@@ -1,0 +1,281 @@
+---
+pagetitle: "Workshop 01: Introducción a Datos Espaciales en R"
+title: "Centro de Investigación en Economía y Finanzas - CIENFI"
+subtitle: "Workshop 01: Introducción a Datos Espaciales en R"
+author: 
+  name: Eduard Fernando Martínez González
+  affiliation: 
+output: 
+  html_document:
+    theme: journal
+    toc: yes
+    toc_float:
+      collapsed: true
+---
+```{r setup, include=F , cache=F}
+## load packages
+require(pacman)
+p_load(knitr,tidyverse,janitor,rio,skimr,kableExtra,ggthemes,fontawesome,kable)
+
+## Opciones para la visualización de gráficos
+options(htmltools.dir.version = F)
+opts_chunk$set(fig.align="center", fig.height=4 , dpi=300 , cache=F)
+```
+ 
+<!--## [1.] Configuración Inicial ##-->
+## **[1.] Configuración Inicial**
+
+Para replicar este ejercicio, puede descargar el siguiente [script de R](https://gitlab.com/lectures-r/big-data-202202/week-10/-/archive/main/week-10-main.zip?path=clase-10).
+
+### 1.1. Cargar paquetes
+
+```{r , eval=T}
+## llamar pacman 
+require(pacman)
+
+## llamar y/o instalar librerias
+p_load(tidyverse,    ## tidy data
+       rio,          ## leer/escribir conjuntos de datos
+       sf,           ## datos espaciales
+       mapview,      ## visualizaciones
+       tidygeocoder, ## geocodificar
+       osmdata)      ## packages osm data
+```
+
+### 1.2. Cargar bases de datos
+
+
+<!--## [1.] Configuración Inicial ##-->
+## **[2.] Geocodificar Direcciones**
+
+La función `geo_arcgis()` de la librería `tidygeocoder` se conecta a la API de `OpenStreetMap` y retorna el vértice con la coordenada geográfica del sitio/dirección buscado. 
+
+```{r , eval=F}
+## Buscar un lugar público por el nombre
+geocode_OSM("Casa de Narino, Bogota")
+```
+
+Puede adicionar el argumento `as.sf=T` para generar un objeto de clase `sf`:
+
+```{r , eval=F}
+## geocode_OSM no reconoce el caracter #, en su lugar se usa %23% 
+cbd <- geocode_OSM("Centro Internacional, Bogota", as.sf=T) 
+cbd
+```
+
+Puede visualizar el objeto `point` usando la librería `mapview`: 
+
+```{r , eval=F}
+## la función mapview adiciona la capa de OpenStreetMap
+mapview(cbd)
+```
+
+
+<!--## [2.] OpenStreetMap ##-->
+## **[2.] OpenStreetMap**
+
+### **2.1 Acerca de OpenStreetMap**
+
+OpenStreetMap ([OSM](https://www.openstreetmap.org)) es un proyecto de mapeo de acceso abierto global, gratuito y licenciado bajo [ODbL Licence](https://www.openstreetmap.org/copyright). OSM recopila información geográfica capturada con dispositivos GPS móviles, ortofotografías y otras fuentes de información libre. 
+
+![](pics/osm.png){width=500}
+
+
+<!---------------->
+### **4.3. Librería `osmdata`**
+
+`osmdata` es una librería de R que permite descargar y usar datos de OpenStreetMap ([OSM](https://www.openstreetmap.org)). 
+
+#### **4.3.1. Features disponibles**
+
+Puede acceder a la lista de `features` disponibles en `OSM` [aquí](https://wiki.openstreetmap.org/wiki/Map_features). En R puede obtener un vector con los nombres de los `features` usando la función `available_features()`:
+
+```{r , eval=F}
+available_features() %>% head(20)
+```
+
+Cada `feature` contiene una lista de `tags`. Puede acceder al vector de `tags` usando la función `available_tags()`. Por ejemplo, puede acceder a la lista de `amenity` así:
+
+```{r , eval=F}
+available_tags("amenity") %>% head(20)
+```
+
+<!---------------->
+### **4.4. Descargar features**
+
+Para descargar `features` desde `OSM`, primero debe definir un espacio geográfico y obtener la caja de de coordenadas que lo contiene:
+
+```{r , eval=F}
+## obtener la caja de coordenada que contiene el polígono de Bogotá
+opq(bbox = getbb("Bogota Colombia"))
+```
+
+Puede almacenar un objeto `osm` de clase `list` y `overpass_query` con las estaciones de autobús para la ciudad de Bogotá:
+
+```{r , eval=F}
+## objeto osm
+osm = opq(bbox = getbb("Bogota Colombia")) %>%
+      add_osm_feature(key="amenity" , value="bus_station") 
+class(osm)
+```
+
+Puede acceder a los `Simple Features` del objeto `osm` usando la función `osmdata_sf()`. El objeto contiene una lista de objetos con los puntos, líneas y polígonos disponibles.
+
+```{r , eval=F}
+## extraer Simple Features Collection
+osm_sf = osm %>% osmdata_sf()
+osm_sf
+```
+
+Puede acceder a los elementos de la lista y crear un objeto de clase `sf`:
+
+```{r , eval=F}
+## Obtener un objeto sf
+bus_station = osm_sf$osm_points %>% select(osm_id,amenity) 
+bus_station
+```
+
+Visualiza el objeto `bus_station`:
+
+```{r , eval=F}
+## Pintar las estaciones de autobus
+mapview(bus_station ,  color="red")
+```
+
+<!---------------------->
+<!---- OpenStreetMap --->
+<!---------------------->
+## **[5.] Operaciones geometricas**
+
+### **5.1 Importar conjuntos de datos**
+
+```{r , eval=F}
+## my_house
+my_house <- geocode_OSM("Calle 26 %23% 4-29, Bogota", as.sf=T) 
+my_house
+
+## parques
+parques <- opq(bbox = getbb("Bogota Colombia")) %>%
+           add_osm_feature(key = "leisure", value = "park") %>%
+           osmdata_sf() %>% .$osm_polygons %>% select(osm_id,name)
+
+mapview(parques)
+```
+
+### **5.2 help:** `sf`
+
+Puede acceder a las viñetas de la librería [sf](https://github.com/r-spatial/sf) así:
+
+```{r , eval=F}
+## Help
+vignette("sf3")
+vignette("sf4")
+```
+
+<!---------------------->
+### **5.3 Afine transformations**
+
+```{r , eval=F}
+st_crs(my_house) == st_crs(parques) 
+```
+
+<!---------------------->
+### **5.4 Filtrar datos**
+
+```{r , eval=F}
+## usando la geometría
+chapinero <- getbb(place_name = "UPZ Chapinero, Bogota", 
+                   featuretype = "boundary:administrative", 
+                   format_out = "sf_polygon") %>% .$multipolygon
+
+mapview(chapinero)
+
+## crop puntos con poligono (opcion 2)
+parques_chapi <- st_intersection(x = parques , y = chapinero)
+
+mapview(chapinero,color="red" , alpha.regions=0) + mapview(parques_chapi)
+
+## crop puntos con poligono (opcion 3)
+parques_chapi <- parques[chapinero,]
+
+mapview(chapinero,color="red" , alpha.regions=0) + mapview(parques_chapi)
+```
+
+<!---------------------->
+### **5.5. Distancia a amenities**
+
+```{r , eval=F}
+## Distancia a un punto
+my_house$dist_cbd <- st_distance(x=my_house , y=cbd)
+
+my_house$dist_cbd %>% head()
+
+## Distancia a muchos puntos
+matrix_dist_bus <- st_distance(x=my_house , y=bus_station)
+
+matrix_dist_bus[1,1:5]
+
+min_dist_bus <- apply(matrix_dist_bus , 1 , min)
+
+min_dist_bus %>% head()
+
+my_house$dist_buse = min_dist_bus
+```
+
+<!---------------------->
+<!---- OpenStreetMap --->
+<!---------------------->
+## **[6.] Visualizaciones**
+
+```{r , eval=F}
+## get Bogota-UPZ 
+bog <- opq(bbox = getbb("Bogota Colombia")) %>%
+       add_osm_feature(key="boundary", value="administrative") %>% 
+       osmdata_sf()
+bog <- bog$osm_multipolygons %>% subset(admin_level==9 & !osm_id %in% 16011743:16011744)
+```
+
+```{r , eval=F}
+## basic plot
+ggplot() + geom_sf(data=bog)
+
+## plot variable
+bog$normal <- rnorm(nrow(bog),100,10)
+ggplot() + geom_sf(data=bog , aes(fill=normal))
+```
+
+```{r , eval=F}
+## plot variable + scale
+map <- ggplot() + geom_sf(data=bog , aes(fill=normal)) +
+       scale_fill_viridis(option = "A" , name = "Variable")
+map 
+
+## add scale_bar
+map <- map +
+       scalebar(data = bog , dist = 5 , transform = T , dist_unit = "km") +
+       north(data = bog , location = "topleft")
+map 
+
+## add theme
+map <- map + theme_linedraw() + labs(x="" , y="")
+map
+```
+
+<!----------------->
+<!--- Checklist --->
+<!----------------->
+### **Referencias**
+
+* Lovelace, R., Nowosad, J., & Muenchow, J. (2019). **Geocomputation with R.** [[Ver aquí]](https://geocompr.robinlovelace.net)
+
+  + Cap. 4: Spatial Data Operations
+  + Cap. 5: Geometry Operations
+  + Cap. 6: Reprojecting geographic data
+  + Cap. 11: Statistical learning
+  
+* Bivand, R. S., Pebesma, E. J., Gómez-Rubio, V., & Pebesma, E. J. (2013). **Applied spatial data analysis with R.** [[Ver aquí]](https://csgillespie.github.io/efficientR/)
+
+  + Cap. 4: Spatial Data Import and Export
+  + Cap. 7: Spatial Point Pattern Analysis
+  + Cap. 8: Interpolation and Geostatistics  
+  
