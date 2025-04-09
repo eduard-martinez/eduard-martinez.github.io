@@ -17,17 +17,17 @@ output:
 require(pacman)
 p_load(knitr,tidyverse,janitor,rio,skimr,kableExtra,ggthemes,fontawesome,kable)
 
-## Opciones para la visualización de gráficos
+## opciones para la visualización de gráficos
 options(htmltools.dir.version = F)
-opts_chunk$set(fig.align="center", fig.height=4 , dpi=300 , cache=F)
+opts_chunk$set(fig.align="center", fig.height=2 , dpi=200 , fig.width=4 , cache=F , message=F)
 ```
  
 <!--## [1.] Configuración Inicial ##-->
-## **[1.] Configuración Inicial**
+## [1.] Configuración Inicial
 
-Para replicar este ejercicio, puede descargar el siguiente [script de R](https://gitlab.com/lectures-r/big-data-202202/week-10/-/archive/main/week-10-main.zip?path=clase-10).
+Para facilitar la reproducción de este ejercicio en sus propios equipos, puede descargar el siguiente script de R [aquí](https://gitlab.com/lectures-r/big-data-202202/week-10/-/archive/main/week-10-main.zip?path=clase-10).
 
-### 1.1. Cargar paquetes
+En este bloque de código se realiza la configuración básica del entorno de trabajo. Para ello se utiliza el paquete `pacman`, que permite cargar múltiples paquetes de forma eficiente. Si un paquete no está instalado, `pacman::p_load()` lo instala automáticamente antes de cargarlo.
 
 ```{r , eval=T}
 ## llamar pacman 
@@ -42,127 +42,175 @@ p_load(tidyverse,    ## tidy data
        osmdata)      ## packages osm data
 ```
 
-### 1.2. Cargar bases de datos
+Cada una de estas librerías cumple un rol importante en el flujo de trabajo para análisis espacial:
 
+`tidyverse`: Facilita la manipulación, exploración y visualización de datos.
+
+`rio`: Permite importar/exportar archivos en múltiples formatos (como .csv, .xlsx, .sav, entre otros).
+
+`sf`: Es el estándar actual para el manejo de datos espaciales vectoriales en R.
+
+`mapview`: Herramienta práctica para visualizar rápidamente objetos espaciales en mapas interactivos.
+
+`tidygeocoder`: Proporciona una interfaz sencilla para convertir direcciones en coordenadas geográficas y viceversa.
+
+`osmdata`: Permite descargar datos vectoriales de OpenStreetMap, como calles, ríos, edificios, entre otros elementos geográficos.
+
+Esta configuración inicial asegura que contamos con todas las herramientas necesarias para realizar análisis geoespaciales y geocodificación dentro de un entorno reproducible.
 
 <!--## [1.] Configuración Inicial ##-->
-## **[2.] Geocodificar Direcciones**
+## [2.] Geocodificar Direcciones
 
-La función `geo_arcgis()` de la librería `tidygeocoder` se conecta a la API de `OpenStreetMap` y retorna el vértice con la coordenada geográfica del sitio/dirección buscado. 
+El paquete `tidygeocoder` permite realizar procesos de geocodificación (obtener coordenadas geográficas a partir de direcciones) y geocodificación inversa (obtener direcciones a partir de coordenadas) de forma sencilla y en formato `tidy`, ideal para trabajar con `dplyr` y `tidyverse.`. 
 
-```{r , eval=F}
-## Buscar un lugar público por el nombre
-geocode_OSM("Casa de Narino, Bogota")
+Aunque su función más conocida es `geocode()`, el paquete incluye otras funciones como `geo()` y `reverse_geocode()`, que permiten realizar tareas similares con menor complejidad o desde coordenadas.
+
+A continuación se presentan los principales motores de geocodificación disponibles en `tidygeocoder`, indicando si requieren o no una clave API:
+
+```{r , eval=T , echo=F}
+data.frame(
+Metodo = c("osm", "arcgis", "google", "census", "tomtom", "bing"),
+Motor = c("OpenStreetMap Nominatim","Esri ArcGIS","Google Maps","US Census Bureau","TomTom","Microsoft Bing Maps"),
+`Requiere API Key` = c("No", "No", "Sí", "No (solo EE.UU.)", "Sí", "Sí")) %>%
+kable()
 ```
 
-Puede adicionar el argumento `as.sf=T` para generar un objeto de clase `sf`:
+La siguiente línea utiliza la función `geo()` para obtener las coordenadas (latitud y longitud) de una dirección específica. En este caso se utiliza el motor arcgis (de Esri), que no requiere clave API para este tipo de consultas. La función retorna un data.frame con las columnas address, lat y long.
 
-```{r , eval=F}
-## geocode_OSM no reconoce el caracter #, en su lugar se usa %23% 
-cbd <- geocode_OSM("Centro Internacional, Bogota", as.sf=T) 
-cbd
+```{r , eval=T}
+## obtener las coordenadas de una dirección
+geo("Universidad Icesi, Cali, Colombia" , method="arcgis") 
 ```
 
-Puede visualizar el objeto `point` usando la librería `mapview`: 
+### 2.1. `geo` y `sf`
 
-```{r , eval=F}
+Aquí almacenamos el resultado de la geocodificación en un objeto llamado icesi, y verificamos su clase. Este objeto es inicialmente un data.frame, lo cual permite manipularlo fácilmente o convertirlo en otros formatos, como objetos espaciales.
+
+```{r , eval=T}
+## Almacenar la dirección en un objeto
+icesi <- geo("Universidad Icesi, Cali, Colombia" , method="arcgis") 
+class(icesi)
+```
+
+Para trabajar con datos espaciales en R es común utilizar el paquete `sf`, que proporciona una estructura de datos geoespaciales moderna. Aquí usamos `st_as_sf()` para convertir el data.frame en un objeto espacial, indicando qué columnas contienen las coordenadas (long y lat) y especificando el sistema de referencia geográfica WGS 84 (`crs = 4326`).
+
+```{r , eval=T}
+## Convertir el objeto a SF
+icesi <- st_as_sf(x=icesi , coords=c("long","lat") , crs=4326)
+icesi
+```
+
+Finalmente, usamos la función `mapview()` para visualizar el punto geocodificado en un mapa interactivo. `mapview` es una herramienta sencilla y potente para inspeccionar visualmente objetos espaciales, añadiendo automáticamente una capa base de `OpenStreetMap`.
+
+```{r , eval=T}
 ## la función mapview adiciona la capa de OpenStreetMap
-mapview(cbd)
+mapview(icesi)
 ```
 
-
-<!--## [2.] OpenStreetMap ##-->
-## **[2.] OpenStreetMap**
-
-### **2.1 Acerca de OpenStreetMap**
-
-OpenStreetMap ([OSM](https://www.openstreetmap.org)) es un proyecto de mapeo de acceso abierto global, gratuito y licenciado bajo [ODbL Licence](https://www.openstreetmap.org/copyright). OSM recopila información geográfica capturada con dispositivos GPS móviles, ortofotografías y otras fuentes de información libre. 
-
-![](pics/osm.png){width=500}
+### 2.2. Geocodificar un vector de direcciones
 
 
-<!---------------->
-### **4.3. Librería `osmdata`**
 
-`osmdata` es una librería de R que permite descargar y usar datos de OpenStreetMap ([OSM](https://www.openstreetmap.org)). 
 
-#### **4.3.1. Features disponibles**
+<!--## [3.] OpenStreetMap ##-->
+## [3.] OpenStreetMap
 
-Puede acceder a la lista de `features` disponibles en `OSM` [aquí](https://wiki.openstreetmap.org/wiki/Map_features). En R puede obtener un vector con los nombres de los `features` usando la función `available_features()`:
+### 3.1. Acerca de OpenStreetMap
 
-```{r , eval=F}
+[OpenStreetMap (OSM)](https://www.openstreetmap.org/#map=6/4.63/-74.30) es un proyecto colaborativo de mapeo global y de acceso abierto, similar a una “Wikipedia de los mapas”. Fue creado con el objetivo de generar una base de datos geográficos libre y accesible para todos, y se construye con contribuciones de voluntarios que utilizan GPS, imágenes satelitales y otras fuentes abiertas.
+
+OSM es gratuito y está licenciado bajo la [Open Database License (ODbL)](https://www.openstreetmap.org/copyright), lo cual permite su uso, modificación y redistribución con algunas condiciones de atribución.
+
+### 3.2. Librería osmdata en R
+
+En R, el paquete `osmdata` permite acceder directamente a los datos de OSM mediante consultas a la API `Overpass`, la cual filtra y extrae información específica desde la base de datos global.
+
+Con `osmdata` se pueden consultar objetos espaciales como calles, hospitales, estaciones de buses, edificios, parques, ciclovías y mucho más. La librería facilita descargar, transformar y visualizar estos datos en estructuras compatibles con `sf.`
+
+### 3.3. Features y Tags disponibles en OSM
+
+En OpenStreetMap, los elementos geográficos se describen mediante features (categorías generales) y tags (atributos específicos). Para explorar qué categorías (features) existen en OSM, se puede utilizar la función `available_features()`. Esto devuelve un vector con nombres de elementos como highway, building, amenity, landuse, entre otros.
+
+```{r , eval=T}
+## Ver features disponibles
 available_features() %>% head(20)
 ```
 
-Cada `feature` contiene una lista de `tags`. Puede acceder al vector de `tags` usando la función `available_tags()`. Por ejemplo, puede acceder a la lista de `amenity` así:
+Cada feature tiene un conjunto de posibles etiquetas (tags). Por ejemplo, si queremos explorar los tipos de amenity (equipamientos):
 
-```{r , eval=F}
+```{r , eval=T}
+## Ver tags de una feature
 available_tags("amenity") %>% head(20)
 ```
 
-<!---------------->
-### **4.4. Descargar features**
+Esto devuelve tags como school, hospital, bus_station, cafe, entre otros.
 
-Para descargar `features` desde `OSM`, primero debe definir un espacio geográfico y obtener la caja de de coordenadas que lo contiene:
+También puede consultar la documentación oficial de features y tags de OSM en este enlace: [Map Features - OSM Wiki](https://wiki.openstreetmap.org/wiki/Map_features)
 
-```{r , eval=F}
-## obtener la caja de coordenada que contiene el polígono de Bogotá
-opq(bbox = getbb("Bogota Colombia"))
+### 3.4. Descargar Features desde OpenStreetMap
+
+El proceso para descargar datos desde OSM con osmdata incluye 3 pasos fundamentales:
+
+#### 3.4.1. Definir un área geográfica con getbb()
+
+Antes de consultar OSM, es necesario definir una “bounding box” o caja de coordenadas que delimite la zona de interés. Se puede usar el nombre de una ciudad o país:
+
+```{r , eval=T}
+opq(bbox = getbb("Cali Colombia"))
 ```
 
-Puede almacenar un objeto `osm` de clase `list` y `overpass_query` con las estaciones de autobús para la ciudad de Bogotá:
+`getbb()` obtiene automáticamente las coordenadas que encierran el área especificada.
 
-```{r , eval=F}
-## objeto osm
-osm = opq(bbox = getbb("Bogota Colombia")) %>%
-      add_osm_feature(key="amenity" , value="bus_station") 
-class(osm)
+#### 3.4.2. Construir la consulta con add_osm_feature()
+
+Se define el tipo de información que se desea descargar usando una combinación de key y value. Por ejemplo, para obtener restaurantes:
+
+```{r , eval=T}
+osm <- opq(bbox = getbb("Cali Colombia")) %>%
+       add_osm_feature(key = "amenity", value = "restaurant")
 ```
 
-Puede acceder a los `Simple Features` del objeto `osm` usando la función `osmdata_sf()`. El objeto contiene una lista de objetos con los puntos, líneas y polígonos disponibles.
+El objeto resultante es una consulta a la API de OSM que aún no se ha ejecutado. Su clase es `overpass_query.`
 
-```{r , eval=F}
-## extraer Simple Features Collection
-osm_sf = osm %>% osmdata_sf()
-osm_sf
+#### 3.4.3. Ejecutar la consulta y convertir a sf
+
+Con `osmdata_sf()` se ejecuta la consulta y se obtiene una lista con objetos espaciales en formato `sf`:
+
+```{r , eval=T}
+osm_sf <- osmdata_sf(osm)
 ```
 
-Puede acceder a los elementos de la lista y crear un objeto de clase `sf`:
+Este objeto contiene elementos como:
 
-```{r , eval=F}
-## Obtener un objeto sf
-bus_station = osm_sf$osm_points %>% select(osm_id,amenity) 
-bus_station
+`osm_points`: objetos puntuales (coordenadas)
+	
+`osm_lines`: líneas (como calles)
+	
+`osm_polygons`: polígonos (como edificios o parques)
+
+#### 3.4.4. Extraer y visualizar los puntos
+
+Por ejemplo, para obtener solo los puntos de tipo `restaurante`:
+
+```{r , eval=T}
+restaurante <- osm_sf$osm_points %>% select(osm_id, name , amenity)
+class(restaurante)
 ```
 
-Visualiza el objeto `bus_station`:
+Y para visualizar el resultado de forma interactiva:
 
-```{r , eval=F}
-## Pintar las estaciones de autobus
-mapview(bus_station ,  color="red")
+```{r , eval=T}
+mapview(restaurante, color = "red")
 ```
 
-<!---------------------->
-<!---- OpenStreetMap --->
-<!---------------------->
-## **[5.] Operaciones geometricas**
+Esto genera un mapa con los puntos representando los restaurantes en Calí, utilizando una base de OpenStreetMap. `mapview` es muy útil para inspecciones visuales rápidas durante la exploración y validación de datos espaciales.
 
-### **5.1 Importar conjuntos de datos**
+Este flujo permite enriquecer cualquier análisis espacial con datos abiertos actualizados, sin necesidad de descargar archivos manualmente. Además, la integración con `sf` y `mapview` permite realizar análisis y visualización directamente en R.
 
-```{r , eval=F}
-## my_house
-my_house <- geocode_OSM("Calle 26 %23% 4-29, Bogota", as.sf=T) 
-my_house
+<!--## [4.] Operaciones Geométricas ##-->
+## [4.] Operaciones Geométricas
 
-## parques
-parques <- opq(bbox = getbb("Bogota Colombia")) %>%
-           add_osm_feature(key = "leisure", value = "park") %>%
-           osmdata_sf() %>% .$osm_polygons %>% select(osm_id,name)
-
-mapview(parques)
-```
-
-### **5.2 help:** `sf`
+### 4.1. Librería `sf`
 
 Puede acceder a las viñetas de la librería [sf](https://github.com/r-spatial/sf) así:
 
@@ -172,24 +220,18 @@ vignette("sf3")
 vignette("sf4")
 ```
 
-<!---------------------->
-### **5.3 Afine transformations**
+### 4.2. Filtrar Geometrías
 
-```{r , eval=F}
-st_crs(my_house) == st_crs(parques) 
+```{r , eval=t}
+## usando la geometría
+granada <- getbb(place_name = "Granada, Cali", 
+                 featuretype = "boundary:administrative", 
+                 format_out = "sf_polygon")
+
+mapview(granada)
 ```
 
-<!---------------------->
-### **5.4 Filtrar datos**
-
 ```{r , eval=F}
-## usando la geometría
-chapinero <- getbb(place_name = "UPZ Chapinero, Bogota", 
-                   featuretype = "boundary:administrative", 
-                   format_out = "sf_polygon") %>% .$multipolygon
-
-mapview(chapinero)
-
 ## crop puntos con poligono (opcion 2)
 parques_chapi <- st_intersection(x = parques , y = chapinero)
 
@@ -201,8 +243,7 @@ parques_chapi <- parques[chapinero,]
 mapview(chapinero,color="red" , alpha.regions=0) + mapview(parques_chapi)
 ```
 
-<!---------------------->
-### **5.5. Distancia a amenities**
+### 4.3. Calcular Distancias
 
 ```{r , eval=F}
 ## Distancia a un punto
@@ -222,10 +263,8 @@ min_dist_bus %>% head()
 my_house$dist_buse = min_dist_bus
 ```
 
-<!---------------------->
-<!---- OpenStreetMap --->
-<!---------------------->
-## **[6.] Visualizaciones**
+<!--## [5.] Visualizar Datos Espaciales ##-->
+## [5.] Visualizar Datos Espaciales
 
 ```{r , eval=F}
 ## get Bogota-UPZ 
