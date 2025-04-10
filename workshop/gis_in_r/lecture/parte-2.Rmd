@@ -19,9 +19,18 @@ p_load(knitr,tidyverse,janitor,rio,skimr,kableExtra,ggthemes,fontawesome,kable)
 
 ## opciones para la visualización de gráficos
 options(htmltools.dir.version = F)
-opts_chunk$set(fig.align="center", fig.height=2 , dpi=200 , fig.width=4 , cache=F , message=F)
+opts_chunk$set(fig.align="center", fig.height=4 , dpi=100 , fig.width=4 , cache=F , message=F)
 ```
+
+<!-- Information -->
+<p style="color:black"><img alt="Qries" src="./images/correo.png" width="20" height="20"> efmartinez@icesi.edu.co </img></p>
+
+ <a href="https://twitter.com/emartigo" style="color:black;"> <img alt="Qries" src="./images/twitter.jpg" width="20" height="20">  @emartigo</a>
  
+<a href="https://gitlab.com/eduard-martinez" style="color:black;"> <img alt="Qries" src="./images/gitlab.png" width="20" height="20">  eduard-martinez</a>
+
+<a href="https://github.com/eduard-martinez" style="color:black;"> <img alt="Qries" src="./images/github.png" width="20" height="20">  eduard-martinez</a>
+
 <!--## [1.] Configuración Inicial ##-->
 ## [1.] Configuración Inicial
 
@@ -39,6 +48,7 @@ p_load(tidyverse,    ## tidy data
        sf,           ## datos espaciales
        mapview,      ## visualizaciones
        tidygeocoder, ## geocodificar
+       ggspatial,    ## mapas base en ggplot2 (tiles OSM, Stamen, Esri) 
        osmdata)      ## packages osm data
 ```
 
@@ -53,6 +63,8 @@ Cada una de estas librerías cumple un rol importante en el flujo de trabajo par
 `mapview`: Herramienta práctica para visualizar rápidamente objetos espaciales en mapas interactivos.
 
 `tidygeocoder`: Proporciona una interfaz sencilla para convertir direcciones en coordenadas geográficas y viceversa.
+
+`ggspatial`: Extiende las capacidades de ggplot2 para incluir mapas base (tiles) de proveedores como OpenStreetMap, Stamen y Esri, a través de la función annotation_map_tile(). Ideal para crear mapas estáticos de alta calidad y superponer objetos sf con contexto geográfico.
 
 `osmdata`: Permite descargar datos vectoriales de OpenStreetMap, como calles, ríos, edificios, entre otros elementos geográficos.
 
@@ -109,8 +121,36 @@ mapview(icesi)
 
 ### 2.2. Geocodificar un vector de direcciones
 
+En esta sección se realiza la geocodificación masiva de un conjunto de direcciones almacenadas en una base de datos. Este procedimiento es útil cuando se dispone de varias ubicaciones (por ejemplo, instituciones, oficinas, puntos de interés) y se desea obtener sus coordenadas geográficas para posterior análisis o visualización.
 
+Se utiliza la función `import()` del paquete rio para leer una base de datos en formato `.rds` desde una URL. Esta base contiene un vector de direcciones de instituciones o puntos de interés en Cali, Colombia, en una columna llamada direccion.
 
+```{r , eval=T}
+## leer base de datos
+cali <- import("https://eduard-martinez.github.io//workshop/gis_in_r/data/data_cali.rds")
+cali
+```
+
+Se utiliza la función `geocode()` del paquete `tidygeocoder` para obtener las coordenadas (latitud y longitud) asociadas a cada dirección en la columna direccion.cSe usa el motor `arcgis`, que no requiere clave API y ofrece buenos resultados para direcciones en Colombia.
+
+La función añade automáticamente dos columnas nuevas: lat y long.
+
+```{r , eval=T}
+cali <- geocode(cali , address="direccion" , method="arcgis")
+cali
+```
+
+El conjunto de datos cali se convierte en un objeto espacial de clase sf utilizando `st_as_sf()`, especificando que las columnas de coordenadas son long (longitud) y lat (latitud), y asignando el sistema de referencia geográfica WGS 84 (EPSG:4326), que es el estándar para coordenadas GPS.
+
+```{r , eval=T}
+cali <- st_as_sf(x=cali , coords=c("long","lat") , crs=4326)
+```
+
+Finalmente, se visualiza el resultado en un mapa interactivo con `mapview()`, lo cual permite explorar visualmente la distribución de los puntos sobre una capa base de OpenStreetMap.
+
+```{r , eval=T}
+mapview(cali)
+```
 
 <!--## [3.] OpenStreetMap ##-->
 ## [3.] OpenStreetMap
@@ -193,37 +233,25 @@ Este objeto contiene elementos como:
 Por ejemplo, para obtener solo los puntos de tipo `restaurante`:
 
 ```{r , eval=T}
-restaurante <- osm_sf$osm_points %>% select(osm_id, name , amenity)
-class(restaurante)
+rest_cali <- osm_sf$osm_points %>% select(osm_id, name , amenity)
+class(rest_cali)
 ```
 
 Y para visualizar el resultado de forma interactiva:
 
 ```{r , eval=T}
-mapview(restaurante, color = "red")
+mapview(rest_cali, color = "red")
 ```
 
 Esto genera un mapa con los puntos representando los restaurantes en Calí, utilizando una base de OpenStreetMap. `mapview` es muy útil para inspecciones visuales rápidas durante la exploración y validación de datos espaciales.
 
 Este flujo permite enriquecer cualquier análisis espacial con datos abiertos actualizados, sin necesidad de descargar archivos manualmente. Además, la integración con `sf` y `mapview` permite realizar análisis y visualización directamente en R.
 
-<!--## [4.] Operaciones Geométricas ##-->
-## [4.] Operaciones Geométricas
+### 3.5. Más allá de los puntos: descargar otros tipos de datos desde OSM
 
-### 4.1. Librería `sf`
+En este último ejemplo, se utiliza `getbb()` para obtener una geometría de tipo polígono correspondiente al barrio Granada en Cali. En lugar de devolver solo una caja de coordenadas (bounding box), aquí se indica que se desea una geometría de tipo sf_polygon. Esto permite trabajar con unidades administrativas o barrios específicos de manera más precisa.
 
-Puede acceder a las viñetas de la librería [sf](https://github.com/r-spatial/sf) así:
-
-```{r , eval=F}
-## Help
-vignette("sf3")
-vignette("sf4")
-```
-
-### 4.2. Filtrar Geometrías
-
-```{r , eval=t}
-## usando la geometría
+```{r , eval=T}
 granada <- getbb(place_name = "Granada, Cali", 
                  featuretype = "boundary:administrative", 
                  format_out = "sf_polygon")
@@ -231,79 +259,125 @@ granada <- getbb(place_name = "Granada, Cali",
 mapview(granada)
 ```
 
-```{r , eval=F}
-## crop puntos con poligono (opcion 2)
-parques_chapi <- st_intersection(x = parques , y = chapinero)
+El resultado es un objeto de clase sf que representa el límite administrativo del área consultada. Esto puede ser muy útil para delimitar zonas de interés antes de realizar consultas más específicas (por ejemplo, todos los parques, restaurantes u oficinas públicas dentro de Granada).
 
-mapview(chapinero,color="red" , alpha.regions=0) + mapview(parques_chapi)
+<!--## [4.] Operaciones Geométricas ##-->
+## [4.] Operaciones Geométricas
 
-## crop puntos con poligono (opcion 3)
-parques_chapi <- parques[chapinero,]
+### 4.1. Librería `sf`
 
-mapview(chapinero,color="red" , alpha.regions=0) + mapview(parques_chapi)
-```
-
-### 4.3. Calcular Distancias
+La librería `sf` (Simple Features) es el estándar moderno para manejar datos espaciales vectoriales en R. Su integración con `dplyr` y su compatibilidad con otras librerías como `ggplot2`, `mapview` o `leaflet` la convierten en una herramienta central para cualquier flujo de trabajo geoespacial.
 
 ```{r , eval=F}
-## Distancia a un punto
-my_house$dist_cbd <- st_distance(x=my_house , y=cbd)
-
-my_house$dist_cbd %>% head()
-
-## Distancia a muchos puntos
-matrix_dist_bus <- st_distance(x=my_house , y=bus_station)
-
-matrix_dist_bus[1,1:5]
-
-min_dist_bus <- apply(matrix_dist_bus , 1 , min)
-
-min_dist_bus %>% head()
-
-my_house$dist_buse = min_dist_bus
+## Documentación extendida de sf
+vignette("sf3")  # Reading, writing and converting simple features
+vignette("sf4")  # Geometry operations
 ```
+
+### 4.2. Filtrar Geometrías
+
+Una operación muy común en el análisis espacial es filtrar los objetos que se encuentran dentro de una zona específica. En este caso, se recorta el conjunto de restaurantes (`rest_cali`) para conservar únicamente aquellos que están dentro del barrio Granada, utilizando la función `st_crop()`:
+
+```{r , eval=T}
+rest_grana <- st_crop(x=rest_cali , y=granada  , mask=T)
+```
+
+`x`: objeto espacial a recortar (Restaurantes).
+
+`y`: geometría de recorte (barrio Granada).
+
+`mask` = TRUE: garantiza que el resultado se recorta exactamente al polígono.
+
+Para verificar cuántos restaurantes hay antes y después del recorte:
+
+```{r , eval=T}
+nrow(rest_cali)
+nrow(rest_grana)
+```
+
+Finalmente, se visualiza el resultado de forma interactiva:
+
+```{r , eval=T}
+mapview(granada , color="red") + mapview(rest_grana)
+```
+
+### 4.3. Calcular Distancias Geodésicas
+
+Otra operación fundamental es el cálculo de distancias entre objetos espaciales. En este caso, se calcula la distancia desde el punto icesi (previamente geocodificado) a cada uno de los puntos en el objeto cali (direcciones institucionales en Cali):
+
+```{r , eval=T}
+cali$dist <- st_distance(x=cali , y=icesi)
+cali %>% head()
+cali$dist <- as.numeric(cali$dist)/1000
+```
+
+La función `st_distance()` devuelve una matriz de distancias geodésicas entre los elementos de dos objetos espaciales. En este caso, se calcula la distancia entre cada punto de cali y el punto único de icesi.
+
+Dado que icesi contiene un solo punto, el resultado es una columna con una distancia por cada fila de cali. Es decir, se mide la distancia entre cada dirección en Cali y la Universidad Icesi.
+
+Las distancias se expresan por defecto en metros, ya que el sistema de referencia espacial (crs) utilizado es WGS 84 (EPSG:4326).
+Este tipo de cálculo permite realizar análisis como encontrar la ubicación más cercana, establecer zonas de influencia o clasificar puntos por cercanía a un lugar de referencia.
 
 <!--## [5.] Visualizar Datos Espaciales ##-->
 ## [5.] Visualizar Datos Espaciales
 
-```{r , eval=F}
-## get Bogota-UPZ 
-bog <- opq(bbox = getbb("Bogota Colombia")) %>%
-       add_osm_feature(key="boundary", value="administrative") %>% 
-       osmdata_sf()
-bog <- bog$osm_multipolygons %>% subset(admin_level==9 & !osm_id %in% 16011743:16011744)
-```
+El paquete `ggplot2`, parte del ecosistema `tidyverse`, también permite trabajar con objetos espaciales gracias a la función `geom_sf()`. A diferencia de `mapview`, que es interactivo, `ggplot2` permite crear gráficos estáticos personalizables, ideales para informes, artículos o publicaciones.
 
-```{r , eval=F}
+Este gráfico muestra todos los puntos del objeto espacial cali sin aplicar ninguna estética adicional. Es útil para una visualización rápida de la distribución espacial de los datos.
+
+```{r , eval=T}
 ## basic plot
-ggplot() + geom_sf(data=bog)
-
-## plot variable
-bog$normal <- rnorm(nrow(bog),100,10)
-ggplot() + geom_sf(data=bog , aes(fill=normal))
+ggplot() + geom_sf(data=cali , size=3)
 ```
 
-```{r , eval=F}
+En este gráfico se utiliza la variable dist (distancia a Icesi) como estética para asignar color a los puntos. De esta forma, el color representa la proximidad de cada ubicación respecto a la Universidad Icesi. Esta técnica permite comunicar información cuantitativa a través de una representación espacial.
+
+```{r , eval=T}
+## plot variable
+ggplot() + geom_sf(data=cali , aes(color=dist) , size=3)
+```
+
+Aquí se mejora la visualización anterior utilizando la paleta Viridis, que es perceptualmente uniforme y adecuada para personas con daltonismo. Se define también el tamaño de los puntos (size = 3) para darles mayor visibilidad.
+El uso de scale_color_viridis_b() permite crear una escala de color continua bien definida y estéticamente agradable para representar valores numéricos.
+
+```{r , eval=T}
 ## plot variable + scale
-map <- ggplot() + geom_sf(data=bog , aes(fill=normal)) +
-       scale_fill_viridis(option = "A" , name = "Variable")
+map <- ggplot() + 
+       geom_sf(data=cali , aes(color=dist) , size=3) +
+       scale_color_viridis_b(option = "D") +
+       theme_minimal()
 map 
+```
 
-## add scale_bar
-map <- map +
-       scalebar(data = bog , dist = 5 , transform = T , dist_unit = "km") +
-       north(data = bog , location = "topleft")
+Ahora, se incorpora un mapa base utilizando `annotation_map_tile()` del paquete `ggspatial`, que permite agregar mosaicos (tiles) provenientes de OpenStreetMap (OSM), Carto, Stamen, entre otros. El parámetro zoom controla el nivel de detalle (mayores valores → más zoom), y type = "osm" indica que se desea usar OpenStreetMap como fondo.
+
+```{r , eval=T}
+## plot variable + scale
+map <- ggplot() + 
+       annotation_map_tile(type="osm" , zoom=14) +
+       geom_sf(data=cali , aes(color=dist) , size=3) +
+       scale_color_viridis_b(option = "D") +
+       theme_minimal()
 map 
+```
 
-## add theme
-map <- map + theme_linedraw() + labs(x="" , y="")
-map
+Finalmente, se añaden dos elementos cartográficos importantes:
+
+	•	Una flecha de norte, que orienta al lector respecto a la dirección geográfica.
+	•	Una barra de escala, que indica la relación entre la distancia en el mapa y la distancia real.
+
+Ambos elementos se agregan con funciones del paquete ggspatial y pueden personalizarse en estilo y ubicación.
+
+```{r , eval=T}
+map +
+annotation_north_arrow(location="tr" , which_north="true" , style=north_arrow_fancy_orienteering) +
+annotation_scale(location = "bl",width_hint = 0.4) 
 ```
 
 <!----------------->
 <!--- Checklist --->
 <!----------------->
-### **Referencias**
+## **Referencias**
 
 * Lovelace, R., Nowosad, J., & Muenchow, J. (2019). **Geocomputation with R.** [[Ver aquí]](https://geocompr.robinlovelace.net)
 
@@ -318,3 +392,8 @@ map
   + Cap. 7: Spatial Point Pattern Analysis
   + Cap. 8: Interpolation and Geostatistics  
   
+*	Pebesma, E. (2018). Simple Features for R: Standardized Support for Spatial Vector Data. [Ver artículo](https://journal.r-project.org/archive/2018/RJ-2018-009/index.html)
+
+*	Curso de Earth Data Science - University of Colorado.  [Ver curso](https://www.earthdatascience.org)
+
+
