@@ -14,7 +14,7 @@ nl_r <- rast("https://eduard-martinez.github.io/blog/intro_raster_in_r/data/nigh
 nl_r          
 
 ## Visualización
-
+plot(nl_r)
 
 ## Obtener los límites administrativos de Cali desde OpenStreetMap
 cali <- getbb(place_name = "Cali, Colombia", 
@@ -28,9 +28,10 @@ cali <- cali[2, ]
 mapview(cali)
 
 ## Recortar el raster original (nl_r) usando el polígono de Cali
-cali_r <- 
+cali_r <- crop(nl_r , cali , mask=T)
 
 ## Visualizar el raster recortado de Cali
+mapview(cali_r)
 
 ## Guardar el raster recortado como archivo GeoTIFF en el disco
 writeRaster(cali_r, "cali_recorte.tif", overwrite=T)
@@ -51,12 +52,13 @@ st_crs(cali_sf) == st_crs(mnz)
 
 ## transformar el CRS
 cali_sf <- st_transform(cali_sf , st_crs(mnz))
+st_crs(cali_sf) == st_crs(mnz)
 
 ## unir los shapefiles
-mnz_nl <- st_join(x=mnz , y=cali_sf)
+mnz_nl <- st_join(x=mnz , y=cali_sf , largest=T)
 
 ## Visualizar resultado
-mapview(mnz_nl, zcol = "night_light_201301")
+mapview(mnz_nl, zcol = "night_light_202301")
 
 ## Convertir el objeto sf en un data.frame plano
 df_nl <- as.data.frame(mnz_nl, geometry = NULL)
@@ -64,11 +66,22 @@ head(df_nl)
 
 ## Graficar relación entre población y luminosidad
 ggplot(data = df_nl, 
-       aes(x = log(personas), y = log(night_light_201301))) +
+       aes(x = log(personas), y = log(night_light_202301))) +
 geom_point() +
 geom_smooth(method="lm", se =T , color = "blue") +
 theme_bw()
 
 ## regresion
-lm(asinh(night_light_201301) ~ asinh(personas), data = df_nl)
+lm(asinh(night_light_202301) ~ asinh(personas), data = df_nl)
+
+## luminosidad 2023
+nl_r <- c(rast("https://eduard-martinez.github.io/blog/intro_raster_in_r/data/night_light_201301.tif"),
+          rast("https://eduard-martinez.github.io/blog/intro_raster_in_r/data/night_light_202301.tif")) %>%
+        crop(cali,mask=T) %>%
+        as.polygons() %>%
+        st_as_sf() %>%
+        st_transform(crs=st_crs(mnz))
+data <- st_join(nl_r , mnz , largest = T) %>%
+        as.data.frame(xy=T)
+
 
