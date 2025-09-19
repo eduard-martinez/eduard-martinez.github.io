@@ -69,9 +69,7 @@ rm(list = ls())
 require(dplyr)      # Manipulación de datos 
 require(ggplot2)    # Visualización de datos
 require(skimr)      # Resúmenes rápidos y completos
-require(ggfortify)  # autoplot para PCA
 require(purrr)      # map_dbl, map, etc.
-require(factoextra) # funciones adicionales para K-means y PCA
 ```
 
 ## Ingesta de datos (carga desde archivo o URL)
@@ -95,12 +93,22 @@ source("https://raw.githubusercontent.com/ba-in-r/01-slides/main/week-08/quarto/
 ## chuequear objetos en la memoria
 ls()
 
+## atributos de sotify
+class(spotify)
+nrow(spotify)
+ncol(spotify)
+```
+
+```{webr-r}
 ## Inspecciona nombres del dataset (colnames)
 
 ## Inspeccionar los datos con skim?
 
 ## visualicemos los datos (ggplot)
+ggplot(data=spotify , aes(x=tempo , y=danceability)) +
+geom_point()
 ```
+
 ## Selección de variables
 
 En este paso se seleccionan únicamente las variables numéricas asociadas a las características de audio de cada canción: danceability, energy, valence, acousticness, liveness, speechiness y tempo. Estas son las más adecuadas para aplicar un algoritmo de clustering, ya que describen propiedades musicales cuantitativas y comparables entre canciones.
@@ -111,9 +119,11 @@ Al reducir la base a este subconjunto, garantizamos que el análisis con `K-mean
 ## filtrar variables
 features <- select(.data=spotify , danceability,  tempo)
 
-## check data (head)
+## check los objetos en la memoria
+ls()
 
-## visualicemos las variables danceability y tempo
+## 
+head(features)
 ```
 
 ## Escalado
@@ -130,6 +140,8 @@ x <- scale(features)
 skim(x)
 
 ## visualicemos las variables danceability y tempo
+ggplot(data=x , aes(x=tempo , y=danceability)) +
+geom_point()
 ```
 
 ## Ajuste de K-means con K = 4
@@ -145,7 +157,7 @@ El objeto resultante km contiene la información clave del modelo: asignación d
 set.seed(2024)
 
 ## ajustar modelo
-km <- kmeans(x, centers = 3, nstart = 30)
+km <- kmeans(x, centers = 4, nstart = 30)
 ```
 
 En este bloque se realiza el ajuste final de K-means y el resumen de los clusters obtenidos. Primero, se crea un nuevo objeto spotify_c que añade una columna llamada cluster, donde se almacena el resultado de la asignación de cada observación al grupo correspondiente (km$cluster). Esta columna se convierte en un factor para facilitar la interpretación y las operaciones posteriores.
@@ -166,7 +178,7 @@ table(spotify_c$cluster)
 
 ```{webr-r}
 ## plot
-ggplot(spotify_c, aes(x=temp , y=danceability , color=cluster)) +
+ggplot(spotify_c, aes(x=tempo , y=danceability , color=cluster)) +
 geom_point(alpha = 0.6) +
 theme_minimal(base_size = 12)
 ```
