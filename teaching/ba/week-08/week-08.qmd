@@ -98,6 +98,8 @@ ls()
 ## Inspecciona nombres del dataset (colnames)
 
 ## Inspeccionar los datos con skim?
+
+## visualicemos los datos (ggplot)
 ```
 ## Selección de variables
 
@@ -107,11 +109,11 @@ Al reducir la base a este subconjunto, garantizamos que el análisis con `K-mean
 
 ```{webr-r}
 ## filtrar variables
-features <- select(.data=spotify , 
-                   danceability, energy, valence, acousticness, liveness, speechiness, tempo)
+features <- select(.data=spotify , danceability,  tempo)
 
 ## check data (head)
 
+## visualicemos las variables danceability y tempo
 ```
 
 ## Escalado
@@ -126,6 +128,47 @@ x <- scale(features)
 
 ## check data (skim)
 skim(x)
+
+## visualicemos las variables danceability y tempo
+```
+
+## Ajuste de K-means con K = 4
+
+En este bloque se realiza el entrenamiento del modelo K-means fijando el número de clusters en k = 3. Primero, se establece una semilla aleatoria (set.seed(2024)) para asegurar que los resultados sean reproducibles, ya que K-means depende de inicializaciones aleatorias de los centroides.
+
+Después, con la función kmeans() se ajusta el modelo sobre la matriz estandarizada X, indicando centers = 4 para formar cuatro grupos. El argumento nstart = 30 hace que el algoritmo se ejecute 30 veces con diferentes inicializaciones y escoja la mejor solución encontrada, reduciendo la posibilidad de caer en mínimos locales.
+
+El objeto resultante km contiene la información clave del modelo: asignación de observaciones a clusters, coordenadas de los centroides y medidas de ajuste como la suma de cuadrados intra e inter-cluster.
+
+```{webr-r}
+## fijar semilla
+set.seed(2024)
+
+## ajustar modelo
+km <- kmeans(x, centers = 3, nstart = 30)
+```
+
+En este bloque se realiza el ajuste final de K-means y el resumen de los clusters obtenidos. Primero, se crea un nuevo objeto spotify_c que añade una columna llamada cluster, donde se almacena el resultado de la asignación de cada observación al grupo correspondiente (km$cluster). Esta columna se convierte en un factor para facilitar la interpretación y las operaciones posteriores.
+
+```{webr-r}
+## Agregar variable de cluster
+spotify_c <- spotify %>% 
+             mutate(cluster = factor(km$cluster))
+
+## head(spotify_c)
+head(spotify_c)
+
+## inspeccionar con tabla de frecuencias
+table(spotify_c$cluster)
+```
+
+## Inspeccionar los clusters
+
+```{webr-r}
+## plot
+ggplot(spotify_c, aes(x=temp , y=danceability , color=cluster)) +
+geom_point(alpha = 0.6) +
+theme_minimal(base_size = 12)
 ```
 
 ## Heurística del codo
@@ -174,46 +217,6 @@ labs(title = "Heurística del codo para elegir K",
      x = "N. de clusters (K)", y = "Suma intra-cluster (WSS)")
 ```
 
-## Ajuste de K-means con K = 4
-
-En este bloque se realiza el entrenamiento del modelo K-means fijando el número de clusters en k = 4. Primero, se establece una semilla aleatoria (set.seed(2024)) para asegurar que los resultados sean reproducibles, ya que K-means depende de inicializaciones aleatorias de los centroides.
-
-Después, con la función kmeans() se ajusta el modelo sobre la matriz estandarizada X, indicando centers = 4 para formar cuatro grupos. El argumento nstart = 30 hace que el algoritmo se ejecute 30 veces con diferentes inicializaciones y escoja la mejor solución encontrada, reduciendo la posibilidad de caer en mínimos locales.
-
-El objeto resultante km contiene la información clave del modelo: asignación de observaciones a clusters, coordenadas de los centroides y medidas de ajuste como la suma de cuadrados intra e inter-cluster.
-
-```{webr-r}
-## fijar semilla
-set.seed(2024)
-
-## ajustar modelo
-km <- kmeans(x, centers = 4, nstart = 30)
-```
-
-En este bloque se realiza el ajuste final de K-means y el resumen de los clusters obtenidos. Primero, se crea un nuevo objeto spotify_c que añade una columna llamada cluster, donde se almacena el resultado de la asignación de cada observación al grupo correspondiente (km$cluster). Esta columna se convierte en un factor para facilitar la interpretación y las operaciones posteriores.
-
-```{webr-r}
-## Agregar variable de cluster
-spotify_c <- spotify %>% 
-             mutate(cluster = factor(km$cluster))
-
-## head(spotify_c)
-head(spotify_c)
-
-## inspeccionar con tabla de frecuencias
-table(spotify_c$cluster)
-```
-
-## Inspeccionar los clusters
-
-```{webr-r}
-## plot
-ggplot(spotify_c, aes(x = popularity, y = streams, color = cluster)) +
-geom_point(alpha = 0.6) +
-theme_minimal(base_size = 12)
-```
-
-
 ## Actividad en Clase
 
 Instrucciones:
@@ -243,11 +246,11 @@ Preguntas de interpretación:
 
 	1.	Streams (Reproducciones):
 	•	Según los promedios, mínimos y máximos de streams en cada clúster:
-	•	¿Qué cluster concentra las canciones más escuchadas?
+	•	¿Qué cluster contiene la canción más escuchada?
+	•	¿En promedio, qué cluster contiene las canciónes más escuchada?
 
 	2.	Duración: A partir de la mediana de duration_ms por clúster:
-	•	¿Qué cluster tiende a tener canciones más largas?
-	•	¿Cuál parece tener canciones más cortas?
+	•	¿En promedio, cuál cluster tiene canciones más cortas?
 
 	3.	Tempo y Danceability: Considerando el promedio de tempo y danceability por clúster:
 	•	¿Qué cluster tiende a tener canciones con mayor energía rítmica?
