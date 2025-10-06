@@ -1,0 +1,1 @@
+document.addEventListener("DOMContentLoaded",(function(){const e=document.getElementsByClassName("sourceCode");for(var t=0;t<e.length;t++)for(var n=e[t].getElementsByTagName("a"),a=0;a<n.length;a++)""===n[a].innerHTML&&n[a].setAttribute("aria-hidden","true")}));
