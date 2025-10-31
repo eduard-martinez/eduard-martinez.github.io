@@ -120,16 +120,13 @@ Primero, eliminamos cualquier objeto previo que pueda interferir con la sesión 
 rm(list = ls())
 
 ## Instalar paquetes (solo si es necesario)
-install.packages("tidyverse")
-install.packages("class")
-install.packages("caret")
-install.packages("pROC")
+if (!require("pacman")) {install.packages("pacman") ; require("pacman")}
 
 ## Cargar librerías
-library(tidyverse)  # Manipulación y visualización de datos
-library(class)      # Implementación del algoritmo kNN
-library(caret)      # Métricas y matriz de confusión
-library(pROC)       # Calcular la curva ROC y el AUC
+p_load(tidyverse)  # Manipulación y visualización de datos
+p_load(class)      # Implementación del algoritmo kNN
+p_load(caret)      # Métricas y matriz de confusión
+p_load(pROC)       # Calcular la curva ROC y el AUC
  
 ## Fijar semilla para reproducibilidad
 set.seed(123)
@@ -328,14 +325,39 @@ theme_minimal()
 
 ## Estimación del modelo kNN
 
-Ejecute el siguiente código para estimar un modelo **k-Nearest Neighbors (kNN)** que prediga la **probabilidad de que un estudiante se retire del curso**, usando las variables explicativas relacionadas con esfuerzo y participación.  
-⚠️ No incluya la variable `aprueba` en el modelo.
+Ejecute el siguiente código para estimar un modelo **k-Nearest Neighbors (kNN)** que prediga la **probabilidad de que un estudiante se retire del curso**, usando las variables explicativas relacionadas con esfuerzo y participación.  ⚠️ No incluya la variable `aprueba` en el modelo.
 
 ```{webr-r}
+##==: 1. Preparar Entorno
+
+## Limpiar el entorno de trabajo
+rm(list = ls())
+
+## Instalar paquetes (solo si es necesario)
+if (!require("pacman")) {install.packages("pacman") ; require("pacman")}
+
+## Cargar librerías
+p_load(tidyverse)  # Manipulación y visualización de datos
+p_load(class)      # Implementación del algoritmo kNN
+p_load(caret)      # Métricas y matriz de confusión
+p_load(pROC)       # Calcular la curva ROC y el AUC
+
+##==: 2. Ingesta de Datos
+
+## Leer datos
+source("https://raw.githubusercontent.com/ba-in-r/01-slides/main/week-13/data/week-13.r")
+
 ## Preparar los datos
 vars <- select(datos, horas_estudio:afinidad_estadistica)
 datos_scaled <- as.data.frame(scale(vars))
 datos_scaled$retira <- factor(datos$retira, levels = c(0, 1), labels = c("No", "Sí"))
+
+## Ver datos 
+head(datos_scaled)
+``` 
+
+```{webr-r}
+##==: 3. Modelar para K=5
 
 ## Modelo kNN con k = 5
 pred_knn_5 <- knn(train = datos_scaled[, 1:6],
@@ -346,24 +368,47 @@ pred_knn_5 <- knn(train = datos_scaled[, 1:6],
 ## Matriz de confusión
 conf_5 <- table(Predicho = pred_knn_5, Real = datos_scaled$retira)
 conf_5
-``` 
 
-```{webr-r}
-## Calcular exactitud del modelo con k = 5
+## Exactitud del modelo con k = 5
 VP <- conf_5["Sí", "Sí"]
 VN <- conf_5["No", "No"]
 FP <- conf_5["Sí", "No"]
 FN <- conf_5["No", "Sí"]
 
-## plot accuracy
+## Accuracy
 accuracy_5 <- (VP + VN) / sum(conf_5)
 accuracy_5
-``` 
 
-```{webr-r}
-## Calcule la curva ROC y el AUC
+## Curva ROC y el AUC
 roc_5 <- roc(datos_scaled$retira, as.numeric(pred_knn_5))
 auc(roc_5)
 
 plot(roc_5, col = "blue", lwd = 2, main = "Curva ROC — k = 5")
 ```
+
+## Preguntas para el informe
+
+**1. Comparación entre modelos:**
+
+•	¿Cómo cambia la matriz de confusión al pasar de k = 5 a k = 10 y k = 20?
+
+**2. Evaluación de desempeño:**
+
+•	Calcule la exactitud (accuracy) para cada modelo (k = 5, k = 10, k = 20).
+
+•	¿Cuál de los tres modelos presenta la mayor exactitud?
+
+**3. Curva ROC y poder discriminatorio**
+
+•	¿Qué valor de AUC obtuvo para k = 5?
+
+•	¿Qué indica este valor sobre la capacidad del modelo para distinguir entre estudiantes que se retiran y los que no?
+
+•	¿Esperarías que el AUC mejore, empeore o se mantenga al aumentar k? ¿Por qué?
+
+**4. Reflexión final:** Si tuvieras que elegir uno de los tres modelos, ¿cuál seleccionarías y por qué?
+
+::: callout-tip
+💡 Entrega: Suba su documento con las respuestas a la plataforma Intu, en la actividad correspondiente a la Semana 14 — Modelo kNN (Predicción de Retiro). Y suba el script con el que realizó el procedimiento. Recuerde que se evaluará la claridad de sus interpretaciones, la consistencia con los resultados del modelo y su capacidad para proponer acciones basadas en los hallazgos.
+:::
+
