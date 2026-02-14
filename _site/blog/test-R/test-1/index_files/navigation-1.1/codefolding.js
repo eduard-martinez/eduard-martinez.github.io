@@ -1,1 +1,76 @@
-window.initializeCodeFolding=function(a){$("#rmd-show-all-code").click((function(){$("div.r-code-collapse").each((function(){$(this).collapse("show")}))})),$("#rmd-hide-all-code").click((function(){$("div.r-code-collapse").each((function(){$(this).collapse("hide")}))}));var t=1;$("pre.r, pre.python, pre.bash, pre.sql, pre.cpp, pre.stan, pre.julia, pre.foldable").each((function(){if(!$(this).hasClass("fold-none")){var o=$('<div class="collapse r-code-collapse"></div>'),e=(a||$(this).hasClass("fold-show"))&&!$(this).hasClass("fold-hide"),s="rcode-643E0F36"+t++;o.attr("id",s),$(this).before(o),$(this).detach().appendTo(o);var l=$("<span>"+(e?"Hide":"Show")+"</span>"),n=$('<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm code-folding-btn pull-right float-right"></button>');n.append(l),n.attr("data-toggle","collapse").attr("data-bs-toggle","collapse").attr("data-target","#"+s).attr("data-bs-target","#"+s).attr("aria-expanded",e).attr("aria-controls",s);var d=$('<div class="row"></div>'),i=$('<div class="col-md-12"></div>');i.append(n),d.append(i),o.before(d),e&&o.collapse("show"),o.on("hide.bs.collapse",(function(){l.text("Show"),n.addClass("btn-collapsing")})),o.on("hidden.bs.collapse",(function(){n.removeClass("btn-collapsing")})),o.on("show.bs.collapse",(function(){l.text("Hide"),n.addClass("btn-expanding")})),o.on("shown.bs.collapse",(function(){n.removeClass("btn-expanding")}))}}))};
+
+window.initializeCodeFolding = function(show) {
+
+  // handlers for show-all and hide all
+  $("#rmd-show-all-code").click(function() {
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('show');
+    });
+  });
+  $("#rmd-hide-all-code").click(function() {
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('hide');
+    });
+  });
+
+  // index for unique code element ids
+  var currentIndex = 1;
+
+  // select all R code blocks
+  var rCodeBlocks = $('pre.r, pre.python, pre.bash, pre.sql, pre.cpp, pre.stan, pre.julia, pre.foldable');
+  rCodeBlocks.each(function() {
+    // skip if the block has fold-none class
+    if ($(this).hasClass('fold-none')) return;
+
+    // create a collapsable div to wrap the code in
+    var div = $('<div class="collapse r-code-collapse"></div>');
+    var showThis = (show || $(this).hasClass('fold-show')) && !$(this).hasClass('fold-hide');
+    var id = 'rcode-643E0F36' + currentIndex++;
+    div.attr('id', id);
+    $(this).before(div);
+    $(this).detach().appendTo(div);
+
+    // add a show code button right above
+    var showCodeText = $('<span>' + (showThis ? 'Hide' : 'Show') + '</span>');
+    var showCodeButton = $('<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm code-folding-btn pull-right float-right"></button>');
+    showCodeButton.append(showCodeText);
+    showCodeButton
+        .attr('data-toggle', 'collapse')
+        .attr('data-bs-toggle', 'collapse') // BS5
+        .attr('data-target', '#' + id)
+        .attr('data-bs-target', '#' + id)   // BS5
+        .attr('aria-expanded', showThis)
+        .attr('aria-controls', id);
+
+    var buttonRow = $('<div class="row"></div>');
+    var buttonCol = $('<div class="col-md-12"></div>');
+
+    buttonCol.append(showCodeButton);
+    buttonRow.append(buttonCol);
+
+    div.before(buttonRow);
+
+    // show the div if necessary
+    if (showThis) div.collapse('show');
+
+    // update state of button on show/hide
+    //   * Change text
+    //   * add a class for intermediate states styling
+    div.on('hide.bs.collapse', function () {
+      showCodeText.text('Show');
+      showCodeButton.addClass('btn-collapsing');
+    });
+    div.on('hidden.bs.collapse', function () {
+      showCodeButton.removeClass('btn-collapsing');
+    });
+    div.on('show.bs.collapse', function () {
+      showCodeText.text('Hide');
+      showCodeButton.addClass('btn-expanding');
+    });
+    div.on('shown.bs.collapse', function () {
+      showCodeButton.removeClass('btn-expanding');
+    });
+
+  });
+
+}

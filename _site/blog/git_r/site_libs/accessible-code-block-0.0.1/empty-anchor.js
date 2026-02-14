@@ -1,1 +1,15 @@
-document.addEventListener("DOMContentLoaded",(function(){const e=document.getElementsByClassName("sourceCode");for(var t=0;t<e.length;t++)for(var n=e[t].getElementsByTagName("a"),a=0;a<n.length;a++)""===n[a].innerHTML&&n[a].setAttribute("aria-hidden","true")}));
+// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});

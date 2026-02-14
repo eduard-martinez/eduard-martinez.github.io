@@ -36,7 +36,7 @@ casa <- geo("" , method="arcgis")
 ##==: 3. Geocodificar Varias Direcciones
 
 ## leer base de datos
-cali <- import("https://eduard-martinez.github.io/workshop/gis_in_r/data/data_cali.rds")
+cali <- import("https://eduard-martinez.github.io/blog/intro_gis_in_r/data/data_cali.rds")
 cali
 
 ## geocodificar vector de direcciones
