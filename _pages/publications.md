@@ -1,8 +1,8 @@
 ---
 layout: page
-permalink: /publications/
-title: Publications
-description: Working papers on development economics, public policy, big data, and machine learning.
+permalink: /research/
+title: Research
+description: Working papers and publications on development economics, public policy, big data, and machine learning.
 nav: true
 nav_order: 2
 ---
