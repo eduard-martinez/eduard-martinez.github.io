@@ -1,0 +1,3178 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Eduard F. Martínez González">
+
+<title>Unidad 9 — Clasificación</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="week-13_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-13_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-13_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-13_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-13_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-13_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-13_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-13_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-13_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-13_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-13_files/libs/bootstrap/bootstrap-ff7067f47e26017551bec3c0280d8ab3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+<style type="text/css">
+.monaco-editor pre {
+  background-color: unset !important;
+}
+
+.qwebr-editor-toolbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.qwebr-editor-toolbar-left-buttons, .qwebr-editor-toolbar-right-buttons {
+  display: flex;
+}
+
+.qwebr-non-interactive-loading-container.qwebr-cell-needs-evaluation, .qwebr-non-interactive-loading-container.qwebr-cell-evaluated {
+  justify-content: center;
+  display: flex;
+  background-color: rgba(250, 250, 250, 0.65);
+  border: 1px solid rgba(233, 236, 239, 0.65);
+  border-radius: 0.5rem;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.qwebr-r-project-logo {
+  color: #2767B0; /* R Project's blue color */
+}
+
+.qwebr-icon-status-spinner {
+  color: #7894c4;
+}
+
+.qwebr-icon-run-code {
+  color: #0d9c29
+}
+
+body.quarto-light .qwebr-output-code-stdout {
+  color: #111;
+}
+
+body.quarto-dark .qwebr-output-code-stdout {
+  color: #EEE;
+}
+
+.qwebr-output-code-stderr {
+  color: #db4133;
+}
+
+body.quarto-light .qwebr-editor {
+  border: 1px solid #EEEEEE;
+}
+
+body.quarto-light .qwebr-editor-toolbar {
+  background-color: #EEEEEE;
+  padding: 0.2rem 0.5rem;
+}
+
+body.quarto-dark .qwebr-editor {
+  border: 1px solid #111;
+}
+
+body.quarto-dark .qwebr-editor-toolbar {
+  background-color: #111;
+  padding: 0.2rem 0.5rem;
+}
+
+.qwebr-button {
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+  text-align: center;
+  padding: 0.375rem 0.75rem;
+  font-size: .9rem;
+  border-radius: 0.25rem;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+body.quarto-light .qwebr-button {
+  background-color: #EEEEEE;
+  color: #000;
+  border-color: #dee2e6;
+  border: 1px solid rgba(0,0,0,0);
+}
+
+body.quarto-dark .qwebr-button {
+  background-color: #111;
+  color: #EEE;
+  border-color: #dee2e6;
+  border: 1px solid rgba(0,0,0,0);
+}
+
+body.quarto-light .qwebr-button:hover {
+  color: #000;
+  background-color: #d9dce0;
+  border-color: #c8ccd0;
+}
+
+body.quarto-dark .qwebr-button:hover {
+  color: #d9dce0;
+  background-color: #323232;
+  border-color: #d9dce0;
+}
+
+.qwebr-button:disabled,.qwebr-button.disabled,fieldset:disabled .qwebr-button {
+  pointer-events: none;
+  opacity: .65
+}
+
+.qwebr-button-reset {
+  color: #696969; /*#4682b4;*/
+}
+
+.qwebr-button-copy {
+  color: #696969;
+}
+
+/* Style the code highlight lines */
+body.quarto-light .qwebr-editor-highlight-line {
+  background-color: lightblue;
+}
+
+body.quarto-dark .qwebr-editor-highlight-line {
+  background-color: darkblue;
+}
+
+/* Style the modal pop-up */
+
+/* The Modal (background) */
+.qwebr-modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
+
+/* Modal Content */
+.qwebr-modal-content {
+  background-color: #fefefe;
+  margin: 5% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.qwebr-modal-content-code {
+  max-height: 50vh;
+  min-height: 5vh;
+  overflow: scroll;
+  border: 1px solid #888;
+}
+
+/* The Close Button */
+.qwebr-modal-close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.qwebr-modal-close:hover,
+.qwebr-modal-close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.qwebr-download-btn {
+  margin-top: 10px;
+  text-decoration: none !important;
+}
+
+/* Styling to download image that is created */
+
+.qwebr-canvas-image {
+  position: relative;
+  display: inline-block;
+  margin: 10px;
+}
+
+.qwebr-canvas-image-download-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: none;
+}
+
+figure:hover .qwebr-canvas-image-download-btn {
+  display: block;
+}
+
+/* Custom styling for RevealJS Presentations*/
+
+/* Reset the style of the interactive area */
+.reveal div.qwebr-interactive-area {
+  display: block;
+  box-shadow: none;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Provide space to entries */
+.reveal div.qwebr-output-code-area pre div {
+  margin: 1px 2px 1px 10px;
+}
+
+/* Collapse the inside code tags to avoid extra space between line outputs */
+.reveal pre div code.qwebr-output-code-stdout, .reveal pre div code.qwebr-output-code-stderr {
+  padding: 0;
+  display: contents;
+}
+
+body.reveal.quarto-light pre div code.qwebr-output-code-stdout {
+  color: #111;
+}
+
+body.reveal.quarto-dark pre div code.qwebr-output-code-stdout {
+  color: #EEEEEE;
+}
+
+.reveal pre div code.qwebr-output-code-stderr {
+  color: #db4133;
+}
+
+
+/* Create a border around console and output (does not effect graphs) */
+body.reveal.quarto-light div.qwebr-console-area {
+  border: 1px solid #EEEEEE;
+  box-shadow: 2px 2px 10px #EEEEEE;
+}
+
+body.reveal.quarto-dark div.qwebr-console-area {
+  border: 1px solid #111;
+  box-shadow: 2px 2px 10px #111;
+}
+
+
+/* Cap output height and allow text to scroll */
+/* TODO: Is there a better way to fit contents/max it parallel to the monaco editor size? */
+.reveal div.qwebr-output-code-area pre {
+  max-height: 400px;
+  overflow: scroll;
+}
+
+iframe.qwebr-output-code-browse {
+  width: 100%;
+
+  /*
+    TODO: How to make the height automatic according to the widget size,
+    or respect the quarto code block options?
+  */
+  min-height: 500px;
+}
+
+</style>
+<script type="module">
+// Document level settings ----
+
+// Determine if we need to install R packages
+globalThis.qwebrInstallRPackagesList = ['tidyverse', 'broom', 'pROC'];
+
+// Specify possible locations to search for the repository
+globalThis.qwebrPackageRepoURLS = ['https://repo.r-wasm.org/'];
+
+// Check to see if we have an empty array, if we do set to skip the installation.
+globalThis.qwebrSetupRPackages = !(qwebrInstallRPackagesList.indexOf("") !== -1);
+globalThis.qwebrAutoloadRPackages = true;
+
+// Display a startup message?
+globalThis.qwebrShowStartupMessage = true;
+globalThis.qwebrShowHeaderMessage = false;
+
+// Describe the webR settings that should be used
+globalThis.qwebrCustomizedWebROptions = {
+  "baseURL": "https://webr.r-wasm.org/v0.5.2/",
+  "serviceWorkerUrl": "",
+  "homedir": "/home/web_user", 
+  "channelType": "ChannelType.Automatic"
+};
+
+// Store cell data
+globalThis.qwebrCellDetails = [{"code":"## Limpiar el entorno de trabajo\nrm(list = ls())\n\n## Instalar paquetes (solo si es necesario)\ninstall.packages(\"tidyverse\")\ninstall.packages(\"broom\")\ninstall.packages(\"pROC\") \n\n\n## Cargar librerías\nlibrary(tidyverse)  # Manipulación y visualización de datos\nlibrary(broom)      # Para resumir resultados de modelos\nlibrary(pROC)       # Calcular la curva ROC y el AUC\n \n## Fijar semilla para reproducibilidad\nset.seed(123)","id":1,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-1","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## generar los datos\nsource(\"https://raw.githubusercontent.com/ba-in-r/01-slides/main/week-13/data/week-13.r\")\n\n## chuequear objeto\nhead(datos)","id":2,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-2","message":"false","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"false"}},{"code":"# Estimar el modelo logit\nmodelo_logit <- glm(aprueba ~ horas_estudio + asistencia + participacion + \n                      uso_de_R + trabajos_entregados + afinidad_estadistica,\n                    data = datos,\n                    family = binomial(link = \"logit\"))\n\n# Resumen general\nsummary(modelo_logit)","id":3,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-3","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# 1. Extraemos los resultados del modelo en formato ordenado usando broom::tidy()\nr_logit_1 <- tidy(modelo_logit)\nhead(r_logit_1)","id":4,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-4","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# 2. Creamos una nueva columna 'odds_ratio' aplicando la función exponencial a los coeficientes\n#    Esto convierte los coeficientes en términos de cambio multiplicativo en las odds\nr_logit_2 <- mutate(r_logit_1, odds_ratio = exp(estimate))\nhead(r_logit_2)","id":5,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-5","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# 3. Seleccionamos únicamente las columnas de interés:\n#    - term: nombre de la variable\n#    - estimate: coeficiente estimado (log-odds)\n#    - odds_ratio: razón de probabilidades\n#    - p.value: nivel de significancia estadística\nr_logit_3 <- select(r_logit_2, term, estimate, odds_ratio, p.value)\n\n# 4. Mostramos la tabla final con resultados listos para interpretación\nr_logit_3","id":6,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-6","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Generar predicciones\ndatos <- mutate(datos,\n                prob_predicha = predict(modelo_logit, type = \"response\"),\n                aprueba_pred = if_else(prob_predicha > 0.5, 1, 0))\n\n# Verificar las primeras observaciones\nhead(select(datos, aprueba, prob_predicha, aprueba_pred))","id":7,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-7","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Matriz de confusión\ntable(Prediccion = datos$aprueba_pred, Real = datos$aprueba)","id":8,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-8","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Calcular métricas de desempeño\nVP <- sum(datos$aprueba_pred == 1 & datos$aprueba == 1)\nVN <- sum(datos$aprueba_pred == 0 & datos$aprueba == 0)\nFP <- sum(datos$aprueba_pred == 1 & datos$aprueba == 0)\nFN <- sum(datos$aprueba_pred == 0 & datos$aprueba == 1)\n\n## Metricas\naccuracy <- (VP + VN) / (VP + VN + FP + FN)\nsensibilidad <- VP / (VP + FN)\nespecificidad <- VN / (VN + FP)\nprecision <- VP / (VP + FP)\n\n## Metricas del modelo\ntibble(accuracy = round(accuracy, 3),\nsensibilidad = round(sensibilidad, 3),\nespecificidad = round(especificidad, 3),\nprecision = round(precision, 3))","id":9,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-9","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Calcular la curva ROC y el AUC\nroc_obj <- roc(datos$aprueba, datos$prob_predicha)\n\n# Mostrar AUC\nauc(roc_obj)\n\n# Graficar la curva ROC\nplot(roc_obj, col = \"blue\", lwd = 2, main = \"Curva ROC — Modelo Logit\")\nabline(a = 0, b = 1, lty = 2, col = \"gray\")","id":10,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-10","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ggplot(data=datos , aes(x=horas_estudio , y=prob_predicha)) +\ngeom_point(alpha = 0.4, color = \"steelblue\") +\ngeom_smooth(method = \"loess\", se = FALSE, color = \"black\") +\nlabs(title = \"Probabilidad predicha de aprobar según horas de estudio\",\n     x = \"Horas de estudio por semana\",\n     y = \"Probabilidad estimada de aprobar\") +\ntheme_minimal()","id":11,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-11","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Estimar el modelo logit\nmodelo_logit <- glm(retira ~ horas_estudio + asistencia + participacion + \n                    uso_de_R + trabajos_entregados + afinidad_estadistica,\n                    data = datos,\n                    family = binomial(link = \"logit\"))\n\n# Resumen general\nsummary(modelo_logit)","id":12,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-12","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}}];
+
+</script>
+<script type="module">
+// Declare startupMessageQWebR globally
+globalThis.qwebrStartupMessage = document.createElement("p");
+
+// Verify if OffScreenCanvas is supported
+globalThis.qwebrOffScreenCanvasSupport = function() {
+  return typeof OffscreenCanvas !== 'undefined'
+}
+
+// Function to set the button text
+globalThis.qwebrSetInteractiveButtonState = function(buttonText, enableCodeButton = true) {
+  document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+    btn.innerHTML = buttonText;
+    btn.disabled = !enableCodeButton;
+  });
+}
+
+// Function to update the status message in non-interactive cells
+globalThis.qwebrUpdateStatusMessage = function(message) {
+  document.querySelectorAll(".qwebr-status-text.qwebr-cell-needs-evaluation").forEach((elem) => {
+    elem.innerText = message;
+  });
+}
+
+// Function to update the status message
+globalThis.qwebrUpdateStatusHeader = function(message) {
+  qwebrStartupMessage.innerHTML = `
+    <i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i>
+    <span>${message}</span>`;
+}
+
+// Function to return true if element is found, false if not
+globalThis.qwebrCheckHTMLElementExists = function(selector) {
+  const element = document.querySelector(selector);
+  return !!element;
+}
+
+// Function that detects whether reveal.js slides are present
+globalThis.qwebrIsRevealJS = function() {
+  // If the '.reveal .slides' selector exists, RevealJS is likely present
+  return qwebrCheckHTMLElementExists('.reveal .slides');
+}
+
+// Initialize the Quarto sidebar element
+function qwebrSetupQuartoSidebar() {
+  var newSideBarDiv = document.createElement('div');
+  newSideBarDiv.id = 'quarto-margin-sidebar';
+  newSideBarDiv.className = 'sidebar margin-sidebar';
+  newSideBarDiv.style.top = '0px';
+  newSideBarDiv.style.maxHeight = 'calc(0px + 100vh)';
+
+  return newSideBarDiv;
+}
+
+// Position the sidebar in the document
+function qwebrPlaceQuartoSidebar() {
+  // Get the reference to the element with id 'quarto-document-content'
+  var referenceNode = document.getElementById('quarto-document-content');
+
+  // Create the new div element
+  var newSideBarDiv = qwebrSetupQuartoSidebar();
+
+  // Insert the new div before the 'quarto-document-content' element
+  referenceNode.parentNode.insertBefore(newSideBarDiv, referenceNode);
+}
+
+function qwebrPlaceMessageContents(content, html_location = "title-block-header", revealjs_location = "title-slide") {
+
+  // Get references to header elements
+  const headerHTML = document.getElementById(html_location);
+  const headerRevealJS = document.getElementById(revealjs_location);
+
+  // Determine where to insert the quartoTitleMeta element
+  if (headerHTML || headerRevealJS) {
+    // Append to the existing "title-block-header" element or "title-slide" div
+    (headerHTML || headerRevealJS).appendChild(content);
+  } else {
+    // If neither headerHTML nor headerRevealJS is found, insert after "webr-monaco-editor-init" script
+    const monacoScript = document.getElementById("qwebr-monaco-editor-init");
+    const header = document.createElement("header");
+    header.setAttribute("id", "title-block-header");
+    header.appendChild(content);
+    monacoScript.after(header);
+  }
+}
+
+
+
+function qwebrOffScreenCanvasSupportWarningMessage() {
+  
+  // Verify canvas is supported.
+  if(qwebrOffScreenCanvasSupport()) return;
+
+  // Create the main container div
+  var calloutContainer = document.createElement('div');
+  calloutContainer.classList.add('callout', 'callout-style-default', 'callout-warning', 'callout-titled');
+
+  // Create the header div
+  var headerDiv = document.createElement('div');
+  headerDiv.classList.add('callout-header', 'd-flex', 'align-content-center');
+
+  // Create the icon container div
+  var iconContainer = document.createElement('div');
+  iconContainer.classList.add('callout-icon-container');
+
+  // Create the icon element
+  var iconElement = document.createElement('i');
+  iconElement.classList.add('callout-icon');
+
+  // Append the icon element to the icon container
+  iconContainer.appendChild(iconElement);
+
+  // Create the title container div
+  var titleContainer = document.createElement('div');
+  titleContainer.classList.add('callout-title-container', 'flex-fill');
+  titleContainer.innerText = 'Warning: Web Browser Does Not Support Graphing!';
+
+  // Append the icon container and title container to the header div
+  headerDiv.appendChild(iconContainer);
+  headerDiv.appendChild(titleContainer);
+
+  // Create the body container div
+  var bodyContainer = document.createElement('div');
+  bodyContainer.classList.add('callout-body-container', 'callout-body');
+
+  // Create the paragraph element for the body content
+  var paragraphElement = document.createElement('p');
+  paragraphElement.innerHTML = 'This web browser does not have support for displaying graphs through the <code>quarto-webr</code> extension since it lacks an <code>OffScreenCanvas</code>. Please upgrade your web browser to one that supports <code>OffScreenCanvas</code>.';
+
+  // Append the paragraph element to the body container
+  bodyContainer.appendChild(paragraphElement);
+
+  // Append the header div and body container to the main container div
+  calloutContainer.appendChild(headerDiv);
+  calloutContainer.appendChild(bodyContainer);
+
+  // Append the main container div to the document depending on format
+  qwebrPlaceMessageContents(calloutContainer, "title-block-header"); 
+
+}
+
+
+// Function that attaches the document status message and diagnostics
+function displayStartupMessage(showStartupMessage, showHeaderMessage) {
+  if (!showStartupMessage) {
+    return;
+  }
+
+  // Create the outermost div element for metadata
+  const quartoTitleMeta = document.createElement("div");
+  quartoTitleMeta.classList.add("quarto-title-meta");
+
+  // Create the first inner div element
+  const firstInnerDiv = document.createElement("div");
+  firstInnerDiv.setAttribute("id", "qwebr-status-message-area");
+
+  // Create the second inner div element for "WebR Status" heading and contents
+  const secondInnerDiv = document.createElement("div");
+  secondInnerDiv.setAttribute("id", "qwebr-status-message-title");
+  secondInnerDiv.classList.add("quarto-title-meta-heading");
+  secondInnerDiv.innerText = "WebR Status";
+
+  // Create another inner div for contents
+  const secondInnerDivContents = document.createElement("div");
+  secondInnerDivContents.setAttribute("id", "qwebr-status-message-body");
+  secondInnerDivContents.classList.add("quarto-title-meta-contents");
+
+  // Describe the WebR state
+  qwebrStartupMessage.innerText = "🟡 Loading...";
+  qwebrStartupMessage.setAttribute("id", "qwebr-status-message-text");
+  // Add `aria-live` to auto-announce the startup status to screen readers
+  qwebrStartupMessage.setAttribute("aria-live", "assertive");
+
+  // Append the startup message to the contents
+  secondInnerDivContents.appendChild(qwebrStartupMessage);
+
+  // Add a status indicator for COOP and COEP Headers if needed
+  if (showHeaderMessage) {
+    const crossOriginMessage = document.createElement("p");
+    crossOriginMessage.innerText = `${crossOriginIsolated ? '🟢' : '🟡'} COOP & COEP Headers`;
+    crossOriginMessage.setAttribute("id", "qwebr-coop-coep-header");
+    secondInnerDivContents.appendChild(crossOriginMessage);
+  }
+
+  // Combine the inner divs and contents
+  firstInnerDiv.appendChild(secondInnerDiv);
+  firstInnerDiv.appendChild(secondInnerDivContents);
+  quartoTitleMeta.appendChild(firstInnerDiv);
+
+  // Place message on webpage
+  qwebrPlaceMessageContents(quartoTitleMeta); 
+}
+
+function qwebrAddCommandHistoryModal() {
+  // Create the modal div
+  var modalDiv = document.createElement('div');
+  modalDiv.id = 'qwebr-history-modal';
+  modalDiv.className = 'qwebr-modal';
+
+  // Create the modal content div
+  var modalContentDiv = document.createElement('div');
+  modalContentDiv.className = 'qwebr-modal-content';
+
+  // Create the span for closing the modal
+  var closeSpan = document.createElement('span');
+  closeSpan.id = 'qwebr-command-history-close-btn';
+  closeSpan.className = 'qwebr-modal-close';
+  closeSpan.innerHTML = '&times;';
+
+  // Create the h1 element for the modal
+  var modalH1 = document.createElement('h1');
+  modalH1.textContent = 'R History Command Contents';
+
+  // Create an anchor element for downloading the Rhistory file 
+  var downloadLink = document.createElement('a');
+  downloadLink.href = '#';
+  downloadLink.id = 'qwebr-download-history-btn';
+  downloadLink.className = 'qwebr-download-btn';
+
+  // Create an 'i' element for the icon
+  var icon = document.createElement('i');
+  icon.className = 'bi bi-file-code';
+
+  // Append the icon to the anchor element
+  downloadLink.appendChild(icon);
+
+  // Add the text 'Download R History' to the anchor element
+  downloadLink.appendChild(document.createTextNode(' Download R History File'));
+
+  // Create the pre for command history contents
+  var commandContentsPre = document.createElement('pre');
+  commandContentsPre.id = 'qwebr-command-history-contents';
+  commandContentsPre.className = 'qwebr-modal-content-code';
+
+  // Append the close span, h1, and history contents pre to the modal content div
+  modalContentDiv.appendChild(closeSpan);
+  modalContentDiv.appendChild(modalH1);
+  modalContentDiv.appendChild(downloadLink);
+  modalContentDiv.appendChild(commandContentsPre);
+
+  // Append the modal content div to the modal div
+  modalDiv.appendChild(modalContentDiv);
+
+  // Append the modal div to the body
+  document.body.appendChild(modalDiv);
+}
+
+function qwebrRegisterRevealJSCommandHistoryModal() {
+  // Select the <ul> element inside the <div> with data-panel="Custom0"
+  let ulElement = document.querySelector('div[data-panel="Custom0"] > ul.slide-menu-items');
+
+  // Find the last <li> element with class slide-tool-item
+  let lastItem = ulElement.querySelector('li.slide-tool-item:last-child');
+
+  // Calculate the next data-item value
+  let nextItemValue = 0;
+  if (lastItem) {
+      nextItemValue = parseInt(lastItem.dataset.item) + 1;
+  }
+
+  // Create a new <li> element
+  let newListItem = document.createElement('li');
+  newListItem.className = 'slide-tool-item';
+  newListItem.dataset.item = nextItemValue.toString(); // Set the next available data-item value
+
+  // Create the <a> element inside the <li>
+  let newLink = document.createElement('a');
+  newLink.href = '#';
+  newLink.id = 'qwebrRHistoryButton'; // Set the ID for the new link
+  
+  // Create the <kbd> element inside the <a>
+  let newKbd = document.createElement('kbd');
+  newKbd.textContent = ' '; // Set to empty as we are not registering a keyboard shortcut
+
+  // Create text node for the link text
+  let newText = document.createTextNode(' View R History');
+
+  // Append <kbd> and text node to <a>
+  newLink.appendChild(newKbd);
+  newLink.appendChild(newText);
+
+  // Append <a> to <li>
+  newListItem.appendChild(newLink);
+
+  // Append <li> to <ul>
+  ulElement.appendChild(newListItem);
+}
+
+// Handle setting up the R history modal
+function qwebrCodeLinks() {
+
+  if (qwebrIsRevealJS()) {
+    qwebrRegisterRevealJSCommandHistoryModal();
+    return;
+  }
+
+  // Create the container div
+  var containerDiv = document.createElement('div');
+  containerDiv.className = 'quarto-code-links';
+
+  // Create the h2 element
+  var h2 = document.createElement('h2');
+  h2.textContent = 'webR Code Links';
+
+  // Create the ul element
+  var ul = document.createElement('ul');
+
+  // Create the li element
+  var li = document.createElement('li');
+
+  // Create the a_history_btn element
+  var a_history_btn = document.createElement('a');
+  a_history_btn.href = 'javascript:void(0)';
+  a_history_btn.setAttribute('id', 'qwebrRHistoryButton');
+
+  // Create the i_history_btn element
+  var i_history_btn = document.createElement('i');
+  i_history_btn.className = 'bi bi-file-code';
+
+  // Create the text node for the link text
+  var text_history_btn = document.createTextNode('View R History');
+
+  // Append the icon element and link text to the a element
+  a_history_btn.appendChild(i_history_btn);
+  a_history_btn.appendChild(text_history_btn);
+
+  // Append the a element to the li element
+  li.appendChild(a_history_btn);
+
+  // Append the li element to the ul element
+  ul.appendChild(li);
+
+  // Append the h2 and ul elements to the container div
+  containerDiv.appendChild(h2);
+  containerDiv.appendChild(ul);
+
+  // Append the container div to the element with the ID 'quarto-margin-sidebar'
+  var sidebar = document.getElementById('quarto-margin-sidebar');
+    
+  // If the sidebar element is not found, create it
+  if(!sidebar) {
+    qwebrPlaceQuartoSidebar();
+  }
+  
+  // Re-select the sidebar element (if it was just created)
+  sidebar = document.getElementById('quarto-margin-sidebar');   
+
+
+  // If the sidebar element exists, append the container div to it
+  if(sidebar) {
+    // Append the container div to the sidebar
+    sidebar.appendChild(containerDiv);
+    // Force the sidebar to be clickable by removing the 'zindex-bottom' class
+    // added in pre-release: https://github.com/quarto-dev/quarto-cli/commit/f0c53a1ffcaa1de4eccbf07803b096898248adcc
+    sidebar.className = 'sidebar margin-sidebar';
+  } else {
+    // Get a debugger ...
+    console.warn('Element with ID "quarto-margin-sidebar" not found.');
+  }
+}
+
+// Call the function to append the code links for qwebR into the right sidebar
+qwebrCodeLinks();
+
+// Add the command history modal
+qwebrAddCommandHistoryModal();
+
+displayStartupMessage(qwebrShowStartupMessage, qwebrShowHeaderMessage);
+qwebrOffScreenCanvasSupportWarningMessage();
+</script>
+<script type="module">
+// Define a global storage and retrieval solution ----
+
+// Store commands executed in R
+globalThis.qwebrRCommandHistory = [];
+
+// Function to retrieve the command history
+globalThis.qwebrFormatRHistory = function() {
+   return qwebrRCommandHistory.join("\n\n");
+}
+
+// Retrieve HTML Elements ----
+
+// Get the command modal
+const command_history_modal = document.getElementById("qwebr-history-modal");
+
+// Get the button that opens the command modal
+const command_history_btn = document.getElementById("qwebrRHistoryButton");
+
+// Get the <span> element that closes the command modal
+const command_history_close_span = document.getElementById("qwebr-command-history-close-btn");
+
+// Get the download button for r history information
+const command_history_download_btn = document.getElementById("qwebr-download-history-btn");
+
+// Plug in command history into modal/download button ----
+
+// Function to populate the modal with command history
+function populateCommandHistoryModal() {
+    document.getElementById("qwebr-command-history-contents").innerHTML = qwebrFormatRHistory() || "No commands have been executed yet.";
+}
+
+// Function to format the current date and time to
+// a string with the format YYYY-MM-DD-HH-MM-SS
+function formatDateTime() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+}
+
+
+// Function to convert document title with datetime to a safe filename
+function safeFileName() {
+    // Get the current page title
+    let pageTitle = document.title;
+
+    // Combine the current page title with the current date and time
+    let pageNameWithDateTime = `Rhistory-${pageTitle}-${formatDateTime()}`;
+
+    // Replace unsafe characters with safe alternatives
+    let safeFilename = pageNameWithDateTime.replace(/[\\/:\*\?! "<>\|]/g, '-');
+
+    return safeFilename;
+}
+
+
+// Function to download list contents as text file
+function downloadRHistory() {
+    // Get the current page title + datetime and use it as the filename
+    const filename = `${safeFileName()}.R`;
+
+    // Get the text contents of the R History list
+    const text = qwebrFormatRHistory();
+
+    // Create a new Blob object with the text contents
+    const blob = new Blob([text], { type: 'text/plain' });
+  
+    // Create a new anchor element for the download
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+
+    // Append the anchor to the body, click it, and remove it
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// Register event handlers ----
+
+// When the user clicks the View R History button, open the command modal
+command_history_btn.onclick = function() {
+    populateCommandHistoryModal();
+    command_history_modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the command modal
+command_history_close_span.onclick = function() {
+    command_history_modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the command modal, close it
+window.onclick = function(event) {
+    if (event.target == command_history_modal) {
+        command_history_modal.style.display = "none";
+    }
+}
+
+// Add an onclick event listener to the download button so that
+// the user can download the R history as a text file
+command_history_download_btn.onclick = function() {
+    downloadRHistory();
+};
+</script>
+<script type="module">
+// Supported Evaluation Types for Context
+globalThis.EvalTypes = Object.freeze({
+  Interactive: 'interactive',
+  Setup: 'setup',
+  Output: 'output',
+});
+
+// Function that obtains the font size for a given element 
+globalThis.qwebrCurrentFontSizeOnElement = function(element, cssProperty = 'font-size') {
+
+  const currentFontSize = parseFloat(
+    window
+    .getComputedStyle(element)
+    .getPropertyValue(cssProperty)
+  );
+  
+  return currentFontSize;
+}
+
+// Function to determine font scaling
+globalThis.qwebrScaledFontSize = function(div, qwebrOptions) {
+  // Determine if we should compute font-size using RevealJS's `--r-main-font-size` 
+  // or if we can directly use the document's `font-size`.
+  const cssProperty = document.body.classList.contains('reveal') ? 
+    "--r-main-font-size" : "font-size";
+  
+  // Get the current font size on the div element
+  const elementFontSize = qwebrCurrentFontSizeOnElement(div, cssProperty);
+
+  // Determine the scaled font size value
+  const scaledFontSize = ((qwebrOptions['editor-font-scale'] ?? 1) * elementFontSize) ?? 17.5;
+
+  return scaledFontSize;
+}
+
+
+// Function that dispatches the creation request
+globalThis.qwebrCreateHTMLElement = function (
+  cellData
+) {
+
+  // Extract key components
+  const evalType = cellData.options.context;
+  const qwebrCounter = cellData.id;
+
+  // We make an assumption that insertion points are defined by the Lua filter as:
+  // qwebr-insertion-location-{qwebrCounter} 
+  const elementLocator = document.getElementById(`qwebr-insertion-location-${qwebrCounter}`);
+
+  // Figure out the routine to use to insert the element.
+  let qwebrElement;
+  switch ( evalType ) {
+    case EvalTypes.Interactive:
+      qwebrElement = qwebrCreateInteractiveElement(qwebrCounter, cellData.options);
+      break;
+    case EvalTypes.Output: 
+      qwebrElement = qwebrCreateNonInteractiveOutputElement(qwebrCounter, cellData.options);
+      break;
+    case EvalTypes.Setup: 
+      qwebrElement = qwebrCreateNonInteractiveSetupElement(qwebrCounter, cellData.options);
+      break;
+    default: 
+      qwebrElement = document.createElement('div');
+      qwebrElement.textContent = 'Error creating `quarto-webr` element';
+  }
+
+  // Insert the dynamically generated object at the document location.
+  elementLocator.appendChild(qwebrElement);
+};
+
+// Function that setups the interactive element creation
+globalThis.qwebrCreateInteractiveElement = function (qwebrCounter, qwebrOptions) {
+
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = 'qwebr-interactive-area-' + qwebrCounter;
+  mainDiv.className = `qwebr-interactive-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+
+  // Create toolbar div
+  var toolbarDiv = document.createElement('div');
+  toolbarDiv.className = 'qwebr-editor-toolbar';
+  toolbarDiv.id = 'qwebr-editor-toolbar-' + qwebrCounter;
+
+  // Create a div to hold the left buttons
+  var leftButtonsDiv = document.createElement('div');
+  leftButtonsDiv.className = 'qwebr-editor-toolbar-left-buttons';
+
+  // Create a div to hold the right buttons
+  var rightButtonsDiv = document.createElement('div');
+  rightButtonsDiv.className = 'qwebr-editor-toolbar-right-buttons';
+
+  // Create Run Code button
+  var runCodeButton = document.createElement('button');
+  runCodeButton.className = 'btn btn-default qwebr-button qwebr-button-run';
+  runCodeButton.disabled = true;
+  runCodeButton.type = 'button';
+  runCodeButton.id = 'qwebr-button-run-' + qwebrCounter;
+  runCodeButton.textContent = '🟡 Loading webR...';
+  runCodeButton.title = `Run code (Shift + Enter)`;
+
+  // Append buttons to the leftButtonsDiv
+  leftButtonsDiv.appendChild(runCodeButton);
+
+  // Create Reset button
+  var resetButton = document.createElement('button');
+  resetButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-reset';
+  resetButton.type = 'button';
+  resetButton.id = 'qwebr-button-reset-' + qwebrCounter;
+  resetButton.title = 'Start over';
+  resetButton.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i>';
+
+  // Create Copy button
+  var copyButton = document.createElement('button');
+  copyButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-copy';
+  copyButton.type = 'button';
+  copyButton.id = 'qwebr-button-copy-' + qwebrCounter;
+  copyButton.title = 'Copy code';
+  copyButton.innerHTML = '<i class="fa-regular fa-copy"></i>';
+
+  // Append buttons to the rightButtonsDiv
+  rightButtonsDiv.appendChild(resetButton);
+  rightButtonsDiv.appendChild(copyButton);
+
+  // Create console area div
+  var consoleAreaDiv = document.createElement('div');
+  consoleAreaDiv.id = 'qwebr-console-area-' + qwebrCounter;
+  consoleAreaDiv.className = 'qwebr-console-area';
+
+  // Create editor div
+  var editorDiv = document.createElement('div');
+  editorDiv.id = 'qwebr-editor-' + qwebrCounter;
+  editorDiv.className = 'qwebr-editor';
+
+  // Create output code area div
+  var outputCodeAreaDiv = document.createElement('div');
+  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
+  outputCodeAreaDiv.className = 'qwebr-output-code-area';
+  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
+
+  // Create pre element inside output code area
+  var preElement = document.createElement('pre');
+  preElement.style.visibility = 'hidden';
+  outputCodeAreaDiv.appendChild(preElement);
+
+  // Create output graph area div
+  var outputGraphAreaDiv = document.createElement('div');
+  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
+  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
+
+  // Append buttons to the toolbar
+  toolbarDiv.appendChild(leftButtonsDiv);
+  toolbarDiv.appendChild(rightButtonsDiv);
+
+  // Append all elements to the main div
+  mainDiv.appendChild(toolbarDiv);
+  consoleAreaDiv.appendChild(editorDiv);
+  consoleAreaDiv.appendChild(outputCodeAreaDiv);
+  mainDiv.appendChild(consoleAreaDiv);
+  mainDiv.appendChild(outputGraphAreaDiv);
+
+  return mainDiv;
+}
+
+// Function that adds output structure for non-interactive output
+globalThis.qwebrCreateNonInteractiveOutputElement = function(qwebrCounter, qwebrOptions) {
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = 'qwebr-noninteractive-area-' + qwebrCounter;
+  mainDiv.className = `qwebr-noninteractive-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+  
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+  
+  // Create a status container div
+  var statusContainer = createLoadingContainer(qwebrCounter);
+
+  // Create output code area div
+  var outputCodeAreaDiv = document.createElement('div');
+  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
+  outputCodeAreaDiv.className = 'qwebr-output-code-area';
+  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
+
+  // Create pre element inside output code area
+  var preElement = document.createElement('pre');
+  preElement.style.visibility = 'hidden';
+  outputCodeAreaDiv.appendChild(preElement);
+
+  // Create output graph area div
+  var outputGraphAreaDiv = document.createElement('div');
+  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
+  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
+
+  // Append all elements to the main div
+  mainDiv.appendChild(statusContainer);
+  mainDiv.appendChild(outputCodeAreaDiv);
+  mainDiv.appendChild(outputGraphAreaDiv);
+
+  return mainDiv;
+};
+
+// Function that adds a stub in the page to indicate a setup cell was used.
+globalThis.qwebrCreateNonInteractiveSetupElement = function(qwebrCounter, qwebrOptions) {
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = `qwebr-noninteractive-setup-area-${qwebrCounter}`;
+  mainDiv.className = `qwebr-noninteractive-setup-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+
+
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+
+  // Create a status container div
+  var statusContainer = createLoadingContainer(qwebrCounter);
+
+  // Append status onto the main div
+  mainDiv.appendChild(statusContainer);
+
+  return mainDiv;
+}
+
+
+// Function to create loading container with specified ID
+globalThis.createLoadingContainer = function(qwebrCounter) {
+
+  // Create a status container
+  const container = document.createElement('div');
+  container.id = `qwebr-non-interactive-loading-container-${qwebrCounter}`;
+  container.className = 'qwebr-non-interactive-loading-container qwebr-cell-needs-evaluation';
+
+  // Create an R project logo to indicate its a code space
+  const rProjectIcon = document.createElement('i');
+  rProjectIcon.className = 'fa-brands fa-r-project fa-3x qwebr-r-project-logo';
+
+  // Setup a loading icon from font awesome
+  const spinnerIcon = document.createElement('i');
+  spinnerIcon.className = 'fa-solid fa-spinner fa-spin fa-1x qwebr-icon-status-spinner';
+
+  // Add a section for status text
+  const statusText = document.createElement('p');
+  statusText.id = `qwebr-status-text-${qwebrCounter}`;
+  statusText.className = `qwebr-status-text qwebr-cell-needs-evaluation`;
+  statusText.innerText = 'Loading webR...';
+
+  // Incorporate an inner container
+  const innerContainer = document.createElement('div');
+
+  // Append elements to the inner container
+  innerContainer.appendChild(spinnerIcon);
+  innerContainer.appendChild(statusText);
+
+  // Append elements to the main container
+  container.appendChild(rProjectIcon);
+  container.appendChild(innerContainer);
+
+  return container;
+}
+</script>
+<script type="module">
+// Function to install a single package
+async function qwebrInstallRPackage(packageName) {
+  await mainWebR.evalRVoid(`webr::install('${packageName}');`);
+}
+
+// Function to load a single package
+async function qwebrLoadRPackage(packageName) {
+  await mainWebR.evalRVoid(`require('${packageName}', quietly = TRUE)`);
+}
+
+// Generic function to process R packages
+async function qwebrProcessRPackagesWithStatus(packages, processType, displayStatusMessageUpdate = true) {
+  // Switch between contexts
+  const messagePrefix = processType === 'install' ? 'Installing' : 'Loading';
+
+  // Modify button state
+  qwebrSetInteractiveButtonState(`🟡 ${messagePrefix} package ...`, false);
+
+  // Iterate over packages
+  for (let i = 0; i < packages.length; i++) {
+    const activePackage = packages[i];
+    const formattedMessage = `${messagePrefix} package ${i + 1} out of ${packages.length}: ${activePackage}`;
+
+    // Display the update in header
+    if (displayStatusMessageUpdate) {
+      qwebrUpdateStatusHeader(formattedMessage);
+    }
+
+    // Display the update in non-active areas
+    qwebrUpdateStatusMessage(formattedMessage);
+
+    // Run package installation
+    if (processType === 'install') {
+      await qwebrInstallRPackage(activePackage);
+    } else {
+      await qwebrLoadRPackage(activePackage);
+    }
+  }
+
+  // Clean slate
+  if (processType === 'load') {
+    await mainWebR.flush();
+  }
+}
+
+// Start a timer
+const initializeWebRTimerStart = performance.now();
+
+// Encase with a dynamic import statement
+globalThis.qwebrInstance = import(qwebrCustomizedWebROptions.baseURL + "webr.mjs").then(
+  async ({ WebR, ChannelType }) => {
+    // Populate WebR options with defaults or new values based on `webr` meta
+    globalThis.mainWebR = new WebR(qwebrCustomizedWebROptions);
+
+    // Initialization WebR
+    await mainWebR.init();
+
+    // Setup a shelter
+    globalThis.mainWebRCodeShelter = await new mainWebR.Shelter();
+
+    // Setup a pager to allow processing help documentation
+    await mainWebR.evalRVoid('webr::pager_install()');
+
+    // Setup a viewer to allow processing htmlwidgets.
+    // This might not be available in old webr version
+    await mainWebR.evalRVoid('try({ webr::viewer_install() })');
+
+    // Override the existing install.packages() to use webr::install()
+    await mainWebR.evalRVoid('webr::shim_install()');
+
+    // Specify the repositories to pull from
+    // Note: webR does not use the `repos` option, but instead uses `webr_pkg_repos`
+    // inside of `install()`. However, other R functions still pull from `repos`.
+    await mainWebR.evalRVoid(`
+      options(
+        webr_pkg_repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')}),
+        repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')})
+      )
+    `);
+
+    // Check to see if any packages need to be installed
+    if (qwebrSetupRPackages) {
+      // Obtain only a unique list of packages
+      const uniqueRPackageList = Array.from(new Set(qwebrInstallRPackagesList));
+
+      // Install R packages one at a time (either silently or with a status update)
+      await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'install', qwebrShowStartupMessage);
+
+      if (qwebrAutoloadRPackages) {
+        // Load R packages one at a time (either silently or with a status update)
+        await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'load', qwebrShowStartupMessage);
+      }
+    }
+  }
+);
+
+// Stop timer
+const initializeWebRTimerEnd = performance.now();
+
+</script>
+<script type="module">
+// Function to verify a given JavaScript Object is empty
+globalThis.qwebrIsObjectEmpty = function (arr) {
+    return Object.keys(arr).length === 0;
+}
+
+// Global version of the Escape HTML function that converts HTML
+// characters to their HTML entities.
+globalThis.qwebrEscapeHTMLCharacters = function(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+};
+
+// Passthrough results
+globalThis.qwebrIdentity = function(x) {
+    return x;
+};
+
+// Append a comment
+globalThis.qwebrPrefixComment = function(x, comment) {
+    return `${comment}${x}`;
+};
+
+// Function to store the code in the history
+globalThis.qwebrLogCodeToHistory = function(codeToRun, options) {
+    qwebrRCommandHistory.push(
+        `# Ran code in ${options.label} at ${new Date().toLocaleString()} ----\n${codeToRun}`
+    );
+};
+
+// Function to attach a download button onto the canvas
+// allowing the user to download the image.
+function qwebrImageCanvasDownloadButton(canvas, canvasContainer) {
+
+    // Create the download button
+    const downloadButton = document.createElement('button');
+    downloadButton.className = 'qwebr-canvas-image-download-btn';
+    downloadButton.textContent = 'Download Image';
+    canvasContainer.appendChild(downloadButton);
+
+    // Trigger a download of the image when the button is clicked
+    downloadButton.addEventListener('click', function() {
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = 'qwebr-canvas-image.png';
+        link.click();
+    });
+}
+
+
+// Function to parse the pager results
+globalThis.qwebrParseTypePager = async function (msg) {
+
+    // Split out the event data
+    const { path, title, deleteFile } = msg.data;
+
+    // Process the pager data by reading the information from disk
+    const paged_data = await mainWebR.FS.readFile(path).then((data) => {
+        // Obtain the file content
+        let content = new TextDecoder().decode(data);
+
+        // Remove excessive backspace characters until none remain
+        while(content.match(/.[\b]/)){
+            content = content.replace(/.[\b]/g, '');
+        }
+
+        // Returned cleaned data
+        return content;
+    });
+
+    // Unlink file if needed
+    if (deleteFile) {
+        await mainWebR.FS.unlink(path);
+    }
+
+    // Return extracted data with spaces
+    return paged_data;
+};
+
+
+// Function to parse the browse results
+globalThis.qwebrParseTypeBrowse = async function (msg) {
+
+    // msg.type === "browse"
+    const path = msg.data.url;
+
+    // Process the browse data by reading the information from disk
+    const browse_data = await mainWebR.FS.readFile(path).then((data) => {
+        // Obtain the file content
+        let content = new TextDecoder().decode(data);
+
+        return content;
+    });
+
+    // Return extracted data as-is
+    return browse_data;
+};
+
+// Function to run the code using webR and parse the output
+globalThis.qwebrComputeEngine = async function(
+    codeToRun,
+    elements,
+    options) {
+
+    // Call into the R compute engine that persists within the document scope.
+    // To be prepared for all scenarios, the following happens:
+    // 1. We setup a canvas device to write to by making a namespace call into the {webr} package
+    // 2. We use values inside of the options array to set the figure size.
+    // 3. We capture the output stream information (STDOUT and STERR)
+    // 4. We disable the current device's image creation.
+    // 5. Piece-wise parse the results into the different output areas
+
+    // Create a pager variable for help/file contents
+    let pager = [];
+
+    // Handle how output is processed
+    let showMarkup = options.results === "markup" && options.output !== "asis";
+    let processOutput;
+
+    if (showMarkup) {
+        processOutput = qwebrEscapeHTMLCharacters;
+    } else {
+        processOutput = qwebrIdentity;
+    }
+
+    // ----
+    // Convert from Inches to Pixels by using DPI (dots per inch)
+    // for bitmap devices (dpi * inches = pixels)
+    let fig_width = options["fig-width"] * options["dpi"];
+    let fig_height = options["fig-height"] * options["dpi"];
+
+    // Initialize webR
+    await mainWebR.init();
+
+    // Configure capture output
+    let captureOutputOptions = {
+        withAutoprint: true,
+        captureStreams: true,
+        captureConditions: false,
+        // env: webR.objs.emptyEnv, // maintain a global environment for webR v0.2.0
+    };
+
+    // Determine if the browser supports OffScreen
+    if (qwebrOffScreenCanvasSupport()) {
+        // Mirror default options of webr::canvas()
+        // with changes to figure height and width.
+        captureOutputOptions.captureGraphics = {
+            width: fig_width,
+            height: fig_height,
+            bg: "white", // default: transparent
+            pointsize: 12,
+            capture: true
+        };
+    }  else {
+        // Disable generating graphics
+        captureOutputOptions.captureGraphics = false;
+    }
+
+    // Store the code to run in history
+    qwebrLogCodeToHistory(codeToRun, options);
+
+    // Setup a webR canvas by making a namespace call into the {webr} package
+    // Evaluate the R code
+    // Remove the active canvas silently
+    const result = await mainWebRCodeShelter.captureR(
+        `${codeToRun}`,
+        captureOutputOptions
+    );
+
+    // -----
+
+    // Start attempting to parse the result data
+    processResultOutput:try {
+
+        // Avoid running through output processing
+        if (options.results === "hide" || options.output === "false") {
+            break processResultOutput;
+        }
+
+        // Merge output streams of STDOUT and STDErr (messages and errors are combined.)
+        // Require both `warning` and `message` to be true to display `STDErr`.
+        const out = result.output
+        .filter(
+            evt => evt.type === "stdout" ||
+            ( evt.type === "stderr" && (options.warning === "true" && options.message === "true"))
+        )
+        .map((evt, index) => {
+            const className = `qwebr-output-code-${evt.type}`;
+            const outputResult = qwebrPrefixComment(processOutput(evt.data), options.comment);
+            return `<code id="${className}-editor-${elements.id}-result-${index + 1}" class="${className}">${outputResult}</code>`;
+        })
+        .join("\n");
+
+
+        // Clean the state
+        // We're now able to process pager events.
+        // As a result, we cannot maintain a true 1-to-1 output order
+        // without individually feeding each line
+        const msgs = await mainWebR.flush();
+
+        // Use `map` to process the filtered "pager" events asynchronously
+        const pager = [];
+        const browse = [];
+
+        await Promise.all(
+            msgs.map(
+                async (msg) => {
+
+                    const msgType = msg.type || "unknown";
+
+                    switch(msgType) {
+                        case 'pager':
+                            const pager_data = await qwebrParseTypePager(msg);
+                            pager.push(pager_data);
+                            break;
+                        case 'browse':
+                            const browse_data = await qwebrParseTypeBrowse(msg);
+                            browse.push(browse_data);
+                            break;
+                    }
+                    return;
+                }
+            )
+        );
+
+        // Nullify the output area of content
+        elements.outputCodeDiv.innerHTML = "";
+        elements.outputGraphDiv.innerHTML = "";
+
+        // Design an output object for messages
+        const pre = document.createElement("pre");
+        if (/\S/.test(out)) {
+            // Display results as HTML elements to retain output styling
+            const div = document.createElement("div");
+            div.innerHTML = out;
+
+            // Calculate a scaled font-size value
+            const scaledFontSize = qwebrScaledFontSize(
+                elements.outputCodeDiv, options);
+
+            // Override output code cell size
+            pre.style.fontSize = `${scaledFontSize}px`;
+            pre.appendChild(div);
+        } else {
+            // If nothing is present, hide the element.
+            pre.style.visibility = "hidden";
+        }
+
+        elements.outputCodeDiv.appendChild(pre);
+
+        // Determine if we have graphs to display
+        if (result.images.length > 0) {
+
+            // Create figure element
+            const figureElement = document.createElement("figure");
+            figureElement.className = "qwebr-canvas-image";
+
+            // Place each rendered graphic onto a canvas element
+            result.images.forEach((img) => {
+
+                // Construct canvas for object
+                const canvas = document.createElement("canvas");
+
+                // Add an image download button
+                qwebrImageCanvasDownloadButton(canvas, figureElement);
+
+                // Set canvas size to image
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                // Apply output truncations
+                canvas.style.width = options["out-width"] ? options["out-width"] : `${fig_width}px`;
+                if (options["out-height"]) {
+                    canvas.style.height = options["out-height"];
+                }
+
+                // Apply styling
+                canvas.style.display = "block";
+                canvas.style.margin = "auto";
+
+                // Draw image onto Canvas
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                // Append canvas to figure output area
+                figureElement.appendChild(canvas);
+
+            });
+
+            if (options['fig-cap']) {
+                // Create figcaption element
+                const figcaptionElement = document.createElement('figcaption');
+                figcaptionElement.innerText = options['fig-cap'];
+                // Append figcaption to figure
+                figureElement.appendChild(figcaptionElement);
+            }
+
+            elements.outputGraphDiv.appendChild(figureElement);
+
+        }
+
+        // Display the pager data
+        if (pager.length > 0) {
+            // Use the `pre` element to preserve whitespace.
+            pager.forEach((paged_data, index) => {
+                const pre_pager = document.createElement("pre");
+                pre_pager.innerText = paged_data;
+                pre_pager.classList.add("qwebr-output-code-pager");
+                pre_pager.setAttribute("id", `qwebr-output-code-pager-editor-${elements.id}-result-${index + 1}`);
+                elements.outputCodeDiv.appendChild(pre_pager);
+            });
+        }
+
+        // Display the browse data
+        if (browse.length > 0) {
+            // Use the `pre` element to preserve whitespace.
+            browse.forEach((browse_data, index) => {
+                const iframe_browse = document.createElement('iframe');
+                iframe_browse.classList.add("qwebr-output-code-browse");
+                iframe_browse.setAttribute("id", `qwebr-output-code-browse-editor-${elements.id}-result-${index + 1}`);
+                iframe_browse.style.width = "100%";
+                iframe_browse.style.minHeight = "500px";
+                elements.outputCodeDiv.appendChild(iframe_browse);
+
+                iframe_browse.contentWindow.document.open();
+                iframe_browse.contentWindow.document.write(browse_data);
+                iframe_browse.contentWindow.document.close();
+            });
+        }
+    } finally {
+        // Clean up the remaining code
+        mainWebRCodeShelter.purge();
+    }
+};
+
+// Function to execute the code (accepts code as an argument)
+globalThis.qwebrExecuteCode = async function (
+    codeToRun,
+    id,
+    options = {}) {
+
+    // If options are not passed, we fall back on the bare minimum to handle the computation
+    if (qwebrIsObjectEmpty(options)) {
+        options = {
+            "context": "interactive",
+            "fig-width": 7, "fig-height": 5,
+            "out-width": "700px", "out-height": "",
+            "dpi": 72,
+            "results": "markup",
+            "warning": "true", "message": "true",
+        };
+    }
+
+    // Next, we access the compute areas values
+    const elements = {
+        runButton: document.getElementById(`qwebr-button-run-${id}`),
+        outputCodeDiv: document.getElementById(`qwebr-output-code-area-${id}`),
+        outputGraphDiv: document.getElementById(`qwebr-output-graph-area-${id}`),
+        id: id,
+    }
+
+    // Disallowing execution of other code cells
+    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+        btn.disabled = true;
+    });
+
+    if (options.context == EvalTypes.Interactive) {
+        // Emphasize the active code cell
+        elements.runButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i> <span>Run Code</span>';
+    }
+
+    // Evaluate the code and parse the output into the document
+    await qwebrComputeEngine(codeToRun, elements, options);
+
+    // Switch to allowing execution of code
+    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+        btn.disabled = false;
+    });
+
+    if (options.context == EvalTypes.Interactive) {
+        // Revert to the initial code cell state
+        elements.runButton.innerHTML = '<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>';
+    }
+}
+
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="1">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#qué-es-un-problema-de-clasificación" id="toc-qué-es-un-problema-de-clasificación" class="nav-link active" data-scroll-target="#qué-es-un-problema-de-clasificación"><span class="header-section-number">1</span> ¿Qué es un problema de clasificación?</a>
+  <ul class="collapse">
+  <li><a href="#modelación" id="toc-modelación" class="nav-link" data-scroll-target="#modelación"><span class="header-section-number">1.1</span> Modelación</a>
+  <ul class="collapse">
+  <li><a href="#el-modelo-logit" id="toc-el-modelo-logit" class="nav-link" data-scroll-target="#el-modelo-logit"><span class="header-section-number">1.1.1</span> El Modelo Logit</a></li>
+  <li><a href="#interpretación-matemática-y-empírica" id="toc-interpretación-matemática-y-empírica" class="nav-link" data-scroll-target="#interpretación-matemática-y-empírica"><span class="header-section-number">1.1.2</span> Interpretación matemática y empírica</a></li>
+  <li><a href="#odds-y-log-odds-intuición-práctica" id="toc-odds-y-log-odds-intuición-práctica" class="nav-link" data-scroll-target="#odds-y-log-odds-intuición-práctica"><span class="header-section-number">1.1.3</span> Odds y log-odds: intuición práctica</a></li>
+  <li><a href="#interpretación-de-los-coeficientes" id="toc-interpretación-de-los-coeficientes" class="nav-link" data-scroll-target="#interpretación-de-los-coeficientes"><span class="header-section-number">1.1.4</span> Interpretación de los coeficientes</a></li>
+  <li><a href="#comportamiento-no-lineal-del-logit" id="toc-comportamiento-no-lineal-del-logit" class="nav-link" data-scroll-target="#comportamiento-no-lineal-del-logit"><span class="header-section-number">1.1.5</span> Comportamiento no lineal del Logit</a></li>
+  </ul></li>
+  <li><a href="#evaluación-del-modelo" id="toc-evaluación-del-modelo" class="nav-link" data-scroll-target="#evaluación-del-modelo"><span class="header-section-number">1.2</span> Evaluación del modelo</a>
+  <ul class="collapse">
+  <li><a href="#interpretación-estratégica" id="toc-interpretación-estratégica" class="nav-link" data-scroll-target="#interpretación-estratégica"><span class="header-section-number">1.2.1</span> Interpretación estratégica</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#aplicación-en-r" id="toc-aplicación-en-r" class="nav-link" data-scroll-target="#aplicación-en-r"><span class="header-section-number">2</span> Aplicación en R</a>
+  <ul class="collapse">
+  <li><a href="#preparación-del-entorno" id="toc-preparación-del-entorno" class="nav-link" data-scroll-target="#preparación-del-entorno"><span class="header-section-number">2.1</span> Preparación del entorno</a></li>
+  <li><a href="#ingesta-de-datos" id="toc-ingesta-de-datos" class="nav-link" data-scroll-target="#ingesta-de-datos"><span class="header-section-number">2.2</span> Ingesta de datos</a></li>
+  <li><a href="#estimación-del-modelo-logit" id="toc-estimación-del-modelo-logit" class="nav-link" data-scroll-target="#estimación-del-modelo-logit"><span class="header-section-number">2.3</span> Estimación del Modelo Logit</a>
+  <ul class="collapse">
+  <li><a href="#cómo-se-formula-el-modelo" id="toc-cómo-se-formula-el-modelo" class="nav-link" data-scroll-target="#cómo-se-formula-el-modelo"><span class="header-section-number">2.3.1</span> ¿Cómo se formula el modelo?</a></li>
+  <li><a href="#qué-significa-cada-parte" id="toc-qué-significa-cada-parte" class="nav-link" data-scroll-target="#qué-significa-cada-parte"><span class="header-section-number">2.3.2</span> ¿Qué significa cada parte?</a></li>
+  <li><a href="#estimación-en-r" id="toc-estimación-en-r" class="nav-link" data-scroll-target="#estimación-en-r"><span class="header-section-number">2.3.3</span> Estimación en R</a></li>
+  <li><a href="#interpretación-de-coeficientes" id="toc-interpretación-de-coeficientes" class="nav-link" data-scroll-target="#interpretación-de-coeficientes"><span class="header-section-number">2.3.4</span> Interpretación de coeficientes</a></li>
+  </ul></li>
+  <li><a href="#evaluación-del-modelo-logit" id="toc-evaluación-del-modelo-logit" class="nav-link" data-scroll-target="#evaluación-del-modelo-logit"><span class="header-section-number">2.4</span> Evaluación del Modelo Logit</a>
+  <ul class="collapse">
+  <li><a href="#predicciones-del-modelo" id="toc-predicciones-del-modelo" class="nav-link" data-scroll-target="#predicciones-del-modelo"><span class="header-section-number">2.4.1</span> Predicciones del modelo</a></li>
+  <li><a href="#matriz-de-confusión" id="toc-matriz-de-confusión" class="nav-link" data-scroll-target="#matriz-de-confusión"><span class="header-section-number">2.4.2</span> Matriz de confusión</a></li>
+  <li><a href="#métricas-de-desempeño" id="toc-métricas-de-desempeño" class="nav-link" data-scroll-target="#métricas-de-desempeño"><span class="header-section-number">2.4.3</span> Métricas de desempeño</a></li>
+  <li><a href="#curva-roc-y-auc" id="toc-curva-roc-y-auc" class="nav-link" data-scroll-target="#curva-roc-y-auc"><span class="header-section-number">2.4.4</span> Curva ROC y AUC</a></li>
+  <li><a href="#visualización-de-resultados" id="toc-visualización-de-resultados" class="nav-link" data-scroll-target="#visualización-de-resultados"><span class="header-section-number">2.4.5</span> Visualización de resultados</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#actividad-en-clase" id="toc-actividad-en-clase" class="nav-link" data-scroll-target="#actividad-en-clase"><span class="header-section-number">3</span> Actividad en Clase</a>
+  <ul class="collapse">
+  <li><a href="#instrucciones" id="toc-instrucciones" class="nav-link" data-scroll-target="#instrucciones"><span class="header-section-number">3.1</span> Instrucciones:</a>
+  <ul class="collapse">
+  <li><a href="#estimación-del-modelo-logit-1" id="toc-estimación-del-modelo-logit-1" class="nav-link" data-scroll-target="#estimación-del-modelo-logit-1"><span class="header-section-number">3.1.1</span> Estimación del modelo Logit</a></li>
+  </ul></li>
+  <li><a href="#evaluación-del-modelo-logit-1" id="toc-evaluación-del-modelo-logit-1" class="nav-link" data-scroll-target="#evaluación-del-modelo-logit-1"><span class="header-section-number">3.2</span> Evaluación del Modelo Logit</a></li>
+  <li><a href="#preguntas-para-el-informe" id="toc-preguntas-para-el-informe" class="nav-link" data-scroll-target="#preguntas-para-el-informe"><span class="header-section-number">3.3</span> Preguntas para el informe</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
+<script type="module" id="qwebr-monaco-editor-init">
+
+  // Configure the Monaco Editor's loader
+  require.config({
+    paths: {
+      'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs'
+    }
+  });
+</script>
+<script type="module">
+// Function to update Monaco Editors when body class changes
+function updateMonacoEditorsOnBodyClassChange() {
+    // Select the body element
+    const body = document.querySelector('body');
+
+    // Options for the observer (which mutations to observe)
+    const observerOptions = {
+        attributes: true,  // Observe changes to attributes
+        attributeFilter: ['class'] // Only observe changes to the 'class' attribute
+    };
+
+    // Callback function to execute when mutations are observed
+    const bodyClassChangeCallback = function(mutationsList, observer) {
+        for(let mutation of mutationsList) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                // Class attribute has changed
+                // Update all Monaco Editors on the page
+                updateMonacoEditorTheme();
+            }
+        }
+    };
+
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver(bodyClassChangeCallback);
+
+    // Start observing the target node for configured mutations
+    observer.observe(body, observerOptions);
+}
+
+// Function to update all instances of Monaco Editors on the page
+function updateMonacoEditorTheme() {
+    // Determine what VS Theme to use
+    const vsThemeToUse = document.body.classList.contains("quarto-dark") ? 'vs-dark' : 'vs' ;
+
+    // Iterate through all initialized Monaco Editors
+    qwebrEditorInstances.forEach( function(editorInstance) { 
+        editorInstance.updateOptions({ theme: vsThemeToUse }); 
+    });
+}
+
+// Call the function to start observing changes to body class
+updateMonacoEditorsOnBodyClassChange();
+</script>
+<script type="module">
+// Global array to store Monaco Editor instances
+globalThis.qwebrEditorInstances = [];
+
+function isValidCodeLineNumbers(stringCodeLineNumbers) {
+  // Regular expression to match valid input strings
+  const regex = /^(\d+(-\d+)?)(,\d+(-\d+)?)*$/;
+  return regex.test(stringCodeLineNumbers);
+}
+
+// Function that builds and registers a Monaco Editor instance    
+globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
+
+  const initialCode = cellData.code;
+  const qwebrCounter = cellData.id;
+  const qwebrOptions = cellData.options;
+
+  // Retrieve the previously created document elements
+  let runButton = document.getElementById(`qwebr-button-run-${qwebrCounter}`);
+  let resetButton = document.getElementById(`qwebr-button-reset-${qwebrCounter}`);
+  let copyButton = document.getElementById(`qwebr-button-copy-${qwebrCounter}`);
+  let editorDiv = document.getElementById(`qwebr-editor-${qwebrCounter}`);
+
+  // Load the Monaco Editor and create an instance
+  let editor;
+  require(['vs/editor/editor.main'], function () {
+    editor = monaco.editor.create(editorDiv, {
+      value: initialCode,
+      language: 'r',
+      theme: 'vs-light',
+      automaticLayout: true,           // Works wonderfully with RevealJS
+      scrollBeyondLastLine: false,
+      minimap: {
+        enabled: false
+      },
+      fontSize: qwebrScaledFontSize(editorDiv, qwebrOptions),         
+      renderLineHighlight: "none",      // Disable current line highlighting
+      hideCursorInOverviewRuler: true,  // Remove cursor indictor in right hand side scroll bar
+      readOnly: qwebrOptions['read-only'] ?? false,
+      quickSuggestions: qwebrOptions['editor-quick-suggestions'] ?? false,
+      wordWrap: (qwebrOptions['editor-word-wrap'] == 'true' ? "on" : "off")
+    });
+
+    // Store the official counter ID to be used in keyboard shortcuts
+    editor.__qwebrCounter = qwebrCounter;
+
+    // Store the official div container ID
+    editor.__qwebrEditorId = `qwebr-editor-${qwebrCounter}`;
+
+    // Store the initial code value and options
+    editor.__qwebrinitialCode = initialCode;
+    editor.__qwebrOptions = qwebrOptions;
+
+    // Set at the model level the preferred end of line (EOL) character to LF.
+    // This prevent `\r\n` from being given to the webR engine if the user is on Windows.
+    // See details in: https://github.com/coatless/quarto-webr/issues/94
+    // Associated error text: 
+    // Error: <text>:1:7 unexpected input
+
+    // Retrieve the underlying model
+    const model = editor.getModel();
+    // Set EOL for the model
+    model.setEOL(monaco.editor.EndOfLineSequence.LF);
+    
+    // Dynamically modify the height of the editor window if new lines are added.
+    let ignoreEvent = false;
+    const updateHeight = () => {
+      // Increment editor height by 2 to prevent vertical scroll bar from appearing
+      const contentHeight = editor.getContentHeight() + 2;
+
+      // Retrieve editor-max-height option
+      const maxEditorHeight = qwebrOptions['editor-max-height'];
+
+      // If editor-max-height is missing, allow infinite growth. Otherwise, threshold.
+      const editorHeight = !maxEditorHeight ?  contentHeight : Math.min(contentHeight, maxEditorHeight);
+
+      // We're avoiding a width change
+      //editorDiv.style.width = `${width}px`;
+      editorDiv.style.height = `${editorHeight}px`;
+      try {
+        ignoreEvent = true;
+
+        // The key to resizing is this call
+        editor.layout();
+      } finally {
+        ignoreEvent = false;
+      }
+    };
+
+    // Function to generate decorations to highlight lines
+    // in the editor based on input string.
+    function decoratorHighlightLines(codeLineNumbers) {
+      // Store the lines to be lighlight
+      let linesToHighlight = [];
+      
+      // Parse the codeLineNumbers string to get the line numbers to highlight
+      // First, split the string by commas
+      codeLineNumbers.split(',').forEach(part => {
+        // Check if we have a range of lines
+        if (part.includes('-')) {
+            // Handle range of lines (e.g., "6-8")
+            const [start, end] = part.split('-').map(Number);
+            for (let i = start; i <= end; i++) {
+                linesToHighlight.push(i);
+            }
+        } else {
+            // Handle single line (e.g., "7")
+            linesToHighlight.push(Number(part));
+        }
+      });
+  
+      // Create monaco decorations for the lines to highlight
+      const decorations = linesToHighlight.map(lineNumber => ({
+          range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+          options: {
+              isWholeLine: true,
+              className: 'qwebr-editor-highlight-line'
+          }
+      }));
+  
+      // Return decorations to be applied to the editor
+      return decorations;
+    }
+
+    // Ensure that the editor-code-line-numbers option is set and valid
+    // then apply styling
+    if (qwebrOptions['editor-code-line-numbers']) {
+      // Remove all whitespace from the string
+      const codeLineNumbers = qwebrOptions['editor-code-line-numbers'].replace(/\s/g,'');
+      // Check if the string is valid for line numbers, e.g., "1,3-5,7"
+      if (isValidCodeLineNumbers(codeLineNumbers)) {
+        // Apply the decorations to the editor
+        editor.createDecorationsCollection(decoratorHighlightLines(codeLineNumbers));
+      } else {
+        // Warn the user that the input is invalid
+        console.warn(`Invalid "editor-code-line-numbers" value in code cell ${qwebrOptions['label']}: ${codeLineNumbers}`);
+      }
+    }
+
+    // Helper function to check if selected text is empty
+    function isEmptyCodeText(selectedCodeText) {
+      return (selectedCodeText === null || selectedCodeText === undefined || selectedCodeText === "");
+    }
+
+    // Registry of keyboard shortcuts that should be re-added to each editor window
+    // when focus changes.
+    const addWebRKeyboardShortCutCommands = () => {
+      // Add a keydown event listener for Shift+Enter to run all code in cell
+      editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
+
+        // Retrieve all text inside the editor
+        qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
+      });
+
+      // Add a keydown event listener for CMD/Ctrl+Enter to run selected code
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+
+        // Get the selected text from the editor
+        const selectedText = editor.getModel().getValueInRange(editor.getSelection());
+        // Check if no code is selected
+        if (isEmptyCodeText(selectedText)) {
+          // Obtain the current cursor position
+          let currentPosition = editor.getPosition();
+          // Retrieve the current line content
+          let currentLine = editor.getModel().getLineContent(currentPosition.lineNumber);
+
+          // Propose a new position to move the cursor to
+          let newPosition = new monaco.Position(currentPosition.lineNumber + 1, 1);
+
+          // Check if the new position is beyond the last line of the editor
+          if (newPosition.lineNumber > editor.getModel().getLineCount()) {
+            // Add a new line at the end of the editor
+            editor.executeEdits("addNewLine", [{
+            range: new monaco.Range(newPosition.lineNumber, 1, newPosition.lineNumber, 1),
+            text: "\n", 
+            forceMoveMarkers: true,
+            }]);
+          }
+          
+          // Run the entire line of code.
+          qwebrExecuteCode(currentLine, editor.__qwebrCounter, editor.__qwebrOptions);
+
+          // Move cursor to new position
+          editor.setPosition(newPosition);
+        } else {
+          // Code to run when Ctrl+Enter is pressed with selected code
+          qwebrExecuteCode(selectedText, editor.__qwebrCounter, editor.__qwebrOptions);
+        }
+      });
+    }
+
+    // Register an on focus event handler for when a code cell is selected to update
+    // what keyboard shortcut commands should work.
+    // This is a workaround to fix a regression that happened with multiple
+    // editor windows since Monaco 0.32.0 
+    // https://github.com/microsoft/monaco-editor/issues/2947
+    editor.onDidFocusEditorText(addWebRKeyboardShortCutCommands);
+
+    // Register an on change event for when new code is added to the editor window
+    editor.onDidContentSizeChange(updateHeight);
+
+    // Manually re-update height to account for the content we inserted into the call
+    updateHeight();
+
+    // Store the editor instance in the global dictionary
+    qwebrEditorInstances[editor.__qwebrCounter] = editor;
+
+  });
+
+  // Add a click event listener to the run button
+  runButton.onclick = function () {
+    qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
+  };
+
+  // Add a click event listener to the reset button
+  copyButton.onclick = function () {
+    // Retrieve current code data
+    const data = editor.getValue();
+    
+    // Write code data onto the clipboard.
+    navigator.clipboard.writeText(data || "");
+  };
+  
+  // Add a click event listener to the copy button
+  resetButton.onclick = function () {
+    editor.setValue(editor.__qwebrinitialCode);
+  };
+  
+}
+</script>
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 9 — Clasificación</h1>
+<p class="subtitle lead">Semana 13: Modelo Logit</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Eduard F. Martínez González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><a href="mailto:efmartinez@icesi.edu.co" style="color:black;"> <img src="pic/correo.png" alt="Email" width="20" height="20"> efmartinez@icesi.edu.co </a></p>
+<p><a href="https://github.com/eduard-martinez" style="color:black;"> <img src="pic/github.png" alt="Qries" width="20" height="20"> eduard-martinez</a></p>
+<p><a href="https://twitter.com/emartigo" style="color:black;"> <img src="pic/twitter.jpg" alt="Qries" width="20" height="20"> <span class="citation" data-cites="emartigo">@emartigo</span></a></p>
+<p><a href="https://eduard-martinez.github.io" style="color:black;"> <img src="pic/link.png" alt="Qries" width="20" height="20"> https://eduard-martinez.github.io</a></p>
+<section id="qué-es-un-problema-de-clasificación" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> ¿Qué es un problema de clasificación?</h1>
+<p><img src="clasfication-gif.gif" class="img-fluid"></p>
+<p>En <em>Business Analytics</em>, los modelos de <strong>clasificación</strong> se utilizan cuando la <strong>variable de respuesta es categórica</strong> (por ejemplo, <em>acepta/no acepta</em>, <em>fraude/no fraude</em>, <em>compra/no compra</em>).<br>
+El objetivo es <strong>asignar observaciones a categorías</strong> con base en sus características observadas.</p>
+<p><strong>Ejemplos típicos:</strong></p>
+<ul>
+<li>Determinar si un cliente pagará su crédito o caerá en mora.<br>
+</li>
+<li>Identificar si una transacción es legítima o fraudulenta.<br>
+</li>
+<li>Predecir si un estudiante aprobará o no un curso.<br>
+</li>
+<li>Clasificar correos en “spam” o “no spam”.</li>
+</ul>
+<section id="modelación" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="modelación"><span class="header-section-number">1.1</span> Modelación</h2>
+<section id="el-modelo-logit" class="level3" data-number="1.1.1">
+<h3 data-number="1.1.1" class="anchored" data-anchor-id="el-modelo-logit"><span class="header-section-number">1.1.1</span> El Modelo Logit</h3>
+<p>En el contexto de <strong>Business Analytics</strong>, cuando la variable de interés es dicotómica (por ejemplo, <em>comprar/no comprar</em>, <em>aprobar/reprobar</em>, <em>renovar/no renovar</em>), necesitamos un modelo que relacione las características observadas (X) con la <strong>probabilidad de éxito</strong> (P(Y=1)).</p>
+<p>El modelo <strong>Logit</strong> propone una relación no lineal entre estas variables mediante la <strong>función logística</strong>:</p>
+<p><span class="math inline">\(P(Y=1|X) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \cdots + \beta_k X_k)}}\)</span></p>
+<p>Esta transformación convierte una combinación lineal de predictores (<span class="math inline">\(\beta_0 + \beta_1 X_1 + \cdots\)</span>) en un valor comprendido entre <strong>0 y 1</strong>, es decir, una probabilidad válida.</p>
+<p>📈 <strong>Idea clave:</strong> Mientras que la regresión lineal puede producir predicciones fuera del rango [0,1], el modelo Logit <strong>comprime la escala</strong> y captura relaciones no lineales entre las variables explicativas y la probabilidad del evento.</p>
+</section>
+<section id="interpretación-matemática-y-empírica" class="level3" data-number="1.1.2">
+<h3 data-number="1.1.2" class="anchored" data-anchor-id="interpretación-matemática-y-empírica"><span class="header-section-number">1.1.2</span> Interpretación matemática y empírica</h3>
+<p>En lugar de modelar directamente la probabilidad, el modelo Logit transforma la relación a través del <strong>logaritmo de las odds (razón de probabilidades)</strong>, definido como:</p>
+<p><span class="math inline">\(\log\left(\frac{P(Y=1)}{1 - P(Y=1)}\right) = \beta_0 + \beta_1 X_1 + \cdots + \beta_k X_k\)</span></p>
+<p>Esta ecuación implica que los <strong>log-odds</strong> cambian linealmente con los valores de (X), aunque la probabilidad (P(Y=1)) lo haga de manera no lineal. De este modo, el Logit puede modelar relaciones complejas, donde los efectos marginales de cada variable disminuyen a medida que la probabilidad se acerca a 0 o 1.</p>
+<p>En la práctica, este comportamiento <strong>“en S” o sigmoide</strong> refleja situaciones reales de decisión:</p>
+<ul>
+<li>Un aumento en las horas de estudio tiene un fuerte impacto cuando un estudiante está indeciso (probabilidad ≈ 0.5),<br>
+pero un efecto mucho menor si ya tiene una probabilidad muy alta o muy baja de aprobar.</li>
+</ul>
+</section>
+<section id="odds-y-log-odds-intuición-práctica" class="level3" data-number="1.1.3">
+<h3 data-number="1.1.3" class="anchored" data-anchor-id="odds-y-log-odds-intuición-práctica"><span class="header-section-number">1.1.3</span> Odds y log-odds: intuición práctica</h3>
+<p><strong>Odds (razón de probabilidades):</strong> <span class="math inline">\(\text{odds} = \frac{P(Y=1)}{1 - P(Y=1)}\)</span></p>
+<p>Ejemplo: si <span class="math inline">\(P=0.8\)</span>, las odds son 4 a 1 (es decir, cuatro veces más probable que ocurra el evento que que no ocurra).</p>
+<ul>
+<li><strong>Log-odds:</strong> Es el logaritmo natural de las <em>odds</em>. Este paso permite que la relación entre las variables y el resultado sea lineal, facilitando la estimación con métodos de regresión.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Nota:</strong> La escala de log-odds no tiene una interpretación inmediata en porcentajes, pero al exponenciar los coeficientes (<span class="math inline">\(e^{\beta\_j}\)</span>) recuperamos una medida interpretable: el <strong>odds ratio</strong>, que indica cuánto se multiplican las probabilidades relativas del evento cuando una variable cambia en una unidad.</p>
+</div>
+</div>
+</section>
+<section id="interpretación-de-los-coeficientes" class="level3" data-number="1.1.4">
+<h3 data-number="1.1.4" class="anchored" data-anchor-id="interpretación-de-los-coeficientes"><span class="header-section-number">1.1.4</span> Interpretación de los coeficientes</h3>
+<p>Cada parámetro <span class="math inline">\(\beta\_j\)</span> representa el <strong>efecto parcial</strong> de la variable <span class="math inline">\(X_j\)</span> sobre el logaritmo de las odds del evento, manteniendo las demás constantes:</p>
+<ul>
+<li>Si <span class="math inline">\(\beta_j &gt; 0\)</span>: el aumento en<span class="math inline">\(X_j\)</span> incrementa la probabilidad de éxito.<br>
+</li>
+<li>Si <span class="math inline">\(\beta_j &lt; 0\)</span>: el aumento en <span class="math inline">\(X_j\)</span> reduce la probabilidad de éxito.</li>
+</ul>
+<p>Sin embargo, dado que los coeficientes se expresan en log-odds, solemos transformarlos a <strong>odds ratios</strong>:</p>
+<p><span class="math inline">\(\text{odds ratio} = e^{\beta_j}\)</span></p>
+<p>Esta medida es más intuitiva, ya que describe un cambio multiplicativo en las odds:</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Ejemplo interpretativo:</strong> Si <span class="math inline">\(e^{\beta_{\text{horas\_estudio}}} = 1.5\)</span>, entonces cada hora adicional de estudio aumenta en un <strong>50 %</strong> las probabilidades relativas de aprobar, manteniendo las demás variables constantes.</p>
+</div>
+</div>
+</section>
+<section id="comportamiento-no-lineal-del-logit" class="level3" data-number="1.1.5">
+<h3 data-number="1.1.5" class="anchored" data-anchor-id="comportamiento-no-lineal-del-logit"><span class="header-section-number">1.1.5</span> Comportamiento no lineal del Logit</h3>
+<p>El modelo Logit captura <strong>efectos decrecientes</strong> a medida que la probabilidad se acerca a los extremos.<br>
+Gráficamente, su forma sigmoide muestra tres zonas:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 40%">
+<col style="width: 43%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Zona</th>
+<th>Probabilidad</th>
+<th>Comportamiento</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Inferior (P≈0)</strong></td>
+<td>Evento muy improbable</td>
+<td>Cambios en X apenas afectan la probabilidad</td>
+</tr>
+<tr class="even">
+<td><strong>Central (P≈0.5)</strong></td>
+<td>Región de máxima sensibilidad</td>
+<td>Pequeños cambios en X producen grandes cambios en P</td>
+</tr>
+<tr class="odd">
+<td><strong>Superior (P≈1)</strong></td>
+<td>Evento casi seguro</td>
+<td>Cambios en X tienen poco efecto adicional</td>
+</tr>
+</tbody>
+</table>
+<p>Esta propiedad hace del Logit una herramienta potente para <strong>problemas de decisión</strong>,<br>
+donde la respuesta no cambia de forma constante, sino en umbrales o zonas críticas.</p>
+<p>📘 <strong>En resumen:</strong> El modelo Logit combina <strong>rigor estadístico</strong> con <strong>interpretabilidad económica</strong>, lo que lo convierte en una de las técnicas más utilizadas en Business Analytics. Permite traducir información observable en probabilidades, evaluar qué variables influyen en un resultado y apoyar decisiones basadas en datos y riesgo.</p>
+</section>
+</section>
+<section id="evaluación-del-modelo" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="evaluación-del-modelo"><span class="header-section-number">1.2</span> Evaluación del modelo</h2>
+<p>Evaluar un modelo de clasificación no solo consiste en verificar cuántas predicciones fueron correctas, sino en <strong>entender cómo y dónde el modelo acierta o se equivoca</strong>. Las métricas permiten medir su desempeño bajo diferentes perspectivas: precisión, cobertura y capacidad de discriminación entre clases. Las métricas más comunes incluyen:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 28%">
+<col style="width: 51%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Métrica</th>
+<th>Descripción</th>
+<th>Interpretación práctica</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Exactitud (Accuracy)</strong></td>
+<td>Proporción de predicciones correctas sobre el total.</td>
+<td>Mide el desempeño global del modelo, pero puede ser engañosa si las clases están desbalanceadas.</td>
+</tr>
+<tr class="even">
+<td><strong>Sensibilidad (Recall o Tasa de Verdaderos Positivos)</strong></td>
+<td>Capacidad del modelo para identificar correctamente los casos positivos.</td>
+<td>Indica qué tan bien detecta el modelo a quienes realmente presentan el evento.</td>
+</tr>
+<tr class="odd">
+<td><strong>Especificidad</strong></td>
+<td>Capacidad del modelo para identificar correctamente los casos negativos.</td>
+<td>Evalúa la habilidad para no confundir casos negativos con positivos.</td>
+</tr>
+<tr class="even">
+<td><strong>Precisión (Precision)</strong></td>
+<td>Proporción de verdaderos positivos entre todos los positivos predichos.</td>
+<td>Indica cuántas de las predicciones positivas son realmente correctas.</td>
+</tr>
+<tr class="odd">
+<td><strong>F1-Score</strong></td>
+<td>Media armónica entre precisión y sensibilidad.</td>
+<td>Balancea los errores tipo I y II; útil cuando las clases son desiguales.</td>
+</tr>
+<tr class="even">
+<td><strong>AUC-ROC</strong></td>
+<td>Área bajo la curva ROC (Receiver Operating Characteristic).</td>
+<td>Evalúa la capacidad general del modelo para distinguir entre clases. Cuanto más cerca de 1, mejor.</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Matriz de confusión:</strong> Es la herramienta base para calcular todas las métricas anteriores. Muestra los aciertos (predicciones correctas) y errores (predicciones incorrectas) del modelo:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 37%">
+<col style="width: 37%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Real Positivo (1)</strong></th>
+<th><strong>Real Negativo (0)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Predicho Positivo (1)</strong></td>
+<td>Verdaderos Positivos (VP)</td>
+<td>Falsos Positivos (FP)</td>
+</tr>
+<tr class="even">
+<td><strong>Predicho Negativo (0)</strong></td>
+<td>Falsos Negativos (FN)</td>
+<td>Verdaderos Negativos (VN)</td>
+</tr>
+</tbody>
+</table>
+<p>Esta tabla permite diagnosticar el tipo de error predominante: si el modelo <strong>no detecta casos verdaderos</strong> (alta tasa de FN) o si <strong>etiqueta erróneamente casos negativos como positivos</strong> (alta tasa de FP).</p>
+</div>
+</div>
+<section id="interpretación-estratégica" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="interpretación-estratégica"><span class="header-section-number">1.2.1</span> Interpretación estratégica</h3>
+<p>Cada métrica tiene un significado <strong>operativo</strong> según el contexto de negocio:</p>
+<ul>
+<li>En <strong>riesgo crediticio</strong>, un falso negativo (no identificar un cliente riesgoso) puede ser costoso.<br>
+</li>
+<li>En <strong>salud</strong>, un falso positivo (diagnóstico incorrecto de enfermedad) puede generar tratamientos innecesarios.<br>
+</li>
+<li>En <strong>educación</strong>, un modelo que predice mal quién está en riesgo de retirarse podría afectar la asignación de tutorías o becas.<br>
+Por ello, <strong>no existe una única métrica “mejor”</strong>; el análisis debe centrarse en la métrica que maximiza el valor para la decisión.</li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Resumen:</strong> El modelo Logit es el punto de partida de la analítica predictiva moderna. Permite <strong>clasificar observaciones</strong>, <strong>estimar probabilidades</strong> y <strong>analizar la influencia de cada variable</strong>, combinando interpretabilidad estadística con valor práctico para la gestión y la estrategia empresarial.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+</section>
+<section id="aplicación-en-r" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Aplicación en R</h1>
+<p>Para ilustrar el uso de los <strong>modelos de clasificación</strong>, trabajaremos con una base sintética que representa a <strong>estudiantes inscritos en un curso universitario</strong>. Cada registro contiene información sobre el comportamiento académico y el desempeño del estudiante a lo largo del semestre, lo que nos permitirá <strong>estimar la probabilidad de aprobar el curso</strong> y analizar los factores que más influyen en ese resultado.</p>
+<p>En este contexto:</p>
+<ul>
+<li>Cada <strong>observación</strong> corresponde a un estudiante.<br>
+</li>
+<li>La <strong>variable dependiente</strong> es binaria: <code>aprueba</code> (1 = aprueba, 0 = reprueba).<br>
+</li>
+<li>Las <strong>variables explicativas</strong> describen aspectos como el número de horas de estudio, la asistencia, la participación y la afinidad con la estadística.</li>
+</ul>
+<p>El objetivo es construir un <strong>modelo Logit</strong> que nos permita responder preguntas como:</p>
+<ul>
+<li>¿Qué factores aumentan la probabilidad de aprobar el curso?<br>
+</li>
+<li>¿Cómo se interpreta el efecto de cada variable en términos de <em>odds ratio</em>?<br>
+</li>
+<li>¿Qué tan bien puede el modelo predecir los resultados académicos?</li>
+</ul>
+<p>Este tipo de análisis es una herramienta clave en <strong>Business Analytics</strong>, ya que permite tomar decisiones basadas en datos —por ejemplo, identificar estudiantes en riesgo académico, diseñar estrategias de acompañamiento o evaluar la efectividad de las metodologías de enseñanza.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>💡 <strong>Cómo usar este material:</strong><br>
+Puedes ejecutar los <em>chunks</em> de R directamente en el navegador gracias a <strong>webR</strong>, sin necesidad de instalar nada localmente.</p>
+</div>
+</div>
+<section id="preparación-del-entorno" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="preparación-del-entorno"><span class="header-section-number">2.1</span> Preparación del entorno</h2>
+<p>El propósito de este bloque es asegurar un entorno <strong>limpio, reproducible y funcional</strong> antes de iniciar el análisis.<br>
+Primero, eliminamos cualquier objeto previo que pueda interferir con la sesión actual. Luego, instalamos (si es necesario) y cargamos los paquetes requeridos para la <strong>manipulación de datos</strong>, la <strong>visualización</strong> y la <strong>estimación del modelo Logit</strong>.</p>
+<p>Con esto, dejamos el entorno preparado para comenzar el análisis aplicado.</p>
+<div id="qwebr-insertion-location-1"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Los paquetes <code>tidyverse</code> y <code>broom</code> son parte del ecosistema de análisis de datos en R: • <code>tidyverse</code> permite transformar y visualizar datos de manera eficiente. • <code>broom</code> facilita la conversión de resultados de modelos estadísticos en tablas ordenadas y listas para interpretar.</p>
+</div>
+</div>
+</section>
+<section id="ingesta-de-datos" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="ingesta-de-datos"><span class="header-section-number">2.2</span> Ingesta de datos</h2>
+<p>En esta sección realizamos la ingesta de datos, es decir, el proceso de generar o cargar la base que utilizaremos para estimar el modelo Logit. Cada registro representa a un estudiante, con variables relacionadas con su esfuerzo, participación y rendimiento a lo largo del semestre.</p>
+<p>La estructura de los datos es la siguiente: • horas_estudio: promedio semanal de horas dedicadas al curso. • asistencia: porcentaje de asistencia a clase. • participacion: nivel de participación en clase (0–100). • uso_de_R: nivel de dominio de R (1–5). • trabajos_entregados: cantidad de trabajos entregados (0–5). • afinidad_estadistica: gusto por la estadística (0–100). • aprueba: resultado final (1 = aprueba, 0 = reprueba). • retira: indica si el estudiante se retiró del curso antes de finalizar (1 = sí, 0 = no).</p>
+<p>Nuestro objetivo será estimar cómo cada una de estas variables influye en la probabilidad de aprobar el curso.</p>
+<div id="qwebr-insertion-location-2"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</section>
+<section id="estimación-del-modelo-logit" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="estimación-del-modelo-logit"><span class="header-section-number">2.3</span> Estimación del Modelo Logit</h2>
+<p>Ahora sí, pasemos a la parte práctica: vamos a <strong>estimar un modelo Logit</strong> que nos ayude a predecir la probabilidad de que un estudiante <strong>apruebe el curso</strong>. La idea es bastante simple: queremos entender qué factores —como las horas de estudio, la asistencia, la participación en clase o el gusto por la estadística— están realmente asociados con aprobar o no. Podríamos pensar en esto como tratar de responder preguntas del tipo:</p>
+<p>“¿Qué tanto influye estudiar más o asistir con regularidad en la probabilidad de aprobar?”<br>
+“¿Tiene impacto que el estudiante use más R o entregue más trabajos?”</p>
+<p>El modelo Logit nos permite cuantificar esas relaciones de forma probabilística.</p>
+<section id="cómo-se-formula-el-modelo" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="cómo-se-formula-el-modelo"><span class="header-section-number">2.3.1</span> ¿Cómo se formula el modelo?</h3>
+<p>En pocas palabras, el Logit relaciona las variables explicativas con la <strong>probabilidad de aprobar</strong> a través de una función no lineal llamada <em>función logística</em>. Matemáticamente, el modelo se puede escribir así:</p>
+<p><span class="math inline">\(\log\left(\frac{P(\text{aprueba}=1)}{1 - P(\text{aprueba}=1)}\right) =\)</span> <span class="math inline">\(\beta_0 + \beta_1(\text{horas\_estudio}) + ... + \beta_6(\text{afinidad\_estadistica})\)</span></p>
+<p>Dónde las variables explicativas son: <span class="math inline">\(\text{horas\_estudio}\)</span> + <span class="math inline">\(\text{asistencia}\)</span> + <span class="math inline">\(\text{participacion}\)</span> + <span class="math inline">\(\text{uso\_de\_R}\)</span> + <span class="math inline">\(\text{trabajos\_entregados}\)</span> + <span class="math inline">\(\text{afinidad\_estadistica}\)</span>. Lo que hace este modelo es algo muy interesante: en lugar de predecir directamente una probabilidad (que siempre debe estar entre 0 y 1), predice el <strong>logaritmo de las odds</strong> o razones de probabilidad. Esto permite usar una relación lineal en el “fondo” del modelo, pero que al transformarse con la función logística se mantiene siempre dentro del rango válido.</p>
+</section>
+<section id="qué-significa-cada-parte" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="qué-significa-cada-parte"><span class="header-section-number">2.3.2</span> ¿Qué significa cada parte?</h3>
+<p>El término del lado izquierdo, <span class="math inline">\(\log\left(\frac{P(Y=1)}{1 - P(Y=1)}\right)\)</span> es el <strong>logaritmo de las odds</strong>, es decir, cómo cambian las probabilidades relativas de aprobar frente a reprobar.</p>
+<p>Los coeficientes <span class="math inline">\(\beta_j\)</span>) nos dicen <strong>cuánto cambia esa razón</strong> cuando una variable cambia en una unidad, manteniendo las demás constantes. Por ejemplo, si el coeficiente de <code>horas_estudio</code> es positivo, significa que estudiar más está asociado con una mayor probabilidad de aprobar.</p>
+<p>En resumen, el modelo nos permite <em>traducir datos en probabilidades</em>. A partir de los valores observados de las variables, podemos estimar qué tan probable es que un estudiante apruebe, y además entender <strong>qué factores son los que realmente mueven la aguja</strong>.</p>
+</section>
+<section id="estimación-en-r" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="estimación-en-r"><span class="header-section-number">2.3.3</span> Estimación en R</h3>
+<p>Usaremos la función <code>glm()</code> (Generalized Linear Model) especificando <code>family = binomial(link = "logit")</code> para estimar el modelo logístico. Esta función ajusta un modelo de regresión que predice la probabilidad de que un estudiante <strong>apruebe el curso</strong>, dada su combinación de características.</p>
+<div id="qwebr-insertion-location-3"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Interpretación inicial:</strong> Un coeficiente positivo indica que un aumento en la variable incrementa la probabilidad de aprobar, mientras que un coeficiente negativo la reduce. Sin embargo, los valores de los coeficientes están en escala log-odds, por lo que deben transformarse para interpretarse como odds ratios.</p>
+</div>
+</div>
+</section>
+<section id="interpretación-de-coeficientes" class="level3" data-number="2.3.4">
+<h3 data-number="2.3.4" class="anchored" data-anchor-id="interpretación-de-coeficientes"><span class="header-section-number">2.3.4</span> Interpretación de coeficientes</h3>
+<p>Para obtener una interpretación más intuitiva, transformamos los coeficientes mediante la exponenciación:</p>
+<p><span class="math inline">\(\text{odds ratio} = e^{\beta_j}\)</span></p>
+<p>Un odds ratio mayor a 1 indica que un aumento en la variable incrementa la probabilidad de aprobar, mientras que un valor menor a 1 indica que la reduce.</p>
+<div id="qwebr-insertion-location-4"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div id="qwebr-insertion-location-5"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div id="qwebr-insertion-location-6"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Ejemplo de interpretación:</strong> Si el odds ratio de horas_estudio es 1.27, significa que por cada hora adicional de estudio, las probabilidades de aprobar el curso se incrementan en un 27%, manteniendo las demás variables constantes.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="evaluación-del-modelo-logit" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="evaluación-del-modelo-logit"><span class="header-section-number">2.4</span> Evaluación del Modelo Logit</h2>
+<p>Una vez estimado el modelo Logit, necesitamos <strong>evaluar su capacidad predictiva</strong>:¿qué tan bien logra distinguir entre los estudiantes que aprueban y los que no?</p>
+<p>En esta sección construiremos una <strong>matriz de confusión</strong>, calcularemos <strong>métricas de desempeño</strong> y visualizaremos la <strong>curva ROC</strong> (<em>Receiver Operating Characteristic</em>) para medir el poder discriminatorio del modelo.</p>
+<section id="predicciones-del-modelo" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="predicciones-del-modelo"><span class="header-section-number">2.4.1</span> Predicciones del modelo</h3>
+<p>Usamos la función <code>predict()</code> para calcular la <strong>probabilidad estimada de aprobar</strong> (<code>prob_predicha</code>) y clasificamos a cada estudiante según un umbral de 0.5 (es decir, si la probabilidad es mayor a 0.5, se predice que aprueba).</p>
+<div id="qwebr-insertion-location-7"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Nota:</strong> El valor 0.5 es un umbral arbitrario. Podemos ajustarlo según los objetivos del análisis: • Usar un umbral menor (p.&nbsp;ej. 0.4) si queremos detectar más estudiantes en riesgo (aunque aumenten los falsos positivos). • Usar un umbral mayor (p.&nbsp;ej. 0.6) si preferimos mayor precisión en las predicciones positivas.</p>
+</div>
+</div>
+</section>
+<section id="matriz-de-confusión" class="level3" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="matriz-de-confusión"><span class="header-section-number">2.4.2</span> Matriz de confusión</h3>
+<p>Una vez que el modelo ha hecho sus predicciones, el siguiente paso es <strong>evaluar qué tan bien lo hizo</strong>. Para eso usamos una herramienta clásica en clasificación: la <strong>matriz de confusión</strong>. Esta matriz no es más que una tabla de doble entrada que compara, para cada observación, lo que el modelo <strong>predijo</strong> frente a lo que <strong>realmente ocurrió</strong>. Es decir, muestra los aciertos y errores del modelo de una forma muy clara.</p>
+<div id="qwebr-insertion-location-8"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>Esta matriz no es más que una tabla de doble entrada que compara, para cada observación, lo que el modelo <strong>predijo</strong> frente a lo que <strong>realmente ocurrió</strong>. Es decir, muestra los aciertos y errores del modelo de una forma muy clara. Cuando ejecutes el comando para crear la matriz, obtendrás una tabla similar a:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Real = 0</th>
+<th>Real = 1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Predicho = 0</strong></td>
+<td>176</td>
+<td>122</td>
+</tr>
+<tr class="even">
+<td><strong>Predicho = 1</strong></td>
+<td>418</td>
+<td>1284</td>
+</tr>
+</tbody>
+</table>
+<p>Cada celda te está contando <strong>cuántos estudiantes</strong> cayeron en cada situación posible. Veamos qué significa cada una:</p>
+<ul>
+<li><strong>Verdaderos positivos (VP):</strong> el modelo predijo que el estudiante aprobaría, y efectivamente aprobó.<br>
+</li>
+<li><strong>Verdaderos negativos (VN):</strong> el modelo predijo que el estudiante reprobaría, y así fue.<br>
+</li>
+<li><strong>Falsos positivos (FP):</strong> el modelo predijo que aprobaría, pero en realidad reprobó.<br>
+</li>
+<li><strong>Falsos negativos (FN):</strong> el modelo predijo que reprobaría, pero el estudiante aprobó.</li>
+</ul>
+<section id="por-qué-se-llama-confusión" class="level4" data-number="2.4.2.1">
+<h4 data-number="2.4.2.1" class="anchored" data-anchor-id="por-qué-se-llama-confusión"><span class="header-section-number">2.4.2.1</span> ¿Por qué se llama “confusión”?</h4>
+<p>Porque literalmente nos muestra <strong>en qué se confunde el modelo</strong> 😅.<br>
+Idealmente quisiéramos una matriz donde solo existan VP y VN (es decir, el modelo no se equivoca nunca).<br>
+Pero en la práctica eso rara vez ocurre: siempre hay un equilibrio entre los errores de tipo <strong>FP</strong> y <strong>FN</strong>,<br>
+y depende del contexto cuál de ellos es más costoso.</p>
+<p><strong>Ejemplo aplicado:</strong></p>
+<ul>
+<li>En un curso, un <strong>falso negativo</strong> (el modelo predice que el estudiante no aprobará, pero sí lo hace) puede no ser tan grave, porque el estudiante tuvo un buen resultado.<br>
+</li>
+<li>En cambio, un <strong>falso positivo</strong> (el modelo predice que aprobará, pero no lo hace) podría significar que el sistema subestimó el riesgo académico y el estudiante no recibió la ayuda que necesitaba.</li>
+</ul>
+<p>Por eso, <strong>interpretar la matriz de confusión va más allá de contar aciertos</strong>: nos ayuda a entender <strong>qué tipo de error comete el modelo</strong> y <strong>qué tan grave puede ser</strong> en el contexto real.</p>
+</section>
+</section>
+<section id="métricas-de-desempeño" class="level3" data-number="2.4.3">
+<h3 data-number="2.4.3" class="anchored" data-anchor-id="métricas-de-desempeño"><span class="header-section-number">2.4.3</span> Métricas de desempeño</h3>
+<p>A partir de esta matriz, podemos calcular todas las métricas de desempeño del modelo: la <strong>exactitud (accuracy)</strong>, la <strong>sensibilidad (recall)</strong>, la <strong>especificidad</strong> y la <strong>precisión (precision)</strong>. Cada una de ellas utiliza una combinación de estos cuatro valores (VP, VN, FP, FN) para describir un aspecto distinto del rendimiento del modelo.</p>
+<p><span class="math inline">\(\text{Accuracy} = \frac{VP + VN}{VP + VN + FP + FN}\)</span></p>
+<p><span class="math inline">\(\text{Sensibilidad (Recall)} = \frac{VP}{VP + FN}\)</span></p>
+<p><span class="math inline">\(\text{Especificidad} = \frac{VN}{VN + FP}\)</span></p>
+<p><span class="math inline">\(\text{Precisión (Precision)} = \frac{VP}{VP + FP}\)</span></p>
+<div id="qwebr-insertion-location-9"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>💡 Interpretación práctica: • Exactitud (Accuracy): proporción de predicciones correctas. • Sensibilidad: qué tan bien el modelo identifica a quienes aprueban. • Especificidad: qué tan bien identifica a quienes reprueban. • Precisión: de los que el modelo predice como aprobados, cuántos realmente aprueban.</p>
+</div>
+</div>
+</section>
+<section id="curva-roc-y-auc" class="level3" data-number="2.4.4">
+<h3 data-number="2.4.4" class="anchored" data-anchor-id="curva-roc-y-auc"><span class="header-section-number">2.4.4</span> Curva ROC y AUC</h3>
+<p>Hasta este punto ya sabemos cuántas predicciones acierta o se equivoca nuestro modelo. Pero todavía no hemos respondido algo importante: <strong>¿Qué tan bien distingue el modelo entre quienes aprueban y quienes no?</strong></p>
+<p>Ahí es donde entra en juego la <strong>curva ROC</strong>, una de las herramientas más potentes y visuales para evaluar modelos de clasificación.</p>
+<section id="qué-representa-la-curva-roc" class="level4" data-number="2.4.4.1">
+<h4 data-number="2.4.4.1" class="anchored" data-anchor-id="qué-representa-la-curva-roc"><span class="header-section-number">2.4.4.1</span> ¿Qué representa la curva ROC?</h4>
+<p>La curva ROC (Receiver Operating Characteristic) muestra la relación entre dos tasas calculadas a partir de la matriz de confusión:</p>
+<ul>
+<li><strong>Eje Y:</strong> la tasa de verdaderos positivos (Sensibilidad o Recall) → qué tan bien el modelo detecta correctamente los casos positivos.<br>
+</li>
+<li><strong>Eje X:</strong> la tasa de falsos positivos (1 - Especificidad) → cuántos negativos fueron clasificados erróneamente como positivos.</li>
+</ul>
+<p>Cada punto de la curva representa un umbral de decisión distinto. Por ejemplo: - Si el umbral es <strong>0.5</strong>, el modelo predice “aprueba” cuando la probabilidad es mayor a 0.5.<br>
+- Si bajamos el umbral a <strong>0.3</strong>, el modelo será más “generoso” y clasificará más estudiantes como aprobados (mayor sensibilidad, pero más falsos positivos).<br>
+- Si lo subimos a <strong>0.7</strong>, el modelo será más estricto (menos falsos positivos, pero también más falsos negativos).</p>
+<p>Por eso, la curva ROC <strong>resume el comportamiento del modelo a través de todos los posibles umbrales</strong>.</p>
+</section>
+<section id="el-área-bajo-la-curva-auc" class="level4" data-number="2.4.4.2">
+<h4 data-number="2.4.4.2" class="anchored" data-anchor-id="el-área-bajo-la-curva-auc"><span class="header-section-number">2.4.4.2</span> El Área Bajo la Curva (AUC)</h4>
+<p>El <strong>Área Bajo la Curva (AUC)</strong> es una medida global de desempeño que resume la capacidad del modelo para separar las dos clases. Su valor oscila entre 0 y 1:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 35%">
+<col style="width: 31%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Valor de AUC</th>
+<th>Interpretación</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>0.5</strong></td>
+<td>Sin poder discriminatorio</td>
+<td>El modelo predice al azar (como lanzar una moneda).</td>
+</tr>
+<tr class="even">
+<td><strong>0.6 – 0.7</strong></td>
+<td>Discriminación pobre</td>
+<td>El modelo distingue las clases, pero con bajo rendimiento.</td>
+</tr>
+<tr class="odd">
+<td><strong>0.7 – 0.9</strong></td>
+<td>Buen modelo</td>
+<td>El modelo separa adecuadamente las clases.</td>
+</tr>
+<tr class="even">
+<td><strong>&gt; 0.9</strong></td>
+<td>Excelente modelo</td>
+<td>El modelo casi clasifica perfectamente.</td>
+</tr>
+<tr class="odd">
+<td><strong>1.0</strong></td>
+<td>Clasificación perfecta</td>
+<td>Ideal (pero rara vez alcanzable en la práctica).</td>
+</tr>
+</tbody>
+</table>
+<p>💡 En pocas palabras: Cuanto mayor sea el AUC, <strong>mejor capacidad tiene el modelo para diferenciar entre aprobados y no aprobados</strong>, sin importar qué umbral usemos.</p>
+</section>
+<section id="cómo-se-interpreta-visualmente" class="level4" data-number="2.4.4.3">
+<h4 data-number="2.4.4.3" class="anchored" data-anchor-id="cómo-se-interpreta-visualmente"><span class="header-section-number">2.4.4.3</span> ¿Cómo se interpreta visualmente?</h4>
+<ul>
+<li>Una <strong>curva ROC “más arriba y más a la izquierda”</strong> indica un mejor modelo: logra una alta sensibilidad con pocos falsos positivos.<br>
+</li>
+<li>Una <strong>curva cercana a la diagonal (AUC ≈ 0.5)</strong> indica un modelo que no tiene valor predictivo.<br>
+</li>
+<li>Una <strong>curva casi perfecta</strong> se pega a los bordes del gráfico (AUC cercano a 1), lo cual indica una excelente separación entre clases.</li>
+</ul>
+<p>En el caso del modelo Logit, la curva suele ser suave y continua, ya que trabaja con probabilidades estimadas de manera gradual.</p>
+<div id="qwebr-insertion-location-10"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Un valor de AUC entre 0.7 y 0.9 indica un buen poder discriminatorio, mientras que valores superiores a 0.9 suelen considerarse excelentes. Si el AUC está cerca de 0.5, el modelo no está capturando patrones útiles.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="visualización-de-resultados" class="level3" data-number="2.4.5">
+<h3 data-number="2.4.5" class="anchored" data-anchor-id="visualización-de-resultados"><span class="header-section-number">2.4.5</span> Visualización de resultados</h3>
+<p>Finalmente, podemos representar la relación entre la probabilidad predicha de aprobar y alguna variable explicativa, como las horas de estudio.</p>
+<div id="qwebr-insertion-location-11"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Interpretación visual:</strong> La curva creciente refleja la naturaleza no lineal del modelo Logit. A medida que aumentan las horas de estudio, la probabilidad de aprobar se incrementa, pero a un ritmo decreciente: los beneficios marginales de estudiar más disminuyen.</p>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="actividad-en-clase" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Actividad en Clase</h1>
+<section id="instrucciones" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="instrucciones"><span class="header-section-number">3.1</span> Instrucciones:</h2>
+<ol type="1">
+<li>Ejecute los <em>chunks</em> de código proporcionados en R (puede hacerlo directamente en el navegador o en RStudio).<br>
+</li>
+<li>Observe los resultados obtenidos en cada sección.<br>
+</li>
+<li>Genere un documento en <strong>Word (.docx)</strong> donde:
+<ul>
+<li>Copie las preguntas que aparecen al final.<br>
+</li>
+<li>Redacte sus interpretaciones y conclusiones con base en los resultados.<br>
+</li>
+<li><strong>No copie el código</strong>, solo las tablas y redacte sus respuestas.<br>
+</li>
+</ul></li>
+<li>Suba su documento a la plataforma <strong>Intu</strong>, en la actividad correspondiente a la <strong>Semana 13 — Modelo Logit (Predicción de Retiro)</strong>.</li>
+</ol>
+<section id="estimación-del-modelo-logit-1" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="estimación-del-modelo-logit-1"><span class="header-section-number">3.1.1</span> Estimación del modelo Logit</h3>
+<p>Ejecute el siguiente código para estimar un modelo Logit que prediga la <strong>probabilidad de que un estudiante se retire del curso</strong>, usando las variables explicativas relacionadas con esfuerzo y participación.<br>
+⚠️ No incluya la variable <code>aprueba</code> en el modelo.</p>
+<div id="qwebr-insertion-location-12"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</section>
+</section>
+<section id="evaluación-del-modelo-logit-1" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="evaluación-del-modelo-logit-1"><span class="header-section-number">3.2</span> Evaluación del Modelo Logit</h2>
+<p>Una vez que hayas estimado tu modelo Logit, el siguiente paso es <strong>evaluar qué tan bien funciona</strong>. En esta parte debes comprobar la capacidad predictiva del modelo, es decir, qué tan bien distingue entre los estudiantes que <strong>se retiran</strong> y los que <strong>no se retiran</strong> del curso. Para esta evaluación debes <strong>usar exactamente el mismo código que vimos en clase</strong>, adaptándolo al modelo que acabas de estimar (<code>modelo_logit</code>). No necesitas escribir nuevas funciones ni cambiar el procedimiento. Simplemente ejecuta paso a paso los bloques de código que ya exploramos para:</p>
+<ol type="1">
+<li><strong>Generar las predicciones</strong> del modelo (<code>predict()</code>):
+<ul>
+<li>Calcula la probabilidad estimada de retiro (<code>prob_predicha</code>).<br>
+</li>
+<li>Clasifica a cada estudiante como retirado (<code>1</code>) o no retirado (<code>0</code>) según un umbral de 0.5.</li>
+</ul></li>
+<li><strong>Construir la matriz de confusión:</strong>
+<ul>
+<li>Compara las predicciones con los valores reales de <code>retira</code>.<br>
+</li>
+<li>Identifica los verdaderos positivos (VP), falsos positivos (FP), verdaderos negativos (VN) y falsos negativos (FN).</li>
+</ul></li>
+<li><strong>Calcular las métricas de desempeño:</strong>
+<ul>
+<li>Usa el mismo conjunto de operaciones visto en clase para obtener:
+<ul>
+<li><strong>Exactitud (Accuracy)</strong> → proporción de predicciones correctas.<br>
+</li>
+<li><strong>Sensibilidad (Recall)</strong> → qué tan bien detecta a quienes se retiran.<br>
+</li>
+<li><strong>Especificidad</strong> → qué tan bien detecta a quienes permanecen.<br>
+</li>
+<li><strong>Precisión (Precision)</strong> → cuántas predicciones de retiro fueron correctas.</li>
+</ul></li>
+</ul></li>
+<li><strong>Analizar la curva ROC y el AUC:</strong>
+<ul>
+<li>Calcula el Área Bajo la Curva (AUC) usando <code>roc()</code> y <code>auc()</code> del paquete <code>pROC</code>.</li>
+</ul></li>
+</ol>
+</section>
+<section id="preguntas-para-el-informe" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="preguntas-para-el-informe"><span class="header-section-number">3.3</span> Preguntas para el informe</h2>
+<ol type="1">
+<li><p>Interpretación general • ¿Qué variables parecen tener mayor influencia en la probabilidad de retiro según el resumen del modelo (summary(modelo_logit))? • ¿Cuál es el signo del coeficiente asociado a horas_estudio y cómo lo interpretarías?</p></li>
+<li><p>Evaluación del desempeño • ¿Qué tan bien clasifica el modelo según las métricas de desempeño calculadas? • Si la exactitud (accuracy) es del 75 %, ¿cómo interpretarías este resultado en este contexto? • ¿El modelo tiende a cometer más falsos positivos o falsos negativos? ¿Qué implicaciones tendría eso?</p></li>
+<li><p>Curva ROC y visualización • ¿Qué valor obtuvo el AUC y qué indica sobre el poder predictivo del modelo? • ¿Cómo se interpreta la relación entre las horas de estudio y la probabilidad de retiro en el gráfico final?</p></li>
+</ol>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>💡 Entrega: Suba su documento con las respuestas a la plataforma Intu, en la actividad correspondiente a la Semana 13 — Modelo Logit. Y suba el script con el que realizo el proedimiento. Recuerde que se evaluará la claridad de sus interpretaciones, la consistencia con los resultados del modelo y su capacidad para proponer acciones basadas en los hallazgos.</p>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script type="module">
+// Handle cell initialization initialization
+qwebrCellDetails.map(
+  (entry) => {
+    // Handle the creation of the element
+    qwebrCreateHTMLElement(entry);
+    // In the event of interactive, initialize the monaco editor
+    if (entry.options.context == EvalTypes.Interactive) {
+      qwebrCreateMonacoEditorInstance(entry);
+    }
+  }
+);
+
+// Identify non-interactive cells (in order)
+const filteredEntries = qwebrCellDetails.filter(entry => {
+  const contextOption = entry.options && entry.options.context;
+  return ['output', 'setup'].includes(contextOption) || (contextOption == "interactive" && entry.options && entry.options.autorun === 'true');
+});
+
+// Condition non-interactive cells to only be run after webR finishes its initialization.
+qwebrInstance.then(
+  async () => {
+    const nHiddenCells = filteredEntries.length;
+    var currentHiddenCell = 0;
+
+
+    // Modify button state
+    qwebrSetInteractiveButtonState(`🟡 Running hidden code cells ...`, false);
+
+    // Begin processing non-interactive sections
+    // Due to the iteration policy, we must use a for() loop.
+    // Otherwise, we would need to switch to using reduce with an empty
+    // starting promise
+    for (const entry of filteredEntries) {
+
+      // Determine cell being examined
+      currentHiddenCell = currentHiddenCell + 1;
+      const formattedMessage = `Evaluating hidden cell ${currentHiddenCell} out of ${nHiddenCells}`;
+
+      // Update the document status header
+      if (qwebrShowStartupMessage) {
+        qwebrUpdateStatusHeader(formattedMessage);
+      }
+
+      // Display the update in non-active areas
+      qwebrUpdateStatusMessage(formattedMessage);
+
+      // Extract details on the active cell
+      const evalType = entry.options.context;
+      const cellCode = entry.code;
+      const qwebrCounter = entry.id;
+
+      if (['output', 'setup'].includes(evalType)) {
+        // Disable further global status updates
+        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
+        activeContainer.classList.remove('qwebr-cell-needs-evaluation');
+        activeContainer.classList.add('qwebr-cell-evaluated');
+
+        // Update status on the code cell
+        const activeStatus = document.getElementById(`qwebr-status-text-${qwebrCounter}`);
+        activeStatus.innerText = " Evaluating hidden code cell...";
+        activeStatus.classList.remove('qwebr-cell-needs-evaluation');
+        activeStatus.classList.add('qwebr-cell-evaluated');
+      }
+
+      switch (evalType) {
+        case 'interactive':
+          // TODO: Make this more standardized.
+          // At the moment, we're overriding the interactive status update by pretending its
+          // output-like. 
+          const tempOptions = entry.options;
+          tempOptions["context"] = "output"
+          // Run the code in a non-interactive state that is geared to displaying output
+          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, tempOptions);
+          break;
+        case 'output':
+          // Run the code in a non-interactive state that is geared to displaying output
+          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, entry.options);
+          break;
+        case 'setup':
+          const activeDiv = document.getElementById(`qwebr-noninteractive-setup-area-${qwebrCounter}`);
+
+          // Store code in history
+          qwebrLogCodeToHistory(cellCode, entry.options);
+
+          // Run the code in a non-interactive state with all output thrown away
+          await mainWebR.evalRVoid(`${cellCode}`);
+          break;
+        default: 
+          break; 
+      }
+
+      if (['output', 'setup'].includes(evalType)) {
+        // Disable further global status updates
+        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
+        // Disable visibility
+        activeContainer.style.visibility = 'hidden';
+        activeContainer.style.display = 'none';
+      }
+    }
+  }
+).then(
+  () => {
+    // Release document status as ready
+
+    if (qwebrShowStartupMessage) {
+      qwebrStartupMessage.innerText = "🟢 Ready!"
+    }
+  
+    qwebrSetInteractiveButtonState(
+      `<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>`, 
+      true
+    );  
+  }
+);
+</script>
+
+
+
+
+</body></html>

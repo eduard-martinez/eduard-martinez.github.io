@@ -1,0 +1,561 @@
+---
+title: "Unidad 9 — Clasificación"
+subtitle: "Semana 13: Modelo Logit"
+author: "Eduard F. Martínez González"
+---
+
+<a href="mailto:efmartinez@icesi.edu.co" style="color:black;">
+<img src="pic/correo.png" alt="Email" width="20" height="20"/> efmartinez@icesi.edu.co
+</a>
+
+<a href="https://github.com/eduard-martinez" style="color:black;"> <img src="pic/github.png" alt="Qries" width="20" height="20"/> eduard-martinez</a>
+
+<a href="https://twitter.com/emartigo" style="color:black;"> <img src="pic/twitter.jpg" alt="Qries" width="20" height="20"/> @emartigo</a>
+
+<a href="https://eduard-martinez.github.io" style="color:black;"> <img src="pic/link.png" alt="Qries" width="20" height="20"/> https://eduard-martinez.github.io</a>
+
+# ¿Qué es un problema de clasificación?
+
+![](clasfication-gif.gif)
+
+En *Business Analytics*, los modelos de **clasificación** se utilizan cuando la **variable de respuesta es categórica** (por ejemplo, *acepta/no acepta*, *fraude/no fraude*, *compra/no compra*).  
+El objetivo es **asignar observaciones a categorías** con base en sus características observadas.
+
+**Ejemplos típicos:**
+
+- Determinar si un cliente pagará su crédito o caerá en mora.  
+- Identificar si una transacción es legítima o fraudulenta.  
+- Predecir si un estudiante aprobará o no un curso.  
+- Clasificar correos en “spam” o “no spam”.
+
+## Modelación
+
+### El Modelo Logit
+
+En el contexto de **Business Analytics**, cuando la variable de interés es dicotómica (por ejemplo, *comprar/no comprar*, *aprobar/reprobar*, *renovar/no renovar*), necesitamos un modelo que relacione las características observadas \(X\) con la **probabilidad de éxito** \(P(Y=1)\). 
+
+El modelo **Logit** propone una relación no lineal entre estas variables mediante la **función logística**:
+
+$P(Y=1|X) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 X_1 + \cdots + \beta_k X_k)}}$
+
+Esta transformación convierte una combinación lineal de predictores ($\beta_0 + \beta_1 X_1 + \cdots$) en un valor comprendido entre **0 y 1**, es decir, una probabilidad válida.
+
+📈 **Idea clave:**  Mientras que la regresión lineal puede producir predicciones fuera del rango [0,1], el modelo Logit **comprime la escala** y captura relaciones no lineales entre las variables explicativas y la probabilidad del evento.
+
+### Interpretación matemática y empírica
+
+En lugar de modelar directamente la probabilidad, el modelo Logit transforma la relación a través del **logaritmo de las odds (razón de probabilidades)**, definido como:
+
+$\log\left(\frac{P(Y=1)}{1 - P(Y=1)}\right) = \beta_0 + \beta_1 X_1 + \cdots + \beta_k X_k$
+
+Esta ecuación implica que los **log-odds** cambian linealmente con los valores de \(X\), aunque la probabilidad \(P(Y=1)\) lo haga de manera no lineal. De este modo, el Logit puede modelar relaciones complejas, donde los efectos marginales de cada variable disminuyen a medida que la probabilidad se acerca a 0 o 1.
+
+En la práctica, este comportamiento **“en S” o sigmoide** refleja situaciones reales de decisión:
+
+- Un aumento en las horas de estudio tiene un fuerte impacto cuando un estudiante está indeciso (probabilidad ≈ 0.5),  
+  pero un efecto mucho menor si ya tiene una probabilidad muy alta o muy baja de aprobar.
+
+### Odds y log-odds: intuición práctica
+
+**Odds (razón de probabilidades):** $\text{odds} = \frac{P(Y=1)}{1 - P(Y=1)}$ 
+
+Ejemplo: si $P=0.8$, las odds son 4 a 1 (es decir, cuatro veces más probable que ocurra el evento que que no ocurra).
+
+- **Log-odds:** Es el logaritmo natural de las *odds*. Este paso permite que la relación entre las variables y el resultado sea lineal, facilitando la estimación con métodos de regresión.
+
+::: callout-note
+**Nota:** La escala de log-odds no tiene una interpretación inmediata en porcentajes, pero al exponenciar los coeficientes ($e^{\beta\_j}$) recuperamos una medida interpretable: el **odds ratio**, que indica cuánto se multiplican las probabilidades relativas del evento cuando una variable cambia en una unidad.
+:::
+
+### Interpretación de los coeficientes
+
+Cada parámetro $\beta\_j$ representa el **efecto parcial** de la variable $X_j$ sobre el logaritmo de las odds del evento, manteniendo las demás constantes:
+
+- Si $\beta_j > 0$: el aumento en$X_j$ incrementa la probabilidad de éxito.  
+- Si $\beta_j < 0$: el aumento en $X_j$ reduce la probabilidad de éxito.  
+
+Sin embargo, dado que los coeficientes se expresan en log-odds, solemos transformarlos a **odds ratios**:
+
+$\text{odds ratio} = e^{\beta_j}$
+
+Esta medida es más intuitiva, ya que describe un cambio multiplicativo en las odds:
+
+::: callout-tip
+**Ejemplo interpretativo:** Si $e^{\beta_{\text{horas\_estudio}}} = 1.5$, entonces cada hora adicional de estudio aumenta en un **50 %** las probabilidades relativas de aprobar, manteniendo las demás variables constantes.
+:::
+
+### Comportamiento no lineal del Logit
+
+El modelo Logit captura **efectos decrecientes** a medida que la probabilidad se acerca a los extremos.  
+Gráficamente, su forma sigmoide muestra tres zonas:
+
+| Zona | Probabilidad | Comportamiento |
+|------|---------------|----------------|
+| **Inferior (P≈0)** | Evento muy improbable | Cambios en X apenas afectan la probabilidad |
+| **Central (P≈0.5)** | Región de máxima sensibilidad | Pequeños cambios en X producen grandes cambios en P |
+| **Superior (P≈1)** | Evento casi seguro | Cambios en X tienen poco efecto adicional |
+
+Esta propiedad hace del Logit una herramienta potente para **problemas de decisión**,  
+donde la respuesta no cambia de forma constante, sino en umbrales o zonas críticas.
+
+📘 **En resumen:** El modelo Logit combina **rigor estadístico** con **interpretabilidad económica**, lo que lo convierte en una de las técnicas más utilizadas en Business Analytics. Permite traducir información observable en probabilidades, evaluar qué variables influyen en un resultado y apoyar decisiones basadas en datos y riesgo.
+
+## Evaluación del modelo
+
+Evaluar un modelo de clasificación no solo consiste en verificar cuántas predicciones fueron correctas, sino en **entender cómo y dónde el modelo acierta o se equivoca**. Las métricas permiten medir su desempeño bajo diferentes perspectivas: precisión, cobertura y capacidad de discriminación entre clases. Las métricas más comunes incluyen:
+
+| Métrica | Descripción | Interpretación práctica |
+|----------|--------------|-------------------------|
+| **Exactitud (Accuracy)** | Proporción de predicciones correctas sobre el total. | Mide el desempeño global del modelo, pero puede ser engañosa si las clases están desbalanceadas. |
+| **Sensibilidad (Recall o Tasa de Verdaderos Positivos)** | Capacidad del modelo para identificar correctamente los casos positivos. | Indica qué tan bien detecta el modelo a quienes realmente presentan el evento. |
+| **Especificidad** | Capacidad del modelo para identificar correctamente los casos negativos. | Evalúa la habilidad para no confundir casos negativos con positivos. |
+| **Precisión (Precision)** | Proporción de verdaderos positivos entre todos los positivos predichos. | Indica cuántas de las predicciones positivas son realmente correctas. |
+| **F1-Score** | Media armónica entre precisión y sensibilidad. | Balancea los errores tipo I y II; útil cuando las clases son desiguales. |
+| **AUC-ROC** | Área bajo la curva ROC (Receiver Operating Characteristic). | Evalúa la capacidad general del modelo para distinguir entre clases. Cuanto más cerca de 1, mejor. |
+
+::: callout-note
+**Matriz de confusión:**  Es la herramienta base para calcular todas las métricas anteriores. Muestra los aciertos (predicciones correctas) y errores (predicciones incorrectas) del modelo:
+
+|               | **Real Positivo (1)** | **Real Negativo (0)** |
+|---------------|-----------------------|-----------------------|
+| **Predicho Positivo (1)** | Verdaderos Positivos (VP) | Falsos Positivos (FP) |
+| **Predicho Negativo (0)** | Falsos Negativos (FN) | Verdaderos Negativos (VN) |
+
+Esta tabla permite diagnosticar el tipo de error predominante: si el modelo **no detecta casos verdaderos** (alta tasa de FN) o si **etiqueta erróneamente casos negativos como positivos** (alta tasa de FP).
+:::
+
+### Interpretación estratégica
+
+Cada métrica tiene un significado **operativo** según el contexto de negocio:
+
+- En **riesgo crediticio**, un falso negativo (no identificar un cliente riesgoso) puede ser costoso.  
+- En **salud**, un falso positivo (diagnóstico incorrecto de enfermedad) puede generar tratamientos innecesarios.  
+- En **educación**, un modelo que predice mal quién está en riesgo de retirarse podría afectar la asignación de tutorías o becas.  
+Por ello, **no existe una única métrica “mejor”**; el análisis debe centrarse en la métrica que maximiza el valor para la decisión.
+
+::: callout-tip
+**Resumen:** El modelo Logit es el punto de partida de la analítica predictiva moderna. Permite **clasificar observaciones**, **estimar probabilidades** y **analizar la influencia de cada variable**, combinando interpretabilidad estadística con valor práctico para la gestión y la estrategia empresarial.
+:::
+
+---
+
+# Aplicación en R
+
+Para ilustrar el uso de los **modelos de clasificación**, trabajaremos con una base sintética que representa a **estudiantes inscritos en un curso universitario**. Cada registro contiene información sobre el comportamiento académico y el desempeño del estudiante a lo largo del semestre, lo que nos permitirá **estimar la probabilidad de aprobar el curso** y analizar los factores que más influyen en ese resultado.
+
+En este contexto:
+
+- Cada **observación** corresponde a un estudiante.  
+- La **variable dependiente** es binaria: `aprueba` (1 = aprueba, 0 = reprueba).  
+- Las **variables explicativas** describen aspectos como el número de horas de estudio, la asistencia, la participación y la afinidad con la estadística.  
+
+El objetivo es construir un **modelo Logit** que nos permita responder preguntas como:
+
+- ¿Qué factores aumentan la probabilidad de aprobar el curso?  
+- ¿Cómo se interpreta el efecto de cada variable en términos de *odds ratio*?  
+- ¿Qué tan bien puede el modelo predecir los resultados académicos?  
+
+Este tipo de análisis es una herramienta clave en **Business Analytics**, ya que permite tomar decisiones basadas en datos —por ejemplo, identificar estudiantes en riesgo académico, diseñar estrategias de acompañamiento o evaluar la efectividad de las metodologías de enseñanza.
+
+::: callout-tip
+💡 **Cómo usar este material:**  
+Puedes ejecutar los _chunks_ de R directamente en el navegador gracias a **webR**, sin necesidad de instalar nada localmente.
+:::
+
+## Preparación del entorno
+
+El propósito de este bloque es asegurar un entorno **limpio, reproducible y funcional** antes de iniciar el análisis.  
+Primero, eliminamos cualquier objeto previo que pueda interferir con la sesión actual. Luego, instalamos (si es necesario) y cargamos los paquetes requeridos para la **manipulación de datos**, la **visualización** y la **estimación del modelo Logit**.  
+
+Con esto, dejamos el entorno preparado para comenzar el análisis aplicado.
+
+```{webr-r}
+## Limpiar el entorno de trabajo
+rm(list = ls())
+
+## Instalar paquetes (solo si es necesario)
+install.packages("tidyverse")
+install.packages("broom")
+install.packages("pROC") 
+
+
+## Cargar librerías
+library(tidyverse)  # Manipulación y visualización de datos
+library(broom)      # Para resumir resultados de modelos
+library(pROC)       # Calcular la curva ROC y el AUC
+ 
+## Fijar semilla para reproducibilidad
+set.seed(123)
+```
+
+::: callout-note
+Los paquetes `tidyverse` y `broom` son parte del ecosistema de análisis de datos en R:
+	•	`tidyverse` permite transformar y visualizar datos de manera eficiente.
+	•	`broom` facilita la conversión de resultados de modelos estadísticos en tablas ordenadas y listas para interpretar.
+:::
+
+## Ingesta de datos 
+
+En esta sección realizamos la ingesta de datos, es decir, el proceso de generar o cargar la base que utilizaremos para estimar el modelo Logit. Cada registro representa a un estudiante, con variables relacionadas con su esfuerzo, participación y rendimiento a lo largo del semestre.
+
+La estructura de los datos es la siguiente:
+	•	horas_estudio: promedio semanal de horas dedicadas al curso.
+	•	asistencia: porcentaje de asistencia a clase.
+	•	participacion: nivel de participación en clase (0–100).
+	•	uso_de_R: nivel de dominio de R (1–5).
+	•	trabajos_entregados: cantidad de trabajos entregados (0–5).
+	•	afinidad_estadistica: gusto por la estadística (0–100).
+	•	aprueba: resultado final (1 = aprueba, 0 = reprueba).
+	•	retira: indica si el estudiante se retiró del curso antes de finalizar (1 = sí, 0 = no).
+
+Nuestro objetivo será estimar cómo cada una de estas variables influye en la probabilidad de aprobar el curso.
+
+```{webr-r}
+#| warning: false
+#| message: false
+
+## generar los datos
+source("https://raw.githubusercontent.com/ba-in-r/01-slides/main/week-13/data/week-13.r")
+
+## chuequear objeto
+head(datos)
+```
+
+## Estimación del Modelo Logit
+
+Ahora sí, pasemos a la parte práctica: vamos a **estimar un modelo Logit** que nos ayude a predecir la probabilidad de que un estudiante **apruebe el curso**. La idea es bastante simple: queremos entender qué factores —como las horas de estudio, la asistencia, la participación en clase o el gusto por la estadística— están realmente asociados con aprobar o no. Podríamos pensar en esto como tratar de responder preguntas del tipo:
+
+“¿Qué tanto influye estudiar más o asistir con regularidad en la probabilidad de aprobar?”  
+“¿Tiene impacto que el estudiante use más R o entregue más trabajos?”
+
+El modelo Logit nos permite cuantificar esas relaciones de forma probabilística.
+
+### ¿Cómo se formula el modelo?
+
+En pocas palabras, el Logit relaciona las variables explicativas con la **probabilidad de aprobar** a través de una función no lineal llamada *función logística*. Matemáticamente, el modelo se puede escribir así:
+
+$\log\left(\frac{P(\text{aprueba}=1)}{1 - P(\text{aprueba}=1)}\right) =$
+$\beta_0 + \beta_1(\text{horas\_estudio}) + ... + \beta_6(\text{afinidad\_estadistica})$
+
+Dónde las variables explicativas son: $\text{horas\_estudio}$ + $\text{asistencia}$ + $\text{participacion}$ + $\text{uso\_de\_R}$ + $\text{trabajos\_entregados}$ + $\text{afinidad\_estadistica}$. Lo que hace este modelo es algo muy interesante: en lugar de predecir directamente una probabilidad (que siempre debe estar entre 0 y 1), predice el **logaritmo de las odds** o razones de probabilidad. Esto permite usar una relación lineal en el “fondo” del modelo, pero que al transformarse con la función logística se mantiene siempre dentro del rango válido.
+
+### ¿Qué significa cada parte?
+
+El término del lado izquierdo,  $\log\left(\frac{P(Y=1)}{1 - P(Y=1)}\right)$ es el **logaritmo de las odds**, es decir, cómo cambian las probabilidades relativas de aprobar frente a reprobar.
+
+Los coeficientes $\beta_j$) nos dicen **cuánto cambia esa razón** cuando una variable cambia en una unidad, manteniendo las demás constantes.  Por ejemplo, si el coeficiente de `horas_estudio` es positivo, significa que estudiar más está asociado con una mayor probabilidad de aprobar.
+
+En resumen, el modelo nos permite *traducir datos en probabilidades*. A partir de los valores observados de las variables, podemos estimar qué tan probable es que un estudiante apruebe, y además entender **qué factores son los que realmente mueven la aguja**.
+
+### Estimación en R
+
+Usaremos la función `glm()` (Generalized Linear Model) especificando `family = binomial(link = "logit")` para estimar el modelo logístico.  Esta función ajusta un modelo de regresión que predice la probabilidad de que un estudiante **apruebe el curso**, dada su combinación de características.
+
+```{webr-r}
+# Estimar el modelo logit
+modelo_logit <- glm(aprueba ~ horas_estudio + asistencia + participacion + 
+                      uso_de_R + trabajos_entregados + afinidad_estadistica,
+                    data = datos,
+                    family = binomial(link = "logit"))
+
+# Resumen general
+summary(modelo_logit)
+```
+
+::: callout-note
+**Interpretación inicial:** Un coeficiente positivo indica que un aumento en la variable incrementa la probabilidad de aprobar, mientras que un coeficiente negativo la reduce. Sin embargo, los valores de los coeficientes están en escala log-odds, por lo que deben transformarse para interpretarse como odds ratios.
+:::
+
+### Interpretación de coeficientes
+
+Para obtener una interpretación más intuitiva, transformamos los coeficientes mediante la exponenciación:
+
+$\text{odds ratio} = e^{\beta_j}$
+
+Un odds ratio mayor a 1 indica que un aumento en la variable incrementa la probabilidad de aprobar, mientras que un valor menor a 1 indica que la reduce.
+
+```{webr-r}
+# 1. Extraemos los resultados del modelo en formato ordenado usando broom::tidy()
+r_logit_1 <- tidy(modelo_logit)
+head(r_logit_1)
+```
+
+```{webr-r}
+# 2. Creamos una nueva columna 'odds_ratio' aplicando la función exponencial a los coeficientes
+#    Esto convierte los coeficientes en términos de cambio multiplicativo en las odds
+r_logit_2 <- mutate(r_logit_1, odds_ratio = exp(estimate))
+head(r_logit_2)
+```
+
+```{webr-r}
+# 3. Seleccionamos únicamente las columnas de interés:
+#    - term: nombre de la variable
+#    - estimate: coeficiente estimado (log-odds)
+#    - odds_ratio: razón de probabilidades
+#    - p.value: nivel de significancia estadística
+r_logit_3 <- select(r_logit_2, term, estimate, odds_ratio, p.value)
+
+# 4. Mostramos la tabla final con resultados listos para interpretación
+r_logit_3
+```
+
+::: callout-tip
+**Ejemplo de interpretación:** Si el odds ratio de horas_estudio es 1.27, significa que por cada hora adicional de estudio, las probabilidades de aprobar el curso se incrementan en un 27%, manteniendo las demás variables constantes.
+:::
+
+## Evaluación del Modelo Logit
+
+Una vez estimado el modelo Logit, necesitamos **evaluar su capacidad predictiva**:¿qué tan bien logra distinguir entre los estudiantes que aprueban y los que no? 
+
+En esta sección construiremos una **matriz de confusión**, calcularemos **métricas de desempeño** y visualizaremos la **curva ROC** (*Receiver Operating Characteristic*) para medir el poder discriminatorio del modelo.
+
+### Predicciones del modelo
+
+Usamos la función `predict()` para calcular la **probabilidad estimada de aprobar** (`prob_predicha`) y clasificamos a cada estudiante según un umbral de 0.5 (es decir, si la probabilidad es mayor a 0.5, se predice que aprueba).
+
+```{webr-r}
+# Generar predicciones
+datos <- mutate(datos,
+                prob_predicha = predict(modelo_logit, type = "response"),
+                aprueba_pred = if_else(prob_predicha > 0.5, 1, 0))
+
+# Verificar las primeras observaciones
+head(select(datos, aprueba, prob_predicha, aprueba_pred))
+```
+
+::: callout-note
+**Nota:** El valor 0.5 es un umbral arbitrario.
+Podemos ajustarlo según los objetivos del análisis:
+	•	Usar un umbral menor (p. ej. 0.4) si queremos detectar más estudiantes en riesgo (aunque aumenten los falsos positivos).
+	•	Usar un umbral mayor (p. ej. 0.6) si preferimos mayor precisión en las predicciones positivas.
+:::
+
+### Matriz de confusión
+
+Una vez que el modelo ha hecho sus predicciones, el siguiente paso es **evaluar qué tan bien lo hizo**. Para eso usamos una herramienta clásica en clasificación: la **matriz de confusión**. Esta matriz no es más que una tabla de doble entrada que compara, para cada observación, lo que el modelo **predijo** frente a lo que **realmente ocurrió**. Es decir, muestra los aciertos y errores del modelo de una forma muy clara.
+
+```{webr-r}
+# Matriz de confusión
+table(Prediccion = datos$aprueba_pred, Real = datos$aprueba)
+```
+
+Esta matriz no es más que una tabla de doble entrada que compara, para cada observación, lo que el modelo **predijo** frente a lo que **realmente ocurrió**. Es decir, muestra los aciertos y errores del modelo de una forma muy clara. Cuando ejecutes el comando para crear la matriz, obtendrás una tabla similar a:
+
+|             | Real = 0 | Real = 1 |
+|--------------|-----------|-----------|
+| **Predicho = 0** |  176  |  122   |
+| **Predicho = 1** |  418   |  1284  |
+
+Cada celda te está contando **cuántos estudiantes** cayeron en cada situación posible. Veamos qué significa cada una:
+
+- **Verdaderos positivos (VP):** el modelo predijo que el estudiante aprobaría, y efectivamente aprobó.  
+- **Verdaderos negativos (VN):** el modelo predijo que el estudiante reprobaría, y así fue.  
+- **Falsos positivos (FP):** el modelo predijo que aprobaría, pero en realidad reprobó.  
+- **Falsos negativos (FN):** el modelo predijo que reprobaría, pero el estudiante aprobó.
+
+#### ¿Por qué se llama “confusión”?
+
+Porque literalmente nos muestra **en qué se confunde el modelo** 😅.  
+Idealmente quisiéramos una matriz donde solo existan VP y VN (es decir, el modelo no se equivoca nunca).  
+Pero en la práctica eso rara vez ocurre: siempre hay un equilibrio entre los errores de tipo **FP** y **FN**,  
+y depende del contexto cuál de ellos es más costoso.
+
+**Ejemplo aplicado:**
+
+- En un curso, un **falso negativo** (el modelo predice que el estudiante no aprobará, pero sí lo hace) puede no ser tan grave, porque el estudiante tuvo un buen resultado.  
+- En cambio, un **falso positivo** (el modelo predice que aprobará, pero no lo hace) podría significar que el sistema subestimó el riesgo académico y el estudiante no recibió la ayuda que necesitaba.
+
+Por eso, **interpretar la matriz de confusión va más allá de contar aciertos**: nos ayuda a entender **qué tipo de error comete el modelo** y **qué tan grave puede ser** en el contexto real.
+
+### Métricas de desempeño
+
+A partir de esta matriz, podemos calcular todas las métricas de desempeño del modelo: la **exactitud (accuracy)**, la **sensibilidad (recall)**, la **especificidad** y la **precisión (precision)**. Cada una de ellas utiliza una combinación de estos cuatro valores (VP, VN, FP, FN) para describir un aspecto distinto del rendimiento del modelo.
+
+$\text{Accuracy} = \frac{VP + VN}{VP + VN + FP + FN}$
+
+$\text{Sensibilidad (Recall)} = \frac{VP}{VP + FN}$
+
+$\text{Especificidad} = \frac{VN}{VN + FP}$
+
+$\text{Precisión (Precision)} = \frac{VP}{VP + FP}$
+
+```{webr-r}
+## Calcular métricas de desempeño
+VP <- sum(datos$aprueba_pred == 1 & datos$aprueba == 1)
+VN <- sum(datos$aprueba_pred == 0 & datos$aprueba == 0)
+FP <- sum(datos$aprueba_pred == 1 & datos$aprueba == 0)
+FN <- sum(datos$aprueba_pred == 0 & datos$aprueba == 1)
+
+## Metricas
+accuracy <- (VP + VN) / (VP + VN + FP + FN)
+sensibilidad <- VP / (VP + FN)
+especificidad <- VN / (VN + FP)
+precision <- VP / (VP + FP)
+
+## Metricas del modelo
+tibble(accuracy = round(accuracy, 3),
+sensibilidad = round(sensibilidad, 3),
+especificidad = round(especificidad, 3),
+precision = round(precision, 3))
+```
+
+::: callout-tip
+💡 Interpretación práctica:
+	•	Exactitud (Accuracy): proporción de predicciones correctas.
+	•	Sensibilidad: qué tan bien el modelo identifica a quienes aprueban.
+	•	Especificidad: qué tan bien identifica a quienes reprueban.
+	•	Precisión: de los que el modelo predice como aprobados, cuántos realmente aprueban.
+:::
+
+
+### Curva ROC y AUC
+
+Hasta este punto ya sabemos cuántas predicciones acierta o se equivoca nuestro modelo. Pero todavía no hemos respondido algo importante: **¿Qué tan bien distingue el modelo entre quienes aprueban y quienes no?**
+
+Ahí es donde entra en juego la **curva ROC**, una de las herramientas más potentes y visuales para evaluar modelos de clasificación. 
+
+#### ¿Qué representa la curva ROC?
+
+La curva ROC (Receiver Operating Characteristic) muestra la relación entre dos tasas calculadas a partir de la matriz de confusión:
+
+- **Eje Y:** la tasa de verdaderos positivos (Sensibilidad o Recall) → qué tan bien el modelo detecta correctamente los casos positivos.  
+- **Eje X:** la tasa de falsos positivos (1 - Especificidad) → cuántos negativos fueron clasificados erróneamente como positivos.
+
+Cada punto de la curva representa un umbral de decisión distinto. Por ejemplo:
+- Si el umbral es **0.5**, el modelo predice “aprueba” cuando la probabilidad es mayor a 0.5.  
+- Si bajamos el umbral a **0.3**, el modelo será más “generoso” y clasificará más estudiantes como aprobados (mayor sensibilidad, pero más falsos positivos).  
+- Si lo subimos a **0.7**, el modelo será más estricto (menos falsos positivos, pero también más falsos negativos).
+
+Por eso, la curva ROC **resume el comportamiento del modelo a través de todos los posibles umbrales**.
+
+#### El Área Bajo la Curva (AUC)
+
+El **Área Bajo la Curva (AUC)** es una medida global de desempeño que resume la capacidad del modelo para separar las dos clases. Su valor oscila entre 0 y 1:
+
+| Valor de AUC | Interpretación | Descripción |
+|---------------|----------------|--------------|
+| **0.5** | Sin poder discriminatorio | El modelo predice al azar (como lanzar una moneda). |
+| **0.6 – 0.7** | Discriminación pobre | El modelo distingue las clases, pero con bajo rendimiento. |
+| **0.7 – 0.9** | Buen modelo | El modelo separa adecuadamente las clases. |
+| **> 0.9** | Excelente modelo | El modelo casi clasifica perfectamente. |
+| **1.0** | Clasificación perfecta | Ideal (pero rara vez alcanzable en la práctica). |
+
+💡 En pocas palabras: Cuanto mayor sea el AUC, **mejor capacidad tiene el modelo para diferenciar entre aprobados y no aprobados**, sin importar qué umbral usemos.
+
+#### ¿Cómo se interpreta visualmente?
+
+- Una **curva ROC “más arriba y más a la izquierda”** indica un mejor modelo: logra una alta sensibilidad con pocos falsos positivos.  
+- Una **curva cercana a la diagonal (AUC ≈ 0.5)** indica un modelo que no tiene valor predictivo.  
+- Una **curva casi perfecta** se pega a los bordes del gráfico (AUC cercano a 1), lo cual indica una excelente separación entre clases.
+
+En el caso del modelo Logit, la curva suele ser suave y continua, ya que trabaja con probabilidades estimadas de manera gradual.
+
+```{webr-r}
+# Calcular la curva ROC y el AUC
+roc_obj <- roc(datos$aprueba, datos$prob_predicha)
+
+# Mostrar AUC
+auc(roc_obj)
+
+# Graficar la curva ROC
+plot(roc_obj, col = "blue", lwd = 2, main = "Curva ROC — Modelo Logit")
+abline(a = 0, b = 1, lty = 2, col = "gray")
+```
+
+::: callout-note
+Un valor de AUC entre 0.7 y 0.9 indica un buen poder discriminatorio, mientras que valores superiores a 0.9 suelen considerarse excelentes. Si el AUC está cerca de 0.5, el modelo no está capturando patrones útiles.
+:::
+
+### Visualización de resultados
+
+Finalmente, podemos representar la relación entre la probabilidad predicha de aprobar y alguna variable explicativa, como las horas de estudio.
+
+```{webr-r}
+ggplot(data=datos , aes(x=horas_estudio , y=prob_predicha)) +
+geom_point(alpha = 0.4, color = "steelblue") +
+geom_smooth(method = "loess", se = FALSE, color = "black") +
+labs(title = "Probabilidad predicha de aprobar según horas de estudio",
+     x = "Horas de estudio por semana",
+     y = "Probabilidad estimada de aprobar") +
+theme_minimal()
+```
+  
+::: callout-tip
+**Interpretación visual:**
+La curva creciente refleja la naturaleza no lineal del modelo Logit. A medida que aumentan las horas de estudio, la probabilidad de aprobar se incrementa, pero a un ritmo decreciente: los beneficios marginales de estudiar más disminuyen.
+:::
+
+# Actividad en Clase
+
+## Instrucciones:
+
+1. Ejecute los *chunks* de código proporcionados en R (puede hacerlo directamente en el navegador o en RStudio).  
+2. Observe los resultados obtenidos en cada sección.  
+3. Genere un documento en **Word (.docx)** donde:  
+   - Copie las preguntas que aparecen al final.  
+   - Redacte sus interpretaciones y conclusiones con base en los resultados.  
+   - **No copie el código**, solo las tablas y redacte sus respuestas.  
+4. Suba su documento a la plataforma **Intu**, en la actividad correspondiente a la **Semana 13 — Modelo Logit (Predicción de Retiro)**.
+
+### Estimación del modelo Logit
+
+Ejecute el siguiente código para estimar un modelo Logit que prediga la **probabilidad de que un estudiante se retire del curso**, usando las variables explicativas relacionadas con esfuerzo y participación.  
+⚠️ No incluya la variable `aprueba` en el modelo.
+
+```{webr-r}
+# Estimar el modelo logit
+modelo_logit <- glm(retira ~ horas_estudio + asistencia + participacion + 
+                    uso_de_R + trabajos_entregados + afinidad_estadistica,
+                    data = datos,
+                    family = binomial(link = "logit"))
+
+# Resumen general
+summary(modelo_logit)
+```
+
+## Evaluación del Modelo Logit
+
+Una vez que hayas estimado tu modelo Logit, el siguiente paso es **evaluar qué tan bien funciona**. En esta parte debes comprobar la capacidad predictiva del modelo, es decir, qué tan bien distingue entre los estudiantes que **se retiran** y los que **no se retiran** del curso. Para esta evaluación debes **usar exactamente el mismo código que vimos en clase**, adaptándolo al modelo que acabas de estimar (`modelo_logit`). No necesitas escribir nuevas funciones ni cambiar el procedimiento. Simplemente ejecuta paso a paso los bloques de código que ya exploramos para:
+
+1. **Generar las predicciones** del modelo (`predict()`):  
+   - Calcula la probabilidad estimada de retiro (`prob_predicha`).  
+   - Clasifica a cada estudiante como retirado (`1`) o no retirado (`0`) según un umbral de 0.5.
+
+2. **Construir la matriz de confusión:**  
+   - Compara las predicciones con los valores reales de `retira`.  
+   - Identifica los verdaderos positivos (VP), falsos positivos (FP), verdaderos negativos (VN) y falsos negativos (FN).
+
+3. **Calcular las métricas de desempeño:**  
+   - Usa el mismo conjunto de operaciones visto en clase para obtener:
+     - **Exactitud (Accuracy)** → proporción de predicciones correctas.  
+     - **Sensibilidad (Recall)** → qué tan bien detecta a quienes se retiran.  
+     - **Especificidad** → qué tan bien detecta a quienes permanecen.  
+     - **Precisión (Precision)** → cuántas predicciones de retiro fueron correctas.  
+
+4. **Analizar la curva ROC y el AUC:**  
+   - Calcula el Área Bajo la Curva (AUC) usando `roc()` y `auc()` del paquete `pROC`.  
+
+## Preguntas para el informe
+
+1. Interpretación general
+	•	¿Qué variables parecen tener mayor influencia en la probabilidad de retiro según el resumen del modelo (summary(modelo_logit))?
+	•	¿Cuál es el signo del coeficiente asociado a horas_estudio y cómo lo interpretarías?
+
+2. Evaluación del desempeño
+	•	¿Qué tan bien clasifica el modelo según las métricas de desempeño calculadas?
+	•	Si la exactitud (accuracy) es del 75 %, ¿cómo interpretarías este resultado en este contexto?
+	•	¿El modelo tiende a cometer más falsos positivos o falsos negativos? ¿Qué implicaciones tendría eso?
+
+3. Curva ROC y visualización
+	•	¿Qué valor obtuvo el AUC y qué indica sobre el poder predictivo del modelo?
+	•	¿Cómo se interpreta la relación entre las horas de estudio y la probabilidad de retiro en el gráfico final?
+
+::: callout-tip
+💡 Entrega: Suba su documento con las respuestas a la plataforma Intu, en la actividad correspondiente a la Semana 13 — Modelo Logit. Y suba el script con el que realizo el proedimiento. Recuerde que se evaluará la claridad de sus interpretaciones, la consistencia con los resultados del modelo y su capacidad para proponer acciones basadas en los hallazgos.
+:::
+
+
+
+
+
+
