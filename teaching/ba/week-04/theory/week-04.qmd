@@ -1,6 +1,6 @@
 ---
-title: "Unidad 2 - Fundamentos de R y Programación"
-subtitle: "Introducción al Business Analytics · Semana 3 · 06278-ECO"
+title: "Unidad 3 - Transformación de Datos con dplyr"
+subtitle: "Introducción al Business Analytics · Semana 4 · 06278-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
   html: default
@@ -16,1324 +16,936 @@ lang: es
 </div>
 
 <!--=================-->
+<!--=================-->
 # Objetivo de la semana
 
-Esta semana NO aprenderemos "programación" en el sentido tradicional. El foco está en [interpretación]{.term}, no en memorizar sintaxis.
+Esta semana aprenderemos a **transformar datos crudos en información lista para tomar decisiones**. El foco NO está en "dominar dplyr", sino en responder preguntas de negocio mediante filtros, cálculos, agrupaciones y resúmenes.
 
 ::: {.callout-key}
-**¿Qué significa "interpretar" en este contexto?**
+**¿Por qué necesitamos transformar datos?**
 
-Significa entender **qué hace una herramienta** cuando la ejecutamos, **cómo leer sus resultados**, y **cómo conectar esos resultados con decisiones de negocio**. No necesitamos ser programadores expertos, necesitamos ser usuarios inteligentes de herramientas analíticas.
+Los datos raramente vienen en el formato que necesitamos para responder preguntas. Casi siempre debemos:
+
+- **Filtrar:** "Solo quiero ver las ventas de 2023"
+- **Calcular:** "¿Cuál es el margen unitario de cada producto?"
+- **Agrupar:** "¿Cuánto vendió cada región?"
+- **Resumir:** "¿Cuál es el promedio de ventas por vendedor?"
+
+`dplyr` es una "gramática" que nos permite hacer estas transformaciones con verbos claros. Esta semana aprenderemos cada verbo por separado. Al final de la clase los combinaremos.
 :::
 
 ## Lo que aprenderemos esta semana
 
-**1. Entender qué hace R cuando ejecutamos código**
+**1. Transformaciones básicas — un verbo a la vez**
 
-- Qué pasa "por dentro" cuando presionamos ejecutar
-- Cómo R almacena información (objetos en memoria)
-- Por qué algunos comandos funcionan y otros no
+- Seleccionar columnas con `select()`
+- Filtrar filas con `filter()`
+- Crear variables calculadas con `mutate()`
+- Obtener resúmenes globales con `summarise()`
 
-**2. Leer e interpretar lo que R nos muestra**
+**2. Descriptivas por grupo**
 
-- Diferenciar entre resultados normales, advertencias (warnings) y errores
-- Entender la consola como "conversación" con R
-- Leer el panel Environment para saber qué existe en cada momento
-
-**3. Reconocer objetos y estructuras de datos**
-
-- Qué es un objeto y por qué todo es un objeto en R
-- Diferencia entre vectores (una dimensión) y data frames (tablas)
-- Cómo acceder y manipular información básica
-
-<!--=================-->
-# Interfaz de RStudio
-
-RStudio es un [IDE]{.term} (Entorno de Desarrollo Integrado) que hace más fácil trabajar con R. Organiza su espacio de trabajo en cuatro paneles, cada uno con una función específica.
-
-![Distribución de paneles en RStudio](figures/interfaz_rstudio.png){width="700"}
-
-## Los cuatro paneles principales
-
-### Panel superior izquierdo: Source (Editor de scripts)
-
-Este es nuestro "cuaderno de trabajo". Aquí:
-
-- Escribimos código que queremos guardar y reutilizar
-- Documentamos nuestro análisis paso a paso
-- Ejecutamos líneas con `Ctrl + Enter` (Windows/Linux) o `Cmd + Enter` (Mac)
-
-**¿Por qué escribir aquí y no directamente en la consola?**  
-
-Porque necesitamos poder reproducir nuestro trabajo, corregir errores, y compartir análisis con otros. El script es nuestra "memoria" del proceso analítico.
-
-### Panel inferior izquierdo: Console (Consola)
-
-La consola es donde R "nos habla". Aquí:
-
-- Aparecen los resultados de lo que ejecutamos
-- R nos muestra mensajes, advertencias y errores
-- Podemos escribir código directamente (pero no se guarda)
-
-::: {.callout-practice}
-**Cómo leer la consola**
-
-Cuando ejecutamos código, R puede responder de tres formas:
-- **Resultado normal:** Muestra el output esperado
-- **Warning (advertencia):** Algo inesperado, pero el código continúa
-- **Error:** Algo falló y el código se detiene
-
-Aprenderemos a distinguir estos tres casos más adelante en esta misma clase.
-:::
-
-### Panel superior derecho: Environment / History
-
-Este panel tiene dos pestañas importantes:
-
-**Environment (Entorno):** Muestra todos los objetos que hemos creado en la sesión actual (datos, variables, resultados). Es como el "inventario" de lo que existe en la memoria de R en este momento.
-
-**History (Historial):** Registra todos los comandos que hemos ejecutado durante la sesión.
+- Agrupar datos con `group_by()`
+- Calcular KPIs por segmento con `group_by() + summarise()`
 
 ::: {.callout-key}
-**El Environment es tu aliado**
+**Conexión con el flujo analítico**
 
-Durante todo el curso, el panel [Environment]{.term} será tu mejor referencia. Si un objeto no aparece aquí, R no lo "conoce" y dará error si intentas usarlo. Si ejecutaste código correctamente, deberías ver nuevos objetos aparecer en este panel.
-:::
+Ya entendemos qué es el proceso analítico (Semana 02) y cómo funciona R como entorno de trabajo (Semana 03). Ahora aprendemos a **preparar tablas** que respondan preguntas específicas antes de visualizarlas (Semana 05).
 
-### Panel inferior derecho: Files / Plots / Packages / Help
-
-Este panel agrupa varias funcionalidades útiles:
-
-**Files:** Navegador de archivos del proyecto (carpetas, datos, scripts)  
-**Plots:** Visualización de gráficos que generamos  
-**Packages:** Listado de paquetes (librerías) instalados y cargados  
-**Help:** Documentación de funciones (se abre cuando usamos `?nombre_funcion`)
-
----
-
-## Flujo de trabajo recomendado
-
-::: {.callout-workflow}
-**La rutina de trabajo en RStudio**
-
-1. **Escribo** código en el panel [Source]{.term} (script)
-2. **Ejecuto** la línea o bloque seleccionado (`Ctrl/Cmd + Enter`)
-3. **Reviso** el resultado en la [Console]{.term} (¿funcionó? ¿error? ¿warning?)
-4. **Verifico** el [Environment]{.term} (¿se creó el objeto? ¿tiene los valores esperados?)
-
-Este ciclo se repite constantemente durante el análisis de datos. No es necesario memorizarlo, se volverá automático con la práctica.
-:::
-
----
-
-## Mini-ejercicio: Reconociendo los paneles
-
-Abra RStudio y localice cada panel. Luego:
-
-1. En la [Console]{.term}, escriba `2 + 2` y presione Enter. ¿Dónde aparece el resultado?
-
-```{webr-r}
-2 + 2
-```
-
-2. Escriba `?mean` en la consola. ¿En qué panel se abre la ayuda?
-
-```{webr-r}
-?mean
-```
-
-Si puede responder estas preguntas, ya entendió la función básica de cada panel. En la siguiente sección aprenderemos a "guardar" resultados para usarlos después.
-
-<!--=================-->
-# R como calculadora
-
-Antes de trabajar con datos, podemos usar R como calculadora para familiarizarnos con la [consola]{.term}. Esto nos ayuda a entender cómo R ejecuta operaciones y muestra resultados.
-
-## Operaciones aritméticas básicas
-
-R reconoce todos los operadores matemáticos estándar:
-
-```{webr-r}
-# Suma
-10 + 5
-
-# Resta
-20 - 8
-
-# Multiplicación
-4 * 7
-
-# División
-100 / 4
-
-# Potencia
-2^3
-
-# Módulo (resto de división)
-17 %% 5  # ¿Cuánto sobra al dividir 17 entre 5?
-```
-
-**Nota importante:** Estos resultados aparecen en la consola pero **no se guardan** en ningún lugar. Si queremos reutilizar un resultado, necesitaremos aprender a "guardarlo" (lo haremos en la siguiente sección sobre objetos).
-
-## Orden de precedencia
-
-R sigue las reglas matemáticas estándar. Las operaciones se evalúan en este orden:
-
-1. Paréntesis `( )`
-2. Potencias `^`
-3. Multiplicación `*` y división `/`
-4. Suma `+` y resta `-`
-
-```{webr-r}
-# Sin paréntesis: primero multiplica, luego suma
-2 + 3 * 4
-
-# Con paréntesis: primero suma, luego multiplica
-(2 + 3) * 4
-```
-
-::: {.callout-practice}
-**Regla práctica**
-
-Cuando tenga dudas sobre el orden de operaciones, use paréntesis. Es mejor ser explícito que obtener un resultado inesperado.
-:::
-
-## Operadores de comparación (anticipo)
-
-R puede comparar valores y devolver respuestas de verdadero o falso:
-
-```{webr-r}
-# Mayor que
-10 > 5
-
-# Menor que
-10 < 5
-
-# Igual a (nota: dos signos igual)
-10 == 10
-
-# Diferente de
-10 != 5
-```
-
-**Nota importante:** Para comparar si dos valores son iguales usamos `==` (dos signos igual). Más adelante veremos que `=` (un solo igual) sirve para otra cosa: asignar valores.
-
-## Operadores lógicos (anticipo)
-
-Podemos combinar comparaciones usando operadores lógicos:
-
-```{webr-r}
-# Y lógico: ambas condiciones deben ser verdaderas
-10 > 5 & 10 < 20
-
-# O lógico: al menos una condición debe ser verdadera
-10 > 5 | 10 > 20
-```
-
-::: {.callout-connect}
-**¿Para qué sirven estas comparaciones?**
-
-En la Semana 04, usaremos estos operadores para filtrar datos. Por ejemplo: "mostrar solo clientes con ventas > 1000 y región == 'Norte'". Por ahora, solo necesitamos saber que existen y cómo funcionan básicamente.
+Esta semana trabajamos con datos "ideales" (sin valores faltantes ni errores). La limpieza la veremos en la Semana 06.
 :::
 
 <!--=================-->
-# Tipos de datos
-
-En R existen diferentes tipos de datos. Los tres más comunes son: numérico, carácter y lógico.
-
-## Numérico
-
-Representa números (enteros o decimales):
-
-```{webr-r}
-# Números enteros
-42
-
-# Números decimales
-3.14159
-```
-
-## Carácter (texto)
-
-Representa texto. Siempre va entre comillas `" "` o `' '`:
-
-```{webr-r}
-# Texto simple
-"Hola"
-
-# Nota: "100" es texto, no número
-"100"
-```
-
-::: {.callout-warning}
-**Cuidado con las comillas**
-
-`100` (sin comillas) es un número que puede sumarse, multiplicarse, etc.  
-`"100"` (con comillas) es texto que R no puede usar en operaciones matemáticas.
-
-Este es un error común al importar datos desde Excel o CSV.
-:::
-
-## Lógico
-
-Solo dos valores posibles: `TRUE` o `FALSE` (en mayúsculas, sin comillas):
-
-```{webr-r}
-# Valores lógicos
-TRUE
-
-FALSE
-```
-
-Los valores lógicos resultan de comparaciones:
-
-```{webr-r}
-# Esta comparación devuelve TRUE
-10 > 5
-```
-
-## Valores especiales
-
-R tiene algunos valores especiales que encontraremos frecuentemente:
-
-```{webr-r}
-# NA: dato faltante (Not Available)
-NA
-
-# NULL: ausencia de valor (vacío)
-NULL
-
-# Inf: infinito (resultado de operaciones como 1/0)
-1/0
-
-# NaN: "Not a Number" (operación matemáticamente indefinida)
-0/0
-```
-
-::: {.callout-practice}
-**¿Cuál es la diferencia entre NA y NULL?**
-
-- [NA]{.term} significa "dato faltante": había un espacio para un valor, pero no lo conocemos. Ejemplo: un cliente no reportó su edad.
-- [NULL]{.term} significa "inexistente": no hay ni siquiera un espacio. Ejemplo: todavía no hemos creado esa variable.
-
-Por ahora, solo necesitamos reconocer [NA]{.term} porque es muy común en bases de datos reales.
-:::
-
-**Hasta aquí hemos visto:** Podemos usar R como calculadora y obtener resultados inmediatos, pero estos resultados **no se guardan**. En la siguiente sección aprenderemos a guardar información para reutilizarla.
-
 <!--=================-->
-# Objetos y asignación
+# Introducción a dplyr
 
-## R es orientado a objetos (OOP)
+## ¿Qué es dplyr?
 
-::: {.callout-key}
-**Concepto fundamental: Todo es un objeto**
+`dplyr` es un paquete de R diseñado para manipular data frames de manera intuitiva. Es parte del [tidyverse]{.term}: un ecosistema de paquetes con una filosofía común de código claro y legible.
 
-En R, absolutamente todo es un objeto:
-- Un número es un objeto
-- Una tabla de datos es un objeto
-- Un gráfico es un objeto
-- Un modelo estadístico es un objeto
-- Incluso una función es un objeto
+**La idea central: verbos para acciones**
 
-Esta filosofía nos permite trabajar con múltiples elementos simultáneamente sin preocuparnos por "guardar y cargar" constantemente (como en Excel o Stata).
-:::
-
-**Ventaja práctica:** Podemos tener abiertas varias tablas de datos al mismo tiempo, crear múltiples gráficos, y guardar resultados de diferentes modelos, todo en la misma sesión.
-
-## ¿Qué es un objeto?
-
-Un objeto es un **nombre** que almacena **información** en la memoria de R. Es como una etiqueta que le ponemos a algo para poder referirnos a ello después.
-
-**Analogía:** Si calculamos `10 + 5`, el resultado `15` aparece en la consola pero desaparece inmediatamente. Si queremos usar ese `15` más tarde (por ejemplo, para multiplicarlo por 2), necesitamos "guardarlo" con un nombre. Eso es un objeto.
-
-## Crear objetos: Asignación con `<-`
-
-Para crear un objeto usamos el operador de asignación `<-`:
-
-```{webr-r}
-# Crear un objeto llamado 'ventas_enero'
-ventas_enero <- 15000
-
-# Ahora podemos usarlo
-ventas_enero
-
-# Operaciones con el objeto
-ventas_enero * 1.15  # Incremento del 15%
-```
-
-**Estructura general:**
+En R base podemos filtrar filas así:
 
 ```r
-nombre_objeto <- valor_o_resultado
+ventas[ventas$region == "Norte", ]
 ```
 
-**¿Qué pasó?**
-1. R calculó el valor `15000`
-2. Lo guardó en memoria con el nombre `ventas_enero`
-3. El objeto aparece en el panel [Environment]{.term}
-4. Ahora podemos usar ese nombre en lugar de escribir `15000` cada vez
-
-## Más ejemplos de asignación
-
-```{webr-r}
-# Guardar resultado de operación
-precio_unitario <- 100 * 1.19  # Precio con IVA
-precio_unitario
-
-# Guardar resultado de función
-promedio_ventas <- mean(c(1000, 1500, 1200, 1800))
-promedio_ventas
-
-# Usar objetos en cálculos
-total <- precio_unitario * 50  # 50 unidades
-total
-```
-
-::: {.callout-practice}
-**¿Cuándo crear objetos?**
-
-Cree un objeto cuando:
-- Va a reutilizar un valor varias veces
-- Quiere documentar qué representa un número (mejor `tasa_descuento` que `0.15`)
-- Necesita guardar resultados intermedios de un análisis
-- Quiere comparar o combinar diferentes cálculos
-
-**No es necesario** crear objetos para cálculos únicos y simples.
-:::
-
-## ¿`<-` o `=`?
-
-Ambos funcionan para asignar objetos, pero tienen diferencias sutiles:
-
-```{webr-r}
-# Ambas formas funcionan
-x <- 100
-y = 200
-
-x
-y
-```
-
-::: {.callout-practice}
-**Recomendación del curso**
-
-Use `<-` para asignar objetos:
-```r
-resultado <- mean(ventas)
-```
-
-Reserve `=` para argumentos dentro de funciones:
-```r
-mean(ventas, na.rm = TRUE)
-```
-
-Esto hace el código más legible y sigue la convención estándar de la comunidad R.
-
-**Atajo de teclado:** `Alt + -` (Windows/Linux) o `Option + -` (Mac) escribe `<-` automáticamente.
-:::
-
-## Reglas para nombrar objetos
-
-**Reglas obligatorias:**
-- Debe empezar con letra (no con número)
-- Puede contener letras, números, `.` y `_`
-- NO puede contener espacios
-- Es sensible a mayúsculas (`ventas` ≠ `Ventas`)
-
-```{webr-r}
-# Válidos
-ventas_2024 <- 50000
-ventas.totales <- 75000
-VentasQ1 <- 25000
-
-# NO válidos (producen error)
-# 2024_ventas <- 50000  # Empieza con número
-# ventas totales <- 75000  # Contiene espacio
-# ventas-totales <- 75000  # El guion se interpreta como resta
-```
-
-::: {.callout-practice}
-**Buenas prácticas de nomenclatura**
-
-**Use nombres descriptivos:**
-```r
-# Mal
-x <- 1500
-v <- 2000
-
-# Bien
-precio_unitario <- 1500
-volumen_ventas <- 2000
-```
-
-**Sea consistente en el estilo:**
-```r
-# snake_case (recomendado para este curso)
-ventas_anuales
-precio_promedio
-
-# camelCase (también válido)
-ventasAnuales
-precioPromedio
-
-# Use uno u otro consistentemente
-```
-
-**Evite nombres que puedan confundirse con funciones:**
-```r
-# Evitar
-mean <- 50  # 'mean' es una función importante
-data <- datos  # 'data' es una función de R
-```
-:::
-
-## Mini-ejercicio: Creando objetos
-
-```{webr-r}
-# 1. Crear objetos con información de un producto
-precio_base <- 1000
-impuesto <- 0.19
-precio_final <- precio_base * (1 + impuesto)
-
-# 2. Verificar resultados
-precio_base
-precio_final
-
-# 3. Calcular descuento del 10%
-precio_con_descuento <- precio_final * 0.90
-precio_con_descuento
-```
-
-**Revise el panel [Environment]{.term}:** Debería ver cuatro objetos creados (`precio_base`, `impuesto`, `precio_final`, `precio_con_descuento`).
-
-<!--=================-->
-# Clase, tipo y estructura
-
-Ahora que sabemos crear objetos, necesitamos herramientas para **inspeccionar** qué contienen. R provee tres funciones "lupa":
-
-## `class()`: ¿Qué tipo de objeto es?
-
-```{webr-r}
-x <- 42
-class(x)  # numeric
-
-y <- "analytics"
-class(y)  # character
-
-z <- TRUE
-class(z)  # logical
-```
-
-La clase indica cómo R interpreta ese objeto (número, texto, lógico, tabla de datos, etc.).
-
-## `typeof()`: ¿Cómo lo almacena internamente?
-
-```{webr-r}
-x <- 42
-typeof(x)  # double (número decimal de doble precisión)
-
-y <- "analytics"
-typeof(y)  # character
-
-z <- TRUE
-typeof(z)  # logical
-```
-
-El tipo es más técnico y detalla cómo R guarda ese dato en memoria. Para nuestros propósitos, `class()` es más útil.
-
-## `str()`: Muestra la estructura completa
-
-```{webr-r}
-x <- 42
-str(x)  # num 42
-
-nombre <- "Juan"
-str(nombre)  # chr "Juan"
-```
-
-`str()` es especialmente útil para objetos complejos (vectores, tablas) que veremos pronto.
-
-::: {.callout-key}
-**Las tres lupas en acción**
-
-```{webr-r}
-# Crear objeto
-ventas_Q1 <- 15000
-
-# Inspeccionar con las tres lupas
-class(ventas_Q1)   # numeric
-typeof(ventas_Q1)  # double
-str(ventas_Q1)     # num 15000
-```
-
-Estas funciones nos ayudan a entender "qué es" un objeto antes de intentar trabajar con él. Muy útil cuando:
-- Importamos datos y queremos verificar si se leyeron correctamente
-- Recibimos un error y necesitamos entender qué tipo de objeto estamos usando
-- Queremos asegurarnos de que un cálculo produjo el tipo de resultado esperado
-:::
-
-<!--=================-->
-# Environment: Gestión del espacio de trabajo
-
-El panel [Environment]{.term} muestra todos los objetos que existen actualmente en la memoria de R. Aprendamos a gestionarlo.
-
-## Listar objetos: `ls()`
-
-```{webr-r}
-# Crear algunos objetos
-ventas <- 10000
-costos <- 7000
-utilidad <- ventas - costos
-
-# Listar todos los objetos
-ls()
-```
-
-Esta función es útil cuando tenemos muchos objetos y queremos verificar qué existe.
-
-## Eliminar objetos: `rm()`
-
-```{webr-r}
-# Eliminar un objeto específico
-rm(costos)
-
-# Verificar que se eliminó
-ls()
-```
-
-El objeto `costos` ya no existe. Si intentamos usarlo, R dará error.
-
-## Mantener el entorno limpio
-
-::: {.callout-practice}
-**Por qué importa un Environment limpio**
-
-Un entorno desordenado puede causar:
-- Confusión sobre qué objetos están disponibles
-- Errores al usar versiones viejas de objetos
-- Uso excesivo de memoria
-
-**Buenas prácticas:**
-1. Elimine objetos intermedios que ya no necesita
-2. Use nombres descriptivos para identificar objetos rápidamente
-3. Al cerrar RStudio, elija "No" cuando pregunte si quiere guardar el workspace (`.RData`)
-
-**Filosofía del curso:** Es mejor ejecutar el script completo desde cero cada vez (reproducibilidad) que depender de objetos guardados de sesiones anteriores.
-:::
-
-## Ver tamaño de objetos
-
-```{webr-r}
-# Crear objeto con más datos
-datos_grandes <- 1:10000
-
-# Ver cuánta memoria ocupa
-object.size(datos_grandes)
-```
-
-Esto es útil cuando trabajamos con bases de datos grandes y queremos optimizar memoria.
-
-<!--=================-->
-# ¿Qué puede pasar en la consola?
-
-Cuando ejecutamos código, R nos responde de diferentes formas en la consola. Aprender a interpretar estos mensajes es fundamental para trabajar eficientemente.
-
-## Output normal (resultado esperado)
-
-Si todo funciona correctamente, R simplemente muestra el resultado:
-
-```{webr-r}
-10 + 5
-
-mean(c(10, 20, 30))
-```
-
-La notación `[1]` indica que estamos viendo el elemento número 1 del resultado. Si el resultado tuviera muchos elementos, veríamos `[1]`, `[10]`, `[20]`, etc., indicando la posición.
-
-## Warning (advertencia)
-
-Un [warning]{.term} NO detiene la ejecución del código, pero nos alerta que algo inesperado ocurrió.
-
-**Ejemplo controlado:**
-
-```{webr-r}
-# Logaritmo de un número negativo
-log(-1)
-```
-
-R nos advierte que generó `NaN` (Not a Number) porque matemáticamente no podemos calcular el logaritmo de un número negativo. Pero el código se ejecutó hasta el final.
-
-**Otro ejemplo común:**
-
-```{webr-r}
-# Promedio con valores faltantes
-ventas <- c(100, 200, NA, 400)
-mean(ventas)
-```
-
-El resultado es `NA` porque hay un dato faltante. R nos advierte pero no da error. Para solucionarlo:
-
-```{webr-r}
-mean(ventas, na.rm = TRUE)  # na.rm = "remover NAs"
-```
-
-::: {.callout-practice}
-**¿Qué hacer cuando veo un warning?**
-
-1. **Lea el mensaje completo** (no lo ignore automáticamente)
-2. **Revise el resultado:** ¿tiene sentido o es `NA`/`NaN`?
-3. **Ajuste el código si es necesario** (como agregar `na.rm = TRUE`)
-
-Los warnings son "alertas amarillas": R pudo ejecutar, pero quiere que verifiquemos si el resultado es el esperado.
-:::
-
-## Error (fallo que detiene ejecución)
-
-Un [error]{.term} detiene completamente la ejecución. R no puede continuar.
-
-**Ejemplo 1: Objeto inexistente**
-
-```{webr-r}
-# Intentar usar un objeto que no existe
-mi_dato_inexistente
-```
-
-**Mensaje:** `Error: object 'mi_dato_inexistente' not found`
-
-**Interpretación:** R buscó un objeto con ese nombre en el [Environment]{.term} y no lo encontró. Posibles causas:
-- Olvidamos crear el objeto
-- Escribimos mal el nombre
-- Lo creamos pero luego lo eliminamos
-
-**Ejemplo 2: Argumento mal escrito**
-
-```{webr-r}
-# Argumento incorrecto
-mean(x = c(1, 2, 3), naa.rm = TRUE)  # Error: 'naa.rm' no existe
-```
-
-**Mensaje:** `Error in mean.default(...) : unused argument (naa.rm = TRUE)`
-
-**Interpretación:** R no reconoce el argumento `naa.rm`. El argumento correcto es `na.rm` (sin doble 'a').
-
-::: {.callout-warning}
-**¿Qué hacer cuando veo un error?**
-
-1. **No entre en pánico:** Los errores son normales, incluso para programadores expertos
-2. **Lea el mensaje completo:** Usualmente indica qué salió mal
-3. **Revise ortografía:** Nombres de objetos, funciones y argumentos son sensibles a mayúsculas y espacios
-4. **Verifique el Environment:** ¿El objeto que intenta usar realmente existe?
-5. **Use `?nombre_funcion`** para verificar argumentos correctos
-
-La habilidad de leer y entender errores es más importante que memorizar sintaxis perfecta.
-:::
-
-## Mini-ejercicio: Identificando mensajes
-
-Ejecute estos tres códigos y clasifique cada resultado como "output normal", "warning" o "error":
-
-```{webr-r}
-# Caso 1
-sum(c(10, 20, 30))
-
-# Caso 2
-sqrt(-4)
-
-# Caso 3
-promedio_ventas  # (este objeto no existe)
-```
-
-**Respuestas esperadas:**
-
-- Caso 1: Output normal (resultado: 60)
-- Caso 2: Warning (genera NaN por raíz cuadrada de número negativo)
-- Caso 3: Error (objeto no existe)
-
-Si puede distinguir estos tres casos, ya tiene la habilidad clave para depurar código y trabajar eficientemente con R.
-
-<!--=================-->
-# Funciones y sistema de ayuda
-
-En R, prácticamente todo es una función. Incluso operaciones simples como `+` o `<-` son funciones internamente. Entender cómo funcionan las funciones y cómo consultar su documentación es esencial.
-
-## Anatomía de una función
-
-Una función tiene tres componentes:
-
-1. **Nombre:** identifica qué hace (`mean`, `sum`, `seq`)
-2. **Argumentos:** valores que recibe como input (van entre paréntesis)
-3. **Resultado:** output que devuelve después de ejecutarse
-
-**Estructura general:**
+Con `dplyr`, la misma operación se escribe así:
 
 ```r
-nombre_funcion(argumento1 = valor1, argumento2 = valor2, ...)
+filter(ventas, region == "Norte")
 ```
 
-## Funciones básicas comunes
+`dplyr` reemplaza la notación de corchetes por **verbos** que describen exactamente qué queremos hacer. Cada verbo hace una sola cosa, y tiene un nombre que lo dice claramente.
+
+## Instalación y carga
+
+La función `install.packages()` descarga el paquete en tu computador — solo se hace **una vez**, igual que instalas una aplicación. `library()` lo activa para la sesión actual — esto sí hay que hacerlo **cada vez** que abres RStudio, igual que abres la app cada vez que la necesitas.
+
+**Regla práctica:** `install.packages()` se corre una sola vez directo en la Consola. Nunca debe quedar activo en el script. Si quieres conservarla como referencia, déjala comentada: así evitas reinstalaciones innecesarias y, si compartes el script, otras personas no reinstalarán paquetes que ya tienen.
 
 ```{webr-r}
-# Suma de elementos
-sum(c(10, 20, 30, 40))
+## Instalar dplyr (solo una vez, fuera del script)
+# install.packages("dplyr")
 
-# Promedio
-mean(c(10, 20, 30, 40))
-
-# Crear secuencia
-seq(from = 0, to = 100, by = 10)
-
-# Longitud de un vector
-length(c(5, 10, 15, 20))
-```
-
-::: {.callout-practice}
-**Todo en R es función**
-
-Incluso operaciones que parecen simples son funciones internamente:
-
-```{webr-r}
-# Estas dos líneas son equivalentes
-10 + 5
-`+`(10, 5)
-```
-
-No necesitamos escribir así normalmente, pero ayuda entender que R trata todo consistentemente como funciones.
-:::
-
-## Sistema de ayuda: Consultando documentación
-
-Para saber qué hace una función y qué argumentos acepta, usamos `?` o `help()`:
-
-```{webr-r}
-?mean
-
-# Equivalente
-help(mean)
-```
-
-La documentación se abre en el panel [Help]{.term} y tiene esta estructura:
-
-**Description:** ¿Qué hace la función? (resumen en una línea)  
-**Usage:** Sintaxis general (cómo se escribe)  
-**Arguments:** Qué valores recibe y qué significa cada uno  
-**Details:** Explicación más técnica (opcional, para profundizar)  
-**Value:** Qué devuelve la función  
-**Examples:** Ejemplos prácticos (¡LA SECCIÓN MÁS ÚTIL!)
-
-::: {.callout-key}
-**Cómo leer la ayuda eficientemente**
-
-Cuando consulte la ayuda de una función por primera vez:
-
-1. Lea la sección **Description** (¿hace lo que necesito?)
-2. Vaya directo a **Examples** (copie y ejecute un ejemplo)
-3. Regrese a **Arguments** solo cuando necesite ajustar algo específico
-
-La mayoría de usuarios (incluso expertos) aprenden más de los ejemplos que de las explicaciones técnicas.
-:::
-
-## Ejecutar ejemplos automáticamente
-
-R permite ejecutar todos los ejemplos de una función automáticamente:
-
-```{webr-r}
-# Ejecuta todos los ejemplos de la ayuda de mean()
-example(mean)
-```
-
-Esto ejecuta cada ejemplo paso a paso, mostrando el código y su resultado.
-
-## Buena práctica: Copiar y adaptar ejemplos
-
-La forma más efectiva de aprender una función nueva:
-
-1. Consulte `?nombre_funcion`
-2. Vaya a la sección **Examples**
-3. Copie un ejemplo a su script
-4. Modifíquelo paso a paso con sus datos
-5. Experimente cambiando argumentos
-
-**Ejemplo práctico:**
-
-```{webr-r}
-# Ejemplo de la ayuda de seq()
-seq(1, 10, by = 2)
-
-# Adaptado a mi caso: IDs de clientes
-seq(100, 200, by = 5)
-```
-
-::: {.callout-practice}
-**No necesita memorizar funciones**
-
-Es imposible (e innecesario) memorizar todas las funciones y sus argumentos. Lo importante es:
-- Saber que existen herramientas para cada tarea
-- Saber cómo consultar la documentación
-- Practicar copiando y adaptando ejemplos
-
-Con el tiempo, las funciones más usadas se memorizan naturalmente.
-:::
-
-<!--=================-->
-# Paquetes y librerías
-
-R viene con funciones básicas incluidas ([base R]{.term}), pero podemos expandir sus capacidades instalando [paquetes]{.term} (también llamados librerías).
-
-## ¿Qué es un paquete?
-
-Un paquete es un conjunto de funciones especializadas en tareas específicas. Por ejemplo:
-
-- `dplyr`: manipulación de datos (filtrar, resumir, transformar)
-- `ggplot2`: creación de gráficos profesionales
-- `readxl`: importar archivos Excel
-
-Actualmente existen más de 20,000 paquetes disponibles en el [CRAN]{.term} (repositorio oficial de R).
-
-## Dos pasos: Instalar vs. Cargar
-
-::: {.callout-key}
-**Diferencia fundamental**
-
-| Acción | Comando | Frecuencia | Analogía |
-|--------|---------|------------|----------|
-| **Instalar** | `install.packages("nombre")` | Una sola vez en tu computadora | Comprar un libro y guardarlo en tu estante |
-| **Cargar** | `library(nombre)` | Cada vez que inicias R | Sacar el libro del estante para leerlo |
-:::
-
-### Instalar un paquete (una vez)
-
-```r
-# Instalar dplyr
-install.packages("dplyr")
-
-# Instalar varios paquetes
-install.packages(c("dplyr", "ggplot2", "readxl"))
-```
-
-Este comando descarga el paquete desde internet y lo guarda en tu computadora. **Solo necesitas hacerlo una vez** (a menos que quieras actualizar a una nueva versión).
-
-### Cargar un paquete (cada sesión)
-
-```{webr-r}
-# Cargar dplyr para usarlo en esta sesión
+## Cargar al inicio de cada sesión
 library(dplyr)
-
-# Ahora podemos usar funciones de dplyr
-# Por ejemplo: filter(), select(), summarize()
 ```
 
-Cada vez que abres RStudio, debes cargar los paquetes que necesitarás en esa sesión.
+## Dataset de ejemplo: ventas de una tienda
 
-::: {.callout-warning}
-**Error común: Intentar usar un paquete sin cargarlo**
+Usaremos este data frame durante toda la clase. Tiene **9 transacciones** y **6 columnas**: trimestre, producto, categoría, precio unitario, cantidad vendida y región del vendedor.
 
-```r
-# Si no cargamos dplyr primero
-filter(datos, edad > 25)
-# Error: could not find function "filter"
+En el entorno de **WebR** (este documento), el dataset ya viene precargado: no necesitas leerlo desde ningún archivo. Basta con ejecutar el segundo chunk para inspeccionarlo.
 
-# Solución: cargar el paquete
-library(dplyr)
-filter(datos, edad > 25)  # Ahora funciona
-```
-:::
-
-## Atajo: pacman para gestión simplificada
-
-El paquete `pacman` simplifica la gestión de librerías:
-
-```r
-# Instalar pacman (solo una vez)
-install.packages("pacman")
-
-# Usar p_load para cargar (e instalar automáticamente si no existe)
-pacman::p_load(dplyr, ggplot2, readxl)
-```
-
-La ventaja de `p_load()`: si un paquete no está instalado, lo instala automáticamente antes de cargarlo.
-
-::: {.callout-workflow}
-**Práctica estándar para este curso**
-
-Al inicio de cada script, incluiremos:
-
-```r
-# Gestión de paquetes
-pacman::p_load(dplyr, ggplot2, tidyr, readxl)
-```
-
-Esto asegura que todos tengan los paquetes necesarios sin preocuparse por instalarlos manualmente.
-:::
-
-## Ver paquetes cargados
+Si trabajas desde **RStudio**, descomenta la línea `read.csv(...)` para cargar el dataset directamente desde internet.
 
 ```{webr-r}
-# Ver información de la sesión (incluyendo paquetes cargados)
-sessionInfo()
+#| context: setup
+
+ventas <- data.frame(
+  trimestre = c("Q1","Q1","Q1","Q2","Q2","Q2","Q3","Q3","Q3"),
+  producto  = c("Laptop","Mouse","Licencia","Laptop","Soporte","Mouse","Licencia","Laptop","Soporte"),
+  categoria = c("Hardware","Hardware","Software","Hardware","Software","Hardware","Software","Hardware","Software"),
+  precio    = c(1200, 25, 150, 1200, 80, 25, 150, 1200, 80),
+  cantidad  = c(2, 10, 5, 3, 8, 15, 6, 1, 4),
+  region    = c("Norte","Sur","Norte","Centro","Sur","Norte","Centro","Sur","Norte")
+)
 ```
 
-Esto muestra la versión de R, paquetes activos, y otra información técnica de la sesión.
-
-<!--=================-->
-# Vectores
-
-Un vector es la estructura de datos más simple en R. Es fundamental entenderlo porque casi todo en R es un vector o está construido a partir de vectores.
-
-## Concepto: Estructura homogénea
-
-::: {.callout-key}
-**Características de un vector**
-
-- **Homogéneo:** Todos los elementos deben ser del mismo tipo (numérico, carácter o lógico)
-- **Una dimensión:** Solo filas O solo columnas (no ambas)
-- **Ordenado:** Los elementos tienen posición (1, 2, 3...)
-:::
-
-## Crear vectores: función `c()`
-
-La función `c()` (concatenate) une elementos en un vector:
-
 ```{webr-r}
-# Vector numérico
-ventas_semana <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)
-ventas_semana
+## Descomenta esta línea si trabajas desde RStudio
+# ventas <- read.csv("https://eduard-martinez.github.io/data-r/ventas.csv")
 
-# Vector de caracteres
-dias <- c("Lunes", "Martes", "Miércoles", "Jueves", "Viernes")
-dias
-
-# Vector lógico
-meta_cumplida <- c(TRUE, TRUE, FALSE, TRUE, TRUE)
-meta_cumplida
-```
-
-**Revise el [Environment]{.term}:** Debería ver tres objetos nuevos.
-
-## Secuencias regulares
-
-Para crear vectores con patrones, usamos atajos:
-
-```{webr-r}
-# Secuencia con el operador ':'
-numeros <- 1:10
-numeros
-
-# Secuencia con seq()
-secuencia <- seq(from = 0, to = 100, by = 10)
-secuencia
-
-# Repetir valores con rep()
-repetido <- rep(5, times = 6)
-repetido
-
-# Combinar técnicas
-meses <- rep(1:12, times = 2)  # Dos años completos
-meses
-```
-
-## Indexación: Acceder a elementos
-
-R indexa desde 1 (no desde 0 como Python o JavaScript):
-
-```{webr-r}
-ventas <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)
-
-# Primer elemento
-ventas[1]
-
-# Tercer elemento
-ventas[3]
-
-# Elementos del 2 al 5
-ventas[2:5]
-
-# Elementos específicos (posiciones 1, 3 y 7)
-ventas[c(1, 3, 7)]
-
-# Todos excepto el tercero
-ventas[-3]
-```
-
-::: {.callout-practice}
-**Indexación con condiciones lógicas**
-
-Podemos seleccionar elementos que cumplan una condición:
-
-```{webr-r}
-ventas <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)
-
-# Ventas mayores a 1500
-ventas[ventas > 1500]
-
-# Ventas exactamente igual a 1200
-ventas[ventas == 1200]
-```
-
-Esta técnica será fundamental cuando trabajemos con filtros en [dplyr]{.term} (Semana 04).
-:::
-
-## Reemplazar valores
-
-```{webr-r}
-ventas <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)
-
-# Reemplazar el primer elemento
-ventas[1] <- 1250
-ventas
-
-# Reemplazar todos los valores menores a 1200 por 1200
-ventas[ventas < 1200] <- 1200
+## Inspeccionar la base de datos
 ventas
 ```
 
-## Funciones útiles para vectores
-
-```{webr-r}
-ventas <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)
-
-length(ventas)    # Cantidad de elementos
-sum(ventas)       # Suma total
-mean(ventas)      # Promedio
-median(ventas)    # Mediana
-min(ventas)       # Valor mínimo
-max(ventas)       # Valor máximo
-range(ventas)     # Rango (mínimo y máximo)
-```
-
-## Mini-ejercicio: Análisis de ventas semanales
-
-```{webr-r}
-# Ventas diarias de una semana
-ventas_diarias <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)
-
-# 1. Total de ventas de la semana
-total_semana <- sum(ventas_diarias)
-total_semana
-
-# 2. Promedio diario
-promedio_dia <- mean(ventas_diarias)
-promedio_dia
-
-# 3. ¿Qué día tuvo la mayor venta?
-which.max(ventas_diarias)  # Devuelve la posición
-
-# 4. ¿Cuántos días superaron el promedio?
-dias_sobre_promedio <- sum(ventas_diarias > promedio_dia)
-dias_sobre_promedio
-```
-
-::: {.callout-connect}
-**Conexión con análisis de datos**
-
-Aunque los vectores parecen simples, son fundamentales porque:
-- Las columnas de una tabla de datos (data frame) son vectores
-- Las operaciones en [dplyr]{.term} trabajan sobre vectores
-- Los gráficos en [ggplot2]{.term} se construyen mapeando vectores
-
-Por eso es importante entender cómo funcionan ahora.
-:::
-
 <!--=================-->
-# Data frames
+<!--=================-->
+# Transformaciones básicas
 
-Los [data frames]{.term} son LA estructura central para análisis de datos en R. Son el equivalente a una tabla de Excel o una hoja de cálculo.
+La lógica de trabajo es siempre la misma:
 
-## Concepto: Tabla = Data frame
+```
+resultado <- verbo(datos, argumentos)
+```
+
+Aplicamos un verbo al dataset y guardamos el resultado en un objeto nuevo. El dataset original **no se modifica**.
+
+---
+
+## select(): Seleccionar columnas
+
+La función `select()` devuelve solo las columnas que le pedimos.
+
+```{webr-r}
+## Seleccionar 3 columnas del dataset ventas
+ventas_red <- select(ventas, producto, precio, cantidad)
+ventas_red
+```
 
 ::: {.callout-key}
-**Características de un data frame**
+**¿Qué pasó aquí?**
 
-- **Heterogéneo:** Cada columna puede ser de un tipo diferente (numérica, carácter, lógica)
-- **Dos dimensiones:** Filas (observaciones) y columnas (variables)
-- **Estructura rectangular:** Todas las columnas tienen la misma longitud
-- **Columnas con nombre:** Cada variable tiene un nombre único
+- `ventas` sigue intacto en el Environment (con 6 columnas)
+- `ventas_red` es un objeto nuevo con solo 3 columnas
+- `select()` no modifica el original, crea una copia reducida
 
-**Analogía:** Un data frame es como una tabla de Excel donde:
-- Cada fila es una observación/registro (por ejemplo, un cliente)
-- Cada columna es una variable (por ejemplo, edad, ventas, región)
+Puedes verificarlo ejecutando `ncol(ventas)` y `ncol(ventas_red)` por separado.
 :::
 
-## Crear un data frame
+También puedes excluir columnas con el operador `-`. Útil cuando es más fácil decir qué NO quieres:
 
 ```{webr-r}
-# Crear data frame de clientes
-clientes <- data.frame(
-  nombre = c("Ana", "Juan", "María", "Pedro"),
-  edad = c(28, 35, 42, 31),
-  ventas = c(15000, 22000, 18000, 25000),
-  activo = c(TRUE, TRUE, FALSE, TRUE)
-)
-
-clientes
+## Todas las columnas EXCEPTO trimestre
+ventas_notrim <- select(ventas, -trimestre)
+ventas_notrim
 ```
 
-**Nota:** Cada columna es un vector del mismo largo. Si intentamos crear columnas de diferente longitud, R dará error.
+Si en algún momento trabajas con datasets de muchas columnas, `select()` tiene funciones auxiliares como `starts_with()` y `ends_with()` que permiten seleccionar columnas por patrones en sus nombres.
 
-## Inspeccionar un data frame
+
+## rename(): Renombrar columnas
+
+La función `rename()` cambia el nombre de una o más columnas sin modificar su contenido. La sintaxis es `nuevo_nombre = nombre_viejo`:
 
 ```{webr-r}
-# Estructura completa
-str(clientes)
-
-# Dimensiones (filas, columnas)
-dim(clientes)
-
-# Solo filas
-nrow(clientes)
-
-# Solo columnas
-ncol(clientes)
-
-# Nombres de columnas
-colnames(clientes)
-
-# Primeras 3 filas
-head(clientes, n = 3)
+## Renombrar la columna "producto" a "item"
+ventas_ren <- rename(ventas, item = producto)
+ventas_ren
 ```
 
 ::: {.callout-practice}
-**Interpretación de `str()`**
+**¿Cuándo renombrar?** Cuando los nombres originales no son descriptivos (`x1`, `var2`), contienen espacios o caracteres especiales, o quieres estandarizar nomenclatura antes de combinar datasets.
 
-```{webr-r}
-str(clientes)
-```
-
-**Qué nos dice:**
-- `'data.frame': 4 obs. of 4 variables` → 4 filas (observaciones), 4 columnas (variables)
-- `$ nombre: chr` → columna "nombre" es de tipo carácter
-- `$ edad: num` → columna "edad" es numérica
-- `$ ventas: num` → columna "ventas" es numérica
-- `$ activo: logi` → columna "activo" es lógica
-
-Esta función es su "radiografía" rápida de cualquier tabla de datos.
+**Buena práctica:** minúsculas y guion bajo — `precio_unitario`, no `Precio Unitario`.
 :::
 
-## Acceder a columnas con `$`
+---
+
+## filter(): Filtrar filas
+
+La función `filter()` devuelve solo las filas que cumplen una condición. Las demás se descartan.
+
+### Filtros simples
 
 ```{webr-r}
-# Acceder a una columna completa
-clientes$nombre
-
-# Operar sobre una columna
-mean(clientes$edad)
-sum(clientes$ventas)
+## Filas donde region es exactamente "Norte"
+ventas_norte <- filter(ventas, region == "Norte")
+ventas_norte
 ```
-
-**Nota:** Cuando extraemos una columna con `$`, obtenemos un vector.
-
-## Acceder a celdas con `[fila, columna]`
 
 ```{webr-r}
-# Primera fila (todos los valores)
-clientes[1, ]
-
-# Primera columna (todos los valores)
-clientes[, 1]
-
-# Celda específica (fila 2, columna 3)
-clientes[2, 3]
-
-# Primeras 2 filas, columnas 1 y 3
-clientes[1:2, c(1, 3)]
-
-# Filtro: clientes mayores de 30 años
-clientes[clientes$edad > 30, ]
+## Filas donde el precio supera 100
+ventas_alta <- filter(ventas, precio > 100)
+ventas_alta
 ```
 
-::: {.callout-warning}
-**Cuidado con el orden: siempre [fila, columna]**
+### Operadores de comparación
+
+La condición dentro de `filter()` siempre usa un operador de comparación. Estos son los más comunes:
+
+| Operador | Significado | Ejemplo |
+|----------|-------------|---------|
+| `==` | Igual a | `region == "Norte"` |
+| `!=` | Diferente de | `region != "Sur"` |
+| `>` | Mayor que | `precio > 100` |
+| `<` | Menor que | `precio < 500` |
+| `>=` | Mayor o igual | `cantidad >= 5` |
+| `<=` | Menor o igual | `precio <= 300` |
+| `%in%` | Pertenece al conjunto | `region %in% c("Norte","Sur")` |
+
+::: {.callout-practice}
+**Error común: confundir `=` con `==`**
 
 ```r
-# Correcto: fila primero, columna después
-clientes[2, 3]  # Fila 2, columna 3
-
-# Incorrecto (orden invertido)
-clientes[3, 2]  # Esto da un resultado diferente
+filter(ventas, region = "Norte")   # Error — asigna en lugar de comparar
+filter(ventas, region == "Norte")  # Correcto — compara
 ```
 
-**Truco para recordar:** Piense en RC (fila Row, columna Column) en orden alfabético.
+Dentro de `filter()`, siempre dos signos igual para comparar.
 :::
 
-## Agregar columnas
+### Filtros con múltiples condiciones
+
+Cuando la pregunta exige que se cumplan **dos condiciones al mismo tiempo**, usamos `&`:
 
 ```{webr-r}
-# Agregar columna de comisión (10% de ventas)
-clientes$comision <- clientes$ventas * 0.10
-
-clientes
+# Ventas de región Norte con precio mayor a 100
+norte <- filter(ventas, region=="Norte" & precio>100)
+norte
 ```
 
-## Data frames precargados en R
-
-R incluye varios data frames para practicar:
+Cuando basta con que se cumpla **al menos una**, usamos `|`:
 
 ```{webr-r}
-# Ver data frames disponibles
-data()
-
-# Cargar el famoso dataset mtcars
-data(mtcars)
-
-# Inspeccionar
-head(mtcars)
-str(mtcars)
+# Ventas de región Centro o región Sur
+centro <- filter(ventas, region=="Centro" | region=="Sur")
+centro
 ```
 
-## Mini-ejercicio: Análisis de clientes
+---
+
+### Mini-ejercicio
+
+Escribe el código para responder cada pregunta. Si obtienes el resultado esperado, vas bien.
 
 ```{webr-r}
-# Crear data frame
-clientes <- data.frame(
-  id = 1:5,
-  nombre = c("Ana", "Juan", "María", "Pedro", "Lucía"),
-  ventas = c(15000, 22000, 18000, 25000, 19000),
-  region = c("Norte", "Sur", "Norte", "Centro", "Sur")
+# P1. ¿Cuáles ventas son de Hardware?
+#     Resultado esperado: 5 filas
+
+
+# P2. ¿Cuáles ventas tienen cantidad mayor o igual a 5?
+#     Resultado esperado: 6 filas
+
+
+# P3. ¿Cuáles ventas son de Software con cantidad mayor a 5?
+#     Resultado esperado: 2 filas
+
+
+# P4. ¿Cuáles ventas NO son de la región Norte?
+#     Resultado esperado: 5 filas
+
+
+```
+
+---
+
+## arrange(): Ordenar filas
+
+Filtrar y calcular nos da los datos correctos, pero no siempre en el orden más útil para leerlos o comunicarlos. `arrange()` reorganiza las filas de un data frame según los valores de una o más columnas. Es especialmente útil como paso final antes de mostrar una tabla: un ranking de productos por ingreso, los clientes con mayor deuda primero, o las transacciones más recientes arriba son todos casos donde el orden importa tanto como el contenido.
+
+```{webr-r}
+# Ordenar por precio de menor a mayor (ascendente por defecto)
+ventas_por_precio <- arrange(ventas, precio)
+ventas_por_precio
+```
+
+```{webr-r}
+# Ordenar de mayor a menor con desc()
+ventas_precio_desc <- arrange(ventas, desc(precio))
+ventas_precio_desc
+```
+
+```{webr-r}
+# Ordenar por región (ascendente) y dentro de cada región por precio (descendente)
+ventas_ordenado <- arrange(ventas, region, desc(precio))
+ventas_ordenado
+```
+
+**Cómo leer el último ejemplo:** "Ordena primero por región (A→Z). Dentro de cada región, ordena por precio de mayor a menor."
+
+---
+
+## mutate(): Crear nuevas variables
+
+La función `mutate()` añade columnas calculadas al dataset. Las columnas originales se conservan.
+
+### Cálculos simples
+```{webr-r}
+# Calcular ingreso por transacción
+ventas_ing <- mutate(ventas, ingreso = precio * cantidad)
+ventas_ing
+```
+```{webr-r}
+# Crear varias columnas a la vez
+ventas_cal <- mutate(ventas,
+                     ingreso = precio * cantidad,
+                     ing_miles = (precio * cantidad) /1000)
+ventas_cal
+```
+
+::: {.callout-key}
+**mutate() mantiene el número de filas**
+
+`mutate()` siempre devuelve un data frame con **el mismo número de filas** que el original. Solo añade (o reemplaza) columnas. Cada fila recibe su propio valor calculado.
+
+Más adelante veremos `summarise()`, que hace lo opuesto: **colapsa** todas las filas en un resumen.
+:::
+
+### Clasificar con ifelse()
+```{webr-r}
+# Etiquetar productos como "Alto" o "Bajo" precio
+ventas_d <- mutate(ventas, 
+                   rango = ifelse(precio > 100, "A", "B"))
+ventas_d
+```
+
+**Cómo leer esto:** "Para cada fila, si el precio es mayor a 100 escribe `"A"`, si no escribe `"B"`."
+
+Cuando necesitas **tres o más categorías**, `ifelse()` anidado se vuelve difícil de leer. Para esos casos existe `case_when()` — explóralo en la [documentación de dplyr](https://dplyr.tidyverse.org/reference/case_when.html) cuando lo necesites.
+
+---
+
+### Mini-ejercicio
+
+Con el dataset `ventas`, crea una nueva columna `tipo_venta` que clasifique cada transacción así:
+
+- `"Alta"` si el ingreso (`precio * cantidad`) supera 500
+- `"Baja"` en cualquier otro caso
+
+Guarda el resultado en `ventas_tipo` e imprímelo.
+```{webr-r}
+# Tu código aquí
+ventas_tipo <- mutate(ventas,
+                      tipo_venta = ___(___ , ___, ___))
+ventas_tipo
+```
+
+::: {.callout-practice}
+**Pista**
+
+Necesitas calcular el ingreso *dentro* de la condición: `precio * cantidad > 500`.
+No es necesario crear la columna `ingreso` primero — `mutate()` puede evaluarla directamente.
+:::
+
+<!--=================-->
+<!--=================-->
+# Resúmenes globales
+
+## summarise(): Colapsar datos en un resumen
+
+La lógica de trabajo sigue siendo la misma:
+
+```
+resultado <- verbo(datos, argumentos)
+```
+
+`summarise()` es diferente a todos los verbos que hemos visto hasta ahora. `select()`, `mutate()` y `arrange()` devuelven un data frame con el mismo número de filas que el original. `summarise()` hace algo distinto: **colapsa todas las filas en una sola**, calculando una estadística que representa al grupo completo. Pensemos en ello así: si `mutate()` añade una columna nueva a cada fila, `summarise()` toma todas las filas y las "aplasta" en un único número.
+
+### Un solo estadístico
+
+La forma más simple: pedirle a `summarise()` un único valor.
+
+```{webr-r}
+## ¿Cuál es el precio promedio de todas las transacciones?
+resumen_p <- summarise(ventas, precio_p = mean(precio))
+
+# ver resultado
+resumen_p
+```
+
+**Qué pasó:** el data frame `ventas` tenía 9 filas. `summarise()` las leyó todas, calculó el promedio de la columna `precio`, y devolvió **una sola fila** con ese resultado. El nombre `precio_p` es el que nosotros elegimos para la columna de salida.
+
+### Varios estadísticos a la vez
+
+Podemos pedir múltiples resúmenes en una sola llamada. Cada uno se convierte en una columna del resultado:
+
+```{webr-r}
+## Resumen global de precios con varios estadísticos
+resumen_glo <- summarise(ventas,
+                         precio_promedio = mean(precio),
+                         precio_minimo   = min(precio),
+                         precio_maximo   = max(precio),
+                         n_transacciones = n())
+
+## ver resultado
+resumen_glo
+```
+
+**Qué pasó:** el mismo proceso de antes, pero ahora `summarise()` calculó cuatro estadísticos simultáneamente. El resultado sigue siendo **una sola fila**, pero ahora tiene cuatro columnas —una por cada estadístico que pedimos. La función especial `n()` no recibe ninguna columna como argumento: simplemente cuenta cuántas filas había en el dataset antes de colapsar.
+
+::: {.callout-key}
+**Funciones de resumen más comunes**
+
+**Tendencia central:** `mean()` (promedio), `median()` (mediana)
+
+**Dispersión:** `sd()` (desviación estándar), `IQR()` (rango intercuartílico)
+
+**Extremos:** `min()`, `max()`
+
+**Conteos:** `n()` (número de filas), `n_distinct()` (valores únicos), `sum()`
+:::
+
+### Mini-ejercicio
+
+Usando `filter()`, `mutate()` y `summarise()`, calcula el ingreso total y el ticket promedio de las transacciones de la categoría **Software**. Guarda el resultado en `resumen_soft` e imprímelo.
+
+```{webr-r}
+# Paso 1: filtrar solo Software
+ventas_soft <- filter(___, ___ == ___)
+
+# Paso 2: calcular ingreso por fila
+ventas_soft_ing <- mutate(___, ingreso = ___ * ___)
+
+# Paso 3: resumir
+resumen_soft <- summarise(___,
+                          ingreso_total   = ___,
+                          ticket_promedio = ___,
+                          n_ventas        = ___
 )
-
-# 1. ¿Cuántos clientes hay?
-nrow(clientes)
-
-# 2. ¿Cuál es el promedio de ventas?
-mean(clientes$ventas)
-
-# 3. ¿Cuáles clientes tienen ventas > 20000?
-clientes[clientes$ventas > 20000, ]
-
-# 4. ¿Cuántos clientes hay en la región Norte?
-sum(clientes$region == "Norte")
+resumen_soft
 ```
+
+::: {.callout-practice}
+**Pista**
+
+`ingreso` no existe en el dataset original — hay que crearla con `mutate()` antes de poder usarla en `summarise()`. Si ves un error que dice `object 'ingreso' not found`, significa que saltaste el Paso 2.
+
+**Resultado esperado:** una sola fila con `ingreso_total = 1710`, `ticket_promedio = 427.5` y `n_ventas = 4`.
+:::
+
+
+<!--=================-->
+# Descriptivas por grupo
+
+## ¿Qué significa agrupar?
+
+`summarise()` sin agrupación produce una sola fila para todo el dataset. Pero casi siempre queremos comparar segmentos:
+
+- Ventas **por región**
+- Ticket promedio **por vendedor**
+- Ingreso **por categoría**
+
+Para eso usamos `group_by()` antes de `summarise()`.
+
+::: {.callout-key}
+**Concepto de granularidad**
+
+| Operación | Resultado |
+|-----------|-----------|
+| `summarise()` sin grupo | 1 fila — resumen de todo |
+| `group_by(region)` + `summarise()` | 1 fila por cada región |
+| `group_by(region, categoria)` + `summarise()` | 1 fila por cada combinación región × categoría |
+
+La granularidad define **a qué nivel** hacemos el análisis.
+:::
+
+## group_by() + summarise(): el dúo central
+
+`group_by()` marca el dataset como agrupado. `summarise()` calcula los resúmenes dentro de cada grupo:
+
+```{webr-r}
+# Paso 1: calcular ingreso por transacción
+ventas_ing <- mutate(ventas, ingreso = precio * cantidad)
+
+# Paso 2: agrupar por región
+ventas_ing_g <- group_by(ventas_ing, region)
+
+# Paso 3: resumir por grupo
+kpis_region <- summarise(ventas_ing_g,
+                         ingreso_total   = sum(ingreso),
+                         n_transacciones = n()
+                         )
+kpis_region
+```
+
+**Cómo leer el resultado:** Cada fila es una región. Podemos ver de un vistazo cuánto generó cada una y cuántas transacciones tuvo.
+
+::: {.callout-key}
+**¿Qué hace group_by() exactamente?**
+
+`group_by()` no cambia el data frame visualmente. Lo que hace es marcar el objeto como "agrupado". Puedes verificarlo ejecutando el objeto después de agrupar: verás `# Groups: region [3]` encima de la tabla.
+
+Cuando el siguiente paso es `summarise()`, R calcula las estadísticas **por separado para cada grupo**.
+:::
+
+## Múltiples KPIs por grupo
+
+Hasta ahora calculamos uno o dos estadísticos por grupo. En la práctica, casi siempre necesitamos varios KPIs a la vez para tener una visión completa del desempeño de cada segmento.
+
+```{webr-r}
+## Paso 1: crear ingreso
+ventas_ing <- mutate(ventas, ingreso = precio * cantidad)
+
+## Paso 2: agrupar por región
+ventas_agr <- group_by(ventas_ing, region)
+
+## Paso 3: calcular múltiples KPIs
+kpis_region <- summarise(ventas_agr,
+                         ingreso_total   = sum(ingreso),
+                         ticket_promedio = mean(ingreso),
+                         n_transacciones = n(),
+                         .groups = "drop")
+
+## ver resultado
+kpis_region
+```
+
+**Qué pasó:** cada región tiene ahora tres métricas. Podemos compararlas de un vistazo: cuál generó más ingresos, cuál tiene el ticket promedio más alto, cuál es más activa. El argumento `.groups = "drop"` desagrupa el resultado automáticamente — sin esto, el objeto quedaría marcado como agrupado y podría generar resultados inesperados en pasos posteriores.
 
 ::: {.callout-connect}
-**Esto es la base para el resto del curso**
+**De tabla a decisión**
 
-Los data frames son fundamentales porque:
+Esta tabla es el punto de partida para decisiones concretas:
 
-**Semana 04 (dplyr):** Aprenderemos funciones especializadas para manipular data frames:
-- `filter()`: Filtrar filas (en lugar de `data[condicion, ]`)
-- `select()`: Seleccionar columnas (en lugar de `data$columna`)
-- `mutate()`: Crear columnas nuevas (en lugar de `data$nueva <- ...`)
-- `summarize()`: Calcular resúmenes (promedios, totales, etc.)
+- Invertir más presupuesto de marketing en la región de mayor ingreso
+- Capacitar vendedores en regiones con ticket promedio bajo
+- Redistribuir esfuerzos según volumen de transacciones
 
-**Semana 05 (ggplot2):** Visualizaremos data frames con gráficos profesionales
-
-**Semana 06:** Importaremos data frames desde Excel, CSV, bases de datos
-
-**Semanas 09-16:** Usaremos data frames para entrenar modelos de machine learning
-
-Por ahora, lo importante es entender:
-- Qué es un data frame (tabla con filas/columnas)
-- Cómo acceder a sus elementos (`$` para columnas, `[,]` para celdas)
-- Cómo crear data frames simples
-
-Lo demás lo construiremos gradualmente.
+La analítica descriptiva diagnostica; la decisión la toma el negocio.
 :::
 
+---
 
+## Agrupar por múltiples variables
+
+A veces necesitamos mayor granularidad. Además de comparar regiones, queremos ver qué pasa **dentro de cada región** según otra dimensión: categoría de producto, trimestre, canal de venta, etc.
+
+Cuando agrupamos por dos variables, obtenemos una fila por cada **combinación** única de esas variables.
+
+```{webr-r}
+## Calcular ingreso
+ventas_ing <- mutate(ventas, ingreso = precio * cantidad)
+
+## Agrupar por región Y categoría
+ventas_agr <- group_by(ventas_ing, region, categoria)
+
+## Resumir
+kpis_rc <- summarise(ventas_agr,
+                     ingreso_total = sum(ingreso),
+                     n_trans = n(),
+                     .groups = "drop")
+
+## ver resultado
+kpis_rc
+```
+
+**Qué pasó:** ahora cada fila representa una combinación región × categoría. Por ejemplo, podemos ver cuánto generó Hardware en la región Norte, cuánto Software en el Sur, etc. Esto nos ayuda a identificar qué categoría domina en cada zona geográfica.
+
+**Pregunta de análisis:** ¿En qué regiones deberíamos promocionar más Software? Busca las regiones donde Software tiene bajo `ingreso_total` o bajo `n_trans`.
+
+---
+
+## count(): atajo para contar frecuencias
+
+Cuando solo necesitamos saber **cuántas filas hay por grupo**, escribir `group_by() + summarise(n = n())` es innecesariamente largo. `count()` hace exactamente eso en una sola función.
+
+```{webr-r}
+## ¿Cuántas transacciones por región?
+conteo_region <- count(ventas, region)
+conteo_region
+```
+
+**Equivalente largo:**
+```r
+ventas_agr <- group_by(ventas, region)
+conteo <- summarise(ventas_agr, n = n(), .groups = "drop")
+```
+
+Si además queremos ordenar de mayor a menor, usamos `sort = TRUE`:
+
+```{webr-r}
+## ¿Qué producto se vendió más veces?
+count(ventas, producto, sort = TRUE)
+```
+
+**Cuándo usar `count()`:** cuando solo te interesa la frecuencia. Si necesitas calcular otras métricas (promedios, totales, etc.), usa `group_by() + summarise()`.
+
+---
+
+## distinct() y n_distinct(): explorar categorías
+
+A veces no queremos resumir datos, solo queremos saber **qué valores únicos** tiene una variable.
+
+### distinct(): mostrar valores únicos
+
+```{webr-r}
+## ¿Qué regiones tenemos en el dataset?
+distinct(ventas, region)
+```
+
+```{webr-r}
+## ¿Qué combinaciones de región y categoría existen?
+distinct(ventas, region, categoria)
+```
+
+**Para qué sirve:** exploración rápida del dataset. Antes de filtrar o agrupar, es útil ver qué valores existen.
+
+### n_distinct(): contar valores únicos
+
+Cuando lo que necesitamos es el **número** de valores únicos (no verlos), usamos `n_distinct()` dentro de `summarise()`:
+
+```{webr-r}
+## ¿Cuántos productos diferentes se vendieron por región?
+ventas_agr <- group_by(ventas, region)
+
+diversidad <- summarise(ventas_agr,
+                        n_productos = n_distinct(producto),
+                        .groups = "drop")
+diversidad
+```
+
+**Qué pasó:** cada región tiene su conteo de productos únicos. Esto nos dice qué tan diversificado está el catálogo en cada zona.
+
+::: {.callout-practice}
+**distinct() vs. n_distinct()**
+
+- `distinct(ventas, region)` → tabla con los valores únicos de región
+- `n_distinct(region)` dentro de `summarise()` → un número (cuántos valores únicos)
+
+Usa `distinct()` para **ver**, `n_distinct()` para **contar**.
+:::
+
+---
+
+## Mini-ejercicio final
+
+Usando lo aprendido, responde:
+
+**P1.** ¿Cuántos productos distintos se vendieron en Q2?
+
+**P2.** ¿Cuál es el ingreso total por trimestre? Ordena de mayor a menor.
+
+**P3.** ¿Cuál es el ticket promedio (`ingreso / n_trans`) de Hardware vs. Software?
+
+```{webr-r}
+## P1
+
+
+## P2
+
+
+## P3
+
+
+```
+
+::: {.callout-practice}
+**Pistas**
+
+- P1: `filter()` + `n_distinct()` dentro de `summarise()`
+- P2: `mutate()` → `group_by(trimestre)` → `summarise()` → `arrange()`
+- P3: `mutate()` → `group_by(categoria)` → `summarise()` con promedio de ingreso
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Working directory y organización
+
+## ¿Qué es el working directory?
+
+El **working directory** (directorio de trabajo) es la carpeta en la que R está "parado" en este momento. Cuando le pides leer o guardar un archivo sin especificar la ruta completa, R busca en esta carpeta.
+
+```{webr-r}
+## Ver cuál es el directorio actual
+getwd()
+```
+
+**¿Por qué importa?** Si intentas leer `"ventas.csv"` y R no encuentra el archivo, probablemente es porque el archivo está en otra carpeta y R está buscando en el working directory equivocado.
+
+---
+
+## RStudio Projects: la mejor práctica
+
+En lugar de cambiar el working directory manualmente con `setwd()` (lo cual rompe la reproducibilidad), usa **RStudio Projects**.
+
+::: {.callout-key}
+**Ventajas de RStudio Projects**
+
+✓ R automáticamente establece el working directory en la carpeta del proyecto  
+✓ Cualquiera puede abrir el proyecto y todo funciona sin modificar rutas  
+✓ Cada análisis vive en su propia carpeta organizada  
+✓ R recuerda el historial y los objetos de la última sesión
+
+**Cómo crear uno:**
+
+1. File → New Project...
+2. New Directory → New Project
+3. Dale un nombre descriptivo (ej: `analisis_ventas_2025`)
+4. R crea una carpeta con un archivo `.Rproj`
+
+**Cómo usarlo:** abre siempre el proyecto haciendo doble clic en el archivo `.Rproj`, **no** abriendo RStudio directamente.
+:::
+
+---
+
+## Estructura de carpetas recomendada
+
+```
+analisis_ventas_2025/
+├── analisis_ventas_2025.Rproj   # archivo del proyecto
+├── data/                        # datos crudos (NUNCA modificar)
+│   └── ventas.csv
+├── scripts/                     # código R
+│   ├── 01_limpieza.R
+│   └── 02_analisis.R
+└── outputs/                     # resultados generados
+    ├── kpis_region.csv
+    └── grafico_ventas.png
+```
+
+**Regla de oro:** el contenido de `data/` es intocable. Si necesitas modificar datos, hazlo en el script y guarda el resultado en `outputs/`.
+
+---
+
+## Guardar una tabla como CSV
+
+Una vez que tenemos nuestra tabla final de KPIs, podemos exportarla para compartirla o usarla en otras herramientas (Excel, Power BI, etc.):
+
+```r
+## Guardar tabla de KPIs en la carpeta outputs
+write.csv(kpis_region, "outputs/kpis_region.csv", row.names = FALSE)
+```
+
+**Nota:** `row.names = FALSE` evita que R agregue una columna extra con números de fila.
+
+---
+
+<!--=================-->
+<!--=================-->
+# Errores comunes y cómo evitarlos
+
+Estos son los 5 errores más frecuentes al aprender `dplyr`. Si los reconoces y evitas, ahorrarás mucho tiempo de debugging.
+
+---
+
+## 1. No guardar el resultado
+
+```r
+## INCORRECTO: se muestra en la consola pero no se guarda
+filter(ventas, region == "Norte")
+
+## CORRECTO: asignar a un objeto
+ventas_norte <- filter(ventas, region == "Norte")
+```
+
+**Por qué pasa:** olvidamos que R no modifica objetos automáticamente. Cada transformación debe guardarse explícitamente con `<-`.
+
+---
+
+## 2. Confundir `=` con `==`
+
+```r
+## INCORRECTO
+filter(ventas, region = "Norte")   # Error: unexpected '='
+
+## CORRECTO
+filter(ventas, region == "Norte")
+```
+
+**Por qué pasa:** en matemáticas usamos `=` para igualdades. En R, `=` asigna valores (como `<-`) y `==` compara. Dentro de `filter()`, siempre `==`.
+
+---
+
+## 3. Usar una variable que no existe todavía
+
+```r
+## INCORRECTO: ingreso no existe en ventas
+resumen_mal <- summarise(ventas, total = sum(ingreso))
+# Error: object 'ingreso' not found
+
+## CORRECTO: crear la variable primero
+ventas_ing <- mutate(ventas, ingreso = precio * cantidad)
+resumen_ok <- summarise(ventas_ing, total = sum(ingreso))
+```
+
+**Por qué pasa:** `mutate()` crea columnas nuevas. Si queremos usarlas en pasos posteriores, primero hay que crearlas y guardar el resultado.
+
+---
+
+## 4. Olvidar que group_by() no hace nada solo
+
+```{webr-r}
+## group_by() SOLO marca el dataset como agrupado
+ventas_agrupado <- group_by(ventas, region)
+ventas_agrupado  
+## ↑ Sigue teniendo 9 filas, solo está "marcado" como agrupado
+```
+
+**Para qué sirve:** `group_by()` no colapsa datos ni calcula nada. Solo prepara el terreno. El cálculo lo hace `summarise()`:
+
+```{webr-r}
+## Ahora sí colapsa
+ventas_agr <- group_by(ventas, region)
+resumen <- summarise(ventas_agr, n = n(), .groups = "drop")
+resumen
+```
+
+---
+
+## 5. Confundir mutate() con summarise()
+
+Este es el error conceptual más común. Ambas funciones crean columnas, pero funcionan de forma radicalmente distinta.
+
+::: {.callout-key}
+**Regla mnemotécnica**
+
+- `mutate()` → **M**antiene el número de filas. Añade una columna calculada para **cada fila**.
+- `summarise()` → **S**intetiza. Colapsa todas las filas en **un resumen**.
+
+**¿Cuándo usar cuál?**
+
+- Quieres calcular algo **para cada transacción** (margen, descuento, categoría)? → `mutate()`
+- Quieres un **total, promedio o conteo global**? → `summarise()`
+
+**Ejemplo:**
+
+```r
+## mutate: 9 filas → 9 filas (con nueva columna)
+ventas_ing <- mutate(ventas, ingreso = precio * cantidad)
+
+## summarise: 9 filas → 1 fila (resumen global)
+resumen <- summarise(ventas_ing, total = sum(ingreso))
+```
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Checklist de salida
+
+Al terminar esta semana, debes poder:
+
+- [ ] Explicar con tus palabras qué hace cada verbo de `dplyr`
+- [ ] Leer un bloque de código con objetos intermedios y describir el flujo paso a paso
+- [ ] Filtrar datos usando condiciones simples (`==`, `>`) y combinadas (`&`, `|`)
+- [ ] Crear variables calculadas con `mutate()` y clasificarlas con `ifelse()`
+- [ ] Generar tablas de KPIs con `group_by() + summarise()`
+- [ ] Interpretar una tabla resumida y conectarla con una decisión de negocio
+- [ ] Reconocer y corregir los 5 errores comunes de esta semana
+- [ ] Organizar un proyecto de análisis con RStudio Projects
+
+---
+
+<!--=================-->
+<!--=================-->
+# Preguntas de comprensión
+
+## 1. Interpretación de output
+
+Ejecuta el código y responde:
+
+```{webr-r}
+ventas_agr <- group_by(ventas, categoria)
+
+resultado <- summarise(ventas_agr,
+                       n = n(),
+                       precio_medio = mean(precio),
+                       .groups = "drop")
+
+resultado
+```
+
+**Pregunta:** ¿Qué representa cada fila? ¿Cuántas filas esperabas y por qué?
+
+---
+
+## 2. Orden de operaciones
+
+¿Cuál es la diferencia entre estos dos bloques?
+
+```{webr-r}
+## Bloque A
+ventas_filtrado <- filter(ventas, precio > 100)
+ventas_agr_A <- group_by(ventas_filtrado, region)
+resumen_A <- summarise(ventas_agr_A, n = n(), .groups = "drop")
+resumen_A
+```
+
+```{webr-r}
+## Bloque B
+ventas_agr_B <- group_by(ventas, region)
+resumen_B <- summarise(ventas_agr_B, n = n(), .groups = "drop")
+resumen_filtrado_B <- filter(resumen_B, n > 2)
+resumen_filtrado_B
+```
+
+**Respuesta esperada:**
+
+- Bloque A: filtra transacciones con precio > 100 **primero**, luego cuenta por región.
+- Bloque B: cuenta todas las transacciones por región **primero**, luego filtra regiones con más de 2 transacciones.
+
+Son preguntas distintas con resultados distintos.
+
+---
+
+## 3. Aplicación práctica
+
+Tienes un dataset de clientes con columnas `cliente_id`, `compras_totales`, `region`.
+
+**¿Cómo identificarías los 5 mejores clientes de cada región por monto de compras?**
+
+```{webr-r}
+## Escribe tu solución aquí:
+## Pista: necesitas group_by(), arrange() y un método para quedarte con los primeros 5
+
+
+```
+
+---
+
+<!--=================-->
+<!--=================-->
+# Próxima semana: Visualización con ggplot2
+
+En la Semana 05 aprenderemos a visualizar las tablas de KPIs que construimos esta semana usando `ggplot2`:
+
+- Gráficos de barras para comparar regiones y productos
+- Gráficos de líneas para evolución por trimestre
+- Gráficos de dispersión para relaciones entre variables
+
+La tabla `kpis_region` que construimos hoy será la entrada directa para los primeros gráficos de la próxima semana. Todo lo que aprendiste esta semana sobre transformar datos es la base para comunicar resultados visualmente.
 
 
 ```{=html}
-<!-- Panel Environment (CSS en styles.css) -->
+<!-- Panel Environment -->
 <div id="env-panel" class="collapsed">
   <div id="env-header" onclick="toggleEnvPanel()">
     <span id="env-header-left">&#x1F4E6; Environment</span>
@@ -1349,7 +961,6 @@ Lo demás lo construiremos gradualmente.
 </div>
 
 <script type="module">
-/* ── Toggle colapsar / expandir ── */
 window.toggleEnvPanel = function() {
   const panel = document.getElementById('env-panel');
   const btn   = document.getElementById('env-toggle-btn');
@@ -1357,7 +968,6 @@ window.toggleEnvPanel = function() {
   btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
 };
 
-/* ── Consultar el environment de R ── */
 async function getEnvData() {
   if (!globalThis.mainWebR) return [];
   try {
@@ -1403,7 +1013,6 @@ async function getEnvData() {
   }
 }
 
-/* ── Renderizar la lista de objetos ── */
 function renderEnv(items) {
   const body   = document.getElementById('env-body');
   const status = document.getElementById('env-status');
@@ -1435,7 +1044,6 @@ function escHtml(s) {
   return d.innerHTML;
 }
 
-/* ── Actualizar panel ── */
 async function updateEnvPanel() {
   const items = await getEnvData();
   renderEnv(items);
@@ -1447,7 +1055,6 @@ window.refreshEnv = function() {
   updateEnvPanel();
 };
 
-/* ── Mover webR Status despues de los links de contacto ── */
 function moveWebRStatus() {
   const anchor = document.getElementById('webr-status-anchor');
   const statusArea = document.getElementById('qwebr-status-message-area');
@@ -1462,9 +1069,7 @@ function moveWebRStatus() {
   }
 }
 
-/* ── Esperar webR y conectar hooks ── */
 async function init() {
-  /* Esperar a que mainWebR exista */
   while (!globalThis.qwebrInstance) {
     await new Promise(r => setTimeout(r, 300));
   }
@@ -1472,7 +1077,6 @@ async function init() {
   document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
   moveWebRStatus();
 
-  /* Esperar a que los botones Run esten habilitados (todas las celdas ocultas ejecutadas) */
   await new Promise(resolve => {
     const check = setInterval(() => {
       const btns = document.querySelectorAll('.qwebr-button-run');
@@ -1483,7 +1087,6 @@ async function init() {
     }, 400);
   });
 
-  /* Monkey-patch qwebrComputeEngine para detectar ejecucion */
   const original = globalThis.qwebrComputeEngine;
   globalThis.qwebrComputeEngine = async function(...args) {
     const res = await original.apply(this, args);
@@ -1491,7 +1094,6 @@ async function init() {
     return res;
   };
 
-  /* Expandir panel y hacer primer scan */
   const panel = document.getElementById('env-panel');
   if (panel.classList.contains('collapsed')) {
     toggleEnvPanel();
