@@ -1,0 +1,820 @@
+---
+title: "Evolución territorial del voto por Gustavo Petro en el Atlántico"
+subtitle: "Elecciones presidenciales 2018–2022"
+author: 
+  - "Centro de Investigación en Economía y Finanzas (CIENFI)"
+  - "Universidad Icesi"
+lang: es
+format: 
+  html:
+    self-contained: true
+    number-sections: true
+    code-fold: false
+    code-tools: false
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    theme: cosmo
+    fontsize: 18px
+    page-layout: full
+    df-print: paged
+    smooth-scroll: true
+    embed-resources: true
+execute:
+  echo: false
+  warning: false
+  message: false
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, fig.width = 10, fig.height = 10)
+```
+
+```{r librerias}
+# Cargar librerías
+library(tidyverse)
+library(rio)
+library(sf)
+library(leaflet)
+library(crosstalk)
+library(DT)
+library(scales)
+library(htmltools)
+library(plotly)
+library(kableExtra)
+library(patchwork)
+library(ggrepel)
+library(dplyr)
+```
+
+```{r cargar_datos_procesados}
+# ============================================================================
+# CARGAR TODOS LOS OUTPUTS DE LOS PASOS ANTERIORES
+# ============================================================================
+
+# Datos preparados
+#datos_comparacion <- readRDS(
+#  file.path("..", "02_prepare", "output", "datos_comparacion.rds")
+#)
+
+# Ruta relativa segura
+datos_comparacion <- readRDS("../02_prepare/output/datos_comparacion.rds")
+
+datos_mapa <- readRDS(
+  file.path("..", "02_prepare", "output", "datos_mapa.rds")
+)
+
+```
+
+::: {.callout-tip appearance="minimal" title="Resumen"}
+Este informe presenta un análisis comparativo de los resultados electorales en el departamento del Atlántico para las elecciones presidenciales de **2018** y **2022**, con énfasis en la **evolución territorial del voto de Gustavo Petro** entre ambos ciclos electorales.
+
+El analis muestra cómo cambiaron los patrones de apoyo en **primera** y **segunda vuelta**, y contrasta estas dinámicas con los candidatos que disputaron la segunda vuelta en cada elección: Iván Duque (2018) y Rodolfo Hernández (2022).
+
+A partir de información desagregada por puesto de votación, se identifican variaciones espaciales en la intensidad del voto, cambios en la participación y reconfiguraciones del mapa electoral departamental, con el fin de aportar evidencia clara y útil para el análisis político y territorial.
+:::
+
+# Análisis Municipal
+
+El Atlántico se divide en **23 municipios**, con Barranquilla como su principal centro urbano, concentrando gran parte de la población y del electorado. Entre 2018 y 2022, **el apoyo a Gustavo Petro creció en prácticamente todo el departamento**, destacando municipios clave como Malambo (62% → 78.5%), Palmar de Varela (64.4% → 77.9%) y Galapa (61.4% → 76.9%).
+
+El mapa permite explorar los resultados por municipio y visualizar cómo se intensificó el respaldo. Se observa una consolidación del voto en el área metropolitana de Barranquilla —Soledad, Malambo, Galapa y Santo Tomás superan el 76%— mientras que en el sur del departamento, municipios como Manatí (25.8% → 42.4%), Candelaria (25.9% → 47.6%) y Santa Lucía (26.8% → 37.7%) muestran incrementos más modestos, con apoyo aún por debajo del 50%. Este patrón evidencia un voto territorialmente desigual, con el cinturón metropolitano mostrando mayor intensidad electoral que los municipios rurales del sur.
+
+::: panel-tabset
+## Segunda vuelta
+
+```{r}
+# Cargar mapas de Atlantico
+magdalena_map_1 <- readRDS("../03_figures/output/atlantico_map_2018.rds")
+magdalena_map_2 <- readRDS("../03_figures/output/atlantico_map_2022.rds")
+
+# Definir colores rojos
+colores_rojos <- c(
+  "0-20%"  = "#fff5f0",
+  "20-30%" = "#fee0d2",
+  "30-40%" = "#fcbba1",
+  "40-50%" = "#fc9272",
+  ">50%"   = "#fb6a4a"
+)
+
+# Categorizar votos (si no lo has hecho)
+categorizar_votos <- function(df) {
+  df %>%
+    mutate(prop_cat = case_when(
+      prop_mpio < 0.2 ~ "0-20%",
+      prop_mpio >= 0.2 & prop_mpio < 0.3 ~ "20-30%",
+      prop_mpio >= 0.3 & prop_mpio < 0.4 ~ "30-40%",
+      prop_mpio >= 0.4 & prop_mpio < 0.5 ~ "40-50%",
+      prop_mpio >= 0.5 ~ ">50%"
+    )) %>%
+    mutate(prop_cat = factor(prop_cat,
+                             levels = c("0-20%", "20-30%", "30-40%", "40-50%", ">50%")))
+}
+
+magdalena_map_1 <- categorizar_votos(magdalena_map_1)
+magdalena_map_2 <- categorizar_votos(magdalena_map_2)
+
+pal <- colorFactor(
+  palette = colores_rojos,
+  domain = magdalena_map_1$prop_cat
+)
+
+leaflet() %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addPolygons(
+    data = magdalena_map_1,
+    fillColor = ~pal(prop_cat),
+    color = "black",
+    weight = 1,
+    fillOpacity = 0.7,
+    label = ~mpio_label,
+    group = "2018",
+    highlight = highlightOptions(
+      weight = 3,
+      color = "#666",
+      fillOpacity = 0.9,
+      bringToFront = TRUE
+    )
+  ) %>%
+  addPolygons(
+    data = magdalena_map_2,
+    fillColor = ~pal(prop_cat),
+    color = "black",
+    weight = 1,
+    fillOpacity = 0.7,
+    label = ~mpio_label,
+    group = "2022",
+    highlight = highlightOptions(
+      weight = 3,
+      color = "#666",
+      fillOpacity = 0.9,
+      bringToFront = TRUE
+    )
+  ) %>%
+  addLegend(
+    "bottomright",
+    colors = colores_rojos,
+    labels = names(colores_rojos),
+    title = "Proporción de votos"
+  ) %>%
+  addLayersControl(
+    baseGroups = c("2018", "2022"),
+    options = layersControlOptions(collapsed = FALSE)
+  ) %>%
+  hideGroup("2022")
+```
+:::
+
+## Participación Electoral
+
+Durante el período 2018–2022, el departamento del Atlántico registró un aumento en los niveles de participación electoral, aunque de manera no constante: la participación creció apenas un 7% en primera vuelta (de 824 mil a 882 mil votos), pero tuvo un salto importante del 32.8% en segunda vuelta. En este periodo, **el apoyo a Gustavo Petro registró un crecimiento aún más notable.** En primera vuelta, pasó de captar poco más de un **tercio de los votos (38.3%)** a más de la **mitad (54.5%)**. En segunda vuelta, el avance fue más contundente: pasó del **54.8%** al **66.7%**. Así, en apenas cuatro años, Petro pasó de ser un candidato competitivo en el departamento a consolidarse como la opción dominante en el Atlántico.
+
+```{r resumen_general}
+# Calcular totales del departamento
+total_votos_v1_2018 <- sum(datos_comparacion$t_votos_v1_2018, na.rm = TRUE)
+total_votos_v2_2018 <- sum(datos_comparacion$t_votos_v2_2018, na.rm = TRUE)
+total_votos_v1_2022 <- sum(datos_comparacion$t_votos_v1_2022, na.rm = TRUE)
+total_votos_v2_2022 <- sum(datos_comparacion$t_votos_v2_2022, na.rm = TRUE)
+
+# Calcular votos de Petro
+petro_v1_2018 <- sum(datos_comparacion$Petro_v1_2018, na.rm = TRUE)
+petro_v2_2018 <- sum(datos_comparacion$Petro_v2_2018, na.rm = TRUE)
+petro_v1_2022 <- sum(datos_comparacion$Petro_v1_2022, na.rm = TRUE)
+petro_v2_2022 <- sum(datos_comparacion$Petro_v2_2022, na.rm = TRUE)
+
+# Crear tabla de participación electoral
+resumen <- tibble(
+  Indicador = c(
+    "Total Votos 2018 - Primera Vuelta",
+    "Total Votos 2018 - Segunda Vuelta",
+    "Total Votos 2022 - Primera Vuelta",
+    "Total Votos 2022 - Segunda Vuelta"
+  ),
+  Valor = c(
+    total_votos_v1_2018,
+    total_votos_v2_2018,
+    total_votos_v1_2022,
+    total_votos_v2_2022
+  ),
+  `Proporción Petro (%)` = c(
+    (petro_v1_2018 / total_votos_v1_2018) * 100,
+    (petro_v2_2018 / total_votos_v2_2018) * 100,
+    (petro_v1_2022 / total_votos_v1_2022) * 100,
+    (petro_v2_2022 / total_votos_v2_2022) * 100
+  )
+)
+
+resumen %>% 
+  mutate(
+    Valor = comma(Valor),
+    `Proporción Petro (%)` = paste0(round(`Proporción Petro (%)`, 2), "%")
+  ) %>% 
+  kbl(align = c("l", "r", "r")) %>% 
+  kable_styling(
+    bootstrap_options = c("condensed", "hover"),
+    full_width = FALSE,
+    position = "left",
+    font_size = 12
+  ) %>% 
+  column_spec(1, bold = TRUE, width = "18em") %>% 
+  column_spec(2, width = "8em") %>% 
+  column_spec(3, width = "10em", color = "white", background = "#3498db") %>% 
+  row_spec(0, bold = TRUE, color = "white", background = "#2c3e50")
+```
+
+## Petro frente a sus contrincantes
+
+Petro sumó más de **164 mil votos nuevos en primera vuelta (+52%)** y cerca de **257 mil en segunda vuelta (+61%)** entre ambas elecciones. Sus rivales, en cambio, **perdieron fuerza** sobre todo en primera vuelta. Duque obtuvo 224 mil votos en la primera vuelta de 2018; Hernández llegó casi a la mitad de los votos de Duque cuatro años atras 113 mil en 2022, una caída del **49%**. En segunda vuelta la pérdida de sus rivales frente a él se mantuvo.
+
+El contraste es claro: mientras Petro **expandió su base electoral en ambas vueltas¨**, la coalición opositora se contrajo en primera vuelta y también cayó en la definición. El Atlántico no solo votó más por Petro; votó **decididamente menos por sus opositores**.
+
+```{r tabla_agregada_mejorada}
+# Crear tabla resumen con métricas adicionales
+tabla_atlanico_larga <- tibble(
+  Región = rep("Atlantico", 4),
+  Candidato = c("Gustavo Petro", "Gustavo Petro", 
+                "Contrincante (Duque 2018 / Hernández 2022)", 
+                "Contrincante (Duque 2018 / Hernández 2022)"),
+  Vuelta = rep(c("Primera Vuelta", "Segunda Vuelta"), 2),
+  
+  `2018` = c(
+    sum(datos_comparacion$Petro_v1_2018, na.rm = TRUE),
+    sum(datos_comparacion$Petro_v2_2018, na.rm = TRUE),
+    sum(datos_comparacion$Duque_v1_2018, na.rm = TRUE),
+    sum(datos_comparacion$Duque_v2_2018, na.rm = TRUE)
+  ),
+  
+  `2022` = c(
+    sum(datos_comparacion$Petro_v1_2022, na.rm = TRUE),
+    sum(datos_comparacion$Petro_v2_2022, na.rm = TRUE),
+    sum(datos_comparacion$Hernandez_v1_2022, na.rm = TRUE),
+    sum(datos_comparacion$Hernandez_v2_2022, na.rm = TRUE)
+  )
+) %>%
+  mutate(
+    `Δ Absoluta` = `2022` - `2018`,
+    `Δ %` = ((`2022` - `2018`) / `2018`) * 100
+  )
+
+# Mostrar tabla formateada
+tabla_atlanico_larga %>%
+  mutate(
+    `2018` = comma(`2018`),
+    `2022` = comma(`2022`),
+    `Δ Absoluta` = paste0(ifelse(`Δ Absoluta` > 0, "+", ""), comma(`Δ Absoluta`)),
+    `Δ %` = paste0(ifelse(`Δ %` > 0, "+", ""), round(`Δ %`, 2), "%")
+  ) %>%
+  knitr::kable(
+    align = c("l", "l", "l", "r", "r", "r", "r")
+  ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "bordered")) %>%
+  row_spec(1:2, background = "#d4edda") %>%  # Color suave para Petro
+  row_spec(3:4, background = "#f8d7da")      # Color suave para contrincantes
+```
+
+## Resultados por municipio
+
+Los 23 municipios del Atlántico muestran trayectorias diversas, pero con un patrón común: **en 2022 Petro ganó votos en todas las ciudades respecto a la elección anterior**. Las diferencias están en la magnitud. Candelaria —ubicado en la zona rural del departamento— incrementó en más del doble el apoyo al candidato en primera vuelta (210%); Santo Tomás, en cambio, apenas creció un 1.2%. Barranquilla, con su volumen electoral, aportó más de 53 mil votos nuevos en primera vuelta, aunque su crecimiento porcentual (31.7%) fue modesto comparado con municipios más pequeños.
+
+
+Lo interesante está en la **columna de participación:** algunos municipios donde creció el voto por Petro también crecieron significativamente en participación total (Malambo +76.5%, Barranquilla +65.7%), mientras otros mantuvieron niveles bajos o incluso redujeron sus niveles de votación (Santo Tomás -9.4%, Juan de Acosta -12.4%), pero redistribuyeron sus preferencias hacia él.
+
+
+```{r tabla_municipios_detallada}
+resumen_municipios <- datos_comparacion %>% 
+  filter(ambos) %>% 
+  group_by(mpio) %>% 
+  summarise(
+    `N° Puestos` = n(),
+    
+    # Petro Primera Vuelta
+    `Petro 2018 V1` = sum(Petro_v1_2018, na.rm = TRUE),
+    `Petro 2022 V1` = sum(Petro_v1_2022, na.rm = TRUE),
+    `Δ Abs V1` = `Petro 2022 V1` - `Petro 2018 V1`,
+    `Δ % V1` = ((`Petro 2022 V1` - `Petro 2018 V1`) / `Petro 2018 V1`) * 100,
+    
+    # Petro Segunda Vuelta
+    `Petro 2018 V2` = sum(Petro_v2_2018, na.rm = TRUE),
+    `Petro 2022 V2` = sum(Petro_v2_2022, na.rm = TRUE),
+    `Δ Abs V2` = `Petro 2022 V2` - `Petro 2018 V2`,
+    `Δ % V2` = ((`Petro 2022 V2` - `Petro 2018 V2`) / `Petro 2018 V2`) * 100,
+    
+    # Participación
+    `Part. Δ %` = mean(var_participacion_v2, na.rm = TRUE)
+  ) %>% 
+  arrange(desc(`Δ Abs V2`))
+
+# Función para aplicar color condicional
+color_var <- function(x) {
+  case_when(
+    x > 0 ~ "#27ae60",   # Verde
+    x < 0 ~ "#c0392b",   # Rojo
+    TRUE ~ "#2c3e50"     # Gris oscuro
+  )
+}
+
+resumen_municipios %>% 
+  mutate(
+    across(c(`Petro 2018 V1`, `Petro 2022 V1`, `Δ Abs V1`,
+             `Petro 2018 V2`, `Petro 2022 V2`, `Δ Abs V2`), ~comma(.x)),
+    `Δ % V1` = paste0(ifelse(`Δ % V1` > 0, "+", ""), round(`Δ % V1`, 1), "%"),
+    `Δ % V2` = paste0(ifelse(`Δ % V2` > 0, "+", ""), round(`Δ % V2`, 1), "%"),
+    `Part. Δ %` = paste0(ifelse(`Part. Δ %` > 0, "+", ""), round(`Part. Δ %`, 1), "%")
+  ) %>% 
+  kbl(align = c("l", rep("r", 10))) %>% 
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = TRUE,
+    position = "left",
+    font_size = 13
+  ) %>% 
+  column_spec(1, bold = TRUE, width = "12em") %>% 
+  column_spec(6, 
+    color = spec_color(resumen_municipios$`Δ % V1`, 
+                       begin = 0.3, end = 0.9, 
+                       option = "D", direction = 1)
+  ) %>% 
+  column_spec(10, 
+    color = spec_color(resumen_municipios$`Δ % V2`, 
+                       begin = 0.3, end = 0.9, 
+                       option = "D", direction = 1)
+  ) %>% 
+  column_spec(11, 
+    color = spec_color(resumen_municipios$`Part. Δ %`, 
+                       begin = 0.3, end = 0.9, 
+                       option = "D", direction = 1)
+  ) %>% 
+  row_spec(0, bold = TRUE, color = "white", background = "#2c3e50") %>% 
+  scroll_box(width = "100%", height = "500px")
+```
+
+------------------------------------------------------------------------
+
+# Análisis a Nivel Puesto de Votación
+
+
+Para 2022, el Atlántico contó con **297 puestos de votación** habilitados por la Registraduría, distribuidos en sus 23 municipios. Barranquilla concentra **136 de ellos**, casi la mitad del total departamental (45.8%), reflejando su peso demográfico como capital. Le siguen Soledad con 43 puestos, Sabanalarga con 14, Malambo con 13 y Baranoa con 12. En el otro extremo están municipios como Manatí, Suan y Usiacurí con apenas 1 puesto cada uno, Santa Lucía con 2, y Candelaria y Polonuevo con 3 cada uno.
+
+Esta distribución marca diferencias importantes en cómo se lee el voto. En **municipios pequeños**, un solo puesto puede definir el resultado municipal completo. En Barranquilla, en cambio, la diversidad de puestos permite identificar **patrones espaciales más finos**, que empiezan a mostrar dónde exactamente ocurrieron los cambios en los resultados electorales y qué características territoriales podrían estar asociadas.
+
+## Correlación de Votos 2018 vs 2022
+
+Este gráfico compara puesto por puesto el desempeño de Petro en segunda vuelta entre ambas elecciones. Cada punto representa un puesto de votación: en el eje horizontal está su votación en 2018, en el vertical la de 2022. La línea punteada marca el equilibrio: si un puesto cayera exactamente sobre ella, significaría que Petro obtuvo los mismos votos en ambos años.
+
+Salta a la vista que **la mayoría de puntos se ubican por encima de esa línea**. Petro creció en prácticamente todos los puestos del departamento. Los puntos en *verde más intenso* marcan los crecimientos más pronunciados: puestos donde duplicó o incluso triplicó su votación. Los pocos puntos rosados, ubicados bajo la línea, señalan las excepciones: lugares donde **perdió votos** entre una elección y otra.
+
+La nube de puntos también muestra una correlación positiva: los puestos donde Petro ya era fuerte en 2018 tendieron a crecer aún más en 2022, consolidando bastiones. Pero incluso en territorios donde partía de votaciones bajas logró sumar.
+
+```{r correlacion_petro_interactivo, echo=FALSE}
+library(plotly)
+
+p <- datos_comparacion %>% 
+  filter(ambos) %>% 
+  ggplot(
+    aes(
+      x = Petro_v2_2018,
+      y = Petro_v2_2022,
+      text = paste0(
+        "<b>Puesto:</b> ", puesto_nom, "<br>",
+        "<b>Municipio:</b> ", mpio, "<br>",
+        "<b>Votos 2018:</b> ", comma(Petro_v2_2018), "<br>",
+        "<b>Votos 2022:</b> ", comma(Petro_v2_2022), "<br>",
+        "<b>Variación (%):</b> ", round(var_Petro_v2, 1)
+      )
+    )
+  ) +
+  geom_point(
+    aes(color = var_Petro_v2, size = t_votos_v2_2022),
+    alpha = 0.85,
+    stroke = 0.4
+  ) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  scale_color_gradient2(
+    low = "#8B0000",      # rojo fuerte
+    mid = "#FFFFFF",      # blanco puro
+    high = "#003300",     # verde oscuro
+    midpoint = 0
+  ) +
+  scale_size_continuous(range = c(4, 10)) +
+  labs(
+    x = "Votos Petro 2018 (2da vuelta)",
+    y = "Votos Petro 2022 (2da vuelta)"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "none",
+    panel.grid.minor = element_blank()
+  )
+
+ggplotly(p, tooltip = "text")
+
+```
+
+## Mayores Ganancias de Petro
+
+Estos diez puestos registraron las mayores variaciones absolutas en el voto por Petro al comparar las rondas finales de 2018 y 2022. El *IEB Bicentenario de Soledad* lidera: pasó de 2.029 votos a 4.734, sumando 2.705 votos nuevos (+133.3%). Le sigue el *IET José Castillo Bolívar*, también en Soledad, con un incremento de 2.673 votos, y el Colegio Metropolitano de Soledad 2000 con 2.663 votos adicionales.
+
+La geografía de estas ganancias muestra lo siguiente: **cinco de los diez puestos están en Soledad**, concentrados en instituciones educativas de barrios populares y zonas de expansión urbana. Tres están en Barranquilla *(colegios en sectores como Talpablo Neruda, Marco Fidel Suárez y el Nuevo Colegio Técnico del Santuario)*, y uno en Malambo *(dos puestos: Colegio La Candelaria y Colegio Juan XXIII)*. Son territorios con alta densidad de votantes, donde pequeños movimientos en preferencias se traducen en miles de votos.
+
+
+```{r top_ganancias}
+datos_comparacion %>% 
+  filter(ambos, !is.na(var_abs_Petro_v2)) %>% 
+  arrange(desc(var_abs_Petro_v2)) %>% 
+  head(10) %>% 
+  select(
+    Municipio = mpio,
+    Puesto = puesto_nom,
+    `2018` = Petro_v2_2018,
+    `2022` = Petro_v2_2022,
+    `Ganancia` = var_abs_Petro_v2,
+    `Var %` = var_Petro_v2
+  ) %>% 
+  mutate(
+    across(c(`2018`, `2022`, Ganancia), ~comma(.x)),
+    `Var %` = paste0("+", round(`Var %`, 1), "%")
+  ) %>% 
+  kbl(align = c("l", "l", rep("r", 4))) %>% 
+  kable_styling(
+    bootstrap_options = c("condensed", "hover"),
+    full_width = FALSE,
+    font_size = 12
+  ) %>% 
+  row_spec(0, bold = TRUE, color = "white", background = "#27ae60") %>% 
+  column_spec(1:2, bold = TRUE, width = "10em") %>% 
+  column_spec(3:6, width = "7em")
+```
+
+## Mayores Pérdidas de Petro
+
+No todo fue crecimiento. Estos diez puestos registraron las mayores pérdidas absolutas en el voto por Petro entre las rondas finales de 2018 y 2022. El *IET de Microempresas de Soledad* registró la mayor caída: pasó de 4.688 votos a 3.039 (-1.649 votos, -35.2%). Le sigue el *Colegio Manuel Elkin Patarroyo* en Barranquilla con una pérdida de 1.180 votos (-67.8%), y el *IDETH Sede I Primaria*, también en Barranquilla, con 1.048 votos menos (-34.8%).
+
+
+La geografía de estas pérdidas muestra lo siguiente: **cinco de los diez puestos** están en Barranquilla, concentrados principalmente en colegios de diferentes sectores de la ciudad. Dos están en Soledad *(IET de Microempresas y Colegio Liceo Nacional)*, dos en el municipio de Santo Tomás *(Instituto Educativo Div. Oriental Sede 4 y el IE Técnico Comercial Sede 3)*, y uno en Sabanagrande *(IE Simón Bolívar)*.
+
+Vale la pena notar que varios de estos puestos, a pesar de las pérdidas, mantienen votaciones absolutas considerables por Petro: el IET de Microempresas con 3.039, el IDETH Sede I con 1.967 y el IE Simón Bolívar con 1.340. No necesariamente son territorios que le quitaron su apoyo, sino lugares donde su votación se contrajo, mientras que en prácticamente todo el resto del departamento crecía de forma sostenida. 
+
+
+```{r top_perdidas}
+datos_comparacion %>% 
+  filter(ambos, !is.na(var_abs_Petro_v2)) %>% 
+  arrange(var_abs_Petro_v2) %>% 
+  head(10) %>% 
+  select(
+    Municipio = mpio,
+    Puesto = puesto_nom,
+    `2018` = Petro_v2_2018,
+    `2022` = Petro_v2_2022,
+    `Pérdida` = var_abs_Petro_v2,
+    `Var %` = var_Petro_v2
+  ) %>% 
+  mutate(
+    across(c(`2018`, `2022`, Pérdida), ~comma(.x)),
+    `Var %` = paste0(round(`Var %`, 1), "%")
+  ) %>% 
+  kbl(align = c("l", "l", rep("r", 4))) %>% 
+  kable_styling(
+    bootstrap_options = c("condensed", "hover"),
+    full_width = FALSE,
+    font_size = 12
+  ) %>% 
+  row_spec(0, bold = TRUE, color = "white", background = "#c0392b") %>% 
+  column_spec(1:2, bold = TRUE, width = "10em") %>% 
+  column_spec(3:6, width = "7em")
+```
+
+## Puestos que Cambiaron de Ganador entre elecciones (Flips)
+
+La tabla muestra los puestos que cambiaron de ganador entre 2018 y 2022, tanto en primera como en segunda vuelta. Barranquilla es un caso relevante: de 136 puestos, varias plazas que había ganado Duque en 2018 viraron a Petro en 2022, incluyendo instituciones como el *Colegio Distrital Boston*, el Colegio *Americano*, el *Militar Acolsure* y *La Salle*. En Soledad, el *IEB Bicentenario de Soledad* —que fue de Duque en 2018— pasó a manos de Petro, consolidando el dominio petrista en el municipio.
+
+El patrón se repite en Malambo, Tubará, Ponedera y Puerto Colombia, donde varios colegios y corregimientos que votaron mayoritariamente por Duque en 2018 eligieron a Petro cuatro años después. Algunos cambios son particularmente llamativos: en Baranoa, puestos como Campeche y Sibarco que habían votado por Vargas Lleras en primera vuelta de 2018 pasaron directamente a Petro en 2022.
+
+Pero no todo el mapa viró hacia Petro. En municipios como Campo de la Cruz, Candelaria, Luruaco, Manatí, Santa Lucía y Suan, varios puestos que ganó Duque en 2018 no fueron para Petro sino para Federico Gutiérrez en 2022 (primera vuelta). Rodolfo Hernández logró sostener algunos territorios que Duque había ganado —como en el Liceo Campestre de Puerto Colombia, *Santa Verónica* en Juan de Acosta, o *Rotinet* en Repelón—, aunque en general no consiguió retener la coalición uribista en segunda vuelta, cediendo ante Petro en la mayoría de estos territorios.
+
+
+```{r analisis_flips}
+# Tabla de flips - CONSIDERANDO TODOS LOS CANDIDATOS
+flips_completa <- datos_comparacion %>% 
+  filter(ambos) %>% 
+  mutate(
+    # Determinar si Petro ganó en todas las vueltas de ambas elecciones
+    petro_gano_todas = (ganador_v1_2018 == "Petro" & ganador_v2_2018 == "Petro" &
+                        ganador_v1_2022 == "Petro" & ganador_v2_2022 == "Petro"),
+    # Determinar si Petro no ganó en ninguna
+    petro_perdio_todas = (ganador_v1_2018 != "Petro" & ganador_v2_2018 != "Petro" &
+                          ganador_v1_2022 != "Petro" & ganador_v2_2022 != "Petro")
+  ) %>% 
+  select(
+    Municipio = mpio,
+    Puesto = puesto_nom,
+    `2018 V1` = ganador_v1_2018,
+    `2018 V2` = ganador_v2_2018,
+    `2022 V1` = ganador_v1_2022,
+    `2022 V2` = ganador_v2_2022,
+    petro_gano_todas,
+    petro_perdio_todas
+  ) %>% 
+  arrange(Municipio, Puesto)
+
+# Crear índices para colorear filas
+idx_petro_todas <- which(flips_completa$petro_gano_todas)
+idx_petro_ninguna <- which(flips_completa$petro_perdio_todas)
+
+# Tabla principal
+flips_completa %>% 
+  select(-petro_gano_todas, -petro_perdio_todas) %>% 
+  kbl(align = c("l", "l", rep("c", 4))) %>% 
+  kable_styling(
+    bootstrap_options = c("condensed", "hover", "striped"),
+    full_width = FALSE,
+    font_size = 11
+  ) %>% 
+  column_spec(1, bold = TRUE, width = "10em") %>% 
+  column_spec(2, width = "15em") %>% 
+  column_spec(3:6, width = "7em") %>% 
+  add_header_above(c(" " = 2, "Ganador 2018" = 2, "Ganador 2022" = 2)) %>% 
+  row_spec(0, bold = TRUE, color = "white", background = "#2c3e50") %>% 
+  row_spec(idx_petro_todas, background = "#c8e6c9", bold = TRUE) %>% 
+  row_spec(idx_petro_ninguna, background = "#ffcdd2") %>% 
+  scroll_box(width = "100%", height = "600px")
+```
+
+## Mirada espacial de los votos
+
+Este mapa interactivo geolocaliza los puestos de votación del Magdalena y muestra visualmente cómo cambió el voto por Petro en segunda vuelta entre ambas elecciones. Cada círculo representa un puesto: su tamaño es proporcional a la participación electoral (mientras mayor el número de votantes, más grande el punto), y su color indica la magnitud del cambio.
+
+El verde domina el mapa. Los puntos en *🟢 verde oscuro (50% o más)* corresponden a los puestos donde Petro duplicó o triplicó su votación. El *🟢 verde claro (25% a 50%)* señala crecimientos moderados pero significativos. El *🟡 amarillo (-25% a 25%)* indica estabilidad relativa. Los pocos puntos en *🟠 naranja (-50% a -25%)* y *🔴 rojo oscuro (-50% o más)*, concentrados principalmente en Santa Marta, muestran las pérdidas más relevantes. Los puntos en *⚫ gris* corresponden a puestos sin información comparable.
+
+Geográficamente, el crecimiento fue generalizado pero con intensidades distintas. El área metropolitana de Barranquilla (Barranquilla, Soledad, Malambo) muestra una concentración de verdes claros y oscuros, reflejando procesos de consolidación en territorios ya fuertes, con crecimientos que oscilan entre 25% y más de 100% en algunos puestos. La zona sur del departamento (municipios como Sabanalarga, Repelón, Manatí) presenta predominio de verdes intermedios y algunos amarillos, lo que indica expansiones relativas más moderadas. El occidente (Tubará, Juan de Acosta) y algunos municipios rurales muestran patrones mixtos, con puestos que van desde amarillos (crecimiento bajo o negativo) hasta verdes intensos, evidenciando dinámicas locales heterogéneas incluso dentro de un mismo municipio.
+
+El mapa es interactivo: se puede hacer clic en cualquier punto para observar el detalle de cada puesto específico, y filtrar por municipio usando el selector superior, lo que permite identificar patrones locales con mayor precisión.
+
+```{r mapa_interactivo, fig.height=10}
+# Calcular tamaños de radio proporcionales a participación
+datos_mapa <- datos_mapa %>% 
+  mutate(
+    # Usar votos de segunda vuelta 2022 (o 2018 si no hay 2022)
+    votos_referencia = coalesce(t_votos_v2_2022, t_votos_v2_2018, 0),
+    # Escalar radius entre 4 y 18 basado en participación (raíz cuadrada para mejor visualización)
+    radius_scaled = scales::rescale(sqrt(votos_referencia), to = c(4, 18))
+  )
+
+# Preparar datos para crosstalk
+datos_compartidos <- SharedData$new(
+  datos_mapa %>% 
+    mutate(
+      mpio = ifelse(is.na(mpio), "Sin municipio", mpio),
+      puesto_nom = ifelse(is.na(puesto_nom), "Sin nombre", puesto_nom)
+    ),
+  key = ~id_puesto
+)
+
+# Paleta de colores con rangos
+pal <- colorBin(
+  palette = c("#d73027", "#fc8d59", "#fee08b", "#d9ef8b", "#91cf60", "#1a9850"),
+  domain = datos_mapa$var_Petro_v2,
+  bins = c(-Inf,-50, -25, 25, 50, 100, Inf),
+  na.color = "#808080"
+)
+
+# Filtro por municipio
+filter_select(
+  id = "municipio",
+  label = "Selecciona municipio:",
+  sharedData = datos_compartidos,
+  group = ~mpio,
+  multiple = TRUE
+)
+
+# Crear el mapa con fondo claro, más grande y puntos proporcionales
+leaflet(datos_compartidos, height = 750, width = "100%") %>% 
+  # Usar CartoDB Positron para fondo minimalista y claro
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addCircleMarkers(
+    lng = ~lon,
+    lat = ~lat,
+    radius = ~radius_scaled,  # Radio variable según participación
+    color = "#2c3e50",  # Borde oscuro para mejor contraste
+    fillColor = ~pal(var_Petro_v2),
+    fillOpacity = 0.7,
+    stroke = TRUE,
+    weight = 1.5,
+    opacity = 0.9,
+    popup = ~paste0(
+      "<div style='width:520px; background-color:#ffffff; padding:15px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.15);'>",
+      "<h4 style='margin:0 0 10px 0; color:#2c3e50; border-bottom:2px solid #3498db; padding-bottom:8px;'><strong>", puesto_nom, "</strong></h4>",
+      "<p style='margin:5px 0; font-size:13px;'><strong>Municipio:</strong> ", mpio, "</p>",
+      "<p style='margin:5px 0; font-size:13px;'><strong>ID:</strong> ", id_puesto, "</p>",
+      
+      ifelse(solo_2018, 
+        "<div style='margin:10px 0; padding:10px; background-color:#fff3cd; border-left:4px solid #ffc107; border-radius:4px;'><strong>⚠️ Solo datos 2018</strong></div>",
+        ifelse(solo_2022,
+          "<div style='margin:10px 0; padding:10px; background-color:#d1ecf1; border-left:4px solid #17a2b8; border-radius:4px;'><strong>ℹ️ Solo datos 2022</strong></div>",
+          "")),
+      
+      "<hr style='margin:15px 0; border:none; border-top:1px solid #ddd;'>",
+      
+      "<table style='width:100%; border-collapse: collapse; font-size:12px; background-color:#ffffff;'>",
+      "<thead>",
+      "<tr style='background-color:#34495e; color:white;'>",
+      "<th colspan='4' style='padding:10px; text-align:center; border:1px solid #bdc3c7; font-size:13px;'>GUSTAVO PETRO</th>",
+      "</tr>",
+      "<tr style='background-color:#ecf0f1;'>",
+      "<th style='padding:6px; border:1px solid #bdc3c7; font-weight:bold;'></th>",
+      "<th style='padding:6px; border:1px solid #bdc3c7; text-align:center; font-weight:bold;'>2018</th>",
+      "<th style='padding:6px; border:1px solid #bdc3c7; text-align:center; font-weight:bold;'>2022</th>",
+      "<th style='padding:6px; border:1px solid #bdc3c7; text-align:center; font-weight:bold;'>Δ</th>",
+      "</tr>",
+      "</thead>",
+      "<tbody style='background-color:#ffffff;'>",
+      "<tr style='background-color:#ffffff;'>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; background-color:#f8f9fa;'><strong>1ª Vuelta</strong></td>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; text-align:right; background-color:#ffffff;'>", 
+        ifelse(!is.na(Petro_v1_2018), comma(Petro_v1_2018), "N/A"), "</td>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; text-align:right; background-color:#ffffff;'>", 
+        ifelse(!is.na(Petro_v1_2022), comma(Petro_v1_2022), "N/A"), "</td>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; text-align:right; font-weight:bold; background-color:#ffffff; color:", 
+        ifelse(!is.na(var_Petro_v1) & var_Petro_v1 > 0, "#27ae60", 
+               ifelse(!is.na(var_Petro_v1) & var_Petro_v1 < 0, "#c0392b", "black")), ";'>", 
+        ifelse(!is.na(var_Petro_v1), paste0(ifelse(var_Petro_v1 > 0, "+", ""), round(var_Petro_v1, 1), "%"), "N/A"), "</td>",
+      "</tr>",
+      "<tr style='background-color:#ffffff;'>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; background-color:#f8f9fa;'><strong>2ª Vuelta</strong></td>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; text-align:right; background-color:#ffffff;'>", 
+        ifelse(!is.na(Petro_v2_2018), comma(Petro_v2_2018), "N/A"), "</td>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; text-align:right; background-color:#ffffff;'>", 
+        ifelse(!is.na(Petro_v2_2022), comma(Petro_v2_2022), "N/A"), "</td>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; text-align:right; font-weight:bold; background-color:#ffffff; color:", 
+        ifelse(!is.na(var_Petro_v2) & var_Petro_v2 > 0, "#27ae60", 
+               ifelse(!is.na(var_Petro_v2) & var_Petro_v2 < 0, "#c0392b", "black")), ";'>", 
+        ifelse(!is.na(var_Petro_v2), paste0(ifelse(var_Petro_v2 > 0, "+", ""), round(var_Petro_v2, 1), "%"), "N/A"), "</td>",
+      "</tr>",
+      "</tbody>",
+      "</table>",
+      
+      "<div style='height:12px;'></div>",
+      
+      "<table style='width:100%; border-collapse: collapse; font-size:12px; background-color:#ffffff;'>",
+      "<thead>",
+      "<tr style='background-color:#c0392b; color:white;'>",
+      "<th colspan='4' style='padding:10px; text-align:center; border:1px solid #bdc3c7; font-size:13px;'>CONTRINCANTES</th>",
+      "</tr>",
+      "<tr style='background-color:#ecf0f1;'>",
+      "<th style='padding:6px; border:1px solid #bdc3c7; font-weight:bold;'></th>",
+      "<th style='padding:6px; border:1px solid #bdc3c7; text-align:center; font-weight:bold;'>Duque 2018</th>",
+      "<th style='padding:6px; border:1px solid #bdc3c7; text-align:center; font-weight:bold;'>Hernández 2022</th>",
+      "<th style='padding:6px; border:1px solid #bdc3c7; text-align:center; font-weight:bold;'>Δ</th>",
+      "</tr>",
+      "</thead>",
+      "<tbody style='background-color:#ffffff;'>",
+      "<tr style='background-color:#ffffff;'>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; background-color:#f8f9fa;'><strong>1ª Vuelta</strong></td>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; text-align:right; background-color:#ffffff;'>", 
+        ifelse(!is.na(Duque_v1_2018), comma(Duque_v1_2018), "N/A"), "</td>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; text-align:right; background-color:#ffffff;'>", 
+        ifelse(!is.na(Hernandez_v1_2022), comma(Hernandez_v1_2022), "N/A"), "</td>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; text-align:right; font-weight:bold; background-color:#ffffff; color:", 
+        ifelse(!is.na(var_Contrincante_v1) & var_Contrincante_v1 > 0, "#27ae60", 
+               ifelse(!is.na(var_Contrincante_v1) & var_Contrincante_v1 < 0, "#c0392b", "black")), ";'>", 
+        ifelse(!is.na(var_Contrincante_v1), paste0(ifelse(var_Contrincante_v1 > 0, "+", ""), round(var_Contrincante_v1, 1), "%"), "N/A"), "</td>",
+      "</tr>",
+      "<tr style='background-color:#ffffff;'>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; background-color:#f8f9fa;'><strong>2ª Vuelta</strong></td>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; text-align:right; background-color:#ffffff;'>", 
+        ifelse(!is.na(Duque_v2_2018), comma(Duque_v2_2018), "N/A"), "</td>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; text-align:right; background-color:#ffffff;'>", 
+        ifelse(!is.na(Hernandez_v2_2022), comma(Hernandez_v2_2022), "N/A"), "</td>",
+      "<td style='padding:6px; border:1px solid #bdc3c7; text-align:right; font-weight:bold; background-color:#ffffff; color:", 
+        ifelse(!is.na(var_Contrincante_v2) & var_Contrincante_v2 > 0, "#27ae60", 
+               ifelse(!is.na(var_Contrincante_v2) & var_Contrincante_v2 < 0, "#c0392b", "black")), ";'>", 
+        ifelse(!is.na(var_Contrincante_v2), paste0(ifelse(var_Contrincante_v2 > 0, "+", ""), round(var_Contrincante_v2, 1), "%"), "N/A"), "</td>",
+      "</tr>",
+      "</tbody>",
+      "</table>",
+      
+      "<hr style='margin:15px 0; border:none; border-top:1px solid #ddd;'>",
+      "<p style='font-size:11px; color:#7f8c8d; margin:0; padding:8px; background-color:#f8f9fa; border-radius:4px;'><strong>Participación Δ:</strong> ",
+      ifelse(!is.na(var_participacion_v2), 
+        paste0(ifelse(var_participacion_v2 > 0, "+", ""), round(var_participacion_v2, 1), "% (2ª vuelta)"), 
+        "N/A"),
+      "</p>",
+      
+      "</div>"
+    ),
+    label = ~puesto_nom
+  ) %>% 
+  addLegend(
+  position = "bottomright",
+  pal = pal,
+  values = ~var_Petro_v2,
+  title = "Variación Petro<br>2ª Vuelta (%)",
+  opacity = 0.8,
+  labFormat = function(type, cuts, p) {
+    cuts <- as.numeric(cuts)
+
+    paste0(
+      ifelse(is.infinite(cuts[-length(cuts)]),
+             ifelse(cuts[-length(cuts)] < 0, "< ", ""),
+             cuts[-length(cuts)]),
+      " – ",
+      ifelse(is.infinite(cuts[-1]),
+             ifelse(cuts[-1] > 0, "> ", ""),
+             cuts[-1]),
+      "%"
+    )
+  },
+  na.label = "Sin datos"
+)
+
+```
+
+## Resultados por puestos de votación
+
+```{r tabla_datos_completa, results='asis'}
+
+tabla_puestos <- datos_mapa %>% 
+  st_drop_geometry() %>% 
+  filter(ambos) %>% 
+  select(
+    Municipio = mpio,
+    Puesto = puesto_nom,
+    `Petro 2018 V1` = Petro_v1_2018,
+    `Petro 2022 V1` = Petro_v1_2022,
+    `Δ % V1` = var_Petro_v1,
+    `Petro 2018 V2` = Petro_v2_2018,
+    `Petro 2022 V2` = Petro_v2_2022,
+    `Δ % V2` = var_Petro_v2,
+    `Part. Δ %` = var_participacion_v2
+  )
+
+valores_color <- tabla_puestos %>% 
+  select(`Δ % V1`, `Δ % V2`, `Part. Δ %`) %>% 
+  unlist()
+
+# Recorte robusto (percentil 95)
+max_abs <- quantile(abs(valores_color), 0.95, na.rm = TRUE)
+
+color_grad <- function(x) {
+  
+  intensidad <- abs(x) / max_abs
+  intensidad <- pmin(intensidad, 1)        # truncar extremos
+  intensidad <- 0.35 + 0.65 * intensidad   # piso mínimo 35%
+  
+  ifelse(
+    x > 0,
+    col_numeric(c("#66bb6a", "#006400"), domain = c(0.35,1))(intensidad),
+    col_numeric(c("#ef5350", "#8B0000"), domain = c(0.35,1))(intensidad)
+  )
+}
+
+tabla_puestos %>% 
+  mutate(
+    across(contains("2018") | contains("2022"), ~comma(.x)),
+    `Δ % V1` = cell_spec(
+      paste0(ifelse(`Δ % V1` > 0, "+", ""), round(`Δ % V1`, 1), "%"),
+      color = color_grad(tabla_puestos$`Δ % V1`),
+      bold = TRUE
+    ),
+    `Δ % V2` = cell_spec(
+      paste0(ifelse(`Δ % V2` > 0, "+", ""), round(`Δ % V2`, 1), "%"),
+      color = color_grad(tabla_puestos$`Δ % V2`),
+      bold = TRUE
+    ),
+    `Part. Δ %` = cell_spec(
+      paste0(ifelse(`Part. Δ %` > 0, "+", ""), round(`Part. Δ %`, 1), "%"),
+      color = color_grad(tabla_puestos$`Part. Δ %`),
+      bold = TRUE
+    )
+  ) %>% 
+  kbl(
+    align = c("l", "l", rep("r", 7)),
+    escape = FALSE
+  ) %>% 
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = TRUE,
+    position = "left",
+    font_size = 13
+  ) %>% 
+  column_spec(1, bold = TRUE, width = "10em") %>% 
+  row_spec(0, bold = TRUE, color = "white", background = "#2c3e50") %>% 
+  scroll_box(width = "100%", height = "500px")
+
+```
+
+*Nota: El análisis a nivel de puesto de votación compara únicamente aquellos puestos que se mantienen consistentes entre las elecciones de 2018 y 2022. Dado que la Registraduría Nacional del Estado Civil no garantiza la permanencia de todos los puntos electorales de una elección a otra, en el caso del departamento del Magdalena, únicamente 320 puestos de votación coinciden entre ambos períodos.*
+
+------------------------------------------------------------------------
+
+```{r footer, results='asis', echo=FALSE}
+cat('
+<div style="text-align: center; margin-top: 40px; padding: 20px; background-color: #ecf0f1; border-radius: 8px;">
+<strong style="font-size: 16px;">Evolución territorial del voto por Gustavo Petro en el Atlantico</strong><br>
+<span style="font-size: 14px;">Elecciones presidenciales 2018–2022</span><br>
+<em style="font-size: 12px; color: #7f8c8d;">
+Centro de Investigación en Economía y Finanzas (CIENFI) – Universidad Icesi
+</em>
+</div>
+')
+```
