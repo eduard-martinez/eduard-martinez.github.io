@@ -1,8 +1,8 @@
 ---
 layout: post
-date: 2025-02-01
+date: 2024-08-21
 inline: true
 related_posts: false
 ---
 
-Teaching **Causal Inference for Public Policy** and **Introduction to Business Analytics** at Universidad ICESI (2025-02).
+Our research on coca cultivation was featured in **El País**: *La coca, un soporte económico vital con beneficios fugaces para la Colombia más apartada*. [Read the article](https://elpais.com/america-colombia/2024-08-21/la-coca-un-soporte-economico-vital-con-beneficios-fugaces-para-la-colombia-mas-apartada.html).
