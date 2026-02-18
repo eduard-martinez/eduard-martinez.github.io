@@ -8,7 +8,7 @@
 
 <meta name="author" content="PhD. Eduard F. Martínez-González">
 
-<title>Unidad 3 - Transformación de Datos con dplyr</title>
+<title>Unidad 2 - Fundamentos de R y Programación</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,55 +21,20 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
-<script src="week-04_files/libs/clipboard/clipboard.min.js"></script>
-<script src="week-04_files/libs/quarto-html/quarto.js" type="module"></script>
-<script src="week-04_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="week-04_files/libs/quarto-html/popper.min.js"></script>
-<script src="week-04_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="week-04_files/libs/quarto-html/anchor.min.js"></script>
-<link href="week-04_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="week-04_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="week-04_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="week-04_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="week-04_files/libs/bootstrap/bootstrap-e6bb25874def5e3c119f13f2169c6013.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="taller-en-clase_files/libs/clipboard/clipboard.min.js"></script>
+<script src="taller-en-clase_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="taller-en-clase_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="taller-en-clase_files/libs/quarto-html/popper.min.js"></script>
+<script src="taller-en-clase_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="taller-en-clase_files/libs/quarto-html/anchor.min.js"></script>
+<link href="taller-en-clase_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="taller-en-clase_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="taller-en-clase_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="taller-en-clase_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="taller-en-clase_files/libs/bootstrap/bootstrap-e6bb25874def5e3c119f13f2169c6013.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <style>html{ scroll-behavior: smooth; }</style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -371,7 +336,7 @@ globalThis.qwebrCustomizedWebROptions = {
 };
 
 // Store cell data
-globalThis.qwebrCellDetails = [{"code":"## Instalar dplyr (solo una vez, fuera del script)\n# install.packages(\"dplyr\")\n\n## Cargar al inicio de cada sesión\nlibrary(dplyr)","id":1,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-1","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ventas <- data.frame(\n  trimestre = c(\"Q1\",\"Q1\",\"Q1\",\"Q2\",\"Q2\",\"Q2\",\"Q3\",\"Q3\",\"Q3\"),\n  producto  = c(\"Laptop\",\"Mouse\",\"Licencia\",\"Laptop\",\"Soporte\",\"Mouse\",\"Licencia\",\"Laptop\",\"Soporte\"),\n  categoria = c(\"Hardware\",\"Hardware\",\"Software\",\"Hardware\",\"Software\",\"Hardware\",\"Software\",\"Hardware\",\"Software\"),\n  precio    = c(1200, 25, 150, 1200, 80, 25, 150, 1200, 80),\n  cantidad  = c(2, 10, 5, 3, 8, 15, 6, 1, 4),\n  region    = c(\"Norte\",\"Sur\",\"Norte\",\"Centro\",\"Sur\",\"Norte\",\"Centro\",\"Sur\",\"Norte\")\n)","id":2,"options":{"autorun":"true","classes":"","comment":"","context":"setup","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-2","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Descomenta esta línea si trabajas desde RStudio\n# ventas <- read.csv(\"https://eduard-martinez.github.io/databases/ba/ventas.csv\")\n\n## Inspeccionar la base de datos\nventas","id":3,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-3","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Seleccionar 3 columnas del dataset ventas\nventas_red <- select(ventas, producto, precio, cantidad)\nventas_red","id":4,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-4","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Todas las columnas EXCEPTO trimestre\nventas_notrim <- select(ventas, -trimestre)\nventas_notrim","id":5,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-5","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Renombrar la columna \"producto\" a \"item\"\nventas_ren <- rename(ventas, item = producto)\nventas_ren","id":6,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-6","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Filas donde region es exactamente \"Norte\"\nventas_norte <- filter(ventas, region == \"Norte\")\nventas_norte","id":7,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-7","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Filas donde el precio supera 100\nventas_alta <- filter(ventas, precio > 100)\nventas_alta","id":8,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-8","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Ventas de región Norte con precio mayor a 100\nnorte <- filter(ventas, region==\"Norte\" & precio>100)\nnorte","id":9,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-9","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Ventas de región Centro o región Sur\ncentro <- filter(ventas, region==\"Centro\" | region==\"Sur\")\ncentro","id":10,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-10","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# P1. ¿Cuáles ventas son de Hardware?\n#     Resultado esperado: 5 filas\n\n\n# P2. ¿Cuáles ventas tienen cantidad mayor o igual a 5?\n#     Resultado esperado: 6 filas\n\n\n# P3. ¿Cuáles ventas son de Software con cantidad mayor a 5?\n#     Resultado esperado: 2 filas\n\n\n# P4. ¿Cuáles ventas NO son de la región Norte?\n#     Resultado esperado: 5 filas\n","id":11,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-11","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Ordenar por precio de menor a mayor (ascendente por defecto)\nventas_por_precio <- arrange(ventas, precio)\nventas_por_precio","id":12,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-12","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Ordenar de mayor a menor con desc()\nventas_precio_desc <- arrange(ventas, desc(precio))\nventas_precio_desc","id":13,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-13","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Ordenar por región (ascendente) y dentro de cada región por precio (descendente)\nventas_ordenado <- arrange(ventas, region, desc(precio))\nventas_ordenado","id":14,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-14","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Calcular ingreso por transacción\nventas_ing <- mutate(ventas, ingreso = precio * cantidad)\nventas_ing","id":15,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-15","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Crear varias columnas a la vez\nventas_cal <- mutate(ventas,\n                     ingreso = precio * cantidad,\n                     ing_miles = (precio * cantidad) /1000)\nventas_cal","id":16,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-16","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Etiquetar productos como \"Alto\" o \"Bajo\" precio\nventas_d <- mutate(ventas, \n                   rango = ifelse(precio > 100, \"A\", \"B\"))\nventas_d","id":17,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-17","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Tu código aquí\nventas_tipo <- mutate(ventas,\n                      tipo_venta = ___(___ , ___, ___))\nventas_tipo","id":18,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-18","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Cuál es el precio promedio de todas las transacciones?\nresumen_p <- summarise(ventas, precio_p = mean(precio))\n\n# ver resultado\nresumen_p","id":19,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-19","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Resumen global de precios con varios estadísticos\nresumen_glo <- summarise(ventas,\n                         precio_promedio = mean(precio),\n                         precio_minimo   = min(precio),\n                         precio_maximo   = max(precio),\n                         n_transacciones = n())\n\n## ver resultado\nresumen_glo","id":20,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-20","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Paso 1: filtrar solo Software\nventas_soft <- filter(___, ___ == ___)\n\n# Paso 2: calcular ingreso por fila\nventas_soft_ing <- mutate(___, ingreso = ___ * ___)\n\n# Paso 3: resumir\nresumen_soft <- summarise(___,\n                          ingreso_total   = ___,\n                          ticket_promedio = ___,\n                          n_ventas        = ___\n)\nresumen_soft","id":21,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-21","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Paso 1: calcular ingreso por transacción\nventas_ing <- mutate(ventas, ingreso = precio * cantidad)\n\n# Paso 2: agrupar por región\nventas_ing_g <- group_by(ventas_ing, region)\n\n# Paso 3: resumir por grupo\nkpis_region <- summarise(ventas_ing_g,\n                         ingreso_total   = sum(ingreso),\n                         n_transacciones = n()\n                         )\nkpis_region","id":22,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-22","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Paso 1: crear ingreso\nventas_ing <- mutate(ventas, ingreso = precio * cantidad)\n\n## Paso 2: agrupar por región\nventas_agr <- group_by(ventas_ing, region)\n\n## Paso 3: calcular múltiples KPIs\nkpis_region <- summarise(ventas_agr,\n                         ingreso_total   = sum(ingreso),\n                         ticket_promedio = mean(ingreso),\n                         n_transacciones = n(),\n                         .groups = \"drop\")\n\n## ver resultado\nkpis_region","id":23,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-23","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Calcular ingreso\nventas_ing <- mutate(ventas, ingreso = precio * cantidad)\n\n## Agrupar por región Y categoría\nventas_agr <- group_by(ventas_ing, region, categoria)\n\n## Resumir\nkpis_rc <- summarise(ventas_agr,\n                     ingreso_total = sum(ingreso),\n                     n_trans = n(),\n                     .groups = \"drop\")\n\n## ver resultado\nkpis_rc","id":24,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-24","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Cuántas transacciones por región?\nconteo_region <- count(ventas, region)\nconteo_region","id":25,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-25","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Qué producto se vendió más veces?\ncount(ventas, producto, sort = TRUE)","id":26,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-26","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Qué regiones tenemos en el dataset?\ndistinct(ventas, region)","id":27,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-27","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Qué combinaciones de región y categoría existen?\ndistinct(ventas, region, categoria)","id":28,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-28","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Cuántos productos diferentes se vendieron por región?\nventas_agr <- group_by(ventas, region)\n\ndiversidad <- summarise(ventas_agr,\n                        n_productos = n_distinct(producto),\n                        .groups = \"drop\")\ndiversidad","id":29,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-29","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## P1\n\n\n## P2\n\n\n## P3\n","id":30,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-30","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Ver cuál es el directorio actual\ngetwd()","id":31,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-31","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## group_by() SOLO marca el dataset como agrupado\nventas_agrupado <- group_by(ventas, region)\nventas_agrupado  \n## ↑ Sigue teniendo 9 filas, solo está \"marcado\" como agrupado","id":32,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-32","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Ahora sí colapsa\nventas_agr <- group_by(ventas, region)\nresumen <- summarise(ventas_agr, n = n(), .groups = \"drop\")\nresumen","id":33,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-33","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ventas_agr <- group_by(ventas, categoria)\n\nresultado <- summarise(ventas_agr,\n                       n = n(),\n                       precio_medio = mean(precio),\n                       .groups = \"drop\")\n\nresultado","id":34,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-34","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Bloque A\nventas_filtrado <- filter(ventas, precio > 100)\nventas_agr_A <- group_by(ventas_filtrado, region)\nresumen_A <- summarise(ventas_agr_A, n = n(), .groups = \"drop\")\nresumen_A","id":35,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-35","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Bloque B\nventas_agr_B <- group_by(ventas, region)\nresumen_B <- summarise(ventas_agr_B, n = n(), .groups = \"drop\")\nresumen_filtrado_B <- filter(resumen_B, n > 2)\nresumen_filtrado_B","id":36,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-36","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Escribe tu solución aquí:\n## Pista: necesitas group_by(), arrange() y un método para quedarte con los primeros 5\n","id":37,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-37","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}}];
+globalThis.qwebrCellDetails = [{"code":"# Suma\n\n\n# Resta\n\n\n# Multiplicación\n\n\n# División\n","id":1,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-1","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Crear vector_1\n\n\n# Verificar el tipo\n","id":2,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-2","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Crear vector_2\n\n\n# Verificar el tipo\n","id":3,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-3","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Crear dataframe_1\n\n\n# Ver la estructura\n\n\n# Ver las dimensiones\n","id":4,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-4","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Asignar nombres a las columnas\n\n\n# Verificar los nuevos nombres\n\n\n# Acceder a las columnas por nombre\n\n","id":5,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-5","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}}];
 
 </script>
 <script type="module">
@@ -1637,81 +1602,14 @@ globalThis.qwebrExecuteCode = async function (
     <h2 id="toc-title">Tabla de contenidos</h2>
    
   <ul>
-  <li><a href="#objetivo-de-la-semana" id="toc-objetivo-de-la-semana" class="nav-link active" data-scroll-target="#objetivo-de-la-semana"><span class="header-section-number">1</span> Objetivo de la semana</a>
+  <li><a href="#actividad-en-clase" id="toc-actividad-en-clase" class="nav-link active" data-scroll-target="#actividad-en-clase"><span class="header-section-number">1</span> Actividad en Clase</a>
   <ul class="collapse">
-  <li><a href="#lo-que-aprenderemos-esta-semana" id="toc-lo-que-aprenderemos-esta-semana" class="nav-link" data-scroll-target="#lo-que-aprenderemos-esta-semana"><span class="header-section-number">1.1</span> Lo que aprenderemos esta semana</a></li>
+  <li><a href="#punto-1" id="toc-punto-1" class="nav-link" data-scroll-target="#punto-1"><span class="header-section-number">1.1</span> Punto 1</a></li>
+  <li><a href="#punto-2" id="toc-punto-2" class="nav-link" data-scroll-target="#punto-2"><span class="header-section-number">1.2</span> Punto 2</a></li>
+  <li><a href="#punto-3" id="toc-punto-3" class="nav-link" data-scroll-target="#punto-3"><span class="header-section-number">1.3</span> Punto 3</a></li>
+  <li><a href="#punto-4" id="toc-punto-4" class="nav-link" data-scroll-target="#punto-4"><span class="header-section-number">1.4</span> Punto 4</a></li>
+  <li><a href="#punto-5" id="toc-punto-5" class="nav-link" data-scroll-target="#punto-5"><span class="header-section-number">1.5</span> Punto 5</a></li>
   </ul></li>
-  <li><a href="#introducción-a-dplyr" id="toc-introducción-a-dplyr" class="nav-link" data-scroll-target="#introducción-a-dplyr"><span class="header-section-number">2</span> Introducción a dplyr</a>
-  <ul class="collapse">
-  <li><a href="#qué-es-dplyr" id="toc-qué-es-dplyr" class="nav-link" data-scroll-target="#qué-es-dplyr"><span class="header-section-number">2.1</span> ¿Qué es dplyr?</a></li>
-  <li><a href="#instalación-y-carga" id="toc-instalación-y-carga" class="nav-link" data-scroll-target="#instalación-y-carga"><span class="header-section-number">2.2</span> Instalación y carga</a></li>
-  <li><a href="#dataset-de-ejemplo-ventas-de-una-tienda" id="toc-dataset-de-ejemplo-ventas-de-una-tienda" class="nav-link" data-scroll-target="#dataset-de-ejemplo-ventas-de-una-tienda"><span class="header-section-number">2.3</span> Dataset de ejemplo: ventas de una tienda</a></li>
-  </ul></li>
-  <li><a href="#transformaciones-básicas" id="toc-transformaciones-básicas" class="nav-link" data-scroll-target="#transformaciones-básicas"><span class="header-section-number">3</span> Transformaciones básicas</a>
-  <ul class="collapse">
-  <li><a href="#select-seleccionar-columnas" id="toc-select-seleccionar-columnas" class="nav-link" data-scroll-target="#select-seleccionar-columnas"><span class="header-section-number">3.1</span> select(): Seleccionar columnas</a></li>
-  <li><a href="#rename-renombrar-columnas" id="toc-rename-renombrar-columnas" class="nav-link" data-scroll-target="#rename-renombrar-columnas"><span class="header-section-number">3.2</span> rename(): Renombrar columnas</a></li>
-  <li><a href="#filter-filtrar-filas" id="toc-filter-filtrar-filas" class="nav-link" data-scroll-target="#filter-filtrar-filas"><span class="header-section-number">3.3</span> filter(): Filtrar filas</a>
-  <ul class="collapse">
-  <li><a href="#filtros-simples" id="toc-filtros-simples" class="nav-link" data-scroll-target="#filtros-simples"><span class="header-section-number">3.3.1</span> Filtros simples</a></li>
-  <li><a href="#operadores-de-comparación" id="toc-operadores-de-comparación" class="nav-link" data-scroll-target="#operadores-de-comparación"><span class="header-section-number">3.3.2</span> Operadores de comparación</a></li>
-  <li><a href="#filtros-con-múltiples-condiciones" id="toc-filtros-con-múltiples-condiciones" class="nav-link" data-scroll-target="#filtros-con-múltiples-condiciones"><span class="header-section-number">3.3.3</span> Filtros con múltiples condiciones</a></li>
-  <li><a href="#mini-ejercicio" id="toc-mini-ejercicio" class="nav-link" data-scroll-target="#mini-ejercicio"><span class="header-section-number">3.3.4</span> Mini-ejercicio</a></li>
-  </ul></li>
-  <li><a href="#arrange-ordenar-filas" id="toc-arrange-ordenar-filas" class="nav-link" data-scroll-target="#arrange-ordenar-filas"><span class="header-section-number">3.4</span> arrange(): Ordenar filas</a></li>
-  <li><a href="#mutate-crear-nuevas-variables" id="toc-mutate-crear-nuevas-variables" class="nav-link" data-scroll-target="#mutate-crear-nuevas-variables"><span class="header-section-number">3.5</span> mutate(): Crear nuevas variables</a>
-  <ul class="collapse">
-  <li><a href="#cálculos-simples" id="toc-cálculos-simples" class="nav-link" data-scroll-target="#cálculos-simples"><span class="header-section-number">3.5.1</span> Cálculos simples</a></li>
-  <li><a href="#clasificar-con-ifelse" id="toc-clasificar-con-ifelse" class="nav-link" data-scroll-target="#clasificar-con-ifelse"><span class="header-section-number">3.5.2</span> Clasificar con ifelse()</a></li>
-  <li><a href="#mini-ejercicio-1" id="toc-mini-ejercicio-1" class="nav-link" data-scroll-target="#mini-ejercicio-1"><span class="header-section-number">3.5.3</span> Mini-ejercicio</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#resúmenes-globales" id="toc-resúmenes-globales" class="nav-link" data-scroll-target="#resúmenes-globales"><span class="header-section-number">4</span> Resúmenes globales</a>
-  <ul class="collapse">
-  <li><a href="#summarise-colapsar-datos-en-un-resumen" id="toc-summarise-colapsar-datos-en-un-resumen" class="nav-link" data-scroll-target="#summarise-colapsar-datos-en-un-resumen"><span class="header-section-number">4.1</span> summarise(): Colapsar datos en un resumen</a>
-  <ul class="collapse">
-  <li><a href="#un-solo-estadístico" id="toc-un-solo-estadístico" class="nav-link" data-scroll-target="#un-solo-estadístico"><span class="header-section-number">4.1.1</span> Un solo estadístico</a></li>
-  <li><a href="#varios-estadísticos-a-la-vez" id="toc-varios-estadísticos-a-la-vez" class="nav-link" data-scroll-target="#varios-estadísticos-a-la-vez"><span class="header-section-number">4.1.2</span> Varios estadísticos a la vez</a></li>
-  <li><a href="#mini-ejercicio-2" id="toc-mini-ejercicio-2" class="nav-link" data-scroll-target="#mini-ejercicio-2"><span class="header-section-number">4.1.3</span> Mini-ejercicio</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#descriptivas-por-grupo" id="toc-descriptivas-por-grupo" class="nav-link" data-scroll-target="#descriptivas-por-grupo"><span class="header-section-number">5</span> Descriptivas por grupo</a>
-  <ul class="collapse">
-  <li><a href="#qué-significa-agrupar" id="toc-qué-significa-agrupar" class="nav-link" data-scroll-target="#qué-significa-agrupar"><span class="header-section-number">5.1</span> ¿Qué significa agrupar?</a></li>
-  <li><a href="#group_by-summarise-el-dúo-central" id="toc-group_by-summarise-el-dúo-central" class="nav-link" data-scroll-target="#group_by-summarise-el-dúo-central"><span class="header-section-number">5.2</span> group_by() + summarise(): el dúo central</a></li>
-  <li><a href="#múltiples-kpis-por-grupo" id="toc-múltiples-kpis-por-grupo" class="nav-link" data-scroll-target="#múltiples-kpis-por-grupo"><span class="header-section-number">5.3</span> Múltiples KPIs por grupo</a></li>
-  <li><a href="#agrupar-por-múltiples-variables" id="toc-agrupar-por-múltiples-variables" class="nav-link" data-scroll-target="#agrupar-por-múltiples-variables"><span class="header-section-number">5.4</span> Agrupar por múltiples variables</a></li>
-  <li><a href="#count-atajo-para-contar-frecuencias" id="toc-count-atajo-para-contar-frecuencias" class="nav-link" data-scroll-target="#count-atajo-para-contar-frecuencias"><span class="header-section-number">5.5</span> count(): atajo para contar frecuencias</a></li>
-  <li><a href="#distinct-y-n_distinct-explorar-categorías" id="toc-distinct-y-n_distinct-explorar-categorías" class="nav-link" data-scroll-target="#distinct-y-n_distinct-explorar-categorías"><span class="header-section-number">5.6</span> distinct() y n_distinct(): explorar categorías</a>
-  <ul class="collapse">
-  <li><a href="#distinct-mostrar-valores-únicos" id="toc-distinct-mostrar-valores-únicos" class="nav-link" data-scroll-target="#distinct-mostrar-valores-únicos"><span class="header-section-number">5.6.1</span> distinct(): mostrar valores únicos</a></li>
-  <li><a href="#n_distinct-contar-valores-únicos" id="toc-n_distinct-contar-valores-únicos" class="nav-link" data-scroll-target="#n_distinct-contar-valores-únicos"><span class="header-section-number">5.6.2</span> n_distinct(): contar valores únicos</a></li>
-  </ul></li>
-  <li><a href="#mini-ejercicio-final" id="toc-mini-ejercicio-final" class="nav-link" data-scroll-target="#mini-ejercicio-final"><span class="header-section-number">5.7</span> Mini-ejercicio final</a></li>
-  </ul></li>
-  <li><a href="#working-directory-y-organización" id="toc-working-directory-y-organización" class="nav-link" data-scroll-target="#working-directory-y-organización"><span class="header-section-number">6</span> Working directory y organización</a>
-  <ul class="collapse">
-  <li><a href="#qué-es-el-working-directory" id="toc-qué-es-el-working-directory" class="nav-link" data-scroll-target="#qué-es-el-working-directory"><span class="header-section-number">6.1</span> ¿Qué es el working directory?</a></li>
-  <li><a href="#rstudio-projects-la-mejor-práctica" id="toc-rstudio-projects-la-mejor-práctica" class="nav-link" data-scroll-target="#rstudio-projects-la-mejor-práctica"><span class="header-section-number">6.2</span> RStudio Projects: la mejor práctica</a></li>
-  <li><a href="#estructura-de-carpetas-recomendada" id="toc-estructura-de-carpetas-recomendada" class="nav-link" data-scroll-target="#estructura-de-carpetas-recomendada"><span class="header-section-number">6.3</span> Estructura de carpetas recomendada</a></li>
-  <li><a href="#guardar-una-tabla-como-csv" id="toc-guardar-una-tabla-como-csv" class="nav-link" data-scroll-target="#guardar-una-tabla-como-csv"><span class="header-section-number">6.4</span> Guardar una tabla como CSV</a></li>
-  </ul></li>
-  <li><a href="#errores-comunes-y-cómo-evitarlos" id="toc-errores-comunes-y-cómo-evitarlos" class="nav-link" data-scroll-target="#errores-comunes-y-cómo-evitarlos"><span class="header-section-number">7</span> Errores comunes y cómo evitarlos</a>
-  <ul class="collapse">
-  <li><a href="#no-guardar-el-resultado" id="toc-no-guardar-el-resultado" class="nav-link" data-scroll-target="#no-guardar-el-resultado"><span class="header-section-number">7.1</span> 1. No guardar el resultado</a></li>
-  <li><a href="#confundir-con" id="toc-confundir-con" class="nav-link" data-scroll-target="#confundir-con"><span class="header-section-number">7.2</span> 2. Confundir <code>=</code> con <code>==</code></a></li>
-  <li><a href="#usar-una-variable-que-no-existe-todavía" id="toc-usar-una-variable-que-no-existe-todavía" class="nav-link" data-scroll-target="#usar-una-variable-que-no-existe-todavía"><span class="header-section-number">7.3</span> 3. Usar una variable que no existe todavía</a></li>
-  <li><a href="#olvidar-que-group_by-no-hace-nada-solo" id="toc-olvidar-que-group_by-no-hace-nada-solo" class="nav-link" data-scroll-target="#olvidar-que-group_by-no-hace-nada-solo"><span class="header-section-number">7.4</span> 4. Olvidar que group_by() no hace nada solo</a></li>
-  <li><a href="#confundir-mutate-con-summarise" id="toc-confundir-mutate-con-summarise" class="nav-link" data-scroll-target="#confundir-mutate-con-summarise"><span class="header-section-number">7.5</span> 5. Confundir mutate() con summarise()</a></li>
-  </ul></li>
-  <li><a href="#checklist-de-salida" id="toc-checklist-de-salida" class="nav-link" data-scroll-target="#checklist-de-salida"><span class="header-section-number">8</span> Checklist de salida</a></li>
-  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">9</span> Preguntas de comprensión</a>
-  <ul class="collapse">
-  <li><a href="#interpretación-de-output" id="toc-interpretación-de-output" class="nav-link" data-scroll-target="#interpretación-de-output"><span class="header-section-number">9.1</span> 1. Interpretación de output</a></li>
-  <li><a href="#orden-de-operaciones" id="toc-orden-de-operaciones" class="nav-link" data-scroll-target="#orden-de-operaciones"><span class="header-section-number">9.2</span> 2. Orden de operaciones</a></li>
-  <li><a href="#aplicación-práctica" id="toc-aplicación-práctica" class="nav-link" data-scroll-target="#aplicación-práctica"><span class="header-section-number">9.3</span> 3. Aplicación práctica</a></li>
-  </ul></li>
-  <li><a href="#próxima-semana-visualización-con-ggplot2" id="toc-próxima-semana-visualización-con-ggplot2" class="nav-link" data-scroll-target="#próxima-semana-visualización-con-ggplot2"><span class="header-section-number">10</span> Próxima semana: Visualización con ggplot2</a></li>
   </ul>
 </nav>
 </div>
@@ -2005,8 +1903,8 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Unidad 3 - Transformación de Datos con dplyr</h1>
-<p class="subtitle lead">Introducción al Business Analytics · Semana 4 · 06278-ECO</p>
+<h1 class="title">Unidad 2 - Fundamentos de R y Programación</h1>
+<p class="subtitle lead">Introducción al Business Analytics · Semana 3 · 06278-ECO</p>
 </div>
 
 
@@ -2032,628 +1930,40 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
 <p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a> <span id="webr-status-anchor"></span></p>
 </div>
-<!--=================-->
-<!--=================-->
-<section id="objetivo-de-la-semana" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Objetivo de la semana</h1>
-<p>Esta semana aprenderemos a <strong>transformar datos crudos en información lista para tomar decisiones</strong>. El foco NO está en “dominar dplyr”, sino en responder preguntas de negocio mediante filtros, cálculos, agrupaciones y resúmenes.</p>
-<div class="callout-key">
-<p><strong>¿Por qué necesitamos transformar datos?</strong></p>
-<p>Los datos raramente vienen en el formato que necesitamos para responder preguntas. Casi siempre debemos:</p>
-<ul>
-<li><strong>Filtrar:</strong> “Solo quiero ver las ventas de 2023”</li>
-<li><strong>Calcular:</strong> “¿Cuál es el margen unitario de cada producto?”</li>
-<li><strong>Agrupar:</strong> “¿Cuánto vendió cada región?”</li>
-<li><strong>Resumir:</strong> “¿Cuál es el promedio de ventas por vendedor?”</li>
-</ul>
-<p><code>dplyr</code> es una “gramática” que nos permite hacer estas transformaciones con verbos claros. Esta semana aprenderemos cada verbo por separado. Al final de la clase los combinaremos.</p>
-</div>
-<section id="lo-que-aprenderemos-esta-semana" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="lo-que-aprenderemos-esta-semana"><span class="header-section-number">1.1</span> Lo que aprenderemos esta semana</h2>
-<p><strong>1. Transformaciones básicas — un verbo a la vez</strong></p>
-<ul>
-<li>Seleccionar columnas con <code>select()</code></li>
-<li>Filtrar filas con <code>filter()</code></li>
-<li>Crear variables calculadas con <code>mutate()</code></li>
-<li>Obtener resúmenes globales con <code>summarise()</code></li>
-</ul>
-<p><strong>2. Descriptivas por grupo</strong></p>
-<ul>
-<li>Agrupar datos con <code>group_by()</code></li>
-<li>Calcular KPIs por segmento con <code>group_by() + summarise()</code></li>
-</ul>
-<div class="callout-key">
-<p><strong>Conexión con el flujo analítico</strong></p>
-<p>Ya entendemos qué es el proceso analítico (Semana 02) y cómo funciona R como entorno de trabajo (Semana 03). Ahora aprendemos a <strong>preparar tablas</strong> que respondan preguntas específicas antes de visualizarlas (Semana 05).</p>
-<p>Esta semana trabajamos con datos “ideales” (sin valores faltantes ni errores). La limpieza la veremos en la Semana 06.</p>
-</div>
-<!--=================-->
-<!--=================-->
-</section>
-</section>
-<section id="introducción-a-dplyr" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Introducción a dplyr</h1>
-<section id="qué-es-dplyr" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="qué-es-dplyr"><span class="header-section-number">2.1</span> ¿Qué es dplyr?</h2>
-<p><code>dplyr</code> es un paquete de R diseñado para manipular data frames de manera intuitiva. Es parte del <span class="term">tidyverse</span>: un ecosistema de paquetes con una filosofía común de código claro y legible.</p>
-<p><strong>La idea central: verbos para acciones</strong></p>
-<p>En R base podemos filtrar filas así:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ventas[ventas<span class="sc">$</span>region <span class="sc">==</span> <span class="st">"Norte"</span>, ]</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Con <code>dplyr</code>, la misma operación se escribe así:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(ventas, region <span class="sc">==</span> <span class="st">"Norte"</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><code>dplyr</code> reemplaza la notación de corchetes por <strong>verbos</strong> que describen exactamente qué queremos hacer. Cada verbo hace una sola cosa, y tiene un nombre que lo dice claramente.</p>
-</section>
-<section id="instalación-y-carga" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="instalación-y-carga"><span class="header-section-number">2.2</span> Instalación y carga</h2>
-<p>La función <code>install.packages()</code> descarga el paquete en tu computador — solo se hace <strong>una vez</strong>, igual que instalas una aplicación. <code>library()</code> lo activa para la sesión actual — esto sí hay que hacerlo <strong>cada vez</strong> que abres RStudio, igual que abres la app cada vez que la necesitas.</p>
-<p><strong>Regla práctica:</strong> <code>install.packages()</code> se corre una sola vez directo en la Consola. Nunca debe quedar activo en el script. Si quieres conservarla como referencia, déjala comentada: así evitas reinstalaciones innecesarias y, si compartes el script, otras personas no reinstalarán paquetes que ya tienen.</p>
+<hr>
+<section id="actividad-en-clase" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Actividad en Clase</h1>
+<p>Cree un script y guardelo con su nombre y codigo así: <em>nombre_apellido_codigo.R</em>. Después copie y pegue cada una de las preguntas con sus comentarios y respuestas en el script. Envie la actividad en el siguiente link:</p>
+<section id="punto-1" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="punto-1"><span class="header-section-number">1.1</span> Punto 1</h2>
+<p>Realiza una suma, resta, multiplicación y división cuyo resultado sea <strong>28</strong></p>
 <div id="qwebr-insertion-location-1"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 </section>
-<section id="dataset-de-ejemplo-ventas-de-una-tienda" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="dataset-de-ejemplo-ventas-de-una-tienda"><span class="header-section-number">2.3</span> Dataset de ejemplo: ventas de una tienda</h2>
-<p>Usaremos este data frame durante toda la clase. Tiene <strong>9 transacciones</strong> y <strong>6 columnas</strong>: trimestre, producto, categoría, precio unitario, cantidad vendida y región del vendedor.</p>
-<p>En el entorno de <strong>WebR</strong> (este documento), el dataset ya viene precargado: no necesitas leerlo desde ningún archivo. Basta con ejecutar el segundo chunk para inspeccionarlo.</p>
-<p>Si trabajas desde <strong>RStudio</strong>, descomenta la línea <code>read.csv(...)</code> para cargar el dataset directamente desde internet.</p>
+<section id="punto-2" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="punto-2"><span class="header-section-number">1.2</span> Punto 2</h2>
+<p>Cree un objeto de tipo caracter que contenga las primeras 10 letras del alfabeto. Guardelo como <code>vector_1</code>.</p>
 <div id="qwebr-insertion-location-2"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</section>
+<section id="punto-3" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="punto-3"><span class="header-section-number">1.3</span> Punto 3</h2>
+<p>Cree un vector con los números de 1 al 10 (puede usar funciones o secuencias). Guardelo como <code>vector_2</code>.</p>
 <div id="qwebr-insertion-location-3"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<!--=================-->
-<!--=================-->
 </section>
-</section>
-<section id="transformaciones-básicas" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Transformaciones básicas</h1>
-<p>La lógica de trabajo es siempre la misma:</p>
-<pre><code>resultado &lt;- verbo(datos, argumentos)</code></pre>
-<p>Aplicamos un verbo al dataset y guardamos el resultado en un objeto nuevo. El dataset original <strong>no se modifica</strong>.</p>
-<hr>
-<section id="select-seleccionar-columnas" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="select-seleccionar-columnas"><span class="header-section-number">3.1</span> select(): Seleccionar columnas</h2>
-<p>La función <code>select()</code> devuelve solo las columnas que le pedimos.</p>
+<section id="punto-4" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="punto-4"><span class="header-section-number">1.4</span> Punto 4</h2>
+<p>Cree un dataframe con los elementos <code>vector_1</code> y <code>vector_2</code>. Guardelo como <code>dataframe_1</code>.</p>
 <div id="qwebr-insertion-location-4"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>¿Qué pasó aquí?</strong></p>
-<ul>
-<li><code>ventas</code> sigue intacto en el Environment (con 6 columnas)</li>
-<li><code>ventas_red</code> es un objeto nuevo con solo 3 columnas</li>
-<li><code>select()</code> no modifica el original, crea una copia reducida</li>
-</ul>
-<p>Puedes verificarlo ejecutando <code>ncol(ventas)</code> y <code>ncol(ventas_red)</code> por separado.</p>
-</div>
-<p>También puedes excluir columnas con el operador <code>-</code>. Útil cuando es más fácil decir qué NO quieres:</p>
+</section>
+<section id="punto-5" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="punto-5"><span class="header-section-number">1.5</span> Punto 5</h2>
+<p>Asigne los nombres <code>col_1</code> y <code>col_2</code> al <code>dataframe_1</code>. Guardelo como <code>dataframe_1</code>.</p>
 <div id="qwebr-insertion-location-5"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p>Si en algún momento trabajas con datasets de muchas columnas, <code>select()</code> tiene funciones auxiliares como <code>starts_with()</code> y <code>ends_with()</code> que permiten seleccionar columnas por patrones en sus nombres.</p>
-</section>
-<section id="rename-renombrar-columnas" class="level2" data-number="3.2">
-<h2 data-number="3.2" class="anchored" data-anchor-id="rename-renombrar-columnas"><span class="header-section-number">3.2</span> rename(): Renombrar columnas</h2>
-<p>La función <code>rename()</code> cambia el nombre de una o más columnas sin modificar su contenido. La sintaxis es <code>nuevo_nombre = nombre_viejo</code>:</p>
-<div id="qwebr-insertion-location-6"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-practice">
-<p><strong>¿Cuándo renombrar?</strong> Cuando los nombres originales no son descriptivos (<code>x1</code>, <code>var2</code>), contienen espacios o caracteres especiales, o quieres estandarizar nomenclatura antes de combinar datasets.</p>
-<p><strong>Buena práctica:</strong> minúsculas y guion bajo — <code>precio_unitario</code>, no <code>Precio Unitario</code>.</p>
-</div>
-<hr>
-</section>
-<section id="filter-filtrar-filas" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="filter-filtrar-filas"><span class="header-section-number">3.3</span> filter(): Filtrar filas</h2>
-<p>La función <code>filter()</code> devuelve solo las filas que cumplen una condición. Las demás se descartan.</p>
-<section id="filtros-simples" class="level3" data-number="3.3.1">
-<h3 data-number="3.3.1" class="anchored" data-anchor-id="filtros-simples"><span class="header-section-number">3.3.1</span> Filtros simples</h3>
-<div id="qwebr-insertion-location-7"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-8"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</section>
-<section id="operadores-de-comparación" class="level3" data-number="3.3.2">
-<h3 data-number="3.3.2" class="anchored" data-anchor-id="operadores-de-comparación"><span class="header-section-number">3.3.2</span> Operadores de comparación</h3>
-<p>La condición dentro de <code>filter()</code> siempre usa un operador de comparación. Estos son los más comunes:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Operador</th>
-<th>Significado</th>
-<th>Ejemplo</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>==</code></td>
-<td>Igual a</td>
-<td><code>region == "Norte"</code></td>
-</tr>
-<tr class="even">
-<td><code>!=</code></td>
-<td>Diferente de</td>
-<td><code>region != "Sur"</code></td>
-</tr>
-<tr class="odd">
-<td><code>&gt;</code></td>
-<td>Mayor que</td>
-<td><code>precio &gt; 100</code></td>
-</tr>
-<tr class="even">
-<td><code>&lt;</code></td>
-<td>Menor que</td>
-<td><code>precio &lt; 500</code></td>
-</tr>
-<tr class="odd">
-<td><code>&gt;=</code></td>
-<td>Mayor o igual</td>
-<td><code>cantidad &gt;= 5</code></td>
-</tr>
-<tr class="even">
-<td><code>&lt;=</code></td>
-<td>Menor o igual</td>
-<td><code>precio &lt;= 300</code></td>
-</tr>
-<tr class="odd">
-<td><code>%in%</code></td>
-<td>Pertenece al conjunto</td>
-<td><code>region %in% c("Norte","Sur")</code></td>
-</tr>
-</tbody>
-</table>
-<div class="callout-practice">
-<p><strong>Error común: confundir <code>=</code> con <code>==</code></strong></p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(ventas, <span class="at">region =</span> <span class="st">"Norte"</span>)   <span class="co"># Error — asigna en lugar de comparar</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(ventas, region <span class="sc">==</span> <span class="st">"Norte"</span>)  <span class="co"># Correcto — compara</span></span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Dentro de <code>filter()</code>, siempre dos signos igual para comparar.</p>
-</div>
-</section>
-<section id="filtros-con-múltiples-condiciones" class="level3" data-number="3.3.3">
-<h3 data-number="3.3.3" class="anchored" data-anchor-id="filtros-con-múltiples-condiciones"><span class="header-section-number">3.3.3</span> Filtros con múltiples condiciones</h3>
-<p>Cuando la pregunta exige que se cumplan <strong>dos condiciones al mismo tiempo</strong>, usamos <code>&amp;</code>:</p>
-<div id="qwebr-insertion-location-9"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p>Cuando basta con que se cumpla <strong>al menos una</strong>, usamos <code>|</code>:</p>
-<div id="qwebr-insertion-location-10"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<hr>
-</section>
-<section id="mini-ejercicio" class="level3" data-number="3.3.4">
-<h3 data-number="3.3.4" class="anchored" data-anchor-id="mini-ejercicio"><span class="header-section-number">3.3.4</span> Mini-ejercicio</h3>
-<p>Escribe el código para responder cada pregunta. Si obtienes el resultado esperado, vas bien.</p>
-<div id="qwebr-insertion-location-11"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<hr>
-</section>
-</section>
-<section id="arrange-ordenar-filas" class="level2" data-number="3.4">
-<h2 data-number="3.4" class="anchored" data-anchor-id="arrange-ordenar-filas"><span class="header-section-number">3.4</span> arrange(): Ordenar filas</h2>
-<p>Filtrar y calcular nos da los datos correctos, pero no siempre en el orden más útil para leerlos o comunicarlos. <code>arrange()</code> reorganiza las filas de un data frame según los valores de una o más columnas. Es especialmente útil como paso final antes de mostrar una tabla: un ranking de productos por ingreso, los clientes con mayor deuda primero, o las transacciones más recientes arriba son todos casos donde el orden importa tanto como el contenido.</p>
-<div id="qwebr-insertion-location-12"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-13"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-14"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Cómo leer el último ejemplo:</strong> “Ordena primero por región (A→Z). Dentro de cada región, ordena por precio de mayor a menor.”</p>
-<hr>
-</section>
-<section id="mutate-crear-nuevas-variables" class="level2" data-number="3.5">
-<h2 data-number="3.5" class="anchored" data-anchor-id="mutate-crear-nuevas-variables"><span class="header-section-number">3.5</span> mutate(): Crear nuevas variables</h2>
-<p>La función <code>mutate()</code> añade columnas calculadas al dataset. Las columnas originales se conservan.</p>
-<section id="cálculos-simples" class="level3" data-number="3.5.1">
-<h3 data-number="3.5.1" class="anchored" data-anchor-id="cálculos-simples"><span class="header-section-number">3.5.1</span> Cálculos simples</h3>
-<div id="qwebr-insertion-location-15"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-16"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>mutate() mantiene el número de filas</strong></p>
-<p><code>mutate()</code> siempre devuelve un data frame con <strong>el mismo número de filas</strong> que el original. Solo añade (o reemplaza) columnas. Cada fila recibe su propio valor calculado.</p>
-<p>Más adelante veremos <code>summarise()</code>, que hace lo opuesto: <strong>colapsa</strong> todas las filas en un resumen.</p>
-</div>
-</section>
-<section id="clasificar-con-ifelse" class="level3" data-number="3.5.2">
-<h3 data-number="3.5.2" class="anchored" data-anchor-id="clasificar-con-ifelse"><span class="header-section-number">3.5.2</span> Clasificar con ifelse()</h3>
-<div id="qwebr-insertion-location-17"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Cómo leer esto:</strong> “Para cada fila, si el precio es mayor a 100 escribe <code>"A"</code>, si no escribe <code>"B"</code>.”</p>
-<p>Cuando necesitas <strong>tres o más categorías</strong>, <code>ifelse()</code> anidado se vuelve difícil de leer. Para esos casos existe <code>case_when()</code> — explóralo en la <a href="https://dplyr.tidyverse.org/reference/case_when.html">documentación de dplyr</a> cuando lo necesites.</p>
-<hr>
-</section>
-<section id="mini-ejercicio-1" class="level3" data-number="3.5.3">
-<h3 data-number="3.5.3" class="anchored" data-anchor-id="mini-ejercicio-1"><span class="header-section-number">3.5.3</span> Mini-ejercicio</h3>
-<p>Con el dataset <code>ventas</code>, crea una nueva columna <code>tipo_venta</code> que clasifique cada transacción así:</p>
-<ul>
-<li><code>"Alta"</code> si el ingreso (<code>precio * cantidad</code>) supera 500</li>
-<li><code>"Baja"</code> en cualquier otro caso</li>
-</ul>
-<p>Guarda el resultado en <code>ventas_tipo</code> e imprímelo.</p>
-<div id="qwebr-insertion-location-18"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-practice">
-<p><strong>Pista</strong></p>
-<p>Necesitas calcular el ingreso <em>dentro</em> de la condición: <code>precio * cantidad &gt; 500</code>. No es necesario crear la columna <code>ingreso</code> primero — <code>mutate()</code> puede evaluarla directamente.</p>
-</div>
-<!--=================-->
-<!--=================-->
-</section>
-</section>
-</section>
-<section id="resúmenes-globales" class="level1" data-number="4">
-<h1 data-number="4"><span class="header-section-number">4</span> Resúmenes globales</h1>
-<section id="summarise-colapsar-datos-en-un-resumen" class="level2" data-number="4.1">
-<h2 data-number="4.1" class="anchored" data-anchor-id="summarise-colapsar-datos-en-un-resumen"><span class="header-section-number">4.1</span> summarise(): Colapsar datos en un resumen</h2>
-<p>La lógica de trabajo sigue siendo la misma:</p>
-<pre><code>resultado &lt;- verbo(datos, argumentos)</code></pre>
-<p><code>summarise()</code> es diferente a todos los verbos que hemos visto hasta ahora. <code>select()</code>, <code>mutate()</code> y <code>arrange()</code> devuelven un data frame con el mismo número de filas que el original. <code>summarise()</code> hace algo distinto: <strong>colapsa todas las filas en una sola</strong>, calculando una estadística que representa al grupo completo. Pensemos en ello así: si <code>mutate()</code> añade una columna nueva a cada fila, <code>summarise()</code> toma todas las filas y las “aplasta” en un único número.</p>
-<section id="un-solo-estadístico" class="level3" data-number="4.1.1">
-<h3 data-number="4.1.1" class="anchored" data-anchor-id="un-solo-estadístico"><span class="header-section-number">4.1.1</span> Un solo estadístico</h3>
-<p>La forma más simple: pedirle a <code>summarise()</code> un único valor.</p>
-<div id="qwebr-insertion-location-19"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Qué pasó:</strong> el data frame <code>ventas</code> tenía 9 filas. <code>summarise()</code> las leyó todas, calculó el promedio de la columna <code>precio</code>, y devolvió <strong>una sola fila</strong> con ese resultado. El nombre <code>precio_p</code> es el que nosotros elegimos para la columna de salida.</p>
-</section>
-<section id="varios-estadísticos-a-la-vez" class="level3" data-number="4.1.2">
-<h3 data-number="4.1.2" class="anchored" data-anchor-id="varios-estadísticos-a-la-vez"><span class="header-section-number">4.1.2</span> Varios estadísticos a la vez</h3>
-<p>Podemos pedir múltiples resúmenes en una sola llamada. Cada uno se convierte en una columna del resultado:</p>
-<div id="qwebr-insertion-location-20"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Qué pasó:</strong> el mismo proceso de antes, pero ahora <code>summarise()</code> calculó cuatro estadísticos simultáneamente. El resultado sigue siendo <strong>una sola fila</strong>, pero ahora tiene cuatro columnas —una por cada estadístico que pedimos. La función especial <code>n()</code> no recibe ninguna columna como argumento: simplemente cuenta cuántas filas había en el dataset antes de colapsar.</p>
-<div class="callout-key">
-<p><strong>Funciones de resumen más comunes</strong></p>
-<p><strong>Tendencia central:</strong> <code>mean()</code> (promedio), <code>median()</code> (mediana)</p>
-<p><strong>Dispersión:</strong> <code>sd()</code> (desviación estándar), <code>IQR()</code> (rango intercuartílico)</p>
-<p><strong>Extremos:</strong> <code>min()</code>, <code>max()</code></p>
-<p><strong>Conteos:</strong> <code>n()</code> (número de filas), <code>n_distinct()</code> (valores únicos), <code>sum()</code></p>
-</div>
-</section>
-<section id="mini-ejercicio-2" class="level3" data-number="4.1.3">
-<h3 data-number="4.1.3" class="anchored" data-anchor-id="mini-ejercicio-2"><span class="header-section-number">4.1.3</span> Mini-ejercicio</h3>
-<p>Usando <code>filter()</code>, <code>mutate()</code> y <code>summarise()</code>, calcula el ingreso total y el ticket promedio de las transacciones de la categoría <strong>Software</strong>. Guarda el resultado en <code>resumen_soft</code> e imprímelo.</p>
-<div id="qwebr-insertion-location-21"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-practice">
-<p><strong>Pista</strong></p>
-<p><code>ingreso</code> no existe en el dataset original — hay que crearla con <code>mutate()</code> antes de poder usarla en <code>summarise()</code>. Si ves un error que dice <code>object 'ingreso' not found</code>, significa que saltaste el Paso 2.</p>
-<p><strong>Resultado esperado:</strong> una sola fila con <code>ingreso_total = 1710</code>, <code>ticket_promedio = 427.5</code> y <code>n_ventas = 4</code>.</p>
-</div>
-<!--=================-->
-</section>
-</section>
-</section>
-<section id="descriptivas-por-grupo" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> Descriptivas por grupo</h1>
-<section id="qué-significa-agrupar" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="qué-significa-agrupar"><span class="header-section-number">5.1</span> ¿Qué significa agrupar?</h2>
-<p><code>summarise()</code> sin agrupación produce una sola fila para todo el dataset. Pero casi siempre queremos comparar segmentos:</p>
-<ul>
-<li>Ventas <strong>por región</strong></li>
-<li>Ticket promedio <strong>por vendedor</strong></li>
-<li>Ingreso <strong>por categoría</strong></li>
-</ul>
-<p>Para eso usamos <code>group_by()</code> antes de <code>summarise()</code>.</p>
-<div class="callout-key">
-<p><strong>Concepto de granularidad</strong></p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Operación</th>
-<th>Resultado</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>summarise()</code> sin grupo</td>
-<td>1 fila — resumen de todo</td>
-</tr>
-<tr class="even">
-<td><code>group_by(region)</code> + <code>summarise()</code></td>
-<td>1 fila por cada región</td>
-</tr>
-<tr class="odd">
-<td><code>group_by(region, categoria)</code> + <code>summarise()</code></td>
-<td>1 fila por cada combinación región × categoría</td>
-</tr>
-</tbody>
-</table>
-<p>La granularidad define <strong>a qué nivel</strong> hacemos el análisis.</p>
-</div>
-</section>
-<section id="group_by-summarise-el-dúo-central" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="group_by-summarise-el-dúo-central"><span class="header-section-number">5.2</span> group_by() + summarise(): el dúo central</h2>
-<p><code>group_by()</code> marca el dataset como agrupado. <code>summarise()</code> calcula los resúmenes dentro de cada grupo:</p>
-<div id="qwebr-insertion-location-22"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Cómo leer el resultado:</strong> Cada fila es una región. Podemos ver de un vistazo cuánto generó cada una y cuántas transacciones tuvo.</p>
-<div class="callout-key">
-<p><strong>¿Qué hace group_by() exactamente?</strong></p>
-<p><code>group_by()</code> no cambia el data frame visualmente. Lo que hace es marcar el objeto como “agrupado”. Puedes verificarlo ejecutando el objeto después de agrupar: verás <code># Groups: region [3]</code> encima de la tabla.</p>
-<p>Cuando el siguiente paso es <code>summarise()</code>, R calcula las estadísticas <strong>por separado para cada grupo</strong>.</p>
-</div>
-</section>
-<section id="múltiples-kpis-por-grupo" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="múltiples-kpis-por-grupo"><span class="header-section-number">5.3</span> Múltiples KPIs por grupo</h2>
-<p>Hasta ahora calculamos uno o dos estadísticos por grupo. En la práctica, casi siempre necesitamos varios KPIs a la vez para tener una visión completa del desempeño de cada segmento.</p>
-<div id="qwebr-insertion-location-23"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Qué pasó:</strong> cada región tiene ahora tres métricas. Podemos compararlas de un vistazo: cuál generó más ingresos, cuál tiene el ticket promedio más alto, cuál es más activa. El argumento <code>.groups = "drop"</code> desagrupa el resultado automáticamente — sin esto, el objeto quedaría marcado como agrupado y podría generar resultados inesperados en pasos posteriores.</p>
-<div class="callout-connect">
-<p><strong>De tabla a decisión</strong></p>
-<p>Esta tabla es el punto de partida para decisiones concretas:</p>
-<ul>
-<li>Invertir más presupuesto de marketing en la región de mayor ingreso</li>
-<li>Capacitar vendedores en regiones con ticket promedio bajo</li>
-<li>Redistribuir esfuerzos según volumen de transacciones</li>
-</ul>
-<p>La analítica descriptiva diagnostica; la decisión la toma el negocio.</p>
-</div>
-<hr>
-</section>
-<section id="agrupar-por-múltiples-variables" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="agrupar-por-múltiples-variables"><span class="header-section-number">5.4</span> Agrupar por múltiples variables</h2>
-<p>A veces necesitamos mayor granularidad. Además de comparar regiones, queremos ver qué pasa <strong>dentro de cada región</strong> según otra dimensión: categoría de producto, trimestre, canal de venta, etc.</p>
-<p>Cuando agrupamos por dos variables, obtenemos una fila por cada <strong>combinación</strong> única de esas variables.</p>
-<div id="qwebr-insertion-location-24"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Qué pasó:</strong> ahora cada fila representa una combinación región × categoría. Por ejemplo, podemos ver cuánto generó Hardware en la región Norte, cuánto Software en el Sur, etc. Esto nos ayuda a identificar qué categoría domina en cada zona geográfica.</p>
-<p><strong>Pregunta de análisis:</strong> ¿En qué regiones deberíamos promocionar más Software? Busca las regiones donde Software tiene bajo <code>ingreso_total</code> o bajo <code>n_trans</code>.</p>
-<hr>
-</section>
-<section id="count-atajo-para-contar-frecuencias" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="count-atajo-para-contar-frecuencias"><span class="header-section-number">5.5</span> count(): atajo para contar frecuencias</h2>
-<p>Cuando solo necesitamos saber <strong>cuántas filas hay por grupo</strong>, escribir <code>group_by() + summarise(n = n())</code> es innecesariamente largo. <code>count()</code> hace exactamente eso en una sola función.</p>
-<div id="qwebr-insertion-location-25"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Equivalente largo:</strong></p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ventas_agr <span class="ot">&lt;-</span> <span class="fu">group_by</span>(ventas, region)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>conteo <span class="ot">&lt;-</span> <span class="fu">summarise</span>(ventas_agr, <span class="at">n =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Si además queremos ordenar de mayor a menor, usamos <code>sort = TRUE</code>:</p>
-<div id="qwebr-insertion-location-26"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Cuándo usar <code>count()</code>:</strong> cuando solo te interesa la frecuencia. Si necesitas calcular otras métricas (promedios, totales, etc.), usa <code>group_by() + summarise()</code>.</p>
-<hr>
-</section>
-<section id="distinct-y-n_distinct-explorar-categorías" class="level2" data-number="5.6">
-<h2 data-number="5.6" class="anchored" data-anchor-id="distinct-y-n_distinct-explorar-categorías"><span class="header-section-number">5.6</span> distinct() y n_distinct(): explorar categorías</h2>
-<p>A veces no queremos resumir datos, solo queremos saber <strong>qué valores únicos</strong> tiene una variable.</p>
-<section id="distinct-mostrar-valores-únicos" class="level3" data-number="5.6.1">
-<h3 data-number="5.6.1" class="anchored" data-anchor-id="distinct-mostrar-valores-únicos"><span class="header-section-number">5.6.1</span> distinct(): mostrar valores únicos</h3>
-<div id="qwebr-insertion-location-27"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-28"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Para qué sirve:</strong> exploración rápida del dataset. Antes de filtrar o agrupar, es útil ver qué valores existen.</p>
-</section>
-<section id="n_distinct-contar-valores-únicos" class="level3" data-number="5.6.2">
-<h3 data-number="5.6.2" class="anchored" data-anchor-id="n_distinct-contar-valores-únicos"><span class="header-section-number">5.6.2</span> n_distinct(): contar valores únicos</h3>
-<p>Cuando lo que necesitamos es el <strong>número</strong> de valores únicos (no verlos), usamos <code>n_distinct()</code> dentro de <code>summarise()</code>:</p>
-<div id="qwebr-insertion-location-29"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Qué pasó:</strong> cada región tiene su conteo de productos únicos. Esto nos dice qué tan diversificado está el catálogo en cada zona.</p>
-<div class="callout-practice">
-<p><strong>distinct() vs.&nbsp;n_distinct()</strong></p>
-<ul>
-<li><code>distinct(ventas, region)</code> → tabla con los valores únicos de región</li>
-<li><code>n_distinct(region)</code> dentro de <code>summarise()</code> → un número (cuántos valores únicos)</li>
-</ul>
-<p>Usa <code>distinct()</code> para <strong>ver</strong>, <code>n_distinct()</code> para <strong>contar</strong>.</p>
-</div>
-<hr>
-</section>
-</section>
-<section id="mini-ejercicio-final" class="level2" data-number="5.7">
-<h2 data-number="5.7" class="anchored" data-anchor-id="mini-ejercicio-final"><span class="header-section-number">5.7</span> Mini-ejercicio final</h2>
-<p>Usando lo aprendido, responde:</p>
-<p><strong>P1.</strong> ¿Cuántos productos distintos se vendieron en Q2?</p>
-<p><strong>P2.</strong> ¿Cuál es el ingreso total por trimestre? Ordena de mayor a menor.</p>
-<p><strong>P3.</strong> ¿Cuál es el ticket promedio (<code>ingreso / n_trans</code>) de Hardware vs.&nbsp;Software?</p>
-<div id="qwebr-insertion-location-30"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-practice">
-<p><strong>Pistas</strong></p>
-<ul>
-<li>P1: <code>filter()</code> + <code>n_distinct()</code> dentro de <code>summarise()</code></li>
-<li>P2: <code>mutate()</code> → <code>group_by(trimestre)</code> → <code>summarise()</code> → <code>arrange()</code></li>
-<li>P3: <code>mutate()</code> → <code>group_by(categoria)</code> → <code>summarise()</code> con promedio de ingreso</li>
-</ul>
-</div>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-</section>
-<section id="working-directory-y-organización" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> Working directory y organización</h1>
-<section id="qué-es-el-working-directory" class="level2" data-number="6.1">
-<h2 data-number="6.1" class="anchored" data-anchor-id="qué-es-el-working-directory"><span class="header-section-number">6.1</span> ¿Qué es el working directory?</h2>
-<p>El <strong>working directory</strong> (directorio de trabajo) es la carpeta en la que R está “parado” en este momento. Cuando le pides leer o guardar un archivo sin especificar la ruta completa, R busca en esta carpeta.</p>
-<div id="qwebr-insertion-location-31"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>¿Por qué importa?</strong> Si intentas leer <code>"ventas.csv"</code> y R no encuentra el archivo, probablemente es porque el archivo está en otra carpeta y R está buscando en el working directory equivocado.</p>
-<hr>
-</section>
-<section id="rstudio-projects-la-mejor-práctica" class="level2" data-number="6.2">
-<h2 data-number="6.2" class="anchored" data-anchor-id="rstudio-projects-la-mejor-práctica"><span class="header-section-number">6.2</span> RStudio Projects: la mejor práctica</h2>
-<p>En lugar de cambiar el working directory manualmente con <code>setwd()</code> (lo cual rompe la reproducibilidad), usa <strong>RStudio Projects</strong>.</p>
-<div class="callout-key">
-<p><strong>Ventajas de RStudio Projects</strong></p>
-<p>✓ R automáticamente establece el working directory en la carpeta del proyecto<br>
-✓ Cualquiera puede abrir el proyecto y todo funciona sin modificar rutas<br>
-✓ Cada análisis vive en su propia carpeta organizada<br>
-✓ R recuerda el historial y los objetos de la última sesión</p>
-<p><strong>Cómo crear uno:</strong></p>
-<ol type="1">
-<li>File → New Project…</li>
-<li>New Directory → New Project</li>
-<li>Dale un nombre descriptivo (ej: <code>analisis_ventas_2025</code>)</li>
-<li>R crea una carpeta con un archivo <code>.Rproj</code></li>
-</ol>
-<p><strong>Cómo usarlo:</strong> abre siempre el proyecto haciendo doble clic en el archivo <code>.Rproj</code>, <strong>no</strong> abriendo RStudio directamente.</p>
-</div>
-<hr>
-</section>
-<section id="estructura-de-carpetas-recomendada" class="level2" data-number="6.3">
-<h2 data-number="6.3" class="anchored" data-anchor-id="estructura-de-carpetas-recomendada"><span class="header-section-number">6.3</span> Estructura de carpetas recomendada</h2>
-<pre><code>analisis_ventas_2025/
-├── analisis_ventas_2025.Rproj   # archivo del proyecto
-├── data/                        # datos crudos (NUNCA modificar)
-│   └── ventas.csv
-├── scripts/                     # código R
-│   ├── 01_limpieza.R
-│   └── 02_analisis.R
-└── outputs/                     # resultados generados
-    ├── kpis_region.csv
-    └── grafico_ventas.png</code></pre>
-<p><strong>Regla de oro:</strong> el contenido de <code>data/</code> es intocable. Si necesitas modificar datos, hazlo en el script y guarda el resultado en <code>outputs/</code>.</p>
-<hr>
-</section>
-<section id="guardar-una-tabla-como-csv" class="level2" data-number="6.4">
-<h2 data-number="6.4" class="anchored" data-anchor-id="guardar-una-tabla-como-csv"><span class="header-section-number">6.4</span> Guardar una tabla como CSV</h2>
-<p>Una vez que tenemos nuestra tabla final de KPIs, podemos exportarla para compartirla o usarla en otras herramientas (Excel, Power BI, etc.):</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Guardar tabla de KPIs en la carpeta outputs</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(kpis_region, <span class="st">"outputs/kpis_region.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Nota:</strong> <code>row.names = FALSE</code> evita que R agregue una columna extra con números de fila.</p>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-</section>
-<section id="errores-comunes-y-cómo-evitarlos" class="level1" data-number="7">
-<h1 data-number="7"><span class="header-section-number">7</span> Errores comunes y cómo evitarlos</h1>
-<p>Estos son los 5 errores más frecuentes al aprender <code>dplyr</code>. Si los reconoces y evitas, ahorrarás mucho tiempo de debugging.</p>
-<hr>
-<section id="no-guardar-el-resultado" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="no-guardar-el-resultado"><span class="header-section-number">7.1</span> 1. No guardar el resultado</h2>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## INCORRECTO: se muestra en la consola pero no se guarda</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(ventas, region <span class="sc">==</span> <span class="st">"Norte"</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="do">## CORRECTO: asignar a un objeto</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>ventas_norte <span class="ot">&lt;-</span> <span class="fu">filter</span>(ventas, region <span class="sc">==</span> <span class="st">"Norte"</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Por qué pasa:</strong> olvidamos que R no modifica objetos automáticamente. Cada transformación debe guardarse explícitamente con <code>&lt;-</code>.</p>
-<hr>
-</section>
-<section id="confundir-con" class="level2" data-number="7.2">
-<h2 data-number="7.2" class="anchored" data-anchor-id="confundir-con"><span class="header-section-number">7.2</span> 2. Confundir <code>=</code> con <code>==</code></h2>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## INCORRECTO</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(ventas, <span class="at">region =</span> <span class="st">"Norte"</span>)   <span class="co"># Error: unexpected '='</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="do">## CORRECTO</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">filter</span>(ventas, region <span class="sc">==</span> <span class="st">"Norte"</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Por qué pasa:</strong> en matemáticas usamos <code>=</code> para igualdades. En R, <code>=</code> asigna valores (como <code>&lt;-</code>) y <code>==</code> compara. Dentro de <code>filter()</code>, siempre <code>==</code>.</p>
-<hr>
-</section>
-<section id="usar-una-variable-que-no-existe-todavía" class="level2" data-number="7.3">
-<h2 data-number="7.3" class="anchored" data-anchor-id="usar-una-variable-que-no-existe-todavía"><span class="header-section-number">7.3</span> 3. Usar una variable que no existe todavía</h2>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## INCORRECTO: ingreso no existe en ventas</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>resumen_mal <span class="ot">&lt;-</span> <span class="fu">summarise</span>(ventas, <span class="at">total =</span> <span class="fu">sum</span>(ingreso))</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Error: object 'ingreso' not found</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="do">## CORRECTO: crear la variable primero</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>ventas_ing <span class="ot">&lt;-</span> <span class="fu">mutate</span>(ventas, <span class="at">ingreso =</span> precio <span class="sc">*</span> cantidad)</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>resumen_ok <span class="ot">&lt;-</span> <span class="fu">summarise</span>(ventas_ing, <span class="at">total =</span> <span class="fu">sum</span>(ingreso))</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><strong>Por qué pasa:</strong> <code>mutate()</code> crea columnas nuevas. Si queremos usarlas en pasos posteriores, primero hay que crearlas y guardar el resultado.</p>
-<hr>
-</section>
-<section id="olvidar-que-group_by-no-hace-nada-solo" class="level2" data-number="7.4">
-<h2 data-number="7.4" class="anchored" data-anchor-id="olvidar-que-group_by-no-hace-nada-solo"><span class="header-section-number">7.4</span> 4. Olvidar que group_by() no hace nada solo</h2>
-<div id="qwebr-insertion-location-32"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Para qué sirve:</strong> <code>group_by()</code> no colapsa datos ni calcula nada. Solo prepara el terreno. El cálculo lo hace <code>summarise()</code>:</p>
-<div id="qwebr-insertion-location-33"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<hr>
-</section>
-<section id="confundir-mutate-con-summarise" class="level2" data-number="7.5">
-<h2 data-number="7.5" class="anchored" data-anchor-id="confundir-mutate-con-summarise"><span class="header-section-number">7.5</span> 5. Confundir mutate() con summarise()</h2>
-<p>Este es el error conceptual más común. Ambas funciones crean columnas, pero funcionan de forma radicalmente distinta.</p>
-<div class="callout-key">
-<p><strong>Regla mnemotécnica</strong></p>
-<ul>
-<li><code>mutate()</code> → <strong>M</strong>antiene el número de filas. Añade una columna calculada para <strong>cada fila</strong>.</li>
-<li><code>summarise()</code> → <strong>S</strong>intetiza. Colapsa todas las filas en <strong>un resumen</strong>.</li>
-</ul>
-<p><strong>¿Cuándo usar cuál?</strong></p>
-<ul>
-<li>Quieres calcular algo <strong>para cada transacción</strong> (margen, descuento, categoría)? → <code>mutate()</code></li>
-<li>Quieres un <strong>total, promedio o conteo global</strong>? → <code>summarise()</code></li>
-</ul>
-<p><strong>Ejemplo:</strong></p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">## mutate: 9 filas → 9 filas (con nueva columna)</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>ventas_ing <span class="ot">&lt;-</span> <span class="fu">mutate</span>(ventas, <span class="at">ingreso =</span> precio <span class="sc">*</span> cantidad)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="do">## summarise: 9 filas → 1 fila (resumen global)</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>resumen <span class="ot">&lt;-</span> <span class="fu">summarise</span>(ventas_ing, <span class="at">total =</span> <span class="fu">sum</span>(ingreso))</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-</section>
-<section id="checklist-de-salida" class="level1" data-number="8">
-<h1 data-number="8"><span class="header-section-number">8</span> Checklist de salida</h1>
-<p>Al terminar esta semana, debes poder:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Explicar con tus palabras qué hace cada verbo de <code>dplyr</code></label></li>
-<li><label><input type="checkbox">Leer un bloque de código con objetos intermedios y describir el flujo paso a paso</label></li>
-<li><label><input type="checkbox">Filtrar datos usando condiciones simples (<code>==</code>, <code>&gt;</code>) y combinadas (<code>&amp;</code>, <code>|</code>)</label></li>
-<li><label><input type="checkbox">Crear variables calculadas con <code>mutate()</code> y clasificarlas con <code>ifelse()</code></label></li>
-<li><label><input type="checkbox">Generar tablas de KPIs con <code>group_by() + summarise()</code></label></li>
-<li><label><input type="checkbox">Interpretar una tabla resumida y conectarla con una decisión de negocio</label></li>
-<li><label><input type="checkbox">Reconocer y corregir los 5 errores comunes de esta semana</label></li>
-<li><label><input type="checkbox">Organizar un proyecto de análisis con RStudio Projects</label></li>
-</ul>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-<section id="preguntas-de-comprensión" class="level1" data-number="9">
-<h1 data-number="9"><span class="header-section-number">9</span> Preguntas de comprensión</h1>
-<section id="interpretación-de-output" class="level2" data-number="9.1">
-<h2 data-number="9.1" class="anchored" data-anchor-id="interpretación-de-output"><span class="header-section-number">9.1</span> 1. Interpretación de output</h2>
-<p>Ejecuta el código y responde:</p>
-<div id="qwebr-insertion-location-34"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Pregunta:</strong> ¿Qué representa cada fila? ¿Cuántas filas esperabas y por qué?</p>
-<hr>
-</section>
-<section id="orden-de-operaciones" class="level2" data-number="9.2">
-<h2 data-number="9.2" class="anchored" data-anchor-id="orden-de-operaciones"><span class="header-section-number">9.2</span> 2. Orden de operaciones</h2>
-<p>¿Cuál es la diferencia entre estos dos bloques?</p>
-<div id="qwebr-insertion-location-35"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-36"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p><strong>Respuesta esperada:</strong></p>
-<ul>
-<li>Bloque A: filtra transacciones con precio &gt; 100 <strong>primero</strong>, luego cuenta por región.</li>
-<li>Bloque B: cuenta todas las transacciones por región <strong>primero</strong>, luego filtra regiones con más de 2 transacciones.</li>
-</ul>
-<p>Son preguntas distintas con resultados distintos.</p>
-<hr>
-</section>
-<section id="aplicación-práctica" class="level2" data-number="9.3">
-<h2 data-number="9.3" class="anchored" data-anchor-id="aplicación-práctica"><span class="header-section-number">9.3</span> 3. Aplicación práctica</h2>
-<p>Tienes un dataset de clientes con columnas <code>cliente_id</code>, <code>compras_totales</code>, <code>region</code>.</p>
-<p><strong>¿Cómo identificarías los 5 mejores clientes de cada región por monto de compras?</strong></p>
-<div id="qwebr-insertion-location-37"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-</section>
-<section id="próxima-semana-visualización-con-ggplot2" class="level1" data-number="10">
-<h1 data-number="10"><span class="header-section-number">10</span> Próxima semana: Visualización con ggplot2</h1>
-<p>En la Semana 05 aprenderemos a visualizar las tablas de KPIs que construimos esta semana usando <code>ggplot2</code>:</p>
-<ul>
-<li>Gráficos de barras para comparar regiones y productos</li>
-<li>Gráficos de líneas para evolución por trimestre</li>
-<li>Gráficos de dispersión para relaciones entre variables</li>
-</ul>
-<p>La tabla <code>kpis_region</code> que construimos hoy será la entrada directa para los primeros gráficos de la próxima semana. Todo lo que aprendiste esta semana sobre transformar datos es la base para comunicar resultados visualmente.</p>
-<!-- Panel Environment -->
+<!-- Panel Environment (CSS en styles.css) -->
 <div id="env-panel" class="collapsed">
   <div id="env-header" onclick="toggleEnvPanel()">
     <span id="env-header-left">📦 Environment</span>
@@ -2669,6 +1979,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </div>
 
 <script type="module">
+/* ── Toggle colapsar / expandir ── */
 window.toggleEnvPanel = function() {
   const panel = document.getElementById('env-panel');
   const btn   = document.getElementById('env-toggle-btn');
@@ -2676,6 +1987,7 @@ window.toggleEnvPanel = function() {
   btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
 };
 
+/* ── Consultar el environment de R ── */
 async function getEnvData() {
   if (!globalThis.mainWebR) return [];
   try {
@@ -2721,6 +2033,7 @@ async function getEnvData() {
   }
 }
 
+/* ── Renderizar la lista de objetos ── */
 function renderEnv(items) {
   const body   = document.getElementById('env-body');
   const status = document.getElementById('env-status');
@@ -2752,6 +2065,7 @@ function escHtml(s) {
   return d.innerHTML;
 }
 
+/* ── Actualizar panel ── */
 async function updateEnvPanel() {
   const items = await getEnvData();
   renderEnv(items);
@@ -2763,6 +2077,7 @@ window.refreshEnv = function() {
   updateEnvPanel();
 };
 
+/* ── Mover webR Status despues de los links de contacto ── */
 function moveWebRStatus() {
   const anchor = document.getElementById('webr-status-anchor');
   const statusArea = document.getElementById('qwebr-status-message-area');
@@ -2777,7 +2092,9 @@ function moveWebRStatus() {
   }
 }
 
+/* ── Esperar webR y conectar hooks ── */
 async function init() {
+  /* Esperar a que mainWebR exista */
   while (!globalThis.qwebrInstance) {
     await new Promise(r => setTimeout(r, 300));
   }
@@ -2785,6 +2102,7 @@ async function init() {
   document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
   moveWebRStatus();
 
+  /* Esperar a que los botones Run esten habilitados (todas las celdas ocultas ejecutadas) */
   await new Promise(resolve => {
     const check = setInterval(() => {
       const btns = document.querySelectorAll('.qwebr-button-run');
@@ -2795,6 +2113,7 @@ async function init() {
     }, 400);
   });
 
+  /* Monkey-patch qwebrComputeEngine para detectar ejecucion */
   const original = globalThis.qwebrComputeEngine;
   globalThis.qwebrComputeEngine = async function(...args) {
     const res = await original.apply(this, args);
@@ -2802,6 +2121,7 @@ async function init() {
     return res;
   };
 
+  /* Expandir panel y hacer primer scan */
   const panel = document.getElementById('env-panel');
   if (panel.classList.contains('collapsed')) {
     toggleEnvPanel();
@@ -2811,6 +2131,7 @@ async function init() {
 
 init();
 </script>
+</section>
 </section>
 
 </main>
@@ -3340,5 +2661,5 @@ qwebrInstance.then(
 
 
 
-<script src="week-04_files/libs/quarto-html/zenscroll-min.js"></script>
+<script src="taller-en-clase_files/libs/quarto-html/zenscroll-min.js"></script>
 </body></html>
