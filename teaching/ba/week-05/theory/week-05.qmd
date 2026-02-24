@@ -1,0 +1,1152 @@
+---
+title: "Unidad 3 - Visualización de Datos con ggplot2"
+subtitle: "Introducción al Business Analytics · Semana 5 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+<span id="webr-status-anchor"></span>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Objetivo de la semana
+
+Esta semana NO aprenderemos "sintaxis de gráficos" por sí misma. El foco está en **comunicación**, no en memorizar comandos.
+
+::: {.callout-key}
+**¿Qué significa "comunicar con gráficos"?**
+
+Significa convertir **tablas de KPIs** (que ya sabemos construir con dplyr) en **visualizaciones claras** que transmitan insights y apoyen decisiones de negocio.
+
+Un gráfico bien hecho debe contar una historia sin que el público necesite leer la tabla original.
+:::
+
+## Lo que aprenderemos esta semana
+
+**1. Entender la lógica de construcción de gráficos**
+
+- Gráficos como "capas" que se suman (datos → mapeo → geometría → ajustes)
+- Por qué ggplot2 es diferente a Excel (control fino vs plantillas predefinidas)
+
+**2. Elegir el tipo de gráfico según la pregunta**
+
+- Comparar categorías: barras
+- Ver distribuciones: histogramas
+- Mostrar relaciones: scatter plots
+- Seguir tendencias: líneas
+
+**3. Personalizar para comunicar mejor**
+
+- Títulos, etiquetas y leyendas claras
+- Colores con propósito
+- Temas profesionales
+
+::: {.callout-connect}
+**Conexión con Semana 04**
+
+En la semana anterior usamos `group_by()` + `summarise()` para calcular KPIs por grupo. Esta semana **convertiremos esas tablas en gráficos** para comunicar hallazgos.
+
+| Semana 04 | Semana 05 |
+|---|---|
+| `summarise()` → tabla con ingreso por región | `geom_col()` → barra comparativa que se lee en 3 segundos |
+| `filter()` → filas del trimestre actual | `geom_line()` → tendencia visual inmediata |
+
+El flujo siempre es el mismo: **primero preparar los datos con dplyr, luego graficar con ggplot2**.
+:::
+
+---
+
+## Recursos de referencia
+
+Antes de empezar, guarda estos dos recursos. Los usaremos durante toda la semana (y el resto del curso):
+
+::: {.callout-key}
+**Recurso 1 — ¿Qué gráfico usar según mis datos?**
+
+[from-data-to-viz.com](https://www.data-to-viz.com)
+
+Árbol de decisión interactivo: seleccionas cuántas variables tienes y de qué tipo (numérica, categórica) → te dice qué geometría usar **y te muestra el código en R**. Úsalo cuando no estés seguro de qué tipo de gráfico hacer.
+
+**Recurso 2 — ¿Cómo se escribe en ggplot2?**
+
+[ggplot2 cheat sheet](https://rstudio.github.io/cheatsheets/data-visualization.pdf)
+
+Resumen visual de todas las geometrías, mapeos y ajustes disponibles. Útil como referencia rápida durante la práctica.
+:::
+
+<!--=================-->
+<!--=================-->
+# Instalación y dataset
+
+## Instalación de ggplot2
+
+```{webr-r}
+## Instalar ggplot2 (solo una vez, fuera del script)
+# install.packages("ggplot2")
+
+## Cargar al inicio de cada sesión
+library(ggplot2)
+library(dplyr)  # también necesitaremos dplyr para preparar datos
+```
+
+## Dataset de ejemplo: ventas de tecnología
+
+Usaremos un dataset ampliado de ventas con **36 transacciones** (el triple que en Semana 04). Esto nos permite hacer histogramas y scatter plots con suficientes datos.
+
+En **WebR**, el dataset ya viene precargado. Si trabajas desde **RStudio**, descomenta la línea `read.csv(...)`.
+
+```{webr-r}
+#| context: setup
+
+ventas <- data.frame(
+  trimestre = rep(c("Q1","Q2","Q3"), each = 12),
+  producto  = rep(c("Laptop","Mouse","Licencia","Soporte"), 9),
+  categoria = rep(c("Hardware","Hardware","Software","Software"), 9),
+  precio    = c(1200,25,150,80, 1150,30,160,75, 1250,20,140,85,
+                1200,25,150,80, 1180,28,155,78, 1220,22,145,82,
+                1200,25,150,80, 1190,26,158,77, 1210,24,148,83),
+  cantidad  = c(2,10,5,8, 1,15,6,7, 3,12,4,9,
+                3,8,5,10, 2,14,7,6, 1,11,5,8,
+                2,9,6,7, 3,13,4,9, 1,10,5,8),
+  region    = rep(c("Norte","Sur","Centro"), each = 12)
+)
+
+## Crear columna ingreso (la usaremos en varios gráficos)
+ventas <- mutate(ventas, ingreso = precio * cantidad)
+```
+
+```{webr-r}
+## Descomenta si trabajas desde RStudio
+# ventas <- read.csv("https://eduard-martinez.github.io/databases/ba/ventas.csv")
+# ventas <- mutate(ventas, ingreso = precio * cantidad)
+
+## Inspeccionar
+head(ventas)
+```
+
+**Qué contiene:** 36 transacciones de venta de productos de tecnología, distribuidas en 3 trimestres y 3 regiones. Cada transacción tiene precio unitario, cantidad vendida e ingreso calculado.
+
+<!--=================-->
+<!--=================-->
+# La gramática de gráficos
+
+En Excel seleccionamos datos y elegimos "gráfico de barras" del menú: rápido, pero limitado. ggplot2 usa una lógica diferente: construimos gráficos como **capas que se acumulan**, igual que construimos frases con sujeto + verbo + complemento.
+
+Esto nos da ventajas clave para análisis de negocio:
+
+- Superponer capas (puntos + línea de tendencia en un mismo gráfico)
+- Controlar colores según variables del dataset (no manualmente)
+- Crear el mismo gráfico para distintos grupos automáticamente (facetas)
+- Reproducir el gráfico exacto la próxima semana con datos actualizados
+
+## Los tres componentes mínimos
+
+Todo gráfico en ggplot2 necesita tres elementos:
+
+::: {.callout-key}
+**La construcción de un gráfico en ggplot2 es acumulativa**
+
+Imagina que estás decorando un cuarto:
+
+1. **Datos** → `ggplot(data = mis_datos)` → entras al cuarto vacío (el lienzo en blanco). R reserva un espacio de trabajo para esa tabla, pero aún no pinta nada.
+
+2. **Mapeos estéticos** → `mapping = aes(x = ..., y = ..., color = ...)` → decides qué va en qué pared (eje X, eje Y) y qué código de color usarás para cada tipo de mueble. Los ejes aparecen con sus etiquetas, pero el interior sigue vacío.
+
+3. **Geometría** → `geom_point()`, `geom_col()`, `geom_line()`, etc. → por fin traes los muebles (los puntos, las barras, las líneas).
+
+Estos tres elementos se conectan con el operador **`+`** (suma de capas).
+:::
+
+Estos tres elementos se conectan con el operador **`+`** (suma de capas).
+
+---
+
+## Construcción progresiva: paso a paso
+
+Veremos cómo ggplot2 construye un gráfico en tres pasos. Primero preparamos la tabla con dplyr (lo que ya sabemos hacer):
+
+```{webr-r}
+## Paso 0: preparar los datos con dplyr (igual que Semana 04)
+ing_region <- ventas %>%
+  group_by(region) %>%
+  summarise(ingreso_total = sum(ingreso), .groups = "drop")
+
+ing_region  ## → tabla de 3 filas que vamos a graficar
+```
+
+---
+
+**Paso 1 — Solo los datos: el lienzo en blanco**
+
+```{webr-r}
+## Decirle a ggplot2 "voy a graficar este objeto"
+ggplot(data = ing_region)
+```
+
+::: {.callout-key}
+R muestra un **rectángulo gris vacío** — es el lienzo. Todavía no sabe qué variables graficar ni cómo representarlas. Este es el punto de partida.
+:::
+
+---
+
+**Paso 2 — Añadir el mapeo: definir ejes**
+
+```{webr-r}
+## Decirle qué va en X y qué va en Y
+ggplot(data = ing_region,
+       mapping = aes(x = region, y = ingreso_total))
+```
+
+::: {.callout-key}
+Ahora el lienzo tiene **ejes etiquetados con los rangos de las variables**, pero sigue vacío en el interior. R ya sabe *qué* mostrar, pero aún no sabe *cómo* dibujarlo.
+
+Nota: `mapping = aes(...)` es la forma completa. En la práctica se suele escribir abreviado `aes(...)` y R lo entiende igual.
+:::
+
+---
+
+**Paso 3 — Añadir la geometría: elegir el tipo de gráfico**
+
+```{webr-r}
+## Añadir barras con geom_col()
+ggplot(data = ing_region,
+       mapping = aes(x = region, y = ingreso_total)) +
+  geom_col()
+```
+
+**¿Qué hace cada parte?**
+
+| Línea | Pregunta que responde |
+|---|---|
+| `ggplot(data = ing_region, ...)` | ¿Qué tabla voy a graficar? |
+| `mapping = aes(x = region, y = ingreso_total)` | ¿Qué variable va en cada eje? |
+| `geom_col()` | ¿Cómo represento visualmente los datos? |
+
+El operador `+` actúa como "y además agrega esta capa". Podemos seguir sumando capas (títulos, colores, temas, facetas).
+
+---
+
+::: {.callout-practice}
+**Ejercicio mental: leer código antes de ejecutarlo**
+
+Antes de correr este código, predice qué mostrará:
+
+```r
+ggplot(data = ing_region, aes(x = region, y = ingreso_total)) +
+  geom_point()
+```
+
+Piensa en los tres pasos:
+
+1. ¿Qué tabla usa? → `ing_region` (3 filas: Norte, Sur, Centro)
+2. ¿Qué va en los ejes? → X = región (categoría), Y = ingreso total (número)
+3. ¿Qué geometría? → `geom_point()` = puntos, no barras
+
+**Respuesta:** Mismo gráfico que las barras, pero con **puntos flotantes** en lugar de columnas. Los ejes son idénticos.
+
+Esto muestra que la **lógica de construcción es siempre la misma** — solo cambia la pieza de geometría.
+:::
+
+<!--=================-->
+<!--=================-->
+# Mapeos estéticos: dentro vs fuera de aes()
+
+Una de las confusiones más comunes en ggplot2 es entender **cuándo poner algo dentro de `aes()` y cuándo fuera**.
+
+## Regla fundamental
+
+::: {.callout-key}
+**Dentro de `aes()`:** Cuando el valor depende de una **variable** del dataset.  
+→ "Quiero que el color cambie según la categoría de cada fila"
+
+**Fuera de `aes()`:** Cuando el valor es **fijo** para todo el gráfico.  
+→ "Quiero que todas las barras sean azules"
+:::
+
+## Ejemplo con nuestros datos
+
+```{webr-r}
+## Caso 1: Color fijo (todas las barras azules)
+ggplot(ing_region, aes(x = region, y = ingreso_total)) +
+  geom_col(fill = "steelblue")
+```
+
+**Qué pasó:** `fill = "steelblue"` está **fuera de `aes()`** porque no depende de ninguna variable. Todas las barras son azules.
+
+```{webr-r}
+## Caso 2: Color según región
+ggplot(ing_region, aes(x = region, y = ingreso_total, fill = region)) +
+  geom_col()
+```
+
+**Qué pasó:** `fill = region` está **dentro de `aes()`** porque queremos que cada región tenga un color diferente. R asigna automáticamente un color distinto a cada región.
+
+---
+
+::: {.callout-warning}
+**Error común**
+
+```r
+## Esto NO funciona como esperas
+ggplot(ing_region, aes(x = region, y = ingreso_total, fill = "steelblue")) +
+  geom_col()
+```
+
+Al poner `fill = "steelblue"` dentro de `aes()`, R interpreta que "steelblue" es el **nombre de una variable** (que no existe). No lo interpreta como "quiero color azul fijo".
+
+**Regla práctica:** Si escribes algo entre comillas o un número literal (`"steelblue"`, `4`), probablemente debe ir **fuera** de `aes()`.
+:::
+
+<!--=================-->
+<!--=================-->
+# Geometrías según la pregunta
+
+Cada tipo de pregunta de negocio tiene una geometría natural.
+
+## geom_col(): Comparar categorías con barras
+
+**Pregunta típica:** "¿Qué región vendió más?"
+
+Ya vimos el ejemplo básico. Ahora exploremos variantes útiles:
+
+```{webr-r}
+## Barras horizontales (útil si los nombres son largos)
+ggplot(ing_region, aes(x = ingreso_total, y = region)) +
+  geom_col(fill = "steelblue")
+```
+
+**Qué cambió:** intercambiamos `x` e `y`. Ahora las barras son horizontales.
+
+```{webr-r}
+## Barras ordenadas de mayor a menor
+ing_region_ord <- arrange(ing_region, desc(ingreso_total))
+
+ggplot(ing_region_ord, aes(x = reorder(region, ingreso_total), y = ingreso_total)) +
+  geom_col(fill = "steelblue")
+```
+
+**Qué pasó:** `reorder(region, ingreso_total)` reordena las regiones según su ingreso total. Esto hace el gráfico más fácil de leer: de un vistazo vemos cuál es la mejor región.
+
+---
+
+### Mini-ejercicio
+
+Usando la tabla `ventas`, calcula el ingreso total por categoría (Hardware vs Software) y grafícalo con barras. Ordena de mayor a menor.
+
+```{webr-r}
+## Tu código aquí
+## Paso 1: calcular ingreso por categoría
+
+
+## Paso 2: ordenar
+
+
+## Paso 3: graficar
+
+
+```
+
+::: {.callout-practice}
+**Resultado esperado:** Hardware debe tener una barra más alta que Software.
+:::
+
+---
+
+## geom_histogram(): Ver distribuciones
+
+**Pregunta típica:** "¿Cómo se distribuyen los precios de los productos que vendemos?"
+
+Los histogramas agrupan valores continuos en "bins" (rangos) y cuentan cuántas observaciones caen en cada rango.
+
+```{webr-r}
+## Distribución de precios
+ggplot(ventas, aes(x = precio)) +
+  geom_histogram(bins = 10, fill = "lightblue", color = "black")
+```
+
+**Qué pasó:**
+
+- Solo necesitamos una variable (`x = precio`). R cuenta automáticamente cuántas transacciones tienen cada rango de precio.
+- `bins = 10`: divide el eje X en 10 rangos
+- `fill` y `color`: color de relleno y bordes de las barras
+
+**Cómo interpretar:** vemos que la mayoría de transacciones tienen precios bajos (Mouse, accesorios), con algunos picos en precios altos (Laptops). Esto es esperado: vendemos más productos de bajo valor en cantidad que productos caros.
+
+---
+
+```{webr-r}
+## Distribución de ingresos por transacción
+ggplot(ventas, aes(x = ingreso)) +
+  geom_histogram(bins = 15, fill = "coral", color = "black")
+```
+
+**Qué pasó:** ahora graficamos `ingreso` en lugar de `precio`. Vemos una distribución diferente: ingresos muy variados porque `ingreso = precio * cantidad`.
+
+---
+
+### Mini-ejercicio
+
+Crea un histograma de la variable `cantidad`. ¿Qué puedes concluir sobre las cantidades que vendemos por transacción?
+
+```{webr-r}
+## Tu código aquí
+
+
+```
+
+::: {.callout-practice}
+**Pregunta de análisis:** ¿Vendemos más transacciones de pocas unidades o de muchas unidades?
+:::
+
+---
+
+## geom_density(): Ver la forma de la distribución
+
+**Pregunta típica:** "¿Cómo se distribuyen los precios que manejamos? ¿Hay un precio típico o son muy dispersos?"
+
+La curva de densidad es similar al histograma pero **continua**: muestra la "forma" de la distribución sin depender del número de bins.
+
+```{webr-r}
+## Distribución de precios — curva de densidad
+ggplot(ventas, aes(x = precio)) +
+  geom_density(fill = "lightblue", alpha = 0.5)
+```
+
+**Cómo interpretar:** los picos (modas) señalan los rangos de precio más comunes. Si hay dos picos separados ("distribución bimodal"), puede indicar dos segmentos de productos muy diferentes. En nuestros datos, vemos claramente la separación entre productos baratos (Mouse, Soporte) y caros (Laptop).
+
+::: {.callout-key}
+**¿Histograma o densidad?**
+
+- `geom_histogram()`: muestra **conteos exactos** (cuántas transacciones caen en cada rango)
+- `geom_density()`: muestra la **forma general** sin depender del tamaño del bin
+
+Con pocos datos la curva puede verse irregular. Con cientos o miles de registros, la densidad suele ser más informativa que el histograma.
+:::
+
+---
+
+## geom_point(): Mostrar relaciones entre variables
+
+**Pregunta típica:** "¿Los productos más caros generan más ingreso por transacción?"
+
+Los scatter plots (gráficos de dispersión) muestran la relación entre dos variables continuas.
+
+```{webr-r}
+## Relación entre precio y cantidad vendida
+ggplot(ventas, aes(x = precio, y = cantidad)) +
+  geom_point()
+```
+
+**Qué pasó:** cada punto es una transacción. El eje X muestra el precio del producto, el eje Y la cantidad vendida.
+
+**Cómo interpretar:** no vemos una relación clara (los puntos están dispersos). Esto sugiere que el precio del producto no determina directamente cuántas unidades vendemos por transacción.
+
+---
+
+```{webr-r}
+## Relación entre precio e ingreso
+ggplot(ventas, aes(x = precio, y = ingreso)) +
+  geom_point(color = "steelblue", size = 3)
+```
+
+**Qué pasó:** ahora vemos una relación más clara. Los productos más caros tienden a generar más ingreso (aunque no perfectamente lineal, porque `ingreso = precio * cantidad`).
+
+---
+
+**Variante útil:** agregar color según categoría para ver patrones por grupo:
+
+```{webr-r}
+## Precio vs ingreso, coloreado por categoría
+ggplot(ventas, aes(x = precio, y = ingreso, color = categoria)) +
+  geom_point(size = 3)
+```
+
+**Qué pasó:** `color = categoria` dentro de `aes()` hace que Hardware y Software tengan colores diferentes. Ahora vemos que Hardware (puntos rojos) tiene precios más altos que Software (puntos azules).
+
+---
+
+### Mini-ejercicio
+
+Crea un scatter plot de `cantidad` (eje X) vs `ingreso` (eje Y). Colorea los puntos según `region`. ¿Qué región tiene transacciones de mayor ingreso?
+
+```{webr-r}
+## Tu código aquí
+
+
+```
+
+---
+
+## geom_line(): Seguir tendencias temporales
+
+**Pregunta típica:** "¿Cómo ha evolucionado nuestro ingreso trimestre a trimestre?"
+
+Los gráficos de línea conectan puntos en orden, útiles para series de tiempo.
+
+Primero preparamos la tabla:
+
+```{webr-r}
+## Ingreso total por trimestre
+ing_trimestre <- ventas %>%
+  group_by(trimestre) %>%
+  summarise(ingreso_total = sum(ingreso), .groups = "drop")
+
+ing_trimestre
+```
+
+Ahora graficamos:
+
+```{webr-r}
+## Evolución del ingreso
+ggplot(ing_trimestre, aes(x = trimestre, y = ingreso_total)) +
+  geom_line(group = 1) +
+  geom_point(size = 3)
+```
+
+**Qué pasó:**
+
+- `geom_line(group = 1)`: dibuja la línea. `group = 1` le dice a R que conecte todos los puntos (sin esto, no conectaría nada).
+- `geom_point()`: añade puntos sobre la línea para marcar cada trimestre.
+
+**Cómo interpretar:** vemos una ligera tendencia al alza del Q1 al Q3 (crecimiento moderado).
+
+---
+
+**Variante:** ver evolución por región:
+
+```{webr-r}
+## Ingreso por trimestre y región
+ing_trim_reg <- ventas %>%
+  group_by(trimestre, region) %>%
+  summarise(ingreso_total = sum(ingreso), .groups = "drop")
+
+ggplot(ing_trim_reg, aes(x = trimestre, y = ingreso_total, color = region, group = region)) +
+  geom_line() +
+  geom_point(size = 2)
+```
+
+**Qué pasó:** `color = region` y `group = region` hacen que cada región tenga su propia línea con su propio color. Ahora podemos comparar la evolución de las tres regiones simultáneamente.
+
+---
+
+### Mini-ejercicio
+
+Calcula el número de transacciones por trimestre y grafícalo con línea. ¿En qué trimestre hubo más actividad comercial?
+
+```{webr-r}
+## Tu código aquí
+## Paso 1: calcular n() por trimestre
+
+
+## Paso 2: graficar
+
+
+```
+
+---
+
+::: {.callout-practice}
+**Decisión de geometría**
+
+Para cada pregunta, identifica qué geometría usarías:
+
+1. "¿Cuáles son los 3 productos más vendidos por cantidad?"
+2. "¿Existe relación entre el precio del producto y el ingreso generado?"
+3. "¿Cómo se distribuyen las cantidades vendidas por transacción?"
+4. "¿Cómo ha cambiado el ticket promedio trimestre a trimestre?"
+5. "¿Cómo se 'forma' la distribución de precios: simétrica, sesgada, bimodal?"
+
+**Respuestas:**
+1. `geom_col()` (barras, top 3 ordenados)
+2. `geom_point()` (scatter plot)
+3. `geom_histogram()` (distribución en conteos)
+4. `geom_line()` (tendencia temporal)
+5. `geom_density()` (forma de la distribución, sin depender de bins)
+:::
+
+<!--=================-->
+<!--=================-->
+# Personalización: comunicar mejor
+
+Un gráfico sin títulos ni etiquetas claras es como un reporte sin conclusiones: técnicamente está "completo" pero no comunica nada.
+
+## Etiquetas con labs()
+
+La función `labs()` controla todos los textos del gráfico:
+
+```{webr-r}
+ggplot(ing_region, aes(x = region, y = ingreso_total)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = "Norte lidera el ingreso total de ventas",
+    subtitle = "Acumulado Q1-Q3 2025",
+    x = "Región",
+    y = "Ingreso total (USD)",
+    caption = "Fuente: Sistema interno de ventas"
+  )
+```
+
+**Qué pasó:** añadimos título, subtítulo, etiquetas de ejes y fuente de datos. Ahora el gráfico cuenta una historia completa.
+
+**Buenas prácticas:**
+
+- **Título:** La idea principal ("Norte lidera", no "Gráfico de ventas")
+- **Subtítulo:** Contexto (período, filtros aplicados)
+- **Ejes:** Unidades claras ("USD", "número de clientes", etc.)
+- **Caption:** Fuente de datos
+
+---
+
+## Temas: cambiar la apariencia general
+
+Los temas controlan colores de fondo, grillas, fuentes, etc.
+
+```{webr-r}
+## Tema minimalista (sin fondo gris)
+ggplot(ing_region, aes(x = region, y = ingreso_total)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Ingreso por región") +
+  theme_minimal()
+```
+
+```{webr-r}
+## Tema clásico (fondo blanco, bordes negros)
+ggplot(ing_region, aes(x = region, y = ingreso_total)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Ingreso por región") +
+  theme_bw()
+```
+
+::: {.callout-key}
+**Cuándo usar cada tema**
+
+- `theme_minimal()`: Presentaciones corporativas (limpio, moderno)
+- `theme_bw()`: Reportes académicos/técnicos (formal, tradicional)
+- `theme_classic()`: Publicaciones impresas (sin grillas ni distracciones)
+- `theme_gray()` (default): Generalmente **evitar** en entregas profesionales
+:::
+
+---
+
+## Ajustes finos con theme()
+
+Para control total, usamos `theme()`:
+
+```{webr-r}
+ggplot(ing_region, aes(x = region, y = ingreso_total, fill = region)) +
+  geom_col() +
+  labs(title = "Ingreso por región") +
+  theme_minimal() +
+  theme(
+    legend.position = "none",  # Quitar leyenda (redundante con eje X)
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.text.x = element_text(size = 12)
+  )
+```
+
+**Qué pasó:**
+
+- `legend.position = "none"`: oculta la leyenda (innecesaria porque el eje X ya dice las regiones)
+- `plot.title`: hace el título más grande y en negrita
+- `axis.text.x`: aumenta tamaño de etiquetas del eje X
+
+---
+
+## Colores con propósito
+
+**Color fijo:**
+
+```{webr-r}
+ggplot(ing_region, aes(x = region, y = ingreso_total)) +
+  geom_col(fill = "coral") +
+  theme_minimal()
+```
+
+**Color según variable:**
+
+```{webr-r}
+ggplot(ing_region, aes(x = region, y = ingreso_total, fill = region)) +
+  geom_col() +
+  theme_minimal()
+```
+
+**Paleta personalizada:**
+
+```{webr-r}
+ggplot(ing_region, aes(x = region, y = ingreso_total, fill = region)) +
+  geom_col() +
+  scale_fill_manual(values = c("Norte" = "#2E86AB",
+                                "Sur" = "#A23B72",
+                                "Centro" = "#F18F01")) +
+  theme_minimal()
+```
+
+**Qué pasó:** `scale_fill_manual()` nos permite asignar colores específicos a cada región.
+
+::: {.callout-warning}
+**Cuidado con los colores**
+
+- Evita colores "gritones" (rojo/verde neón)
+- Considera daltonismo (evita rojo-verde como única distinción)
+- En duda, usa grises o azules (profesionales y neutrales)
+:::
+
+---
+
+### Mini-ejercicio integrador
+
+Crea un gráfico de barras del ingreso total por categoría (Hardware vs Software) con:
+
+- Título descriptivo
+- Etiquetas de ejes con unidades
+- Tema minimalista
+- Barras de color según categoría
+
+```{webr-r}
+## Tu código aquí
+
+
+```
+
+<!--=================-->
+<!--=================-->
+# Facetas: comparar múltiples grupos
+
+A veces queremos ver **el mismo gráfico para diferentes subgrupos**.
+
+## facet_wrap(): dividir por una variable
+
+Queremos ver la distribución de precios separada por región:
+
+```{webr-r}
+ggplot(ventas, aes(x = precio)) +
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  facet_wrap(~ region)
+```
+
+**Qué pasó:** `facet_wrap(~ region)` crea **un panel separado para cada región**, todos con la misma escala (facilita comparación).
+
+**Cómo interpretar:** podemos ver si alguna región vende más productos de cierto rango de precio que otras.
+
+---
+
+**Variante:** permitir escalas diferentes en Y si los rangos son muy distintos:
+
+```{webr-r}
+ggplot(ventas, aes(x = precio)) +
+  geom_histogram(bins = 10, fill = "coral", color = "black") +
+  facet_wrap(~ region, scales = "free_y")
+```
+
+**Qué pasó:** `scales = "free_y"` permite que cada panel tenga su propio rango en el eje Y. Útil cuando los grupos tienen tamaños muy diferentes.
+
+---
+
+## facet_grid(): dividir por dos variables
+
+```{webr-r}
+ggplot(ventas, aes(x = precio)) +
+  geom_histogram(bins = 8, fill = "steelblue", color = "black") +
+  facet_grid(categoria ~ region)
+```
+
+**Qué pasó:** `facet_grid(categoria ~ region)` crea una matriz de gráficos. Filas = categoría, Columnas = región. Cada celda muestra la distribución de precios de esa combinación.
+
+---
+
+::: {.callout-connect}
+**¿Cuándo usar facetas?**
+
+Facetas son útiles cuando:
+
+1. Quieres comparar la **misma métrica** para diferentes grupos
+2. Poner todo en un solo gráfico sería confuso (muchas barras/líneas superpuestas)
+3. Los grupos tienen patrones similares (facilita ver diferencias)
+
+**Ejemplo práctico:** "Mostrar la evolución de ventas trimestre a trimestre para cada región" → 3 paneles con líneas temporales
+:::
+
+<!--=================-->
+<!--=================-->
+# Buenas prácticas de comunicación
+
+## Principios generales
+
+::: {.callout-key}
+**1. Un gráfico = una idea**
+
+No intentes mostrar 5 cosas en un mismo gráfico. Si necesitas comunicar 5 insights, crea 5 gráficos.
+
+**2. Simplicidad > complejidad**
+
+Un gráfico de barras bien hecho comunica mejor que un gráfico 3D con efectos. Evita:
+- Gráficos de pie (especialmente con muchas categorías)
+- 3D sin propósito
+- Colores excesivos
+- Información redundante (números + barras + líneas del mismo dato)
+
+**3. Contexto siempre**
+
+- Título descriptivo (no "Gráfico 1")
+- Fuente de datos
+- Unidades de medida claras
+- Notas si hay filtros o supuestos importantes
+:::
+
+---
+
+## Checklist antes de compartir un gráfico
+
+- [ ] ¿El título comunica el mensaje principal?
+- [ ] ¿Los ejes tienen etiquetas y unidades claras?
+- [ ] ¿La fuente de datos está citada?
+- [ ] ¿Los colores ayudan a entender (no solo decoran)?
+- [ ] ¿Puedo explicar este gráfico en 30 segundos?
+- [ ] ¿Alguien sin contexto puede entender la idea principal?
+
+Si la respuesta a alguna es "no", mejora el gráfico antes de compartirlo.
+
+---
+
+## Errores comunes en visualización de negocio
+
+::: {.callout-warning}
+**Error 1: Eje Y que no empieza en cero (en barras)**
+
+Para barras que representan cantidades (ventas, clientes, etc.), el eje Y **debe empezar en cero**. Si no, distorsionas la comparación visual.
+
+**Excepción:** Gráficos de línea para tendencias (temperatura, precio de acciones) pueden no empezar en cero si tiene sentido para el negocio.
+:::
+
+::: {.callout-warning}
+**Error 2: Demasiadas categorías en barras**
+
+Si tienes 20 categorías, un gráfico de barras es ilegible. Opciones:
+
+1. Filtrar top 10
+2. Agrupar categorías menores en "Otros"
+3. Cambiar a tabla (si necesitas ver todos los valores)
+:::
+
+::: {.callout-warning}
+**Error 3: Colores sin significado**
+
+No uses colores diferentes solo "porque se ve bonito". Los colores deben:
+
+- Representar una variable (categoría, rango de valores)
+- O ser todos iguales (si no hay distinción)
+
+**Mal:** 5 barras de 5 colores diferentes sin razón  
+**Bien:** 5 barras del mismo color, o colores que representan regiones
+:::
+
+<!--=================-->
+<!--=================-->
+# Resumen ejecutivo
+
+## Flujo de trabajo para crear un gráfico
+
+::: {.callout-workflow}
+**Paso 1: Preparar los datos (dplyr)**
+
+Usar `group_by()` + `summarise()` para obtener la tabla de KPIs que quiero graficar. Si el gráfico es sobre datos brutos (histograma, scatter), puedo saltar este paso.
+
+**Paso 2: Construir el gráfico en tres capas**
+
+```
+ggplot(data = mi_tabla, mapping = aes(x = ..., y = ...))  # 1️⃣ lienzo + ejes
+  + geom_...()                                             # 2️⃣ geometría
+  + labs() + theme_...()                                   # 3️⃣ personalización
+```
+
+**Paso 3: Elegir la geometría según la pregunta**
+
+| Pregunta | Geometría |
+|---|---|
+| ¿Cuánto vendió cada región? | `geom_col()` |
+| ¿Cómo evolucionó en el tiempo? | `geom_line()` |
+| ¿Existe relación entre X e Y? | `geom_point()` |
+| ¿Cuántas obs. caen en cada rango? | `geom_histogram()` |
+| ¿Cómo es la forma de la distribución? | `geom_density()` |
+
+**Paso 4: Personalizar para comunicar**
+
+- Títulos y etiquetas claras con `labs()`
+- Tema profesional (`theme_minimal()`, `theme_bw()`)
+- Colores con propósito
+
+**Paso 5: Verificar**
+
+¿Alguien sin contexto entiende el mensaje? Si no, iterar.
+:::
+
+---
+
+## Checklist de salida
+
+Al final de esta semana, debes poder:
+
+- [ ] Explicar los **tres pasos** de construcción de un gráfico: lienzo → mapeo → geometría
+- [ ] Mostrar qué produce `ggplot(data=mis_datos)` solo (el lienzo en blanco) y por qué
+- [ ] Explicar qué hace `ggplot(data = ..., mapping = aes(...))` y por qué es el "lienzo"
+- [ ] Diferenciar cuándo poner algo dentro vs fuera de `aes()`
+- [ ] Elegir la geometría adecuada (`col`, `histogram`, `density`, `point`, `line`) para una pregunta de negocio
+- [ ] Agregar títulos, etiquetas y temas a un gráfico
+- [ ] Leer un gráfico existente e identificar qué datos/mapeos tiene
+- [ ] Convertir una tabla de KPIs (de Semana 04) en gráfico profesional
+- [ ] Usar [from-data-to-viz.com](https://www.data-to-viz.com) para elegir el tipo de gráfico correcto
+
+---
+
+<!--=================-->
+<!--=================-->
+# Preguntas de comprensión
+
+::: {.callout-practice}
+**1. Interpretación de código**
+
+```{webr-r}
+#| eval: false
+ggplot(ventas, aes(x = trimestre, y = ingreso, fill = region)) +
+  geom_col(position = "dodge") +
+  theme_minimal()
+```
+
+Sin ejecutarlo, describe qué mostrará este gráfico:
+- ¿Qué hay en el eje X?
+- ¿Qué hay en el eje Y?
+- ¿Qué controla el color?
+- ¿Qué hace `position = "dodge"`?
+
+**Respuestas esperadas:**
+- X: trimestres
+- Y: ingreso de cada transacción (no total)
+- Color: región
+- `position = "dodge"`: barras lado a lado en lugar de apiladas
+:::
+
+::: {.callout-practice}
+**2. Decisión de diseño**
+
+Tienes una tabla con 50 productos y sus ventas. ¿Qué harías?
+
+a) Gráfico de barras con los 50 productos  
+b) Gráfico de barras con top 10 + categoría "Otros"  
+c) Tabla ordenada  
+
+**Respuesta correcta:** b) — 50 barras son ilegibles
+:::
+
+::: {.callout-practice}
+**3. Mapeo estético**
+
+¿Cuál de estos códigos mostrará puntos rojos?
+
+```{webr-r}
+#| eval: false
+## Opción A
+ggplot(ventas, aes(x = precio, y = cantidad, color = "red")) +
+  geom_point()
+
+## Opción B
+ggplot(ventas, aes(x = precio, y = cantidad)) +
+  geom_point(color = "red")
+```
+
+**Respuesta correcta:** Opción B — `color = "red"` debe ir fuera de `aes()`
+:::
+
+---
+
+::: {.callout-connect}
+**Conexión con el resto del curso**
+
+**Semana 06 (siguiente):** Importar datos reales (CSV, Excel) y hacer EDA (Exploratory Data Analysis) combinando dplyr + ggplot2.
+
+**Semanas 09-16:** En machine learning, visualizaremos métricas de modelos, distribuciones de variables predictoras, y resultados de experimentos. Todo con la misma lógica de ggplot2.
+
+**Proyecto final:** Los gráficos que crees serán parte fundamental de tu reporte/sustentación. Un análisis excelente con gráficos malos comunica poco.
+:::
+
+---
+
+## Material adicional (opcional)
+
+Si quieres profundizar:
+
+- **from-data-to-viz.com** (prioridad alta): árbol de decisión para elegir el tipo de gráfico según tus datos → [https://www.data-to-viz.com](https://www.data-to-viz.com)
+- **R Graph Gallery:** galería de ejemplos con código listo para copiar → [https://r-graph-gallery.com](https://r-graph-gallery.com)
+- **ggplot2 cheat sheet:** referencia rápida de geometrías y opciones → [https://rstudio.github.io/cheatsheets/data-visualization.pdf](https://rstudio.github.io/cheatsheets/data-visualization.pdf)
+- **Fundamentals of Data Visualization (Claus Wilke):** principios de visualización independiente de la herramienta — gratis online
+
+Para esta semana, el material de preclase es suficiente. En clase practicaremos con datos reales paso a paso.
+
+
+```{=html}
+<!-- Panel Environment -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">&#x1F4E6; Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
+  </div>
+</div>
+
+<script type="module">
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
+};
+
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Env panel error:', e);
+    return [];
+  }
+}
+
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+function moveWebRStatus() {
+  const anchor = document.getElementById('webr-status-anchor');
+  const statusArea = document.getElementById('qwebr-status-message-area');
+  if (anchor && statusArea) {
+    const wrapper = statusArea.closest('.quarto-title-meta');
+    if (wrapper) {
+      wrapper.style.display = 'inline';
+      wrapper.style.fontSize = '13px';
+      wrapper.style.marginLeft = '30px';
+      anchor.parentNode.insertBefore(wrapper, anchor);
+    }
+  }
+}
+
+async function init() {
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
+  moveWebRStatus();
+
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+```
