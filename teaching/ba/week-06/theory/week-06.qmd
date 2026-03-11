@@ -11,7 +11,7 @@ lang: es
 <a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
 <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
 <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
-<a href="https://Eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard-martinez.github.io</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
 <span id="webr-status-anchor"></span>
 </div>
 
@@ -44,8 +44,9 @@ Un modelo entrenado con datos sucios produce resultados sucios. La limpieza no e
 
 **2. Diagnosticar problemas de calidad**
 
-- Valores faltantes, duplicados, inconsistencias y outliers
-- Cómo detectar cada tipo de problema con R
+- Visión general con `skim()`: faltantes, tipos, distribuciones
+- Revisión de categorías con `unique()` y `table()`
+- Duplicados con `duplicated()`
 
 **3. Limpiar con dplyr**
 
@@ -54,21 +55,9 @@ Un modelo entrenado con datos sucios produce resultados sucios. La limpieza no e
 
 **4. EDA: explorar antes de modelar**
 
-- Estadísticas descriptivas con `summarise()`
+- Resumen descriptivo con `skim()`
 - Visualizaciones exploratorias con `ggplot2`
 - El propósito del EDA no es "hacer gráficos bonitos" — es **encontrar señales y anomalías** antes de comprometer decisiones
-
-::: {.callout-connect}
-**Conexión con semanas anteriores**
-
-| Semana | Lo que aprendimos | Lo que usamos hoy |
-|---|---|---|
-| Semana 03 | Objetos y estructuras de datos en R | `class()`, `str()`, `typeof()` para diagnóstico |
-| Semana 04 | Manipulación con dplyr | `filter()`, `mutate()`, `summarise()` para limpiar |
-| Semana 05 | Visualización con ggplot2 | `geom_histogram()`, `geom_point()`, `geom_col()` para EDA |
-
-Esta semana **integramos todo lo anterior** en un flujo realista: datos sucios → diagnóstico → limpieza → EDA → tabla lista para analizar.
-:::
 
 ---
 
@@ -77,8 +66,6 @@ Esta semana **integramos todo lo anterior** en un flujo realista: datos sucios �
 # Fuentes de datos
 
 Antes de limpiar, necesitamos entender de dónde vienen los datos. El origen determina qué errores son probables.
-
-## Tipos de fuentes
 
 ::: {.callout-key}
 **Fuente primaria vs. secundaria**
@@ -92,22 +79,48 @@ Antes de limpiar, necesitamos entender de dónde vienen los datos. El origen det
   - *Riesgo típico:* no conoces el proceso de recolección; las definiciones pueden no coincidir con las tuyas.
 :::
 
-## Datos estructurados vs. no estructurados
-
-En este curso trabajamos principalmente con **datos estructurados**: tablas con filas (observaciones) y columnas (variables). Son los más comunes en Business Analytics.
+En este curso trabajamos principalmente con **datos estructurados**: tablas con filas (observaciones) y columnas (variables).
 
 | Tipo | Descripción | Ejemplos |
 |---|---|---|
 | **Estructurado** | Tabla con filas y columnas | Excel, CSV, base de datos SQL |
-| **Semi-estructurado** | Tiene estructura pero flexible | JSON, XML, correos electrónicos |
+| **Semi-estructurado** | Tiene estructura pero flexible | JSON, XML |
 | **No estructurado** | Sin formato predefinido | Texto libre, imágenes, audio |
 
 ::: {.callout-warning}
 **Por qué el origen importa para interpretar**
 
-Si tus datos de ventas vienen del sistema ERP pero tienen una columna "región" que el equipo de ventas llenaba manualmente en un formulario de Excel... es probable que encuentres "Norte", "norte", "NORTE" y "Nortte" representando la misma región. No es un error del sistema — es un error humano de captura manual.
+Si tus datos de ventas vienen del sistema ERP pero tienen una columna "región" que el equipo llenaba manualmente en Excel... es probable que encuentres "Norte", "norte", "NORTE" y "Nortte" representando la misma región. No es un error del sistema — es un error humano de captura. Saber el origen te permite anticipar qué tipo de suciedad buscar.
+:::
 
-Saber el origen te permite anticipar qué tipo de suciedad buscar.
+---
+
+<!--=================-->
+<!--=================-->
+# Instalación y carga de paquetes
+
+Esta semana usaremos tres paquetes:
+
+- `dplyr` — para manipular y limpiar datos (ya lo conocemos de Semana 04).
+- `ggplot2` — para hacer gráficos exploratorios (ya lo conocemos de Semana 05).
+- `skimr` — **nuevo**: genera un resumen rápido y completo de cada variable del dataset.
+
+```{webr-r}
+## Instalar (solo una vez, fuera del script)
+# install.packages("dplyr")
+# install.packages("ggplot2")
+# install.packages("skimr")
+
+## Cargar al inicio de cada sesión
+library(dplyr)
+library(ggplot2)
+library(skimr)
+```
+
+::: {.callout-key}
+**Recordatorio**
+
+`install.packages()` se corre una sola vez en la Consola (nunca en el script). `library()` se corre cada vez que abres RStudio. Si trabajas en este documento WebR, los paquetes ya están disponibles.
 :::
 
 ---
@@ -136,19 +149,14 @@ Nuestro trabajo esta semana es **detectar, documentar y corregir** cada uno de e
 
 ```{webr-r}
 #| context: setup
-
-## Cargar librerías
-library(dplyr)
-library(ggplot2)
-
 ## ── Dataset sucio (ventas_raw) ──────────────────────────────────────────────
 ## Este es el dataset "tal como llega": con errores de captura, inconsistencias
 ## y valores problemáticos. Lo usaremos para practicar diagnóstico y limpieza.
 
 ventas_raw <- data.frame(
-  trimestre    = c("Q1","Q1","Q1","Q1",   # Bloque 1 — región Norte
-                   "Q1","Q1","Q1","Q1",   # Bloque 2 — región Sur
-                   "Q1","Q1","Q1","Q1",   # Bloque 3 — región Centro
+  trimestre    = c("Q1","Q1","Q1","Q1",
+                   "Q1","Q1","Q1","Q1",
+                   "Q1","Q1","Q1","Q1",
                    "q2","q2","q2","q2",   # PROBLEMA: "q2" en minúscula
                    "q2","q2","q2","q2",
                    "Q2","Q2","Q2","Q2",
@@ -165,14 +173,14 @@ ventas_raw <- data.frame(
                    "LAPTOP","Mouse","Licencia","Soporte",   # PROBLEMA: "LAPTOP" mayúscula
                    "Laptop","Mouse","Licencia","Soporte"),
   categoria    = rep(c("Hardware","Hardware","Software","Software"), 9),
-  precio       = c("1200","25","150","80",      # precio como CHARACTER (texto)
+  precio       = c("1200","25","150","80",
                    "1150","30","160","75",
                    "1250","20","140","85",
-                   "$1200","25","150","80",     # PROBLEMA: signo "$" en el valor
+                   "$1200","25","150","80",   # PROBLEMA: signo "$" en el valor
                    "1180","28","155","78",
                    "1220","22","145","82",
                    "1200","25","150","80",
-                   "1190","12000","148","83",   # PROBLEMA: outlier 12000 (Mouse)
+                   "1190","12000","148","83", # PROBLEMA: outlier 12000 (Mouse)
                    "1210","24","148","83"),
   cantidad     = c(2,10,5,8,
                    1,15,6,7,
@@ -186,8 +194,8 @@ ventas_raw <- data.frame(
   region       = c(rep("Norte",4),
                    rep("Sur",4),
                    rep("Centro",4),
-                   rep("norte",4),     # PROBLEMA: "norte" en minúscula
-                   rep("SUR",4),       # PROBLEMA: "SUR" en mayúscula
+                   rep("norte",4),   # PROBLEMA: "norte" en minúscula
+                   rep("SUR",4),     # PROBLEMA: "SUR" en mayúscula
                    rep("Centro",4),
                    rep("Norte",4),
                    rep("Sur",4),
@@ -213,26 +221,12 @@ ventas_raw <- rbind(ventas_raw, ventas_raw[c(1, 2, 15), ])
 ```
 
 ```{webr-r}
+## Descomenta si trabajas desde RStudio
+# ventas <- read.csv("https://eduard-martinez.github.io/databases/ba/ventas_raw.csv")
+
 ## Ver las primeras filas del dataset
-head(ventas_raw, 10)
+head(ventas_raw, 5)
 ```
-
-```{webr-r}
-## Ver dimensiones: ¿cuántas filas y columnas?
-dim(ventas_raw)
-```
-
-::: {.callout-practice}
-**¿Qué ves en esas 10 filas?**
-
-Antes de continuar, responde mentalmente:
-
-1. ¿Cuántas filas tiene el dataset? ¿Debería tener más o menos?
-2. ¿Qué tipo de dato tiene la columna `precio`? ¿Es el correcto?
-3. ¿Ves algo raro en la columna `region`?
-
-Continuaremos diagnosticando cada problema con herramientas de R.
-:::
 
 ---
 
@@ -240,93 +234,54 @@ Continuaremos diagnosticando cada problema con herramientas de R.
 <!--=================-->
 # Paso 1 — Diagnóstico: ¿qué tan sucios están los datos?
 
-Antes de corregir, necesitamos **un diagnóstico completo**. No podemos arreglar lo que no hemos visto.
+Antes de corregir, necesitamos un **diagnóstico completo**. La secuencia es:
 
-## 1.1 Estructura general: `str()` y `glimpse()`
+1. Primero, una visión general de todo el dataset con `skim()`
+2. Luego, si algo llama la atención, profundizamos con herramientas específicas
+
+## Visión general: `skim()`
+
+`skim()` es nuestra primera herramienta de diagnóstico. En una sola llamada nos dice: cuántas filas tiene el dataset, el tipo de cada variable, cuántos valores faltantes hay, y un resumen estadístico por columna.
 
 ```{webr-r}
-## glimpse() muestra: nº filas, nº columnas, tipo de cada variable y primeros valores
-glimpse(ventas_raw)
+## Resumen completo del dataset
+skim(ventas_raw)
 ```
 
 ::: {.callout-key}
-**Qué buscar en `glimpse()`**
+**Cómo leer la salida de `skim()`**
 
-| Lo que ves | La pregunta que debes hacer |
+La salida se divide en dos bloques según el tipo de variable:
+
+**Variables de texto (`character`):**
+
+| Columna | Lo que nos dice |
 |---|---|
-| `<chr>` en columna de precio | ¿Por qué es texto? ¿Tiene símbolos como "$"? |
-| `<int>` o `<dbl>` en columna de cantidades | ¿Puede haber negativos? |
-| `<chr>` en columnas de categorías | ¿Están escritas consistentemente? |
-| Número de filas | ¿Coincide con lo esperado? ¿Hay duplicados? |
+| `n_missing` | Cuántos valores faltantes tiene esa columna |
+| `n_unique` | Cuántos valores distintos hay |
 
-`glimpse()` es tu **primera radiografía** del dataset. Nunca empieces a analizar sin correrlo.
+Mira la columna `region`: si `n_unique` dice 5 en vez de 3, hay inconsistencias de mayúsculas/minúsculas.  
+Mira `precio`: si aparece como `character` en vez de `numeric`, hay un problema de tipo de dato.
+
+**Variables numéricas (`numeric`):**
+
+| Columna | Lo que nos dice |
+|---|---|
+| `n_missing` | Cuántos valores faltantes tiene esa columna |
+| `mean`, `sd` | Promedio y desviación estándar |
+| `p0`, `p100` | Mínimo y máximo — aquí aparecen los valores imposibles y outliers |
+
+Mira `cantidad`: si `p0` (el mínimo) es negativo, hay una cantidad imposible.
+
+**Regla práctica:** lee `skim()` de arriba a abajo, columna por columna. Cualquier cosa que no tenga sentido es un problema que documentar.
 :::
 
----
+## Inconsistencias en categorías: `unique()` y `table()`
 
-## 1.2 Valores faltantes: `is.na()` y `summarise()`
-
-```{webr-r}
-## Contar NAs por columna
-ventas_raw %>%
-  summarise(
-    NA_trimestre    = sum(is.na(trimestre)),
-    NA_producto     = sum(is.na(producto)),
-    NA_precio       = sum(is.na(precio)),
-    NA_cantidad     = sum(is.na(cantidad)),
-    NA_region       = sum(is.na(region)),
-    NA_observaciones = sum(is.na(observaciones))
-  )
-```
-
-::: {.callout-key}
-**Cómo interpretar los NAs**
-
-- `is.na(x)` devuelve `TRUE` (1) si el valor es faltante, `FALSE` (0) si no.
-- `sum(is.na(x))` suma los TRUEs → cuenta cuántos faltantes hay.
-- Divide por `n()` para ver el **porcentaje de faltantes**: `mean(is.na(x)) * 100`
-
-**Reglas prácticas:**
-
-- 0–5% faltantes: generalmente manejable (imputar o eliminar filas)
-- 5–20% faltantes: requiere decisión justificada y documentación
-- +20% faltantes: la variable puede ser inutilizable; replantear su uso
-:::
-
----
-
-## 1.3 Filas duplicadas: `duplicated()` y `distinct()`
+`skim()` nos dijo cuántos valores únicos hay en cada columna de texto. Ahora vamos a **ver** cuáles son esos valores:
 
 ```{webr-r}
-## ¿Cuántas filas son duplicadas exactas?
-sum(duplicated(ventas_raw))
-```
-
-```{webr-r}
-## Ver cuáles filas están duplicadas
-ventas_raw[duplicated(ventas_raw), ]
-```
-
-::: {.callout-key}
-**Qué es `duplicated()`**
-
-`duplicated(df)` devuelve un vector lógico: `TRUE` para cada fila que ya apareció antes.
-
-- `sum(duplicated(df))` → cuántas filas son duplicadas
-- `df[duplicated(df), ]` → ver las filas duplicadas
-- `distinct(df)` → eliminar duplicados (lo haremos en la limpieza)
-
-**¿Por qué aparecen duplicados?**
-
-En la práctica ocurren por: joins mal hechos, exportaciones dobles del sistema, actualizaciones de registros que no reemplazan sino que acumulan. Siempre pregunta la causa antes de eliminar.
-:::
-
----
-
-## 1.4 Inconsistencias en categorías: `unique()` y `table()`
-
-```{webr-r}
-## ¿Cuántos valores únicos hay en 'region'?
+## ¿Cuáles son los valores únicos de 'region'?
 unique(ventas_raw$region)
 ```
 
@@ -335,109 +290,100 @@ unique(ventas_raw$region)
 table(ventas_raw$region)
 ```
 
+::: {.callout-warning}
+**Error clásico: "Norte" ≠ "norte" ≠ "NORTE"**
+
+Para R, estas son **tres categorías diferentes**. Si calculas el ingreso por región con `group_by(region)`, obtendrás 5 grupos en vez de 3. Los totales nunca cuadrarán y el gerente tomará decisiones con datos incorrectos — sin que R emita ningún error.
+
+Este es uno de los errores más frecuentes y silenciosos en análisis de datos.
+:::
+
 ```{webr-r}
-## Lo mismo para 'trimestre' y 'producto'
+## Revisar también trimestre y producto
 unique(ventas_raw$trimestre)
 unique(ventas_raw$producto)
 ```
 
-::: {.callout-warning}
-**Error clásico: "Norte" ≠ "norte" ≠ "NORTE"**
-
-Para R, estas son **tres categorías diferentes**. Si calculas el ingreso total por región con `group_by(region)`, obtendrás seis grupos en vez de tres:
-
-```r
-## Sin limpiar: R ve 6 grupos distintos donde debería ver 3
-ventas_raw %>% group_by(region) %>% summarise(n = n())
-# Norte  → 12 filas  ✓
-# Sur    → 8 filas   ✗ (faltan las de "SUR")
-# Centro → 12 filas  ✓
-# norte  → 4 filas   ← estas son Norte disfrazadas
-# SUR    → 4 filas   ← estas son Sur disfrazadas
-# ...y el total nunca cuadra
-```
-
-Este es uno de los errores más frecuentes y silenciosos: no da error en R, pero los cálculos son incorrectos.
-:::
-
----
-
-## 1.5 Tipo de dato incorrecto: el problema de `precio`
+## Filas duplicadas: `duplicated()`
 
 ```{webr-r}
-## ¿Qué tipo de dato es 'precio'?
+## ¿Cuántas filas son duplicadas exactas?
+sum(duplicated(ventas_raw))
+```
+
+```{webr-r}
+## Cuáles son esas filas
+ventas_raw <- mutate(ventas_raw , duplicado = duplicated(ventas_raw))
+ventas_raw
+```
+
+::: {.callout-key}
+**Qué hace `duplicated()`**
+
+`duplicated(df)` compara cada fila con todas las anteriores y devuelve `TRUE` si ya apareció antes.
+
+- `sum(duplicated(df))` → cuántas filas son copias exactas
+- `df[duplicated(df), ]` → ver esas filas
+
+**¿Por qué aparecen duplicados?** En la práctica ocurren por exportaciones dobles del sistema, joins mal hechos, o actualizaciones que acumulan en vez de reemplazar. Siempre pregunta la causa antes de eliminar.
+:::
+
+## Tipo de dato incorrecto: el problema de `precio`
+
+`skim()` ya nos alertó que `precio` es de tipo `character`. Veamos exactamente por qué:
+
+```{webr-r}
+## ¿Qué tipo de dato tiene 'precio'?
 class(ventas_raw$precio)
 ```
 
 ```{webr-r}
-## Ver valores únicos en precio: ¿hay algo raro?
+## Ver los valores únicos: ¿hay algo raro?
 unique(ventas_raw$precio)
 ```
 
 ::: {.callout-key}
 **¿Por qué es un problema que `precio` sea `character`?**
 
-Cuando una columna numérica llega como texto, R no puede hacer aritmética con ella. Prueba esto:
+Cuando una columna numérica llega como texto, R no puede hacer aritmética con ella:
 
 ```r
-## R no puede sumar texto
+## Esto da error
 sum(ventas_raw$precio, na.rm = TRUE)
 ## Error: invalid 'type' (character) of argument
 ```
 
-Para convertirlo a número necesitamos:
-1. Eliminar el signo "$" con `gsub()`
+Para convertirla necesitamos:
+1. Eliminar el signo `$` con `gsub()`
 2. Convertir el texto limpio a número con `as.numeric()`
 
 Lo haremos en la sección de limpieza.
 :::
 
----
+## Valores imposibles y outliers
 
-## 1.6 Valores imposibles e outliers: visualizar antes de decidir
+Con `skim()` ya vimos el mínimo de `cantidad`. Confirmemos el problema y exploremos el precio visualmente:
 
 ```{webr-r}
-## ¿Hay cantidades negativas?
-ventas_raw %>%
-  filter(!is.na(cantidad)) %>%
-  summarise(
-    min_cantidad = min(cantidad),
-    max_cantidad = max(cantidad),
-    n_negativos  = sum(cantidad < 0)
-  )
+## ¿Hay cantidades negativas? Verificar el mínimo
+summary(ventas_raw$cantidad)
 ```
 
 ```{webr-r}
-## Distribucion de precio (como número, ignorando NAs y "$")
-precio_num <- as.numeric(gsub("\\$", "", ventas_raw$precio))
+## convertir en numerica precio
+ventas_raw <- mutate(ventas_raw , precio_num=as.numeric(precio))
 
-## Resumen rápido
-summary(precio_num)
-```
-
-```{webr-r}
-## Visualizar la distribución para detectar outliers
-ggplot(data.frame(precio_num), aes(x = precio_num)) +
-  geom_histogram(bins = 20, fill = "steelblue", color = "white", na.rm = TRUE) +
-  labs(
-    title    = "Distribución de precios — dataset crudo",
-    subtitle = "¿Ves algo raro en el extremo derecho?",
-    x        = "Precio (texto convertido a número)",
-    y        = "Número de transacciones"
-  ) +
-  theme_minimal()
+## Plot la distribución de precio para detectar outliers
+ggplot(ventas_raw , aes(x =precio_num)) +
+geom_histogram(bins = 20) 
 ```
 
 ::: {.callout-key}
 **El histograma como detector de outliers**
 
-Cuando el eje X se extiende muy a la derecha con una barra solitaria, es señal de outlier. En este caso vemos que la gran mayoría de precios están entre 20 y 1.300, pero hay un punto en ~12.000.
+Cuando el eje X se extiende muy a la derecha con una barra solitaria, es señal de outlier. La gran mayoría de precios están entre 20 y 1.250, pero hay un punto en ~12.000.
 
-Ese valor corresponde a un Mouse con precio = 12.000. Un mouse no cuesta $12.000 — es casi con certeza un error de captura (faltó la coma: 12,000 → 1.200; o simplemente se digitó 12000 en vez de 120).
-
-**Dos preguntas antes de corregir:**
-1. ¿Tenemos información adicional para confirmar el error?
-2. ¿Cómo documentamos la corrección para que sea trazable?
+Ese valor corresponde a un Mouse con precio = 12.000. Un mouse no cuesta $12.000 — es casi con certeza un error de captura. Antes de corregirlo, siempre documenta la decisión.
 :::
 
 ---
@@ -446,24 +392,32 @@ Ese valor corresponde a un Mouse con precio = 12.000. Un mouse no cuesta $12.000
 <!--=================-->
 # Paso 2 — Limpieza: corregir cada problema
 
-Limpiamos en orden: primero los problemas estructurales (duplicados, tipos), luego los de contenido (inconsistencias, imposibles, outliers).
+Ya sabemos qué tiene mal el dataset. Ahora lo corregimos. La lógica es simple: partimos de `ventas_raw` (la base original, que no tocamos) y construimos `ventas_clean`, que iremos actualizando en cada paso hasta tener un dataset confiable.
 
-## 2.1 Eliminar filas duplicadas
+El orden importa: primero eliminamos filas problemáticas (duplicados, imposibles), luego corregimos columnas (texto, tipos, outliers), y al final ajustamos la estructura (columnas innecesarias, variables nuevas).
+
+## Eliminar filas duplicadas
+
+El primer paso es eliminar los registros que aparecen más de una vez. Si los dejamos, cualquier suma o promedio quedará inflado, porque R contará la misma transacción dos veces.
 
 ```{webr-r}
-## distinct() elimina filas duplicadas exactas y guarda el resultado
-ventas_v1 <- distinct(ventas_raw)
+## distinct() elimina filas duplicadas exactas
+ventas_clean <- distinct(ventas_raw)
 
-## ¿Cuántas filas tenemos ahora?
-nrow(ventas_v1)
+## ¿Cuántas filas se eliminaron?
+nrow(ventas_raw) - nrow(ventas_clean)
 ```
+
+La diferencia entre ambas dimensiones confirma cuántos duplicados se removieron. Si el resultado es 3, el proceso funcionó como esperábamos.
 
 ::: {.callout-key}
 **Qué hace `distinct()`**
 
-`distinct(df)` compara **todas las columnas** de cada fila. Si dos filas son idénticas en todas las columnas, elimina la segunda.
+`distinct(df)` compara todas las columnas de cada fila. Si dos filas son idénticas en todo, elimina la segunda y conserva la primera.
 
-Si quisieras eliminar duplicados solo en algunas columnas (p. ej., mismo `producto` + `trimestre` + `region`), puedes especificarlas:
+La línea `nrow(ventas_raw) - nrow(ventas_clean)` nos dice cuántas filas duplicadas se removieron — es una forma rápida de confirmar que la operación hizo lo que esperábamos.
+
+Si quisieras eliminar duplicados solo en algunas columnas (por ejemplo, mismo `producto` + `trimestre` + `region`), puedes especificarlas:
 ```r
 distinct(df, producto, trimestre, region, .keep_all = TRUE)
 ```
@@ -471,52 +425,54 @@ distinct(df, producto, trimestre, region, .keep_all = TRUE)
 
 ---
 
-## 2.2 Estandarizar categorías con `mutate()` + `toupper()` / `tolower()`
+## Estandarizar categorías
+
+El diagnóstico mostró que `region`, `trimestre` y `producto` tienen variantes por mayúsculas y minúsculas. Si no las corregimos, `group_by()` producirá más grupos de los reales y los totales no cuadrarán.
+
+La solución es llevar todo al mismo formato. Aquí usamos `toupper()` para convertir todo a mayúsculas, lo que elimina cualquier inconsistencia de capitalización.
 
 ```{webr-r}
-## Estandarizar region, trimestre y producto a formato consistente
-ventas_v2 <- ventas_v1 %>%
-  mutate(
-    ## toupper() pone todo en MAYÚSCULA → útil para códigos como Q1, Q2, Q3
-    trimestre = toupper(trimestre),
-    ## tools::toTitleCase() capitaliza la primera letra → útil para nombres
-    region    = tools::toTitleCase(tolower(region)),
-    producto  = tools::toTitleCase(tolower(producto))
-  )
+## Estandarizar region, trimestre y producto
+ventas_clean <- mutate(ventas_clean,
+                       trimestre = toupper(trimestre),
+                       region    = toupper(region),
+                       producto  = toupper(producto))
 
 ## Verificar: ¿cuántos valores únicos hay ahora?
-unique(ventas_v2$region)
-unique(ventas_v2$trimestre)
+table(ventas_clean$region)
+table(ventas_clean$trimestre)
 ```
+
+Después de `toupper()`, `table()` debe mostrar exactamente 3 regiones y 3 trimestres, cada uno con el conteo correcto.
 
 ::: {.callout-key}
 **Tres funciones para estandarizar texto**
 
 | Función | Resultado | Cuándo usarla |
 |---|---|---|
-| `toupper(x)` | `"NORTE"` | Códigos, IDs, siglas |
+| `toupper(x)` | `"NORTE"` | Códigos, IDs, siglas — la usamos aquí |
 | `tolower(x)` | `"norte"` | Paso intermedio antes de capitalizar |
 | `tools::toTitleCase(x)` | `"Norte"` | Nombres propios, categorías |
 
-La secuencia `toTitleCase(tolower(x))` es la más segura: primero homogeniza a minúsculas (para que "NORTE" y "Norte" queden igual), luego capitaliza la primera letra.
+La elección depende del estilo que quieras en la base final. Para códigos como Q1, Q2, Q3 y nombres de región, las mayúsculas son la opción más limpia.
 :::
 
 ---
 
-## 2.3 Corregir el tipo de dato de `precio`
+## Corregir el tipo de dato de `precio`
+
+`precio` llega como texto (`character`) y tiene un signo `$` en algunos valores. Eso impide hacer cualquier cálculo aritmético. Necesitamos primero eliminar el símbolo `$` y luego convertir el texto a número.
 
 ```{webr-r}
-## Paso 1: eliminar el signo "$" con gsub()
-## Paso 2: convertir de texto a número con as.numeric()
-ventas_v3 <- ventas_v2 %>%
-  mutate(
-    precio = as.numeric(gsub("\\$", "", precio))
-  )
+## Eliminar el signo "$" y convertir a número
+ventas_clean <- mutate(ventas_clean,
+                       precio = as.numeric(gsub("\\$", "", precio)))
 
-## Verificar tipo y valores
-class(ventas_v3$precio)
-head(ventas_v3$precio, 10)
+## Verificar: precio ahora debe ser <dbl> o <num>
+summary(ventas_clean$precio)
 ```
+
+Si `class()` devuelve `"numeric"`, la conversión fue exitosa. Cualquier valor que no se pueda convertir (por ejemplo, si tuviera letras) quedaría como `NA` — lo cual también sería una señal importante.
 
 ::: {.callout-key}
 **Qué hace `gsub("\\$", "", precio)`**
@@ -524,62 +480,64 @@ head(ventas_v3$precio, 10)
 `gsub(patron, reemplazo, texto)` busca el patrón en el texto y lo reemplaza.
 
 - `"\\$"` → el patrón es el símbolo `$` (se escribe `\\$` porque `$` tiene significado especial en expresiones regulares)
-- `""` → reemplaza por nada (es decir, elimina el símbolo)
+- `""` → reemplaza por nada, es decir, elimina el símbolo
 - Resultado: `"$1200"` → `"1200"` → `as.numeric()` → `1200`
-
-`as.numeric()` convierte texto a número. Si el texto no se puede convertir (p. ej., tiene letras), R produce un `NA` con un warning — eso también es información.
 :::
 
 ---
 
-## 2.4 Filtrar valores imposibles
+## Eliminar valores imposibles
+
+Una cantidad negativa es un valor que no tiene sentido en este contexto de negocio: no se puede vender −5 unidades. Lo más seguro es eliminar esa fila, dejando una nota de la decisión.
 
 ```{webr-r}
 ## Eliminar filas con cantidad negativa
-ventas_v4 <- ventas_v3 %>%
-  filter(is.na(cantidad) | cantidad >= 0)
+ventas_clean <- filter(ventas_clean, cantidad >= 0)
 
-## Verificar
-ventas_v4 %>%
-  summarise(min_cantidad = min(cantidad, na.rm = TRUE),
-            n_negativos  = sum(cantidad < 0, na.rm = TRUE))
+## Verificar: el mínimo ahora debe ser cero o positivo
+summary(ventas_clean$cantidad)
 ```
+
+El resultado de `min()` confirma que ya no hay cantidades negativas en el dataset.
 
 ::: {.callout-warning}
 **¿Eliminar o imputar?**
 
-Cuando encuentras un valor imposible (cantidad negativa, edad = 200, precio = -50), tienes tres opciones:
+Cuando encuentras un valor imposible, tienes tres opciones:
 
 1. **Eliminar la fila:** si no tienes información para corregirla.
 2. **Convertir a NA:** si quieres conservar el resto de la fila para otros análisis.
-3. **Corregir el valor:** si tienes evidencia suficiente (p. ej., sello de devolución en el sistema → cantidad negativa es legítima en ese contexto).
+3. **Corregir el valor:** si tienes evidencia suficiente (una devolución documentada, por ejemplo, puede tener cantidad negativa de forma legítima).
 
 La opción correcta depende del **contexto de negocio**, no de una regla estadística. Lo más importante es **documentar la decisión**.
 :::
 
 ---
 
-## 2.5 Tratar el outlier de precio
+## Corregir el outlier de precio
+
+El histograma del diagnóstico mostró un precio de ~12.000 para un Mouse. Ese valor es claramente un error de captura: un mouse no cuesta $12.000. Antes de corregir, conviene ver la fila completa para confirmar el error.
 
 ```{webr-r}
-## Ver la fila del outlier antes de decidir
-ventas_v4 %>%
-  filter(precio > 5000)
+## Ver la fila con precio mayor a 5000 antes de decidir
+ventas_clean[!is.na(ventas_clean$precio) & ventas_clean$precio > 5000, ]
 ```
+
+La fila confirma que es un Mouse. Decisión documentada: reemplazar 12.000 por 120, que es el precio típico de Mouse en el dataset.
 
 ```{webr-r}
-## El valor 12000 en un Mouse es claramente un error de captura
-## Decisión documentada: reemplazar 12000 por 120 (precio típico de Mouse en el dataset)
-ventas_v5 <- ventas_v4 %>%
-  mutate(
-    precio = ifelse(producto == "Mouse" & !is.na(precio) & precio > 5000, 120, precio)
-  )
+## El valor 12000 en un Mouse es un error de captura
+ventas_clean <- mutate(ventas_clean,
+                       precio = ifelse(producto == "Mouse" & precio > 5000 , 
+                                       120 , 
+                                       precio)
+                       )
 
-## Verificar que no queden outliers extremos en Mouse
-ventas_v5 %>%
-  filter(producto == "Mouse") %>%
-  select(producto, precio, cantidad, region, trimestre)
+## Verificar que no queden outliers extremos
+summary(ventas_clean$precio)
 ```
+
+El máximo de `precio` ahora debe ser consistente con el rango de Laptops (~1.200).
 
 ::: {.callout-key}
 **`ifelse()` para correcciones puntuales**
@@ -587,33 +545,24 @@ ventas_v5 %>%
 `ifelse(condicion, valor_si_TRUE, valor_si_FALSE)` aplica una lógica fila por fila:
 
 - Si la condición se cumple → usa el valor nuevo
-- Si no se cumple → conserva el valor original (`precio`)
+- Si no → conserva el valor original
 
-Aquí le decimos: *"si el producto es Mouse Y el precio supera 5000 → reemplaza por 120; en cualquier otro caso, deja el precio tal como está"*.
-
-Siempre es mejor usar una condición **específica** (producto + precio umbral) que una genérica, para no corregir por error otras filas.
+Siempre usa una condición **específica** (producto + umbral de precio) para no corregir por error otras filas.
 :::
 
 ---
 
-## 2.6 Eliminar la columna basura y calcular `ingreso`
+## Eliminar la columna basura y calcular `ingreso`
+
+La columna `observaciones` tiene casi todo en `NA` y no aporta información analítica. La eliminamos para no cargar el dataset con ruido. Aprovechamos este último paso para calcular `ingreso = precio × cantidad`, que usaremos en el EDA.
 
 ```{webr-r}
-## Eliminar columna 'observaciones' (casi todo NA, sin valor analítico)
-## y calcular ingreso = precio × cantidad
-ventas_limpia <- ventas_v5 %>%
-  select(-observaciones) %>%
-  mutate(ingreso = precio * cantidad)
+## Eliminar columna 'observaciones' y calcular ingreso
+ventas_clean <- select(ventas_clean, -observaciones)
+ventas_clean <- mutate(ventas_clean, ingreso = precio * cantidad)
 
-## Vista final
-glimpse(ventas_limpia)
-```
-
-```{webr-r}
-## Comparar: ¿cuántas filas teníamos vs cuántas tenemos ahora?
-cat("Filas originales:", nrow(ventas_raw), "\n")
-cat("Filas limpias:   ", nrow(ventas_limpia), "\n")
-cat("Filas removidas: ", nrow(ventas_raw) - nrow(ventas_limpia), "\n")
+## Vista final del dataset limpio
+head(ventas_clean)
 ```
 
 ::: {.callout-key}
@@ -641,124 +590,104 @@ Con los datos ya limpios, comenzamos el **Análisis Exploratorio de Datos (EDA)*
 
 1. **Distribuciones:** ¿cómo se comportan las variables individualmente? ¿Simétricas, sesgadas, con múltiples picos?
 2. **Resúmenes por grupo:** ¿hay diferencias relevantes entre regiones, categorías, trimestres?
-3. **Relaciones entre variables:** ¿precio y cantidad tienen alguna relación? ¿El ingreso varía según región?
-4. **Valores anómalos residuales:** ¿quedó algo raro que no detectamos en el diagnóstico?
+3. **Relaciones entre variables:** ¿precio y cantidad tienen alguna relación?
+4. **Valores anómalos residuales:** ¿quedó algo raro que no detectamos antes?
 
 El EDA combina **tablas** (dplyr) y **gráficos** (ggplot2). Ninguno es suficiente solo.
 :::
 
----
+## Resumen estadístico del dataset limpio
 
-## 3.1 Resumen estadístico general
+Ahora que los datos están limpios, `skim()` nos da un panorama confiable:
 
 ```{webr-r}
-## Resumen de variables numéricas
-ventas_limpia %>%
-  summarise(
-    precio_min    = min(precio,   na.rm = TRUE),
-    precio_mediana = median(precio, na.rm = TRUE),
-    precio_max    = max(precio,   na.rm = TRUE),
-    cantidad_min  = min(cantidad,  na.rm = TRUE),
-    cantidad_max  = max(cantidad,  na.rm = TRUE),
-    ingreso_total = sum(ingreso,   na.rm = TRUE),
-    n_transacciones = n()
-  )
+## Resumen del dataset limpio
+skim(ventas_clean)
 ```
 
 ::: {.callout-practice}
-**¿Qué nos dice este resumen?**
+**Compara con el `skim()` del dataset crudo**
 
-- El precio mínimo y máximo confirman el rango de productos (Mouse vs Laptop).
-- La mediana del precio es más robusta que el promedio cuando hay outliers.
-- El ingreso total es la métrica de negocio que más nos importa.
-- `n_transacciones` confirma cuántos registros sobrevivieron la limpieza.
+Vuelve a la sección 1.1 y compara las dos salidas. Deberías notar:
+
+- `precio` ahora aparece como `numeric`, no como `character`
+- `n_missing` en precio y cantidad es el mismo (los NAs que venían del origen, no los que generamos)
+- `n_unique` en `region` y `trimestre` ahora coincide con lo esperado (3 regiones, 3 trimestres)
+- El máximo de `cantidad` ya no es negativo
+
+Esta comparación es parte del EDA: confirmar que el dataset limpio tiene la forma que esperábamos.
 :::
 
----
-
-## 3.2 Distribuciones de variables numéricas
+## Distribuciones de variables numéricas
 
 ```{webr-r}
-## Distribución de precio
-ggplot(ventas_limpia, aes(x = precio)) +
-  geom_histogram(bins = 15, fill = "steelblue", color = "white", na.rm = TRUE) +
-  labs(
-    title    = "Distribución de precios — dataset limpio",
-    subtitle = "¿Comparar con el histograma del dataset crudo!",
-    x        = "Precio unitario (USD)",
-    y        = "Número de transacciones"
-  ) +
-  theme_minimal()
-```
-
-```{webr-r}
-## Distribución de cantidad vendida
-ggplot(ventas_limpia, aes(x = cantidad)) +
-  geom_histogram(bins = 12, fill = "coral", color = "white", na.rm = TRUE) +
-  labs(
-    title = "Distribución de cantidades por transacción",
-    x     = "Cantidad vendida",
-    y     = "Número de transacciones"
-  ) +
-  theme_minimal()
+## Distribución de precio — comparar con el histograma del dataset crudo
+ggplot(ventas_clean, aes(x = precio)) +
+geom_histogram(bins = 15, fill = "steelblue") +
+theme_minimal()
 ```
 
 ::: {.callout-key}
 **Distribución bimodal: una señal importante**
 
-Si el histograma de precios muestra dos "jorobas" claramente separadas, es porque tenemos dos segmentos de productos muy distintos: productos baratos (Mouse, Licencia, Soporte) y productos caros (Laptop). Esto ya es un hallazgo de negocio: no se puede calcular un "precio promedio representativo" sin separar los segmentos.
+Si el histograma muestra dos "jorobas" claramente separadas, es porque tenemos dos segmentos de productos muy distintos: productos baratos (Mouse, Licencia, Soporte) y productos caros (Laptop).
+
+Esto ya es un hallazgo de negocio: no se puede calcular un "precio promedio representativo" sin separar los segmentos.
 :::
 
----
-
-## 3.3 Comparar grupos: ingreso por región y categoría
+## Comparar grupos: ingreso por región
 
 ```{webr-r}
-## Ingreso total por región
-ing_region <- ventas_limpia %>%
-  group_by(region) %>%
-  summarise(ingreso_total = sum(ingreso, na.rm = TRUE), .groups = "drop") %>%
-  arrange(desc(ingreso_total))
+## Paso 1: calcular ingreso total por región
+ing_region <- group_by(ventas_clean, region)
+ing_region <- summarise(ing_region,
+                        ingreso_total = sum(ingreso, na.rm = TRUE),
+                        n_transacciones = n(),
+                        .groups = "drop")
+```
 
+```{webr-r}
+## Ver la tabla completa
+ing_region
+```
+
+```{webr-r}
+## Paso 2: graficar
 ggplot(ing_region, aes(x = reorder(region, ingreso_total), y = ingreso_total)) +
-  geom_col(fill = "steelblue") +
-  coord_flip() +
-  labs(
-    title = "Ingreso total por región",
-    x     = "Región",
-    y     = "Ingreso total (USD)"
-  ) +
-  theme_minimal()
+geom_col(fill = "steelblue") +
+coord_flip() 
 ```
+
+::: {.callout-practice}
+**¿Qué nos dice esta tabla?**
+
+- El ingreso total es la métrica de negocio más importante.
+- `n_transacciones` confirma cuántos registros sobrevivieron la limpieza.
+- Si una región tiene muchas transacciones pero bajo ingreso total, puede indicar que vende productos de bajo precio — no necesariamente que tenga bajo desempeño.
+:::
+
+## Evolución temporal: ¿qué está cambiando?
 
 ```{webr-r}
-## Ingreso por categoría y trimestre (tabla)
-ventas_limpia %>%
-  group_by(categoria, trimestre) %>%
-  summarise(
-    ingreso_total = sum(ingreso, na.rm = TRUE),
-    n             = n(),
-    .groups       = "drop"
-  ) %>%
-  arrange(categoria, trimestre)
+## Paso 1: calcular ingreso por trimestre
+ing_trim <- group_by(ventas_clean, trimestre)
+ing_trim <- summarise(ing_trim,
+                      ingreso_total = sum(ingreso, na.rm = TRUE),
+                      .groups = "drop")
+
+## Paso 2: graficar
+ggplot(ing_trim, aes(x = trimestre, y = ingreso_total)) +
+geom_col(fill = "steelblue") +
+theme_minimal()
 ```
 
----
-
-## 3.4 Relaciones entre variables: scatter plot exploratorio
+## Relación entre variables: scatter plot exploratorio
 
 ```{webr-r}
 ## ¿Relación entre precio y cantidad? Colorear por categoría
-ggplot(ventas_limpia, aes(x = precio, y = cantidad, color = categoria)) +
-  geom_point(size = 3, alpha = 0.7, na.rm = TRUE) +
-  labs(
-    title    = "Precio vs cantidad vendida por transacción",
-    subtitle = "¿Los productos más caros se venden en menos cantidad?",
-    x        = "Precio unitario (USD)",
-    y        = "Cantidad vendida",
-    color    = "Categoría"
-  ) +
-  theme_minimal()
+ggplot(ventas_clean, aes(x = precio, y = cantidad, color = categoria)) +
+geom_point(size = 3, alpha = 0.7, na.rm = TRUE) +
+theme_minimal()
 ```
 
 ::: {.callout-practice}
@@ -768,92 +697,9 @@ Observa el gráfico y responde:
 
 1. ¿Los productos de Hardware tienden a tener precios más altos o más bajos que Software?
 2. ¿Hay una relación clara entre precio y cantidad? ¿Positiva, negativa o ninguna?
-3. ¿Ves algún punto que se aleje del patrón general? ¿Qué podría explicarlo?
+3. ¿Ves algún punto que se aleje del patrón general?
 
 El scatter plot no te da la respuesta — te da la **pregunta correcta** para profundizar.
-:::
-
----
-
-## 3.5 Evolución temporal: ¿qué está cambiando?
-
-```{webr-r}
-## Ingreso total por trimestre
-ing_trim <- ventas_limpia %>%
-  group_by(trimestre) %>%
-  summarise(ingreso_total = sum(ingreso, na.rm = TRUE), .groups = "drop")
-
-ggplot(ing_trim, aes(x = trimestre, y = ingreso_total)) +
-  geom_col(fill = "steelblue") +
-  geom_text(aes(label = scales::comma(ingreso_total)),
-            vjust = -0.5, size = 3.5) +
-  labs(
-    title = "Evolución del ingreso total por trimestre",
-    x     = "Trimestre",
-    y     = "Ingreso total (USD)"
-  ) +
-  theme_minimal()
-```
-
-```{webr-r}
-## Ingreso por trimestre y región (para ver si todas las regiones crecen igual)
-ing_trim_reg <- ventas_limpia %>%
-  group_by(trimestre, region) %>%
-  summarise(ingreso_total = sum(ingreso, na.rm = TRUE), .groups = "drop")
-
-ggplot(ing_trim_reg, aes(x = trimestre, y = ingreso_total,
-                          color = region, group = region)) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 2.5) +
-  labs(
-    title    = "Ingreso por trimestre y región",
-    subtitle = "¿Todas las regiones siguen la misma tendencia?",
-    x        = "Trimestre",
-    y        = "Ingreso total (USD)",
-    color    = "Región"
-  ) +
-  theme_minimal()
-```
-
----
-
-## 3.6 Detección visual de anomalías residuales
-
-El EDA también sirve para encontrar problemas que no detectaste en el diagnóstico inicial. Un boxplot es especialmente útil:
-
-```{webr-r}
-## Boxplot de ingreso por producto: ¿hay valores extremos?
-ggplot(ventas_limpia, aes(x = producto, y = ingreso, fill = categoria)) +
-  geom_boxplot(na.rm = TRUE) +
-  labs(
-    title    = "Distribución del ingreso por producto",
-    subtitle = "Los puntos fuera de los bigotes son candidatos a revisión",
-    x        = "Producto",
-    y        = "Ingreso por transacción (USD)",
-    fill     = "Categoría"
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-```
-
-::: {.callout-key}
-**Cómo leer un boxplot**
-
-```
-        ┌──────────────┐
-   ─────┤   25% a 75%  ├──────
-        └──────────────┘
-   │                        │
-Mínimo                   Máximo
-(sin outliers)         (sin outliers)
-
-   ●  ← punto fuera del rango = candidato a outlier
-```
-
-- La **caja** contiene el 50% central de los datos (del percentil 25 al 75)
-- La **línea del medio** es la mediana
-- Los **bigotes** se extienden hasta 1.5 veces el rango intercuartílico
-- Los **puntos** fuera de los bigotes merecen revisión individual
 :::
 
 ---
@@ -862,32 +708,18 @@ Mínimo                   Máximo
 <!--=================-->
 # Resumen del flujo completo
 
-```{webr-r}
-## Tabla resumen comparativa: antes vs después de limpiar
-cat("=== RESUMEN DEL PROCESO ===\n\n")
-cat("Filas originales:           ", nrow(ventas_raw), "\n")
-cat("Duplicados eliminados:       3\n")
-cat("Filas con cantidad negativa: 1\n")
-cat("NAs en precio:               2\n")
-cat("NAs en cantidad:             2\n")
-cat("Outlier corregido:           1 (Mouse precio=12000 → 120)\n")
-cat("Columna eliminada:           observaciones\n")
-cat("Inconsistencias de texto:    región (3), trimestre (12), producto (4)\n\n")
-cat("Filas finales limpias:      ", nrow(ventas_limpia), "\n")
-```
-
 ::: {.callout-connect}
 **Conexión con el resto del curso**
 
 | Lo que hicimos hoy | Cómo lo usaremos después |
 |---|---|
-| Dataset limpio (`ventas_limpia`) | Base para todos los modelos de Semanas 09-12 |
+| Dataset limpio (`ventas_clean`) | Base para todos los modelos de Semanas 09-12 |
 | EDA de distribuciones | En ML: verificar que los datos de train y test tengan distribuciones similares |
 | Detección de outliers | En regresión (Semana 12): los outliers inflan el RMSE y sesgan los coeficientes |
 | Categorías estandarizadas | En clasificación (Semana 11): las etiquetas deben ser consistentes o el modelo las trata como clases distintas |
 | Documentar decisiones de limpieza | Exigencia del proyecto final: toda transformación debe estar justificada |
 
-**Semana 07 (Parcial):** El parcial incluye preguntas sobre diagnóstico de calidad de datos e interpretación de EDA. Revisa las secciones de `glimpse()`, `unique()`, `table()` y los gráficos de distribución.
+**Semana 07 (Parcial):** El parcial incluye preguntas sobre diagnóstico de calidad de datos e interpretación de EDA. Revisa las secciones de `skim()`, `unique()`, `table()` y los histogramas.
 :::
 
 ---
@@ -900,17 +732,19 @@ cat("Filas finales limpias:      ", nrow(ventas_limpia), "\n")
 **Antes de pasar a la siguiente semana, verifica que puedes:**
 
 **Sobre fuentes y calidad:**
+
 - [ ] Distinguir fuente primaria de secundaria y qué riesgos implica cada una
 - [ ] Nombrar al menos 4 tipos de problemas de calidad de datos con un ejemplo de cada uno
 - [ ] Explicar por qué "Norte" ≠ "norte" en R y qué consecuencia tiene en un `group_by()`
 
 **Sobre diagnóstico en R:**
-- [ ] Interpretar la salida de `glimpse()` para identificar tipos de variables
-- [ ] Usar `sum(is.na())` y explicar qué porcentaje de faltantes es "problemático"
-- [ ] Usar `unique()` y `table()` para detectar inconsistencias categóricas
-- [ ] Leer un histograma y señalar dónde podría haber un outlier
+
+- [ ] Interpretar la salida de `skim()` para identificar tipos, faltantes y outliers
+- [ ] Usar `unique()` y `table()` para detectar inconsistencias en categorías
+- [ ] Interpretar un histograma y señalar dónde podría haber un outlier
 
 **Sobre limpieza:**
+
 - [ ] Explicar qué hace `distinct()` y cuándo usarlo
 - [ ] Usar `toupper()` / `tolower()` / `toTitleCase()` para estandarizar texto
 - [ ] Convertir una columna de texto con "$" a número usando `gsub()` + `as.numeric()`
@@ -918,9 +752,10 @@ cat("Filas finales limpias:      ", nrow(ventas_limpia), "\n")
 - [ ] Justificar verbalmente cada decisión de limpieza (eliminar vs imputar vs corregir)
 
 **Sobre EDA:**
-- [ ] Calcular estadísticas descriptivas por grupo con `group_by()` + `summarise()`
+
+- [ ] Usar `skim()` para obtener un resumen completo del dataset limpio
+- [ ] Calcular y graficar el ingreso por grupo con `group_by()` + `summarise()`
 - [ ] Elegir el gráfico adecuado según la pregunta (distribución, comparación, relación, tendencia)
-- [ ] Interpretar un boxplot y señalar candidatos a outlier
 - [ ] Explicar qué es el EDA y por qué se hace antes de modelar
 :::
 
@@ -931,7 +766,7 @@ cat("Filas finales limpias:      ", nrow(ventas_limpia), "\n")
 ::: {.callout-practice}
 **Pregunta 1 — Diagnóstico**
 
-Recibes un dataset de 500 transacciones. Al correr `glimpse()` ves que la columna `precio` tiene tipo `<chr>`. Luego corres `unique(df$precio)` y ves valores como "25.000", "1.200.000" y "$ 450".
+Recibes un dataset de 500 transacciones. Al correr `skim()` ves que la columna `precio` tiene tipo `character` y `n_unique = 47`. Luego corres `unique(df$precio)` y ves valores como `"25.000"`, `"1.200.000"` y `"$ 450"`.
 
 ¿Cuáles son los dos problemas de calidad que debes resolver antes de calcular el ingreso promedio? ¿Qué función de R usarías para cada uno?
 :::
@@ -939,16 +774,16 @@ Recibes un dataset de 500 transacciones. Al correr `glimpse()` ves que la column
 ::: {.callout-practice}
 **Pregunta 2 — Consecuencia de no limpiar**
 
-Un analista recibe el dataset `ventas_raw` y calcula el ingreso total por región sin limpiar primero. Obtiene 6 grupos en vez de 3. Explica en dos oraciones:
+Un analista recibe el dataset `ventas_raw` y calcula el ingreso total por región sin limpiar primero. Obtiene 5 grupos en vez de 3. Explica en dos oraciones:
 
-a) Por qué R genera 6 grupos
+a) Por qué R genera 5 grupos
 b) Cómo afecta esto a la toma de decisiones si el gerente usa esa tabla para asignar presupuesto regional
 :::
 
 ::: {.callout-practice}
 **Pregunta 3 — EDA como decisión**
 
-Después de limpiar los datos, haces un histograma del precio y observas una distribución bimodal (dos picos: uno en ~80 y otro en ~1.200).
+Después de limpiar los datos, corres `skim(ventas_clean)` y luego un histograma del precio. Observas una distribución bimodal (dos picos: uno en ~80 y otro en ~1.200).
 
 ¿Qué significa esa distribución bimodal en términos de negocio? ¿Cambiaría tu análisis si el gerente te pide "el precio promedio de ventas"? ¿Por qué?
 :::
@@ -961,7 +796,6 @@ Si quieres profundizar en los temas de esta semana:
 
 - **R for Data Science — Cap. 18 (Missing values):** cobertura detallada de estrategias para NAs → [https://r4ds.hadley.nz/missing-values](https://r4ds.hadley.nz/missing-values)
 - **Tidy Data (Hadley Wickham):** artículo original que define qué significa un dataset "ordenado" → [https://vita.had.co.nz/papers/tidy-data.pdf](https://vita.had.co.nz/papers/tidy-data.pdf)
-- **The Art of Data Science (Peng & Matsui):** capítulo sobre EDA con perspectiva de negocio — disponible gratis online
 - **dplyr cheat sheet:** referencia rápida de todas las funciones de manipulación → [https://rstudio.github.io/cheatsheets/data-transformation.pdf](https://rstudio.github.io/cheatsheets/data-transformation.pdf)
 
 ```{=html}
@@ -1115,7 +949,7 @@ async function init() {
   };
 
   const panel = document.getElementById('env-panel');
-  if (panel.classList.contains('collapsed')) {
+  if (panel.classList.contains('collapsed') ) {
     toggleEnvPanel();
   }
   await updateEnvPanel();
