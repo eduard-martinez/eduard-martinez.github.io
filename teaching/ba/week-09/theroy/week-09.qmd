@@ -1,0 +1,1039 @@
+---
+title: "Unidad 6 - Fundamentos de Machine Learning"
+subtitle: "Introducción al Business Analytics · Semana 9 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+<span id="webr-status-anchor"></span>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Objetivo de la semana
+
+Esta semana **NO** aprenderemos a programar algoritmos de Machine Learning. El foco está en entender **la lógica general**: qué tipos de problemas resuelve, cómo se evalúa un modelo y cómo se conectan los resultados con decisiones de negocio.
+
+## ¿Qué significa "aprender Machine Learning" en este curso?
+
+Significa entender:
+
+- Qué hace un modelo cuando se entrena y cuando predice.
+- Cómo se evalúa si un modelo es bueno o no (y para quién).
+- Cómo los errores del modelo se traducen en costos y decisiones reales.
+
+No vamos a escribir modelos desde cero. Vamos a **interpretar resultados de modelos ya entrenados**, comparar opciones y justificar recomendaciones.
+
+## Lo que cubriremos esta semana
+
+La clase se organiza en **cuatro ejes**:
+
+**¿Qué es Machine Learning?** Tipos de problemas (clasificación vs. regresión), diferencia con analítica descriptiva, vocabulario clave (target, features, observaciones).
+
+**Train/Test: ¿por qué separar los datos?** La lógica de generalización, overfitting, underfitting, baseline, validación cruzada y data leakage.
+
+**Métricas: ¿qué tan bueno es un modelo?** Matriz de confusión, accuracy y sus limitaciones, precision, recall, MAE, RMSE. Siempre conectando con el costo del error.
+
+**Aplicación guiada en R.** Comparar modelos ya estimados con datos reales: construir matrices de confusión, calcular métricas y traducir resultados a decisiones.
+
+
+## Conexión con lo que ya sabemos
+
+En las semanas 1–6 recorrimos el proceso analítico completo hasta la exploración: formular preguntas, importar datos, manipularlos con dplyr, visualizar con ggplot2 y diagnosticar calidad. En la semana 8 vimos cómo la nube provee la infraestructura para ejecutar estos análisis a escala.
+
+Ahora damos el salto: en lugar de solo **describir** lo que pasó, vamos a usar datos históricos para **anticipar** lo que probablemente pasará. Todo lo que aprendimos de manipulación, limpieza y visualización es prerrequisito directo para este bloque.
+
+| Hasta ahora (descriptiva) | A partir de ahora (ML) |
+|---|---|
+| "El 18% de los clientes canceló" | "Estos 200 clientes tienen >70% de probabilidad de cancelar" |
+| Resume el pasado | Anticipa el futuro (con incertidumbre) |
+| dplyr + ggplot2 como fin | dplyr + ggplot2 como insumo |
+
+---
+
+<!--=================-->
+<!--=================-->
+# ¿Qué es Machine Learning y qué tipos de problemas resuelve?
+
+<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+{{< video https://youtu.be/IRW00HT9eds >}}
+
+---
+
+## ¿Qué es Machine Learning?
+
+Hasta ahora en el curso hemos trabajado con **analítica descriptiva**: resumir lo que pasó, calcular KPIs, visualizar patrones. Machine Learning (ML) es un paso más allá: en lugar de solo describir el pasado, buscamos **aprender patrones en los datos para hacer predicciones o tomar decisiones sobre datos nuevos**.
+
+La idea central es sencilla: si un fenómeno ocurrió de cierta manera en el pasado y tenemos datos que lo documentan, podemos usar esos datos para "enseñarle" a un modelo a reconocer esos patrones y aplicarlos a situaciones que todavía no hemos observado.
+
+### Ejemplo intuitivo: churn en telecomunicaciones
+
+Imaginen que trabajan en una empresa de telecomunicaciones y quieren saber **qué clientes van a cancelar su servicio en los próximos 30 días**. No pueden saberlo con certeza, pero sí tienen el historial de miles de clientes anteriores: cuánto consumían, cuántas quejas pusieron, si tenían competencia en su zona, y si finalmente se fueron o se quedaron.
+
+ML toma esa información histórica, encuentra patrones (por ejemplo: "clientes con más de 3 reclamos en el último trimestre y baja en consumo tienen alta probabilidad de irse"), y los aplica a los clientes actuales para priorizar acciones de retención.
+
+### Lo que ML no es
+
+::: {.callout-warning}
+**Tres ideas incorrectas que hay que desmontar desde el inicio:**
+
+- **ML no es magia.** Si los datos son malos, las predicciones serán malas. "Basura entra, basura sale" aplica más que nunca.
+- **ML no reemplaza el criterio humano.** Un modelo te dice "este cliente probablemente se va"; tú decides qué hacer con esa información.
+- **ML no siempre es la respuesta.** A veces un buen análisis descriptivo o una tabla cruzada resuelve la pregunta sin necesidad de un modelo.
+:::
+
+---
+
+## Supervisado vs. no supervisado
+
+Una de las primeras distinciones que necesitamos entender es cómo se organizan los problemas de ML según el tipo de información disponible.
+
+**Aprendizaje supervisado:** Conocemos la respuesta correcta en los datos históricos. Hay una variable que queremos predecir —llamada **target** o **variable objetivo**— y un conjunto de variables que usamos como insumo —llamadas **features** o **variables predictoras**. El modelo "aprende" la relación entre features y target con datos históricos, y después usa esa relación para predecir en datos nuevos.
+
+*Ejemplo:* Predecir si un cliente cancela (target = "se fue: sí/no") usando como features su antigüedad, número de reclamos, monto de facturación y si tiene competencia en su zona.
+
+**Aprendizaje no supervisado:** No hay target. No tenemos una variable que queramos predecir; en cambio, buscamos **descubrir estructura o patrones ocultos** en los datos.
+
+*Ejemplo:* Agrupar clientes en segmentos según sus patrones de compra (clustering), sin saber de antemano cuántos grupos hay ni cómo se llaman. El modelo encuentra los grupos; el analista los interpreta y les da sentido de negocio.
+
+| | Supervisado | No supervisado |
+|---|---|---|
+| ¿Hay target? | Sí | No |
+| ¿Qué busca? | Predecir una variable | Descubrir patrones/grupos |
+| Pregunta típica | "¿Se irá este cliente?" | "¿Qué tipos de clientes tenemos?" |
+| En el curso | Semanas 11 y 12 | Semana 10 (clustering) |
+
+---
+
+## Dentro del supervisado: clasificación vs. regresión
+
+Cuando el problema es supervisado, la **naturaleza del target** define el tipo de problema:
+
+### Clasificación
+
+El target es **categórico**: pertenece a una de varias categorías o clases.
+
+- ¿El cliente **cancela** o **se queda**? (sí/no)
+- ¿La transacción es **legítima** o **fraudulenta**?
+- ¿El lead se **convierte** en cliente o **no**?
+- ¿El producto tiene un **defecto** de calidad o **no**?
+
+En todos estos casos, el modelo produce una **predicción de clase** (y muchas veces una **probabilidad** asociada). Por ejemplo: "este cliente tiene un 82% de probabilidad de cancelar".
+
+### Regresión
+
+El target es **numérico continuo**: puede tomar cualquier valor dentro de un rango.
+
+- ¿Cuánto **ingreso** generará este cliente el próximo trimestre?
+- ¿Cuál será el **precio** de un inmueble dado sus características?
+- ¿Cuántos **días** tardará la entrega de este pedido?
+- ¿Cuántas **unidades** venderemos el próximo mes?
+
+Aquí el modelo produce un **número** como predicción, y lo evaluamos por qué tan lejos queda del valor real.
+
+### ¿Cómo decido cuál usar?
+
+La decisión es directa: **mira la variable que quieres predecir**.
+
+| Si tu pregunta es... | El target es... | El problema es... |
+|---|---|---|
+| "¿Se irá o se quedará?" | Categoría (sí/no) | Clasificación |
+| "¿Cuánto va a gastar?" | Número ($) | Regresión |
+| "¿Es fraude o no?" | Categoría (sí/no) | Clasificación |
+| "¿Cuántos días tardará?" | Número (días) | Regresión |
+
+**La misma pregunta, dos enfoques**
+
+A veces la misma pregunta de negocio se puede abordar de ambas formas:
+
+- "¿Este cliente va a comprar el producto premium?" → **clasificación** (sí/no)
+- "¿Cuánto gastará este cliente en productos premium?" → **regresión** (monto en $)
+
+La elección depende de **qué decisión de negocio quieres informar**: si necesitas priorizar a quién contactar (clasificación) o estimar ingresos futuros (regresión).
+
+---
+
+## Vocabulario clave: target, features, observaciones
+
+Para hablar con precisión durante el resto del bloque de ML, necesitamos tres términos:
+
+**Target (variable objetivo):** La columna que queremos predecir. En clasificación es una categoría; en regresión es un número. En la Semana 02 ya vimos este concepto cuando hablamos de la variable "el cliente se fue, ¿sí o no?" en el ejemplo de churn.
+
+**Features (variables predictoras):** Las columnas que el modelo usa como insumo para hacer la predicción. Seleccionar bien las features es una decisión analítica crítica.
+
+**Observaciones (filas):** Cada fila de la base de datos es un caso: un cliente, una transacción, un producto. El modelo aprende de muchas observaciones históricas para predecir en observaciones nuevas.
+
+::: {.callout-key}
+**Ejemplo con el dataset del curso**
+
+Si quisiéramos predecir qué clientes harán una compra grande (>$500) el próximo mes usando el dataset `ventas`:
+
+- **Target:** compra_grande (sí/no) → clasificación
+- **Features posibles:** región, categoría de producto preferida, monto promedio histórico, número de compras previas, antigüedad
+- **Observaciones:** cada fila es un cliente
+:::
+
+---
+
+## Checklist
+
+Al finalizar esta sesión, debes poder:
+
+- [ ] Explicar qué es Machine Learning y en qué se diferencia de la analítica descriptiva.
+- [ ] Distinguir aprendizaje supervisado de no supervisado.
+- [ ] Identificar cuándo un problema es de clasificación y cuándo es de regresión.
+- [ ] Definir qué son target, features y observaciones.
+- [ ] Dar un ejemplo propio de un problema de clasificación y uno de regresión en contexto de negocio.
+
+## Preguntas de comprensión
+
+**Pregunta 1.** Una cadena de retail quiere saber cuántas unidades de cada producto deberá tener en inventario la próxima semana. ¿Esto es un problema de clasificación o de regresión? ¿Por qué?
+
+<details>
+<summary>Ver respuesta</summary>
+**Respuesta esperada:** Es regresión, porque el target (unidades en inventario) es un número continuo, no una categoría.
+</details>
+
+**Pregunta 2.** Un banco quiere identificar transacciones sospechosas de fraude para revisarlas manualmente. ¿Supervisado o no supervisado? ¿Clasificación o regresión?
+
+<details>
+<summary>Ver respuesta</summary>
+**Respuesta esperada:** Supervisado (tiene datos históricos donde sabe cuáles transacciones fueron fraude). Clasificación (el target es categórico: fraude sí/no).
+</details>
+
+**Pregunta 3.** "Queremos agrupar a nuestros clientes según sus patrones de compra para diseñar campañas diferenciadas, pero no sabemos de antemano cuántos segmentos hay." ¿Qué tipo de ML es?
+
+<details>
+<summary>Ver respuesta</summary>
+**Respuesta esperada:** No supervisado (no hay target; se busca descubrir grupos). Específicamente clustering, que veremos en la Semana 10.
+</details>
+
+
+---
+
+<!--=================-->
+<!--=================-->
+# Train/Test: ¿por qué separar los datos?
+
+<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+{{< video https://youtu.be/MjSkhkxBlno >}}
+
+---
+
+## El problema central: generalización
+
+El objetivo de un modelo de Machine Learning no es describir perfectamente los datos que ya tenemos. El objetivo es **funcionar bien con datos que nunca ha visto**. A esto le llamamos **generalización**.
+
+### La analogía del examen
+
+Piensen en cómo estudian para un parcial:
+
+- Si estudian **memorizando las respuestas exactas** de los ejercicios del taller, les irá bien *si el parcial tiene las mismas preguntas*. Pero si las preguntas son distintas (aunque del mismo tema), estarán perdidos.
+- Si estudian **entendiendo los conceptos y la lógica**, podrán resolver preguntas nuevas que nunca habían visto.
+
+Un modelo de ML funciona igual. Si le permitimos "ver" todos los datos durante el entrenamiento y lo evaluamos con esos mismos datos, nos dirá que es excelente... pero probablemente solo memorizó. Necesitamos evaluarlo con datos que **nunca vio durante el entrenamiento** para saber si realmente aprendió patrones útiles.
+
+---
+
+## La solución: separar en entrenamiento y prueba (train/test split)
+
+La solución estándar es **dividir los datos en dos grupos antes de hacer cualquier otra cosa**:
+
+**Datos de entrenamiento (train):** El modelo aprende con estos datos. Ve tanto las features como el target, y busca patrones que conecten las unas con el otro. Típicamente usamos entre el 70% y el 80% de los datos.
+
+**Datos de prueba (test):** Estos datos se guardan "en una caja fuerte". El modelo **nunca** los ve durante el entrenamiento. Solo los usamos al final para evaluar qué tan bien generaliza. Típicamente representan entre el 20% y el 30% de los datos.
+
+::: {.callout-warning}
+**Regla de oro:** Los datos de test son sagrados. No se tocan, no se usan para decidir nada durante el entrenamiento, no se miran "solo para ver". Se usan una vez, al final, para la evaluación definitiva. Violar esta regla es como si el estudiante hubiera visto el parcial antes de presentarlo.
+:::
+
+---
+
+## Overfitting y underfitting
+
+Estos dos conceptos son los riesgos opuestos que todo modelo enfrenta:
+
+**Overfitting (sobreajuste):** El modelo aprendió **demasiado bien** los datos de entrenamiento, memorizando incluso el ruido y las particularidades. Funciona excelente en train pero mal en datos nuevos (test). *Señal:* métricas muy buenas en train, significativamente peores en test. *Analogía:* estudiante que memorizó el taller — saca 5.0 en taller, 2.0 en parcial.
+
+**Underfitting (subajuste):** El modelo es **demasiado simple** para capturar los patrones reales. No aprende bien ni siquiera en entrenamiento. *Señal:* métricas malas tanto en train como en test. *Analogía:* estudiante que usó un resumen de una página para tres unidades. No le alcanza ni para el taller.
+
+| | Train | Test | Diagnóstico |
+|---|---|---|---|
+| Overfitting | ✓ Muy bueno | ✗ Malo | Memorizó, no generaliza |
+| Underfitting | ✗ Malo | ✗ Malo | Demasiado simple |
+| **Balance ideal** | ✓ Bueno | ✓ Bueno | Aprendió patrones reales |
+
+Lo que buscamos es un modelo que aprenda los patrones genuinos de train (no underfitting) y generalice bien a test (no overfitting). Esto se logra eligiendo la complejidad adecuada y usando validación cruzada.
+
+---
+
+## El baseline: ¿contra qué comparamos?
+
+Antes de evaluar un modelo, necesitamos una referencia mínima: **¿qué pasaría si usáramos la estrategia más ingenua posible?** Eso es el baseline.
+
+**Baseline en clasificación:** Predecir siempre la clase más frecuente. Si el 85% de los clientes no canceló, un "modelo" que siempre diga "no cancela" acertaría el 85% de las veces. Si tu modelo sofisticado tiene 86% de accuracy, apenas supera al baseline.
+
+**Baseline en regresión:** Predecir siempre el promedio (o la mediana) del target. Si el ingreso promedio mensual es $250, el baseline siempre predice $250 para todos. Si tu modelo tiene un error (MAE) de $45 y el baseline $48, la mejora es marginal.
+
+::: {.callout-key}
+**¿Por qué importa?** 
+Porque sin baseline no sabes si tu modelo realmente aporta valor. Un modelo siempre tendrá alguna métrica; la pregunta es si esa métrica es *mejor* que lo que obtendrías sin esfuerzo alguno.
+:::
+
+---
+
+## Validación cruzada (cross-validation)
+
+La separación train/test tiene un problema: depende de cómo cayó la división. Si por azar los datos de test son "fáciles", las métricas serán optimistas; si son "difíciles", serán pesimistas.
+
+La **validación cruzada (CV)** resuelve esto. La idea de K-Fold CV:
+
+1. Tomamos solo los datos de **train** (el test sigue guardado).
+2. Dividimos train en *k* partes iguales (por ejemplo, k=5).
+3. Repetimos k veces: usamos k-1 partes para entrenar y la parte restante para evaluar.
+4. Promediamos las k métricas resultantes.
+
+**¿Qué ganamos?** Una estimación más estable y confiable del desempeño, que no depende de una sola partición. Se usa principalmente para **comparar modelos y configuraciones** durante el proceso de entrenamiento. Después de tomar la decisión, el modelo final se evalúa con test.
+
+*Analogía:* CV es como hacer 5 simulacros de parcial con preguntas diferentes cada vez. El promedio de los 5 te da una idea más realista de cómo te irá en el parcial real.
+
+---
+
+## Data leakage: el error silencioso
+
+El **data leakage** (fuga de datos) es uno de los errores más peligrosos en ML porque **el modelo parece funcionar muy bien, pero en realidad está haciendo trampa**.
+
+Ocurre cuando el modelo tiene acceso, directa o indirectamente, a información que **no tendría disponible en el momento real de la predicción**.
+
+::: {.callout-warning}
+**Tres ejemplos concretos de leakage:**
+
+**1. Variable que "se cuela":** Incluir "motivo de cancelación" como feature para predecir cancelación. Esa variable solo existe *después* de que el cliente canceló. Es como incluir la respuesta dentro de la pregunta.
+
+**2. Preprocesamiento incorrecto:** Calcular el promedio de una variable usando *todos* los datos antes de separar train/test, y usarlo para llenar faltantes. El promedio incluye información de test que "se filtró" al entrenamiento. Regla: todo cálculo estadístico se aprende solo con train y se aplica a test.
+
+**3. Datos del futuro:** Predecir ventas de marzo usando una feature que contiene información de marzo (actualizada retroactivamente). El modelo aprendió del futuro.
+:::
+
+**Señales de alerta:** resultados "demasiado buenos para ser verdad", una feature con importancia absurdamente alta, métricas perfectas en train y test.
+
+**¿Por qué es tan grave?** Porque el modelo *parece* bueno en la evaluación, se pone en producción y después falla con datos reales. El costo: decisiones de negocio tomadas con confianza falsa.
+
+---
+
+## Resumen del pipeline
+
+Con lo visto en las Sesiones 1 y 2, el pipeline general de ML es:
+
+1. **Formular la pregunta** → ¿clasificación o regresión?
+2. **Definir target y features** → ¿qué predigo? ¿con qué variables?
+3. **Separar train/test** → antes de hacer cualquier otra cosa.
+4. **Establecer el baseline** → predicción más ingenua posible.
+5. **Entrenar modelo(s) con train** → usar CV para comparar opciones.
+6. **Evaluar en test** → una sola vez, al final.
+7. **Comparar contra baseline** → ¿el modelo aporta valor real?
+8. **Reportar** → resultados, limitaciones y recomendación.
+
+---
+
+## Checklist
+
+Al finalizar esta sesión, debes poder:
+
+- [ ] Explicar por qué no se debe evaluar un modelo con los mismos datos con los que se entrenó.
+- [ ] Describir la separación train/test y la regla de oro del test set.
+- [ ] Distinguir overfitting de underfitting y explicar cómo se detectan.
+- [ ] Explicar qué es un baseline y por qué siempre hay que comparar contra él.
+- [ ] Describir la idea de validación cruzada y para qué sirve.
+- [ ] Definir data leakage, dar un ejemplo y explicar por qué es peligroso.
+
+## Preguntas de comprensión — Sesión 2
+
+**Pregunta 1.** Un equipo entrena un modelo de clasificación que obtiene 95% de accuracy en entrenamiento y 62% en test. ¿Qué está pasando? ¿Cómo se lo explicarías al gerente que pide poner este modelo en producción?
+
+<details>
+<summary>Ver respuesta</summary>
+**Respuesta esperada:** Overfitting — memorizó los datos de entrenamiento pero no generaliza. Al gerente le explicaría que el modelo parece bueno "en el laboratorio" pero probablemente fallará con clientes reales. Necesitamos simplificarlo o conseguir más datos.
+</details>
+
+**Pregunta 2.** En un problema de churn, el 92% de los clientes no canceló. Un analista dice: "Mi modelo tiene 92% de accuracy, está listo para producción." ¿Qué le dirías?
+
+<details>
+<summary>Ver respuesta</summary>
+**Respuesta esperada:** Que el baseline (predecir siempre "no cancela") también tiene 92% de accuracy. Su modelo no aporta nada más allá de la estrategia más ingenua. Necesita evaluar con métricas más informativas (como precision/recall).
+</details>
+
+**Pregunta 3.** Un compañero te dice: "Antes de separar train y test, normalicé todas las variables usando el promedio y la desviación estándar de toda la base." ¿Hay algún problema?
+
+<details>
+<summary>Ver respuesta</summary>
+**Respuesta esperada:** Sí, eso es data leakage. El promedio y la desviación estándar incluyen información de test. Lo correcto es calcular esos estadísticos solo con train y aplicarlos a test.
+</details>
+
+---
+
+<!--=================-->
+<!--=================-->
+# Métricas: ¿qué tan bueno es un modelo?
+
+<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+{{< video https://youtu.be/hiM2NS2r3gM >}}
+
+---
+
+## ¿Por qué necesitamos métricas?
+
+Imaginen que un equipo de analítica le presenta a la gerencia un modelo de predicción de churn y dice: "el modelo funciona bien". La pregunta inmediata de cualquier gerente sería: ¿qué tan bien? ¿Mejor que lo que ya teníamos? ¿Lo suficiente como para invertir recursos en implementarlo?. "Funciona bien" no es una respuesta aceptable. Necesitamos  métricas que nos permitan:
+
+- **Comparar un modelo contra el baseline.** Si el modelo no supera a la estrategia más ingenua (como vimos en el Eje 2), no aporta valor. Las métricas nos dan esa comparación objetiva.
+- **Comparar dos o más modelos entre sí.** Cuando hay varias opciones sobre la mesa — un modelo simple vs. uno complejo, por ejemplo — las métricas nos dicen cuál funciona mejor en los datos de test.
+- **Comunicar resultados al negocio en un lenguaje que genere acción.** "El modelo acierta en el 78% de los casos" o "se equivoca en promedio por $42 por cliente" son frases que un gerente puede usar para tomar decisiones. "Funciona bien" no lo es.
+- **Decidir si el modelo es lo suficientemente bueno** para la decisión que queremos tomar. Un modelo que se equivoca por $5 en promedio puede ser excelente para planificar inventario, pero insuficiente para cotizar seguros de alto valor.
+
+Ahora bien, no existe una sola métrica que sirva para todo. Las métricas son diferentes según el tipo de problema: **clasificación** tiene las suyas, **regresión** tiene las suyas. Y dentro de cada tipo, la métrica correcta depende del contexto de negocio. Veamos cada grupo.
+
+---
+
+## Métricas de clasificación
+
+En un problema de clasificación, el modelo predice una **clase** — por ejemplo: "cancela" o "no cancela", "fraude" o "legítima". Las métricas evalúan qué tan bien acertó esa predicción comparada con lo que realmente ocurrió.
+
+### La matriz de confusión: el punto de partida
+
+Antes de hablar de cualquier métrica, necesitamos una herramienta que organice todos los aciertos y errores del modelo en un solo lugar. Esa herramienta es la matriz de confusión. Es simplemente una tabla de 2×2 que cruza dos cosas: **lo que el modelo predijo** vs. **lo que realmente pasó**. Cada celda tiene un nombre que describe qué tipo de resultado es:
+
+| | **Predicho: Sí** | **Predicho: No** |
+|---|---|---|
+| **Real: Sí** | Verdadero Positivo (VP) | Falso Negativo (FN)) |
+| **Real: No** | Falso Positivo (FP) | Verdadero Negativo (VN) |
+
+Detengámonos en cada celda, porque entender bien estas cuatro categorías es la base de todo lo que sigue:
+
+- **Verdadero Positivo (VP):** El modelo dijo "sí" y la realidad era "sí". Es un acierto en la detección del evento que nos interesa.
+- **Verdadero Negativo (VN):** El modelo dijo "no" y la realidad era "no". También es un acierto, pero en el sentido contrario: correctamente descartó un caso.
+- **Falso Positivo (FP):** El modelo dijo "sí" pero la realidad era "no". Es una **falsa alarma**. El modelo "gritó fuego" donde no había fuego.
+- **Falso Negativo (FN):** El modelo dijo "no" pero la realidad era "sí". **Se le escapó** un caso real. El modelo no detectó algo que debió haber detectado.
+
+### Ejemplo concreto: detección de fraude
+
+Un modelo de detección de fraude evalúa 1,000 transacciones. VP = 40 (fraudes detectados), FN = 10 (fraudes escapados), FP = 30 (falsas alarmas), VN = 920 (legítimas correctas). De esta matriz se derivan todas las métricas de clasificación. Para que estos conceptos cobren vida, usemos un caso de negocio. Supongamos que un banco implementa un modelo para detectar transacciones fraudulentas. El modelo revisa 1,000 transacciones y produce estas predicciones:
+
+| | **Predicho: Fraude** | **Predicho: Legítima** |
+|---|---|---|
+| **Real: Fraude** | 40 (VP) | 10 (FN) |
+| **Real: Legítima** | 30 (FP) | 920 (VN) |
+
+¿Cómo leemos esta tabla?
+
+- **De 50 fraudes reales** (fila superior: 40 + 10), el modelo detectó 40 correctamente (VP) pero se le escaparon 10 (FN). Esos 10 fraudes pasaron como si fueran transacciones normales — el banco perdió dinero en cada uno.
+- **De 950 transacciones legítimas** (fila inferior: 30 + 920), el modelo clasificó 920 correctamente (VN) pero marcó 30 como fraude cuando no lo eran (FP). Esos 30 clientes recibieron un bloqueo o una llamada de verificación innecesaria.
+- **En total**, el modelo acertó en 960 de 1,000 casos (40 VP + 920 VN). Pero como veremos a continuación, ese número por sí solo puede ser engañoso.
+
+De esta matriz se derivan **todas** las métricas de clasificación que veremos ahora. Cada métrica simplemente toma diferentes combinaciones de estas cuatro celdas para responder una pregunta específica.
+
+---
+
+### Accuracy (exactitud)
+
+**¿Qué mide?** La proporción total de predicciones correctas, sin distinguir qué tipo de acierto es: 
+
+Accuracy = (VP + VN) / Total de casos
+
+En nuestro ejemplo: (40 + 920) / 1,000 = **96%**. A primera vista, suena excelente. Un modelo que acierta el 96% de las veces parece difícil de superar. Pero aquí viene una lección fundamental del curso:
+
+::: {.callout-warning}
+**El problema del accuracy con clases desbalanceadas**
+
+Miremos de nuevo los datos. De las 1,000 transacciones, solo 50 eran fraude (5%) y 950 eran legítimas (95%). Ahora imaginen un "modelo" absurdamente simple: siempre dice "legítima", sin importar nada. No analiza ninguna variable, no aprende ningún patrón. Simplemente dice "legítima" para todo. ¿Cuál sería su accuracy? 950 / 1,000 = **95%**. ¡Casi tan bueno como nuestro modelo sofisticado! Y sin detectar un solo fraude. 
+
+Este es el problema: cuando una clase es mucho más frecuente que la otra (lo que en la práctica ocurre casi siempre — pocos clientes cancelan, pocas transacciones son fraude, pocos pacientes tienen la enfermedad), el accuracy se "infla" con los aciertos de la clase mayoritaria y **esconde** el desempeño real en la clase que nos importa. Por eso, accuracy solo es útil como métrica cuando las clases están razonablemente balanceadas. Cuando no lo están — que es la mayoría de los problemas reales de negocio — necesitamos métricas que miren los errores con más detalle.
+:::
+
+---
+
+### Precision (precisión)
+
+Precision responde una pregunta muy específica: **De todos los casos que el modelo marcó como positivos, ¿cuántos realmente lo eran?**. Es decir, cuando el modelo "levanta la mano" y dice "¡esto es fraude!", ¿qué tan confiable es esa alarma?
+
+Precision = VP / (VP + FP)
+
+En nuestro ejemplo: 40 / (40 + 30) = **57%**. Esto significa que cuando el modelo dice "esta transacción es fraude", acierta solo el 57% de las veces. El otro 43% son falsas alarmas — transacciones legítimas que el modelo marcó incorrectamente. 
+
+#### ¿Cuándo es especialmente importante la precision?
+
+Cuando las falsas alarmas tienen un costo alto. Piensen en estos escenarios:
+
+- Si cada alerta de fraude implica bloquear la tarjeta del cliente y llamarlo para verificar, un modelo con baja precision genera miles de llamadas innecesarias, clientes molestos y costos operativos altos.
+- Si un modelo de reclutamiento marca candidatos como "alto potencial" y el equipo de RRHH invierte horas entrevistando a cada uno, muchas falsas alarmas desperdician tiempo valioso.
+- Si un filtro de spam clasifica correos como "basura", cada falso positivo es un correo legítimo que la persona no ve — potencialmente un mensaje importante de un cliente o un jefe.
+
+En todos estos casos, queremos que cuando el modelo diga "sí", **realmente sea sí**. Eso es precision alta.
+
+---
+
+### Recall (sensibilidad)
+
+Recall responde la pregunta complementaria: **De todos los casos que realmente eran positivos, ¿cuántos logró detectar el modelo?** Es decir, del universo de fraudes reales que ocurrieron, ¿cuántos capturó el modelo y cuántos se le escaparon?
+
+Recall = VP / (VP + FN)
+
+En nuestro ejemplo: 40 / (40 + 10) = **80%**. De los 50 fraudes que realmente ocurrieron, el modelo detectó 40 (el 80%). Se le escaparon 10 — esos 10 fraudes pasaron como si fueran transacciones normales y el banco absorbió la pérdida.
+
+#### ¿Cuándo es especialmente importante el recall?
+
+Cuando dejarse un caso sin detectar tiene un costo alto. Piensen en estos escenarios:
+
+- Si cada fraude no detectado representa una pérdida de $10,000 para el banco, esos 10 fraudes escapados cuestan $100,000. El banco prefiere investigar algunas falsas alarmas (costo bajo) antes que dejar pasar fraudes reales (costo alto).
+- Si un modelo de diagnóstico médico no detecta un cáncer en etapa temprana, el paciente pierde la oportunidad de tratamiento oportuno. Una falsa alarma (pedir un examen confirmatorio) es infinitamente menos grave que un caso no detectado.
+- Si una empresa pierde un cliente de alto valor porque el modelo de churn no lo identificó a tiempo, el costo de esa pérdida puede superar con creces el costo de enviar una oferta de retención innecesaria a alguien que no iba a cancelar.
+
+En todos estos casos, queremos que el modelo **no se le escape ningún caso positivo**, aunque esto signifique generar algunas falsas alarmas. Eso es recall alto.
+
+---
+
+### El trade-off entre precision y recall
+
+Aquí viene una de las ideas más importantes de esta semana, y una que aparece constantemente en decisiones reales de negocio: **Precision y recall están en tensión.** Mejorar una generalmente empeora la otra. No se pueden maximizar ambas al mismo tiempo. ¿Por qué? Porque el modelo produce probabilidades (por ejemplo, "esta transacción tiene 73% de probabilidad de ser fraude"), y nosotros elegimos un **umbral** para convertir esa probabilidad en una decisión de sí/no.
+
+- Si **bajo el umbral** (por ejemplo, considero fraude todo lo que tenga >30% de probabilidad), el modelo marcará más transacciones como sospechosas. Detectará más fraudes reales (**recall sube**), pero también generará más falsas alarmas (**precision baja**).
+- Si **subo el umbral** (considero fraude solo lo que tenga >90% de probabilidad), el modelo será más selectivo. Cuando diga "fraude", casi seguro será fraude (**precision sube**), pero se le escaparán muchos casos que no alcanzan ese umbral tan alto (**recall baja**).
+
+No hay un umbral "correcto" universal. **La elección depende del costo relativo de cada tipo de error** en el contexto específico del problema.
+
+| Contexto | ¿Qué priorizar? | ¿Por qué? |
+|---|---|---|
+| Fraude bancario | Recall alto | Un fraude no detectado cuesta miles de dólares; una falsa alarma cuesta una llamada de verificación |
+| Filtro de spam | Precision alto | Un correo legítimo en la carpeta de spam puede ser un mensaje crítico del jefe |
+| Diagnóstico médico (screening) | Recall alto | No detectar una enfermedad puede ser fatal; un falso positivo solo genera un examen confirmatorio |
+| Publicidad dirigida | Precision alto | Enviar ofertas a personas no interesadas desperdicia presupuesto de marketing |
+
+La decisión de qué métrica priorizar **no es técnica, es de negocio.** El analista debe entender los costos de cada tipo de error, discutirlos con las áreas involucradas, y elegir el balance adecuado. Un modelo no existe en el vacío: existe para informar una acción concreta, y esa acción tiene costos y beneficios asociados a cada tipo de error.
+
+---
+
+## Métricas de regresión
+
+En un problema de regresión, el modelo no predice una categoría ("sí" o "no") sino un número: cuánto va a gastar un cliente, cuántos días tardará un envío, cuántas unidades se venderán. La pregunta ya no es "¿acertó o no?" sino **¿por cuánto se equivocó?**. Las métricas de regresión miden exactamente eso: la distancia entre lo que el modelo predijo y lo que realmente ocurrió. Veamos las dos más importantes.
+
+### MAE (Mean Absolute Error — Error Absoluto Medio)
+
+El MAE responde la pregunta más intuitiva posible: **En promedio, ¿por cuánto se equivoca el modelo?**. Se calcula tomando cada predicción, midiendo qué tan lejos quedó del valor real (en valor absoluto, sin importar si fue por arriba o por abajo), y promediando todos esos errores.
+
+**Ejemplo concreto:** Supongamos que un modelo predice las ventas mensuales de 5 tiendas:
+
+| Tienda | Ventas reales | Predicción | Error absoluto |
+|---|---|---|---|
+| A | $1,200 | $1,250 | $50 |
+| B | $800 | $780 | $20 |
+| C | $2,000 | $1,850 | $150 |
+| D | $950 | $960 | $10 |
+| E | $1,500 | $1,430 | $70 |
+
+MAE = ($50 + $20 + $150 + $10 + $70) / 5 = **$60**
+
+**¿Cómo se lee?** "En promedio, las predicciones del modelo se desvían $60 del valor real." A veces el modelo predice de más, a veces de menos, pero en promedio el error es de $60.
+
+**Ventajas del MAE:**
+
+- **Se interpreta directamente en las unidades del target.** Si predices ventas en pesos, MAE está en pesos. Si predices días de entrega, MAE está en días. No necesitas ninguna transformación para entenderlo.
+- **Trata todos los errores por igual.** Un error de $150 "pesa" exactamente 3 veces más que uno de $50 en el promedio. No más, no menos.
+
+### RMSE (Root Mean Squared Error — Raíz del Error Cuadrático Medio)
+
+El RMSE responde una pregunta ligeramente diferente: **¿Por cuánto se equivoca el modelo, penalizando especialmente los errores grandes?**. Se calcula elevando cada error al cuadrado (lo que amplifica los errores grandes), promediando esos cuadrados, y sacando la raíz cuadrada para volver a las unidades originales. Con los mismos datos del ejemplo anterior:
+
+Errores al cuadrado: $50² + $20² + $150² + $10² + $70² = 2,500 + 400 + 22,500 + 100 + 4,900 = 30,400
+
+RMSE = √(30,400 / 5) = √6,080 ≈ **$78**
+
+**Noten que MAE = $60** pero **RMSE = $78**. ¿Por qué la diferencia? Porque el error de la Tienda C ($150) es mucho mayor que los demás. Al elevar al cuadrado, ese error grande se amplifica desproporcionadamente: $150² = 22,500, que es el 74% de la suma total de errores al cuadrado. El RMSE está "alertando" de que hay errores grandes en las predicciones.
+
+### ¿Cuándo preferir RMSE sobre MAE?
+
+Cuando los **errores grandes son especialmente costosos** para el negocio. Piensen en estos escenarios:
+
+- **Inventario:** Si predices que una tienda venderá 100 unidades y vende 250, te quedaste sin stock, perdiste ventas, y los clientes se fueron a la competencia. Equivocarte por mucho es desproporcionadamente peor que equivocarte un poco.
+- **Logística:** Si predices que un envío tarda 3 días y tarda 10, el cliente probablemente cancela y pide reembolso. Un error de 7 días es mucho más grave que siete errores de 1 día.
+- **Presupuesto:** Si subestimas los costos de un proyecto por $500,000, puede haber consecuencias financieras serias. Cinco errores de $100,000 son manejables; uno de $500,000 puede no serlo.
+
+En cambio, si todos los errores tienen un costo proporcional a su tamaño — un error de $100 cuesta exactamente el doble que uno de $50 — entonces MAE es suficiente y más fácil de interpretar.
+
+### ¿Cómo saber si un MAE/RMSE es "bueno"?
+
+Un MAE de $35 no significa nada por sí solo. Puede ser excelente o terrible dependiendo del contexto. Las dos referencias que siempre debes usar:
+
+**(1) Comparar contra el baseline.** Recuerda la Sesión 2: el baseline en regresión es predecir siempre el promedio (o la mediana) del target. Si el baseline tiene MAE = $48 y tu modelo tiene MAE = $35, el modelo mejoró un 27% respecto a la estrategia más ingenua. Eso es informativo — ahora puedes decir "el modelo reduce el error en un 27% respecto a no usar ningún modelo".
+
+**(2) Comparar contra el contexto de negocio.** Pregúntate: ¿un error de $35 es aceptable para la decisión que quiero tomar? Si estás prediciendo ventas mensuales de $5,000 por tienda, un error de $35 es el 0.7% — probablemente más que suficiente. Si estás prediciendo el monto de un microcrédito de $50, un error de $35 es el 70% — completamente inaceptable.
+
+---
+
+## Siempre comparar contra el baseline
+
+Este punto merece énfasis propio porque es uno de los errores más frecuentes que cometen los analistas, incluso los experimentados: **reportar métricas sin contexto**. Decir "el modelo tiene 87% de accuracy" o "el modelo tiene MAE de $42" suena informativo, pero en realidad no dice nada útil si no sabemos **contra qué estamos comparando**. ¿87% es bueno? Depende. ¿$42 de error es aceptable? Depende. ¿De qué depende? Del baseline.
+
+### El patrón correcto de reporte
+
+En lugar de presentar una sola cifra, siempre presenta una **tabla comparativa** que incluya el baseline como primera fila:
+
+| Modelo | Accuracy | Precision | Recall |
+|---|---|---|---|
+| Baseline (clase mayoritaria) | 85% | — | 0% |
+| Modelo A | 87% | 45% | 62% |
+| Modelo B | 84% | 58% | 71% |
+
+Ahora sí podemos interpretar con fundamento:
+
+- **Modelo A** tiene 87% de accuracy — apenas 2 puntos por encima del baseline (85%). Si solo miramos accuracy, parece que el modelo apenas aporta. Pero al menos tiene recall de 62%, lo que significa que detecta positivos que el baseline ignora por completo (recall = 0%).
+- **Modelo B** tiene 84% de accuracy — **menos** que el baseline. Si un gerente viera solo esa columna, rechazaría el modelo inmediatamente. Pero miren precision (58%) y recall (71%): es significativamente mejor que el Modelo A para detectar los casos que realmente importan. El "costo" de esa mejora es que genera más falsas alarmas, lo que baja el accuracy total.
+- **El baseline** tiene 85% de accuracy sin detectar un solo positivo. Esto revela que accuracy por sí solo es una métrica casi inútil en este problema.
+
+::: {.callout-warning}
+**Sin baseline, "87% accuracy" suena impresionante. Con baseline, se ve que apenas aporta.** El baseline le da escala y contexto a todas las demás métricas. Nunca presenten un resultado sin él.
+:::
+
+### Lo mismo aplica en regresión
+
+| Modelo | MAE | RMSE |
+|---|---|---|
+| Baseline (predecir promedio) | $48 | $62 |
+| Modelo X | $35 | $41 |
+| Modelo Y | $33 | $58 |
+
+Lectura: ambos modelos mejoran sobre el baseline, pero el Modelo Y tiene RMSE alto — señal de errores grandes esporádicos. Dependiendo de si los errores grandes importan, podríamos preferir X (más consistente) o Y (mejor en promedio, pero con sorpresas).
+
+---
+
+## De la métrica a la decisión de negocio
+
+Llegamos al paso más importante — y el que frecuentemente se omite. Las métricas son **herramientas intermedias**, no el producto final. El producto final es una decisión de negocio informada. Un analista que entrega un reporte diciendo "el modelo tiene 78% de recall y 54% de precision" sin traducir esos números a consecuencias prácticas está dejando el trabajo a medias. El gerente, el director de operaciones o el VP de marketing no piensa en "recall"; piensa en clientes, dinero y recursos.
+
+### Las preguntas que cierran el puente
+
+Después de calcular las métricas, el analista debe hacerse (y responder) preguntas como estas:
+
+- **"El modelo detecta el 80% de los fraudes. ¿Qué pasa con el 20% que se nos escapa?"** Si tenemos 1,000 fraudes al mes y cada fraude cuesta en promedio $5,000, el 20% que se escapa representa 200 fraudes × $5,000 = **$1,000,000 en pérdidas mensuales**. ¿Es aceptable? ¿Qué costaría subir el recall al 90%?
+
+- **"El modelo genera un 43% de falsas alarmas. ¿Cuánto cuesta cada una?"** Si cada falsa alarma requiere 15 minutos de un analista a $25/hora + una llamada al cliente, cada falsa alarma cuesta ~$10. Si el modelo produce 500 falsas alarmas al mes, son $5,000 en costos operativos. ¿Ese costo es aceptable a cambio del fraude que sí detecta?
+
+- **"El modelo predice ventas con un error promedio de $35 por producto. ¿Eso alcanza?"** Si usamos la predicción para decidir cuánto inventario ordenar y el margen por producto es $15, un error de $35 puede generar más pérdidas por sobrestock o quiebres de stock que ganancias por optimizar. Quizás necesitamos un modelo más preciso — o quizás necesitamos aceptar un margen de seguridad en el inventario.
+
+### El criterio de decisión final
+
+**El mejor modelo no es el que tiene el número más alto en una métrica.** Es el que minimiza el costo total de los errores — o equivalentemente, el que maximiza el valor neto — en el contexto específico del problema. Esto implica que dos empresas con el mismo modelo y las mismas métricas podrían tomar decisiones opuestas. Para un banco grande con un equipo de investigación robusto, un modelo con alto recall y baja precision puede ser ideal (pueden investigar muchas alertas). Para un banco pequeño con recursos limitados, un modelo con alta precision puede ser más práctico (solo investigan los casos más claros). Las métricas iluminan las opciones. El negocio elige entre ellas.
+
+---
+
+## Checklist
+
+Al finalizar esta sesión, debes poder:
+
+- [ ] Explicar qué es la matriz de confusión y qué representa cada celda.
+- [ ] Describir qué mide accuracy y por qué es engañoso con clases desbalanceadas.
+- [ ] Explicar qué mide precision, qué mide recall, y por qué están en tensión.
+- [ ] Decidir si priorizar precision o recall según el contexto de negocio.
+- [ ] Describir MAE y RMSE, en qué se diferencian y cuándo usar cada uno.
+- [ ] Justificar por qué siempre hay que comparar las métricas contra un baseline.
+
+## Preguntas de comprensión — Sesión 3
+
+**Pregunta 1.** Un hospital usa un modelo para detectar pacientes con riesgo de diabetes. Precision = 60%, Recall = 95%. ¿Es un buen modelo para este contexto? ¿Por qué?
+
+<details>
+<summary>Ver respuesta</summary>
+**Respuesta esperada:** Probablemente sí. En screening médico es más importante no dejarse pacientes sin detectar (recall 95%). Una falsa alarma significa un examen confirmatorio adicional; un caso no detectado puede ser una enfermedad no tratada a tiempo.
+</details>
+
+**Pregunta 2.** Tienes dos modelos de regresión. Modelo X: MAE=$120, RMSE=$130. Modelo Y: MAE=$125, RMSE=$200. ¿Qué puedes inferir sobre los errores de cada uno?
+
+<details>
+<summary>Ver respuesta</summary>
+**Respuesta esperada:** Modelo X tiene errores más consistentes (MAE y RMSE cerca). Modelo Y tiene un RMSE mucho mayor que su MAE, lo que indica errores muy grandes que inflan el RMSE. Si los errores grandes son costosos, X es preferible.
+</details>
+
+**Pregunta 3.** Un analista reporta: "Nuestro modelo de churn tiene 91% de accuracy." ¿Qué pregunta le harías antes de evaluar si es bueno?
+
+<details>
+<summary>Ver respuesta</summary>
+**Respuesta esperada:** "¿Cuál es la distribución de las clases?" o "¿Cuál es el accuracy del baseline?". Si el 90% no cancela, el baseline tiene 90%. Un 91% apenas supera. También preguntar por precision y recall.
+</details>
+
+---
+
+<!--=================-->
+<!--=================-->
+# Aplicación guiada: comparando modelos
+
+Vamos a trabajar con un dataset donde ya tenemos: (i) el valor real de la variable target, y (ii) las predicciones de tres modelos distintos. Nuestro trabajo no es entrenar modelos, sino **evaluarlos y compararlos**: construir matrices de confusión, calcular métricas y traducir los números a una recomendación de negocio. **Contexto de negocio:** Una empresa de e-commerce quiere identificar clientes que abandonarán (churn) en los próximos 30 días para lanzar una campaña de retención. Tres equipos propusieron modelos diferentes. Debemos evaluar cuál recomendamos.
+
+---
+
+## Paso 1 — Cargar los datos
+
+El dataset `evaluacion_modelos` contiene 500 clientes con el resultado real y las predicciones de tres modelos. Veamos las primeras filas del dataset:
+
+```{webr-r}
+#| context: setup
+
+## Generar dataset de evaluación (500 clientes)
+set.seed(2026)
+n <- 500
+
+## Target real: 15% de churn (desbalanceado, como en la vida real)
+real <- sample(c("cancela", "no_cancela"), n, replace = TRUE, prob = c(0.15, 0.85))
+
+## Modelo A: conservador (pocos positivos, alta precision, bajo recall)
+pred_a <- ifelse(real == "cancela",
+                 sample(c("cancela", "no_cancela"), n, replace = TRUE, prob = c(0.55, 0.45)),
+                 sample(c("cancela", "no_cancela"), n, replace = TRUE, prob = c(0.03, 0.97)))
+
+## Modelo B: agresivo (muchos positivos, alto recall, baja precision)
+pred_b <- ifelse(real == "cancela",
+                 sample(c("cancela", "no_cancela"), n, replace = TRUE, prob = c(0.90, 0.10)),
+                 sample(c("cancela", "no_cancela"), n, replace = TRUE, prob = c(0.20, 0.80)))
+
+## Modelo C: balanceado
+pred_c <- ifelse(real == "cancela",
+                 sample(c("cancela", "no_cancela"), n, replace = TRUE, prob = c(0.72, 0.28)),
+                 sample(c("cancela", "no_cancela"), n, replace = TRUE, prob = c(0.08, 0.92)))
+
+evaluacion <- data.frame(
+  cliente_id = 1:n,
+  real = real,
+  modelo_a = pred_a,
+  modelo_b = pred_b,
+  modelo_c = pred_c
+)
+
+rm(pred_a,pred_b,pred_c,real,n)
+```
+
+```{webr-r}
+## Ver las primeras 10 filas
+head(evaluacion, 10)
+```
+
+**Pregunta para pensar:** ¿Cuántos clientes realmente cancelaron? ¿Qué porcentaje del total representan?
+
+```{webr-r}
+## ¿Cuántos cancelaron realmente?
+table(evaluacion$real)
+```
+
+---
+
+## Paso 2 — Construir la matriz de confusión
+
+La función `table()` en R nos da directamente la matriz de confusión. Recuerda: filas = predicción, columnas = realidad (o viceversa, según cómo lo armemos).
+
+```{webr-r}
+## Matriz de confusión del Modelo A
+## Filas: predicción del modelo | Columnas: valor real
+mc_a <- table(Prediccion = evaluacion$modelo_a, Real = evaluacion$real)
+mc_a
+```
+
+```{webr-r}
+## Matriz de confusión del Modelo B
+mc_b <- table(Prediccion = evaluacion$modelo_b, Real = evaluacion$real)
+mc_b
+```
+
+```{webr-r}
+## Matriz de confusión del Modelo C
+mc_c <- table(Prediccion = evaluacion$modelo_c, Real = evaluacion$real)
+mc_c
+```
+
+::: {.callout-practice}
+**Antes de seguir:** Mira las tres matrices. A simple vista, ¿cuál modelo parece detectar más casos de churn? ¿Cuál parece generar más falsas alarmas?
+:::
+
+---
+
+## Paso 3 — Calcular métricas
+
+Vamos a extraer VP, FP, FN y VN de cada matriz y calcular accuracy, precision y recall. Construiremos una función sencilla para no repetir código:
+
+```{webr-r}
+## Función para calcular métricas desde una matriz de confusión
+## Asume: filas = predicción, columnas = real
+## Clase positiva = "cancela"
+metricas_ml <- function(mc) {
+               vp <- mc["cancela", "cancela"]
+               vn <- mc["no_cancela", "no_cancela"]
+               fp <- mc["cancela", "no_cancela"]
+               fn <- mc["no_cancela", "cancela"]
+            
+               accuracy <- (vp + vn) / sum(mc)
+               precision <- vp / (vp + fp)
+               recall <- vp / (vp + fn)
+            
+               data.frame(VP = vp, FP = fp, FN = fn, VN = vn,
+                          Accuracy  = round(accuracy, 3),
+                          Precision = round(precision, 3),
+                          Recall    = round(recall, 3))
+}
+```
+
+```{webr-r}
+## Métricas del Modelo A
+metricas_a <- calcular_metricas(mc_a)
+metricas_a
+```
+
+```{webr-r}
+## Métricas del Modelo B
+metricas_b <- calcular_metricas(mc_b)
+metricas_b
+```
+
+```{webr-r}
+## Métricas del Modelo C
+metricas_c <- calcular_metricas(mc_c)
+metricas_c
+```
+
+---
+
+## Paso 4 — Calcular el baseline
+
+Recuerda: el baseline es predecir siempre la clase más frecuente. ¿Cuál es?
+
+```{webr-r}
+## ¿Cuál es la clase mayoritaria?
+tabla_real <- table(evaluacion$real)
+tabla_real
+
+## Accuracy del baseline: proporción de la clase mayoritaria
+baseline_accuracy <- max(tabla_real) / sum(tabla_real)
+baseline_accuracy
+```
+
+**Pregunta clave:** Si el baseline tiene ~85% de accuracy, ¿alguno de los tres modelos realmente supera esta referencia de manera significativa? ¿Cuál?
+
+---
+
+## Paso 5 — Tabla comparativa final
+
+Unimos todo en una sola tabla para comparar:
+
+```{webr-r}
+## Tabla comparativa
+comparativa <- rbind(
+  data.frame(Modelo = "Baseline", VP = 0, FP = 0, FN = sum(evaluacion$real == "cancela"), VN = sum(evaluacion$real == "no_cancela"), Accuracy = round(baseline_accuracy, 3), Precision = NA, Recall = 0),
+  data.frame(Modelo = "Modelo A", metricas_a),
+  data.frame(Modelo = "Modelo B", metricas_b),
+  data.frame(Modelo = "Modelo C", metricas_c)
+)
+comparativa
+```
+
+---
+
+## Paso 6 — Interpretación y recomendación de negocio
+
+**Contexto para la decisión:** La empresa planea enviar un paquete de retención (descuento + llamada personalizada) a los clientes que el modelo identifique como "va a cancelar". Cada paquete cuesta **$50**. Cada cliente que cancela representa una pérdida promedio de **$800** en ingresos anuales.
+
+Con esta información, responde:
+
+1. **¿Qué modelo recomendarías?** Justifica con las métricas de la tabla.
+2. **¿Por qué no basta con mirar accuracy?** ¿Qué pasa con el baseline?
+3. **¿Qué costos implica cada tipo de error?**
+    - Falso Positivo (enviar paquete a alguien que no iba a cancelar) → costo: $50
+    - Falso Negativo (no detectar a alguien que sí cancela) → costo: $800
+4. **¿Qué métrica debería priorizar esta empresa: precision o recall?** ¿Por qué?
+:::
+
+**Reflexión final:** Calcula el costo total de errores de cada modelo usando la fórmula: Costo = (FP × $50) + (FN × $800). ¿Cuál modelo minimiza el costo total?
+
+```{webr-r}
+## Costo de errores de cada modelo
+## FP cuesta $50 (paquete enviado innecesariamente)
+## FN cuesta $800 (cliente perdido)
+
+costo_a <- metricas_a$FP * 50 + metricas_a$FN * 800
+costo_b <- metricas_b$FP * 50 + metricas_b$FN * 800
+costo_c <- metricas_c$FP * 50 + metricas_c$FN * 800
+costo_baseline <- sum(evaluacion$real == "cancela") * 800
+
+data.frame(
+  Modelo = c("Baseline", "Modelo A", "Modelo B", "Modelo C"),
+  Costo_Total = c(costo_baseline, costo_a, costo_b, costo_c)
+)
+```
+
+::: {.callout-key}
+**Mensaje final**
+
+El mejor modelo no es el que tiene el accuracy más alto. Es el que **minimiza el costo total de los errores** en el contexto específico del problema. Las métricas son herramientas; la decisión siempre es de negocio.
+:::
+
+
+```{=html}
+<!-- Panel Environment -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">&#x1F4E6; Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
+  </div>
+</div>
+
+<script type="module">
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
+};
+
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Env panel error:', e);
+    return [];
+  }
+}
+
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+function moveWebRStatus() {
+  const anchor = document.getElementById('webr-status-anchor');
+  const statusArea = document.getElementById('qwebr-status-message-area');
+  if (anchor && statusArea) {
+    const wrapper = statusArea.closest('.quarto-title-meta');
+    if (wrapper) {
+      wrapper.style.display = 'inline';
+      wrapper.style.fontSize = '13px';
+      wrapper.style.marginLeft = '30px';
+      anchor.parentNode.insertBefore(wrapper, anchor);
+    }
+  }
+}
+
+async function init() {
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
+  moveWebRStatus();
+
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+```

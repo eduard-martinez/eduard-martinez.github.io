@@ -1,0 +1,3635 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Unidad 6 - Fundamentos de Machine Learning</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="week-09_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-09_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-09_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-09_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-09_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-09_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-09_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-09_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-09_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-09_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-09_files/libs/bootstrap/bootstrap-e6bb25874def5e3c119f13f2169c6013.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+<style type="text/css">
+.monaco-editor pre {
+  background-color: unset !important;
+}
+
+.qwebr-editor-toolbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.qwebr-editor-toolbar-left-buttons, .qwebr-editor-toolbar-right-buttons {
+  display: flex;
+}
+
+.qwebr-non-interactive-loading-container.qwebr-cell-needs-evaluation, .qwebr-non-interactive-loading-container.qwebr-cell-evaluated {
+  justify-content: center;
+  display: flex;
+  background-color: rgba(250, 250, 250, 0.65);
+  border: 1px solid rgba(233, 236, 239, 0.65);
+  border-radius: 0.5rem;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.qwebr-r-project-logo {
+  color: #2767B0; /* R Project's blue color */
+}
+
+.qwebr-icon-status-spinner {
+  color: #7894c4;
+}
+
+.qwebr-icon-run-code {
+  color: #0d9c29
+}
+
+body.quarto-light .qwebr-output-code-stdout {
+  color: #111;
+}
+
+body.quarto-dark .qwebr-output-code-stdout {
+  color: #EEE;
+}
+
+.qwebr-output-code-stderr {
+  color: #db4133;
+}
+
+body.quarto-light .qwebr-editor {
+  border: 1px solid #EEEEEE;
+}
+
+body.quarto-light .qwebr-editor-toolbar {
+  background-color: #EEEEEE;
+  padding: 0.2rem 0.5rem;
+}
+
+body.quarto-dark .qwebr-editor {
+  border: 1px solid #111;
+}
+
+body.quarto-dark .qwebr-editor-toolbar {
+  background-color: #111;
+  padding: 0.2rem 0.5rem;
+}
+
+.qwebr-button {
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+  text-align: center;
+  padding: 0.375rem 0.75rem;
+  font-size: .9rem;
+  border-radius: 0.25rem;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+body.quarto-light .qwebr-button {
+  background-color: #EEEEEE;
+  color: #000;
+  border-color: #dee2e6;
+  border: 1px solid rgba(0,0,0,0);
+}
+
+body.quarto-dark .qwebr-button {
+  background-color: #111;
+  color: #EEE;
+  border-color: #dee2e6;
+  border: 1px solid rgba(0,0,0,0);
+}
+
+body.quarto-light .qwebr-button:hover {
+  color: #000;
+  background-color: #d9dce0;
+  border-color: #c8ccd0;
+}
+
+body.quarto-dark .qwebr-button:hover {
+  color: #d9dce0;
+  background-color: #323232;
+  border-color: #d9dce0;
+}
+
+.qwebr-button:disabled,.qwebr-button.disabled,fieldset:disabled .qwebr-button {
+  pointer-events: none;
+  opacity: .65
+}
+
+.qwebr-button-reset {
+  color: #696969; /*#4682b4;*/
+}
+
+.qwebr-button-copy {
+  color: #696969;
+}
+
+/* Style the code highlight lines */
+body.quarto-light .qwebr-editor-highlight-line {
+  background-color: lightblue;
+}
+
+body.quarto-dark .qwebr-editor-highlight-line {
+  background-color: darkblue;
+}
+
+/* Style the modal pop-up */
+
+/* The Modal (background) */
+.qwebr-modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
+
+/* Modal Content */
+.qwebr-modal-content {
+  background-color: #fefefe;
+  margin: 5% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.qwebr-modal-content-code {
+  max-height: 50vh;
+  min-height: 5vh;
+  overflow: scroll;
+  border: 1px solid #888;
+}
+
+/* The Close Button */
+.qwebr-modal-close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.qwebr-modal-close:hover,
+.qwebr-modal-close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.qwebr-download-btn {
+  margin-top: 10px;
+  text-decoration: none !important;
+}
+
+/* Styling to download image that is created */
+
+.qwebr-canvas-image {
+  position: relative;
+  display: inline-block;
+  margin: 10px;
+}
+
+.qwebr-canvas-image-download-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: none;
+}
+
+figure:hover .qwebr-canvas-image-download-btn {
+  display: block;
+}
+
+/* Custom styling for RevealJS Presentations*/
+
+/* Reset the style of the interactive area */
+.reveal div.qwebr-interactive-area {
+  display: block;
+  box-shadow: none;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Provide space to entries */
+.reveal div.qwebr-output-code-area pre div {
+  margin: 1px 2px 1px 10px;
+}
+
+/* Collapse the inside code tags to avoid extra space between line outputs */
+.reveal pre div code.qwebr-output-code-stdout, .reveal pre div code.qwebr-output-code-stderr {
+  padding: 0;
+  display: contents;
+}
+
+body.reveal.quarto-light pre div code.qwebr-output-code-stdout {
+  color: #111;
+}
+
+body.reveal.quarto-dark pre div code.qwebr-output-code-stdout {
+  color: #EEEEEE;
+}
+
+.reveal pre div code.qwebr-output-code-stderr {
+  color: #db4133;
+}
+
+
+/* Create a border around console and output (does not effect graphs) */
+body.reveal.quarto-light div.qwebr-console-area {
+  border: 1px solid #EEEEEE;
+  box-shadow: 2px 2px 10px #EEEEEE;
+}
+
+body.reveal.quarto-dark div.qwebr-console-area {
+  border: 1px solid #111;
+  box-shadow: 2px 2px 10px #111;
+}
+
+
+/* Cap output height and allow text to scroll */
+/* TODO: Is there a better way to fit contents/max it parallel to the monaco editor size? */
+.reveal div.qwebr-output-code-area pre {
+  max-height: 400px;
+  overflow: scroll;
+}
+
+iframe.qwebr-output-code-browse {
+  width: 100%;
+
+  /*
+    TODO: How to make the height automatic according to the widget size,
+    or respect the quarto code block options?
+  */
+  min-height: 500px;
+}
+
+</style>
+<script type="module">
+// Document level settings ----
+
+// Determine if we need to install R packages
+globalThis.qwebrInstallRPackagesList = ['dplyr', 'ggplot2', 'skimr'];
+
+// Specify possible locations to search for the repository
+globalThis.qwebrPackageRepoURLS = ['https://repo.r-wasm.org/'];
+
+// Check to see if we have an empty array, if we do set to skip the installation.
+globalThis.qwebrSetupRPackages = !(qwebrInstallRPackagesList.indexOf("") !== -1);
+globalThis.qwebrAutoloadRPackages = true;
+
+// Display a startup message?
+globalThis.qwebrShowStartupMessage = true;
+globalThis.qwebrShowHeaderMessage = false;
+
+// Describe the webR settings that should be used
+globalThis.qwebrCustomizedWebROptions = {
+  "baseURL": "https://webr.r-wasm.org/v0.5.2/",
+  "serviceWorkerUrl": "",
+  "homedir": "/home/web_user", 
+  "channelType": "ChannelType.Automatic"
+};
+
+// Store cell data
+globalThis.qwebrCellDetails = [{"code":"## Generar dataset de evaluación (500 clientes)\nset.seed(2026)\nn <- 500\n\n## Target real: 15% de churn (desbalanceado, como en la vida real)\nreal <- sample(c(\"cancela\", \"no_cancela\"), n, replace = TRUE, prob = c(0.15, 0.85))\n\n## Modelo A: conservador (pocos positivos, alta precision, bajo recall)\npred_a <- ifelse(real == \"cancela\",\n                 sample(c(\"cancela\", \"no_cancela\"), n, replace = TRUE, prob = c(0.55, 0.45)),\n                 sample(c(\"cancela\", \"no_cancela\"), n, replace = TRUE, prob = c(0.03, 0.97)))\n\n## Modelo B: agresivo (muchos positivos, alto recall, baja precision)\npred_b <- ifelse(real == \"cancela\",\n                 sample(c(\"cancela\", \"no_cancela\"), n, replace = TRUE, prob = c(0.90, 0.10)),\n                 sample(c(\"cancela\", \"no_cancela\"), n, replace = TRUE, prob = c(0.20, 0.80)))\n\n## Modelo C: balanceado\npred_c <- ifelse(real == \"cancela\",\n                 sample(c(\"cancela\", \"no_cancela\"), n, replace = TRUE, prob = c(0.72, 0.28)),\n                 sample(c(\"cancela\", \"no_cancela\"), n, replace = TRUE, prob = c(0.08, 0.92)))\n\nevaluacion <- data.frame(\n  cliente_id = 1:n,\n  real = real,\n  modelo_a = pred_a,\n  modelo_b = pred_b,\n  modelo_c = pred_c\n)\n\nrm(pred_a,pred_b,pred_c,real,n)","id":1,"options":{"autorun":"true","classes":"","comment":"","context":"setup","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-1","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Ver las primeras 10 filas\nhead(evaluacion, 10)","id":2,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-2","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Cuántos cancelaron realmente?\ntable(evaluacion$real)","id":3,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-3","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Matriz de confusión del Modelo A\n## Filas: predicción del modelo | Columnas: valor real\nmc_a <- table(Prediccion = evaluacion$modelo_a, Real = evaluacion$real)\nmc_a","id":4,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-4","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Matriz de confusión del Modelo B\nmc_b <- table(Prediccion = evaluacion$modelo_b, Real = evaluacion$real)\nmc_b","id":5,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-5","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Matriz de confusión del Modelo C\nmc_c <- table(Prediccion = evaluacion$modelo_c, Real = evaluacion$real)\nmc_c","id":6,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-6","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Función para calcular métricas desde una matriz de confusión\n## Asume: filas = predicción, columnas = real\n## Clase positiva = \"cancela\"\nmetricas_ml <- function(mc) {\n               vp <- mc[\"cancela\", \"cancela\"]\n               vn <- mc[\"no_cancela\", \"no_cancela\"]\n               fp <- mc[\"cancela\", \"no_cancela\"]\n               fn <- mc[\"no_cancela\", \"cancela\"]\n            \n               accuracy <- (vp + vn) / sum(mc)\n               precision <- vp / (vp + fp)\n               recall <- vp / (vp + fn)\n            \n               data.frame(VP = vp, FP = fp, FN = fn, VN = vn,\n                          Accuracy  = round(accuracy, 3),\n                          Precision = round(precision, 3),\n                          Recall    = round(recall, 3))\n}","id":7,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-7","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Métricas del Modelo A\nmetricas_a <- calcular_metricas(mc_a)\nmetricas_a","id":8,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-8","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Métricas del Modelo B\nmetricas_b <- calcular_metricas(mc_b)\nmetricas_b","id":9,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-9","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Métricas del Modelo C\nmetricas_c <- calcular_metricas(mc_c)\nmetricas_c","id":10,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-10","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Cuál es la clase mayoritaria?\ntabla_real <- table(evaluacion$real)\ntabla_real\n\n## Accuracy del baseline: proporción de la clase mayoritaria\nbaseline_accuracy <- max(tabla_real) / sum(tabla_real)\nbaseline_accuracy","id":11,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-11","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Tabla comparativa\ncomparativa <- rbind(\n  data.frame(Modelo = \"Baseline\", VP = 0, FP = 0, FN = sum(evaluacion$real == \"cancela\"), VN = sum(evaluacion$real == \"no_cancela\"), Accuracy = round(baseline_accuracy, 3), Precision = NA, Recall = 0),\n  data.frame(Modelo = \"Modelo A\", metricas_a),\n  data.frame(Modelo = \"Modelo B\", metricas_b),\n  data.frame(Modelo = \"Modelo C\", metricas_c)\n)\ncomparativa","id":12,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-12","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Costo de errores de cada modelo\n## FP cuesta $50 (paquete enviado innecesariamente)\n## FN cuesta $800 (cliente perdido)\n\ncosto_a <- metricas_a$FP * 50 + metricas_a$FN * 800\ncosto_b <- metricas_b$FP * 50 + metricas_b$FN * 800\ncosto_c <- metricas_c$FP * 50 + metricas_c$FN * 800\ncosto_baseline <- sum(evaluacion$real == \"cancela\") * 800\n\ndata.frame(\n  Modelo = c(\"Baseline\", \"Modelo A\", \"Modelo B\", \"Modelo C\"),\n  Costo_Total = c(costo_baseline, costo_a, costo_b, costo_c)\n)","id":13,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-13","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}}];
+
+</script>
+<script type="module">
+// Declare startupMessageQWebR globally
+globalThis.qwebrStartupMessage = document.createElement("p");
+
+// Verify if OffScreenCanvas is supported
+globalThis.qwebrOffScreenCanvasSupport = function() {
+  return typeof OffscreenCanvas !== 'undefined'
+}
+
+// Function to set the button text
+globalThis.qwebrSetInteractiveButtonState = function(buttonText, enableCodeButton = true) {
+  document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+    btn.innerHTML = buttonText;
+    btn.disabled = !enableCodeButton;
+  });
+}
+
+// Function to update the status message in non-interactive cells
+globalThis.qwebrUpdateStatusMessage = function(message) {
+  document.querySelectorAll(".qwebr-status-text.qwebr-cell-needs-evaluation").forEach((elem) => {
+    elem.innerText = message;
+  });
+}
+
+// Function to update the status message
+globalThis.qwebrUpdateStatusHeader = function(message) {
+  qwebrStartupMessage.innerHTML = `
+    <i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i>
+    <span>${message}</span>`;
+}
+
+// Function to return true if element is found, false if not
+globalThis.qwebrCheckHTMLElementExists = function(selector) {
+  const element = document.querySelector(selector);
+  return !!element;
+}
+
+// Function that detects whether reveal.js slides are present
+globalThis.qwebrIsRevealJS = function() {
+  // If the '.reveal .slides' selector exists, RevealJS is likely present
+  return qwebrCheckHTMLElementExists('.reveal .slides');
+}
+
+// Initialize the Quarto sidebar element
+function qwebrSetupQuartoSidebar() {
+  var newSideBarDiv = document.createElement('div');
+  newSideBarDiv.id = 'quarto-margin-sidebar';
+  newSideBarDiv.className = 'sidebar margin-sidebar';
+  newSideBarDiv.style.top = '0px';
+  newSideBarDiv.style.maxHeight = 'calc(0px + 100vh)';
+
+  return newSideBarDiv;
+}
+
+// Position the sidebar in the document
+function qwebrPlaceQuartoSidebar() {
+  // Get the reference to the element with id 'quarto-document-content'
+  var referenceNode = document.getElementById('quarto-document-content');
+
+  // Create the new div element
+  var newSideBarDiv = qwebrSetupQuartoSidebar();
+
+  // Insert the new div before the 'quarto-document-content' element
+  referenceNode.parentNode.insertBefore(newSideBarDiv, referenceNode);
+}
+
+function qwebrPlaceMessageContents(content, html_location = "title-block-header", revealjs_location = "title-slide") {
+
+  // Get references to header elements
+  const headerHTML = document.getElementById(html_location);
+  const headerRevealJS = document.getElementById(revealjs_location);
+
+  // Determine where to insert the quartoTitleMeta element
+  if (headerHTML || headerRevealJS) {
+    // Append to the existing "title-block-header" element or "title-slide" div
+    (headerHTML || headerRevealJS).appendChild(content);
+  } else {
+    // If neither headerHTML nor headerRevealJS is found, insert after "webr-monaco-editor-init" script
+    const monacoScript = document.getElementById("qwebr-monaco-editor-init");
+    const header = document.createElement("header");
+    header.setAttribute("id", "title-block-header");
+    header.appendChild(content);
+    monacoScript.after(header);
+  }
+}
+
+
+
+function qwebrOffScreenCanvasSupportWarningMessage() {
+  
+  // Verify canvas is supported.
+  if(qwebrOffScreenCanvasSupport()) return;
+
+  // Create the main container div
+  var calloutContainer = document.createElement('div');
+  calloutContainer.classList.add('callout', 'callout-style-default', 'callout-warning', 'callout-titled');
+
+  // Create the header div
+  var headerDiv = document.createElement('div');
+  headerDiv.classList.add('callout-header', 'd-flex', 'align-content-center');
+
+  // Create the icon container div
+  var iconContainer = document.createElement('div');
+  iconContainer.classList.add('callout-icon-container');
+
+  // Create the icon element
+  var iconElement = document.createElement('i');
+  iconElement.classList.add('callout-icon');
+
+  // Append the icon element to the icon container
+  iconContainer.appendChild(iconElement);
+
+  // Create the title container div
+  var titleContainer = document.createElement('div');
+  titleContainer.classList.add('callout-title-container', 'flex-fill');
+  titleContainer.innerText = 'Warning: Web Browser Does Not Support Graphing!';
+
+  // Append the icon container and title container to the header div
+  headerDiv.appendChild(iconContainer);
+  headerDiv.appendChild(titleContainer);
+
+  // Create the body container div
+  var bodyContainer = document.createElement('div');
+  bodyContainer.classList.add('callout-body-container', 'callout-body');
+
+  // Create the paragraph element for the body content
+  var paragraphElement = document.createElement('p');
+  paragraphElement.innerHTML = 'This web browser does not have support for displaying graphs through the <code>quarto-webr</code> extension since it lacks an <code>OffScreenCanvas</code>. Please upgrade your web browser to one that supports <code>OffScreenCanvas</code>.';
+
+  // Append the paragraph element to the body container
+  bodyContainer.appendChild(paragraphElement);
+
+  // Append the header div and body container to the main container div
+  calloutContainer.appendChild(headerDiv);
+  calloutContainer.appendChild(bodyContainer);
+
+  // Append the main container div to the document depending on format
+  qwebrPlaceMessageContents(calloutContainer, "title-block-header"); 
+
+}
+
+
+// Function that attaches the document status message and diagnostics
+function displayStartupMessage(showStartupMessage, showHeaderMessage) {
+  if (!showStartupMessage) {
+    return;
+  }
+
+  // Create the outermost div element for metadata
+  const quartoTitleMeta = document.createElement("div");
+  quartoTitleMeta.classList.add("quarto-title-meta");
+
+  // Create the first inner div element
+  const firstInnerDiv = document.createElement("div");
+  firstInnerDiv.setAttribute("id", "qwebr-status-message-area");
+
+  // Create the second inner div element for "WebR Status" heading and contents
+  const secondInnerDiv = document.createElement("div");
+  secondInnerDiv.setAttribute("id", "qwebr-status-message-title");
+  secondInnerDiv.classList.add("quarto-title-meta-heading");
+  secondInnerDiv.innerText = "WebR Status";
+
+  // Create another inner div for contents
+  const secondInnerDivContents = document.createElement("div");
+  secondInnerDivContents.setAttribute("id", "qwebr-status-message-body");
+  secondInnerDivContents.classList.add("quarto-title-meta-contents");
+
+  // Describe the WebR state
+  qwebrStartupMessage.innerText = "🟡 Loading...";
+  qwebrStartupMessage.setAttribute("id", "qwebr-status-message-text");
+  // Add `aria-live` to auto-announce the startup status to screen readers
+  qwebrStartupMessage.setAttribute("aria-live", "assertive");
+
+  // Append the startup message to the contents
+  secondInnerDivContents.appendChild(qwebrStartupMessage);
+
+  // Add a status indicator for COOP and COEP Headers if needed
+  if (showHeaderMessage) {
+    const crossOriginMessage = document.createElement("p");
+    crossOriginMessage.innerText = `${crossOriginIsolated ? '🟢' : '🟡'} COOP & COEP Headers`;
+    crossOriginMessage.setAttribute("id", "qwebr-coop-coep-header");
+    secondInnerDivContents.appendChild(crossOriginMessage);
+  }
+
+  // Combine the inner divs and contents
+  firstInnerDiv.appendChild(secondInnerDiv);
+  firstInnerDiv.appendChild(secondInnerDivContents);
+  quartoTitleMeta.appendChild(firstInnerDiv);
+
+  // Place message on webpage
+  qwebrPlaceMessageContents(quartoTitleMeta); 
+}
+
+function qwebrAddCommandHistoryModal() {
+  // Create the modal div
+  var modalDiv = document.createElement('div');
+  modalDiv.id = 'qwebr-history-modal';
+  modalDiv.className = 'qwebr-modal';
+
+  // Create the modal content div
+  var modalContentDiv = document.createElement('div');
+  modalContentDiv.className = 'qwebr-modal-content';
+
+  // Create the span for closing the modal
+  var closeSpan = document.createElement('span');
+  closeSpan.id = 'qwebr-command-history-close-btn';
+  closeSpan.className = 'qwebr-modal-close';
+  closeSpan.innerHTML = '&times;';
+
+  // Create the h1 element for the modal
+  var modalH1 = document.createElement('h1');
+  modalH1.textContent = 'R History Command Contents';
+
+  // Create an anchor element for downloading the Rhistory file 
+  var downloadLink = document.createElement('a');
+  downloadLink.href = '#';
+  downloadLink.id = 'qwebr-download-history-btn';
+  downloadLink.className = 'qwebr-download-btn';
+
+  // Create an 'i' element for the icon
+  var icon = document.createElement('i');
+  icon.className = 'bi bi-file-code';
+
+  // Append the icon to the anchor element
+  downloadLink.appendChild(icon);
+
+  // Add the text 'Download R History' to the anchor element
+  downloadLink.appendChild(document.createTextNode(' Download R History File'));
+
+  // Create the pre for command history contents
+  var commandContentsPre = document.createElement('pre');
+  commandContentsPre.id = 'qwebr-command-history-contents';
+  commandContentsPre.className = 'qwebr-modal-content-code';
+
+  // Append the close span, h1, and history contents pre to the modal content div
+  modalContentDiv.appendChild(closeSpan);
+  modalContentDiv.appendChild(modalH1);
+  modalContentDiv.appendChild(downloadLink);
+  modalContentDiv.appendChild(commandContentsPre);
+
+  // Append the modal content div to the modal div
+  modalDiv.appendChild(modalContentDiv);
+
+  // Append the modal div to the body
+  document.body.appendChild(modalDiv);
+}
+
+function qwebrRegisterRevealJSCommandHistoryModal() {
+  // Select the <ul> element inside the <div> with data-panel="Custom0"
+  let ulElement = document.querySelector('div[data-panel="Custom0"] > ul.slide-menu-items');
+
+  // Find the last <li> element with class slide-tool-item
+  let lastItem = ulElement.querySelector('li.slide-tool-item:last-child');
+
+  // Calculate the next data-item value
+  let nextItemValue = 0;
+  if (lastItem) {
+      nextItemValue = parseInt(lastItem.dataset.item) + 1;
+  }
+
+  // Create a new <li> element
+  let newListItem = document.createElement('li');
+  newListItem.className = 'slide-tool-item';
+  newListItem.dataset.item = nextItemValue.toString(); // Set the next available data-item value
+
+  // Create the <a> element inside the <li>
+  let newLink = document.createElement('a');
+  newLink.href = '#';
+  newLink.id = 'qwebrRHistoryButton'; // Set the ID for the new link
+  
+  // Create the <kbd> element inside the <a>
+  let newKbd = document.createElement('kbd');
+  newKbd.textContent = ' '; // Set to empty as we are not registering a keyboard shortcut
+
+  // Create text node for the link text
+  let newText = document.createTextNode(' View R History');
+
+  // Append <kbd> and text node to <a>
+  newLink.appendChild(newKbd);
+  newLink.appendChild(newText);
+
+  // Append <a> to <li>
+  newListItem.appendChild(newLink);
+
+  // Append <li> to <ul>
+  ulElement.appendChild(newListItem);
+}
+
+// Handle setting up the R history modal
+function qwebrCodeLinks() {
+
+  if (qwebrIsRevealJS()) {
+    qwebrRegisterRevealJSCommandHistoryModal();
+    return;
+  }
+
+  // Create the container div
+  var containerDiv = document.createElement('div');
+  containerDiv.className = 'quarto-code-links';
+
+  // Create the h2 element
+  var h2 = document.createElement('h2');
+  h2.textContent = 'webR Code Links';
+
+  // Create the ul element
+  var ul = document.createElement('ul');
+
+  // Create the li element
+  var li = document.createElement('li');
+
+  // Create the a_history_btn element
+  var a_history_btn = document.createElement('a');
+  a_history_btn.href = 'javascript:void(0)';
+  a_history_btn.setAttribute('id', 'qwebrRHistoryButton');
+
+  // Create the i_history_btn element
+  var i_history_btn = document.createElement('i');
+  i_history_btn.className = 'bi bi-file-code';
+
+  // Create the text node for the link text
+  var text_history_btn = document.createTextNode('View R History');
+
+  // Append the icon element and link text to the a element
+  a_history_btn.appendChild(i_history_btn);
+  a_history_btn.appendChild(text_history_btn);
+
+  // Append the a element to the li element
+  li.appendChild(a_history_btn);
+
+  // Append the li element to the ul element
+  ul.appendChild(li);
+
+  // Append the h2 and ul elements to the container div
+  containerDiv.appendChild(h2);
+  containerDiv.appendChild(ul);
+
+  // Append the container div to the element with the ID 'quarto-margin-sidebar'
+  var sidebar = document.getElementById('quarto-margin-sidebar');
+    
+  // If the sidebar element is not found, create it
+  if(!sidebar) {
+    qwebrPlaceQuartoSidebar();
+  }
+  
+  // Re-select the sidebar element (if it was just created)
+  sidebar = document.getElementById('quarto-margin-sidebar');   
+
+
+  // If the sidebar element exists, append the container div to it
+  if(sidebar) {
+    // Append the container div to the sidebar
+    sidebar.appendChild(containerDiv);
+    // Force the sidebar to be clickable by removing the 'zindex-bottom' class
+    // added in pre-release: https://github.com/quarto-dev/quarto-cli/commit/f0c53a1ffcaa1de4eccbf07803b096898248adcc
+    sidebar.className = 'sidebar margin-sidebar';
+  } else {
+    // Get a debugger ...
+    console.warn('Element with ID "quarto-margin-sidebar" not found.');
+  }
+}
+
+// Call the function to append the code links for qwebR into the right sidebar
+qwebrCodeLinks();
+
+// Add the command history modal
+qwebrAddCommandHistoryModal();
+
+displayStartupMessage(qwebrShowStartupMessage, qwebrShowHeaderMessage);
+qwebrOffScreenCanvasSupportWarningMessage();
+</script>
+<script type="module">
+// Define a global storage and retrieval solution ----
+
+// Store commands executed in R
+globalThis.qwebrRCommandHistory = [];
+
+// Function to retrieve the command history
+globalThis.qwebrFormatRHistory = function() {
+   return qwebrRCommandHistory.join("\n\n");
+}
+
+// Retrieve HTML Elements ----
+
+// Get the command modal
+const command_history_modal = document.getElementById("qwebr-history-modal");
+
+// Get the button that opens the command modal
+const command_history_btn = document.getElementById("qwebrRHistoryButton");
+
+// Get the <span> element that closes the command modal
+const command_history_close_span = document.getElementById("qwebr-command-history-close-btn");
+
+// Get the download button for r history information
+const command_history_download_btn = document.getElementById("qwebr-download-history-btn");
+
+// Plug in command history into modal/download button ----
+
+// Function to populate the modal with command history
+function populateCommandHistoryModal() {
+    document.getElementById("qwebr-command-history-contents").innerHTML = qwebrFormatRHistory() || "No commands have been executed yet.";
+}
+
+// Function to format the current date and time to
+// a string with the format YYYY-MM-DD-HH-MM-SS
+function formatDateTime() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+}
+
+
+// Function to convert document title with datetime to a safe filename
+function safeFileName() {
+    // Get the current page title
+    let pageTitle = document.title;
+
+    // Combine the current page title with the current date and time
+    let pageNameWithDateTime = `Rhistory-${pageTitle}-${formatDateTime()}`;
+
+    // Replace unsafe characters with safe alternatives
+    let safeFilename = pageNameWithDateTime.replace(/[\\/:\*\?! "<>\|]/g, '-');
+
+    return safeFilename;
+}
+
+
+// Function to download list contents as text file
+function downloadRHistory() {
+    // Get the current page title + datetime and use it as the filename
+    const filename = `${safeFileName()}.R`;
+
+    // Get the text contents of the R History list
+    const text = qwebrFormatRHistory();
+
+    // Create a new Blob object with the text contents
+    const blob = new Blob([text], { type: 'text/plain' });
+  
+    // Create a new anchor element for the download
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+
+    // Append the anchor to the body, click it, and remove it
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// Register event handlers ----
+
+// When the user clicks the View R History button, open the command modal
+command_history_btn.onclick = function() {
+    populateCommandHistoryModal();
+    command_history_modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the command modal
+command_history_close_span.onclick = function() {
+    command_history_modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the command modal, close it
+window.onclick = function(event) {
+    if (event.target == command_history_modal) {
+        command_history_modal.style.display = "none";
+    }
+}
+
+// Add an onclick event listener to the download button so that
+// the user can download the R history as a text file
+command_history_download_btn.onclick = function() {
+    downloadRHistory();
+};
+</script>
+<script type="module">
+// Supported Evaluation Types for Context
+globalThis.EvalTypes = Object.freeze({
+  Interactive: 'interactive',
+  Setup: 'setup',
+  Output: 'output',
+});
+
+// Function that obtains the font size for a given element 
+globalThis.qwebrCurrentFontSizeOnElement = function(element, cssProperty = 'font-size') {
+
+  const currentFontSize = parseFloat(
+    window
+    .getComputedStyle(element)
+    .getPropertyValue(cssProperty)
+  );
+  
+  return currentFontSize;
+}
+
+// Function to determine font scaling
+globalThis.qwebrScaledFontSize = function(div, qwebrOptions) {
+  // Determine if we should compute font-size using RevealJS's `--r-main-font-size` 
+  // or if we can directly use the document's `font-size`.
+  const cssProperty = document.body.classList.contains('reveal') ? 
+    "--r-main-font-size" : "font-size";
+  
+  // Get the current font size on the div element
+  const elementFontSize = qwebrCurrentFontSizeOnElement(div, cssProperty);
+
+  // Determine the scaled font size value
+  const scaledFontSize = ((qwebrOptions['editor-font-scale'] ?? 1) * elementFontSize) ?? 17.5;
+
+  return scaledFontSize;
+}
+
+
+// Function that dispatches the creation request
+globalThis.qwebrCreateHTMLElement = function (
+  cellData
+) {
+
+  // Extract key components
+  const evalType = cellData.options.context;
+  const qwebrCounter = cellData.id;
+
+  // We make an assumption that insertion points are defined by the Lua filter as:
+  // qwebr-insertion-location-{qwebrCounter} 
+  const elementLocator = document.getElementById(`qwebr-insertion-location-${qwebrCounter}`);
+
+  // Figure out the routine to use to insert the element.
+  let qwebrElement;
+  switch ( evalType ) {
+    case EvalTypes.Interactive:
+      qwebrElement = qwebrCreateInteractiveElement(qwebrCounter, cellData.options);
+      break;
+    case EvalTypes.Output: 
+      qwebrElement = qwebrCreateNonInteractiveOutputElement(qwebrCounter, cellData.options);
+      break;
+    case EvalTypes.Setup: 
+      qwebrElement = qwebrCreateNonInteractiveSetupElement(qwebrCounter, cellData.options);
+      break;
+    default: 
+      qwebrElement = document.createElement('div');
+      qwebrElement.textContent = 'Error creating `quarto-webr` element';
+  }
+
+  // Insert the dynamically generated object at the document location.
+  elementLocator.appendChild(qwebrElement);
+};
+
+// Function that setups the interactive element creation
+globalThis.qwebrCreateInteractiveElement = function (qwebrCounter, qwebrOptions) {
+
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = 'qwebr-interactive-area-' + qwebrCounter;
+  mainDiv.className = `qwebr-interactive-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+
+  // Create toolbar div
+  var toolbarDiv = document.createElement('div');
+  toolbarDiv.className = 'qwebr-editor-toolbar';
+  toolbarDiv.id = 'qwebr-editor-toolbar-' + qwebrCounter;
+
+  // Create a div to hold the left buttons
+  var leftButtonsDiv = document.createElement('div');
+  leftButtonsDiv.className = 'qwebr-editor-toolbar-left-buttons';
+
+  // Create a div to hold the right buttons
+  var rightButtonsDiv = document.createElement('div');
+  rightButtonsDiv.className = 'qwebr-editor-toolbar-right-buttons';
+
+  // Create Run Code button
+  var runCodeButton = document.createElement('button');
+  runCodeButton.className = 'btn btn-default qwebr-button qwebr-button-run';
+  runCodeButton.disabled = true;
+  runCodeButton.type = 'button';
+  runCodeButton.id = 'qwebr-button-run-' + qwebrCounter;
+  runCodeButton.textContent = '🟡 Loading webR...';
+  runCodeButton.title = `Run code (Shift + Enter)`;
+
+  // Append buttons to the leftButtonsDiv
+  leftButtonsDiv.appendChild(runCodeButton);
+
+  // Create Reset button
+  var resetButton = document.createElement('button');
+  resetButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-reset';
+  resetButton.type = 'button';
+  resetButton.id = 'qwebr-button-reset-' + qwebrCounter;
+  resetButton.title = 'Start over';
+  resetButton.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i>';
+
+  // Create Copy button
+  var copyButton = document.createElement('button');
+  copyButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-copy';
+  copyButton.type = 'button';
+  copyButton.id = 'qwebr-button-copy-' + qwebrCounter;
+  copyButton.title = 'Copy code';
+  copyButton.innerHTML = '<i class="fa-regular fa-copy"></i>';
+
+  // Append buttons to the rightButtonsDiv
+  rightButtonsDiv.appendChild(resetButton);
+  rightButtonsDiv.appendChild(copyButton);
+
+  // Create console area div
+  var consoleAreaDiv = document.createElement('div');
+  consoleAreaDiv.id = 'qwebr-console-area-' + qwebrCounter;
+  consoleAreaDiv.className = 'qwebr-console-area';
+
+  // Create editor div
+  var editorDiv = document.createElement('div');
+  editorDiv.id = 'qwebr-editor-' + qwebrCounter;
+  editorDiv.className = 'qwebr-editor';
+
+  // Create output code area div
+  var outputCodeAreaDiv = document.createElement('div');
+  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
+  outputCodeAreaDiv.className = 'qwebr-output-code-area';
+  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
+
+  // Create pre element inside output code area
+  var preElement = document.createElement('pre');
+  preElement.style.visibility = 'hidden';
+  outputCodeAreaDiv.appendChild(preElement);
+
+  // Create output graph area div
+  var outputGraphAreaDiv = document.createElement('div');
+  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
+  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
+
+  // Append buttons to the toolbar
+  toolbarDiv.appendChild(leftButtonsDiv);
+  toolbarDiv.appendChild(rightButtonsDiv);
+
+  // Append all elements to the main div
+  mainDiv.appendChild(toolbarDiv);
+  consoleAreaDiv.appendChild(editorDiv);
+  consoleAreaDiv.appendChild(outputCodeAreaDiv);
+  mainDiv.appendChild(consoleAreaDiv);
+  mainDiv.appendChild(outputGraphAreaDiv);
+
+  return mainDiv;
+}
+
+// Function that adds output structure for non-interactive output
+globalThis.qwebrCreateNonInteractiveOutputElement = function(qwebrCounter, qwebrOptions) {
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = 'qwebr-noninteractive-area-' + qwebrCounter;
+  mainDiv.className = `qwebr-noninteractive-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+  
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+  
+  // Create a status container div
+  var statusContainer = createLoadingContainer(qwebrCounter);
+
+  // Create output code area div
+  var outputCodeAreaDiv = document.createElement('div');
+  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
+  outputCodeAreaDiv.className = 'qwebr-output-code-area';
+  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
+
+  // Create pre element inside output code area
+  var preElement = document.createElement('pre');
+  preElement.style.visibility = 'hidden';
+  outputCodeAreaDiv.appendChild(preElement);
+
+  // Create output graph area div
+  var outputGraphAreaDiv = document.createElement('div');
+  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
+  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
+
+  // Append all elements to the main div
+  mainDiv.appendChild(statusContainer);
+  mainDiv.appendChild(outputCodeAreaDiv);
+  mainDiv.appendChild(outputGraphAreaDiv);
+
+  return mainDiv;
+};
+
+// Function that adds a stub in the page to indicate a setup cell was used.
+globalThis.qwebrCreateNonInteractiveSetupElement = function(qwebrCounter, qwebrOptions) {
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = `qwebr-noninteractive-setup-area-${qwebrCounter}`;
+  mainDiv.className = `qwebr-noninteractive-setup-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+
+
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+
+  // Create a status container div
+  var statusContainer = createLoadingContainer(qwebrCounter);
+
+  // Append status onto the main div
+  mainDiv.appendChild(statusContainer);
+
+  return mainDiv;
+}
+
+
+// Function to create loading container with specified ID
+globalThis.createLoadingContainer = function(qwebrCounter) {
+
+  // Create a status container
+  const container = document.createElement('div');
+  container.id = `qwebr-non-interactive-loading-container-${qwebrCounter}`;
+  container.className = 'qwebr-non-interactive-loading-container qwebr-cell-needs-evaluation';
+
+  // Create an R project logo to indicate its a code space
+  const rProjectIcon = document.createElement('i');
+  rProjectIcon.className = 'fa-brands fa-r-project fa-3x qwebr-r-project-logo';
+
+  // Setup a loading icon from font awesome
+  const spinnerIcon = document.createElement('i');
+  spinnerIcon.className = 'fa-solid fa-spinner fa-spin fa-1x qwebr-icon-status-spinner';
+
+  // Add a section for status text
+  const statusText = document.createElement('p');
+  statusText.id = `qwebr-status-text-${qwebrCounter}`;
+  statusText.className = `qwebr-status-text qwebr-cell-needs-evaluation`;
+  statusText.innerText = 'Loading webR...';
+
+  // Incorporate an inner container
+  const innerContainer = document.createElement('div');
+
+  // Append elements to the inner container
+  innerContainer.appendChild(spinnerIcon);
+  innerContainer.appendChild(statusText);
+
+  // Append elements to the main container
+  container.appendChild(rProjectIcon);
+  container.appendChild(innerContainer);
+
+  return container;
+}
+</script>
+<script type="module">
+// Function to install a single package
+async function qwebrInstallRPackage(packageName) {
+  await mainWebR.evalRVoid(`webr::install('${packageName}');`);
+}
+
+// Function to load a single package
+async function qwebrLoadRPackage(packageName) {
+  await mainWebR.evalRVoid(`require('${packageName}', quietly = TRUE)`);
+}
+
+// Generic function to process R packages
+async function qwebrProcessRPackagesWithStatus(packages, processType, displayStatusMessageUpdate = true) {
+  // Switch between contexts
+  const messagePrefix = processType === 'install' ? 'Installing' : 'Loading';
+
+  // Modify button state
+  qwebrSetInteractiveButtonState(`🟡 ${messagePrefix} package ...`, false);
+
+  // Iterate over packages
+  for (let i = 0; i < packages.length; i++) {
+    const activePackage = packages[i];
+    const formattedMessage = `${messagePrefix} package ${i + 1} out of ${packages.length}: ${activePackage}`;
+
+    // Display the update in header
+    if (displayStatusMessageUpdate) {
+      qwebrUpdateStatusHeader(formattedMessage);
+    }
+
+    // Display the update in non-active areas
+    qwebrUpdateStatusMessage(formattedMessage);
+
+    // Run package installation
+    if (processType === 'install') {
+      await qwebrInstallRPackage(activePackage);
+    } else {
+      await qwebrLoadRPackage(activePackage);
+    }
+  }
+
+  // Clean slate
+  if (processType === 'load') {
+    await mainWebR.flush();
+  }
+}
+
+// Start a timer
+const initializeWebRTimerStart = performance.now();
+
+// Encase with a dynamic import statement
+globalThis.qwebrInstance = import(qwebrCustomizedWebROptions.baseURL + "webr.mjs").then(
+  async ({ WebR, ChannelType }) => {
+    // Populate WebR options with defaults or new values based on `webr` meta
+    globalThis.mainWebR = new WebR(qwebrCustomizedWebROptions);
+
+    // Initialization WebR
+    await mainWebR.init();
+
+    // Setup a shelter
+    globalThis.mainWebRCodeShelter = await new mainWebR.Shelter();
+
+    // Setup a pager to allow processing help documentation
+    await mainWebR.evalRVoid('webr::pager_install()');
+
+    // Setup a viewer to allow processing htmlwidgets.
+    // This might not be available in old webr version
+    await mainWebR.evalRVoid('try({ webr::viewer_install() })');
+
+    // Override the existing install.packages() to use webr::install()
+    await mainWebR.evalRVoid('webr::shim_install()');
+
+    // Specify the repositories to pull from
+    // Note: webR does not use the `repos` option, but instead uses `webr_pkg_repos`
+    // inside of `install()`. However, other R functions still pull from `repos`.
+    await mainWebR.evalRVoid(`
+      options(
+        webr_pkg_repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')}),
+        repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')})
+      )
+    `);
+
+    // Check to see if any packages need to be installed
+    if (qwebrSetupRPackages) {
+      // Obtain only a unique list of packages
+      const uniqueRPackageList = Array.from(new Set(qwebrInstallRPackagesList));
+
+      // Install R packages one at a time (either silently or with a status update)
+      await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'install', qwebrShowStartupMessage);
+
+      if (qwebrAutoloadRPackages) {
+        // Load R packages one at a time (either silently or with a status update)
+        await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'load', qwebrShowStartupMessage);
+      }
+    }
+  }
+);
+
+// Stop timer
+const initializeWebRTimerEnd = performance.now();
+
+</script>
+<script type="module">
+// Function to verify a given JavaScript Object is empty
+globalThis.qwebrIsObjectEmpty = function (arr) {
+    return Object.keys(arr).length === 0;
+}
+
+// Global version of the Escape HTML function that converts HTML
+// characters to their HTML entities.
+globalThis.qwebrEscapeHTMLCharacters = function(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+};
+
+// Passthrough results
+globalThis.qwebrIdentity = function(x) {
+    return x;
+};
+
+// Append a comment
+globalThis.qwebrPrefixComment = function(x, comment) {
+    return `${comment}${x}`;
+};
+
+// Function to store the code in the history
+globalThis.qwebrLogCodeToHistory = function(codeToRun, options) {
+    qwebrRCommandHistory.push(
+        `# Ran code in ${options.label} at ${new Date().toLocaleString()} ----\n${codeToRun}`
+    );
+};
+
+// Function to attach a download button onto the canvas
+// allowing the user to download the image.
+function qwebrImageCanvasDownloadButton(canvas, canvasContainer) {
+
+    // Create the download button
+    const downloadButton = document.createElement('button');
+    downloadButton.className = 'qwebr-canvas-image-download-btn';
+    downloadButton.textContent = 'Download Image';
+    canvasContainer.appendChild(downloadButton);
+
+    // Trigger a download of the image when the button is clicked
+    downloadButton.addEventListener('click', function() {
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = 'qwebr-canvas-image.png';
+        link.click();
+    });
+}
+
+
+// Function to parse the pager results
+globalThis.qwebrParseTypePager = async function (msg) {
+
+    // Split out the event data
+    const { path, title, deleteFile } = msg.data;
+
+    // Process the pager data by reading the information from disk
+    const paged_data = await mainWebR.FS.readFile(path).then((data) => {
+        // Obtain the file content
+        let content = new TextDecoder().decode(data);
+
+        // Remove excessive backspace characters until none remain
+        while(content.match(/.[\b]/)){
+            content = content.replace(/.[\b]/g, '');
+        }
+
+        // Returned cleaned data
+        return content;
+    });
+
+    // Unlink file if needed
+    if (deleteFile) {
+        await mainWebR.FS.unlink(path);
+    }
+
+    // Return extracted data with spaces
+    return paged_data;
+};
+
+
+// Function to parse the browse results
+globalThis.qwebrParseTypeBrowse = async function (msg) {
+
+    // msg.type === "browse"
+    const path = msg.data.url;
+
+    // Process the browse data by reading the information from disk
+    const browse_data = await mainWebR.FS.readFile(path).then((data) => {
+        // Obtain the file content
+        let content = new TextDecoder().decode(data);
+
+        return content;
+    });
+
+    // Return extracted data as-is
+    return browse_data;
+};
+
+// Function to run the code using webR and parse the output
+globalThis.qwebrComputeEngine = async function(
+    codeToRun,
+    elements,
+    options) {
+
+    // Call into the R compute engine that persists within the document scope.
+    // To be prepared for all scenarios, the following happens:
+    // 1. We setup a canvas device to write to by making a namespace call into the {webr} package
+    // 2. We use values inside of the options array to set the figure size.
+    // 3. We capture the output stream information (STDOUT and STERR)
+    // 4. We disable the current device's image creation.
+    // 5. Piece-wise parse the results into the different output areas
+
+    // Create a pager variable for help/file contents
+    let pager = [];
+
+    // Handle how output is processed
+    let showMarkup = options.results === "markup" && options.output !== "asis";
+    let processOutput;
+
+    if (showMarkup) {
+        processOutput = qwebrEscapeHTMLCharacters;
+    } else {
+        processOutput = qwebrIdentity;
+    }
+
+    // ----
+    // Convert from Inches to Pixels by using DPI (dots per inch)
+    // for bitmap devices (dpi * inches = pixels)
+    let fig_width = options["fig-width"] * options["dpi"];
+    let fig_height = options["fig-height"] * options["dpi"];
+
+    // Initialize webR
+    await mainWebR.init();
+
+    // Configure capture output
+    let captureOutputOptions = {
+        withAutoprint: true,
+        captureStreams: true,
+        captureConditions: false,
+        // env: webR.objs.emptyEnv, // maintain a global environment for webR v0.2.0
+    };
+
+    // Determine if the browser supports OffScreen
+    if (qwebrOffScreenCanvasSupport()) {
+        // Mirror default options of webr::canvas()
+        // with changes to figure height and width.
+        captureOutputOptions.captureGraphics = {
+            width: fig_width,
+            height: fig_height,
+            bg: "white", // default: transparent
+            pointsize: 12,
+            capture: true
+        };
+    }  else {
+        // Disable generating graphics
+        captureOutputOptions.captureGraphics = false;
+    }
+
+    // Store the code to run in history
+    qwebrLogCodeToHistory(codeToRun, options);
+
+    // Setup a webR canvas by making a namespace call into the {webr} package
+    // Evaluate the R code
+    // Remove the active canvas silently
+    const result = await mainWebRCodeShelter.captureR(
+        `${codeToRun}`,
+        captureOutputOptions
+    );
+
+    // -----
+
+    // Start attempting to parse the result data
+    processResultOutput:try {
+
+        // Avoid running through output processing
+        if (options.results === "hide" || options.output === "false") {
+            break processResultOutput;
+        }
+
+        // Merge output streams of STDOUT and STDErr (messages and errors are combined.)
+        // Require both `warning` and `message` to be true to display `STDErr`.
+        const out = result.output
+        .filter(
+            evt => evt.type === "stdout" ||
+            ( evt.type === "stderr" && (options.warning === "true" && options.message === "true"))
+        )
+        .map((evt, index) => {
+            const className = `qwebr-output-code-${evt.type}`;
+            const outputResult = qwebrPrefixComment(processOutput(evt.data), options.comment);
+            return `<code id="${className}-editor-${elements.id}-result-${index + 1}" class="${className}">${outputResult}</code>`;
+        })
+        .join("\n");
+
+
+        // Clean the state
+        // We're now able to process pager events.
+        // As a result, we cannot maintain a true 1-to-1 output order
+        // without individually feeding each line
+        const msgs = await mainWebR.flush();
+
+        // Use `map` to process the filtered "pager" events asynchronously
+        const pager = [];
+        const browse = [];
+
+        await Promise.all(
+            msgs.map(
+                async (msg) => {
+
+                    const msgType = msg.type || "unknown";
+
+                    switch(msgType) {
+                        case 'pager':
+                            const pager_data = await qwebrParseTypePager(msg);
+                            pager.push(pager_data);
+                            break;
+                        case 'browse':
+                            const browse_data = await qwebrParseTypeBrowse(msg);
+                            browse.push(browse_data);
+                            break;
+                    }
+                    return;
+                }
+            )
+        );
+
+        // Nullify the output area of content
+        elements.outputCodeDiv.innerHTML = "";
+        elements.outputGraphDiv.innerHTML = "";
+
+        // Design an output object for messages
+        const pre = document.createElement("pre");
+        if (/\S/.test(out)) {
+            // Display results as HTML elements to retain output styling
+            const div = document.createElement("div");
+            div.innerHTML = out;
+
+            // Calculate a scaled font-size value
+            const scaledFontSize = qwebrScaledFontSize(
+                elements.outputCodeDiv, options);
+
+            // Override output code cell size
+            pre.style.fontSize = `${scaledFontSize}px`;
+            pre.appendChild(div);
+        } else {
+            // If nothing is present, hide the element.
+            pre.style.visibility = "hidden";
+        }
+
+        elements.outputCodeDiv.appendChild(pre);
+
+        // Determine if we have graphs to display
+        if (result.images.length > 0) {
+
+            // Create figure element
+            const figureElement = document.createElement("figure");
+            figureElement.className = "qwebr-canvas-image";
+
+            // Place each rendered graphic onto a canvas element
+            result.images.forEach((img) => {
+
+                // Construct canvas for object
+                const canvas = document.createElement("canvas");
+
+                // Add an image download button
+                qwebrImageCanvasDownloadButton(canvas, figureElement);
+
+                // Set canvas size to image
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                // Apply output truncations
+                canvas.style.width = options["out-width"] ? options["out-width"] : `${fig_width}px`;
+                if (options["out-height"]) {
+                    canvas.style.height = options["out-height"];
+                }
+
+                // Apply styling
+                canvas.style.display = "block";
+                canvas.style.margin = "auto";
+
+                // Draw image onto Canvas
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                // Append canvas to figure output area
+                figureElement.appendChild(canvas);
+
+            });
+
+            if (options['fig-cap']) {
+                // Create figcaption element
+                const figcaptionElement = document.createElement('figcaption');
+                figcaptionElement.innerText = options['fig-cap'];
+                // Append figcaption to figure
+                figureElement.appendChild(figcaptionElement);
+            }
+
+            elements.outputGraphDiv.appendChild(figureElement);
+
+        }
+
+        // Display the pager data
+        if (pager.length > 0) {
+            // Use the `pre` element to preserve whitespace.
+            pager.forEach((paged_data, index) => {
+                const pre_pager = document.createElement("pre");
+                pre_pager.innerText = paged_data;
+                pre_pager.classList.add("qwebr-output-code-pager");
+                pre_pager.setAttribute("id", `qwebr-output-code-pager-editor-${elements.id}-result-${index + 1}`);
+                elements.outputCodeDiv.appendChild(pre_pager);
+            });
+        }
+
+        // Display the browse data
+        if (browse.length > 0) {
+            // Use the `pre` element to preserve whitespace.
+            browse.forEach((browse_data, index) => {
+                const iframe_browse = document.createElement('iframe');
+                iframe_browse.classList.add("qwebr-output-code-browse");
+                iframe_browse.setAttribute("id", `qwebr-output-code-browse-editor-${elements.id}-result-${index + 1}`);
+                iframe_browse.style.width = "100%";
+                iframe_browse.style.minHeight = "500px";
+                elements.outputCodeDiv.appendChild(iframe_browse);
+
+                iframe_browse.contentWindow.document.open();
+                iframe_browse.contentWindow.document.write(browse_data);
+                iframe_browse.contentWindow.document.close();
+            });
+        }
+    } finally {
+        // Clean up the remaining code
+        mainWebRCodeShelter.purge();
+    }
+};
+
+// Function to execute the code (accepts code as an argument)
+globalThis.qwebrExecuteCode = async function (
+    codeToRun,
+    id,
+    options = {}) {
+
+    // If options are not passed, we fall back on the bare minimum to handle the computation
+    if (qwebrIsObjectEmpty(options)) {
+        options = {
+            "context": "interactive",
+            "fig-width": 7, "fig-height": 5,
+            "out-width": "700px", "out-height": "",
+            "dpi": 72,
+            "results": "markup",
+            "warning": "true", "message": "true",
+        };
+    }
+
+    // Next, we access the compute areas values
+    const elements = {
+        runButton: document.getElementById(`qwebr-button-run-${id}`),
+        outputCodeDiv: document.getElementById(`qwebr-output-code-area-${id}`),
+        outputGraphDiv: document.getElementById(`qwebr-output-graph-area-${id}`),
+        id: id,
+    }
+
+    // Disallowing execution of other code cells
+    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+        btn.disabled = true;
+    });
+
+    if (options.context == EvalTypes.Interactive) {
+        // Emphasize the active code cell
+        elements.runButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i> <span>Run Code</span>';
+    }
+
+    // Evaluate the code and parse the output into the document
+    await qwebrComputeEngine(codeToRun, elements, options);
+
+    // Switch to allowing execution of code
+    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+        btn.disabled = false;
+    });
+
+    if (options.context == EvalTypes.Interactive) {
+        // Revert to the initial code cell state
+        elements.runButton.innerHTML = '<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>';
+    }
+}
+
+</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#objetivo-de-la-semana" id="toc-objetivo-de-la-semana" class="nav-link active" data-scroll-target="#objetivo-de-la-semana"><span class="header-section-number">1</span> Objetivo de la semana</a>
+  <ul class="collapse">
+  <li><a href="#qué-significa-aprender-machine-learning-en-este-curso" id="toc-qué-significa-aprender-machine-learning-en-este-curso" class="nav-link" data-scroll-target="#qué-significa-aprender-machine-learning-en-este-curso"><span class="header-section-number">1.1</span> ¿Qué significa “aprender Machine Learning” en este curso?</a></li>
+  <li><a href="#lo-que-cubriremos-esta-semana" id="toc-lo-que-cubriremos-esta-semana" class="nav-link" data-scroll-target="#lo-que-cubriremos-esta-semana"><span class="header-section-number">1.2</span> Lo que cubriremos esta semana</a></li>
+  <li><a href="#conexión-con-lo-que-ya-sabemos" id="toc-conexión-con-lo-que-ya-sabemos" class="nav-link" data-scroll-target="#conexión-con-lo-que-ya-sabemos"><span class="header-section-number">1.3</span> Conexión con lo que ya sabemos</a></li>
+  </ul></li>
+  <li><a href="#qué-es-machine-learning-y-qué-tipos-de-problemas-resuelve" id="toc-qué-es-machine-learning-y-qué-tipos-de-problemas-resuelve" class="nav-link" data-scroll-target="#qué-es-machine-learning-y-qué-tipos-de-problemas-resuelve"><span class="header-section-number">2</span> ¿Qué es Machine Learning y qué tipos de problemas resuelve?</a>
+  <ul class="collapse">
+  <li><a href="#qué-es-machine-learning" id="toc-qué-es-machine-learning" class="nav-link" data-scroll-target="#qué-es-machine-learning"><span class="header-section-number">2.1</span> ¿Qué es Machine Learning?</a>
+  <ul class="collapse">
+  <li><a href="#ejemplo-intuitivo-churn-en-telecomunicaciones" id="toc-ejemplo-intuitivo-churn-en-telecomunicaciones" class="nav-link" data-scroll-target="#ejemplo-intuitivo-churn-en-telecomunicaciones"><span class="header-section-number">2.1.1</span> Ejemplo intuitivo: churn en telecomunicaciones</a></li>
+  <li><a href="#lo-que-ml-no-es" id="toc-lo-que-ml-no-es" class="nav-link" data-scroll-target="#lo-que-ml-no-es"><span class="header-section-number">2.1.2</span> Lo que ML no es</a></li>
+  </ul></li>
+  <li><a href="#supervisado-vs.-no-supervisado" id="toc-supervisado-vs.-no-supervisado" class="nav-link" data-scroll-target="#supervisado-vs.-no-supervisado"><span class="header-section-number">2.2</span> Supervisado vs.&nbsp;no supervisado</a></li>
+  <li><a href="#dentro-del-supervisado-clasificación-vs.-regresión" id="toc-dentro-del-supervisado-clasificación-vs.-regresión" class="nav-link" data-scroll-target="#dentro-del-supervisado-clasificación-vs.-regresión"><span class="header-section-number">2.3</span> Dentro del supervisado: clasificación vs.&nbsp;regresión</a>
+  <ul class="collapse">
+  <li><a href="#clasificación" id="toc-clasificación" class="nav-link" data-scroll-target="#clasificación"><span class="header-section-number">2.3.1</span> Clasificación</a></li>
+  <li><a href="#regresión" id="toc-regresión" class="nav-link" data-scroll-target="#regresión"><span class="header-section-number">2.3.2</span> Regresión</a></li>
+  <li><a href="#cómo-decido-cuál-usar" id="toc-cómo-decido-cuál-usar" class="nav-link" data-scroll-target="#cómo-decido-cuál-usar"><span class="header-section-number">2.3.3</span> ¿Cómo decido cuál usar?</a></li>
+  </ul></li>
+  <li><a href="#vocabulario-clave-target-features-observaciones" id="toc-vocabulario-clave-target-features-observaciones" class="nav-link" data-scroll-target="#vocabulario-clave-target-features-observaciones"><span class="header-section-number">2.4</span> Vocabulario clave: target, features, observaciones</a></li>
+  <li><a href="#checklist" id="toc-checklist" class="nav-link" data-scroll-target="#checklist"><span class="header-section-number">2.5</span> Checklist</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">2.6</span> Preguntas de comprensión</a></li>
+  </ul></li>
+  <li><a href="#traintest-por-qué-separar-los-datos" id="toc-traintest-por-qué-separar-los-datos" class="nav-link" data-scroll-target="#traintest-por-qué-separar-los-datos"><span class="header-section-number">3</span> Train/Test: ¿por qué separar los datos?</a>
+  <ul class="collapse">
+  <li><a href="#el-problema-central-generalización" id="toc-el-problema-central-generalización" class="nav-link" data-scroll-target="#el-problema-central-generalización"><span class="header-section-number">3.1</span> El problema central: generalización</a>
+  <ul class="collapse">
+  <li><a href="#la-analogía-del-examen" id="toc-la-analogía-del-examen" class="nav-link" data-scroll-target="#la-analogía-del-examen"><span class="header-section-number">3.1.1</span> La analogía del examen</a></li>
+  </ul></li>
+  <li><a href="#la-solución-separar-en-entrenamiento-y-prueba-traintest-split" id="toc-la-solución-separar-en-entrenamiento-y-prueba-traintest-split" class="nav-link" data-scroll-target="#la-solución-separar-en-entrenamiento-y-prueba-traintest-split"><span class="header-section-number">3.2</span> La solución: separar en entrenamiento y prueba (train/test split)</a></li>
+  <li><a href="#overfitting-y-underfitting" id="toc-overfitting-y-underfitting" class="nav-link" data-scroll-target="#overfitting-y-underfitting"><span class="header-section-number">3.3</span> Overfitting y underfitting</a></li>
+  <li><a href="#el-baseline-contra-qué-comparamos" id="toc-el-baseline-contra-qué-comparamos" class="nav-link" data-scroll-target="#el-baseline-contra-qué-comparamos"><span class="header-section-number">3.4</span> El baseline: ¿contra qué comparamos?</a></li>
+  <li><a href="#validación-cruzada-cross-validation" id="toc-validación-cruzada-cross-validation" class="nav-link" data-scroll-target="#validación-cruzada-cross-validation"><span class="header-section-number">3.5</span> Validación cruzada (cross-validation)</a></li>
+  <li><a href="#data-leakage-el-error-silencioso" id="toc-data-leakage-el-error-silencioso" class="nav-link" data-scroll-target="#data-leakage-el-error-silencioso"><span class="header-section-number">3.6</span> Data leakage: el error silencioso</a></li>
+  <li><a href="#resumen-del-pipeline" id="toc-resumen-del-pipeline" class="nav-link" data-scroll-target="#resumen-del-pipeline"><span class="header-section-number">3.7</span> Resumen del pipeline</a></li>
+  <li><a href="#checklist-1" id="toc-checklist-1" class="nav-link" data-scroll-target="#checklist-1"><span class="header-section-number">3.8</span> Checklist</a></li>
+  <li><a href="#preguntas-de-comprensión-sesión-2" id="toc-preguntas-de-comprensión-sesión-2" class="nav-link" data-scroll-target="#preguntas-de-comprensión-sesión-2"><span class="header-section-number">3.9</span> Preguntas de comprensión — Sesión 2</a></li>
+  </ul></li>
+  <li><a href="#métricas-qué-tan-bueno-es-un-modelo" id="toc-métricas-qué-tan-bueno-es-un-modelo" class="nav-link" data-scroll-target="#métricas-qué-tan-bueno-es-un-modelo"><span class="header-section-number">4</span> Métricas: ¿qué tan bueno es un modelo?</a>
+  <ul class="collapse">
+  <li><a href="#por-qué-necesitamos-métricas" id="toc-por-qué-necesitamos-métricas" class="nav-link" data-scroll-target="#por-qué-necesitamos-métricas"><span class="header-section-number">4.1</span> ¿Por qué necesitamos métricas?</a></li>
+  <li><a href="#métricas-de-clasificación" id="toc-métricas-de-clasificación" class="nav-link" data-scroll-target="#métricas-de-clasificación"><span class="header-section-number">4.2</span> Métricas de clasificación</a>
+  <ul class="collapse">
+  <li><a href="#la-matriz-de-confusión-el-punto-de-partida" id="toc-la-matriz-de-confusión-el-punto-de-partida" class="nav-link" data-scroll-target="#la-matriz-de-confusión-el-punto-de-partida"><span class="header-section-number">4.2.1</span> La matriz de confusión: el punto de partida</a></li>
+  <li><a href="#ejemplo-concreto-detección-de-fraude" id="toc-ejemplo-concreto-detección-de-fraude" class="nav-link" data-scroll-target="#ejemplo-concreto-detección-de-fraude"><span class="header-section-number">4.2.2</span> Ejemplo concreto: detección de fraude</a></li>
+  <li><a href="#accuracy-exactitud" id="toc-accuracy-exactitud" class="nav-link" data-scroll-target="#accuracy-exactitud"><span class="header-section-number">4.2.3</span> Accuracy (exactitud)</a></li>
+  <li><a href="#precision-precisión" id="toc-precision-precisión" class="nav-link" data-scroll-target="#precision-precisión"><span class="header-section-number">4.2.4</span> Precision (precisión)</a></li>
+  <li><a href="#recall-sensibilidad" id="toc-recall-sensibilidad" class="nav-link" data-scroll-target="#recall-sensibilidad"><span class="header-section-number">4.2.5</span> Recall (sensibilidad)</a></li>
+  <li><a href="#el-trade-off-entre-precision-y-recall" id="toc-el-trade-off-entre-precision-y-recall" class="nav-link" data-scroll-target="#el-trade-off-entre-precision-y-recall"><span class="header-section-number">4.2.6</span> El trade-off entre precision y recall</a></li>
+  </ul></li>
+  <li><a href="#métricas-de-regresión" id="toc-métricas-de-regresión" class="nav-link" data-scroll-target="#métricas-de-regresión"><span class="header-section-number">4.3</span> Métricas de regresión</a>
+  <ul class="collapse">
+  <li><a href="#mae-mean-absolute-error-error-absoluto-medio" id="toc-mae-mean-absolute-error-error-absoluto-medio" class="nav-link" data-scroll-target="#mae-mean-absolute-error-error-absoluto-medio"><span class="header-section-number">4.3.1</span> MAE (Mean Absolute Error — Error Absoluto Medio)</a></li>
+  <li><a href="#rmse-root-mean-squared-error-raíz-del-error-cuadrático-medio" id="toc-rmse-root-mean-squared-error-raíz-del-error-cuadrático-medio" class="nav-link" data-scroll-target="#rmse-root-mean-squared-error-raíz-del-error-cuadrático-medio"><span class="header-section-number">4.3.2</span> RMSE (Root Mean Squared Error — Raíz del Error Cuadrático Medio)</a></li>
+  <li><a href="#cuándo-preferir-rmse-sobre-mae" id="toc-cuándo-preferir-rmse-sobre-mae" class="nav-link" data-scroll-target="#cuándo-preferir-rmse-sobre-mae"><span class="header-section-number">4.3.3</span> ¿Cuándo preferir RMSE sobre MAE?</a></li>
+  <li><a href="#cómo-saber-si-un-maermse-es-bueno" id="toc-cómo-saber-si-un-maermse-es-bueno" class="nav-link" data-scroll-target="#cómo-saber-si-un-maermse-es-bueno"><span class="header-section-number">4.3.4</span> ¿Cómo saber si un MAE/RMSE es “bueno”?</a></li>
+  </ul></li>
+  <li><a href="#siempre-comparar-contra-el-baseline" id="toc-siempre-comparar-contra-el-baseline" class="nav-link" data-scroll-target="#siempre-comparar-contra-el-baseline"><span class="header-section-number">4.4</span> Siempre comparar contra el baseline</a>
+  <ul class="collapse">
+  <li><a href="#el-patrón-correcto-de-reporte" id="toc-el-patrón-correcto-de-reporte" class="nav-link" data-scroll-target="#el-patrón-correcto-de-reporte"><span class="header-section-number">4.4.1</span> El patrón correcto de reporte</a></li>
+  <li><a href="#lo-mismo-aplica-en-regresión" id="toc-lo-mismo-aplica-en-regresión" class="nav-link" data-scroll-target="#lo-mismo-aplica-en-regresión"><span class="header-section-number">4.4.2</span> Lo mismo aplica en regresión</a></li>
+  </ul></li>
+  <li><a href="#de-la-métrica-a-la-decisión-de-negocio" id="toc-de-la-métrica-a-la-decisión-de-negocio" class="nav-link" data-scroll-target="#de-la-métrica-a-la-decisión-de-negocio"><span class="header-section-number">4.5</span> De la métrica a la decisión de negocio</a>
+  <ul class="collapse">
+  <li><a href="#las-preguntas-que-cierran-el-puente" id="toc-las-preguntas-que-cierran-el-puente" class="nav-link" data-scroll-target="#las-preguntas-que-cierran-el-puente"><span class="header-section-number">4.5.1</span> Las preguntas que cierran el puente</a></li>
+  <li><a href="#el-criterio-de-decisión-final" id="toc-el-criterio-de-decisión-final" class="nav-link" data-scroll-target="#el-criterio-de-decisión-final"><span class="header-section-number">4.5.2</span> El criterio de decisión final</a></li>
+  </ul></li>
+  <li><a href="#checklist-2" id="toc-checklist-2" class="nav-link" data-scroll-target="#checklist-2"><span class="header-section-number">4.6</span> Checklist</a></li>
+  <li><a href="#preguntas-de-comprensión-sesión-3" id="toc-preguntas-de-comprensión-sesión-3" class="nav-link" data-scroll-target="#preguntas-de-comprensión-sesión-3"><span class="header-section-number">4.7</span> Preguntas de comprensión — Sesión 3</a></li>
+  </ul></li>
+  <li><a href="#aplicación-guiada-comparando-modelos" id="toc-aplicación-guiada-comparando-modelos" class="nav-link" data-scroll-target="#aplicación-guiada-comparando-modelos"><span class="header-section-number">5</span> Aplicación guiada: comparando modelos</a>
+  <ul class="collapse">
+  <li><a href="#paso-1-cargar-los-datos" id="toc-paso-1-cargar-los-datos" class="nav-link" data-scroll-target="#paso-1-cargar-los-datos"><span class="header-section-number">5.1</span> Paso 1 — Cargar los datos</a></li>
+  <li><a href="#paso-2-construir-la-matriz-de-confusión" id="toc-paso-2-construir-la-matriz-de-confusión" class="nav-link" data-scroll-target="#paso-2-construir-la-matriz-de-confusión"><span class="header-section-number">5.2</span> Paso 2 — Construir la matriz de confusión</a></li>
+  <li><a href="#paso-3-calcular-métricas" id="toc-paso-3-calcular-métricas" class="nav-link" data-scroll-target="#paso-3-calcular-métricas"><span class="header-section-number">5.3</span> Paso 3 — Calcular métricas</a></li>
+  <li><a href="#paso-4-calcular-el-baseline" id="toc-paso-4-calcular-el-baseline" class="nav-link" data-scroll-target="#paso-4-calcular-el-baseline"><span class="header-section-number">5.4</span> Paso 4 — Calcular el baseline</a></li>
+  <li><a href="#paso-5-tabla-comparativa-final" id="toc-paso-5-tabla-comparativa-final" class="nav-link" data-scroll-target="#paso-5-tabla-comparativa-final"><span class="header-section-number">5.5</span> Paso 5 — Tabla comparativa final</a></li>
+  <li><a href="#paso-6-interpretación-y-recomendación-de-negocio" id="toc-paso-6-interpretación-y-recomendación-de-negocio" class="nav-link" data-scroll-target="#paso-6-interpretación-y-recomendación-de-negocio"><span class="header-section-number">5.6</span> Paso 6 — Interpretación y recomendación de negocio</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
+<script type="module" id="qwebr-monaco-editor-init">
+
+  // Configure the Monaco Editor's loader
+  require.config({
+    paths: {
+      'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs'
+    }
+  });
+</script>
+<script type="module">
+// Function to update Monaco Editors when body class changes
+function updateMonacoEditorsOnBodyClassChange() {
+    // Select the body element
+    const body = document.querySelector('body');
+
+    // Options for the observer (which mutations to observe)
+    const observerOptions = {
+        attributes: true,  // Observe changes to attributes
+        attributeFilter: ['class'] // Only observe changes to the 'class' attribute
+    };
+
+    // Callback function to execute when mutations are observed
+    const bodyClassChangeCallback = function(mutationsList, observer) {
+        for(let mutation of mutationsList) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                // Class attribute has changed
+                // Update all Monaco Editors on the page
+                updateMonacoEditorTheme();
+            }
+        }
+    };
+
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver(bodyClassChangeCallback);
+
+    // Start observing the target node for configured mutations
+    observer.observe(body, observerOptions);
+}
+
+// Function to update all instances of Monaco Editors on the page
+function updateMonacoEditorTheme() {
+    // Determine what VS Theme to use
+    const vsThemeToUse = document.body.classList.contains("quarto-dark") ? 'vs-dark' : 'vs' ;
+
+    // Iterate through all initialized Monaco Editors
+    qwebrEditorInstances.forEach( function(editorInstance) { 
+        editorInstance.updateOptions({ theme: vsThemeToUse }); 
+    });
+}
+
+// Call the function to start observing changes to body class
+updateMonacoEditorsOnBodyClassChange();
+</script>
+<script type="module">
+// Global array to store Monaco Editor instances
+globalThis.qwebrEditorInstances = [];
+
+function isValidCodeLineNumbers(stringCodeLineNumbers) {
+  // Regular expression to match valid input strings
+  const regex = /^(\d+(-\d+)?)(,\d+(-\d+)?)*$/;
+  return regex.test(stringCodeLineNumbers);
+}
+
+// Function that builds and registers a Monaco Editor instance    
+globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
+
+  const initialCode = cellData.code;
+  const qwebrCounter = cellData.id;
+  const qwebrOptions = cellData.options;
+
+  // Retrieve the previously created document elements
+  let runButton = document.getElementById(`qwebr-button-run-${qwebrCounter}`);
+  let resetButton = document.getElementById(`qwebr-button-reset-${qwebrCounter}`);
+  let copyButton = document.getElementById(`qwebr-button-copy-${qwebrCounter}`);
+  let editorDiv = document.getElementById(`qwebr-editor-${qwebrCounter}`);
+
+  // Load the Monaco Editor and create an instance
+  let editor;
+  require(['vs/editor/editor.main'], function () {
+    editor = monaco.editor.create(editorDiv, {
+      value: initialCode,
+      language: 'r',
+      theme: 'vs-light',
+      automaticLayout: true,           // Works wonderfully with RevealJS
+      scrollBeyondLastLine: false,
+      minimap: {
+        enabled: false
+      },
+      fontSize: qwebrScaledFontSize(editorDiv, qwebrOptions),         
+      renderLineHighlight: "none",      // Disable current line highlighting
+      hideCursorInOverviewRuler: true,  // Remove cursor indictor in right hand side scroll bar
+      readOnly: qwebrOptions['read-only'] ?? false,
+      quickSuggestions: qwebrOptions['editor-quick-suggestions'] ?? false,
+      wordWrap: (qwebrOptions['editor-word-wrap'] == 'true' ? "on" : "off")
+    });
+
+    // Store the official counter ID to be used in keyboard shortcuts
+    editor.__qwebrCounter = qwebrCounter;
+
+    // Store the official div container ID
+    editor.__qwebrEditorId = `qwebr-editor-${qwebrCounter}`;
+
+    // Store the initial code value and options
+    editor.__qwebrinitialCode = initialCode;
+    editor.__qwebrOptions = qwebrOptions;
+
+    // Set at the model level the preferred end of line (EOL) character to LF.
+    // This prevent `\r\n` from being given to the webR engine if the user is on Windows.
+    // See details in: https://github.com/coatless/quarto-webr/issues/94
+    // Associated error text: 
+    // Error: <text>:1:7 unexpected input
+
+    // Retrieve the underlying model
+    const model = editor.getModel();
+    // Set EOL for the model
+    model.setEOL(monaco.editor.EndOfLineSequence.LF);
+    
+    // Dynamically modify the height of the editor window if new lines are added.
+    let ignoreEvent = false;
+    const updateHeight = () => {
+      // Increment editor height by 2 to prevent vertical scroll bar from appearing
+      const contentHeight = editor.getContentHeight() + 2;
+
+      // Retrieve editor-max-height option
+      const maxEditorHeight = qwebrOptions['editor-max-height'];
+
+      // If editor-max-height is missing, allow infinite growth. Otherwise, threshold.
+      const editorHeight = !maxEditorHeight ?  contentHeight : Math.min(contentHeight, maxEditorHeight);
+
+      // We're avoiding a width change
+      //editorDiv.style.width = `${width}px`;
+      editorDiv.style.height = `${editorHeight}px`;
+      try {
+        ignoreEvent = true;
+
+        // The key to resizing is this call
+        editor.layout();
+      } finally {
+        ignoreEvent = false;
+      }
+    };
+
+    // Function to generate decorations to highlight lines
+    // in the editor based on input string.
+    function decoratorHighlightLines(codeLineNumbers) {
+      // Store the lines to be lighlight
+      let linesToHighlight = [];
+      
+      // Parse the codeLineNumbers string to get the line numbers to highlight
+      // First, split the string by commas
+      codeLineNumbers.split(',').forEach(part => {
+        // Check if we have a range of lines
+        if (part.includes('-')) {
+            // Handle range of lines (e.g., "6-8")
+            const [start, end] = part.split('-').map(Number);
+            for (let i = start; i <= end; i++) {
+                linesToHighlight.push(i);
+            }
+        } else {
+            // Handle single line (e.g., "7")
+            linesToHighlight.push(Number(part));
+        }
+      });
+  
+      // Create monaco decorations for the lines to highlight
+      const decorations = linesToHighlight.map(lineNumber => ({
+          range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+          options: {
+              isWholeLine: true,
+              className: 'qwebr-editor-highlight-line'
+          }
+      }));
+  
+      // Return decorations to be applied to the editor
+      return decorations;
+    }
+
+    // Ensure that the editor-code-line-numbers option is set and valid
+    // then apply styling
+    if (qwebrOptions['editor-code-line-numbers']) {
+      // Remove all whitespace from the string
+      const codeLineNumbers = qwebrOptions['editor-code-line-numbers'].replace(/\s/g,'');
+      // Check if the string is valid for line numbers, e.g., "1,3-5,7"
+      if (isValidCodeLineNumbers(codeLineNumbers)) {
+        // Apply the decorations to the editor
+        editor.createDecorationsCollection(decoratorHighlightLines(codeLineNumbers));
+      } else {
+        // Warn the user that the input is invalid
+        console.warn(`Invalid "editor-code-line-numbers" value in code cell ${qwebrOptions['label']}: ${codeLineNumbers}`);
+      }
+    }
+
+    // Helper function to check if selected text is empty
+    function isEmptyCodeText(selectedCodeText) {
+      return (selectedCodeText === null || selectedCodeText === undefined || selectedCodeText === "");
+    }
+
+    // Registry of keyboard shortcuts that should be re-added to each editor window
+    // when focus changes.
+    const addWebRKeyboardShortCutCommands = () => {
+      // Add a keydown event listener for Shift+Enter to run all code in cell
+      editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
+
+        // Retrieve all text inside the editor
+        qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
+      });
+
+      // Add a keydown event listener for CMD/Ctrl+Enter to run selected code
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+
+        // Get the selected text from the editor
+        const selectedText = editor.getModel().getValueInRange(editor.getSelection());
+        // Check if no code is selected
+        if (isEmptyCodeText(selectedText)) {
+          // Obtain the current cursor position
+          let currentPosition = editor.getPosition();
+          // Retrieve the current line content
+          let currentLine = editor.getModel().getLineContent(currentPosition.lineNumber);
+
+          // Propose a new position to move the cursor to
+          let newPosition = new monaco.Position(currentPosition.lineNumber + 1, 1);
+
+          // Check if the new position is beyond the last line of the editor
+          if (newPosition.lineNumber > editor.getModel().getLineCount()) {
+            // Add a new line at the end of the editor
+            editor.executeEdits("addNewLine", [{
+            range: new monaco.Range(newPosition.lineNumber, 1, newPosition.lineNumber, 1),
+            text: "\n", 
+            forceMoveMarkers: true,
+            }]);
+          }
+          
+          // Run the entire line of code.
+          qwebrExecuteCode(currentLine, editor.__qwebrCounter, editor.__qwebrOptions);
+
+          // Move cursor to new position
+          editor.setPosition(newPosition);
+        } else {
+          // Code to run when Ctrl+Enter is pressed with selected code
+          qwebrExecuteCode(selectedText, editor.__qwebrCounter, editor.__qwebrOptions);
+        }
+      });
+    }
+
+    // Register an on focus event handler for when a code cell is selected to update
+    // what keyboard shortcut commands should work.
+    // This is a workaround to fix a regression that happened with multiple
+    // editor windows since Monaco 0.32.0 
+    // https://github.com/microsoft/monaco-editor/issues/2947
+    editor.onDidFocusEditorText(addWebRKeyboardShortCutCommands);
+
+    // Register an on change event for when new code is added to the editor window
+    editor.onDidContentSizeChange(updateHeight);
+
+    // Manually re-update height to account for the content we inserted into the call
+    updateHeight();
+
+    // Store the editor instance in the global dictionary
+    qwebrEditorInstances[editor.__qwebrCounter] = editor;
+
+  });
+
+  // Add a click event listener to the run button
+  runButton.onclick = function () {
+    qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
+  };
+
+  // Add a click event listener to the reset button
+  copyButton.onclick = function () {
+    // Retrieve current code data
+    const data = editor.getValue();
+    
+    // Write code data onto the clipboard.
+    navigator.clipboard.writeText(data || "");
+  };
+  
+  // Add a click event listener to the copy button
+  resetButton.onclick = function () {
+    editor.setValue(editor.__qwebrinitialCode);
+  };
+  
+}
+</script>
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 6 - Fundamentos de Machine Learning</h1>
+<p class="subtitle lead">Introducción al Business Analytics · Semana 9 · 06278-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a> <span id="webr-status-anchor"></span></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="objetivo-de-la-semana" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Objetivo de la semana</h1>
+<p>Esta semana <strong>NO</strong> aprenderemos a programar algoritmos de Machine Learning. El foco está en entender <strong>la lógica general</strong>: qué tipos de problemas resuelve, cómo se evalúa un modelo y cómo se conectan los resultados con decisiones de negocio.</p>
+<section id="qué-significa-aprender-machine-learning-en-este-curso" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="qué-significa-aprender-machine-learning-en-este-curso"><span class="header-section-number">1.1</span> ¿Qué significa “aprender Machine Learning” en este curso?</h2>
+<p>Significa entender:</p>
+<ul>
+<li>Qué hace un modelo cuando se entrena y cuando predice.</li>
+<li>Cómo se evalúa si un modelo es bueno o no (y para quién).</li>
+<li>Cómo los errores del modelo se traducen en costos y decisiones reales.</li>
+</ul>
+<p>No vamos a escribir modelos desde cero. Vamos a <strong>interpretar resultados de modelos ya entrenados</strong>, comparar opciones y justificar recomendaciones.</p>
+</section>
+<section id="lo-que-cubriremos-esta-semana" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="lo-que-cubriremos-esta-semana"><span class="header-section-number">1.2</span> Lo que cubriremos esta semana</h2>
+<p>La clase se organiza en <strong>cuatro ejes</strong>:</p>
+<p><strong>¿Qué es Machine Learning?</strong> Tipos de problemas (clasificación vs.&nbsp;regresión), diferencia con analítica descriptiva, vocabulario clave (target, features, observaciones).</p>
+<p><strong>Train/Test: ¿por qué separar los datos?</strong> La lógica de generalización, overfitting, underfitting, baseline, validación cruzada y data leakage.</p>
+<p><strong>Métricas: ¿qué tan bueno es un modelo?</strong> Matriz de confusión, accuracy y sus limitaciones, precision, recall, MAE, RMSE. Siempre conectando con el costo del error.</p>
+<p><strong>Aplicación guiada en R.</strong> Comparar modelos ya estimados con datos reales: construir matrices de confusión, calcular métricas y traducir resultados a decisiones.</p>
+</section>
+<section id="conexión-con-lo-que-ya-sabemos" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="conexión-con-lo-que-ya-sabemos"><span class="header-section-number">1.3</span> Conexión con lo que ya sabemos</h2>
+<p>En las semanas 1–6 recorrimos el proceso analítico completo hasta la exploración: formular preguntas, importar datos, manipularlos con dplyr, visualizar con ggplot2 y diagnosticar calidad. En la semana 8 vimos cómo la nube provee la infraestructura para ejecutar estos análisis a escala.</p>
+<p>Ahora damos el salto: en lugar de solo <strong>describir</strong> lo que pasó, vamos a usar datos históricos para <strong>anticipar</strong> lo que probablemente pasará. Todo lo que aprendimos de manipulación, limpieza y visualización es prerrequisito directo para este bloque.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Hasta ahora (descriptiva)</th>
+<th>A partir de ahora (ML)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>“El 18% de los clientes canceló”</td>
+<td>“Estos 200 clientes tienen &gt;70% de probabilidad de cancelar”</td>
+</tr>
+<tr class="even">
+<td>Resume el pasado</td>
+<td>Anticipa el futuro (con incertidumbre)</td>
+</tr>
+<tr class="odd">
+<td>dplyr + ggplot2 como fin</td>
+<td>dplyr + ggplot2 como insumo</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="qué-es-machine-learning-y-qué-tipos-de-problemas-resuelve" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> ¿Qué es Machine Learning y qué tipos de problemas resuelve?</h1>
+<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/IRW00HT9eds" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<hr>
+<section id="qué-es-machine-learning" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="qué-es-machine-learning"><span class="header-section-number">2.1</span> ¿Qué es Machine Learning?</h2>
+<p>Hasta ahora en el curso hemos trabajado con <strong>analítica descriptiva</strong>: resumir lo que pasó, calcular KPIs, visualizar patrones. Machine Learning (ML) es un paso más allá: en lugar de solo describir el pasado, buscamos <strong>aprender patrones en los datos para hacer predicciones o tomar decisiones sobre datos nuevos</strong>.</p>
+<p>La idea central es sencilla: si un fenómeno ocurrió de cierta manera en el pasado y tenemos datos que lo documentan, podemos usar esos datos para “enseñarle” a un modelo a reconocer esos patrones y aplicarlos a situaciones que todavía no hemos observado.</p>
+<section id="ejemplo-intuitivo-churn-en-telecomunicaciones" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="ejemplo-intuitivo-churn-en-telecomunicaciones"><span class="header-section-number">2.1.1</span> Ejemplo intuitivo: churn en telecomunicaciones</h3>
+<p>Imaginen que trabajan en una empresa de telecomunicaciones y quieren saber <strong>qué clientes van a cancelar su servicio en los próximos 30 días</strong>. No pueden saberlo con certeza, pero sí tienen el historial de miles de clientes anteriores: cuánto consumían, cuántas quejas pusieron, si tenían competencia en su zona, y si finalmente se fueron o se quedaron.</p>
+<p>ML toma esa información histórica, encuentra patrones (por ejemplo: “clientes con más de 3 reclamos en el último trimestre y baja en consumo tienen alta probabilidad de irse”), y los aplica a los clientes actuales para priorizar acciones de retención.</p>
+</section>
+<section id="lo-que-ml-no-es" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="lo-que-ml-no-es"><span class="header-section-number">2.1.2</span> Lo que ML no es</h3>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Tres ideas incorrectas que hay que desmontar desde el inicio:</strong></p>
+<ul>
+<li><strong>ML no es magia.</strong> Si los datos son malos, las predicciones serán malas. “Basura entra, basura sale” aplica más que nunca.</li>
+<li><strong>ML no reemplaza el criterio humano.</strong> Un modelo te dice “este cliente probablemente se va”; tú decides qué hacer con esa información.</li>
+<li><strong>ML no siempre es la respuesta.</strong> A veces un buen análisis descriptivo o una tabla cruzada resuelve la pregunta sin necesidad de un modelo.</li>
+</ul>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="supervisado-vs.-no-supervisado" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="supervisado-vs.-no-supervisado"><span class="header-section-number">2.2</span> Supervisado vs.&nbsp;no supervisado</h2>
+<p>Una de las primeras distinciones que necesitamos entender es cómo se organizan los problemas de ML según el tipo de información disponible.</p>
+<p><strong>Aprendizaje supervisado:</strong> Conocemos la respuesta correcta en los datos históricos. Hay una variable que queremos predecir —llamada <strong>target</strong> o <strong>variable objetivo</strong>— y un conjunto de variables que usamos como insumo —llamadas <strong>features</strong> o <strong>variables predictoras</strong>. El modelo “aprende” la relación entre features y target con datos históricos, y después usa esa relación para predecir en datos nuevos.</p>
+<p><em>Ejemplo:</em> Predecir si un cliente cancela (target = “se fue: sí/no”) usando como features su antigüedad, número de reclamos, monto de facturación y si tiene competencia en su zona.</p>
+<p><strong>Aprendizaje no supervisado:</strong> No hay target. No tenemos una variable que queramos predecir; en cambio, buscamos <strong>descubrir estructura o patrones ocultos</strong> en los datos.</p>
+<p><em>Ejemplo:</em> Agrupar clientes en segmentos según sus patrones de compra (clustering), sin saber de antemano cuántos grupos hay ni cómo se llaman. El modelo encuentra los grupos; el analista los interpreta y les da sentido de negocio.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Supervisado</th>
+<th>No supervisado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>¿Hay target?</td>
+<td>Sí</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>¿Qué busca?</td>
+<td>Predecir una variable</td>
+<td>Descubrir patrones/grupos</td>
+</tr>
+<tr class="odd">
+<td>Pregunta típica</td>
+<td>“¿Se irá este cliente?”</td>
+<td>“¿Qué tipos de clientes tenemos?”</td>
+</tr>
+<tr class="even">
+<td>En el curso</td>
+<td>Semanas 11 y 12</td>
+<td>Semana 10 (clustering)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="dentro-del-supervisado-clasificación-vs.-regresión" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="dentro-del-supervisado-clasificación-vs.-regresión"><span class="header-section-number">2.3</span> Dentro del supervisado: clasificación vs.&nbsp;regresión</h2>
+<p>Cuando el problema es supervisado, la <strong>naturaleza del target</strong> define el tipo de problema:</p>
+<section id="clasificación" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="clasificación"><span class="header-section-number">2.3.1</span> Clasificación</h3>
+<p>El target es <strong>categórico</strong>: pertenece a una de varias categorías o clases.</p>
+<ul>
+<li>¿El cliente <strong>cancela</strong> o <strong>se queda</strong>? (sí/no)</li>
+<li>¿La transacción es <strong>legítima</strong> o <strong>fraudulenta</strong>?</li>
+<li>¿El lead se <strong>convierte</strong> en cliente o <strong>no</strong>?</li>
+<li>¿El producto tiene un <strong>defecto</strong> de calidad o <strong>no</strong>?</li>
+</ul>
+<p>En todos estos casos, el modelo produce una <strong>predicción de clase</strong> (y muchas veces una <strong>probabilidad</strong> asociada). Por ejemplo: “este cliente tiene un 82% de probabilidad de cancelar”.</p>
+</section>
+<section id="regresión" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="regresión"><span class="header-section-number">2.3.2</span> Regresión</h3>
+<p>El target es <strong>numérico continuo</strong>: puede tomar cualquier valor dentro de un rango.</p>
+<ul>
+<li>¿Cuánto <strong>ingreso</strong> generará este cliente el próximo trimestre?</li>
+<li>¿Cuál será el <strong>precio</strong> de un inmueble dado sus características?</li>
+<li>¿Cuántos <strong>días</strong> tardará la entrega de este pedido?</li>
+<li>¿Cuántas <strong>unidades</strong> venderemos el próximo mes?</li>
+</ul>
+<p>Aquí el modelo produce un <strong>número</strong> como predicción, y lo evaluamos por qué tan lejos queda del valor real.</p>
+</section>
+<section id="cómo-decido-cuál-usar" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="cómo-decido-cuál-usar"><span class="header-section-number">2.3.3</span> ¿Cómo decido cuál usar?</h3>
+<p>La decisión es directa: <strong>mira la variable que quieres predecir</strong>.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Si tu pregunta es…</th>
+<th>El target es…</th>
+<th>El problema es…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>“¿Se irá o se quedará?”</td>
+<td>Categoría (sí/no)</td>
+<td>Clasificación</td>
+</tr>
+<tr class="even">
+<td>“¿Cuánto va a gastar?”</td>
+<td>Número ($)</td>
+<td>Regresión</td>
+</tr>
+<tr class="odd">
+<td>“¿Es fraude o no?”</td>
+<td>Categoría (sí/no)</td>
+<td>Clasificación</td>
+</tr>
+<tr class="even">
+<td>“¿Cuántos días tardará?”</td>
+<td>Número (días)</td>
+<td>Regresión</td>
+</tr>
+</tbody>
+</table>
+<p><strong>La misma pregunta, dos enfoques</strong></p>
+<p>A veces la misma pregunta de negocio se puede abordar de ambas formas:</p>
+<ul>
+<li>“¿Este cliente va a comprar el producto premium?” → <strong>clasificación</strong> (sí/no)</li>
+<li>“¿Cuánto gastará este cliente en productos premium?” → <strong>regresión</strong> (monto en $)</li>
+</ul>
+<p>La elección depende de <strong>qué decisión de negocio quieres informar</strong>: si necesitas priorizar a quién contactar (clasificación) o estimar ingresos futuros (regresión).</p>
+<hr>
+</section>
+</section>
+<section id="vocabulario-clave-target-features-observaciones" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="vocabulario-clave-target-features-observaciones"><span class="header-section-number">2.4</span> Vocabulario clave: target, features, observaciones</h2>
+<p>Para hablar con precisión durante el resto del bloque de ML, necesitamos tres términos:</p>
+<p><strong>Target (variable objetivo):</strong> La columna que queremos predecir. En clasificación es una categoría; en regresión es un número. En la Semana 02 ya vimos este concepto cuando hablamos de la variable “el cliente se fue, ¿sí o no?” en el ejemplo de churn.</p>
+<p><strong>Features (variables predictoras):</strong> Las columnas que el modelo usa como insumo para hacer la predicción. Seleccionar bien las features es una decisión analítica crítica.</p>
+<p><strong>Observaciones (filas):</strong> Cada fila de la base de datos es un caso: un cliente, una transacción, un producto. El modelo aprende de muchas observaciones históricas para predecir en observaciones nuevas.</p>
+<div class="callout-key">
+<p><strong>Ejemplo con el dataset del curso</strong></p>
+<p>Si quisiéramos predecir qué clientes harán una compra grande (&gt;$500) el próximo mes usando el dataset <code>ventas</code>:</p>
+<ul>
+<li><strong>Target:</strong> compra_grande (sí/no) → clasificación</li>
+<li><strong>Features posibles:</strong> región, categoría de producto preferida, monto promedio histórico, número de compras previas, antigüedad</li>
+<li><strong>Observaciones:</strong> cada fila es un cliente</li>
+</ul>
+</div>
+<hr>
+</section>
+<section id="checklist" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="checklist"><span class="header-section-number">2.5</span> Checklist</h2>
+<p>Al finalizar esta sesión, debes poder:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Explicar qué es Machine Learning y en qué se diferencia de la analítica descriptiva.</label></li>
+<li><label><input type="checkbox">Distinguir aprendizaje supervisado de no supervisado.</label></li>
+<li><label><input type="checkbox">Identificar cuándo un problema es de clasificación y cuándo es de regresión.</label></li>
+<li><label><input type="checkbox">Definir qué son target, features y observaciones.</label></li>
+<li><label><input type="checkbox">Dar un ejemplo propio de un problema de clasificación y uno de regresión en contexto de negocio.</label></li>
+</ul>
+</section>
+<section id="preguntas-de-comprensión" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="preguntas-de-comprensión"><span class="header-section-number">2.6</span> Preguntas de comprensión</h2>
+<p><strong>Pregunta 1.</strong> Una cadena de retail quiere saber cuántas unidades de cada producto deberá tener en inventario la próxima semana. ¿Esto es un problema de clasificación o de regresión? ¿Por qué?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<strong>Respuesta esperada:</strong> Es regresión, porque el target (unidades en inventario) es un número continuo, no una categoría.
+</details>
+<p><strong>Pregunta 2.</strong> Un banco quiere identificar transacciones sospechosas de fraude para revisarlas manualmente. ¿Supervisado o no supervisado? ¿Clasificación o regresión?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<strong>Respuesta esperada:</strong> Supervisado (tiene datos históricos donde sabe cuáles transacciones fueron fraude). Clasificación (el target es categórico: fraude sí/no).
+</details>
+<p><strong>Pregunta 3.</strong> “Queremos agrupar a nuestros clientes según sus patrones de compra para diseñar campañas diferenciadas, pero no sabemos de antemano cuántos segmentos hay.” ¿Qué tipo de ML es?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<strong>Respuesta esperada:</strong> No supervisado (no hay target; se busca descubrir grupos). Específicamente clustering, que veremos en la Semana 10.
+</details>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="traintest-por-qué-separar-los-datos" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Train/Test: ¿por qué separar los datos?</h1>
+<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/MjSkhkxBlno" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<hr>
+<section id="el-problema-central-generalización" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="el-problema-central-generalización"><span class="header-section-number">3.1</span> El problema central: generalización</h2>
+<p>El objetivo de un modelo de Machine Learning no es describir perfectamente los datos que ya tenemos. El objetivo es <strong>funcionar bien con datos que nunca ha visto</strong>. A esto le llamamos <strong>generalización</strong>.</p>
+<section id="la-analogía-del-examen" class="level3" data-number="3.1.1">
+<h3 data-number="3.1.1" class="anchored" data-anchor-id="la-analogía-del-examen"><span class="header-section-number">3.1.1</span> La analogía del examen</h3>
+<p>Piensen en cómo estudian para un parcial:</p>
+<ul>
+<li>Si estudian <strong>memorizando las respuestas exactas</strong> de los ejercicios del taller, les irá bien <em>si el parcial tiene las mismas preguntas</em>. Pero si las preguntas son distintas (aunque del mismo tema), estarán perdidos.</li>
+<li>Si estudian <strong>entendiendo los conceptos y la lógica</strong>, podrán resolver preguntas nuevas que nunca habían visto.</li>
+</ul>
+<p>Un modelo de ML funciona igual. Si le permitimos “ver” todos los datos durante el entrenamiento y lo evaluamos con esos mismos datos, nos dirá que es excelente… pero probablemente solo memorizó. Necesitamos evaluarlo con datos que <strong>nunca vio durante el entrenamiento</strong> para saber si realmente aprendió patrones útiles.</p>
+<hr>
+</section>
+</section>
+<section id="la-solución-separar-en-entrenamiento-y-prueba-traintest-split" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="la-solución-separar-en-entrenamiento-y-prueba-traintest-split"><span class="header-section-number">3.2</span> La solución: separar en entrenamiento y prueba (train/test split)</h2>
+<p>La solución estándar es <strong>dividir los datos en dos grupos antes de hacer cualquier otra cosa</strong>:</p>
+<p><strong>Datos de entrenamiento (train):</strong> El modelo aprende con estos datos. Ve tanto las features como el target, y busca patrones que conecten las unas con el otro. Típicamente usamos entre el 70% y el 80% de los datos.</p>
+<p><strong>Datos de prueba (test):</strong> Estos datos se guardan “en una caja fuerte”. El modelo <strong>nunca</strong> los ve durante el entrenamiento. Solo los usamos al final para evaluar qué tan bien generaliza. Típicamente representan entre el 20% y el 30% de los datos.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Regla de oro:</strong> Los datos de test son sagrados. No se tocan, no se usan para decidir nada durante el entrenamiento, no se miran “solo para ver”. Se usan una vez, al final, para la evaluación definitiva. Violar esta regla es como si el estudiante hubiera visto el parcial antes de presentarlo.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="overfitting-y-underfitting" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="overfitting-y-underfitting"><span class="header-section-number">3.3</span> Overfitting y underfitting</h2>
+<p>Estos dos conceptos son los riesgos opuestos que todo modelo enfrenta:</p>
+<p><strong>Overfitting (sobreajuste):</strong> El modelo aprendió <strong>demasiado bien</strong> los datos de entrenamiento, memorizando incluso el ruido y las particularidades. Funciona excelente en train pero mal en datos nuevos (test). <em>Señal:</em> métricas muy buenas en train, significativamente peores en test. <em>Analogía:</em> estudiante que memorizó el taller — saca 5.0 en taller, 2.0 en parcial.</p>
+<p><strong>Underfitting (subajuste):</strong> El modelo es <strong>demasiado simple</strong> para capturar los patrones reales. No aprende bien ni siquiera en entrenamiento. <em>Señal:</em> métricas malas tanto en train como en test. <em>Analogía:</em> estudiante que usó un resumen de una página para tres unidades. No le alcanza ni para el taller.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Train</th>
+<th>Test</th>
+<th>Diagnóstico</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Overfitting</td>
+<td>✓ Muy bueno</td>
+<td>✗ Malo</td>
+<td>Memorizó, no generaliza</td>
+</tr>
+<tr class="even">
+<td>Underfitting</td>
+<td>✗ Malo</td>
+<td>✗ Malo</td>
+<td>Demasiado simple</td>
+</tr>
+<tr class="odd">
+<td><strong>Balance ideal</strong></td>
+<td>✓ Bueno</td>
+<td>✓ Bueno</td>
+<td>Aprendió patrones reales</td>
+</tr>
+</tbody>
+</table>
+<p>Lo que buscamos es un modelo que aprenda los patrones genuinos de train (no underfitting) y generalice bien a test (no overfitting). Esto se logra eligiendo la complejidad adecuada y usando validación cruzada.</p>
+<hr>
+</section>
+<section id="el-baseline-contra-qué-comparamos" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="el-baseline-contra-qué-comparamos"><span class="header-section-number">3.4</span> El baseline: ¿contra qué comparamos?</h2>
+<p>Antes de evaluar un modelo, necesitamos una referencia mínima: <strong>¿qué pasaría si usáramos la estrategia más ingenua posible?</strong> Eso es el baseline.</p>
+<p><strong>Baseline en clasificación:</strong> Predecir siempre la clase más frecuente. Si el 85% de los clientes no canceló, un “modelo” que siempre diga “no cancela” acertaría el 85% de las veces. Si tu modelo sofisticado tiene 86% de accuracy, apenas supera al baseline.</p>
+<p><strong>Baseline en regresión:</strong> Predecir siempre el promedio (o la mediana) del target. Si el ingreso promedio mensual es $250, el baseline siempre predice $250 para todos. Si tu modelo tiene un error (MAE) de $45 y el baseline $48, la mejora es marginal.</p>
+<div class="callout-key">
+<p><strong>¿Por qué importa?</strong> Porque sin baseline no sabes si tu modelo realmente aporta valor. Un modelo siempre tendrá alguna métrica; la pregunta es si esa métrica es <em>mejor</em> que lo que obtendrías sin esfuerzo alguno.</p>
+</div>
+<hr>
+</section>
+<section id="validación-cruzada-cross-validation" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="validación-cruzada-cross-validation"><span class="header-section-number">3.5</span> Validación cruzada (cross-validation)</h2>
+<p>La separación train/test tiene un problema: depende de cómo cayó la división. Si por azar los datos de test son “fáciles”, las métricas serán optimistas; si son “difíciles”, serán pesimistas.</p>
+<p>La <strong>validación cruzada (CV)</strong> resuelve esto. La idea de K-Fold CV:</p>
+<ol type="1">
+<li>Tomamos solo los datos de <strong>train</strong> (el test sigue guardado).</li>
+<li>Dividimos train en <em>k</em> partes iguales (por ejemplo, k=5).</li>
+<li>Repetimos k veces: usamos k-1 partes para entrenar y la parte restante para evaluar.</li>
+<li>Promediamos las k métricas resultantes.</li>
+</ol>
+<p><strong>¿Qué ganamos?</strong> Una estimación más estable y confiable del desempeño, que no depende de una sola partición. Se usa principalmente para <strong>comparar modelos y configuraciones</strong> durante el proceso de entrenamiento. Después de tomar la decisión, el modelo final se evalúa con test.</p>
+<p><em>Analogía:</em> CV es como hacer 5 simulacros de parcial con preguntas diferentes cada vez. El promedio de los 5 te da una idea más realista de cómo te irá en el parcial real.</p>
+<hr>
+</section>
+<section id="data-leakage-el-error-silencioso" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="data-leakage-el-error-silencioso"><span class="header-section-number">3.6</span> Data leakage: el error silencioso</h2>
+<p>El <strong>data leakage</strong> (fuga de datos) es uno de los errores más peligrosos en ML porque <strong>el modelo parece funcionar muy bien, pero en realidad está haciendo trampa</strong>.</p>
+<p>Ocurre cuando el modelo tiene acceso, directa o indirectamente, a información que <strong>no tendría disponible en el momento real de la predicción</strong>.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Tres ejemplos concretos de leakage:</strong></p>
+<p><strong>1. Variable que “se cuela”:</strong> Incluir “motivo de cancelación” como feature para predecir cancelación. Esa variable solo existe <em>después</em> de que el cliente canceló. Es como incluir la respuesta dentro de la pregunta.</p>
+<p><strong>2. Preprocesamiento incorrecto:</strong> Calcular el promedio de una variable usando <em>todos</em> los datos antes de separar train/test, y usarlo para llenar faltantes. El promedio incluye información de test que “se filtró” al entrenamiento. Regla: todo cálculo estadístico se aprende solo con train y se aplica a test.</p>
+<p><strong>3. Datos del futuro:</strong> Predecir ventas de marzo usando una feature que contiene información de marzo (actualizada retroactivamente). El modelo aprendió del futuro.</p>
+</div>
+</div>
+<p><strong>Señales de alerta:</strong> resultados “demasiado buenos para ser verdad”, una feature con importancia absurdamente alta, métricas perfectas en train y test.</p>
+<p><strong>¿Por qué es tan grave?</strong> Porque el modelo <em>parece</em> bueno en la evaluación, se pone en producción y después falla con datos reales. El costo: decisiones de negocio tomadas con confianza falsa.</p>
+<hr>
+</section>
+<section id="resumen-del-pipeline" class="level2" data-number="3.7">
+<h2 data-number="3.7" class="anchored" data-anchor-id="resumen-del-pipeline"><span class="header-section-number">3.7</span> Resumen del pipeline</h2>
+<p>Con lo visto en las Sesiones 1 y 2, el pipeline general de ML es:</p>
+<ol type="1">
+<li><strong>Formular la pregunta</strong> → ¿clasificación o regresión?</li>
+<li><strong>Definir target y features</strong> → ¿qué predigo? ¿con qué variables?</li>
+<li><strong>Separar train/test</strong> → antes de hacer cualquier otra cosa.</li>
+<li><strong>Establecer el baseline</strong> → predicción más ingenua posible.</li>
+<li><strong>Entrenar modelo(s) con train</strong> → usar CV para comparar opciones.</li>
+<li><strong>Evaluar en test</strong> → una sola vez, al final.</li>
+<li><strong>Comparar contra baseline</strong> → ¿el modelo aporta valor real?</li>
+<li><strong>Reportar</strong> → resultados, limitaciones y recomendación.</li>
+</ol>
+<hr>
+</section>
+<section id="checklist-1" class="level2" data-number="3.8">
+<h2 data-number="3.8" class="anchored" data-anchor-id="checklist-1"><span class="header-section-number">3.8</span> Checklist</h2>
+<p>Al finalizar esta sesión, debes poder:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Explicar por qué no se debe evaluar un modelo con los mismos datos con los que se entrenó.</label></li>
+<li><label><input type="checkbox">Describir la separación train/test y la regla de oro del test set.</label></li>
+<li><label><input type="checkbox">Distinguir overfitting de underfitting y explicar cómo se detectan.</label></li>
+<li><label><input type="checkbox">Explicar qué es un baseline y por qué siempre hay que comparar contra él.</label></li>
+<li><label><input type="checkbox">Describir la idea de validación cruzada y para qué sirve.</label></li>
+<li><label><input type="checkbox">Definir data leakage, dar un ejemplo y explicar por qué es peligroso.</label></li>
+</ul>
+</section>
+<section id="preguntas-de-comprensión-sesión-2" class="level2" data-number="3.9">
+<h2 data-number="3.9" class="anchored" data-anchor-id="preguntas-de-comprensión-sesión-2"><span class="header-section-number">3.9</span> Preguntas de comprensión — Sesión 2</h2>
+<p><strong>Pregunta 1.</strong> Un equipo entrena un modelo de clasificación que obtiene 95% de accuracy en entrenamiento y 62% en test. ¿Qué está pasando? ¿Cómo se lo explicarías al gerente que pide poner este modelo en producción?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<strong>Respuesta esperada:</strong> Overfitting — memorizó los datos de entrenamiento pero no generaliza. Al gerente le explicaría que el modelo parece bueno “en el laboratorio” pero probablemente fallará con clientes reales. Necesitamos simplificarlo o conseguir más datos.
+</details>
+<p><strong>Pregunta 2.</strong> En un problema de churn, el 92% de los clientes no canceló. Un analista dice: “Mi modelo tiene 92% de accuracy, está listo para producción.” ¿Qué le dirías?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<strong>Respuesta esperada:</strong> Que el baseline (predecir siempre “no cancela”) también tiene 92% de accuracy. Su modelo no aporta nada más allá de la estrategia más ingenua. Necesita evaluar con métricas más informativas (como precision/recall).
+</details>
+<p><strong>Pregunta 3.</strong> Un compañero te dice: “Antes de separar train y test, normalicé todas las variables usando el promedio y la desviación estándar de toda la base.” ¿Hay algún problema?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<strong>Respuesta esperada:</strong> Sí, eso es data leakage. El promedio y la desviación estándar incluyen información de test. Lo correcto es calcular esos estadísticos solo con train y aplicarlos a test.
+</details>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="métricas-qué-tan-bueno-es-un-modelo" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Métricas: ¿qué tan bueno es un modelo?</h1>
+<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/hiM2NS2r3gM" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<hr>
+<section id="por-qué-necesitamos-métricas" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="por-qué-necesitamos-métricas"><span class="header-section-number">4.1</span> ¿Por qué necesitamos métricas?</h2>
+<p>Imaginen que un equipo de analítica le presenta a la gerencia un modelo de predicción de churn y dice: “el modelo funciona bien”. La pregunta inmediata de cualquier gerente sería: ¿qué tan bien? ¿Mejor que lo que ya teníamos? ¿Lo suficiente como para invertir recursos en implementarlo?. “Funciona bien” no es una respuesta aceptable. Necesitamos métricas que nos permitan:</p>
+<ul>
+<li><strong>Comparar un modelo contra el baseline.</strong> Si el modelo no supera a la estrategia más ingenua (como vimos en el Eje 2), no aporta valor. Las métricas nos dan esa comparación objetiva.</li>
+<li><strong>Comparar dos o más modelos entre sí.</strong> Cuando hay varias opciones sobre la mesa — un modelo simple vs.&nbsp;uno complejo, por ejemplo — las métricas nos dicen cuál funciona mejor en los datos de test.</li>
+<li><strong>Comunicar resultados al negocio en un lenguaje que genere acción.</strong> “El modelo acierta en el 78% de los casos” o “se equivoca en promedio por $42 por cliente” son frases que un gerente puede usar para tomar decisiones. “Funciona bien” no lo es.</li>
+<li><strong>Decidir si el modelo es lo suficientemente bueno</strong> para la decisión que queremos tomar. Un modelo que se equivoca por $5 en promedio puede ser excelente para planificar inventario, pero insuficiente para cotizar seguros de alto valor.</li>
+</ul>
+<p>Ahora bien, no existe una sola métrica que sirva para todo. Las métricas son diferentes según el tipo de problema: <strong>clasificación</strong> tiene las suyas, <strong>regresión</strong> tiene las suyas. Y dentro de cada tipo, la métrica correcta depende del contexto de negocio. Veamos cada grupo.</p>
+<hr>
+</section>
+<section id="métricas-de-clasificación" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="métricas-de-clasificación"><span class="header-section-number">4.2</span> Métricas de clasificación</h2>
+<p>En un problema de clasificación, el modelo predice una <strong>clase</strong> — por ejemplo: “cancela” o “no cancela”, “fraude” o “legítima”. Las métricas evalúan qué tan bien acertó esa predicción comparada con lo que realmente ocurrió.</p>
+<section id="la-matriz-de-confusión-el-punto-de-partida" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="la-matriz-de-confusión-el-punto-de-partida"><span class="header-section-number">4.2.1</span> La matriz de confusión: el punto de partida</h3>
+<p>Antes de hablar de cualquier métrica, necesitamos una herramienta que organice todos los aciertos y errores del modelo en un solo lugar. Esa herramienta es la matriz de confusión. Es simplemente una tabla de 2×2 que cruza dos cosas: <strong>lo que el modelo predijo</strong> vs.&nbsp;<strong>lo que realmente pasó</strong>. Cada celda tiene un nombre que describe qué tipo de resultado es:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Predicho: Sí</strong></th>
+<th><strong>Predicho: No</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Real: Sí</strong></td>
+<td>Verdadero Positivo (VP)</td>
+<td>Falso Negativo (FN))</td>
+</tr>
+<tr class="even">
+<td><strong>Real: No</strong></td>
+<td>Falso Positivo (FP)</td>
+<td>Verdadero Negativo (VN)</td>
+</tr>
+</tbody>
+</table>
+<p>Detengámonos en cada celda, porque entender bien estas cuatro categorías es la base de todo lo que sigue:</p>
+<ul>
+<li><strong>Verdadero Positivo (VP):</strong> El modelo dijo “sí” y la realidad era “sí”. Es un acierto en la detección del evento que nos interesa.</li>
+<li><strong>Verdadero Negativo (VN):</strong> El modelo dijo “no” y la realidad era “no”. También es un acierto, pero en el sentido contrario: correctamente descartó un caso.</li>
+<li><strong>Falso Positivo (FP):</strong> El modelo dijo “sí” pero la realidad era “no”. Es una <strong>falsa alarma</strong>. El modelo “gritó fuego” donde no había fuego.</li>
+<li><strong>Falso Negativo (FN):</strong> El modelo dijo “no” pero la realidad era “sí”. <strong>Se le escapó</strong> un caso real. El modelo no detectó algo que debió haber detectado.</li>
+</ul>
+</section>
+<section id="ejemplo-concreto-detección-de-fraude" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="ejemplo-concreto-detección-de-fraude"><span class="header-section-number">4.2.2</span> Ejemplo concreto: detección de fraude</h3>
+<p>Un modelo de detección de fraude evalúa 1,000 transacciones. VP = 40 (fraudes detectados), FN = 10 (fraudes escapados), FP = 30 (falsas alarmas), VN = 920 (legítimas correctas). De esta matriz se derivan todas las métricas de clasificación. Para que estos conceptos cobren vida, usemos un caso de negocio. Supongamos que un banco implementa un modelo para detectar transacciones fraudulentas. El modelo revisa 1,000 transacciones y produce estas predicciones:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Predicho: Fraude</strong></th>
+<th><strong>Predicho: Legítima</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Real: Fraude</strong></td>
+<td>40 (VP)</td>
+<td>10 (FN)</td>
+</tr>
+<tr class="even">
+<td><strong>Real: Legítima</strong></td>
+<td>30 (FP)</td>
+<td>920 (VN)</td>
+</tr>
+</tbody>
+</table>
+<p>¿Cómo leemos esta tabla?</p>
+<ul>
+<li><strong>De 50 fraudes reales</strong> (fila superior: 40 + 10), el modelo detectó 40 correctamente (VP) pero se le escaparon 10 (FN). Esos 10 fraudes pasaron como si fueran transacciones normales — el banco perdió dinero en cada uno.</li>
+<li><strong>De 950 transacciones legítimas</strong> (fila inferior: 30 + 920), el modelo clasificó 920 correctamente (VN) pero marcó 30 como fraude cuando no lo eran (FP). Esos 30 clientes recibieron un bloqueo o una llamada de verificación innecesaria.</li>
+<li><strong>En total</strong>, el modelo acertó en 960 de 1,000 casos (40 VP + 920 VN). Pero como veremos a continuación, ese número por sí solo puede ser engañoso.</li>
+</ul>
+<p>De esta matriz se derivan <strong>todas</strong> las métricas de clasificación que veremos ahora. Cada métrica simplemente toma diferentes combinaciones de estas cuatro celdas para responder una pregunta específica.</p>
+<hr>
+</section>
+<section id="accuracy-exactitud" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="accuracy-exactitud"><span class="header-section-number">4.2.3</span> Accuracy (exactitud)</h3>
+<p><strong>¿Qué mide?</strong> La proporción total de predicciones correctas, sin distinguir qué tipo de acierto es:</p>
+<p>Accuracy = (VP + VN) / Total de casos</p>
+<p>En nuestro ejemplo: (40 + 920) / 1,000 = <strong>96%</strong>. A primera vista, suena excelente. Un modelo que acierta el 96% de las veces parece difícil de superar. Pero aquí viene una lección fundamental del curso:</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>El problema del accuracy con clases desbalanceadas</strong></p>
+<p>Miremos de nuevo los datos. De las 1,000 transacciones, solo 50 eran fraude (5%) y 950 eran legítimas (95%). Ahora imaginen un “modelo” absurdamente simple: siempre dice “legítima”, sin importar nada. No analiza ninguna variable, no aprende ningún patrón. Simplemente dice “legítima” para todo. ¿Cuál sería su accuracy? 950 / 1,000 = <strong>95%</strong>. ¡Casi tan bueno como nuestro modelo sofisticado! Y sin detectar un solo fraude.</p>
+<p>Este es el problema: cuando una clase es mucho más frecuente que la otra (lo que en la práctica ocurre casi siempre — pocos clientes cancelan, pocas transacciones son fraude, pocos pacientes tienen la enfermedad), el accuracy se “infla” con los aciertos de la clase mayoritaria y <strong>esconde</strong> el desempeño real en la clase que nos importa. Por eso, accuracy solo es útil como métrica cuando las clases están razonablemente balanceadas. Cuando no lo están — que es la mayoría de los problemas reales de negocio — necesitamos métricas que miren los errores con más detalle.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="precision-precisión" class="level3" data-number="4.2.4">
+<h3 data-number="4.2.4" class="anchored" data-anchor-id="precision-precisión"><span class="header-section-number">4.2.4</span> Precision (precisión)</h3>
+<p>Precision responde una pregunta muy específica: <strong>De todos los casos que el modelo marcó como positivos, ¿cuántos realmente lo eran?</strong>. Es decir, cuando el modelo “levanta la mano” y dice “¡esto es fraude!”, ¿qué tan confiable es esa alarma?</p>
+<p>Precision = VP / (VP + FP)</p>
+<p>En nuestro ejemplo: 40 / (40 + 30) = <strong>57%</strong>. Esto significa que cuando el modelo dice “esta transacción es fraude”, acierta solo el 57% de las veces. El otro 43% son falsas alarmas — transacciones legítimas que el modelo marcó incorrectamente.</p>
+<section id="cuándo-es-especialmente-importante-la-precision" class="level4" data-number="4.2.4.1">
+<h4 data-number="4.2.4.1" class="anchored" data-anchor-id="cuándo-es-especialmente-importante-la-precision"><span class="header-section-number">4.2.4.1</span> ¿Cuándo es especialmente importante la precision?</h4>
+<p>Cuando las falsas alarmas tienen un costo alto. Piensen en estos escenarios:</p>
+<ul>
+<li>Si cada alerta de fraude implica bloquear la tarjeta del cliente y llamarlo para verificar, un modelo con baja precision genera miles de llamadas innecesarias, clientes molestos y costos operativos altos.</li>
+<li>Si un modelo de reclutamiento marca candidatos como “alto potencial” y el equipo de RRHH invierte horas entrevistando a cada uno, muchas falsas alarmas desperdician tiempo valioso.</li>
+<li>Si un filtro de spam clasifica correos como “basura”, cada falso positivo es un correo legítimo que la persona no ve — potencialmente un mensaje importante de un cliente o un jefe.</li>
+</ul>
+<p>En todos estos casos, queremos que cuando el modelo diga “sí”, <strong>realmente sea sí</strong>. Eso es precision alta.</p>
+<hr>
+</section>
+</section>
+<section id="recall-sensibilidad" class="level3" data-number="4.2.5">
+<h3 data-number="4.2.5" class="anchored" data-anchor-id="recall-sensibilidad"><span class="header-section-number">4.2.5</span> Recall (sensibilidad)</h3>
+<p>Recall responde la pregunta complementaria: <strong>De todos los casos que realmente eran positivos, ¿cuántos logró detectar el modelo?</strong> Es decir, del universo de fraudes reales que ocurrieron, ¿cuántos capturó el modelo y cuántos se le escaparon?</p>
+<p>Recall = VP / (VP + FN)</p>
+<p>En nuestro ejemplo: 40 / (40 + 10) = <strong>80%</strong>. De los 50 fraudes que realmente ocurrieron, el modelo detectó 40 (el 80%). Se le escaparon 10 — esos 10 fraudes pasaron como si fueran transacciones normales y el banco absorbió la pérdida.</p>
+<section id="cuándo-es-especialmente-importante-el-recall" class="level4" data-number="4.2.5.1">
+<h4 data-number="4.2.5.1" class="anchored" data-anchor-id="cuándo-es-especialmente-importante-el-recall"><span class="header-section-number">4.2.5.1</span> ¿Cuándo es especialmente importante el recall?</h4>
+<p>Cuando dejarse un caso sin detectar tiene un costo alto. Piensen en estos escenarios:</p>
+<ul>
+<li>Si cada fraude no detectado representa una pérdida de $10,000 para el banco, esos 10 fraudes escapados cuestan $100,000. El banco prefiere investigar algunas falsas alarmas (costo bajo) antes que dejar pasar fraudes reales (costo alto).</li>
+<li>Si un modelo de diagnóstico médico no detecta un cáncer en etapa temprana, el paciente pierde la oportunidad de tratamiento oportuno. Una falsa alarma (pedir un examen confirmatorio) es infinitamente menos grave que un caso no detectado.</li>
+<li>Si una empresa pierde un cliente de alto valor porque el modelo de churn no lo identificó a tiempo, el costo de esa pérdida puede superar con creces el costo de enviar una oferta de retención innecesaria a alguien que no iba a cancelar.</li>
+</ul>
+<p>En todos estos casos, queremos que el modelo <strong>no se le escape ningún caso positivo</strong>, aunque esto signifique generar algunas falsas alarmas. Eso es recall alto.</p>
+<hr>
+</section>
+</section>
+<section id="el-trade-off-entre-precision-y-recall" class="level3" data-number="4.2.6">
+<h3 data-number="4.2.6" class="anchored" data-anchor-id="el-trade-off-entre-precision-y-recall"><span class="header-section-number">4.2.6</span> El trade-off entre precision y recall</h3>
+<p>Aquí viene una de las ideas más importantes de esta semana, y una que aparece constantemente en decisiones reales de negocio: <strong>Precision y recall están en tensión.</strong> Mejorar una generalmente empeora la otra. No se pueden maximizar ambas al mismo tiempo. ¿Por qué? Porque el modelo produce probabilidades (por ejemplo, “esta transacción tiene 73% de probabilidad de ser fraude”), y nosotros elegimos un <strong>umbral</strong> para convertir esa probabilidad en una decisión de sí/no.</p>
+<ul>
+<li>Si <strong>bajo el umbral</strong> (por ejemplo, considero fraude todo lo que tenga &gt;30% de probabilidad), el modelo marcará más transacciones como sospechosas. Detectará más fraudes reales (<strong>recall sube</strong>), pero también generará más falsas alarmas (<strong>precision baja</strong>).</li>
+<li>Si <strong>subo el umbral</strong> (considero fraude solo lo que tenga &gt;90% de probabilidad), el modelo será más selectivo. Cuando diga “fraude”, casi seguro será fraude (<strong>precision sube</strong>), pero se le escaparán muchos casos que no alcanzan ese umbral tan alto (<strong>recall baja</strong>).</li>
+</ul>
+<p>No hay un umbral “correcto” universal. <strong>La elección depende del costo relativo de cada tipo de error</strong> en el contexto específico del problema.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Contexto</th>
+<th>¿Qué priorizar?</th>
+<th>¿Por qué?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fraude bancario</td>
+<td>Recall alto</td>
+<td>Un fraude no detectado cuesta miles de dólares; una falsa alarma cuesta una llamada de verificación</td>
+</tr>
+<tr class="even">
+<td>Filtro de spam</td>
+<td>Precision alto</td>
+<td>Un correo legítimo en la carpeta de spam puede ser un mensaje crítico del jefe</td>
+</tr>
+<tr class="odd">
+<td>Diagnóstico médico (screening)</td>
+<td>Recall alto</td>
+<td>No detectar una enfermedad puede ser fatal; un falso positivo solo genera un examen confirmatorio</td>
+</tr>
+<tr class="even">
+<td>Publicidad dirigida</td>
+<td>Precision alto</td>
+<td>Enviar ofertas a personas no interesadas desperdicia presupuesto de marketing</td>
+</tr>
+</tbody>
+</table>
+<p>La decisión de qué métrica priorizar <strong>no es técnica, es de negocio.</strong> El analista debe entender los costos de cada tipo de error, discutirlos con las áreas involucradas, y elegir el balance adecuado. Un modelo no existe en el vacío: existe para informar una acción concreta, y esa acción tiene costos y beneficios asociados a cada tipo de error.</p>
+<hr>
+</section>
+</section>
+<section id="métricas-de-regresión" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="métricas-de-regresión"><span class="header-section-number">4.3</span> Métricas de regresión</h2>
+<p>En un problema de regresión, el modelo no predice una categoría (“sí” o “no”) sino un número: cuánto va a gastar un cliente, cuántos días tardará un envío, cuántas unidades se venderán. La pregunta ya no es “¿acertó o no?” sino <strong>¿por cuánto se equivocó?</strong>. Las métricas de regresión miden exactamente eso: la distancia entre lo que el modelo predijo y lo que realmente ocurrió. Veamos las dos más importantes.</p>
+<section id="mae-mean-absolute-error-error-absoluto-medio" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="mae-mean-absolute-error-error-absoluto-medio"><span class="header-section-number">4.3.1</span> MAE (Mean Absolute Error — Error Absoluto Medio)</h3>
+<p>El MAE responde la pregunta más intuitiva posible: <strong>En promedio, ¿por cuánto se equivoca el modelo?</strong>. Se calcula tomando cada predicción, midiendo qué tan lejos quedó del valor real (en valor absoluto, sin importar si fue por arriba o por abajo), y promediando todos esos errores.</p>
+<p><strong>Ejemplo concreto:</strong> Supongamos que un modelo predice las ventas mensuales de 5 tiendas:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Tienda</th>
+<th>Ventas reales</th>
+<th>Predicción</th>
+<th>Error absoluto</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td>$1,200</td>
+<td>$1,250</td>
+<td>$50</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td>$800</td>
+<td>$780</td>
+<td>$20</td>
+</tr>
+<tr class="odd">
+<td>C</td>
+<td>$2,000</td>
+<td>$1,850</td>
+<td>$150</td>
+</tr>
+<tr class="even">
+<td>D</td>
+<td>$950</td>
+<td>$960</td>
+<td>$10</td>
+</tr>
+<tr class="odd">
+<td>E</td>
+<td>$1,500</td>
+<td>$1,430</td>
+<td>$70</td>
+</tr>
+</tbody>
+</table>
+<p>MAE = ($50 + $20 + $150 + $10 + $70) / 5 = <strong>$60</strong></p>
+<p><strong>¿Cómo se lee?</strong> “En promedio, las predicciones del modelo se desvían $60 del valor real.” A veces el modelo predice de más, a veces de menos, pero en promedio el error es de $60.</p>
+<p><strong>Ventajas del MAE:</strong></p>
+<ul>
+<li><strong>Se interpreta directamente en las unidades del target.</strong> Si predices ventas en pesos, MAE está en pesos. Si predices días de entrega, MAE está en días. No necesitas ninguna transformación para entenderlo.</li>
+<li><strong>Trata todos los errores por igual.</strong> Un error de $150 “pesa” exactamente 3 veces más que uno de $50 en el promedio. No más, no menos.</li>
+</ul>
+</section>
+<section id="rmse-root-mean-squared-error-raíz-del-error-cuadrático-medio" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="rmse-root-mean-squared-error-raíz-del-error-cuadrático-medio"><span class="header-section-number">4.3.2</span> RMSE (Root Mean Squared Error — Raíz del Error Cuadrático Medio)</h3>
+<p>El RMSE responde una pregunta ligeramente diferente: <strong>¿Por cuánto se equivoca el modelo, penalizando especialmente los errores grandes?</strong>. Se calcula elevando cada error al cuadrado (lo que amplifica los errores grandes), promediando esos cuadrados, y sacando la raíz cuadrada para volver a las unidades originales. Con los mismos datos del ejemplo anterior:</p>
+<p>Errores al cuadrado: $50² + $20² + $150² + $10² + $70² = 2,500 + 400 + 22,500 + 100 + 4,900 = 30,400</p>
+<p>RMSE = √(30,400 / 5) = √6,080 ≈ <strong>$78</strong></p>
+<p><strong>Noten que MAE = $60</strong> pero <strong>RMSE = $78</strong>. ¿Por qué la diferencia? Porque el error de la Tienda C ($150) es mucho mayor que los demás. Al elevar al cuadrado, ese error grande se amplifica desproporcionadamente: $150² = 22,500, que es el 74% de la suma total de errores al cuadrado. El RMSE está “alertando” de que hay errores grandes en las predicciones.</p>
+</section>
+<section id="cuándo-preferir-rmse-sobre-mae" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="cuándo-preferir-rmse-sobre-mae"><span class="header-section-number">4.3.3</span> ¿Cuándo preferir RMSE sobre MAE?</h3>
+<p>Cuando los <strong>errores grandes son especialmente costosos</strong> para el negocio. Piensen en estos escenarios:</p>
+<ul>
+<li><strong>Inventario:</strong> Si predices que una tienda venderá 100 unidades y vende 250, te quedaste sin stock, perdiste ventas, y los clientes se fueron a la competencia. Equivocarte por mucho es desproporcionadamente peor que equivocarte un poco.</li>
+<li><strong>Logística:</strong> Si predices que un envío tarda 3 días y tarda 10, el cliente probablemente cancela y pide reembolso. Un error de 7 días es mucho más grave que siete errores de 1 día.</li>
+<li><strong>Presupuesto:</strong> Si subestimas los costos de un proyecto por $500,000, puede haber consecuencias financieras serias. Cinco errores de $100,000 son manejables; uno de $500,000 puede no serlo.</li>
+</ul>
+<p>En cambio, si todos los errores tienen un costo proporcional a su tamaño — un error de $100 cuesta exactamente el doble que uno de $50 — entonces MAE es suficiente y más fácil de interpretar.</p>
+</section>
+<section id="cómo-saber-si-un-maermse-es-bueno" class="level3" data-number="4.3.4">
+<h3 data-number="4.3.4" class="anchored" data-anchor-id="cómo-saber-si-un-maermse-es-bueno"><span class="header-section-number">4.3.4</span> ¿Cómo saber si un MAE/RMSE es “bueno”?</h3>
+<p>Un MAE de $35 no significa nada por sí solo. Puede ser excelente o terrible dependiendo del contexto. Las dos referencias que siempre debes usar:</p>
+<p><strong>(1) Comparar contra el baseline.</strong> Recuerda la Sesión 2: el baseline en regresión es predecir siempre el promedio (o la mediana) del target. Si el baseline tiene MAE = $48 y tu modelo tiene MAE = $35, el modelo mejoró un 27% respecto a la estrategia más ingenua. Eso es informativo — ahora puedes decir “el modelo reduce el error en un 27% respecto a no usar ningún modelo”.</p>
+<p><strong>(2) Comparar contra el contexto de negocio.</strong> Pregúntate: ¿un error de $35 es aceptable para la decisión que quiero tomar? Si estás prediciendo ventas mensuales de $5,000 por tienda, un error de $35 es el 0.7% — probablemente más que suficiente. Si estás prediciendo el monto de un microcrédito de $50, un error de $35 es el 70% — completamente inaceptable.</p>
+<hr>
+</section>
+</section>
+<section id="siempre-comparar-contra-el-baseline" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="siempre-comparar-contra-el-baseline"><span class="header-section-number">4.4</span> Siempre comparar contra el baseline</h2>
+<p>Este punto merece énfasis propio porque es uno de los errores más frecuentes que cometen los analistas, incluso los experimentados: <strong>reportar métricas sin contexto</strong>. Decir “el modelo tiene 87% de accuracy” o “el modelo tiene MAE de $42” suena informativo, pero en realidad no dice nada útil si no sabemos <strong>contra qué estamos comparando</strong>. ¿87% es bueno? Depende. ¿$42 de error es aceptable? Depende. ¿De qué depende? Del baseline.</p>
+<section id="el-patrón-correcto-de-reporte" class="level3" data-number="4.4.1">
+<h3 data-number="4.4.1" class="anchored" data-anchor-id="el-patrón-correcto-de-reporte"><span class="header-section-number">4.4.1</span> El patrón correcto de reporte</h3>
+<p>En lugar de presentar una sola cifra, siempre presenta una <strong>tabla comparativa</strong> que incluya el baseline como primera fila:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Modelo</th>
+<th>Accuracy</th>
+<th>Precision</th>
+<th>Recall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Baseline (clase mayoritaria)</td>
+<td>85%</td>
+<td>—</td>
+<td>0%</td>
+</tr>
+<tr class="even">
+<td>Modelo A</td>
+<td>87%</td>
+<td>45%</td>
+<td>62%</td>
+</tr>
+<tr class="odd">
+<td>Modelo B</td>
+<td>84%</td>
+<td>58%</td>
+<td>71%</td>
+</tr>
+</tbody>
+</table>
+<p>Ahora sí podemos interpretar con fundamento:</p>
+<ul>
+<li><strong>Modelo A</strong> tiene 87% de accuracy — apenas 2 puntos por encima del baseline (85%). Si solo miramos accuracy, parece que el modelo apenas aporta. Pero al menos tiene recall de 62%, lo que significa que detecta positivos que el baseline ignora por completo (recall = 0%).</li>
+<li><strong>Modelo B</strong> tiene 84% de accuracy — <strong>menos</strong> que el baseline. Si un gerente viera solo esa columna, rechazaría el modelo inmediatamente. Pero miren precision (58%) y recall (71%): es significativamente mejor que el Modelo A para detectar los casos que realmente importan. El “costo” de esa mejora es que genera más falsas alarmas, lo que baja el accuracy total.</li>
+<li><strong>El baseline</strong> tiene 85% de accuracy sin detectar un solo positivo. Esto revela que accuracy por sí solo es una métrica casi inútil en este problema.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Sin baseline, “87% accuracy” suena impresionante. Con baseline, se ve que apenas aporta.</strong> El baseline le da escala y contexto a todas las demás métricas. Nunca presenten un resultado sin él.</p>
+</div>
+</div>
+</section>
+<section id="lo-mismo-aplica-en-regresión" class="level3" data-number="4.4.2">
+<h3 data-number="4.4.2" class="anchored" data-anchor-id="lo-mismo-aplica-en-regresión"><span class="header-section-number">4.4.2</span> Lo mismo aplica en regresión</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Modelo</th>
+<th>MAE</th>
+<th>RMSE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Baseline (predecir promedio)</td>
+<td>$48</td>
+<td>$62</td>
+</tr>
+<tr class="even">
+<td>Modelo X</td>
+<td>$35</td>
+<td>$41</td>
+</tr>
+<tr class="odd">
+<td>Modelo Y</td>
+<td>$33</td>
+<td>$58</td>
+</tr>
+</tbody>
+</table>
+<p>Lectura: ambos modelos mejoran sobre el baseline, pero el Modelo Y tiene RMSE alto — señal de errores grandes esporádicos. Dependiendo de si los errores grandes importan, podríamos preferir X (más consistente) o Y (mejor en promedio, pero con sorpresas).</p>
+<hr>
+</section>
+</section>
+<section id="de-la-métrica-a-la-decisión-de-negocio" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="de-la-métrica-a-la-decisión-de-negocio"><span class="header-section-number">4.5</span> De la métrica a la decisión de negocio</h2>
+<p>Llegamos al paso más importante — y el que frecuentemente se omite. Las métricas son <strong>herramientas intermedias</strong>, no el producto final. El producto final es una decisión de negocio informada. Un analista que entrega un reporte diciendo “el modelo tiene 78% de recall y 54% de precision” sin traducir esos números a consecuencias prácticas está dejando el trabajo a medias. El gerente, el director de operaciones o el VP de marketing no piensa en “recall”; piensa en clientes, dinero y recursos.</p>
+<section id="las-preguntas-que-cierran-el-puente" class="level3" data-number="4.5.1">
+<h3 data-number="4.5.1" class="anchored" data-anchor-id="las-preguntas-que-cierran-el-puente"><span class="header-section-number">4.5.1</span> Las preguntas que cierran el puente</h3>
+<p>Después de calcular las métricas, el analista debe hacerse (y responder) preguntas como estas:</p>
+<ul>
+<li><p><strong>“El modelo detecta el 80% de los fraudes. ¿Qué pasa con el 20% que se nos escapa?”</strong> Si tenemos 1,000 fraudes al mes y cada fraude cuesta en promedio $5,000, el 20% que se escapa representa 200 fraudes × $5,000 = <strong>$1,000,000 en pérdidas mensuales</strong>. ¿Es aceptable? ¿Qué costaría subir el recall al 90%?</p></li>
+<li><p><strong>“El modelo genera un 43% de falsas alarmas. ¿Cuánto cuesta cada una?”</strong> Si cada falsa alarma requiere 15 minutos de un analista a $25/hora + una llamada al cliente, cada falsa alarma cuesta ~$10. Si el modelo produce 500 falsas alarmas al mes, son $5,000 en costos operativos. ¿Ese costo es aceptable a cambio del fraude que sí detecta?</p></li>
+<li><p><strong>“El modelo predice ventas con un error promedio de $35 por producto. ¿Eso alcanza?”</strong> Si usamos la predicción para decidir cuánto inventario ordenar y el margen por producto es $15, un error de $35 puede generar más pérdidas por sobrestock o quiebres de stock que ganancias por optimizar. Quizás necesitamos un modelo más preciso — o quizás necesitamos aceptar un margen de seguridad en el inventario.</p></li>
+</ul>
+</section>
+<section id="el-criterio-de-decisión-final" class="level3" data-number="4.5.2">
+<h3 data-number="4.5.2" class="anchored" data-anchor-id="el-criterio-de-decisión-final"><span class="header-section-number">4.5.2</span> El criterio de decisión final</h3>
+<p><strong>El mejor modelo no es el que tiene el número más alto en una métrica.</strong> Es el que minimiza el costo total de los errores — o equivalentemente, el que maximiza el valor neto — en el contexto específico del problema. Esto implica que dos empresas con el mismo modelo y las mismas métricas podrían tomar decisiones opuestas. Para un banco grande con un equipo de investigación robusto, un modelo con alto recall y baja precision puede ser ideal (pueden investigar muchas alertas). Para un banco pequeño con recursos limitados, un modelo con alta precision puede ser más práctico (solo investigan los casos más claros). Las métricas iluminan las opciones. El negocio elige entre ellas.</p>
+<hr>
+</section>
+</section>
+<section id="checklist-2" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="checklist-2"><span class="header-section-number">4.6</span> Checklist</h2>
+<p>Al finalizar esta sesión, debes poder:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Explicar qué es la matriz de confusión y qué representa cada celda.</label></li>
+<li><label><input type="checkbox">Describir qué mide accuracy y por qué es engañoso con clases desbalanceadas.</label></li>
+<li><label><input type="checkbox">Explicar qué mide precision, qué mide recall, y por qué están en tensión.</label></li>
+<li><label><input type="checkbox">Decidir si priorizar precision o recall según el contexto de negocio.</label></li>
+<li><label><input type="checkbox">Describir MAE y RMSE, en qué se diferencian y cuándo usar cada uno.</label></li>
+<li><label><input type="checkbox">Justificar por qué siempre hay que comparar las métricas contra un baseline.</label></li>
+</ul>
+</section>
+<section id="preguntas-de-comprensión-sesión-3" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="preguntas-de-comprensión-sesión-3"><span class="header-section-number">4.7</span> Preguntas de comprensión — Sesión 3</h2>
+<p><strong>Pregunta 1.</strong> Un hospital usa un modelo para detectar pacientes con riesgo de diabetes. Precision = 60%, Recall = 95%. ¿Es un buen modelo para este contexto? ¿Por qué?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<strong>Respuesta esperada:</strong> Probablemente sí. En screening médico es más importante no dejarse pacientes sin detectar (recall 95%). Una falsa alarma significa un examen confirmatorio adicional; un caso no detectado puede ser una enfermedad no tratada a tiempo.
+</details>
+<p><strong>Pregunta 2.</strong> Tienes dos modelos de regresión. Modelo X: MAE=$120, RMSE=$130. Modelo Y: MAE=$125, RMSE=$200. ¿Qué puedes inferir sobre los errores de cada uno?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<strong>Respuesta esperada:</strong> Modelo X tiene errores más consistentes (MAE y RMSE cerca). Modelo Y tiene un RMSE mucho mayor que su MAE, lo que indica errores muy grandes que inflan el RMSE. Si los errores grandes son costosos, X es preferible.
+</details>
+<p><strong>Pregunta 3.</strong> Un analista reporta: “Nuestro modelo de churn tiene 91% de accuracy.” ¿Qué pregunta le harías antes de evaluar si es bueno?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<strong>Respuesta esperada:</strong> “¿Cuál es la distribución de las clases?” o “¿Cuál es el accuracy del baseline?”. Si el 90% no cancela, el baseline tiene 90%. Un 91% apenas supera. También preguntar por precision y recall.
+</details>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="aplicación-guiada-comparando-modelos" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Aplicación guiada: comparando modelos</h1>
+<p>Vamos a trabajar con un dataset donde ya tenemos: (i) el valor real de la variable target, y (ii) las predicciones de tres modelos distintos. Nuestro trabajo no es entrenar modelos, sino <strong>evaluarlos y compararlos</strong>: construir matrices de confusión, calcular métricas y traducir los números a una recomendación de negocio. <strong>Contexto de negocio:</strong> Una empresa de e-commerce quiere identificar clientes que abandonarán (churn) en los próximos 30 días para lanzar una campaña de retención. Tres equipos propusieron modelos diferentes. Debemos evaluar cuál recomendamos.</p>
+<hr>
+<section id="paso-1-cargar-los-datos" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="paso-1-cargar-los-datos"><span class="header-section-number">5.1</span> Paso 1 — Cargar los datos</h2>
+<p>El dataset <code>evaluacion_modelos</code> contiene 500 clientes con el resultado real y las predicciones de tres modelos. Veamos las primeras filas del dataset:</p>
+<div id="qwebr-insertion-location-1"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div id="qwebr-insertion-location-2"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Pregunta para pensar:</strong> ¿Cuántos clientes realmente cancelaron? ¿Qué porcentaje del total representan?</p>
+<div id="qwebr-insertion-location-3"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<hr>
+</section>
+<section id="paso-2-construir-la-matriz-de-confusión" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="paso-2-construir-la-matriz-de-confusión"><span class="header-section-number">5.2</span> Paso 2 — Construir la matriz de confusión</h2>
+<p>La función <code>table()</code> en R nos da directamente la matriz de confusión. Recuerda: filas = predicción, columnas = realidad (o viceversa, según cómo lo armemos).</p>
+<div id="qwebr-insertion-location-4"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div id="qwebr-insertion-location-5"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div id="qwebr-insertion-location-6"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-practice">
+<p><strong>Antes de seguir:</strong> Mira las tres matrices. A simple vista, ¿cuál modelo parece detectar más casos de churn? ¿Cuál parece generar más falsas alarmas?</p>
+</div>
+<hr>
+</section>
+<section id="paso-3-calcular-métricas" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="paso-3-calcular-métricas"><span class="header-section-number">5.3</span> Paso 3 — Calcular métricas</h2>
+<p>Vamos a extraer VP, FP, FN y VN de cada matriz y calcular accuracy, precision y recall. Construiremos una función sencilla para no repetir código:</p>
+<div id="qwebr-insertion-location-7"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div id="qwebr-insertion-location-8"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div id="qwebr-insertion-location-9"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div id="qwebr-insertion-location-10"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<hr>
+</section>
+<section id="paso-4-calcular-el-baseline" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="paso-4-calcular-el-baseline"><span class="header-section-number">5.4</span> Paso 4 — Calcular el baseline</h2>
+<p>Recuerda: el baseline es predecir siempre la clase más frecuente. ¿Cuál es?</p>
+<div id="qwebr-insertion-location-11"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Pregunta clave:</strong> Si el baseline tiene ~85% de accuracy, ¿alguno de los tres modelos realmente supera esta referencia de manera significativa? ¿Cuál?</p>
+<hr>
+</section>
+<section id="paso-5-tabla-comparativa-final" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="paso-5-tabla-comparativa-final"><span class="header-section-number">5.5</span> Paso 5 — Tabla comparativa final</h2>
+<p>Unimos todo en una sola tabla para comparar:</p>
+<div id="qwebr-insertion-location-12"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<hr>
+</section>
+<section id="paso-6-interpretación-y-recomendación-de-negocio" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="paso-6-interpretación-y-recomendación-de-negocio"><span class="header-section-number">5.6</span> Paso 6 — Interpretación y recomendación de negocio</h2>
+<p><strong>Contexto para la decisión:</strong> La empresa planea enviar un paquete de retención (descuento + llamada personalizada) a los clientes que el modelo identifique como “va a cancelar”. Cada paquete cuesta <strong>$50</strong>. Cada cliente que cancela representa una pérdida promedio de <strong>$800</strong> en ingresos anuales.</p>
+<p>Con esta información, responde:</p>
+<ol type="1">
+<li><strong>¿Qué modelo recomendarías?</strong> Justifica con las métricas de la tabla.</li>
+<li><strong>¿Por qué no basta con mirar accuracy?</strong> ¿Qué pasa con el baseline?</li>
+<li><strong>¿Qué costos implica cada tipo de error?</strong>
+<ul>
+<li>Falso Positivo (enviar paquete a alguien que no iba a cancelar) → costo: $50</li>
+<li>Falso Negativo (no detectar a alguien que sí cancela) → costo: $800</li>
+</ul></li>
+<li><strong>¿Qué métrica debería priorizar esta empresa: precision o recall?</strong> ¿Por qué? :::</li>
+</ol>
+<p><strong>Reflexión final:</strong> Calcula el costo total de errores de cada modelo usando la fórmula: Costo = (FP × $50) + (FN × $800). ¿Cuál modelo minimiza el costo total?</p>
+<div id="qwebr-insertion-location-13"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-key">
+<p><strong>Mensaje final</strong></p>
+<p>El mejor modelo no es el que tiene el accuracy más alto. Es el que <strong>minimiza el costo total de los errores</strong> en el contexto específico del problema. Las métricas son herramientas; la decisión siempre es de negocio.</p>
+</div>
+<!-- Panel Environment -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">📦 Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">🔄</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">▲</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
+  </div>
+</div>
+
+<script type="module">
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
+};
+
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Env panel error:', e);
+    return [];
+  }
+}
+
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+function moveWebRStatus() {
+  const anchor = document.getElementById('webr-status-anchor');
+  const statusArea = document.getElementById('qwebr-status-message-area');
+  if (anchor && statusArea) {
+    const wrapper = statusArea.closest('.quarto-title-meta');
+    if (wrapper) {
+      wrapper.style.display = 'inline';
+      wrapper.style.fontSize = '13px';
+      wrapper.style.marginLeft = '30px';
+      anchor.parentNode.insertBefore(wrapper, anchor);
+    }
+  }
+}
+
+async function init() {
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
+  moveWebRStatus();
+
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script type="module">
+// Handle cell initialization initialization
+qwebrCellDetails.map(
+  (entry) => {
+    // Handle the creation of the element
+    qwebrCreateHTMLElement(entry);
+    // In the event of interactive, initialize the monaco editor
+    if (entry.options.context == EvalTypes.Interactive) {
+      qwebrCreateMonacoEditorInstance(entry);
+    }
+  }
+);
+
+// Identify non-interactive cells (in order)
+const filteredEntries = qwebrCellDetails.filter(entry => {
+  const contextOption = entry.options && entry.options.context;
+  return ['output', 'setup'].includes(contextOption) || (contextOption == "interactive" && entry.options && entry.options.autorun === 'true');
+});
+
+// Condition non-interactive cells to only be run after webR finishes its initialization.
+qwebrInstance.then(
+  async () => {
+    const nHiddenCells = filteredEntries.length;
+    var currentHiddenCell = 0;
+
+
+    // Modify button state
+    qwebrSetInteractiveButtonState(`🟡 Running hidden code cells ...`, false);
+
+    // Begin processing non-interactive sections
+    // Due to the iteration policy, we must use a for() loop.
+    // Otherwise, we would need to switch to using reduce with an empty
+    // starting promise
+    for (const entry of filteredEntries) {
+
+      // Determine cell being examined
+      currentHiddenCell = currentHiddenCell + 1;
+      const formattedMessage = `Evaluating hidden cell ${currentHiddenCell} out of ${nHiddenCells}`;
+
+      // Update the document status header
+      if (qwebrShowStartupMessage) {
+        qwebrUpdateStatusHeader(formattedMessage);
+      }
+
+      // Display the update in non-active areas
+      qwebrUpdateStatusMessage(formattedMessage);
+
+      // Extract details on the active cell
+      const evalType = entry.options.context;
+      const cellCode = entry.code;
+      const qwebrCounter = entry.id;
+
+      if (['output', 'setup'].includes(evalType)) {
+        // Disable further global status updates
+        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
+        activeContainer.classList.remove('qwebr-cell-needs-evaluation');
+        activeContainer.classList.add('qwebr-cell-evaluated');
+
+        // Update status on the code cell
+        const activeStatus = document.getElementById(`qwebr-status-text-${qwebrCounter}`);
+        activeStatus.innerText = " Evaluating hidden code cell...";
+        activeStatus.classList.remove('qwebr-cell-needs-evaluation');
+        activeStatus.classList.add('qwebr-cell-evaluated');
+      }
+
+      switch (evalType) {
+        case 'interactive':
+          // TODO: Make this more standardized.
+          // At the moment, we're overriding the interactive status update by pretending its
+          // output-like. 
+          const tempOptions = entry.options;
+          tempOptions["context"] = "output"
+          // Run the code in a non-interactive state that is geared to displaying output
+          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, tempOptions);
+          break;
+        case 'output':
+          // Run the code in a non-interactive state that is geared to displaying output
+          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, entry.options);
+          break;
+        case 'setup':
+          const activeDiv = document.getElementById(`qwebr-noninteractive-setup-area-${qwebrCounter}`);
+
+          // Store code in history
+          qwebrLogCodeToHistory(cellCode, entry.options);
+
+          // Run the code in a non-interactive state with all output thrown away
+          await mainWebR.evalRVoid(`${cellCode}`);
+          break;
+        default: 
+          break; 
+      }
+
+      if (['output', 'setup'].includes(evalType)) {
+        // Disable further global status updates
+        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
+        // Disable visibility
+        activeContainer.style.visibility = 'hidden';
+        activeContainer.style.display = 'none';
+      }
+    }
+  }
+).then(
+  () => {
+    // Release document status as ready
+
+    if (qwebrShowStartupMessage) {
+      qwebrStartupMessage.innerText = "🟢 Ready!"
+    }
+  
+    qwebrSetInteractiveButtonState(
+      `<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>`, 
+      true
+    );  
+  }
+);
+</script>
+
+
+
+
+<script src="week-09_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
