@@ -583,6 +583,23 @@ Este punto merece énfasis propio porque es uno de los errores más frecuentes q
 
 En lugar de presentar una sola cifra, siempre presenta una **tabla comparativa** que incluya el baseline como primera fila:
 
+En este ejemplo, el modelo busca predecir qué personas afiliadas al plan cancelarán su suscripción. De las 1.000 personas afiliadas, 150 cancelaron durante el último mes. Como punto de partida, el baseline clasifica a todos los afiliados como "no canceló", lo que genera la siguiente matriz de confusión:
+
+| | **Predicho: Cancela** | **Predicho: No Cancela** |
+|---|---|---|
+| **Real: Cancela** | 0 (VP) | 150 (FN) |
+| **Real: No Cancela** | 0 (FP) | 850 (VN) |
+
+Tras calcular las metricas para ese modelo ingenuo, tenemos que:
+
+Accuracy = (850 + 0) / (850 + 0 + 150 + 0) = 85%
+
+Precisión = 0 / (0 + 0) = Indeterminado
+
+Recall = 0 / (0 + 150) = 0%
+
+Finalmente, se desarrollaron dos modelos (modelo A y modelo B) con el objetivo de predecir qué personas cancelarán su afiliación al plan y quiénes la mantendrán. A continuación se presentan los resultados obtenidos por cada uno:
+
 | Modelo | Accuracy | Precision | Recall |
 |---|---|---|---|
 | Baseline (clase mayoritaria) | 85% | — | 0% |
@@ -601,13 +618,15 @@ Ahora sí podemos interpretar con fundamento:
 
 ### Lo mismo aplica en regresión
 
+Digamos que realizamos un modelo para predecir el ingreso promedio mensual de una cadena de restaurantes, tras realizar un modelo ingenuo utilizando la predicción con la media y realizando otros dos modelos de ML (modelo X y modelo Y), estos fueron los resultados:
+
 | Modelo | MAE | RMSE |
 |---|---|---|
 | Baseline (predecir promedio) | $48 | $62 |
 | Modelo X | $35 | $41 |
 | Modelo Y | $33 | $58 |
 
-Lectura: ambos modelos mejoran sobre el baseline, pero el Modelo Y tiene RMSE alto — señal de errores grandes esporádicos. Dependiendo de si los errores grandes importan, podríamos preferir X (más consistente) o Y (mejor en promedio, pero con sorpresas).
+**Lectura:** ambos modelos mejoran sobre el baseline, pero el Modelo Y tiene RMSE alto — señal de errores grandes esporádicos. Dependiendo de si los errores grandes importan, podríamos preferir X (más consistente) o Y (mejor en promedio, pero con sorpresas).
 
 ---
 
@@ -785,19 +804,19 @@ metricas_ml <- function(mc) {
 
 ```{webr-r}
 ## Métricas del Modelo A
-metricas_a <- calcular_metricas(mc_a)
+metricas_a <- metricas_ml(mc_a)
 metricas_a
 ```
 
 ```{webr-r}
 ## Métricas del Modelo B
-metricas_b <- calcular_metricas(mc_b)
+metricas_b <- metricas_ml(mc_b)
 metricas_b
 ```
 
 ```{webr-r}
 ## Métricas del Modelo C
-metricas_c <- calcular_metricas(mc_c)
+metricas_c <- metricas_ml(mc_c)
 metricas_c
 ```
 
