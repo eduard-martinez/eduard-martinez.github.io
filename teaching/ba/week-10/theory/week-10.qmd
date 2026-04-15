@@ -1,0 +1,840 @@
+---
+title: "Unidad 7 - Clustering: Fundamentos y Métricas"
+subtitle: "Introducción al Business Analytics · Semana 10 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+<span id="webr-status-anchor"></span>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Objetivo de la semana
+
+El foco está en **segmentación como herramienta de decisión**: descubrir grupos naturales en los datos sin una variable de resultado (*target*), para luego describirlos, nombrarlos y convertirlos en acciones de negocio.
+
+## Lo que cubriremos
+
+- Lógica del clustering: similitud, escala, diferencia con clasificación 
+- K-means: centroides, WCSS, limitaciones 
+- Elegir k: método del codo, silueta, interpretabilidad 
+- Perfilar segmentos: de números a nombres de negocio 
+
+::: {.callout-key}
+**Conexión con semana 9**
+
+En la semana anterior vimos que en problemas no supervisados no hay etiqueta que diga si acertamos. Esta semana lo vivimos: un cluster es útil si tiene sentido de negocio, no si "da un número alto".
+
+| Semana 09 | Semana 10 |
+|---|---|
+| Pipeline ML, train/test, métricas | Primer algoritmo: k-means |
+| Supervisado vs. no supervisado (concepto) | No supervisado en la práctica |
+| Accuracy, RMSE | Elbow, silhouette (sin "respuesta correcta") |
+:::
+
+# ¿Por qué segmentar?
+
+Antes de hablar de algoritmos, pensemos en el problema de negocio. Imagina que tienes **10,000 clientes** y un presupuesto limitado de marketing. Tratar a todos igual es ineficiente: no todos quieren lo mismo, no todos compran igual, no todos responden al mismo mensaje. La segmentación busca identificar **grupos internamente homogéneos** (los miembros de un grupo se parecen entre sí) y **externamente diferentes** (los grupos se distinguen entre sí).
+
+## Criterio de un buen clustering
+
+Un buen agrupamiento logra dos cosas simultáneamente:
+
+1. **Alta similitud intra-grupo** — los clientes dentro de un mismo segmento se parecen mucho entre sí.
+2. **Alta diferencia inter-grupo** — los segmentos son claramente distintos unos de otros.
+
+Si todos los clientes terminan en un solo grupo, no segmentamos nada. Si cada cliente es un grupo aparte, tampoco sirve. El reto es encontrar el punto intermedio que sea **útil para tomar decisiones**.
+
+## Ejemplos de preguntas de segmentación en negocios:
+
+- ¿Qué perfiles de clientes tenemos según frecuencia, monto y recencia de compras?
+- ¿Qué zonas geográficas se comportan de manera similar en ventas?
+- ¿Qué productos se agrupan según su patrón de demanda estacional?
+
+En todos estos casos, **nadie nos dice de antemano cuántos grupos hay ni cuáles son**. El algoritmo los descubre.
+
+---
+
+<!--=================-->
+<!--=================-->
+# La intuición detrás de k-means
+
+<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+{{< video https://www.youtube.com/watch?v=2kfY0R34Dy0 >}}
+
+## Similitud = cercanía
+
+La idea central del clustering es simple: **observaciones que están "cerca" entre sí pertenecen al mismo grupo**. Pero ¿qué significa "cerca"?
+
+En la vida cotidiana, decimos que dos clientes son "similares" si compran parecido, gastan montos parecidos, visitan con frecuencia parecida. En términos numéricos, cada cliente es un **punto en un espacio** donde cada eje es una variable (monto, frecuencia, recencia). La distancia entre dos puntos mide qué tan diferentes son.
+
+::: {.callout-warning}
+**¿Por qué escalar importa tanto?**
+
+Si una variable está en pesos (rango: 0–5,000,000) y otra en número de visitas (rango: 1–20), la distancia la domina completamente la variable en pesos. El algoritmo "ve" las diferencias en monto como enormes y las diferencias en frecuencia como despreciables.
+
+**Escalar** (estandarizar) las variables las pone en una escala comparable. Sin este paso, el clustering refleja diferencias de unidades, no de comportamiento real.
+
+**Regla práctica:** siempre escalar las variables numéricas antes de aplicar k-means.
+:::
+
+---
+
+## El algoritmo k-means en 4 pasos
+
+k-means es el algoritmo de clustering más usado por su simplicidad e interpretabilidad. Funciona así:
+
+### ¿Cómo funciona k-means? (versión intuitiva)
+::: {.callout-key}
+Imagina que eres gerente de logística y necesitas colocar **k bodegas** para atender a tus clientes distribuidos en un mapa. Quieres que cada bodega quede lo más cerca posible de los clientes que atiende.
+
+1. **Inicio:** Colocas k bodegas en posiciones aleatorias del mapa.
+2. **Asignación:** Cada cliente se asigna a la bodega más cercana.
+3. **Actualización:** Mueves cada bodega al centro geográfico de sus clientes asignados.
+4. **Repetición:** Repites los pasos 2 y 3 hasta que las bodegas ya no se muevan (convergencia).
+
+Las "bodegas" son los **centroides**. Los "clientes asignados a cada bodega" son los **clusters**.
+:::
+
+**Lo que k-means optimiza:** minimizar la suma de distancias entre cada punto y el centroide de su cluster. En lenguaje técnico: minimiza la *within-cluster sum of squares* (WCSS) — la "compactación" total de los grupos.
+
+---
+
+## Explóralo tú mismo: K-Means Playground
+
+Antes de seguir con las limitaciones, experimenta con el algoritmo paso a paso. Usa los controles para ver exactamente qué ocurre en cada iteración.
+
+**¿Qué explorar aquí?**
+
+1. Selecciona **"Blobs separados"** y corre el algoritmo paso a paso: Inicializar → Asignar → Mover centroides → repetir. Observa cómo cambia el WCSS en cada iteración.
+2. Prueba el mismo dataset pero reiniciando varias veces con el mismo k. ¿Los centroides arrancan siempre en el mismo lugar? ¿El resultado final cambia?
+3. Cambia a **"Anillos"** con k = 2. ¿Por qué k-means falla aquí? ¿Qué limitación del algoritmo explica esto?
+4. Prueba **"Grupos desiguales"** con k = 3. Observa la silueta: ¿sube o baja comparado con "Blobs separados"?
+
+```{=html}
+<div style="margin: 1.5rem 0;">
+<style>
+#kmpl *{box-sizing:border-box;margin:0;padding:0}
+#kmpl{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:500px;border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;font-family:inherit}
+#kmpl-panel{background:#f8f8f6;border-right:1px solid #e0e0e0;padding:16px;display:flex;flex-direction:column;gap:16px}
+#kmpl-main{position:relative;background:#fff;display:flex;flex-direction:column}
+#kmpl canvas{cursor:crosshair;display:block;flex:1;min-height:300px}
+#kmpl .ps{display:flex;flex-direction:column;gap:8px}
+#kmpl .pl{font-size:11px;color:#888;letter-spacing:.03em;text-transform:uppercase;font-weight:500}
+#kmpl .pv{font-size:18px;font-weight:500;color:#111}
+#kmpl .sr{display:flex;gap:6px}
+#kmpl .kb{flex:1;padding:6px 4px;font-size:12px;font-weight:500;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111;cursor:pointer;transition:background .15s}
+#kmpl .kb:hover{background:#f0f0f0}
+#kmpl .kb:disabled{opacity:.4;cursor:not-allowed}
+#kmpl .kb.kp{background:#dbeafe;color:#1e40af;border-color:#93c5fd}
+#kmpl .kb.kp:hover{background:#bfdbfe}
+#kmpl .kb.kd{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+#kmpl .kb.kd:hover{background:#fecaca}
+#kmpl select{width:100%;padding:6px 8px;font-size:13px;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111}
+#kmpl input[type=range]{width:100%;accent-color:#378ADD}
+#kmpl .mv{font-size:20px;font-weight:500;color:#111}
+#kmpl .ml{font-size:11px;color:#888}
+#kmpl-status{padding:8px 14px;font-size:12px;color:#666;border-top:1px solid #e0e0e0;min-height:32px;display:flex;align-items:center}
+#kmpl .lr{display:flex;flex-wrap:wrap;gap:6px}
+#kmpl .li{display:flex;align-items:center;gap:4px;font-size:11px;color:#666}
+#kmpl .ld{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+#kmpl-iter{font-size:11px;color:#888;text-align:center}
+</style>
+
+<div id="kmpl">
+  <div id="kmpl-panel">
+    <div class="ps">
+      <div class="pl">Dataset</div>
+      <select id="kmpl-ds">
+        <option value="blobs">Blobs separados</option>
+        <option value="ring">Anillos</option>
+        <option value="spread">Dispersión uniforme</option>
+        <option value="imbalanced">Grupos desiguales</option>
+        <option value="custom">Dibuja tus datos ✏</option>
+      </select>
+    </div>
+    <div class="ps">
+      <div class="pl">Número de clusters (k)</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="kmpl-k" min="2" max="8" value="3" step="1" style="flex:1">
+        <span class="pv" id="kmpl-kv">3</span>
+      </div>
+    </div>
+    <div class="ps">
+      <div class="pl">Pasos del algoritmo</div>
+      <div class="sr">
+        <button class="kb kp" id="kmpl-init">Inicializar</button>
+        <button class="kb" id="kmpl-assign" disabled>Asignar</button>
+      </div>
+      <div class="sr">
+        <button class="kb" id="kmpl-update" disabled>Mover centroides</button>
+      </div>
+      <div class="sr">
+        <button class="kb" id="kmpl-run">▶ Correr todo</button>
+      </div>
+      <div id="kmpl-iter">iteración: —</div>
+    </div>
+    <div class="ps">
+      <div class="pl">WCSS</div>
+      <div class="mv" id="kmpl-wcss">—</div>
+      <div class="ml">compactación intra-cluster</div>
+    </div>
+    <div class="ps">
+      <div class="pl">Silhouette promedio</div>
+      <div class="mv" id="kmpl-sil">—</div>
+    </div>
+    <div class="ps">
+      <div class="pl">Clusters</div>
+      <div class="lr" id="kmpl-legend"></div>
+    </div>
+    <button class="kb kd" id="kmpl-reset" style="margin-top:auto">Reiniciar</button>
+  </div>
+  <div id="kmpl-main">
+    <canvas id="kmpl-canvas"></canvas>
+    <div id="kmpl-status">Elige un dataset e inicializa los centroides</div>
+  </div>
+</div>
+
+<script>
+(function(){
+const CL=[
+  {fill:'#378ADD'},{fill:'#D85A30'},{fill:'#1D9E75'},{fill:'#BA7517'},
+  {fill:'#7F77DD'},{fill:'#D4537E'},{fill:'#639922'},{fill:'#E24B4A'},
+];
+const cv=document.getElementById('kmpl-canvas');
+const cx=cv.getContext('2d');
+const ksl=document.getElementById('kmpl-k');
+const kvl=document.getElementById('kmpl-kv');
+const dsl=document.getElementById('kmpl-ds');
+const bI=document.getElementById('kmpl-init');
+const bA=document.getElementById('kmpl-assign');
+const bU=document.getElementById('kmpl-update');
+const bR=document.getElementById('kmpl-run');
+const bX=document.getElementById('kmpl-reset');
+const wEl=document.getElementById('kmpl-wcss');
+const sEl=document.getElementById('kmpl-sil');
+const stEl=document.getElementById('kmpl-status');
+const itEl=document.getElementById('kmpl-iter');
+const lgEl=document.getElementById('kmpl-legend');
+
+let pts=[],ctr=[],asg=[],iter=0,phase='idle',W,H,timer=null;
+
+function rsz(){
+  const r=cv.parentElement.getBoundingClientRect();
+  W=r.width; H=Math.max(r.height-32,280);
+  cv.width=W; cv.height=H; drw();
+}
+function rnd(a,b){return a+(b-a)*Math.random();}
+function genBlobs(){
+  const p=[],cs=[[.25,.25],[.75,.25],[.5,.72]];
+  cs.forEach(([x,y])=>{for(let i=0;i<40;i++)p.push({x:x+rnd(-.12,.12),y:y+rnd(-.12,.12)});});
+  return p;
+}
+function genRing(){
+  const p=[];
+  for(let i=0;i<60;i++){const a=Math.random()*6.28,r=rnd(.08,.14);p.push({x:.5+r*Math.cos(a),y:.5+r*Math.sin(a)});}
+  for(let i=0;i<80;i++){const a=Math.random()*6.28,r=rnd(.3,.38);p.push({x:.5+r*Math.cos(a),y:.5+r*Math.sin(a)});}
+  return p;
+}
+function genSpread(){const p=[];for(let i=0;i<140;i++)p.push({x:rnd(.05,.95),y:rnd(.05,.95)});return p;}
+function genImb(){
+  const p=[];
+  for(let i=0;i<90;i++)p.push({x:rnd(.05,.45),y:rnd(.05,.95)});
+  for(let i=0;i<15;i++)p.push({x:rnd(.6,.75),y:rnd(.2,.4)});
+  for(let i=0;i<20;i++)p.push({x:rnd(.65,.9),y:rnd(.6,.85)});
+  return p;
+}
+function load(){
+  const v=dsl.value;
+  if(v==='custom'){pts=[];rst();stEl.textContent='Haz clic en el lienzo para agregar puntos';return;}
+  const raw=v==='blobs'?genBlobs():v==='ring'?genRing():v==='spread'?genSpread():genImb();
+  pts=raw.map(p=>({x:Math.max(.02,Math.min(.98,p.x)),y:Math.max(.02,Math.min(.98,p.y))}));
+  rst(); stEl.textContent=`${pts.length} observaciones cargadas. Inicializa los centroides para comenzar.`;
+}
+function tc(p){return {x:p.x*W,y:p.y*H};}
+function tp(x,y){return {x:x/W,y:y/H};}
+function dst(a,b){return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);}
+function rst(){
+  ctr=[];asg=[];iter=0;phase='idle';
+  bA.disabled=true;bU.disabled=true;
+  itEl.textContent='iteración: —';
+  wEl.textContent='—';sEl.textContent='—';sEl.style.color='';
+  lgd();drw();
+}
+function ini(){
+  if(pts.length<3){stEl.textContent='Agrega al menos 3 puntos';return;}
+  const k=+ksl.value;ctr=[];
+  const used=new Set();
+  while(ctr.length<k){const i=Math.floor(Math.random()*pts.length);if(!used.has(i)){used.add(i);ctr.push({...pts[i]});}}
+  asg=new Array(pts.length).fill(-1);iter=0;phase='initialized';
+  bA.disabled=false;bU.disabled=true;itEl.textContent='iteración: 0';
+  wEl.textContent='—';sEl.textContent='—';sEl.style.color='';
+  lgd();drw();stEl.textContent='Centroides inicializados. Pulsa "Asignar" para asignar cada punto al centroide más cercano.';
+}
+function asn(){
+  let chg=false;
+  pts.forEach((p,i)=>{
+    let best=-1,bd=Infinity;
+    ctr.forEach((c,ci)=>{const d=dst(p,c);if(d<bd){bd=d;best=ci;}});
+    if(asg[i]!==best)chg=true;asg[i]=best;
+  });
+  phase='assigned';bA.disabled=true;bU.disabled=false;
+  mtr();drw();
+  if(!chg){phase='converged';bU.disabled=true;stEl.textContent=`¡Convergió en ${iter} iteración(es)! Los centroides ya no se mueven.`;return true;}
+  stEl.textContent=`Iteración ${iter}: puntos asignados al centroide más cercano. Ahora mueve los centroides.`;
+  return false;
+}
+function upd(){
+  const k=ctr.length,sm=Array.from({length:k},()=>({x:0,y:0,n:0}));
+  pts.forEach((p,i)=>{const c=asg[i];if(c>=0){sm[c].x+=p.x;sm[c].y+=p.y;sm[c].n++;}});
+  ctr=sm.map((s,i)=>s.n>0?{x:s.x/s.n,y:s.y/s.n}:ctr[i]);
+  iter++;itEl.textContent=`iteración: ${iter}`;
+  phase='updated';bA.disabled=false;bU.disabled=true;
+  drw();stEl.textContent=`Centroides movidos al centro de su grupo. Iteración ${iter} completa. Vuelve a asignar.`;
+}
+function clrT(){if(timer){clearInterval(timer);timer=null;}}
+function runAll(){
+  if(phase==='idle'){stEl.textContent='Primero inicializa los centroides';return;}
+  if(phase==='converged'){stEl.textContent='Ya convergió. Reinicia para explorar de nuevo.';return;}
+  clrT();
+  timer=setInterval(()=>{
+    if(phase==='converged'){clrT();bR.textContent='▶ Correr todo';return;}
+    if(phase==='initialized'||phase==='updated'){const c=asn();if(c){clrT();bR.textContent='▶ Correr todo';return;}}
+    else if(phase==='assigned')upd();
+  },600);
+  stEl.textContent='Ejecutando automáticamente…';
+}
+function mtr(){
+  if(!asg.some(a=>a>=0))return;
+  let w=0;pts.forEach((p,i)=>{const c=asg[i];if(c>=0)w+=dst(p,ctr[c])**2;});
+  wEl.textContent=w.toFixed(1);
+  if(pts.length<10){sEl.textContent='—';return;}
+  const sl=[];
+  pts.forEach((p,i)=>{
+    const ci=asg[i];
+    const sm=pts.filter((_,j)=>asg[j]===ci&&j!==i);
+    if(!sm.length){sl.push(0);return;}
+    const a=sm.reduce((s,q)=>s+dst(p,q),0)/sm.length;
+    let b=Infinity;
+    ctr.forEach((_,cj)=>{if(cj===ci)return;const ot=pts.filter((_,j)=>asg[j]===cj);if(!ot.length)return;const av=ot.reduce((s,q)=>s+dst(p,q),0)/ot.length;if(av<b)b=av;});
+    sl.push(b===Infinity?0:(b-a)/Math.max(a,b));
+  });
+  const avg=sl.reduce((s,v)=>s+v,0)/sl.length;
+  sEl.textContent=avg.toFixed(3);
+  sEl.style.color=avg>.5?'#15803d':avg>.2?'#b45309':'#b91c1c';
+}
+function lgd(){
+  const k=+ksl.value;lgEl.innerHTML='';
+  for(let i=0;i<k;i++){
+    const d=document.createElement('div');d.className='li';
+    d.innerHTML=`<div class="ld" style="background:${CL[i].fill}"></div><span>C${i+1}</span>`;
+    lgEl.appendChild(d);
+  }
+}
+function drw(){
+  if(!W||!H)return;cx.clearRect(0,0,W,H);
+  if(ctr.length>0){
+    ctr.forEach((c,ci)=>{
+      const cp=tc(c);
+      pts.forEach((p,pi)=>{
+        if(asg[pi]!==ci)return;
+        const pp=tc(p);cx.beginPath();cx.moveTo(cp.x,cp.y);cx.lineTo(pp.x,pp.y);
+        cx.strokeStyle=CL[ci].fill+'28';cx.lineWidth=1;cx.stroke();
+      });
+    });
+    ctr.forEach((c,ci)=>{
+      const cp=tc(c);
+      const ot=ctr.filter((_,j)=>j!==ci);
+      if(ot.length){
+        const md=Math.min(...ot.map(o=>dst(tc(o),cp)));
+        cx.beginPath();cx.arc(cp.x,cp.y,Math.min(md/2,Math.min(W,H)*.38),0,6.28);
+        cx.fillStyle=CL[ci].fill+'18';cx.fill();
+      }
+    });
+  }
+  pts.forEach((p,i)=>{
+    const cp=tc(p);const ci=asg[i];
+    cx.beginPath();cx.arc(cp.x,cp.y,5,0,6.28);
+    cx.fillStyle=ci>=0?CL[ci].fill:'#aaa';cx.fill();
+    cx.strokeStyle='#fff';cx.lineWidth=1.5;cx.stroke();
+  });
+  ctr.forEach((c,ci)=>{
+    const cp=tc(c);const sz=11;
+    cx.beginPath();cx.moveTo(cp.x-sz,cp.y);cx.lineTo(cp.x+sz,cp.y);
+    cx.moveTo(cp.x,cp.y-sz);cx.lineTo(cp.x,cp.y+sz);
+    cx.strokeStyle=CL[ci].fill;cx.lineWidth=3;cx.stroke();
+    cx.beginPath();cx.arc(cp.x,cp.y,sz*.55,0,6.28);
+    cx.fillStyle='#fff';cx.fill();cx.strokeStyle=CL[ci].fill;cx.lineWidth=2.5;cx.stroke();
+    cx.fillStyle=CL[ci].fill;cx.font='500 11px inherit';cx.textAlign='center';cx.textBaseline='middle';
+    cx.fillText(ci+1,cp.x,cp.y+.5);
+  });
+}
+cv.addEventListener('click',e=>{
+  if(dsl.value!=='custom')return;
+  const r=cv.getBoundingClientRect();
+  const p=tp(e.clientX-r.left,e.clientY-r.top);
+  if(p.x<0||p.x>1||p.y<0||p.y>1)return;
+  pts.push(p);if(phase!=='idle')rst();drw();
+  stEl.textContent=`${pts.length} punto(s). Inicializa cuando estés listo.`;
+});
+ksl.addEventListener('input',()=>{kvl.textContent=ksl.value;if(phase!=='idle')rst();else lgd();});
+dsl.addEventListener('change',load);
+bI.addEventListener('click',ini);
+bA.addEventListener('click',asn);
+bU.addEventListener('click',upd);
+bR.addEventListener('click',()=>{if(timer){clrT();bR.textContent='▶ Correr todo';}else{bR.textContent='⏹ Pausar';runAll();}});
+bX.addEventListener('click',()=>{clrT();bR.textContent='▶ Correr todo';load();});
+window.addEventListener('resize',rsz);
+setTimeout(()=>{rsz();load();},120);
+})();
+</script>
+</div>
+```
+
+---
+
+## Limitaciones de k-means
+
+Como todo algoritmo, k-means tiene supuestos y limitaciones que debemos conocer para no interpretar mal los resultados:
+
+::: {.callout-warning}
+**Limitaciones que debes tener en cuenta**
+
+1. **Hay que elegir k de antemano** — el algoritmo no decide cuántos grupos hay; nosotros le decimos cuántos buscar.
+
+2. **Sensible a la inicialización** — como los centroides arrancan en posiciones aleatorias, dos ejecuciones pueden dar resultados distintos. (Solución: correr k-means varias veces y quedarse con el mejor resultado; R lo hace por defecto con `nstart`.)
+
+3. **Asume clusters esféricos y de tamaño similar** — si los grupos reales tienen formas alargadas o tamaños muy desiguales, k-means puede agrupar mal.
+
+4. **Sensible a outliers** — un punto extremo jala el centroide hacia sí y distorsiona el cluster.
+
+5. **Solo variables numéricas** — k-means calcula distancias, que requieren números. Las variables categóricas necesitan tratamiento previo.
+:::
+
+Estas limitaciones no invalidan k-means — lo hacen el algoritmo más usado en la práctica precisamente porque es simple, rápido y fácil de interpretar. Pero debemos tenerlas presentes al leer los resultados.
+
+---
+
+<!--=================-->
+<!--=================-->
+# ¿Cuántos clusters? Elegir k
+
+Este es el paso más importante y donde más se equivocan los principiantes. No hay una respuesta "correcta" automática; hay métodos que nos orientan y un criterio final de negocio.
+
+## Método del codo (*elbow method*)
+
+La idea es sencilla: probamos k-means para k = 2, 3, 4, 5, … y graficamos cómo cambia la compactación (WCSS) a medida que aumentamos k.
+
+**¿Cómo se lee el gráfico del codo?**
+
+- El eje X muestra el número de clusters (k).
+- El eje Y muestra la WCSS (within-cluster sum of squares) — qué tan "apretados" están los puntos dentro de cada grupo.
+- A medida que k crece, la WCSS siempre baja (más grupos = más compactos).
+- El "codo" es el punto donde **agregar un cluster más ya no mejora mucho** la compactación.
+
+Piensa en una analogía: si tienes 100 paquetes y 1 bodega, todo queda lejos. Con 2 bodegas, mejora mucho. Con 3, mejora un poco más. Con 50, apenas cambia. El "codo" es donde la mejora marginal deja de justificar la complejidad.
+
+::: {.callout-warning}
+**Ojo:** el codo no siempre es claro. A veces la curva baja suavemente sin un quiebre obvio. En esos casos, el elbow method da una orientación, pero no una respuesta definitiva.
+:::
+
+---
+
+## Método de la silueta (*silhouette*)
+
+La silueta mide **qué tan bien clasificado está cada punto**: ¿está más cerca de su propio cluster que del cluster vecino más cercano?
+
+**¿Cómo se interpreta la silueta?**
+
+Para cada observación, el coeficiente de silueta va de **-1 a +1**:
+
+| Valor | Significado |
+|---|---|
+| Cercano a **+1** | El punto está bien asignado — muy cerca de su cluster, lejos de los demás |
+| Cercano a **0** | El punto está en la frontera entre dos clusters |
+| **Negativo** | El punto probablemente está en el cluster equivocado |
+
+Para elegir k, calculamos la **silueta promedio** para cada valor de k y elegimos el k que la maximiza. A diferencia del codo, aquí **sí hay un máximo claro** (el k con mejor silueta promedio).
+
+---
+
+## El criterio final: interpretabilidad
+
+Los métodos cuantitativos (elbow, silhouette) nos dan un rango razonable de k. Pero la decisión final debe considerar:
+
+**¿Los clusters tienen sentido de negocio?**
+
+Hazte estas preguntas para cada agrupamiento candidato:
+
+1. **¿Puedo nombrar cada cluster?** — Si no puedes ponerle un nombre descriptivo ("clientes frecuentes de bajo monto", "compradores esporádicos de alto ticket"), probablemente no es un buen agrupamiento.
+
+2. **¿Puedo accionar sobre cada cluster?** — ¿Puedo diseñar una estrategia diferente para cada segmento? Si dos clusters recibirían la misma acción, probablemente deberían ser uno solo.
+
+3. **¿El tamaño de los clusters es razonable?** — Un cluster con 3 clientes de 10,000 probablemente es ruido, no un segmento accionable.
+
+4. **¿Es estable?** — Si corro el algoritmo otra vez y los grupos cambian drásticamente, la segmentación no es confiable.
+
+**Regla práctica:** si el elbow sugiere k = 4 y la silueta sugiere k = 3, prueba ambos y elige el que genere los segmentos más claros y accionables.
+
+---
+
+<!--=================-->
+<!--=================-->
+# Perfilamiento: de números a decisiones
+
+Una vez asignados los clusters, el trabajo analítico **apenas comienza**. El paso más valioso es **perfilar** cada segmento: describir qué lo caracteriza y qué lo diferencia de los demás.
+
+## ¿Cómo se perfila un cluster?
+
+El perfilamiento típico incluye:
+
+1. **Tabla de promedios (o medianas) por cluster** — para cada variable, ¿cuál es el valor típico en cada segmento?
+2. **Tamaño de cada cluster** — ¿cuántas observaciones tiene? ¿Es un segmento grande o un nicho?
+3. **Visualizaciones comparativas** — boxplots o barras que muestren cómo se distribuye cada variable en cada cluster.
+
+::: {.callout-key}
+**Ejemplo de tabla de perfilamiento**
+
+Supongamos que segmentamos clientes usando tres variables: monto promedio de compra, frecuencia mensual y recencia (días desde la última compra).
+
+| Cluster | Nombre sugerido | Monto promedio | Frecuencia | Recencia (días) | Tamaño |
+|---|---|---|---|---|---|
+| 1 | Frecuentes de bajo monto | $45,000 | 8.2 | 5 | 4,200 |
+| 2 | Esporádicos de alto ticket | $320,000 | 1.1 | 45 | 1,800 |
+| 3 | Inactivos | $28,000 | 0.3 | 120 | 4,000 |
+
+**Lectura:** El cluster 1 compra seguido pero montos pequeños → candidatos a programa de lealtad con upgrades. El cluster 2 compra poco pero gasta mucho → mantener relación personalizada. El cluster 3 lleva mucho sin comprar → campaña de reactivación o aceptar como perdidos.
+:::
+
+::: {.callout-warning}
+**Los centroides son promedios, no descripciones exactas**
+
+El centroide de un cluster es el punto promedio del grupo. No todos los miembros del cluster son idénticos al centroide. Siempre revisa la **dispersión** dentro de cada cluster (usando boxplots o desviaciones estándar) para saber qué tan homogéneo es realmente el segmento.
+:::
+
+---
+
+## Nombrar los clusters
+
+Los algoritmos devuelven etiquetas numéricas ("Cluster 1", "Cluster 2"…). Tu trabajo como analista es **traducir esos números a nombres de negocio**. Esto es lo que hace que la segmentación sea comunicable y accionable.
+
+Buenos nombres son cortos, descriptivos y orientados a la acción:
+
+- "VIP dormidos" (alto gasto histórico, inactivos recientemente)
+- "Cazadores de ofertas" (compran solo en descuentos, sensibles a precio)
+- "Nuevos exploradores" (clientes recientes, pocas compras, variedad de categorías)
+
+Malos nombres son los que no dicen nada: "Grupo A", "Cluster grande", "Los del medio".
+
+---
+
+<!--=================-->
+<!--=================-->
+# Alternativas a k-means (alto nivel)
+
+k-means es el punto de partida, pero no la única opción. Conviene conocer dos alternativas para saber cuándo podrían ser más apropiadas:
+
+::: {.callout-key}
+**Clustering jerárquico**
+
+- No requiere elegir k de antemano — construye una jerarquía completa de agrupamientos que se puede "cortar" a cualquier nivel.
+- Produce un **dendrograma**: un árbol que muestra cómo se fusionan (o dividen) los grupos progresivamente.
+- Útil cuando quieres explorar **la estructura a distintos niveles de granularidad** (¿2 macro-segmentos o 6 micro-segmentos?).
+- Desventaja: más lento con datasets grandes.
+:::
+
+::: {.callout-key}
+**DBSCAN (opcional)**
+
+- Encuentra clusters de **forma irregular** (no solo esféricos como k-means).
+- Identifica **outliers automáticamente** — los puntos que no pertenecen a ningún cluster.
+- No requiere especificar k, pero requiere otros parámetros (radio de vecindad y mínimo de puntos).
+- Útil cuando sospechas que los grupos tienen formas no convencionales o hay mucho ruido.
+:::
+
+| Método | Elige k antes | Forma de clusters | Manejo de outliers | Escalabilidad |
+|---|---|---|---|---|
+| k-means | Sí | Esféricos | Sensible (los absorbe) | Muy buena |
+| Jerárquico | No (corta después) | Flexible | Moderado | Limitada en big data |
+| DBSCAN | No | Arbitraria | Excelente (los separa) | Buena |
+
+Para este curso, **k-means es el algoritmo central**. Las alternativas son contexto para que sepas que existen y puedas mencionarlas si el problema lo amerita.
+
+---
+
+<!--=================-->
+<!--=================-->
+# El flujo completo de un proyecto de segmentación
+
+## Pipeline de segmentación (paso a paso)
+
+1. **Definir la pregunta de negocio** — ¿Qué queremos segmentar y para qué? (clientes para personalizar campañas, productos para optimizar inventario, zonas para asignar vendedores…)
+
+2. **Seleccionar y preparar variables** — Elegir solo las variables relevantes para la pregunta. Escalar las numéricas. Excluir IDs y variables categóricas no transformadas.
+
+3. **Estimar k-means para varios valores de k** — Típicamente k = 2, 3, 4, …, 8 o 10.
+
+4. **Evaluar con elbow y silhouette** — Identificar el rango razonable de k.
+
+5. **Elegir k final con criterio de negocio** — Perfilar los candidatos y seleccionar el que produzca segmentos nombrables y accionables.
+
+6. **Asignar etiquetas y perfilar** — Tabla de promedios por cluster, tamaños, visualizaciones.
+
+7. **Comunicar y recomendar** — Nombrar los segmentos, describir sus características y proponer acciones diferenciadas para cada uno.
+
+## Conexión con el proyecto final
+
+::: {.callout-connect}
+El Caso C del proyecto final es exactamente un problema de segmentación. Seguirás este pipeline completo: desde elegir variables y escalar, hasta nombrar los clusters y proponer estrategias diferenciadas. La calidad de tu entrega se medirá por la **interpretabilidad y accionabilidad** de los segmentos, no por la complejidad del algoritmo.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Errores frecuentes
+
+::: {.callout-warning}
+**Errores que debes evitar**
+
+1. **No escalar las variables** — El error más común. Si no escalas, el clustering refleja diferencias de unidades, no de comportamiento.
+
+2. **Elegir k solo por el codo** — El codo es una guía, no una verdad. Siempre valida con silueta y, sobre todo, con interpretabilidad.
+
+3. **Reportar clusters sin perfilarlos** — Decir "encontré 4 clusters" sin describir qué caracteriza a cada uno es inútil para la toma de decisiones.
+
+4. **Incluir variables irrelevantes** — Si segmentas clientes para marketing, incluir el código postal como variable numérica distorsiona el resultado. Selecciona variables que tengan sentido para la pregunta.
+
+5. **Olvidar que los clusters no son verdades absolutas** — Son una simplificación útil. Un cliente asignado al cluster 2 puede estar en la frontera con el cluster 3. No trates las asignaciones como certezas.
+
+6. **Interpretar el centroide como "el cliente típico"** — El centroide es un promedio, y los promedios pueden ser engañosos. Siempre revisa la dispersión dentro de cada cluster.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Preguntas de comprensión
+
+::: {.callout-practice}
+**1. Supervisado vs. no supervisado**
+
+Un banco tiene datos de 50,000 clientes con variables como saldo promedio, número de productos contratados, antigüedad y frecuencia de transacciones digitales. El banco quiere identificar perfiles de clientes para diseñar ofertas personalizadas, pero **no tiene una variable que diga a qué segmento pertenece cada cliente**.
+
+¿Esto es un problema supervisado o no supervisado? ¿Por qué?
+
+**Respuesta esperada:** No supervisado, porque no hay una variable de resultado (*target*) que indique los grupos. El algoritmo debe descubrirlos a partir de los patrones en los datos.
+:::
+
+::: {.callout-practice}
+**2. Escalamiento**
+
+Un analista aplica k-means a clientes usando dos variables: ingreso anual (rango: $10,000,000 – $200,000,000) y número de compras mensuales (rango: 1 – 30). Los clusters resultantes separan casi perfectamente por ingreso, ignorando la frecuencia de compra.
+
+¿Qué salió mal y cómo se corrige?
+
+**Respuesta esperada:** No escaló las variables. El ingreso tiene un rango miles de veces mayor que el número de compras, así que domina completamente el cálculo de distancias. Se corrige estandarizando ambas variables antes de aplicar k-means.
+:::
+
+::: {.callout-practice}
+**3. Interpretación de clusters**
+
+Después de aplicar k-means con k = 3 a una base de clientes, obtienes esta tabla de perfilamiento:
+
+| Cluster | Monto promedio | Frecuencia mensual | Recencia (días) | N clientes |
+|---|---|---|---|---|
+| 1 | $380,000 | 1.2 | 60 | 2,100 |
+| 2 | $52,000 | 7.5 | 4 | 5,400 |
+| 3 | $15,000 | 0.4 | 180 | 2,500 |
+
+a) Propón un nombre de negocio para cada cluster.
+b) Sugiere una acción diferente para cada segmento.
+
+**Respuestas esperadas:**
+
+a) Cluster 1: "Alto ticket esporádico" o "Premium dormido". Cluster 2: "Frecuente de bajo monto" o "Leal cotidiano". Cluster 3: "Inactivo" o "En riesgo de abandono".
+
+b) Cluster 1: comunicación personalizada, acceso anticipado a nuevos productos. Cluster 2: programa de lealtad, descuentos por volumen o upgrades. Cluster 3: campaña de reactivación con incentivo; si no responde, reclasificar como perdido.
+:::
+
+---
+
+## Material adicional (opcional)
+
+Si quieres profundizar:
+
+- **An Introduction to Statistical Learning (ISLR)** — Capítulo 12 (Unsupervised Learning): explicación accesible de k-means y clustering jerárquico con ejemplos visuales — [disponible gratis online](https://www.statlearning.com)
+- **from-data-to-viz.com** — para elegir visualizaciones cuando perfilen clusters → [https://www.data-to-viz.com](https://www.data-to-viz.com)
+- **Artículo de Harvard Business Review sobre segmentación de clientes** — perspectiva de negocio sobre cómo usar clusters para estrategia comercial
+
+Para esta semana, el material de preclase es suficiente. En clase practicaremos con datos reales paso a paso.
+
+
+```{=html}
+<!-- Panel Environment -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">&#x1F4E6; Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
+  </div>
+</div>
+
+<script type="module">
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
+};
+
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Env panel error:', e);
+    return [];
+  }
+}
+
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+function moveWebRStatus() {
+  const anchor = document.getElementById('webr-status-anchor');
+  const statusArea = document.getElementById('qwebr-status-message-area');
+  if (anchor && statusArea) {
+    const wrapper = statusArea.closest('.quarto-title-meta');
+    if (wrapper) {
+      wrapper.style.display = 'inline';
+      wrapper.style.fontSize = '13px';
+      wrapper.style.marginLeft = '30px';
+      anchor.parentNode.insertBefore(wrapper, anchor);
+    }
+  }
+}
+
+async function init() {
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
+  moveWebRStatus();
+
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+```

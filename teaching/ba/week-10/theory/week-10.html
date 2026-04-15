@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Unidad 7 - Clustering: Fundamentos y Métricas</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="week-10_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-10_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-10_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-10_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-10_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-10_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-10_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-10_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-10_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-10_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-10_files/libs/bootstrap/bootstrap-e6bb25874def5e3c119f13f2169c6013.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#objetivo-de-la-semana" id="toc-objetivo-de-la-semana" class="nav-link active" data-scroll-target="#objetivo-de-la-semana"><span class="header-section-number">1</span> Objetivo de la semana</a>
+  <ul class="collapse">
+  <li><a href="#lo-que-cubriremos" id="toc-lo-que-cubriremos" class="nav-link" data-scroll-target="#lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</a></li>
+  </ul></li>
+  <li><a href="#por-qué-segmentar" id="toc-por-qué-segmentar" class="nav-link" data-scroll-target="#por-qué-segmentar"><span class="header-section-number">2</span> ¿Por qué segmentar?</a>
+  <ul class="collapse">
+  <li><a href="#criterio-de-un-buen-clustering" id="toc-criterio-de-un-buen-clustering" class="nav-link" data-scroll-target="#criterio-de-un-buen-clustering"><span class="header-section-number">2.1</span> Criterio de un buen clustering</a></li>
+  <li><a href="#ejemplos-de-preguntas-de-segmentación-en-negocios" id="toc-ejemplos-de-preguntas-de-segmentación-en-negocios" class="nav-link" data-scroll-target="#ejemplos-de-preguntas-de-segmentación-en-negocios"><span class="header-section-number">2.2</span> Ejemplos de preguntas de segmentación en negocios:</a></li>
+  </ul></li>
+  <li><a href="#la-intuición-detrás-de-k-means" id="toc-la-intuición-detrás-de-k-means" class="nav-link" data-scroll-target="#la-intuición-detrás-de-k-means"><span class="header-section-number">3</span> La intuición detrás de k-means</a>
+  <ul class="collapse">
+  <li><a href="#similitud-cercanía" id="toc-similitud-cercanía" class="nav-link" data-scroll-target="#similitud-cercanía"><span class="header-section-number">3.1</span> Similitud = cercanía</a></li>
+  <li><a href="#el-algoritmo-k-means-en-4-pasos" id="toc-el-algoritmo-k-means-en-4-pasos" class="nav-link" data-scroll-target="#el-algoritmo-k-means-en-4-pasos"><span class="header-section-number">3.2</span> El algoritmo k-means en 4 pasos</a>
+  <ul class="collapse">
+  <li><a href="#cómo-funciona-k-means-versión-intuitiva" id="toc-cómo-funciona-k-means-versión-intuitiva" class="nav-link" data-scroll-target="#cómo-funciona-k-means-versión-intuitiva"><span class="header-section-number">3.2.1</span> ¿Cómo funciona k-means? (versión intuitiva)</a></li>
+  </ul></li>
+  <li><a href="#explóralo-tú-mismo-k-means-playground" id="toc-explóralo-tú-mismo-k-means-playground" class="nav-link" data-scroll-target="#explóralo-tú-mismo-k-means-playground"><span class="header-section-number">3.3</span> Explóralo tú mismo: K-Means Playground</a></li>
+  <li><a href="#limitaciones-de-k-means" id="toc-limitaciones-de-k-means" class="nav-link" data-scroll-target="#limitaciones-de-k-means"><span class="header-section-number">3.4</span> Limitaciones de k-means</a></li>
+  </ul></li>
+  <li><a href="#cuántos-clusters-elegir-k" id="toc-cuántos-clusters-elegir-k" class="nav-link" data-scroll-target="#cuántos-clusters-elegir-k"><span class="header-section-number">4</span> ¿Cuántos clusters? Elegir k</a>
+  <ul class="collapse">
+  <li><a href="#método-del-codo-elbow-method" id="toc-método-del-codo-elbow-method" class="nav-link" data-scroll-target="#método-del-codo-elbow-method"><span class="header-section-number">4.1</span> Método del codo (<em>elbow method</em>)</a></li>
+  <li><a href="#método-de-la-silueta-silhouette" id="toc-método-de-la-silueta-silhouette" class="nav-link" data-scroll-target="#método-de-la-silueta-silhouette"><span class="header-section-number">4.2</span> Método de la silueta (<em>silhouette</em>)</a></li>
+  <li><a href="#el-criterio-final-interpretabilidad" id="toc-el-criterio-final-interpretabilidad" class="nav-link" data-scroll-target="#el-criterio-final-interpretabilidad"><span class="header-section-number">4.3</span> El criterio final: interpretabilidad</a></li>
+  </ul></li>
+  <li><a href="#perfilamiento-de-números-a-decisiones" id="toc-perfilamiento-de-números-a-decisiones" class="nav-link" data-scroll-target="#perfilamiento-de-números-a-decisiones"><span class="header-section-number">5</span> Perfilamiento: de números a decisiones</a>
+  <ul class="collapse">
+  <li><a href="#cómo-se-perfila-un-cluster" id="toc-cómo-se-perfila-un-cluster" class="nav-link" data-scroll-target="#cómo-se-perfila-un-cluster"><span class="header-section-number">5.1</span> ¿Cómo se perfila un cluster?</a></li>
+  <li><a href="#nombrar-los-clusters" id="toc-nombrar-los-clusters" class="nav-link" data-scroll-target="#nombrar-los-clusters"><span class="header-section-number">5.2</span> Nombrar los clusters</a></li>
+  </ul></li>
+  <li><a href="#alternativas-a-k-means-alto-nivel" id="toc-alternativas-a-k-means-alto-nivel" class="nav-link" data-scroll-target="#alternativas-a-k-means-alto-nivel"><span class="header-section-number">6</span> Alternativas a k-means (alto nivel)</a></li>
+  <li><a href="#el-flujo-completo-de-un-proyecto-de-segmentación" id="toc-el-flujo-completo-de-un-proyecto-de-segmentación" class="nav-link" data-scroll-target="#el-flujo-completo-de-un-proyecto-de-segmentación"><span class="header-section-number">7</span> El flujo completo de un proyecto de segmentación</a>
+  <ul class="collapse">
+  <li><a href="#pipeline-de-segmentación-paso-a-paso" id="toc-pipeline-de-segmentación-paso-a-paso" class="nav-link" data-scroll-target="#pipeline-de-segmentación-paso-a-paso"><span class="header-section-number">7.1</span> Pipeline de segmentación (paso a paso)</a></li>
+  <li><a href="#conexión-con-el-proyecto-final" id="toc-conexión-con-el-proyecto-final" class="nav-link" data-scroll-target="#conexión-con-el-proyecto-final"><span class="header-section-number">7.2</span> Conexión con el proyecto final</a></li>
+  </ul></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes"><span class="header-section-number">8</span> Errores frecuentes</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">9</span> Preguntas de comprensión</a>
+  <ul class="collapse">
+  <li><a href="#material-adicional-opcional" id="toc-material-adicional-opcional" class="nav-link" data-scroll-target="#material-adicional-opcional"><span class="header-section-number">9.1</span> Material adicional (opcional)</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 7 - Clustering: Fundamentos y Métricas</h1>
+<p class="subtitle lead">Introducción al Business Analytics · Semana 10 · 06278-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a> <span id="webr-status-anchor"></span></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="objetivo-de-la-semana" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Objetivo de la semana</h1>
+<p>El foco está en <strong>segmentación como herramienta de decisión</strong>: descubrir grupos naturales en los datos sin una variable de resultado (<em>target</em>), para luego describirlos, nombrarlos y convertirlos en acciones de negocio.</p>
+<section id="lo-que-cubriremos" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</h2>
+<ul>
+<li>Lógica del clustering: similitud, escala, diferencia con clasificación</li>
+<li>K-means: centroides, WCSS, limitaciones</li>
+<li>Elegir k: método del codo, silueta, interpretabilidad</li>
+<li>Perfilar segmentos: de números a nombres de negocio</li>
+</ul>
+<div class="callout-key">
+<p><strong>Conexión con semana 9</strong></p>
+<p>En la semana anterior vimos que en problemas no supervisados no hay etiqueta que diga si acertamos. Esta semana lo vivimos: un cluster es útil si tiene sentido de negocio, no si “da un número alto”.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Semana 09</th>
+<th>Semana 10</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Pipeline ML, train/test, métricas</td>
+<td>Primer algoritmo: k-means</td>
+</tr>
+<tr class="even">
+<td>Supervisado vs.&nbsp;no supervisado (concepto)</td>
+<td>No supervisado en la práctica</td>
+</tr>
+<tr class="odd">
+<td>Accuracy, RMSE</td>
+<td>Elbow, silhouette (sin “respuesta correcta”)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="por-qué-segmentar" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> ¿Por qué segmentar?</h1>
+<p>Antes de hablar de algoritmos, pensemos en el problema de negocio. Imagina que tienes <strong>10,000 clientes</strong> y un presupuesto limitado de marketing. Tratar a todos igual es ineficiente: no todos quieren lo mismo, no todos compran igual, no todos responden al mismo mensaje. La segmentación busca identificar <strong>grupos internamente homogéneos</strong> (los miembros de un grupo se parecen entre sí) y <strong>externamente diferentes</strong> (los grupos se distinguen entre sí).</p>
+<section id="criterio-de-un-buen-clustering" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="criterio-de-un-buen-clustering"><span class="header-section-number">2.1</span> Criterio de un buen clustering</h2>
+<p>Un buen agrupamiento logra dos cosas simultáneamente:</p>
+<ol type="1">
+<li><strong>Alta similitud intra-grupo</strong> — los clientes dentro de un mismo segmento se parecen mucho entre sí.</li>
+<li><strong>Alta diferencia inter-grupo</strong> — los segmentos son claramente distintos unos de otros.</li>
+</ol>
+<p>Si todos los clientes terminan en un solo grupo, no segmentamos nada. Si cada cliente es un grupo aparte, tampoco sirve. El reto es encontrar el punto intermedio que sea <strong>útil para tomar decisiones</strong>.</p>
+</section>
+<section id="ejemplos-de-preguntas-de-segmentación-en-negocios" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="ejemplos-de-preguntas-de-segmentación-en-negocios"><span class="header-section-number">2.2</span> Ejemplos de preguntas de segmentación en negocios:</h2>
+<ul>
+<li>¿Qué perfiles de clientes tenemos según frecuencia, monto y recencia de compras?</li>
+<li>¿Qué zonas geográficas se comportan de manera similar en ventas?</li>
+<li>¿Qué productos se agrupan según su patrón de demanda estacional?</li>
+</ul>
+<p>En todos estos casos, <strong>nadie nos dice de antemano cuántos grupos hay ni cuáles son</strong>. El algoritmo los descubre.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="la-intuición-detrás-de-k-means" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> La intuición detrás de k-means</h1>
+<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/2kfY0R34Dy0" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<section id="similitud-cercanía" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="similitud-cercanía"><span class="header-section-number">3.1</span> Similitud = cercanía</h2>
+<p>La idea central del clustering es simple: <strong>observaciones que están “cerca” entre sí pertenecen al mismo grupo</strong>. Pero ¿qué significa “cerca”?</p>
+<p>En la vida cotidiana, decimos que dos clientes son “similares” si compran parecido, gastan montos parecidos, visitan con frecuencia parecida. En términos numéricos, cada cliente es un <strong>punto en un espacio</strong> donde cada eje es una variable (monto, frecuencia, recencia). La distancia entre dos puntos mide qué tan diferentes son.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>¿Por qué escalar importa tanto?</strong></p>
+<p>Si una variable está en pesos (rango: 0–5,000,000) y otra en número de visitas (rango: 1–20), la distancia la domina completamente la variable en pesos. El algoritmo “ve” las diferencias en monto como enormes y las diferencias en frecuencia como despreciables.</p>
+<p><strong>Escalar</strong> (estandarizar) las variables las pone en una escala comparable. Sin este paso, el clustering refleja diferencias de unidades, no de comportamiento real.</p>
+<p><strong>Regla práctica:</strong> siempre escalar las variables numéricas antes de aplicar k-means.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="el-algoritmo-k-means-en-4-pasos" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="el-algoritmo-k-means-en-4-pasos"><span class="header-section-number">3.2</span> El algoritmo k-means en 4 pasos</h2>
+<p>k-means es el algoritmo de clustering más usado por su simplicidad e interpretabilidad. Funciona así:</p>
+<section id="cómo-funciona-k-means-versión-intuitiva" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="cómo-funciona-k-means-versión-intuitiva"><span class="header-section-number">3.2.1</span> ¿Cómo funciona k-means? (versión intuitiva)</h3>
+<div class="callout-key">
+<p>Imagina que eres gerente de logística y necesitas colocar <strong>k bodegas</strong> para atender a tus clientes distribuidos en un mapa. Quieres que cada bodega quede lo más cerca posible de los clientes que atiende.</p>
+<ol type="1">
+<li><strong>Inicio:</strong> Colocas k bodegas en posiciones aleatorias del mapa.</li>
+<li><strong>Asignación:</strong> Cada cliente se asigna a la bodega más cercana.</li>
+<li><strong>Actualización:</strong> Mueves cada bodega al centro geográfico de sus clientes asignados.</li>
+<li><strong>Repetición:</strong> Repites los pasos 2 y 3 hasta que las bodegas ya no se muevan (convergencia).</li>
+</ol>
+<p>Las “bodegas” son los <strong>centroides</strong>. Los “clientes asignados a cada bodega” son los <strong>clusters</strong>.</p>
+</div>
+<p><strong>Lo que k-means optimiza:</strong> minimizar la suma de distancias entre cada punto y el centroide de su cluster. En lenguaje técnico: minimiza la <em>within-cluster sum of squares</em> (WCSS) — la “compactación” total de los grupos.</p>
+<hr>
+</section>
+</section>
+<section id="explóralo-tú-mismo-k-means-playground" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="explóralo-tú-mismo-k-means-playground"><span class="header-section-number">3.3</span> Explóralo tú mismo: K-Means Playground</h2>
+<p>Antes de seguir con las limitaciones, experimenta con el algoritmo paso a paso. Usa los controles para ver exactamente qué ocurre en cada iteración.</p>
+<p><strong>¿Qué explorar aquí?</strong></p>
+<ol type="1">
+<li>Selecciona <strong>“Blobs separados”</strong> y corre el algoritmo paso a paso: Inicializar → Asignar → Mover centroides → repetir. Observa cómo cambia el WCSS en cada iteración.</li>
+<li>Prueba el mismo dataset pero reiniciando varias veces con el mismo k. ¿Los centroides arrancan siempre en el mismo lugar? ¿El resultado final cambia?</li>
+<li>Cambia a <strong>“Anillos”</strong> con k = 2. ¿Por qué k-means falla aquí? ¿Qué limitación del algoritmo explica esto?</li>
+<li>Prueba <strong>“Grupos desiguales”</strong> con k = 3. Observa la silueta: ¿sube o baja comparado con “Blobs separados”?</li>
+</ol>
+<div style="margin: 1.5rem 0;">
+<style>
+#kmpl *{box-sizing:border-box;margin:0;padding:0}
+#kmpl{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:500px;border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;font-family:inherit}
+#kmpl-panel{background:#f8f8f6;border-right:1px solid #e0e0e0;padding:16px;display:flex;flex-direction:column;gap:16px}
+#kmpl-main{position:relative;background:#fff;display:flex;flex-direction:column}
+#kmpl canvas{cursor:crosshair;display:block;flex:1;min-height:300px}
+#kmpl .ps{display:flex;flex-direction:column;gap:8px}
+#kmpl .pl{font-size:11px;color:#888;letter-spacing:.03em;text-transform:uppercase;font-weight:500}
+#kmpl .pv{font-size:18px;font-weight:500;color:#111}
+#kmpl .sr{display:flex;gap:6px}
+#kmpl .kb{flex:1;padding:6px 4px;font-size:12px;font-weight:500;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111;cursor:pointer;transition:background .15s}
+#kmpl .kb:hover{background:#f0f0f0}
+#kmpl .kb:disabled{opacity:.4;cursor:not-allowed}
+#kmpl .kb.kp{background:#dbeafe;color:#1e40af;border-color:#93c5fd}
+#kmpl .kb.kp:hover{background:#bfdbfe}
+#kmpl .kb.kd{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+#kmpl .kb.kd:hover{background:#fecaca}
+#kmpl select{width:100%;padding:6px 8px;font-size:13px;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111}
+#kmpl input[type=range]{width:100%;accent-color:#378ADD}
+#kmpl .mv{font-size:20px;font-weight:500;color:#111}
+#kmpl .ml{font-size:11px;color:#888}
+#kmpl-status{padding:8px 14px;font-size:12px;color:#666;border-top:1px solid #e0e0e0;min-height:32px;display:flex;align-items:center}
+#kmpl .lr{display:flex;flex-wrap:wrap;gap:6px}
+#kmpl .li{display:flex;align-items:center;gap:4px;font-size:11px;color:#666}
+#kmpl .ld{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+#kmpl-iter{font-size:11px;color:#888;text-align:center}
+</style>
+
+<div id="kmpl">
+  <div id="kmpl-panel">
+    <div class="ps">
+      <div class="pl">Dataset</div>
+      <select id="kmpl-ds">
+        <option value="blobs">Blobs separados</option>
+        <option value="ring">Anillos</option>
+        <option value="spread">Dispersión uniforme</option>
+        <option value="imbalanced">Grupos desiguales</option>
+        <option value="custom">Dibuja tus datos ✏</option>
+      </select>
+    </div>
+    <div class="ps">
+      <div class="pl">Número de clusters (k)</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="kmpl-k" min="2" max="8" value="3" step="1" style="flex:1">
+        <span class="pv" id="kmpl-kv">3</span>
+      </div>
+    </div>
+    <div class="ps">
+      <div class="pl">Pasos del algoritmo</div>
+      <div class="sr">
+        <button class="kb kp" id="kmpl-init">Inicializar</button>
+        <button class="kb" id="kmpl-assign" disabled="">Asignar</button>
+      </div>
+      <div class="sr">
+        <button class="kb" id="kmpl-update" disabled="">Mover centroides</button>
+      </div>
+      <div class="sr">
+        <button class="kb" id="kmpl-run">▶ Correr todo</button>
+      </div>
+      <div id="kmpl-iter">iteración: —</div>
+    </div>
+    <div class="ps">
+      <div class="pl">WCSS</div>
+      <div class="mv" id="kmpl-wcss">—</div>
+      <div class="ml">compactación intra-cluster</div>
+    </div>
+    <div class="ps">
+      <div class="pl">Silhouette promedio</div>
+      <div class="mv" id="kmpl-sil">—</div>
+    </div>
+    <div class="ps">
+      <div class="pl">Clusters</div>
+      <div class="lr" id="kmpl-legend"></div>
+    </div>
+    <button class="kb kd" id="kmpl-reset" style="margin-top:auto">Reiniciar</button>
+  </div>
+  <div id="kmpl-main">
+    <canvas id="kmpl-canvas"></canvas>
+    <div id="kmpl-status">Elige un dataset e inicializa los centroides</div>
+  </div>
+</div>
+
+<script>
+(function(){
+const CL=[
+  {fill:'#378ADD'},{fill:'#D85A30'},{fill:'#1D9E75'},{fill:'#BA7517'},
+  {fill:'#7F77DD'},{fill:'#D4537E'},{fill:'#639922'},{fill:'#E24B4A'},
+];
+const cv=document.getElementById('kmpl-canvas');
+const cx=cv.getContext('2d');
+const ksl=document.getElementById('kmpl-k');
+const kvl=document.getElementById('kmpl-kv');
+const dsl=document.getElementById('kmpl-ds');
+const bI=document.getElementById('kmpl-init');
+const bA=document.getElementById('kmpl-assign');
+const bU=document.getElementById('kmpl-update');
+const bR=document.getElementById('kmpl-run');
+const bX=document.getElementById('kmpl-reset');
+const wEl=document.getElementById('kmpl-wcss');
+const sEl=document.getElementById('kmpl-sil');
+const stEl=document.getElementById('kmpl-status');
+const itEl=document.getElementById('kmpl-iter');
+const lgEl=document.getElementById('kmpl-legend');
+
+let pts=[],ctr=[],asg=[],iter=0,phase='idle',W,H,timer=null;
+
+function rsz(){
+  const r=cv.parentElement.getBoundingClientRect();
+  W=r.width; H=Math.max(r.height-32,280);
+  cv.width=W; cv.height=H; drw();
+}
+function rnd(a,b){return a+(b-a)*Math.random();}
+function genBlobs(){
+  const p=[],cs=[[.25,.25],[.75,.25],[.5,.72]];
+  cs.forEach(([x,y])=>{for(let i=0;i<40;i++)p.push({x:x+rnd(-.12,.12),y:y+rnd(-.12,.12)});});
+  return p;
+}
+function genRing(){
+  const p=[];
+  for(let i=0;i<60;i++){const a=Math.random()*6.28,r=rnd(.08,.14);p.push({x:.5+r*Math.cos(a),y:.5+r*Math.sin(a)});}
+  for(let i=0;i<80;i++){const a=Math.random()*6.28,r=rnd(.3,.38);p.push({x:.5+r*Math.cos(a),y:.5+r*Math.sin(a)});}
+  return p;
+}
+function genSpread(){const p=[];for(let i=0;i<140;i++)p.push({x:rnd(.05,.95),y:rnd(.05,.95)});return p;}
+function genImb(){
+  const p=[];
+  for(let i=0;i<90;i++)p.push({x:rnd(.05,.45),y:rnd(.05,.95)});
+  for(let i=0;i<15;i++)p.push({x:rnd(.6,.75),y:rnd(.2,.4)});
+  for(let i=0;i<20;i++)p.push({x:rnd(.65,.9),y:rnd(.6,.85)});
+  return p;
+}
+function load(){
+  const v=dsl.value;
+  if(v==='custom'){pts=[];rst();stEl.textContent='Haz clic en el lienzo para agregar puntos';return;}
+  const raw=v==='blobs'?genBlobs():v==='ring'?genRing():v==='spread'?genSpread():genImb();
+  pts=raw.map(p=>({x:Math.max(.02,Math.min(.98,p.x)),y:Math.max(.02,Math.min(.98,p.y))}));
+  rst(); stEl.textContent=`${pts.length} observaciones cargadas. Inicializa los centroides para comenzar.`;
+}
+function tc(p){return {x:p.x*W,y:p.y*H};}
+function tp(x,y){return {x:x/W,y:y/H};}
+function dst(a,b){return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);}
+function rst(){
+  ctr=[];asg=[];iter=0;phase='idle';
+  bA.disabled=true;bU.disabled=true;
+  itEl.textContent='iteración: —';
+  wEl.textContent='—';sEl.textContent='—';sEl.style.color='';
+  lgd();drw();
+}
+function ini(){
+  if(pts.length<3){stEl.textContent='Agrega al menos 3 puntos';return;}
+  const k=+ksl.value;ctr=[];
+  const used=new Set();
+  while(ctr.length<k){const i=Math.floor(Math.random()*pts.length);if(!used.has(i)){used.add(i);ctr.push({...pts[i]});}}
+  asg=new Array(pts.length).fill(-1);iter=0;phase='initialized';
+  bA.disabled=false;bU.disabled=true;itEl.textContent='iteración: 0';
+  wEl.textContent='—';sEl.textContent='—';sEl.style.color='';
+  lgd();drw();stEl.textContent='Centroides inicializados. Pulsa "Asignar" para asignar cada punto al centroide más cercano.';
+}
+function asn(){
+  let chg=false;
+  pts.forEach((p,i)=>{
+    let best=-1,bd=Infinity;
+    ctr.forEach((c,ci)=>{const d=dst(p,c);if(d<bd){bd=d;best=ci;}});
+    if(asg[i]!==best)chg=true;asg[i]=best;
+  });
+  phase='assigned';bA.disabled=true;bU.disabled=false;
+  mtr();drw();
+  if(!chg){phase='converged';bU.disabled=true;stEl.textContent=`¡Convergió en ${iter} iteración(es)! Los centroides ya no se mueven.`;return true;}
+  stEl.textContent=`Iteración ${iter}: puntos asignados al centroide más cercano. Ahora mueve los centroides.`;
+  return false;
+}
+function upd(){
+  const k=ctr.length,sm=Array.from({length:k},()=>({x:0,y:0,n:0}));
+  pts.forEach((p,i)=>{const c=asg[i];if(c>=0){sm[c].x+=p.x;sm[c].y+=p.y;sm[c].n++;}});
+  ctr=sm.map((s,i)=>s.n>0?{x:s.x/s.n,y:s.y/s.n}:ctr[i]);
+  iter++;itEl.textContent=`iteración: ${iter}`;
+  phase='updated';bA.disabled=false;bU.disabled=true;
+  drw();stEl.textContent=`Centroides movidos al centro de su grupo. Iteración ${iter} completa. Vuelve a asignar.`;
+}
+function clrT(){if(timer){clearInterval(timer);timer=null;}}
+function runAll(){
+  if(phase==='idle'){stEl.textContent='Primero inicializa los centroides';return;}
+  if(phase==='converged'){stEl.textContent='Ya convergió. Reinicia para explorar de nuevo.';return;}
+  clrT();
+  timer=setInterval(()=>{
+    if(phase==='converged'){clrT();bR.textContent='▶ Correr todo';return;}
+    if(phase==='initialized'||phase==='updated'){const c=asn();if(c){clrT();bR.textContent='▶ Correr todo';return;}}
+    else if(phase==='assigned')upd();
+  },600);
+  stEl.textContent='Ejecutando automáticamente…';
+}
+function mtr(){
+  if(!asg.some(a=>a>=0))return;
+  let w=0;pts.forEach((p,i)=>{const c=asg[i];if(c>=0)w+=dst(p,ctr[c])**2;});
+  wEl.textContent=w.toFixed(1);
+  if(pts.length<10){sEl.textContent='—';return;}
+  const sl=[];
+  pts.forEach((p,i)=>{
+    const ci=asg[i];
+    const sm=pts.filter((_,j)=>asg[j]===ci&&j!==i);
+    if(!sm.length){sl.push(0);return;}
+    const a=sm.reduce((s,q)=>s+dst(p,q),0)/sm.length;
+    let b=Infinity;
+    ctr.forEach((_,cj)=>{if(cj===ci)return;const ot=pts.filter((_,j)=>asg[j]===cj);if(!ot.length)return;const av=ot.reduce((s,q)=>s+dst(p,q),0)/ot.length;if(av<b)b=av;});
+    sl.push(b===Infinity?0:(b-a)/Math.max(a,b));
+  });
+  const avg=sl.reduce((s,v)=>s+v,0)/sl.length;
+  sEl.textContent=avg.toFixed(3);
+  sEl.style.color=avg>.5?'#15803d':avg>.2?'#b45309':'#b91c1c';
+}
+function lgd(){
+  const k=+ksl.value;lgEl.innerHTML='';
+  for(let i=0;i<k;i++){
+    const d=document.createElement('div');d.className='li';
+    d.innerHTML=`<div class="ld" style="background:${CL[i].fill}"></div><span>C${i+1}</span>`;
+    lgEl.appendChild(d);
+  }
+}
+function drw(){
+  if(!W||!H)return;cx.clearRect(0,0,W,H);
+  if(ctr.length>0){
+    ctr.forEach((c,ci)=>{
+      const cp=tc(c);
+      pts.forEach((p,pi)=>{
+        if(asg[pi]!==ci)return;
+        const pp=tc(p);cx.beginPath();cx.moveTo(cp.x,cp.y);cx.lineTo(pp.x,pp.y);
+        cx.strokeStyle=CL[ci].fill+'28';cx.lineWidth=1;cx.stroke();
+      });
+    });
+    ctr.forEach((c,ci)=>{
+      const cp=tc(c);
+      const ot=ctr.filter((_,j)=>j!==ci);
+      if(ot.length){
+        const md=Math.min(...ot.map(o=>dst(tc(o),cp)));
+        cx.beginPath();cx.arc(cp.x,cp.y,Math.min(md/2,Math.min(W,H)*.38),0,6.28);
+        cx.fillStyle=CL[ci].fill+'18';cx.fill();
+      }
+    });
+  }
+  pts.forEach((p,i)=>{
+    const cp=tc(p);const ci=asg[i];
+    cx.beginPath();cx.arc(cp.x,cp.y,5,0,6.28);
+    cx.fillStyle=ci>=0?CL[ci].fill:'#aaa';cx.fill();
+    cx.strokeStyle='#fff';cx.lineWidth=1.5;cx.stroke();
+  });
+  ctr.forEach((c,ci)=>{
+    const cp=tc(c);const sz=11;
+    cx.beginPath();cx.moveTo(cp.x-sz,cp.y);cx.lineTo(cp.x+sz,cp.y);
+    cx.moveTo(cp.x,cp.y-sz);cx.lineTo(cp.x,cp.y+sz);
+    cx.strokeStyle=CL[ci].fill;cx.lineWidth=3;cx.stroke();
+    cx.beginPath();cx.arc(cp.x,cp.y,sz*.55,0,6.28);
+    cx.fillStyle='#fff';cx.fill();cx.strokeStyle=CL[ci].fill;cx.lineWidth=2.5;cx.stroke();
+    cx.fillStyle=CL[ci].fill;cx.font='500 11px inherit';cx.textAlign='center';cx.textBaseline='middle';
+    cx.fillText(ci+1,cp.x,cp.y+.5);
+  });
+}
+cv.addEventListener('click',e=>{
+  if(dsl.value!=='custom')return;
+  const r=cv.getBoundingClientRect();
+  const p=tp(e.clientX-r.left,e.clientY-r.top);
+  if(p.x<0||p.x>1||p.y<0||p.y>1)return;
+  pts.push(p);if(phase!=='idle')rst();drw();
+  stEl.textContent=`${pts.length} punto(s). Inicializa cuando estés listo.`;
+});
+ksl.addEventListener('input',()=>{kvl.textContent=ksl.value;if(phase!=='idle')rst();else lgd();});
+dsl.addEventListener('change',load);
+bI.addEventListener('click',ini);
+bA.addEventListener('click',asn);
+bU.addEventListener('click',upd);
+bR.addEventListener('click',()=>{if(timer){clrT();bR.textContent='▶ Correr todo';}else{bR.textContent='⏹ Pausar';runAll();}});
+bX.addEventListener('click',()=>{clrT();bR.textContent='▶ Correr todo';load();});
+window.addEventListener('resize',rsz);
+setTimeout(()=>{rsz();load();},120);
+})();
+</script>
+</div>
+<hr>
+</section>
+<section id="limitaciones-de-k-means" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="limitaciones-de-k-means"><span class="header-section-number">3.4</span> Limitaciones de k-means</h2>
+<p>Como todo algoritmo, k-means tiene supuestos y limitaciones que debemos conocer para no interpretar mal los resultados:</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Limitaciones que debes tener en cuenta</strong></p>
+<ol type="1">
+<li><p><strong>Hay que elegir k de antemano</strong> — el algoritmo no decide cuántos grupos hay; nosotros le decimos cuántos buscar.</p></li>
+<li><p><strong>Sensible a la inicialización</strong> — como los centroides arrancan en posiciones aleatorias, dos ejecuciones pueden dar resultados distintos. (Solución: correr k-means varias veces y quedarse con el mejor resultado; R lo hace por defecto con <code>nstart</code>.)</p></li>
+<li><p><strong>Asume clusters esféricos y de tamaño similar</strong> — si los grupos reales tienen formas alargadas o tamaños muy desiguales, k-means puede agrupar mal.</p></li>
+<li><p><strong>Sensible a outliers</strong> — un punto extremo jala el centroide hacia sí y distorsiona el cluster.</p></li>
+<li><p><strong>Solo variables numéricas</strong> — k-means calcula distancias, que requieren números. Las variables categóricas necesitan tratamiento previo.</p></li>
+</ol>
+</div>
+</div>
+<p>Estas limitaciones no invalidan k-means — lo hacen el algoritmo más usado en la práctica precisamente porque es simple, rápido y fácil de interpretar. Pero debemos tenerlas presentes al leer los resultados.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="cuántos-clusters-elegir-k" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> ¿Cuántos clusters? Elegir k</h1>
+<p>Este es el paso más importante y donde más se equivocan los principiantes. No hay una respuesta “correcta” automática; hay métodos que nos orientan y un criterio final de negocio.</p>
+<section id="método-del-codo-elbow-method" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="método-del-codo-elbow-method"><span class="header-section-number">4.1</span> Método del codo (<em>elbow method</em>)</h2>
+<p>La idea es sencilla: probamos k-means para k = 2, 3, 4, 5, … y graficamos cómo cambia la compactación (WCSS) a medida que aumentamos k.</p>
+<p><strong>¿Cómo se lee el gráfico del codo?</strong></p>
+<ul>
+<li>El eje X muestra el número de clusters (k).</li>
+<li>El eje Y muestra la WCSS (within-cluster sum of squares) — qué tan “apretados” están los puntos dentro de cada grupo.</li>
+<li>A medida que k crece, la WCSS siempre baja (más grupos = más compactos).</li>
+<li>El “codo” es el punto donde <strong>agregar un cluster más ya no mejora mucho</strong> la compactación.</li>
+</ul>
+<p>Piensa en una analogía: si tienes 100 paquetes y 1 bodega, todo queda lejos. Con 2 bodegas, mejora mucho. Con 3, mejora un poco más. Con 50, apenas cambia. El “codo” es donde la mejora marginal deja de justificar la complejidad.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Ojo:</strong> el codo no siempre es claro. A veces la curva baja suavemente sin un quiebre obvio. En esos casos, el elbow method da una orientación, pero no una respuesta definitiva.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="método-de-la-silueta-silhouette" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="método-de-la-silueta-silhouette"><span class="header-section-number">4.2</span> Método de la silueta (<em>silhouette</em>)</h2>
+<p>La silueta mide <strong>qué tan bien clasificado está cada punto</strong>: ¿está más cerca de su propio cluster que del cluster vecino más cercano?</p>
+<p><strong>¿Cómo se interpreta la silueta?</strong></p>
+<p>Para cada observación, el coeficiente de silueta va de <strong>-1 a +1</strong>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Valor</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Cercano a <strong>+1</strong></td>
+<td>El punto está bien asignado — muy cerca de su cluster, lejos de los demás</td>
+</tr>
+<tr class="even">
+<td>Cercano a <strong>0</strong></td>
+<td>El punto está en la frontera entre dos clusters</td>
+</tr>
+<tr class="odd">
+<td><strong>Negativo</strong></td>
+<td>El punto probablemente está en el cluster equivocado</td>
+</tr>
+</tbody>
+</table>
+<p>Para elegir k, calculamos la <strong>silueta promedio</strong> para cada valor de k y elegimos el k que la maximiza. A diferencia del codo, aquí <strong>sí hay un máximo claro</strong> (el k con mejor silueta promedio).</p>
+<hr>
+</section>
+<section id="el-criterio-final-interpretabilidad" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="el-criterio-final-interpretabilidad"><span class="header-section-number">4.3</span> El criterio final: interpretabilidad</h2>
+<p>Los métodos cuantitativos (elbow, silhouette) nos dan un rango razonable de k. Pero la decisión final debe considerar:</p>
+<p><strong>¿Los clusters tienen sentido de negocio?</strong></p>
+<p>Hazte estas preguntas para cada agrupamiento candidato:</p>
+<ol type="1">
+<li><p><strong>¿Puedo nombrar cada cluster?</strong> — Si no puedes ponerle un nombre descriptivo (“clientes frecuentes de bajo monto”, “compradores esporádicos de alto ticket”), probablemente no es un buen agrupamiento.</p></li>
+<li><p><strong>¿Puedo accionar sobre cada cluster?</strong> — ¿Puedo diseñar una estrategia diferente para cada segmento? Si dos clusters recibirían la misma acción, probablemente deberían ser uno solo.</p></li>
+<li><p><strong>¿El tamaño de los clusters es razonable?</strong> — Un cluster con 3 clientes de 10,000 probablemente es ruido, no un segmento accionable.</p></li>
+<li><p><strong>¿Es estable?</strong> — Si corro el algoritmo otra vez y los grupos cambian drásticamente, la segmentación no es confiable.</p></li>
+</ol>
+<p><strong>Regla práctica:</strong> si el elbow sugiere k = 4 y la silueta sugiere k = 3, prueba ambos y elige el que genere los segmentos más claros y accionables.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="perfilamiento-de-números-a-decisiones" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Perfilamiento: de números a decisiones</h1>
+<p>Una vez asignados los clusters, el trabajo analítico <strong>apenas comienza</strong>. El paso más valioso es <strong>perfilar</strong> cada segmento: describir qué lo caracteriza y qué lo diferencia de los demás.</p>
+<section id="cómo-se-perfila-un-cluster" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="cómo-se-perfila-un-cluster"><span class="header-section-number">5.1</span> ¿Cómo se perfila un cluster?</h2>
+<p>El perfilamiento típico incluye:</p>
+<ol type="1">
+<li><strong>Tabla de promedios (o medianas) por cluster</strong> — para cada variable, ¿cuál es el valor típico en cada segmento?</li>
+<li><strong>Tamaño de cada cluster</strong> — ¿cuántas observaciones tiene? ¿Es un segmento grande o un nicho?</li>
+<li><strong>Visualizaciones comparativas</strong> — boxplots o barras que muestren cómo se distribuye cada variable en cada cluster.</li>
+</ol>
+<div class="callout-key">
+<p><strong>Ejemplo de tabla de perfilamiento</strong></p>
+<p>Supongamos que segmentamos clientes usando tres variables: monto promedio de compra, frecuencia mensual y recencia (días desde la última compra).</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Cluster</th>
+<th>Nombre sugerido</th>
+<th>Monto promedio</th>
+<th>Frecuencia</th>
+<th>Recencia (días)</th>
+<th>Tamaño</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Frecuentes de bajo monto</td>
+<td>$45,000</td>
+<td>8.2</td>
+<td>5</td>
+<td>4,200</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Esporádicos de alto ticket</td>
+<td>$320,000</td>
+<td>1.1</td>
+<td>45</td>
+<td>1,800</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Inactivos</td>
+<td>$28,000</td>
+<td>0.3</td>
+<td>120</td>
+<td>4,000</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Lectura:</strong> El cluster 1 compra seguido pero montos pequeños → candidatos a programa de lealtad con upgrades. El cluster 2 compra poco pero gasta mucho → mantener relación personalizada. El cluster 3 lleva mucho sin comprar → campaña de reactivación o aceptar como perdidos.</p>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Los centroides son promedios, no descripciones exactas</strong></p>
+<p>El centroide de un cluster es el punto promedio del grupo. No todos los miembros del cluster son idénticos al centroide. Siempre revisa la <strong>dispersión</strong> dentro de cada cluster (usando boxplots o desviaciones estándar) para saber qué tan homogéneo es realmente el segmento.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="nombrar-los-clusters" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="nombrar-los-clusters"><span class="header-section-number">5.2</span> Nombrar los clusters</h2>
+<p>Los algoritmos devuelven etiquetas numéricas (“Cluster 1”, “Cluster 2”…). Tu trabajo como analista es <strong>traducir esos números a nombres de negocio</strong>. Esto es lo que hace que la segmentación sea comunicable y accionable.</p>
+<p>Buenos nombres son cortos, descriptivos y orientados a la acción:</p>
+<ul>
+<li>“VIP dormidos” (alto gasto histórico, inactivos recientemente)</li>
+<li>“Cazadores de ofertas” (compran solo en descuentos, sensibles a precio)</li>
+<li>“Nuevos exploradores” (clientes recientes, pocas compras, variedad de categorías)</li>
+</ul>
+<p>Malos nombres son los que no dicen nada: “Grupo A”, “Cluster grande”, “Los del medio”.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="alternativas-a-k-means-alto-nivel" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Alternativas a k-means (alto nivel)</h1>
+<p>k-means es el punto de partida, pero no la única opción. Conviene conocer dos alternativas para saber cuándo podrían ser más apropiadas:</p>
+<div class="callout-key">
+<p><strong>Clustering jerárquico</strong></p>
+<ul>
+<li>No requiere elegir k de antemano — construye una jerarquía completa de agrupamientos que se puede “cortar” a cualquier nivel.</li>
+<li>Produce un <strong>dendrograma</strong>: un árbol que muestra cómo se fusionan (o dividen) los grupos progresivamente.</li>
+<li>Útil cuando quieres explorar <strong>la estructura a distintos niveles de granularidad</strong> (¿2 macro-segmentos o 6 micro-segmentos?).</li>
+<li>Desventaja: más lento con datasets grandes.</li>
+</ul>
+</div>
+<div class="callout-key">
+<p><strong>DBSCAN (opcional)</strong></p>
+<ul>
+<li>Encuentra clusters de <strong>forma irregular</strong> (no solo esféricos como k-means).</li>
+<li>Identifica <strong>outliers automáticamente</strong> — los puntos que no pertenecen a ningún cluster.</li>
+<li>No requiere especificar k, pero requiere otros parámetros (radio de vecindad y mínimo de puntos).</li>
+<li>Útil cuando sospechas que los grupos tienen formas no convencionales o hay mucho ruido.</li>
+</ul>
+</div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Método</th>
+<th>Elige k antes</th>
+<th>Forma de clusters</th>
+<th>Manejo de outliers</th>
+<th>Escalabilidad</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>k-means</td>
+<td>Sí</td>
+<td>Esféricos</td>
+<td>Sensible (los absorbe)</td>
+<td>Muy buena</td>
+</tr>
+<tr class="even">
+<td>Jerárquico</td>
+<td>No (corta después)</td>
+<td>Flexible</td>
+<td>Moderado</td>
+<td>Limitada en big data</td>
+</tr>
+<tr class="odd">
+<td>DBSCAN</td>
+<td>No</td>
+<td>Arbitraria</td>
+<td>Excelente (los separa)</td>
+<td>Buena</td>
+</tr>
+</tbody>
+</table>
+<p>Para este curso, <strong>k-means es el algoritmo central</strong>. Las alternativas son contexto para que sepas que existen y puedas mencionarlas si el problema lo amerita.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-flujo-completo-de-un-proyecto-de-segmentación" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> El flujo completo de un proyecto de segmentación</h1>
+<section id="pipeline-de-segmentación-paso-a-paso" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="pipeline-de-segmentación-paso-a-paso"><span class="header-section-number">7.1</span> Pipeline de segmentación (paso a paso)</h2>
+<ol type="1">
+<li><p><strong>Definir la pregunta de negocio</strong> — ¿Qué queremos segmentar y para qué? (clientes para personalizar campañas, productos para optimizar inventario, zonas para asignar vendedores…)</p></li>
+<li><p><strong>Seleccionar y preparar variables</strong> — Elegir solo las variables relevantes para la pregunta. Escalar las numéricas. Excluir IDs y variables categóricas no transformadas.</p></li>
+<li><p><strong>Estimar k-means para varios valores de k</strong> — Típicamente k = 2, 3, 4, …, 8 o 10.</p></li>
+<li><p><strong>Evaluar con elbow y silhouette</strong> — Identificar el rango razonable de k.</p></li>
+<li><p><strong>Elegir k final con criterio de negocio</strong> — Perfilar los candidatos y seleccionar el que produzca segmentos nombrables y accionables.</p></li>
+<li><p><strong>Asignar etiquetas y perfilar</strong> — Tabla de promedios por cluster, tamaños, visualizaciones.</p></li>
+<li><p><strong>Comunicar y recomendar</strong> — Nombrar los segmentos, describir sus características y proponer acciones diferenciadas para cada uno.</p></li>
+</ol>
+</section>
+<section id="conexión-con-el-proyecto-final" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="conexión-con-el-proyecto-final"><span class="header-section-number">7.2</span> Conexión con el proyecto final</h2>
+<div class="callout-connect">
+<p>El Caso C del proyecto final es exactamente un problema de segmentación. Seguirás este pipeline completo: desde elegir variables y escalar, hasta nombrar los clusters y proponer estrategias diferenciadas. La calidad de tu entrega se medirá por la <strong>interpretabilidad y accionabilidad</strong> de los segmentos, no por la complejidad del algoritmo.</p>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="errores-frecuentes" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Errores frecuentes</h1>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Errores que debes evitar</strong></p>
+<ol type="1">
+<li><p><strong>No escalar las variables</strong> — El error más común. Si no escalas, el clustering refleja diferencias de unidades, no de comportamiento.</p></li>
+<li><p><strong>Elegir k solo por el codo</strong> — El codo es una guía, no una verdad. Siempre valida con silueta y, sobre todo, con interpretabilidad.</p></li>
+<li><p><strong>Reportar clusters sin perfilarlos</strong> — Decir “encontré 4 clusters” sin describir qué caracteriza a cada uno es inútil para la toma de decisiones.</p></li>
+<li><p><strong>Incluir variables irrelevantes</strong> — Si segmentas clientes para marketing, incluir el código postal como variable numérica distorsiona el resultado. Selecciona variables que tengan sentido para la pregunta.</p></li>
+<li><p><strong>Olvidar que los clusters no son verdades absolutas</strong> — Son una simplificación útil. Un cliente asignado al cluster 2 puede estar en la frontera con el cluster 3. No trates las asignaciones como certezas.</p></li>
+<li><p><strong>Interpretar el centroide como “el cliente típico”</strong> — El centroide es un promedio, y los promedios pueden ser engañosos. Siempre revisa la dispersión dentro de cada cluster.</p></li>
+</ol>
+</div>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="preguntas-de-comprensión" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Preguntas de comprensión</h1>
+<div class="callout-practice">
+<p><strong>1. Supervisado vs.&nbsp;no supervisado</strong></p>
+<p>Un banco tiene datos de 50,000 clientes con variables como saldo promedio, número de productos contratados, antigüedad y frecuencia de transacciones digitales. El banco quiere identificar perfiles de clientes para diseñar ofertas personalizadas, pero <strong>no tiene una variable que diga a qué segmento pertenece cada cliente</strong>.</p>
+<p>¿Esto es un problema supervisado o no supervisado? ¿Por qué?</p>
+<p><strong>Respuesta esperada:</strong> No supervisado, porque no hay una variable de resultado (<em>target</em>) que indique los grupos. El algoritmo debe descubrirlos a partir de los patrones en los datos.</p>
+</div>
+<div class="callout-practice">
+<p><strong>2. Escalamiento</strong></p>
+<p>Un analista aplica k-means a clientes usando dos variables: ingreso anual (rango: $10,000,000 – $200,000,000) y número de compras mensuales (rango: 1 – 30). Los clusters resultantes separan casi perfectamente por ingreso, ignorando la frecuencia de compra.</p>
+<p>¿Qué salió mal y cómo se corrige?</p>
+<p><strong>Respuesta esperada:</strong> No escaló las variables. El ingreso tiene un rango miles de veces mayor que el número de compras, así que domina completamente el cálculo de distancias. Se corrige estandarizando ambas variables antes de aplicar k-means.</p>
+</div>
+<div class="callout-practice">
+<p><strong>3. Interpretación de clusters</strong></p>
+<p>Después de aplicar k-means con k = 3 a una base de clientes, obtienes esta tabla de perfilamiento:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Cluster</th>
+<th>Monto promedio</th>
+<th>Frecuencia mensual</th>
+<th>Recencia (días)</th>
+<th>N clientes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>$380,000</td>
+<td>1.2</td>
+<td>60</td>
+<td>2,100</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>$52,000</td>
+<td>7.5</td>
+<td>4</td>
+<td>5,400</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>$15,000</td>
+<td>0.4</td>
+<td>180</td>
+<td>2,500</td>
+</tr>
+</tbody>
+</table>
+<ol type="a">
+<li>Propón un nombre de negocio para cada cluster.</li>
+<li>Sugiere una acción diferente para cada segmento.</li>
+</ol>
+<p><strong>Respuestas esperadas:</strong></p>
+<ol type="a">
+<li><p>Cluster 1: “Alto ticket esporádico” o “Premium dormido”. Cluster 2: “Frecuente de bajo monto” o “Leal cotidiano”. Cluster 3: “Inactivo” o “En riesgo de abandono”.</p></li>
+<li><p>Cluster 1: comunicación personalizada, acceso anticipado a nuevos productos. Cluster 2: programa de lealtad, descuentos por volumen o upgrades. Cluster 3: campaña de reactivación con incentivo; si no responde, reclasificar como perdido.</p></li>
+</ol>
+</div>
+<hr>
+<section id="material-adicional-opcional" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="material-adicional-opcional"><span class="header-section-number">9.1</span> Material adicional (opcional)</h2>
+<p>Si quieres profundizar:</p>
+<ul>
+<li><strong>An Introduction to Statistical Learning (ISLR)</strong> — Capítulo 12 (Unsupervised Learning): explicación accesible de k-means y clustering jerárquico con ejemplos visuales — <a href="https://www.statlearning.com">disponible gratis online</a></li>
+<li><strong>from-data-to-viz.com</strong> — para elegir visualizaciones cuando perfilen clusters → <a href="https://www.data-to-viz.com">https://www.data-to-viz.com</a></li>
+<li><strong>Artículo de Harvard Business Review sobre segmentación de clientes</strong> — perspectiva de negocio sobre cómo usar clusters para estrategia comercial</li>
+</ul>
+<p>Para esta semana, el material de preclase es suficiente. En clase practicaremos con datos reales paso a paso.</p>
+<!-- Panel Environment -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">📦 Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">🔄</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">▲</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
+  </div>
+</div>
+
+<script type="module">
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
+};
+
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Env panel error:', e);
+    return [];
+  }
+}
+
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+function moveWebRStatus() {
+  const anchor = document.getElementById('webr-status-anchor');
+  const statusArea = document.getElementById('qwebr-status-message-area');
+  if (anchor && statusArea) {
+    const wrapper = statusArea.closest('.quarto-title-meta');
+    if (wrapper) {
+      wrapper.style.display = 'inline';
+      wrapper.style.fontSize = '13px';
+      wrapper.style.marginLeft = '30px';
+      anchor.parentNode.insertBefore(wrapper, anchor);
+    }
+  }
+}
+
+async function init() {
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
+  moveWebRStatus();
+
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-10_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

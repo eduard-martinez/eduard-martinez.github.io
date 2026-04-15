@@ -1,0 +1,302 @@
+---
+title: "Práctica guiada — Semana 10: Clustering con Spotify"
+subtitle: "Introducción al Business Analytics · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<!--=================-->
+<!--=================-->
+# Aplicación guiada: segmentando canciones en Spotify
+
+**Contexto de negocio:** Una plataforma de streaming quiere crear listas de reproducción automáticas con personalidad definida: "para entrenar", "ambiente tranquilo", "energía máxima". Para eso necesita agrupar canciones según sus **características de audio** — no el género declarado (subjetivo), sino variables cuantificables. Nuestro trabajo es aplicar k-means, interpretar los segmentos y proponer nombres accionables para cada grupo.
+
+---
+
+## Paso 1 — Preparar el entorno
+
+```{webr-r}
+#| warning: false
+#| message: false
+
+## Limpiar entorno / Clean environment
+rm(list = ls())
+
+## Cargar paquetes / Load packages
+require(dplyr)    # manipulación de datos / data wrangling
+require(ggplot2)  # visualización / visualization
+require(skimr)    # diagnóstico rápido / quick diagnostics
+require(purrr)    # iteración funcional / functional iteration
+```
+
+---
+
+## Paso 2 — Cargar los datos
+
+```{webr-r}
+#| warning: false
+#| message: false
+
+## Cargar datos / Load data
+# TODO: reemplazar con URL definitiva
+source("https://raw.githubusercontent.com/ba-in-r/01-slides/main/week-08/data/prepare-data.R")
+
+## Verificar objetos en memoria / Check objects in memory
+ls()
+```
+
+```{webr-r}
+## Dimensiones y nombres de columnas / Dimensions and column names
+nrow(spotify)
+ncol(spotify)
+colnames(spotify)
+```
+
+```{webr-r}
+## Diagnóstico completo / Full diagnostic
+skim(spotify)
+```
+
+::: {.callout-key}
+**¿Qué buscamos en el `skim()`?**
+
+Fíjate en los rangos de las variables que usaremos: `tempo` va de ~40 a ~220 BPM, `danceability` de 0 a 1. Esa diferencia de escala es exactamente la razón por la que escalar es obligatorio antes de k-means.
+:::
+
+---
+
+## Paso 3 — Seleccionar variables de clustering
+
+No todas las columnas son útiles para agrupar. Usamos solo las **características de audio cuantitativas**.
+
+```{webr-r}
+## Seleccionar variables de audio / Select audio features
+spotify_features <- select(.data = spotify,
+                            danceability,
+                            energy,
+                            acousticness,
+                            tempo)
+
+## Verificar / Verify
+head(spotify_features)
+```
+
+::: {.callout-key}
+**¿Por qué estas cuatro variables?**
+
+- `danceability` — qué tan bailable (0–1)
+- `energy` — intensidad percibida (0–1)
+- `acousticness` — probabilidad de ser acústica (0–1)
+- `tempo` — velocidad en BPM
+
+Capturan dimensiones distintas del sonido. `streams` queda fuera: mide popularidad, no estilo musical.
+:::
+
+---
+
+## Paso 4 — Escalar las variables
+
+`scale()` lleva cada variable a media 0 y desviación estándar 1, eliminando el efecto de las unidades.
+
+```{webr-r}
+## Escalar / Scale
+spotify_scaled <- scale(spotify_features)
+
+## Verificar: mean ≈ 0, sd ≈ 1 / Verify: mean ≈ 0, sd ≈ 1
+skim(spotify_scaled)
+```
+
+```{webr-r}
+## Dispersión previa al clustering / Pre-clustering scatter
+spotify_scaled_df <- as.data.frame(spotify_scaled)
+
+ggplot(spotify_scaled_df, aes(x = tempo, y = danceability)) +
+  geom_point(alpha = 0.3, color = "#1F4E79") +
+  theme_minimal() +
+  labs(title = "Spotify — variables escaladas",
+       x = "Tempo", y = "Danceability")
+```
+
+---
+
+## Paso 5 — Método del codo para elegir k
+
+Probamos k = 1 a 8 y graficamos cómo cae el WCSS. Buscamos el "codo": donde agregar un cluster más ya no mejora mucho.
+
+```{webr-r}
+## Fijar semilla / Set seed
+set.seed(2025)
+
+## Calcular WSS para k = 1:8 / Calculate WSS for k = 1:8
+valores_k  <- 1:8
+wss_por_k  <- map_dbl(valores_k, ~ kmeans(spotify_scaled,
+                                           centers = .x,
+                                           nstart  = 20)$tot.withinss)
+## Organizar resultados / Organize results
+elbow_df <- data.frame(k = valores_k, wss = wss_por_k)
+elbow_df
+```
+
+```{webr-r}
+## Gráfico del codo / Elbow plot
+ggplot(elbow_df, aes(x = k, y = wss)) +
+  geom_line(color = "#1F4E79") +
+  geom_point(color = "#E87722", size = 3) +
+  scale_x_continuous(breaks = 1:8) +
+  theme_minimal() +
+  labs(title = "Método del codo — Spotify",
+       x = "Número de clusters (k)",
+       y = "WSS")
+```
+
+::: {.callout-key}
+**¿Cómo leer el codo?**
+
+El "codo" es donde la curva deja de caer abruptamente. Antes de ese punto: cada cluster adicional aporta mucho. Después: mejora marginal. ¿En qué k identificas el quiebre?
+:::
+
+---
+
+## Paso 6 — Ajustar k-means
+
+```{webr-r}
+## Fijar semilla / Set seed
+set.seed(2025)
+
+## Ajustar modelo / Fit model
+## Reemplaza centers con el k que identificaste en el codo
+km_spotify <- kmeans(spotify_scaled, centers = 4, nstart = 30)
+
+## Resumen / Summary
+km_spotify
+```
+
+::: {.callout-key}
+**Qué leer en el output de `kmeans()`:**
+
+- `Cluster sizes` — tamaño de cada grupo. Un cluster con 3 observaciones de 5,000 no es accionable.
+- `Cluster means` — los centroides: valor promedio de cada variable por cluster. Aquí está la clave para perfilar.
+- `Within cluster sum of squares` — compactación de cada grupo.
+:::
+
+---
+
+##==: Paso 7 — Agregar clusters al dataset original
+
+```{webr-r}
+## Agregar columna de cluster / Add cluster column
+spotify_clusters <- mutate(.data = spotify,
+                            cluster = factor(km_spotify$cluster))
+
+## Distribución por cluster / Count per cluster
+table(spotify_clusters$cluster)
+```
+
+---
+
+## Paso 8 — Visualizar los clusters
+
+```{webr-r}
+## Dispersión coloreada por cluster / Cluster scatterplot
+ggplot(spotify_clusters, aes(x = tempo, y = danceability, color = cluster)) +
+  geom_point(alpha = 0.4, size = 1.5) +
+  theme_minimal() +
+  labs(title = "Clusters de canciones — Spotify",
+       x = "Tempo (BPM)", y = "Danceability", color = "Cluster")
+```
+
+::: {.callout-warning}
+Este gráfico muestra solo dos de las cuatro variables usadas en el clustering. Puede haber superposición aparente entre clusters que en realidad están separados en las otras dimensiones.
+:::
+
+---
+
+## Paso 9 — Perfilar los clusters
+
+El perfilamiento es el paso más importante: ¿qué caracteriza a cada grupo y en qué se diferencia de los demás?
+
+```{webr-r}
+## Tabla de perfilamiento: promedios por cluster / Profiling table
+perfil_clusters <- summarise(.data = spotify_clusters,
+                              danceability_prom = mean(danceability),
+                              energy_prom       = mean(energy),
+                              acousticness_prom = mean(acousticness),
+                              tempo_prom        = mean(tempo),
+                              streams_prom      = mean(streams),
+                              n_canciones       = n(),
+                              .by = cluster)
+perfil_clusters
+```
+
+```{webr-r}
+## Canción más escuchada por cluster / Top song per cluster
+top_por_cluster <- summarise(.data = spotify_clusters,
+                              top_cancion = track_name[which.max(streams)],
+                              top_artista = artist[which.max(streams)],
+                              max_streams = max(streams),
+                              .by = cluster)
+top_por_cluster
+```
+
+::: {.callout-key}
+**¿Cómo leer la tabla de perfilamiento?**
+
+Compara las columnas fila por fila. Busca los contrastes más nítidos: ¿qué cluster tiene la `energy_prom` más alta?, ¿cuál tiene `acousticness_prom` cerca de 1?, ¿cuál combina alto `danceability` con alto `tempo`? Los nombres de negocio emergen de esos contrastes.
+:::
+
+---
+
+## Paso 10 — De números a nombres de negocio
+
+::: {.callout-practice}
+**Actividad en clase**
+
+Con los datos del Paso 9, completa esta tabla para cada cluster:
+
+| Cluster | Característica principal | Nombre de lista sugerido | Momento de uso |
+|---|---|---|---|
+| 1 | | | |
+| 2 | | | |
+| 3 | | | |
+| 4 | | | |
+
+**Criterio de calidad:** un buen nombre es específico y accionable ("Tarde acústica de trabajo", "Cardio intenso"). Un mal nombre es genérico ("Grupo A", "Música tranquila").
+:::
+
+---
+
+## Checklist
+
+Al finalizar esta práctica, debes poder:
+
+- [ ] Justificar por qué se excluye `streams` de las variables de clustering
+- [ ] Explicar qué hace `scale()` y verificar que funcionó con `skim()`
+- [ ] Leer el gráfico del codo e identificar el k razonable
+- [ ] Interpretar el output de `kmeans()`: tamaños, centroides, compactación
+- [ ] Construir la tabla de perfilamiento y leer los contrastes entre clusters
+- [ ] Proponer un nombre de negocio accionable para cada cluster
+
+## Preguntas de comprensión
+
+**1.** Al ejecutar el codo obtienes: k=1→8500, k=2→5200, k=3→3800, k=4→3100, k=5→2900, k=6→2800. ¿Qué k recomendarías y por qué?
+
+<details>
+<summary>Ver respuesta</summary>
+k=3 o k=4. La caída más fuerte ocurre de k=1 a k=3 (−4700). De k=4 en adelante la mejora es marginal (~200 por paso). El codo está en k=3 o k=4; la decisión final depende de si los clusters tienen sentido de negocio.
+</details>
+
+**2.** El Cluster 2 tiene `energy_prom = 0.87`, `danceability_prom = 0.82`, `acousticness_prom = 0.04`, `tempo_prom = 148`. ¿Qué nombre propondrías y para qué momento?
+
+<details>
+<summary>Ver respuesta</summary>
+Alta energía, muy bailable, casi no acústico (electrónico), ritmo rápido (148 BPM). Nombre: "Cardio máximo", "Pre-partido" o similar. Momento: ejercicio intenso, fiesta. Debe justificarse cada dimensión del perfil.
+</details>
+
+**3.** Un compañero dice que no hay que escalar porque "así los datos reflejan la realidad". ¿Cómo le responderías?
+
+<details>
+<summary>Ver respuesta</summary>
+Sin escalar, `tempo` (rango 40–220) domina completamente a `danceability` (rango 0–1). El algoritmo agrupará por tempo e ignorará las demás variables. Escalar no distorsiona los datos: los pone en escala comparable para que todas las variables tengan igual peso en el cálculo de distancias.
+</details>
