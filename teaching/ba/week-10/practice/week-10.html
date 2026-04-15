@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -27,14 +27,15 @@ ul.task-list li input[type="checkbox"] {
 <script src="week-10_files/libs/clipboard/clipboard.min.js"></script>
 <script src="week-10_files/libs/quarto-html/quarto.js" type="module"></script>
 <script src="week-10_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-10_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="week-10_files/libs/quarto-html/popper.min.js"></script>
 <script src="week-10_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="week-10_files/libs/quarto-html/anchor.min.js"></script>
 <link href="week-10_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="week-10_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="week-10_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="week-10_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="week-10_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="week-10_files/libs/bootstrap/bootstrap-e6bb25874def5e3c119f13f2169c6013.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="week-10_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <style>html{ scroll-behavior: smooth; }</style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -2190,13 +2191,14 @@ Sin escalar, <code>tempo</code> (rango 40–220) domina completamente a <code>da
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
