@@ -104,6 +104,11 @@ credito_check <- read.csv("credito_clasificacion.csv")
 nrow(credito_check)
 colnames(credito_check)
 
+## clean
+rm("antiguedad_apr","antiguedad_rec","credito_check","credito_raw","decision_apr","decision_rec","deuda_apr",    
+     "deuda_rec","edad_apr","edad_rec","historial_apr","historial_rec","idx_shuffle","ingreso_apr",
+     "ingreso_rec","n_aprobados","n_rechazados","n_total")
+
 ## ============================================================
 ##  FIN DEL SCRIPT
 ##  El archivo credito_clasificacion.csv queda listo para subir
