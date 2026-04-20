@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Unidad 8 - Árboles de Clasificación</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="week-11_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-11_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-11_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-11_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-11_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-11_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-11_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-11_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-11_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-11_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-11_files/libs/bootstrap/bootstrap-e6bb25874def5e3c119f13f2169c6013.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#objetivo-de-la-semana" id="toc-objetivo-de-la-semana" class="nav-link active" data-scroll-target="#objetivo-de-la-semana"><span class="header-section-number">1</span> Objetivo de la semana</a>
+  <ul class="collapse">
+  <li><a href="#lo-que-cubriremos" id="toc-lo-que-cubriremos" class="nav-link" data-scroll-target="#lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</a></li>
+  </ul></li>
+  <li><a href="#la-intuición-el-árbol-como-serie-de-preguntas" id="toc-la-intuición-el-árbol-como-serie-de-preguntas" class="nav-link" data-scroll-target="#la-intuición-el-árbol-como-serie-de-preguntas"><span class="header-section-number">2</span> La intuición: el árbol como serie de preguntas</a>
+  <ul class="collapse">
+  <li><a href="#vocabulario-mínimo" id="toc-vocabulario-mínimo" class="nav-link" data-scroll-target="#vocabulario-mínimo"><span class="header-section-number">2.1</span> Vocabulario mínimo</a></li>
+  </ul></li>
+  <li><a href="#árbol-de-clasificación-predecir-una-categoría" id="toc-árbol-de-clasificación-predecir-una-categoría" class="nav-link" data-scroll-target="#árbol-de-clasificación-predecir-una-categoría"><span class="header-section-number">3</span> Árbol de clasificación: predecir una categoría</a>
+  <ul class="collapse">
+  <li><a href="#cómo-aprende-el-árbol" id="toc-cómo-aprende-el-árbol" class="nav-link" data-scroll-target="#cómo-aprende-el-árbol"><span class="header-section-number">3.1</span> Cómo aprende el árbol</a></li>
+  <li><a href="#un-árbol-con-profundidad-1" id="toc-un-árbol-con-profundidad-1" class="nav-link" data-scroll-target="#un-árbol-con-profundidad-1"><span class="header-section-number">3.2</span> Un árbol con profundidad 1</a></li>
+  <li><a href="#qué-pasa-si-el-árbol-es-más-profundo" id="toc-qué-pasa-si-el-árbol-es-más-profundo" class="nav-link" data-scroll-target="#qué-pasa-si-el-árbol-es-más-profundo"><span class="header-section-number">3.3</span> ¿Qué pasa si el árbol es más profundo?</a></li>
+  </ul></li>
+  <li><a href="#explóralo-tú-mismo-árbol-de-clasificación-interactivo" id="toc-explóralo-tú-mismo-árbol-de-clasificación-interactivo" class="nav-link" data-scroll-target="#explóralo-tú-mismo-árbol-de-clasificación-interactivo"><span class="header-section-number">4</span> Explóralo tú mismo: árbol de clasificación interactivo</a></li>
+  <li><a href="#la-matriz-de-confusión-leer-un-modelo-de-clasificación" id="toc-la-matriz-de-confusión-leer-un-modelo-de-clasificación" class="nav-link" data-scroll-target="#la-matriz-de-confusión-leer-un-modelo-de-clasificación"><span class="header-section-number">5</span> La matriz de confusión: leer un modelo de clasificación</a>
+  <ul class="collapse">
+  <li><a href="#la-tabla-22" id="toc-la-tabla-22" class="nav-link" data-scroll-target="#la-tabla-22"><span class="header-section-number">5.1</span> La tabla 2×2</a></li>
+  <li><a href="#las-métricas-que-salen-de-la-matriz" id="toc-las-métricas-que-salen-de-la-matriz" class="nav-link" data-scroll-target="#las-métricas-que-salen-de-la-matriz"><span class="header-section-number">5.2</span> Las métricas que salen de la matriz</a></li>
+  </ul></li>
+  <li><a href="#del-resultado-al-negocio-un-ejemplo-completo" id="toc-del-resultado-al-negocio-un-ejemplo-completo" class="nav-link" data-scroll-target="#del-resultado-al-negocio-un-ejemplo-completo"><span class="header-section-number">6</span> Del resultado al negocio: un ejemplo completo</a>
+  <ul class="collapse">
+  <li><a href="#material-adicional-opcional" id="toc-material-adicional-opcional" class="nav-link" data-scroll-target="#material-adicional-opcional"><span class="header-section-number">6.1</span> Material adicional (opcional)</a></li>
+  <li><a href="#checklist-de-preclase" id="toc-checklist-de-preclase" class="nav-link" data-scroll-target="#checklist-de-preclase"><span class="header-section-number">6.2</span> Checklist de preclase</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">6.3</span> Preguntas de comprensión</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 8 - Árboles de Clasificación</h1>
+<p class="subtitle lead">Introducción al Business Analytics · Semana 11 · 06278-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a> <span id="webr-status-anchor"></span></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="objetivo-de-la-semana" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Objetivo de la semana</h1>
+<p>El foco está en <strong>clasificación supervisada</strong>: dado un conjunto de datos con una etiqueta conocida (aprobado/rechazado, churn/activo, precio alto/bajo), aprender a construir e interpretar un árbol de clasificación y evaluar qué tan bien predice casos nuevos. El énfasis está en <strong>leer lo que el modelo dice y conectarlo con una decisión de negocio</strong>, no en el código.</p>
+<section id="lo-que-cubriremos" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</h2>
+<ul>
+<li>Intuición del árbol de decisión: preguntas que dividen datos<br>
+</li>
+<li>Cómo el árbol aprende: impureza, divisiones y hojas<br>
+</li>
+<li>Cómo leer un árbol de clasificación: nodos, ramas y predicciones<br>
+</li>
+<li>La matriz de confusión: TP, FP, TN, FN<br>
+</li>
+<li>Métricas: accuracy, precisión y recall<br>
+</li>
+<li>Cuándo importa más cada métrica</li>
+</ul>
+<div class="callout-key">
+<p><strong>Conexión con semanas anteriores</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Semana 09</th>
+<th>Semana 10</th>
+<th>Semana 11</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Pipeline ML, train/test, métricas</td>
+<td>Clustering (no supervisado)</td>
+<td>Árbol de clasificación (supervisado)</td>
+</tr>
+<tr class="even">
+<td>“¿Tenemos etiqueta de resultado?”</td>
+<td>Sin etiqueta → grupos</td>
+<td>Con etiqueta → predicción de categoría</td>
+</tr>
+<tr class="odd">
+<td>Concepto de accuracy</td>
+<td>Sin métrica de acierto/fallo</td>
+<td>Accuracy, precisión, recall en la práctica</td>
+</tr>
+<tr class="even">
+<td>Leakage, overfitting</td>
+<td>Elbow, silhouette</td>
+<td>Overfitting según profundidad del árbol</td>
+</tr>
+</tbody>
+</table>
+<p>Esta semana tocamos el primer algoritmo <strong>supervisado</strong> del curso: el modelo aprende de ejemplos pasados con etiqueta para predecir casos nuevos. A diferencia del clustering, aquí sí sabemos si el modelo se equivocó.</p>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="la-intuición-el-árbol-como-serie-de-preguntas" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> La intuición: el árbol como serie de preguntas</h1>
+<p>Antes de cualquier fórmula, piensa en cómo toma decisiones un buen analista de crédito. Cuando alguien pide un préstamo, el analista no aplica una fórmula matemática ciega: hace preguntas en secuencia.</p>
+<blockquote class="blockquote">
+<p><em>“¿Tiene ingresos mensuales superiores a 3 millones?”</em><br>
+→ No: rechazar (alto riesgo).<br>
+→ Sí: siguiente pregunta.</p>
+<p><em>“¿Su historial crediticio es positivo?”</em><br>
+→ No: condicional, pedir garantías.<br>
+→ Sí: <strong>aprobar</strong>.</p>
+</blockquote>
+<p>Eso es exactamente un <strong>árbol de clasificación</strong>: una serie de preguntas binarias encadenadas que terminan en la predicción de una categoría.</p>
+<section id="vocabulario-mínimo" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="vocabulario-mínimo"><span class="header-section-number">2.1</span> Vocabulario mínimo</h2>
+<div class="callout-key">
+<p><strong>Nodo raíz</strong> — La primera pregunta. El modelo elige la variable que mejor separa las clases posibles.</p>
+<p><strong>Nodo interno</strong> — Preguntas intermedias. Cada una divide más el subgrupo que llegó a ese punto.</p>
+<p><strong>Hoja</strong> — El final del árbol: la predicción. Es la categoría más frecuente entre las observaciones de entrenamiento que cayeron en ese nodo.</p>
+<p><strong>Profundidad</strong> — Cuántos niveles de preguntas tiene el árbol. Profundidad 1 = una pregunta. Más profundidad = más complejo = más riesgo de sobreajuste.</p>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Sobreajuste vs.&nbsp;subajuste</strong></p>
+<p>Un árbol muy profundo memoriza los datos de entrenamiento: accuracy alta en train, baja en test. Un árbol muy superficial es demasiado simple: accuracy baja en ambos. La <strong>profundidad máxima</strong> es el parámetro de control más importante.</p>
+</div>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="árbol-de-clasificación-predecir-una-categoría" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Árbol de clasificación: predecir una categoría</h1>
+<p>El siguiente video muestra la intuición general de un árbol de clasificación.</p>
+<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/kqaLlte6P6o" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<p>Ahora vamos a verlo en acción con un ejemplo concreto: 8 solicitudes de crédito donde solo conocemos el ingreso mensual y el historial crediticio de cada solicitante. El objetivo es entender tres cosas que verás en los diagramas que siguen: primero, cómo el árbol elige su primera pregunta; segundo, qué significa la predicción que aparece en cada hoja; y tercero, qué ocurre cuando le permitimos al árbol hacer una segunda pregunta — y por qué eso no siempre es mejor.</p>
+<section id="cómo-aprende-el-árbol" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="cómo-aprende-el-árbol"><span class="header-section-number">3.1</span> Cómo aprende el árbol</h2>
+<p>Para elegir en qué variable y en qué valor cortar, el árbol mide la <strong>impureza</strong> de cada posible división: qué tan mezcladas quedan las clases en cada grupo después del corte. El corte que produce los grupos más “puros” (menos mezclados) es el que elige.</p>
+<p>Imagina 10 solicitantes de crédito y el objetivo de predecir “Aprobado” / “Rechazado”:</p>
+<ul>
+<li>Si el corte en <em>ingresos &gt; 3M</em> separa perfectamente aprobados de rechazados → impureza = 0, corte perfecto.</li>
+<li>Si el corte en <em>número de hijos</em> mezcla aprobados y rechazados por igual → impureza alta, corte inútil.</li>
+</ul>
+<p>El árbol repite este proceso en cada nodo hasta llegar a la profundidad máxima o hasta que los grupos sean suficientemente puros.</p>
+</section>
+<section id="un-árbol-con-profundidad-1" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="un-árbol-con-profundidad-1"><span class="header-section-number">3.2</span> Un árbol con profundidad 1</h2>
+<p>El siguiente ejemplo usa <strong>8 solicitudes de crédito</strong> con dos variables: ingreso mensual (millones) e historial crediticio (1 = positivo, 0 = negativo).</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Solicitante</th>
+<th>Ingreso (M)</th>
+<th>Historial</th>
+<th>Decisión real</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td>1.5</td>
+<td>0</td>
+<td>Rechazado</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td>2.0</td>
+<td>0</td>
+<td>Rechazado</td>
+</tr>
+<tr class="odd">
+<td>C</td>
+<td>2.5</td>
+<td>1</td>
+<td>Rechazado</td>
+</tr>
+<tr class="even">
+<td>D</td>
+<td>3.0</td>
+<td>0</td>
+<td>Rechazado</td>
+</tr>
+<tr class="odd">
+<td>E</td>
+<td>3.5</td>
+<td>1</td>
+<td>Aprobado</td>
+</tr>
+<tr class="even">
+<td>F</td>
+<td>4.0</td>
+<td>1</td>
+<td>Aprobado</td>
+</tr>
+<tr class="odd">
+<td>G</td>
+<td>4.5</td>
+<td>0</td>
+<td>Aprobado</td>
+</tr>
+<tr class="even">
+<td>H</td>
+<td>5.0</td>
+<td>1</td>
+<td>Aprobado</td>
+</tr>
+</tbody>
+</table>
+<p>El árbol analiza todos los posibles cortes y encuentra que <strong>Ingreso ≥ 3.5M</strong> es el que mejor separa las clases:</p>
+<ul>
+<li>Rama izquierda (Ingreso &lt; 3.5M): A, B, C, D → todos rechazados → <strong>hoja: Rechazado</strong></li>
+<li>Rama derecha (Ingreso ≥ 3.5M): E, F, G, H → todos aprobados → <strong>hoja: Aprobado</strong></li>
+</ul>
+<div style="margin:1.5rem 0">
+<svg width="100%" viewbox="0 0 680 310" role="img">
+<title>Árbol de clasificación profundidad 1 — aprobación de crédito</title>
+<desc>Nodo raíz pregunta si ingreso es mayor o igual a 3.5 millones. Rama izquierda lleva a hoja Rechazado con 4 casos. Rama derecha lleva a hoja Aprobado con 4 casos.</desc>
+<defs>
+  <marker id="a1" viewbox="0 0 10 10" refx="8" refy="5" markerwidth="6" markerheight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  </marker>
+</defs>
+
+<!-- Nodo raíz -->
+<rect x="195" y="25" width="290" height="66" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="1.3"></rect>
+<text x="340" y="49" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#0C447C">NODO RAÍZ</text>
+<text x="340" y="72" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#042C53">¿Ingreso ≥ 3.5 M?</text>
+
+<!-- Conectores -->
+<line x1="260" y1="91" x2="155" y2="185" stroke="#aaa" stroke-width="1.3" marker-end="url(#a1)"></line>
+<line x1="420" y1="91" x2="525" y2="185" stroke="#aaa" stroke-width="1.3" marker-end="url(#a1)"></line>
+
+<!-- Etiquetas de rama -->
+<text x="178" y="143" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No  (&lt; 3.5 M)</text>
+<text x="502" y="143" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí  (≥ 3.5 M)</text>
+
+<!-- Hoja izquierda: Rechazado -->
+<rect x="42" y="185" width="226" height="82" rx="10" fill="#FCEBEB" stroke="#E24B4A" stroke-width="1.2"></rect>
+<text x="155" y="208" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#A32D2D">HOJA</text>
+<text x="155" y="232" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="15" font-weight="500" fill="#501313">Rechazado</text>
+<text x="155" y="254" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#791F1F">Casos: A, B, C, D  (n = 4)</text>
+
+<!-- Hoja derecha: Aprobado -->
+<rect x="412" y="185" width="226" height="82" rx="10" fill="#EAF3DE" stroke="#639922" stroke-width="1.2"></rect>
+<text x="525" y="208" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#3B6D11">HOJA</text>
+<text x="525" y="232" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="15" font-weight="500" fill="#173404">Aprobado</text>
+<text x="525" y="254" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#27500A">Casos: E, F, G, H  (n = 4)</text>
+
+<text x="340" y="296" text-anchor="middle" font-family="inherit" font-size="11" fill="#999">Profundidad = 1 · Predicción = categoría mayoritaria en la hoja</text>
+</svg>
+</div>
+<div class="callout-key">
+<p><strong>¿Cómo predice el árbol un caso nuevo?</strong></p>
+<p>Llega una solicitud con ingreso de 2.8M:</p>
+<ul>
+<li>¿Ingreso ≥ 3.5M? → <strong>No</strong> → rama izquierda → predicción: <strong>Rechazado</strong></li>
+</ul>
+<p>Llega otra con ingreso de 4.2M:</p>
+<ul>
+<li>¿Ingreso ≥ 3.5M? → <strong>Sí</strong> → rama derecha → predicción: <strong>Aprobado</strong></li>
+</ul>
+<p>La predicción es determinista: para el mismo dato, siempre da la misma respuesta.</p>
+</div>
+</section>
+<section id="qué-pasa-si-el-árbol-es-más-profundo" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="qué-pasa-si-el-árbol-es-más-profundo"><span class="header-section-number">3.3</span> ¿Qué pasa si el árbol es más profundo?</h2>
+<p>Con profundidad 1, el árbol rechaza al solicitante C (ingreso 2.5M, historial positivo) porque cayó en el grupo izquierdo junto con A, B y D. ¿Pero C merece el mismo trato que alguien con historial negativo?</p>
+<p>Con profundidad 2, el árbol puede hacer una <strong>segunda pregunta</strong> dentro del grupo izquierdo:</p>
+<div style="margin:1.5rem 0">
+<svg width="100%" viewbox="0 0 680 435" role="img">
+<title>Árbol de clasificación profundidad 2 — aprobación de crédito</title>
+<desc>El árbol ahora tiene dos niveles. El nodo raíz divide por ingreso. La rama izquierda (ingreso bajo) hace una segunda pregunta sobre historial crediticio, generando dos hojas adicionales.</desc>
+<defs>
+  <marker id="a2" viewbox="0 0 10 10" refx="8" refy="5" markerwidth="6" markerheight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  </marker>
+</defs>
+
+<!-- Nodo raíz -->
+<rect x="195" y="22" width="290" height="64" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="1.3"></rect>
+<text x="340" y="44" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#0C447C">NODO RAÍZ · profundidad 0</text>
+<text x="340" y="68" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#042C53">¿Ingreso ≥ 3.5 M?</text>
+
+<!-- Rama raíz izq -->
+<line x1="258" y1="86" x2="148" y2="170" stroke="#aaa" stroke-width="1.3" marker-end="url(#a2)"></line>
+<text x="170" y="132" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No</text>
+
+<!-- Rama raíz der: hoja Aprobado (nivel 1) -->
+<line x1="422" y1="86" x2="532" y2="170" stroke="#aaa" stroke-width="1.3" marker-end="url(#a2)"></line>
+<text x="510" y="132" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí</text>
+
+<!-- Hoja derecha nivel 1 -->
+<rect x="408" y="170" width="240" height="74" rx="10" fill="#EAF3DE" stroke="#639922" stroke-width="1.2"></rect>
+<text x="528" y="192" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#3B6D11">HOJA</text>
+<text x="528" y="214" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#173404">Aprobado</text>
+<text x="528" y="234" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#27500A">E, F, G, H  (n = 4)</text>
+
+<!-- Nodo interno izquierdo (profundidad 1) -->
+<rect x="22" y="170" width="252" height="64" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="1.2"></rect>
+<text x="148" y="192" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#633806">NODO INTERNO · profundidad 1</text>
+<text x="148" y="216" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="13" font-weight="500" fill="#412402">¿Historial = positivo?</text>
+
+<!-- Ramas del nodo interno izq -->
+<line x1="80" y1="234" x2="54" y2="320" stroke="#aaa" stroke-width="1.3" marker-end="url(#a2)"></line>
+<line x1="216" y1="234" x2="242" y2="320" stroke="#aaa" stroke-width="1.3" marker-end="url(#a2)"></line>
+<text x="44" y="281" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No</text>
+<text x="252" y="281" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí</text>
+
+<!-- Hoja 1: Rechazado (ingreso bajo + historial negativo) -->
+<rect x="-12" y="320" width="160" height="82" rx="10" fill="#FCEBEB" stroke="#E24B4A" stroke-width="1.2"></rect>
+<text x="68" y="342" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#A32D2D">HOJA</text>
+<text x="68" y="364" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#501313">Rechazado</text>
+<text x="68" y="385" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#791F1F">A, B, D  (n = 3)</text>
+
+<!-- Hoja 2: Aprobado (ingreso bajo + historial positivo) -->
+<rect x="162" y="320" width="160" height="82" rx="10" fill="#EAF3DE" stroke="#639922" stroke-width="1.2"></rect>
+<text x="242" y="342" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#3B6D11">HOJA</text>
+<text x="242" y="364" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#173404">Aprobado</text>
+<text x="242" y="385" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#27500A">C  (n = 1)</text>
+
+<!-- Anotación lateral -->
+<rect x="618" y="170" width="3" height="64" rx="1" fill="#BA7517" opacity="0.4"></rect>
+<text x="635" y="195" font-family="inherit" font-size="10" fill="#666" transform="rotate(90,635,195)">nueva pregunta</text>
+
+<text x="340" y="422" text-anchor="middle" font-family="inherit" font-size="11" fill="#999">Profundidad = 2 · La rama derecha ya era pura; solo la izquierda necesitó refinarse</text>
+</svg>
+</div>
+<p>Con profundidad 2, el árbol detecta que C (ingreso bajo pero historial positivo) merece aprobación. La segunda pregunta refina la predicción, pero también hace el modelo más complejo — y si los datos de entrenamiento son pocos, puede memorizarlos en vez de aprender un patrón real.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="explóralo-tú-mismo-árbol-de-clasificación-interactivo" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Explóralo tú mismo: árbol de clasificación interactivo</h1>
+<p>Experimenta con los parámetros del árbol. El playground tiene dos pestañas: el <strong>Mapa de decisión</strong> (cómo divide el espacio de datos en regiones de colores) y la <strong>Estructura del árbol</strong> (las preguntas que hace, visualizadas como nodos).</p>
+<p><strong>¿Qué explorar?</strong></p>
+<ol type="1">
+<li>Con <strong>“Aprobación de crédito”</strong> y profundidad 1: ¿cuál es la única pregunta del árbol? Cambia al tab <strong>Árbol</strong> para verla.</li>
+<li>Sube la profundidad a 4 o 5: ¿la accuracy en train sube? ¿Y en test? ¿Hay sobreajuste?</li>
+<li>Baja el mínimo de muestras por hoja a 1: ¿el árbol se vuelve más o menos complejo?</li>
+<li>Compara ambas pestañas: cada línea divisoria del Mapa corresponde a un nodo en el Árbol.</li>
+</ol>
+<div style="margin:1.5rem 0;">
+<style>
+#dt11w *{box-sizing:border-box;margin:0;padding:0}
+#dt11w{border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;font-family:inherit;background:#fff}
+#dt11w-inner{display:grid;grid-template-columns:270px 1fr;min-height:520px}
+#dt11w-panel{background:#f8f8f6;border-right:1px solid #e0e0e0;padding:16px;display:flex;flex-direction:column;gap:13px}
+#dt11w-right{display:flex;flex-direction:column;min-width:0}
+#dt11w-tabs{display:flex;border-bottom:1px solid #e0e0e0;background:#fafafa}
+.w11tab{padding:9px 18px;font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;color:#888;border-bottom:2px solid transparent;transition:all .15s}
+.w11tab.on{color:#1F4E79;border-bottom-color:#1F4E79;background:#fff}
+.w11tab:hover:not(.on){color:#555}
+#dt11w-vmap,#dt11w-vtree{flex:1;display:none;min-height:300px}
+#dt11w-vmap.vis{display:flex;flex-direction:column}
+#dt11w-vtree.vis{display:block;overflow:auto;padding:8px}
+#dt11w-cv{display:block;flex:1;width:100%}
+#dt11w-tsvg{display:block;width:100%}
+.w11ps{display:flex;flex-direction:column;gap:6px}
+.w11pl{font-size:10px;color:#888;letter-spacing:.04em;text-transform:uppercase;font-weight:500}
+.w11pv{font-size:17px;font-weight:500;color:#111}
+#dt11w-panel select{width:100%;padding:6px 8px;font-size:13px;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111}
+#dt11w-panel input[type=range]{width:100%;accent-color:#1F4E79}
+.w11btn{width:100%;padding:7px 4px;font-size:12px;font-weight:500;border:1px solid #93c5fd;border-radius:8px;background:#dbeafe;color:#1e40af;cursor:pointer;transition:background .15s}
+.w11btn:hover{background:#bfdbfe}
+.w11rst{width:100%;padding:5px 4px;font-size:11px;font-weight:500;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#666;cursor:pointer;transition:background .15s}
+.w11rst:hover{background:#f0f0f0}
+.w11acc{display:flex;gap:6px}
+.w11ab{flex:1;background:#f0f4f8;border-radius:8px;padding:8px 4px;text-align:center}
+.w11av{font-size:15px;font-weight:600;color:#1F4E79}
+.w11al{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.04em}
+.w11cmt td{border:1px solid #ccc;padding:3px 4px;text-align:center;font-size:10px}
+.w11leg{display:flex;gap:8px;flex-wrap:wrap}
+.w11li{display:flex;align-items:center;gap:4px;font-size:11px;color:#555}
+.w11ld{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+#dt11w-st{padding:7px 14px;font-size:11px;color:#666;border-top:1px solid #e0e0e0;display:flex;align-items:center;min-height:28px}
+</style>
+
+<div id="dt11w">
+<div id="dt11w-inner">
+  <!-- Panel -->
+  <div id="dt11w-panel">
+    <div class="w11ps">
+      <div class="w11pl">Dataset</div>
+      <select id="w11ds">
+        <option value="credit">Aprobación de crédito</option>
+        <option value="churn">Churn de clientes</option>
+      </select>
+    </div>
+    <div class="w11ps">
+      <div class="w11pl">Profundidad máxima</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="w11depth" min="1" max="7" value="3" step="1" style="flex:1">
+        <span class="w11pv" id="w11depthv">3</span>
+      </div>
+    </div>
+    <div class="w11ps">
+      <div class="w11pl">Mín. muestras por hoja</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="w11leaf" min="1" max="20" value="5" step="1" style="flex:1">
+        <span class="w11pv" id="w11leafv">5</span>
+      </div>
+    </div>
+    <div class="w11ps">
+      <div class="w11pl">Mín. muestras para dividir</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="w11split" min="2" max="30" value="10" step="1" style="flex:1">
+        <span class="w11pv" id="w11splitv">10</span>
+      </div>
+    </div>
+    <button class="w11btn" id="w11run">▶ Entrenar árbol</button>
+    <button class="w11rst" id="w11reset">↺ Reiniciar datos</button>
+    <div class="w11ps">
+      <div class="w11pl">Accuracy</div>
+      <div class="w11acc">
+        <div class="w11ab"><div class="w11av" id="w11tr">—</div><div class="w11al">Train</div></div>
+        <div class="w11ab"><div class="w11av" id="w11te">—</div><div class="w11al">Test</div></div>
+      </div>
+    </div>
+    <div class="w11ps">
+      <div class="w11pl">Matriz de confusión (test)</div>
+      <table class="w11cmt" style="width:100%;border-collapse:collapse"><tbody id="w11cm"></tbody></table>
+    </div>
+    <div class="w11ps" style="margin-top:auto">
+      <div class="w11pl">Leyenda</div>
+      <div class="w11leg" id="w11leg"></div>
+    </div>
+  </div>
+
+  <!-- Área derecha -->
+  <div id="dt11w-right">
+    <div id="dt11w-tabs">
+      <button class="w11tab on" id="tab-map11" onclick="w11tab('map')">🗺 Mapa de decisión</button>
+      <button class="w11tab" id="tab-tree11" onclick="w11tab('tree')">🌳 Árbol</button>
+    </div>
+    <div id="dt11w-vmap" class="vis"><canvas id="dt11w-cv"></canvas></div>
+    <div id="dt11w-vtree"><svg id="dt11w-tsvg"></svg></div>
+  </div>
+</div>
+<div id="dt11w-st">Elige un dataset y entrena el árbol para comenzar</div>
+</div>
+
+<script>
+(function(){
+const COLS=['#378ADD','#D85A30','#1D9E75','#BA7517'];
+function rnd(a,b){return a+(b-a)*Math.random();}
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function clamp(v){return Math.max(0.01,Math.min(0.99,v));}
+
+function genCredit(){
+  const p=[];
+  for(let i=0;i<70;i++) p.push({x:clamp(rnd(0.55,0.95)+randn()*0.04),y:clamp(rnd(0.55,0.95)+randn()*0.04),label:0});
+  for(let i=0;i<70;i++) p.push({x:clamp(rnd(0.05,0.48)+randn()*0.04),y:clamp(rnd(0.05,0.48)+randn()*0.04),label:1});
+  for(let i=0;i<20;i++) p.push({x:clamp(rnd(0.3,0.7)),y:clamp(rnd(0.3,0.7)),label:Math.random()<0.5?0:1});
+  return{pts:p,labels:['Aprobado','Rechazado'],xLabel:'Ingresos (normalizado)',yLabel:'Historial crediticio'};
+}
+function genChurn(){
+  const p=[];
+  for(let i=0;i<65;i++) p.push({x:clamp(rnd(0.05,0.45)+randn()*0.04),y:clamp(rnd(0.05,0.45)+randn()*0.04),label:0});
+  for(let i=0;i<75;i++) p.push({x:clamp(rnd(0.5,0.95)+randn()*0.04),y:clamp(rnd(0.5,0.95)+randn()*0.04),label:1});
+  for(let i=0;i<20;i++) p.push({x:clamp(rnd(0.35,0.65)),y:clamp(rnd(0.35,0.65)),label:Math.random()<0.5?0:1});
+  return{pts:p,labels:['Churner','Activo'],xLabel:'Uso del servicio',yLabel:'Antigüedad'};
+}
+
+/* ── Árbol ── */
+function gini(pts){
+  if(!pts.length)return 0;
+  const c=[0,0];pts.forEach(p=>c[p.label]++);
+  const n=pts.length;return 1-(c[0]/n)**2-(c[1]/n)**2;
+}
+function build(pts,depth,maxD,minL,minS){
+  const cnt=[0,0];pts.forEach(p=>cnt[p.label]++);
+  const maj=cnt[0]>=cnt[1]?0:1;
+  if(depth>=maxD||pts.length<minS||!cnt[0]||!cnt[1])return{leaf:true,pred:maj,cnt:[...cnt],depth};
+  let best=null,bg=-Infinity;
+  for(const dim of['x','y']){
+    const vs=[...new Set(pts.map(p=>p[dim]))].sort((a,b)=>a-b);
+    for(let i=0;i<vs.length-1;i++){
+      const th=(vs[i]+vs[i+1])/2;
+      const L=pts.filter(p=>p[dim]<th),R=pts.filter(p=>p[dim]>=th);
+      if(L.length<minL||R.length<minL)continue;
+      const n=pts.length,g=gini(pts)-(L.length/n)*gini(L)-(R.length/n)*gini(R);
+      if(g>bg){bg=g;best={dim,th,L,R};}
+    }
+  }
+  if(!best)return{leaf:true,pred:maj,cnt:[...cnt],depth};
+  return{leaf:false,dim:best.dim,th:best.th,left:build(best.L,depth+1,maxD,minL,minS),right:build(best.R,depth+1,maxD,minL,minS),cnt:[...cnt],depth};
+}
+function pred(tree,p){if(tree.leaf)return tree.pred;return p[tree.dim]<tree.th?pred(tree.left,p):pred(tree.right,p);}
+
+/* ── Estado ── */
+let W=0,H=0,data=null,tree=null,trainIdx=[],testIdx=[];
+const cv=document.getElementById('dt11w-cv');
+const cx=cv.getContext('2d');
+
+/* ── Tabs ── */
+window.w11tab=function(t){
+  document.getElementById('dt11w-vmap').classList.toggle('vis',t==='map');
+  document.getElementById('dt11w-vtree').classList.toggle('vis',t==='tree');
+  document.getElementById('tab-map11').classList.toggle('on',t==='map');
+  document.getElementById('tab-tree11').classList.toggle('on',t==='tree');
+  if(t==='map'){resize();drawMap();}
+  else if(tree)drawTreeSVG();
+};
+
+/* ── Canvas ── */
+function resize(){
+  const r=cv.parentElement.getBoundingClientRect();
+  W=r.width;H=Math.max(r.height-4,280);
+  cv.width=W;cv.height=H;
+}
+function px2n(x,y){const p=36;return{nx:(x-p)/(W-2*p),ny:1-(y-p)/(H-2*p)};}
+function n2px(nx,ny){const p=36;return{x:p+nx*(W-2*p),y:(H-p)-ny*(H-2*p)};}
+function h2r(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+
+function drawMap(){
+  if(!W||!H)return;
+  cx.clearRect(0,0,W,H);
+  if(tree){
+    const img=cx.createImageData(W,H);
+    const pad=36;
+    for(let px=0;px<W;px++)for(let py=0;py<H;py++){
+      const nx=(px-pad)/(W-2*pad),ny=1-(py-pad)/(H-2*pad);
+      if(nx<0||nx>1||ny<0||ny>1)continue;
+      const cl=pred(tree,{x:nx,y:ny});
+      const [r,g,b]=h2r(COLS[cl]);
+      const i=4*(py*W+px);img.data[i]=r;img.data[i+1]=g;img.data[i+2]=b;img.data[i+3]=28;
+    }
+    cx.putImageData(img,0,0);
+  }
+  const pad=36;
+  cx.strokeStyle='#ccc';cx.lineWidth=1;
+  cx.beginPath();cx.moveTo(pad,pad);cx.lineTo(pad,H-pad);cx.lineTo(W-pad,H-pad);cx.stroke();
+  cx.fillStyle='#999';cx.font='11px inherit';cx.textAlign='center';
+  if(data){cx.fillText(data.xLabel,W/2,H-6);cx.save();cx.translate(11,H/2);cx.rotate(-Math.PI/2);cx.fillText(data.yLabel,0,0);cx.restore();}
+  if(data) data.pts.forEach((p,i)=>{
+    const c=n2px(p.x,p.y),isT=testIdx.includes(i);
+    cx.beginPath();cx.arc(c.x,c.y,isT?5:3.5,0,6.28);
+    cx.fillStyle=COLS[p.label];cx.fill();
+    cx.strokeStyle=isT?'#000':'#fff';cx.lineWidth=isT?1.5:1;cx.stroke();
+  });
+}
+
+/* ── Árbol SVG ── */
+function drawTreeSVG(){
+  const container=document.getElementById('dt11w-tsvg');
+  const cW=Math.max(container.parentElement.getBoundingClientRect().width||400,400);
+  const NW=136,NH=54,VG=56;
+
+  function leaves(n){return n.leaf?1:leaves(n.left)+leaves(n.right);}
+  function posX(n,lo,hi){
+    if(n.leaf){n._cx=(lo+hi)/2;return;}
+    const tot=leaves(n);
+    const lf=leaves(n.left)/tot;
+    posX(n.left,lo,lo+(hi-lo)*lf);posX(n.right,lo+(hi-lo)*lf,hi);
+    n._cx=(n.left._cx+n.right._cx)/2;
+  }
+  function posY(n,d){n._cy=38+d*(NH+VG);if(!n.leaf){posY(n.left,d+1);posY(n.right,d+1);}}
+  function maxY(n){return n.leaf?n._cy:Math.max(maxY(n.left),maxY(n.right));}
+
+  posX(tree,40,cW-40);posY(tree,0);
+  const svgH=maxY(tree)+NH+36;
+
+  const dimName=d=>{if(!data)return d==='x'?'X':'Y';return d==='x'?data.xLabel.split('(')[0].trim():data.yLabel.split('(')[0].trim();};
+
+  let lines='',nodes='';
+  function walk(n){
+    if(!n.leaf){
+      lines+=`<line x1="${n._cx}" y1="${n._cy+NH/2}" x2="${n.left._cx}" y2="${n.left._cy-NH/2}" stroke="#bbb" stroke-width="1.2"/>`;
+      lines+=`<line x1="${n._cx}" y1="${n._cy+NH/2}" x2="${n.right._cx}" y2="${n.right._cy-NH/2}" stroke="#bbb" stroke-width="1.2"/>`;
+      const mlx=(n._cx+n.left._cx)/2,mly=(n._cy+NH/2+n.left._cy-NH/2)/2;
+      lines+=`<text x="${mlx-4}" y="${mly}" font-family="inherit" font-size="10" fill="#888" text-anchor="end">No</text>`;
+      const mrx=(n._cx+n.right._cx)/2,mry=(n._cy+NH/2+n.right._cy-NH/2)/2;
+      lines+=`<text x="${mrx+4}" y="${mry}" font-family="inherit" font-size="10" fill="#888">Sí</text>`;
+      walk(n.left);walk(n.right);
+    }
+    const x=n._cx-NW/2,y=n._cy-NH/2;
+    if(n.leaf){
+      const isPos=n.pred===0;
+      const bg=isPos?'#EAF3DE':'#FCEBEB',br=isPos?'#639922':'#E24B4A';
+      const ft=isPos?'#173404':'#501313',fs=isPos?'#3B6D11':'#A32D2D';
+      const lbl=data?data.labels[n.pred]:`Clase ${n.pred}`;
+      const tot=n.cnt[0]+n.cnt[1];
+      nodes+=`<rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="8" fill="${bg}" stroke="${br}" stroke-width="1"/>`;
+      nodes+=`<text x="${n._cx}" y="${y+16}" font-family="inherit" font-size="10" fill="${fs}" text-anchor="middle" dominant-baseline="central">HOJA</text>`;
+      nodes+=`<text x="${n._cx}" y="${y+34}" font-family="inherit" font-size="12" font-weight="500" fill="${ft}" text-anchor="middle" dominant-baseline="central">${lbl}</text>`;
+      nodes+=`<text x="${n._cx}" y="${y+50}" font-family="inherit" font-size="10" fill="#666" text-anchor="middle" dominant-baseline="central">n=${tot}</text>`;
+    } else {
+      const th=n.th.toFixed(2);
+      nodes+=`<rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>`;
+      nodes+=`<text x="${n._cx}" y="${y+16}" font-family="inherit" font-size="10" fill="#0C447C" text-anchor="middle" dominant-baseline="central">prof. ${n.depth}</text>`;
+      nodes+=`<text x="${n._cx}" y="${y+37}" font-family="inherit" font-size="11" font-weight="500" fill="#042C53" text-anchor="middle" dominant-baseline="central">${dimName(n.dim)} &lt; ${th}</text>`;
+    }
+  }
+  walk(tree);
+  container.setAttribute('viewBox',`0 0 ${cW} ${svgH}`);
+  container.setAttribute('height',svgH);
+  container.innerHTML=lines+nodes;
+}
+
+/* ── Métricas ── */
+function accuracy(idxs){
+  if(!idxs.length)return'—';
+  return(idxs.filter(i=>pred(tree,data.pts[i])===data.pts[i].label).length/idxs.length*100).toFixed(1)+'%';
+}
+function confMatrix(idxs){
+  const m=[[0,0],[0,0]];
+  idxs.forEach(i=>{const p=data.pts[i];m[p.label][pred(tree,p)]++;});return m;
+}
+function renderCM(m){
+  const b=document.getElementById('w11cm');
+  if(!m||!data){b.innerHTML='';return;}
+  const l0=data.labels[0].substring(0,9),l1=data.labels[1].substring(0,9);
+  b.innerHTML=`
+<tr><td colspan="3" style="border:none;padding:2px 0;font-size:10px;color:#888;text-align:right">Predicción →</td></tr>
+<tr><td style="background:#f8f8f8;font-size:10px;color:#888;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;padding:2px;white-space:nowrap">Real ↓</td><td style="background:#dbeafe;font-size:10px;font-weight:500;text-align:center;padding:3px">${l0}</td><td style="background:#fee2e2;font-size:10px;font-weight:500;text-align:center;padding:3px">${l1}</td></tr>
+<tr><td style="background:#dbeafe;font-size:10px;font-weight:500;text-align:center;padding:3px">${l0}</td><td style="border:1px solid #ccc;font-weight:600;color:#15803d;text-align:center;padding:4px">${m[0][0]}</td><td style="border:1px solid #ccc;font-weight:600;color:#b91c1c;text-align:center;padding:4px">${m[0][1]}</td></tr>
+<tr><td style="background:#fee2e2;font-size:10px;font-weight:500;text-align:center;padding:3px">${l1}</td><td style="border:1px solid #ccc;font-weight:600;color:#b91c1c;text-align:center;padding:4px">${m[1][0]}</td><td style="border:1px solid #ccc;font-weight:600;color:#15803d;text-align:center;padding:4px">${m[1][1]}</td></tr>`;
+}
+function splitTT(n){
+  const idx=Array.from({length:n},(_,i)=>i);
+  for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
+  const cut=Math.floor(n*0.75);return{train:idx.slice(0,cut),test:idx.slice(cut)};
+}
+
+/* ── Cargar dataset ── */
+function loadDS(){
+  const v=document.getElementById('w11ds').value;
+  data=v==='credit'?genCredit():genChurn();
+  const{train,test}=splitTT(data.pts.length);
+  trainIdx=train;testIdx=test;
+  document.getElementById('w11leg').innerHTML=data.labels.map((l,i)=>
+    `<div class="w11li"><div class="w11ld" style="background:${COLS[i]}"></div>${l}</div>`).join('');
+  tree=null;
+  document.getElementById('w11tr').textContent='—';
+  document.getElementById('w11te').textContent='—';
+  renderCM(null);
+  document.getElementById('dt11w-tsvg').innerHTML='';
+  resize();drawMap();
+  document.getElementById('dt11w-st').textContent=
+    `${data.pts.length} obs. (${trainIdx.length} entrenamiento, ${testIdx.length} prueba). Puntos con borde negro = conjunto de prueba.`;
+}
+
+/* ── Entrenar ── */
+document.getElementById('w11run').addEventListener('click',()=>{
+  if(!data)return;
+  const maxD=+document.getElementById('w11depth').value;
+  const minL=+document.getElementById('w11leaf').value;
+  const minS=+document.getElementById('w11split').value;
+  tree=build(trainIdx.map(i=>data.pts[i]),0,maxD,minL,minS);
+  document.getElementById('w11tr').textContent=accuracy(trainIdx);
+  document.getElementById('w11te').textContent=accuracy(testIdx);
+  renderCM(confMatrix(testIdx));
+  drawMap();
+  if(document.getElementById('dt11w-vtree').classList.contains('vis'))drawTreeSVG();
+  document.getElementById('dt11w-st').textContent=
+    `Árbol entrenado: profundidad máx ${maxD}, mín hoja ${minL}, mín split ${minS}.`;
+});
+
+/* ── Sliders ── */
+[['w11depth','w11depthv'],['w11leaf','w11leafv'],['w11split','w11splitv']].forEach(([id,vid])=>{
+  document.getElementById(id).addEventListener('input',e=>{document.getElementById(vid).textContent=e.target.value;});
+});
+document.getElementById('w11reset').addEventListener('click',loadDS);
+document.getElementById('w11ds').addEventListener('change',loadDS);
+window.addEventListener('resize',()=>{if(document.getElementById('dt11w-vmap').classList.contains('vis')){resize();drawMap();}});
+setTimeout(()=>{resize();loadDS();},150);
+})();
+</script>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="la-matriz-de-confusión-leer-un-modelo-de-clasificación" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> La matriz de confusión: leer un modelo de clasificación</h1>
+<p>En el video anterior viste cómo un árbol de clasificación llega a una predicción: recorre sus preguntas y termina en una hoja que dice “Aprobado” o “Rechazado”. Pero predecir no es suficiente — necesitamos saber qué tan bien predice, y para eso necesitamos comparar lo que el modelo dijo con lo que realmente ocurrió.</p>
+<p>Esa comparación se organiza en una tabla de cuatro celdas llamada matriz de confusión. En este video vas a ver cómo se construye celda por celda, siguiendo dos reglas simples: la primera letra (Verdadero o Falso) depende de si el modelo acertó; la segunda (Positivo o Negativo) depende únicamente de lo que el modelo predijo. Al final del video el profesor te propone un ejercicio de conteo — páusalo y resuélvelo antes de seguir, porque en clase trabajarás con exactamente esta misma lógica aplicada a datos reales.</p>
+<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/TWDdeKs3org" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<p>Cuando el árbol predice sobre el conjunto de prueba, comparamos lo que predijo con lo que realmente ocurrió. Ese resumen es la <strong>matriz de confusión</strong>.</p>
+<section id="la-tabla-22" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="la-tabla-22"><span class="header-section-number">5.1</span> La tabla 2×2</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Predicho: Aprobado</strong></th>
+<th><strong>Predicho: Rechazado</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Real: Aprobado</strong></td>
+<td>Verdadero Positivo (TP)</td>
+<td>Falso Negativo (FN)</td>
+</tr>
+<tr class="even">
+<td><strong>Real: Rechazado</strong></td>
+<td>Falso Positivo (FP)</td>
+<td>Verdadero Negativo (TN)</td>
+</tr>
+</tbody>
+</table>
+<div class="callout-key">
+<p><strong>Los cuatro resultados posibles:</strong></p>
+<p><strong>TP (Verdadero Positivo):</strong> Dijo “Aprobado” y era aprobado. Acierto donde importaba.</p>
+<p><strong>TN (Verdadero Negativo):</strong> Dijo “Rechazado” y era rechazado. Acierto también.</p>
+<p><strong>FP (Falso Positivo):</strong> Dijo “Aprobado” pero era rechazado → riesgo de impago para la entidad.</p>
+<p><strong>FN (Falso Negativo):</strong> Dijo “Rechazado” pero era aprobado → se perdió un buen cliente.</p>
+<p><strong>Regla de memoria:</strong> el primer adjetivo (Verdadero/Falso) dice si acertó. El segundo sustantivo (Positivo/Negativo) dice lo que predijo el modelo.</p>
+</div>
+</section>
+<section id="las-métricas-que-salen-de-la-matriz" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="las-métricas-que-salen-de-la-matriz"><span class="header-section-number">5.2</span> Las métricas que salen de la matriz</h2>
+<div class="callout-key">
+<p><strong>Accuracy:</strong><br>
+<span class="math display">\[\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}\]</span><br>
+Fracción de casos correctamente clasificados.<br>
+<em>Limitación: engañosa si las clases están desbalanceadas.</em></p>
+<p><strong>Precisión:</strong><br>
+<span class="math display">\[\text{Precisión} = \frac{TP}{TP + FP}\]</span><br>
+De los que el modelo dijo “Aprobado”, ¿cuántos realmente lo eran?</p>
+<p><strong>Recall:</strong><br>
+<span class="math display">\[\text{Recall} = \frac{TP}{TP + FN}\]</span><br>
+De los que realmente eran aprobados, ¿cuántos detectó el modelo?</p>
+</div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Situación</th>
+<th>Error más costoso</th>
+<th>Priorizar</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fraude bancario</td>
+<td>FN: dejar pasar un fraude</td>
+<td>Recall alto</td>
+</tr>
+<tr class="even">
+<td>Diagnóstico médico</td>
+<td>FN: no detectar un caso real</td>
+<td>Recall alto</td>
+</tr>
+<tr class="odd">
+<td>Crédito (impago caro)</td>
+<td>FP: aprobar a quien no pagará</td>
+<td>Precisión alta</td>
+</tr>
+<tr class="even">
+<td>Retención de clientes</td>
+<td>FN: no detectar al que se va</td>
+<td>Recall alto</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>No existe la métrica perfecta. Mejorar el recall suele bajar la precisión y viceversa. La decisión de qué optimizar es de negocio, no del algoritmo.</p>
+</div>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="del-resultado-al-negocio-un-ejemplo-completo" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Del resultado al negocio: un ejemplo completo</h1>
+<p>Una entidad financiera evalúa el árbol sobre 50 solicitudes del conjunto de prueba:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Predicho: Aprobado</th>
+<th>Predicho: Rechazado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Real: Aprobado</td>
+<td><strong>22</strong> (TP)</td>
+<td><strong>4</strong> (FN)</td>
+</tr>
+<tr class="even">
+<td>Real: Rechazado</td>
+<td><strong>5</strong> (FP)</td>
+<td><strong>19</strong> (TN)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Accuracy = (22 + 19) / 50 = <strong>82%</strong><br>
+</li>
+<li>Precisión = 22 / 27 = <strong>81.5%</strong> — cuando dice “Aprobado”, acierta el 81.5% de las veces<br>
+</li>
+<li>Recall = 22 / 26 = <strong>84.6%</strong> — detecta el 84.6% de los buenos clientes</li>
+</ul>
+<p>¿Es suficiente? Depende del costo del error. Si el costo de un impago (FP) supera al costo de perder un buen cliente (FN), el modelo debería ajustarse para aumentar precisión — aceptando más FN a cambio. <strong>Esa es una decisión de negocio, no del algoritmo.</strong></p>
+<div class="callout-connect">
+<p><strong>Conexión con semana 9</strong></p>
+<p>¿Por qué evaluamos en el conjunto de <strong>prueba</strong> y no en el de entrenamiento?</p>
+<p>El árbol ya “vio” los datos de entrenamiento. Medir allí da accuracy inflada. El conjunto de prueba simula solicitudes futuras — eso mide la capacidad real de predecir. Un árbol con 99% en train y 62% en test está memorizando, no aprendiendo (sobreajuste).</p>
+</div>
+<hr>
+<section id="material-adicional-opcional" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="material-adicional-opcional"><span class="header-section-number">6.1</span> Material adicional (opcional)</h2>
+<ul>
+<li><strong>An Introduction to Statistical Learning (ISLR)</strong> — Capítulo 8: árboles, bagging, random forests — <a href="https://www.statlearning.com">statlearning.com</a></li>
+<li><strong>Google ML Crash Course</strong> — clasificación con ejemplos interactivos — <a href="https://developers.google.com/machine-learning/crash-course">developers.google.com/machine-learning/crash-course</a></li>
+</ul>
+<hr>
+</section>
+<section id="checklist-de-preclase" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="checklist-de-preclase"><span class="header-section-number">6.2</span> Checklist de preclase</h2>
+<p>Al llegar a clase debes poder explicar:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">¿Qué es un nodo raíz, un nodo interno y una hoja?</label></li>
+<li><label><input type="checkbox">¿Qué predice el árbol en cada hoja?</label></li>
+<li><label><input type="checkbox">¿Cómo elige el árbol la primera variable de corte?</label></li>
+<li><label><input type="checkbox">¿Qué son TP, FP, TN, FN y cómo se ubican en la tabla 2×2?</label></li>
+<li><label><input type="checkbox">¿Cómo se calcula la accuracy? ¿Por qué puede ser engañosa?</label></li>
+<li><label><input type="checkbox">¿Cuándo es más importante el recall que la precisión?</label></li>
+<li><label><input type="checkbox">¿Por qué se evalúa en el conjunto de prueba y no en el de entrenamiento?</label></li>
+<li><label><input type="checkbox">¿Qué significa que un árbol esté sobreajustado?</label></li>
+</ul>
+</section>
+<section id="preguntas-de-comprensión" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="preguntas-de-comprensión"><span class="header-section-number">6.3</span> Preguntas de comprensión</h2>
+<p><strong>1.</strong> Un árbol entrega estos resultados sobre 50 solicitudes del conjunto de prueba:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Predicho: Aprobado</th>
+<th>Predicho: Rechazado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Real: Aprobado</td>
+<td>20</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td>Real: Rechazado</td>
+<td>3</td>
+<td>22</td>
+</tr>
+</tbody>
+</table>
+<p>Calcula la accuracy, la precisión y el recall. ¿Qué error es más frecuente: FP o FN?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>TP=20, FN=5, FP=3, TN=22<br>
+- Accuracy = (20+22)/50 = <strong>84%</strong><br>
+- Precisión = 20/23 = <strong>87%</strong><br>
+- Recall = 20/25 = <strong>80%</strong></p>
+El error más frecuente es FN (5) &gt; FP (3): el modelo rechaza más clientes buenos de lo que aprueba malos.
+</details>
+<p><strong>2.</strong> Un compañero entrena un árbol con profundidad 7 y obtiene 98% en train y 63% en test. Dice: “Es excelente, casi no se equivoca.” ¿Qué le responderías?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+El modelo está sobreajustado. La brecha enorme entre train (98%) y test (63%) indica que memorizó los datos de entrenamiento en vez de aprender un patrón generalizable. Lo que importa es el desempeño en test. La solución probable es reducir la profundidad máxima o aumentar el mínimo de muestras por hoja.
+</details>
+<p><strong>3.</strong> La entidad decide que el costo de aprobar a alguien que no pagará (FP) es 4 veces mayor que el costo de rechazar a un buen cliente (FN). ¿Qué métrica debe optimizar el modelo? ¿Qué le pasa a la otra métrica?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+Debe optimizar <strong>precisión</strong>: el FP es el error más costoso. Para subirla, el árbol clasifica como “Aprobado” solo cuando está muy seguro — lo que probablemente sube los FN (rechaza más buenos clientes) bajando el recall. Es un trade-off inevitable: no se pueden maximizar ambas métricas a la vez. La decisión de dónde fijar ese trade-off es de la entidad.
+</details>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-11_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

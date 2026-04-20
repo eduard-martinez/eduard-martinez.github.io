@@ -1,0 +1,747 @@
+---
+title: "Unidad 8 - Árboles de Clasificación"
+subtitle: "Introducción al Business Analytics · Semana 11 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+<span id="webr-status-anchor"></span>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Objetivo de la semana
+
+El foco está en **clasificación supervisada**: dado un conjunto de datos con una etiqueta conocida (aprobado/rechazado, churn/activo, precio alto/bajo), aprender a construir e interpretar un árbol de clasificación y evaluar qué tan bien predice casos nuevos. El énfasis está en **leer lo que el modelo dice y conectarlo con una decisión de negocio**, no en el código.
+
+## Lo que cubriremos
+
+- Intuición del árbol de decisión: preguntas que dividen datos  
+- Cómo el árbol aprende: impureza, divisiones y hojas  
+- Cómo leer un árbol de clasificación: nodos, ramas y predicciones  
+- La matriz de confusión: TP, FP, TN, FN  
+- Métricas: accuracy, precisión y recall  
+- Cuándo importa más cada métrica  
+
+::: {.callout-key}
+**Conexión con semanas anteriores**
+
+| Semana 09 | Semana 10 | Semana 11 |
+|---|---|---|
+| Pipeline ML, train/test, métricas | Clustering (no supervisado) | Árbol de clasificación (supervisado) |
+| "¿Tenemos etiqueta de resultado?" | Sin etiqueta → grupos | Con etiqueta → predicción de categoría |
+| Concepto de accuracy | Sin métrica de acierto/fallo | Accuracy, precisión, recall en la práctica |
+| Leakage, overfitting | Elbow, silhouette | Overfitting según profundidad del árbol |
+
+Esta semana tocamos el primer algoritmo **supervisado** del curso: el modelo aprende de ejemplos pasados con etiqueta para predecir casos nuevos. A diferencia del clustering, aquí sí sabemos si el modelo se equivocó.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# La intuición: el árbol como serie de preguntas
+
+Antes de cualquier fórmula, piensa en cómo toma decisiones un buen analista de crédito. Cuando alguien pide un préstamo, el analista no aplica una fórmula matemática ciega: hace preguntas en secuencia.
+
+> *"¿Tiene ingresos mensuales superiores a 3 millones?"*  
+> → No: rechazar (alto riesgo).  
+> → Sí: siguiente pregunta.  
+>  
+> *"¿Su historial crediticio es positivo?"*  
+> → No: condicional, pedir garantías.  
+> → Sí: **aprobar**.  
+
+Eso es exactamente un **árbol de clasificación**: una serie de preguntas binarias encadenadas que terminan en la predicción de una categoría.
+
+## Vocabulario mínimo
+
+::: {.callout-key}
+**Nodo raíz** — La primera pregunta. El modelo elige la variable que mejor separa las clases posibles.
+
+**Nodo interno** — Preguntas intermedias. Cada una divide más el subgrupo que llegó a ese punto.
+
+**Hoja** — El final del árbol: la predicción. Es la categoría más frecuente entre las observaciones de entrenamiento que cayeron en ese nodo.
+
+**Profundidad** — Cuántos niveles de preguntas tiene el árbol. Profundidad 1 = una pregunta. Más profundidad = más complejo = más riesgo de sobreajuste.
+:::
+
+::: {.callout-warning}
+**Sobreajuste vs. subajuste**
+
+Un árbol muy profundo memoriza los datos de entrenamiento: accuracy alta en train, baja en test. Un árbol muy superficial es demasiado simple: accuracy baja en ambos. La **profundidad máxima** es el parámetro de control más importante.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Árbol de clasificación: predecir una categoría
+
+El siguiente video muestra la intuición general de un árbol de clasificación. 
+
+<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+{{< video https://www.youtube.com/watch?v=kqaLlte6P6o >}}
+
+Ahora vamos a verlo en acción con un ejemplo concreto: 8 solicitudes de crédito donde solo conocemos el ingreso mensual y el historial crediticio de cada solicitante.
+El objetivo es entender tres cosas que verás en los diagramas que siguen: primero, cómo el árbol elige su primera pregunta; segundo, qué significa la predicción que aparece en cada hoja; y tercero, qué ocurre cuando le permitimos al árbol hacer una segunda pregunta — y por qué eso no siempre es mejor.
+
+## Cómo aprende el árbol
+
+Para elegir en qué variable y en qué valor cortar, el árbol mide la **impureza** de cada posible división: qué tan mezcladas quedan las clases en cada grupo después del corte. El corte que produce los grupos más "puros" (menos mezclados) es el que elige.
+
+Imagina 10 solicitantes de crédito y el objetivo de predecir "Aprobado" / "Rechazado":
+
+- Si el corte en *ingresos > 3M* separa perfectamente aprobados de rechazados → impureza = 0, corte perfecto.
+- Si el corte en *número de hijos* mezcla aprobados y rechazados por igual → impureza alta, corte inútil.
+
+El árbol repite este proceso en cada nodo hasta llegar a la profundidad máxima o hasta que los grupos sean suficientemente puros.
+
+## Un árbol con profundidad 1
+
+El siguiente ejemplo usa **8 solicitudes de crédito** con dos variables: ingreso mensual (millones) e historial crediticio (1 = positivo, 0 = negativo).
+
+| Solicitante | Ingreso (M) | Historial | Decisión real |
+|---|---|---|---|
+| A | 1.5 | 0 | Rechazado |
+| B | 2.0 | 0 | Rechazado |
+| C | 2.5 | 1 | Rechazado |
+| D | 3.0 | 0 | Rechazado |
+| E | 3.5 | 1 | Aprobado |
+| F | 4.0 | 1 | Aprobado |
+| G | 4.5 | 0 | Aprobado |
+| H | 5.0 | 1 | Aprobado |
+
+El árbol analiza todos los posibles cortes y encuentra que **Ingreso ≥ 3.5M** es el que mejor separa las clases:
+
+- Rama izquierda (Ingreso < 3.5M): A, B, C, D → todos rechazados → **hoja: Rechazado**
+- Rama derecha (Ingreso ≥ 3.5M): E, F, G, H → todos aprobados → **hoja: Aprobado**
+
+```{=html}
+<div style="margin:1.5rem 0">
+<svg width="100%" viewBox="0 0 680 310" role="img">
+<title>Árbol de clasificación profundidad 1 — aprobación de crédito</title>
+<desc>Nodo raíz pregunta si ingreso es mayor o igual a 3.5 millones. Rama izquierda lleva a hoja Rechazado con 4 casos. Rama derecha lleva a hoja Aprobado con 4 casos.</desc>
+<defs>
+  <marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Nodo raíz -->
+<rect x="195" y="25" width="290" height="66" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="1.3"/>
+<text x="340" y="49" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#0C447C">NODO RAÍZ</text>
+<text x="340" y="72" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#042C53">¿Ingreso ≥ 3.5 M?</text>
+
+<!-- Conectores -->
+<line x1="260" y1="91" x2="155" y2="185" stroke="#aaa" stroke-width="1.3" marker-end="url(#a1)"/>
+<line x1="420" y1="91" x2="525" y2="185" stroke="#aaa" stroke-width="1.3" marker-end="url(#a1)"/>
+
+<!-- Etiquetas de rama -->
+<text x="178" y="143" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No  (< 3.5 M)</text>
+<text x="502" y="143" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí  (≥ 3.5 M)</text>
+
+<!-- Hoja izquierda: Rechazado -->
+<rect x="42" y="185" width="226" height="82" rx="10" fill="#FCEBEB" stroke="#E24B4A" stroke-width="1.2"/>
+<text x="155" y="208" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#A32D2D">HOJA</text>
+<text x="155" y="232" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="15" font-weight="500" fill="#501313">Rechazado</text>
+<text x="155" y="254" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#791F1F">Casos: A, B, C, D  (n = 4)</text>
+
+<!-- Hoja derecha: Aprobado -->
+<rect x="412" y="185" width="226" height="82" rx="10" fill="#EAF3DE" stroke="#639922" stroke-width="1.2"/>
+<text x="525" y="208" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#3B6D11">HOJA</text>
+<text x="525" y="232" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="15" font-weight="500" fill="#173404">Aprobado</text>
+<text x="525" y="254" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#27500A">Casos: E, F, G, H  (n = 4)</text>
+
+<text x="340" y="296" text-anchor="middle" font-family="inherit" font-size="11" fill="#999">Profundidad = 1 · Predicción = categoría mayoritaria en la hoja</text>
+</svg>
+</div>
+```
+
+::: {.callout-key}
+**¿Cómo predice el árbol un caso nuevo?**
+
+Llega una solicitud con ingreso de 2.8M:
+
+- ¿Ingreso ≥ 3.5M? → **No** → rama izquierda → predicción: **Rechazado**
+
+Llega otra con ingreso de 4.2M:
+
+- ¿Ingreso ≥ 3.5M? → **Sí** → rama derecha → predicción: **Aprobado**
+
+La predicción es determinista: para el mismo dato, siempre da la misma respuesta.
+:::
+
+## ¿Qué pasa si el árbol es más profundo?
+
+Con profundidad 1, el árbol rechaza al solicitante C (ingreso 2.5M, historial positivo) porque cayó en el grupo izquierdo junto con A, B y D. ¿Pero C merece el mismo trato que alguien con historial negativo?
+
+Con profundidad 2, el árbol puede hacer una **segunda pregunta** dentro del grupo izquierdo:
+
+```{=html}
+<div style="margin:1.5rem 0">
+<svg width="100%" viewBox="0 0 680 435" role="img">
+<title>Árbol de clasificación profundidad 2 — aprobación de crédito</title>
+<desc>El árbol ahora tiene dos niveles. El nodo raíz divide por ingreso. La rama izquierda (ingreso bajo) hace una segunda pregunta sobre historial crediticio, generando dos hojas adicionales.</desc>
+<defs>
+  <marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Nodo raíz -->
+<rect x="195" y="22" width="290" height="64" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="1.3"/>
+<text x="340" y="44" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#0C447C">NODO RAÍZ · profundidad 0</text>
+<text x="340" y="68" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#042C53">¿Ingreso ≥ 3.5 M?</text>
+
+<!-- Rama raíz izq -->
+<line x1="258" y1="86" x2="148" y2="170" stroke="#aaa" stroke-width="1.3" marker-end="url(#a2)"/>
+<text x="170" y="132" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No</text>
+
+<!-- Rama raíz der: hoja Aprobado (nivel 1) -->
+<line x1="422" y1="86" x2="532" y2="170" stroke="#aaa" stroke-width="1.3" marker-end="url(#a2)"/>
+<text x="510" y="132" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí</text>
+
+<!-- Hoja derecha nivel 1 -->
+<rect x="408" y="170" width="240" height="74" rx="10" fill="#EAF3DE" stroke="#639922" stroke-width="1.2"/>
+<text x="528" y="192" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#3B6D11">HOJA</text>
+<text x="528" y="214" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#173404">Aprobado</text>
+<text x="528" y="234" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#27500A">E, F, G, H  (n = 4)</text>
+
+<!-- Nodo interno izquierdo (profundidad 1) -->
+<rect x="22" y="170" width="252" height="64" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="1.2"/>
+<text x="148" y="192" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#633806">NODO INTERNO · profundidad 1</text>
+<text x="148" y="216" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="13" font-weight="500" fill="#412402">¿Historial = positivo?</text>
+
+<!-- Ramas del nodo interno izq -->
+<line x1="80"  y1="234" x2="54"  y2="320" stroke="#aaa" stroke-width="1.3" marker-end="url(#a2)"/>
+<line x1="216" y1="234" x2="242" y2="320" stroke="#aaa" stroke-width="1.3" marker-end="url(#a2)"/>
+<text x="44"  y="281" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No</text>
+<text x="252" y="281" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí</text>
+
+<!-- Hoja 1: Rechazado (ingreso bajo + historial negativo) -->
+<rect x="-12" y="320" width="160" height="82" rx="10" fill="#FCEBEB" stroke="#E24B4A" stroke-width="1.2"/>
+<text x="68" y="342" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#A32D2D">HOJA</text>
+<text x="68" y="364" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#501313">Rechazado</text>
+<text x="68" y="385" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#791F1F">A, B, D  (n = 3)</text>
+
+<!-- Hoja 2: Aprobado (ingreso bajo + historial positivo) -->
+<rect x="162" y="320" width="160" height="82" rx="10" fill="#EAF3DE" stroke="#639922" stroke-width="1.2"/>
+<text x="242" y="342" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#3B6D11">HOJA</text>
+<text x="242" y="364" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#173404">Aprobado</text>
+<text x="242" y="385" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#27500A">C  (n = 1)</text>
+
+<!-- Anotación lateral -->
+<rect x="618" y="170" width="3" height="64" rx="1" fill="#BA7517" opacity="0.4"/>
+<text x="635" y="195" font-family="inherit" font-size="10" fill="#666" transform="rotate(90,635,195)">nueva pregunta</text>
+
+<text x="340" y="422" text-anchor="middle" font-family="inherit" font-size="11" fill="#999">Profundidad = 2 · La rama derecha ya era pura; solo la izquierda necesitó refinarse</text>
+</svg>
+</div>
+```
+
+Con profundidad 2, el árbol detecta que C (ingreso bajo pero historial positivo) merece aprobación. La segunda pregunta refina la predicción, pero también hace el modelo más complejo — y si los datos de entrenamiento son pocos, puede memorizarlos en vez de aprender un patrón real.
+
+---
+
+<!--=================-->
+<!--=================-->
+# Explóralo tú mismo: árbol de clasificación interactivo
+
+Experimenta con los parámetros del árbol. El playground tiene dos pestañas: el **Mapa de decisión** (cómo divide el espacio de datos en regiones de colores) y la **Estructura del árbol** (las preguntas que hace, visualizadas como nodos).
+
+**¿Qué explorar?**
+
+1. Con **"Aprobación de crédito"** y profundidad 1: ¿cuál es la única pregunta del árbol? Cambia al tab **Árbol** para verla.
+2. Sube la profundidad a 4 o 5: ¿la accuracy en train sube? ¿Y en test? ¿Hay sobreajuste?
+3. Baja el mínimo de muestras por hoja a 1: ¿el árbol se vuelve más o menos complejo?
+4. Compara ambas pestañas: cada línea divisoria del Mapa corresponde a un nodo en el Árbol.
+
+```{=html}
+<div style="margin:1.5rem 0;">
+<style>
+#dt11w *{box-sizing:border-box;margin:0;padding:0}
+#dt11w{border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;font-family:inherit;background:#fff}
+#dt11w-inner{display:grid;grid-template-columns:270px 1fr;min-height:520px}
+#dt11w-panel{background:#f8f8f6;border-right:1px solid #e0e0e0;padding:16px;display:flex;flex-direction:column;gap:13px}
+#dt11w-right{display:flex;flex-direction:column;min-width:0}
+#dt11w-tabs{display:flex;border-bottom:1px solid #e0e0e0;background:#fafafa}
+.w11tab{padding:9px 18px;font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;color:#888;border-bottom:2px solid transparent;transition:all .15s}
+.w11tab.on{color:#1F4E79;border-bottom-color:#1F4E79;background:#fff}
+.w11tab:hover:not(.on){color:#555}
+#dt11w-vmap,#dt11w-vtree{flex:1;display:none;min-height:300px}
+#dt11w-vmap.vis{display:flex;flex-direction:column}
+#dt11w-vtree.vis{display:block;overflow:auto;padding:8px}
+#dt11w-cv{display:block;flex:1;width:100%}
+#dt11w-tsvg{display:block;width:100%}
+.w11ps{display:flex;flex-direction:column;gap:6px}
+.w11pl{font-size:10px;color:#888;letter-spacing:.04em;text-transform:uppercase;font-weight:500}
+.w11pv{font-size:17px;font-weight:500;color:#111}
+#dt11w-panel select{width:100%;padding:6px 8px;font-size:13px;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111}
+#dt11w-panel input[type=range]{width:100%;accent-color:#1F4E79}
+.w11btn{width:100%;padding:7px 4px;font-size:12px;font-weight:500;border:1px solid #93c5fd;border-radius:8px;background:#dbeafe;color:#1e40af;cursor:pointer;transition:background .15s}
+.w11btn:hover{background:#bfdbfe}
+.w11rst{width:100%;padding:5px 4px;font-size:11px;font-weight:500;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#666;cursor:pointer;transition:background .15s}
+.w11rst:hover{background:#f0f0f0}
+.w11acc{display:flex;gap:6px}
+.w11ab{flex:1;background:#f0f4f8;border-radius:8px;padding:8px 4px;text-align:center}
+.w11av{font-size:15px;font-weight:600;color:#1F4E79}
+.w11al{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.04em}
+.w11cmt td{border:1px solid #ccc;padding:3px 4px;text-align:center;font-size:10px}
+.w11leg{display:flex;gap:8px;flex-wrap:wrap}
+.w11li{display:flex;align-items:center;gap:4px;font-size:11px;color:#555}
+.w11ld{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+#dt11w-st{padding:7px 14px;font-size:11px;color:#666;border-top:1px solid #e0e0e0;display:flex;align-items:center;min-height:28px}
+</style>
+
+<div id="dt11w">
+<div id="dt11w-inner">
+  <!-- Panel -->
+  <div id="dt11w-panel">
+    <div class="w11ps">
+      <div class="w11pl">Dataset</div>
+      <select id="w11ds">
+        <option value="credit">Aprobación de crédito</option>
+        <option value="churn">Churn de clientes</option>
+      </select>
+    </div>
+    <div class="w11ps">
+      <div class="w11pl">Profundidad máxima</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="w11depth" min="1" max="7" value="3" step="1" style="flex:1">
+        <span class="w11pv" id="w11depthv">3</span>
+      </div>
+    </div>
+    <div class="w11ps">
+      <div class="w11pl">Mín. muestras por hoja</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="w11leaf" min="1" max="20" value="5" step="1" style="flex:1">
+        <span class="w11pv" id="w11leafv">5</span>
+      </div>
+    </div>
+    <div class="w11ps">
+      <div class="w11pl">Mín. muestras para dividir</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="w11split" min="2" max="30" value="10" step="1" style="flex:1">
+        <span class="w11pv" id="w11splitv">10</span>
+      </div>
+    </div>
+    <button class="w11btn" id="w11run">▶ Entrenar árbol</button>
+    <button class="w11rst" id="w11reset">↺ Reiniciar datos</button>
+    <div class="w11ps">
+      <div class="w11pl">Accuracy</div>
+      <div class="w11acc">
+        <div class="w11ab"><div class="w11av" id="w11tr">—</div><div class="w11al">Train</div></div>
+        <div class="w11ab"><div class="w11av" id="w11te">—</div><div class="w11al">Test</div></div>
+      </div>
+    </div>
+    <div class="w11ps">
+      <div class="w11pl">Matriz de confusión (test)</div>
+      <table class="w11cmt" style="width:100%;border-collapse:collapse"><tbody id="w11cm"></tbody></table>
+    </div>
+    <div class="w11ps" style="margin-top:auto">
+      <div class="w11pl">Leyenda</div>
+      <div class="w11leg" id="w11leg"></div>
+    </div>
+  </div>
+
+  <!-- Área derecha -->
+  <div id="dt11w-right">
+    <div id="dt11w-tabs">
+      <button class="w11tab on" id="tab-map11"  onclick="w11tab('map')">🗺 Mapa de decisión</button>
+      <button class="w11tab"    id="tab-tree11" onclick="w11tab('tree')">🌳 Árbol</button>
+    </div>
+    <div id="dt11w-vmap" class="vis"><canvas id="dt11w-cv"></canvas></div>
+    <div id="dt11w-vtree"><svg id="dt11w-tsvg"></svg></div>
+  </div>
+</div>
+<div id="dt11w-st">Elige un dataset y entrena el árbol para comenzar</div>
+</div>
+
+<script>
+(function(){
+const COLS=['#378ADD','#D85A30','#1D9E75','#BA7517'];
+function rnd(a,b){return a+(b-a)*Math.random();}
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function clamp(v){return Math.max(0.01,Math.min(0.99,v));}
+
+function genCredit(){
+  const p=[];
+  for(let i=0;i<70;i++) p.push({x:clamp(rnd(0.55,0.95)+randn()*0.04),y:clamp(rnd(0.55,0.95)+randn()*0.04),label:0});
+  for(let i=0;i<70;i++) p.push({x:clamp(rnd(0.05,0.48)+randn()*0.04),y:clamp(rnd(0.05,0.48)+randn()*0.04),label:1});
+  for(let i=0;i<20;i++) p.push({x:clamp(rnd(0.3,0.7)),y:clamp(rnd(0.3,0.7)),label:Math.random()<0.5?0:1});
+  return{pts:p,labels:['Aprobado','Rechazado'],xLabel:'Ingresos (normalizado)',yLabel:'Historial crediticio'};
+}
+function genChurn(){
+  const p=[];
+  for(let i=0;i<65;i++) p.push({x:clamp(rnd(0.05,0.45)+randn()*0.04),y:clamp(rnd(0.05,0.45)+randn()*0.04),label:0});
+  for(let i=0;i<75;i++) p.push({x:clamp(rnd(0.5,0.95)+randn()*0.04),y:clamp(rnd(0.5,0.95)+randn()*0.04),label:1});
+  for(let i=0;i<20;i++) p.push({x:clamp(rnd(0.35,0.65)),y:clamp(rnd(0.35,0.65)),label:Math.random()<0.5?0:1});
+  return{pts:p,labels:['Churner','Activo'],xLabel:'Uso del servicio',yLabel:'Antigüedad'};
+}
+
+/* ── Árbol ── */
+function gini(pts){
+  if(!pts.length)return 0;
+  const c=[0,0];pts.forEach(p=>c[p.label]++);
+  const n=pts.length;return 1-(c[0]/n)**2-(c[1]/n)**2;
+}
+function build(pts,depth,maxD,minL,minS){
+  const cnt=[0,0];pts.forEach(p=>cnt[p.label]++);
+  const maj=cnt[0]>=cnt[1]?0:1;
+  if(depth>=maxD||pts.length<minS||!cnt[0]||!cnt[1])return{leaf:true,pred:maj,cnt:[...cnt],depth};
+  let best=null,bg=-Infinity;
+  for(const dim of['x','y']){
+    const vs=[...new Set(pts.map(p=>p[dim]))].sort((a,b)=>a-b);
+    for(let i=0;i<vs.length-1;i++){
+      const th=(vs[i]+vs[i+1])/2;
+      const L=pts.filter(p=>p[dim]<th),R=pts.filter(p=>p[dim]>=th);
+      if(L.length<minL||R.length<minL)continue;
+      const n=pts.length,g=gini(pts)-(L.length/n)*gini(L)-(R.length/n)*gini(R);
+      if(g>bg){bg=g;best={dim,th,L,R};}
+    }
+  }
+  if(!best)return{leaf:true,pred:maj,cnt:[...cnt],depth};
+  return{leaf:false,dim:best.dim,th:best.th,left:build(best.L,depth+1,maxD,minL,minS),right:build(best.R,depth+1,maxD,minL,minS),cnt:[...cnt],depth};
+}
+function pred(tree,p){if(tree.leaf)return tree.pred;return p[tree.dim]<tree.th?pred(tree.left,p):pred(tree.right,p);}
+
+/* ── Estado ── */
+let W=0,H=0,data=null,tree=null,trainIdx=[],testIdx=[];
+const cv=document.getElementById('dt11w-cv');
+const cx=cv.getContext('2d');
+
+/* ── Tabs ── */
+window.w11tab=function(t){
+  document.getElementById('dt11w-vmap').classList.toggle('vis',t==='map');
+  document.getElementById('dt11w-vtree').classList.toggle('vis',t==='tree');
+  document.getElementById('tab-map11').classList.toggle('on',t==='map');
+  document.getElementById('tab-tree11').classList.toggle('on',t==='tree');
+  if(t==='map'){resize();drawMap();}
+  else if(tree)drawTreeSVG();
+};
+
+/* ── Canvas ── */
+function resize(){
+  const r=cv.parentElement.getBoundingClientRect();
+  W=r.width;H=Math.max(r.height-4,280);
+  cv.width=W;cv.height=H;
+}
+function px2n(x,y){const p=36;return{nx:(x-p)/(W-2*p),ny:1-(y-p)/(H-2*p)};}
+function n2px(nx,ny){const p=36;return{x:p+nx*(W-2*p),y:(H-p)-ny*(H-2*p)};}
+function h2r(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+
+function drawMap(){
+  if(!W||!H)return;
+  cx.clearRect(0,0,W,H);
+  if(tree){
+    const img=cx.createImageData(W,H);
+    const pad=36;
+    for(let px=0;px<W;px++)for(let py=0;py<H;py++){
+      const nx=(px-pad)/(W-2*pad),ny=1-(py-pad)/(H-2*pad);
+      if(nx<0||nx>1||ny<0||ny>1)continue;
+      const cl=pred(tree,{x:nx,y:ny});
+      const [r,g,b]=h2r(COLS[cl]);
+      const i=4*(py*W+px);img.data[i]=r;img.data[i+1]=g;img.data[i+2]=b;img.data[i+3]=28;
+    }
+    cx.putImageData(img,0,0);
+  }
+  const pad=36;
+  cx.strokeStyle='#ccc';cx.lineWidth=1;
+  cx.beginPath();cx.moveTo(pad,pad);cx.lineTo(pad,H-pad);cx.lineTo(W-pad,H-pad);cx.stroke();
+  cx.fillStyle='#999';cx.font='11px inherit';cx.textAlign='center';
+  if(data){cx.fillText(data.xLabel,W/2,H-6);cx.save();cx.translate(11,H/2);cx.rotate(-Math.PI/2);cx.fillText(data.yLabel,0,0);cx.restore();}
+  if(data) data.pts.forEach((p,i)=>{
+    const c=n2px(p.x,p.y),isT=testIdx.includes(i);
+    cx.beginPath();cx.arc(c.x,c.y,isT?5:3.5,0,6.28);
+    cx.fillStyle=COLS[p.label];cx.fill();
+    cx.strokeStyle=isT?'#000':'#fff';cx.lineWidth=isT?1.5:1;cx.stroke();
+  });
+}
+
+/* ── Árbol SVG ── */
+function drawTreeSVG(){
+  const container=document.getElementById('dt11w-tsvg');
+  const cW=Math.max(container.parentElement.getBoundingClientRect().width||400,400);
+  const NW=136,NH=54,VG=56;
+
+  function leaves(n){return n.leaf?1:leaves(n.left)+leaves(n.right);}
+  function posX(n,lo,hi){
+    if(n.leaf){n._cx=(lo+hi)/2;return;}
+    const tot=leaves(n);
+    const lf=leaves(n.left)/tot;
+    posX(n.left,lo,lo+(hi-lo)*lf);posX(n.right,lo+(hi-lo)*lf,hi);
+    n._cx=(n.left._cx+n.right._cx)/2;
+  }
+  function posY(n,d){n._cy=38+d*(NH+VG);if(!n.leaf){posY(n.left,d+1);posY(n.right,d+1);}}
+  function maxY(n){return n.leaf?n._cy:Math.max(maxY(n.left),maxY(n.right));}
+
+  posX(tree,40,cW-40);posY(tree,0);
+  const svgH=maxY(tree)+NH+36;
+
+  const dimName=d=>{if(!data)return d==='x'?'X':'Y';return d==='x'?data.xLabel.split('(')[0].trim():data.yLabel.split('(')[0].trim();};
+
+  let lines='',nodes='';
+  function walk(n){
+    if(!n.leaf){
+      lines+=`<line x1="${n._cx}" y1="${n._cy+NH/2}" x2="${n.left._cx}" y2="${n.left._cy-NH/2}" stroke="#bbb" stroke-width="1.2"/>`;
+      lines+=`<line x1="${n._cx}" y1="${n._cy+NH/2}" x2="${n.right._cx}" y2="${n.right._cy-NH/2}" stroke="#bbb" stroke-width="1.2"/>`;
+      const mlx=(n._cx+n.left._cx)/2,mly=(n._cy+NH/2+n.left._cy-NH/2)/2;
+      lines+=`<text x="${mlx-4}" y="${mly}" font-family="inherit" font-size="10" fill="#888" text-anchor="end">No</text>`;
+      const mrx=(n._cx+n.right._cx)/2,mry=(n._cy+NH/2+n.right._cy-NH/2)/2;
+      lines+=`<text x="${mrx+4}" y="${mry}" font-family="inherit" font-size="10" fill="#888">Sí</text>`;
+      walk(n.left);walk(n.right);
+    }
+    const x=n._cx-NW/2,y=n._cy-NH/2;
+    if(n.leaf){
+      const isPos=n.pred===0;
+      const bg=isPos?'#EAF3DE':'#FCEBEB',br=isPos?'#639922':'#E24B4A';
+      const ft=isPos?'#173404':'#501313',fs=isPos?'#3B6D11':'#A32D2D';
+      const lbl=data?data.labels[n.pred]:`Clase ${n.pred}`;
+      const tot=n.cnt[0]+n.cnt[1];
+      nodes+=`<rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="8" fill="${bg}" stroke="${br}" stroke-width="1"/>`;
+      nodes+=`<text x="${n._cx}" y="${y+16}" font-family="inherit" font-size="10" fill="${fs}" text-anchor="middle" dominant-baseline="central">HOJA</text>`;
+      nodes+=`<text x="${n._cx}" y="${y+34}" font-family="inherit" font-size="12" font-weight="500" fill="${ft}" text-anchor="middle" dominant-baseline="central">${lbl}</text>`;
+      nodes+=`<text x="${n._cx}" y="${y+50}" font-family="inherit" font-size="10" fill="#666" text-anchor="middle" dominant-baseline="central">n=${tot}</text>`;
+    } else {
+      const th=n.th.toFixed(2);
+      nodes+=`<rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>`;
+      nodes+=`<text x="${n._cx}" y="${y+16}" font-family="inherit" font-size="10" fill="#0C447C" text-anchor="middle" dominant-baseline="central">prof. ${n.depth}</text>`;
+      nodes+=`<text x="${n._cx}" y="${y+37}" font-family="inherit" font-size="11" font-weight="500" fill="#042C53" text-anchor="middle" dominant-baseline="central">${dimName(n.dim)} &lt; ${th}</text>`;
+    }
+  }
+  walk(tree);
+  container.setAttribute('viewBox',`0 0 ${cW} ${svgH}`);
+  container.setAttribute('height',svgH);
+  container.innerHTML=lines+nodes;
+}
+
+/* ── Métricas ── */
+function accuracy(idxs){
+  if(!idxs.length)return'—';
+  return(idxs.filter(i=>pred(tree,data.pts[i])===data.pts[i].label).length/idxs.length*100).toFixed(1)+'%';
+}
+function confMatrix(idxs){
+  const m=[[0,0],[0,0]];
+  idxs.forEach(i=>{const p=data.pts[i];m[p.label][pred(tree,p)]++;});return m;
+}
+function renderCM(m){
+  const b=document.getElementById('w11cm');
+  if(!m||!data){b.innerHTML='';return;}
+  const l0=data.labels[0].substring(0,9),l1=data.labels[1].substring(0,9);
+  b.innerHTML=`
+<tr><td colspan="3" style="border:none;padding:2px 0;font-size:10px;color:#888;text-align:right">Predicción →</td></tr>
+<tr><td style="background:#f8f8f8;font-size:10px;color:#888;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;padding:2px;white-space:nowrap">Real ↓</td><td style="background:#dbeafe;font-size:10px;font-weight:500;text-align:center;padding:3px">${l0}</td><td style="background:#fee2e2;font-size:10px;font-weight:500;text-align:center;padding:3px">${l1}</td></tr>
+<tr><td style="background:#dbeafe;font-size:10px;font-weight:500;text-align:center;padding:3px">${l0}</td><td style="border:1px solid #ccc;font-weight:600;color:#15803d;text-align:center;padding:4px">${m[0][0]}</td><td style="border:1px solid #ccc;font-weight:600;color:#b91c1c;text-align:center;padding:4px">${m[0][1]}</td></tr>
+<tr><td style="background:#fee2e2;font-size:10px;font-weight:500;text-align:center;padding:3px">${l1}</td><td style="border:1px solid #ccc;font-weight:600;color:#b91c1c;text-align:center;padding:4px">${m[1][0]}</td><td style="border:1px solid #ccc;font-weight:600;color:#15803d;text-align:center;padding:4px">${m[1][1]}</td></tr>`;
+}
+function splitTT(n){
+  const idx=Array.from({length:n},(_,i)=>i);
+  for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
+  const cut=Math.floor(n*0.75);return{train:idx.slice(0,cut),test:idx.slice(cut)};
+}
+
+/* ── Cargar dataset ── */
+function loadDS(){
+  const v=document.getElementById('w11ds').value;
+  data=v==='credit'?genCredit():genChurn();
+  const{train,test}=splitTT(data.pts.length);
+  trainIdx=train;testIdx=test;
+  document.getElementById('w11leg').innerHTML=data.labels.map((l,i)=>
+    `<div class="w11li"><div class="w11ld" style="background:${COLS[i]}"></div>${l}</div>`).join('');
+  tree=null;
+  document.getElementById('w11tr').textContent='—';
+  document.getElementById('w11te').textContent='—';
+  renderCM(null);
+  document.getElementById('dt11w-tsvg').innerHTML='';
+  resize();drawMap();
+  document.getElementById('dt11w-st').textContent=
+    `${data.pts.length} obs. (${trainIdx.length} entrenamiento, ${testIdx.length} prueba). Puntos con borde negro = conjunto de prueba.`;
+}
+
+/* ── Entrenar ── */
+document.getElementById('w11run').addEventListener('click',()=>{
+  if(!data)return;
+  const maxD=+document.getElementById('w11depth').value;
+  const minL=+document.getElementById('w11leaf').value;
+  const minS=+document.getElementById('w11split').value;
+  tree=build(trainIdx.map(i=>data.pts[i]),0,maxD,minL,minS);
+  document.getElementById('w11tr').textContent=accuracy(trainIdx);
+  document.getElementById('w11te').textContent=accuracy(testIdx);
+  renderCM(confMatrix(testIdx));
+  drawMap();
+  if(document.getElementById('dt11w-vtree').classList.contains('vis'))drawTreeSVG();
+  document.getElementById('dt11w-st').textContent=
+    `Árbol entrenado: profundidad máx ${maxD}, mín hoja ${minL}, mín split ${minS}.`;
+});
+
+/* ── Sliders ── */
+[['w11depth','w11depthv'],['w11leaf','w11leafv'],['w11split','w11splitv']].forEach(([id,vid])=>{
+  document.getElementById(id).addEventListener('input',e=>{document.getElementById(vid).textContent=e.target.value;});
+});
+document.getElementById('w11reset').addEventListener('click',loadDS);
+document.getElementById('w11ds').addEventListener('change',loadDS);
+window.addEventListener('resize',()=>{if(document.getElementById('dt11w-vmap').classList.contains('vis')){resize();drawMap();}});
+setTimeout(()=>{resize();loadDS();},150);
+})();
+</script>
+</div>
+```
+
+---
+
+<!--=================-->
+<!--=================-->
+# La matriz de confusión: leer un modelo de clasificación
+
+En el video anterior viste cómo un árbol de clasificación llega a una predicción: recorre sus preguntas y termina en una hoja que dice "Aprobado" o "Rechazado". Pero predecir no es suficiente — necesitamos saber qué tan bien predice, y para eso necesitamos comparar lo que el modelo dijo con lo que realmente ocurrió.
+
+Esa comparación se organiza en una tabla de cuatro celdas llamada matriz de confusión. En este video vas a ver cómo se construye celda por celda, siguiendo dos reglas simples: la primera letra (Verdadero o Falso) depende de si el modelo acertó; la segunda (Positivo o Negativo) depende únicamente de lo que el modelo predijo. Al final del video el profesor te propone un ejercicio de conteo — páusalo y resuélvelo antes de seguir, porque en clase trabajarás con exactamente esta misma lógica aplicada a datos reales.
+
+<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+{{< video https://youtu.be/TWDdeKs3org >}}
+
+Cuando el árbol predice sobre el conjunto de prueba, comparamos lo que predijo con lo que realmente ocurrió. Ese resumen es la **matriz de confusión**.
+
+## La tabla 2×2
+
+|  | **Predicho: Aprobado** | **Predicho: Rechazado** |
+|---|---|---|
+| **Real: Aprobado** | Verdadero Positivo (TP) | Falso Negativo (FN) |
+| **Real: Rechazado** | Falso Positivo (FP) | Verdadero Negativo (TN) |
+
+::: {.callout-key}
+**Los cuatro resultados posibles:**
+
+**TP (Verdadero Positivo):** Dijo "Aprobado" y era aprobado. Acierto donde importaba.
+
+**TN (Verdadero Negativo):** Dijo "Rechazado" y era rechazado. Acierto también.
+
+**FP (Falso Positivo):** Dijo "Aprobado" pero era rechazado → riesgo de impago para la entidad.
+
+**FN (Falso Negativo):** Dijo "Rechazado" pero era aprobado → se perdió un buen cliente.
+
+**Regla de memoria:** el primer adjetivo (Verdadero/Falso) dice si acertó. El segundo sustantivo (Positivo/Negativo) dice lo que predijo el modelo.
+:::
+
+## Las métricas que salen de la matriz
+
+::: {.callout-key}
+**Accuracy:**  
+$$\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}$$  
+Fracción de casos correctamente clasificados.  
+*Limitación: engañosa si las clases están desbalanceadas.*
+
+**Precisión:**  
+$$\text{Precisión} = \frac{TP}{TP + FP}$$  
+De los que el modelo dijo "Aprobado", ¿cuántos realmente lo eran?
+
+**Recall:**  
+$$\text{Recall} = \frac{TP}{TP + FN}$$  
+De los que realmente eran aprobados, ¿cuántos detectó el modelo?
+:::
+
+| Situación | Error más costoso | Priorizar |
+|---|---|---|
+| Fraude bancario | FN: dejar pasar un fraude | Recall alto |
+| Diagnóstico médico | FN: no detectar un caso real | Recall alto |
+| Crédito (impago caro) | FP: aprobar a quien no pagará | Precisión alta |
+| Retención de clientes | FN: no detectar al que se va | Recall alto |
+
+::: {.callout-warning}
+No existe la métrica perfecta. Mejorar el recall suele bajar la precisión y viceversa. La decisión de qué optimizar es de negocio, no del algoritmo.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Del resultado al negocio: un ejemplo completo
+
+Una entidad financiera evalúa el árbol sobre 50 solicitudes del conjunto de prueba:
+
+|  | Predicho: Aprobado | Predicho: Rechazado |
+|---|---|---|
+| Real: Aprobado | **22** (TP) | **4** (FN) |
+| Real: Rechazado | **5** (FP) | **19** (TN) |
+
+- Accuracy = (22 + 19) / 50 = **82%**  
+- Precisión = 22 / 27 = **81.5%** — cuando dice "Aprobado", acierta el 81.5% de las veces  
+- Recall = 22 / 26 = **84.6%** — detecta el 84.6% de los buenos clientes  
+
+¿Es suficiente? Depende del costo del error. Si el costo de un impago (FP) supera al costo de perder un buen cliente (FN), el modelo debería ajustarse para aumentar precisión — aceptando más FN a cambio. **Esa es una decisión de negocio, no del algoritmo.**
+
+::: {.callout-connect}
+**Conexión con semana 9**
+
+¿Por qué evaluamos en el conjunto de **prueba** y no en el de entrenamiento?
+
+El árbol ya "vio" los datos de entrenamiento. Medir allí da accuracy inflada. El conjunto de prueba simula solicitudes futuras — eso mide la capacidad real de predecir. Un árbol con 99% en train y 62% en test está memorizando, no aprendiendo (sobreajuste).
+:::
+
+---
+
+## Material adicional (opcional)
+
+- **An Introduction to Statistical Learning (ISLR)** — Capítulo 8: árboles, bagging, random forests — [statlearning.com](https://www.statlearning.com)
+- **Google ML Crash Course** — clasificación con ejemplos interactivos — [developers.google.com/machine-learning/crash-course](https://developers.google.com/machine-learning/crash-course)
+
+---
+
+## Checklist de preclase
+
+Al llegar a clase debes poder explicar:
+
+- [ ] ¿Qué es un nodo raíz, un nodo interno y una hoja?
+- [ ] ¿Qué predice el árbol en cada hoja?
+- [ ] ¿Cómo elige el árbol la primera variable de corte?
+- [ ] ¿Qué son TP, FP, TN, FN y cómo se ubican en la tabla 2×2?
+- [ ] ¿Cómo se calcula la accuracy? ¿Por qué puede ser engañosa?
+- [ ] ¿Cuándo es más importante el recall que la precisión?
+- [ ] ¿Por qué se evalúa en el conjunto de prueba y no en el de entrenamiento?
+- [ ] ¿Qué significa que un árbol esté sobreajustado?
+
+## Preguntas de comprensión
+
+**1.** Un árbol entrega estos resultados sobre 50 solicitudes del conjunto de prueba:
+
+|  | Predicho: Aprobado | Predicho: Rechazado |
+|---|---|---|
+| Real: Aprobado | 20 | 5 |
+| Real: Rechazado | 3 | 22 |
+
+Calcula la accuracy, la precisión y el recall. ¿Qué error es más frecuente: FP o FN?
+
+<details>
+<summary>Ver respuesta</summary>
+
+TP=20, FN=5, FP=3, TN=22  
+- Accuracy = (20+22)/50 = **84%**  
+- Precisión = 20/23 = **87%**  
+- Recall = 20/25 = **80%**  
+
+El error más frecuente es FN (5) > FP (3): el modelo rechaza más clientes buenos de lo que aprueba malos.
+</details>
+
+**2.** Un compañero entrena un árbol con profundidad 7 y obtiene 98% en train y 63% en test. Dice: "Es excelente, casi no se equivoca." ¿Qué le responderías?
+
+<details>
+<summary>Ver respuesta</summary>
+
+El modelo está sobreajustado. La brecha enorme entre train (98%) y test (63%) indica que memorizó los datos de entrenamiento en vez de aprender un patrón generalizable. Lo que importa es el desempeño en test. La solución probable es reducir la profundidad máxima o aumentar el mínimo de muestras por hoja.
+</details>
+
+**3.** La entidad decide que el costo de aprobar a alguien que no pagará (FP) es 4 veces mayor que el costo de rechazar a un buen cliente (FN). ¿Qué métrica debe optimizar el modelo? ¿Qué le pasa a la otra métrica?
+
+<details>
+<summary>Ver respuesta</summary>
+
+Debe optimizar **precisión**: el FP es el error más costoso. Para subirla, el árbol clasifica como "Aprobado" solo cuando está muy seguro — lo que probablemente sube los FN (rechaza más buenos clientes) bajando el recall. Es un trade-off inevitable: no se pueden maximizar ambas métricas a la vez. La decisión de dónde fijar ese trade-off es de la entidad.
+</details>

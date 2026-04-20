@@ -1,0 +1,614 @@
+---
+title: "Práctica guiada — Semana 11: Árboles de Clasificación"
+subtitle: "Introducción al Business Analytics · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<!--=================-->
+<!--=================-->
+# Contexto de negocio
+
+Una entidad financiera quiere automatizar la evaluación de solicitudes de crédito. Tienen un historial de 300 solicitudes con características del solicitante y saben si cada una fue **"Aprobada"** o **"Rechazada"** por el comité de crédito. Quieren un modelo que, dadas las características de una solicitud nueva, prediga automáticamente la decisión correcta.
+
+**Nuestro trabajo:** Entrenar un árbol de clasificación, obtener sus predicciones en el conjunto de prueba, y construir la matriz de confusión para evaluar qué tan bien predice el modelo.
+
+**Tu entregable al final de la clase:** La matriz de confusión completa con los valores de TP, FP, TN, FN, las tres métricas calculadas (accuracy, precisión, recall), la comparación con el baseline, y una interpretación escrita de máximo 3 líneas.
+
+---
+
+<!--=================-->
+<!--=================-->
+# Paso 1 — Preparar el entorno
+
+```{webr-r}
+#| warning: false
+#| message: false
+
+## Limpiar entorno / Clean environment
+rm(list = ls())
+
+## Cargar paquetes / Load packages
+require(dplyr)    # manipulación de datos / data wrangling
+require(ggplot2)  # visualización / visualization
+require(rpart)    # árbol de decisión / decision tree
+```
+
+---
+
+<!--=================-->
+<!--=================-->
+# Paso 2 — Cargar los datos
+
+Trabajamos con el dataset `credito_icesi`, que contiene solicitudes de crédito de una entidad financiera colombiana.
+
+```{webr-r}
+#| warning: false
+#| message: false
+
+## Cargar datos / Load data
+credito <- read.csv("https://eduard-martinez.github.io/databases/ba/credito_clasificacion.csv")
+
+## Verificar dimensiones / Check dimensions
+nrow(credito)
+ncol(credito)
+```
+
+```{webr-r}
+## Ver las primeras filas / Preview first rows
+head(credito)
+```
+
+```{webr-r}
+## Nombres de columnas / Column names
+colnames(credito)
+```
+
+::: {.callout-key}
+**Variables del dataset:**
+
+- `ingreso_m` — Ingreso mensual en millones de pesos
+- `historial` — Historial crediticio (1 = positivo, 0 = negativo)
+- `deuda_actual` — Deuda vigente en millones de pesos
+- `antiguedad_lab` — Años de antigüedad laboral
+- `edad` — Edad del solicitante en años
+- `decision` — **Variable de resultado**: `"Aprobado"` si el crédito fue aprobado, `"Rechazado"` si fue rechazado
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Paso 3 — Explorar la variable de resultado
+
+Antes de entrenar, siempre revisamos cuántos casos hay de cada categoría. Esto nos permite calcular el **baseline** al final.
+
+```{webr-r}
+## Distribución de la variable de resultado / Target variable distribution
+table(credito$decision)
+```
+
+```{webr-r}
+## Proporción de cada categoría / Proportion per category
+prop.table(table(credito$decision))
+```
+
+::: {.callout-key}
+**¿Qué es el baseline?**
+
+El baseline es el resultado que obtendríamos con el modelo más simple posible: predecir siempre la categoría más frecuente. Si el 58% de las solicitudes son "Aprobado", un modelo que siempre predice "Aprobado" tendría 58% de accuracy sin aprender nada.
+
+Nuestro árbol debe superar ese porcentaje. Si no lo hace, no está aprendiendo nada útil. **Anota este porcentaje** — lo necesitarás en el entregable final.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Paso 4 — Dividir en entrenamiento y prueba
+
+El árbol aprende con los datos de entrenamiento. Evaluamos con los datos de prueba — solicitudes que el modelo nunca vio durante el entrenamiento.
+
+```{webr-r}
+## Fijar semilla para reproducibilidad / Set seed for reproducibility
+set.seed(2025)
+
+## Total de filas / Total rows
+n_total <- nrow(credito)
+n_total
+
+## Índices de entrenamiento (75% de los datos) / Training indices (75%)
+idx_train <- sample(x = 1:n_total, size = floor(0.75 * n_total))
+
+## Crear conjuntos / Create sets
+credito_train <- credito[idx_train, ]
+credito_test  <- credito[-idx_train, ]
+
+## Verificar tamaños / Check sizes
+nrow(credito_train)
+nrow(credito_test)
+```
+
+::: {.callout-key}
+**¿Por qué dividir los datos?**
+
+El árbol memoriza patrones del conjunto de entrenamiento. Si medimos el error en esos mismos datos, el modelo parece perfecto. El conjunto de prueba simula solicitudes futuras y mide la capacidad real de predecir. Esto es el train/test split que vimos en la Semana 9.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Paso 5 — Entrenar el árbol de clasificación
+
+```{webr-r}
+## Entrenar el árbol / Train the tree
+## method = "class" indica clasificación / method = "class" for classification
+arbol <- rpart(formula = decision ~ ingreso_m + historial + deuda_actual + antiguedad_lab + edad,
+               data    = credito_train,
+               method  = "class",
+               control = rpart.control(maxdepth = 3))
+
+## Ver el árbol en texto / Print tree as text
+arbol
+```
+
+::: {.callout-key}
+**¿Cómo leer el output de texto del árbol?**
+
+Cada línea es un nodo. Se lee de arriba hacia abajo:
+
+- El primer nodo (sin sangría) es el **nodo raíz**: la primera pregunta que hace el modelo. Recuerda el diagrama de la teoría — en el ejemplo de los 8 solicitantes era `¿Ingreso ≥ 3.5M?`. Aquí el árbol eligió otra variable de corte basándose en los 225 datos de entrenamiento.
+- El símbolo `*` al final de una línea indica que es una **hoja**: allí termina esa rama y el árbol da una predicción.
+- La columna `yval` muestra la predicción de ese nodo (Aprobado o Rechazado).
+- Los números entre paréntesis muestran cuántas observaciones de entrenamiento cayeron en ese nodo y cómo se distribuyen entre las categorías.
+
+**Identifica:** ¿Cuál es la primera variable que usa el árbol para dividir? ¿Coincide con la intuición del analista de crédito de la teoría?
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Paso 6 — Visualizar el árbol
+
+```{webr-r}
+## Visualizar el árbol / Plot the tree
+plot(arbol, uniform = TRUE, margin = 0.12)
+text(arbol, use.n = TRUE, cex = 0.8)
+```
+
+::: {.callout-key}
+**¿Qué muestra el gráfico?**
+
+- Cada nodo interno muestra la pregunta que divide: la variable y el umbral de corte.
+- Cada hoja (nodo terminal) muestra la predicción: "Aprobado" o "Rechazado".
+- `use.n = TRUE` agrega el conteo de observaciones de entrenamiento que cayeron en cada nodo.
+
+Compara este gráfico con los diagramas SVG de la teoría (profundidad 1 y profundidad 2). ¿El árbol que entrenaste aquí tiene más o menos niveles que el ejemplo de la teoría? ¿Cuántas hojas tiene?
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Paso 7 — Predecir en el conjunto de prueba
+
+El árbol ya aprendió. Ahora predice sobre las solicitudes que nunca vio durante el entrenamiento.
+
+```{webr-r}
+## Predecir en conjunto de prueba / Predict on test set
+## type = "class" devuelve la categoría, no probabilidades / returns category label
+predicciones <- predict(object  = arbol,
+                        newdata = credito_test,
+                        type    = "class")
+
+## Ver las primeras predicciones / Preview first predictions
+head(predicciones)
+```
+
+```{webr-r}
+## Cuántas predicciones de cada categoría / Count predictions per category
+table(predicciones)
+```
+
+```{webr-r}
+## Comparar predicción vs. valor real — primeras 10 filas
+## Compare prediction vs. real value — first 10 rows
+head(
+  data.frame(real       = credito_test$decision,
+             prediccion = predicciones),
+  n = 10
+)
+```
+
+::: {.callout-warning}
+**¿Ves filas donde `real` y `prediccion` difieren?** Esos son los errores del modelo. Algunos son FP (predijo Aprobado, era Rechazado) y otros son FN (predijo Rechazado, era Aprobado). La matriz de confusión del siguiente paso los cuenta todos.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Paso 8 — Construir la matriz de confusión
+
+Este es el paso central de la clase. Usamos `table()` para cruzar los valores reales con las predicciones.
+
+```{webr-r}
+## Construir la tabla de confusión / Build confusion matrix
+## Filas = valor real, Columnas = predicción del modelo
+## Rows = real value, Cols = model prediction
+tabla_confusion <- table(Real      = credito_test$decision,
+                         Prediccion = predicciones)
+
+## Ver la tabla / Print table
+tabla_confusion
+```
+
+::: {.callout-key}
+**Cómo leer esta tabla:**
+
+La estructura es **filas = valor real** y **columnas = predicción del modelo** — igual que los diagramas de la teoría.
+
+| Posición | Nombre | Significado |
+|---|---|---|
+| Fila "Aprobado", Col "Aprobado" | **TP** | Predijo Aprobado y era Aprobado — acierto |
+| Fila "Aprobado", Col "Rechazado" | **FN** | Predijo Rechazado pero era Aprobado — se perdió un buen cliente |
+| Fila "Rechazado", Col "Aprobado" | **FP** | Predijo Aprobado pero era Rechazado — riesgo de impago |
+| Fila "Rechazado", Col "Rechazado" | **TN** | Predijo Rechazado y era Rechazado — acierto |
+
+**Tu tarea:** Extrae los cuatro números de la tabla y anótalos. Los usarás en el paso siguiente y en el entregable.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Paso 9 — Extraer TP, FP, TN, FN
+
+```{webr-r}
+## Extraer cada celda de la tabla / Extract each cell from the table
+## Sintaxis: tabla["nombre_fila", "nombre_columna"]
+## Syntax:   table["row_name",  "column_name"]
+
+TP <- tabla_confusion["Aprobado",  "Aprobado"]   # real Aprobado, pred Aprobado
+FN <- tabla_confusion["Aprobado",  "Rechazado"]  # real Aprobado, pred Rechazado
+FP <- tabla_confusion["Rechazado", "Aprobado"]   # real Rechazado, pred Aprobado
+TN <- tabla_confusion["Rechazado", "Rechazado"]  # real Rechazado, pred Rechazado
+
+## Imprimir / Print
+cat("TP — Verdaderos Positivos (Aprobado | Aprobado):", TP, "\n")
+cat("FN — Falsos Negativos    (Aprobado | Rechazado):", FN, "\n")
+cat("FP — Falsos Positivos    (Rechazado| Aprobado) :", FP, "\n")
+cat("TN — Verdaderos Negativos(Rechazado| Rechazado):", TN, "\n")
+```
+
+::: {.callout-warning}
+**¿Por qué `tabla["Aprobado", "Aprobado"]` y no `tabla[1,1]`?**
+
+Usar los nombres de las categorías es más seguro: si R ordena las filas o columnas alfabéticamente de forma distinta a lo que esperamos, `tabla[1,1]` puede no ser el TP. Los nombres siempre apuntan a la celda correcta.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Paso 10 — Calcular las métricas
+
+```{webr-r}
+## Total de observaciones en prueba / Total test observations
+n_test <- TP + FN + FP + TN
+
+## Accuracy: proporción de casos correctamente clasificados
+accuracy  <- (TP + TN) / n_test
+
+## Precisión: de los que predijo "Aprobado", cuántos lo eran realmente
+precision <- TP / (TP + FP)
+
+## Recall: de los que eran realmente "Aprobado", cuántos detectó el modelo
+recall    <- TP / (TP + FN)
+
+## Imprimir resultados / Print results
+cat("Accuracy:  ", round(accuracy  * 100, 1), "%\n")
+cat("Precisión: ", round(precision * 100, 1), "%\n")
+cat("Recall:    ", round(recall    * 100, 1), "%\n")
+```
+
+::: {.callout-key}
+**¿Cómo interpretar los tres números juntos?**
+
+- **Accuracy:** de todas las solicitudes del test, ¿en qué fracción acertó el modelo? Si es 82%, acierta 8 de cada 10.
+- **Precisión:** de las que predijo "Aprobado", ¿cuántas realmente lo eran? Una precisión alta protege a la entidad de aprobar malos créditos.
+- **Recall:** de las que realmente eran "Aprobado", ¿cuántas detectó? Un recall alto minimiza los buenos clientes rechazados.
+
+Ahora piensa: ¿cuál error es más costoso para esta entidad financiera — el FP o el FN?
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Paso 11 — Comparar con el baseline
+
+Antes de concluir que el modelo es bueno, lo comparamos con el modelo más simple posible: predecir siempre la categoría más frecuente del conjunto de prueba.
+
+```{webr-r}
+## Distribución real en el conjunto de prueba / Real distribution in test set
+table(credito_test$decision)
+```
+
+```{webr-r}
+## Proporción de cada categoría / Proportion per category
+prop.table(table(credito_test$decision))
+```
+
+```{webr-r}
+## Accuracy del baseline: predecir siempre la categoría mayoritaria
+## Baseline accuracy: always predict the majority class
+max(prop.table(table(credito_test$decision)))
+```
+
+::: {.callout-warning}
+**¿El árbol mejora el baseline?**
+
+Compara la accuracy del árbol (Paso 10) con la del baseline (el `max()` que acabas de calcular). Si el árbol no supera ese número, no aprendió nada útil: cualquier persona que siempre diga "Aprobado" lo haría igual de bien.
+
+Si sí lo supera: ¿cuántos puntos porcentuales ganamos? ¿Vale la complejidad del modelo?
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Tu entregable: la matriz completa
+
+::: {.callout-practice}
+**Actividad en clase — Entrega individual**
+
+Con los resultados de los pasos anteriores, completa esta tabla a mano o en el espacio indicado por el profesor.
+
+---
+
+**Matriz de confusión (conjunto de prueba):**
+
+|  | Predicción: Aprobado | Predicción: Rechazado |
+|---|---|---|
+| **Real: Aprobado** | TP = _____ | FN = _____ |
+| **Real: Rechazado** | FP = _____ | TN = _____ |
+
+---
+
+**Métricas calculadas:**
+
+| Métrica | Fórmula | Resultado |
+|---|---|---|
+| Accuracy | (TP + TN) / (TP + FN + FP + TN) | ______% |
+| Precisión | TP / (TP + FP) | ______% |
+| Recall | TP / (TP + FN) | ______% |
+
+---
+
+**Baseline:**
+
+- Categoría más frecuente en el test: __________________ 
+- Proporción: ______%  
+- ¿El árbol supera el baseline? ☐ Sí ☐ No  
+- Diferencia de accuracy: ______ puntos porcentuales
+
+---
+
+**Interpretación (máximo 3 líneas):**
+
+Responde: ¿Qué error comete más el modelo — FP o FN? ¿Qué significa ese error en términos del negocio de la entidad financiera? ¿Recomendarías usar este modelo tal como está?
+
+_______________________________________________
+_______________________________________________
+_______________________________________________
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+## Checklist
+
+Al finalizar esta práctica, debes poder:
+
+- [ ] Cargar datos y explorar la distribución de la variable de resultado antes de entrenar
+- [ ] Dividir en train/test con `sample()` y `set.seed()` para reproducibilidad
+- [ ] Entrenar un árbol con `rpart(..., method = "class", control = rpart.control(maxdepth = ...))`
+- [ ] Leer el output de texto del árbol: identificar el nodo raíz, las hojas y las predicciones
+- [ ] Conectar el gráfico del árbol con los diagramas SVG vistos en la teoría
+- [ ] Obtener predicciones con `predict(..., type = "class")`
+- [ ] Construir la tabla de confusión con `table(Real = ..., Prediccion = ...)`
+- [ ] Extraer TP, FP, TN, FN usando los nombres de categoría: `tabla["nombre_fila", "nombre_col"]`
+- [ ] Calcular accuracy, precisión y recall con las fórmulas
+- [ ] Calcular el baseline con `max(prop.table(...))` y comparar con la accuracy del árbol
+- [ ] Interpretar el tipo de error más frecuente en términos del contexto de negocio
+
+## Preguntas de comprensión
+
+**1.** En el Paso 5 entrenaste con `maxdepth = 3`. Si cambias a `maxdepth = 1`, ¿esperas que la accuracy en test suba o baje? ¿Y si usas `maxdepth = 8`? ¿Qué concepto de la teoría explica ambos casos?
+
+<details>
+<summary>Ver respuesta</summary>
+Con `maxdepth = 1` el árbol hace una sola pregunta — igual que el ejemplo de profundidad 1 de la teoría. Es muy simple: probablemente baja la accuracy en test (subajuste). Con `maxdepth = 8` el árbol tiene muchos niveles y puede memorizar los 225 datos de entrenamiento: accuracy alta en train, pero puede bajar en test (sobreajuste). El mejor punto suele estar en un valor intermedio donde el árbol generaliza sin memorizar.
+</details>
+
+**2.** Tu tabla de confusión muestra FP = 8 y FN = 3. Una compañera dice: "Prefiero el modelo con FP = 3 y FN = 8 porque aprueba menos créditos malos." ¿Tienes razón de preocuparte? ¿Qué depende?
+
+<details>
+<summary>Ver respuesta</summary>
+Depende del costo relativo de cada error para la entidad. FP = aprobar a alguien que no pagará → pérdida por impago (costo financiero directo). FN = rechazar a un buen cliente → pérdida de ingresos futuros (costo de oportunidad). Si el costo del impago es mayor que el del cliente perdido, el modelo con FP=3 es preferible aunque tenga más FN. Si rechazar buenos clientes tiene un costo alto (por ejemplo en un mercado competitivo), puede ser mejor tolerar más FP. No hay respuesta universal — es una decisión de negocio.
+</details>
+
+**3.** El árbol da 84% de accuracy en test. El baseline es 56%. Un colega dice: "Ganamos 28 puntos porcentuales, el modelo es excelente." ¿Estás de acuerdo con esa sola afirmación? ¿Qué más revisarías?
+
+<details>
+<summary>Ver respuesta</summary>
+La mejora sobre el baseline es importante y es una buena señal — el modelo sí aprendió algo. Pero la accuracy sola no es suficiente: hay que revisar precisión y recall para saber qué tipo de errores comete. Si el 84% de accuracy se logra aprobando casi todo (recall muy alto, precisión baja), puede estar asumiendo demasiado riesgo de impago. También conviene verificar que la diferencia entre accuracy en train y en test no sea muy grande (señal de sobreajuste) y que el árbol tenga sentido de negocio: ¿la primera variable de corte que eligió es razonable?
+</details>
+
+
+```{=html}
+<!-- Panel Environment -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">&#x1F4E6; Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
+  </div>
+</div>
+
+<script type="module">
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
+};
+
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Env panel error:', e);
+    return [];
+  }
+}
+
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+function moveWebRStatus() {
+  const anchor = document.getElementById('webr-status-anchor');
+  const statusArea = document.getElementById('qwebr-status-message-area');
+  if (anchor && statusArea) {
+    const wrapper = statusArea.closest('.quarto-title-meta');
+    if (wrapper) {
+      wrapper.style.display = 'inline';
+      wrapper.style.fontSize = '13px';
+      wrapper.style.marginLeft = '30px';
+      anchor.parentNode.insertBefore(wrapper, anchor);
+    }
+  }
+}
+
+async function init() {
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
+  moveWebRStatus();
+
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+```
