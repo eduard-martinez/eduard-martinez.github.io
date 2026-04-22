@@ -255,10 +255,10 @@ La estructura es **filas = valor real** y **columnas = predicción del modelo** 
 
 | Posición | Nombre | Significado |
 |---|---|---|
-| Fila "Aprobado", Col "Aprobado" | **TP** | Predijo Aprobado y era Aprobado — acierto |
+| Fila "Aprobado", Col "Aprobado" | **VP** | Predijo Aprobado y era Aprobado — acierto |
 | Fila "Aprobado", Col "Rechazado" | **FN** | Predijo Rechazado pero era Aprobado — se perdió un buen cliente |
 | Fila "Rechazado", Col "Aprobado" | **FP** | Predijo Aprobado pero era Rechazado — riesgo de impago |
-| Fila "Rechazado", Col "Rechazado" | **TN** | Predijo Rechazado y era Rechazado — acierto |
+| Fila "Rechazado", Col "Rechazado" | **VN** | Predijo Rechazado y era Rechazado — acierto |
 
 **Tu tarea:** Extrae los cuatro números de la tabla y anótalos. Los usarás en el paso siguiente y en el entregable.
 :::
@@ -267,23 +267,17 @@ La estructura es **filas = valor real** y **columnas = predicción del modelo** 
 
 <!--=================-->
 <!--=================-->
-# Paso 9 — Extraer TP, FP, TN, FN
+# Paso 9 — Extraer VP, FP, VN, FN
 
 ```{webr-r}
 ## Extraer cada celda de la tabla / Extract each cell from the table
 ## Sintaxis: tabla["nombre_fila", "nombre_columna"]
 ## Syntax:   table["row_name",  "column_name"]
 
-TP <- tabla_confusion["Aprobado",  "Aprobado"]   # real Aprobado, pred Aprobado
+VP <- tabla_confusion["Aprobado",  "Aprobado"]   # real Aprobado, pred Aprobado
 FN <- tabla_confusion["Aprobado",  "Rechazado"]  # real Aprobado, pred Rechazado
 FP <- tabla_confusion["Rechazado", "Aprobado"]   # real Rechazado, pred Aprobado
-TN <- tabla_confusion["Rechazado", "Rechazado"]  # real Rechazado, pred Rechazado
-
-## Imprimir / Print
-cat("TP — Verdaderos Positivos (Aprobado | Aprobado):", TP, "\n")
-cat("FN — Falsos Negativos    (Aprobado | Rechazado):", FN, "\n")
-cat("FP — Falsos Positivos    (Rechazado| Aprobado) :", FP, "\n")
-cat("TN — Verdaderos Negativos(Rechazado| Rechazado):", TN, "\n")
+VN <- tabla_confusion["Rechazado", "Rechazado"]  # real Rechazado, pred Rechazado
 ```
 
 ::: {.callout-warning}
@@ -300,16 +294,16 @@ Usar los nombres de las categorías es más seguro: si R ordena las filas o colu
 
 ```{webr-r}
 ## Total de observaciones en prueba / Total test observations
-n_test <- TP + FN + FP + TN
+n_test <- VP + FN + FP + VN
 
 ## Accuracy: proporción de casos correctamente clasificados
-accuracy  <- (TP + TN) / n_test
+accuracy  <- (VP + VN) / n_test
 
 ## Precisión: de los que predijo "Aprobado", cuántos lo eran realmente
-precision <- TP / (TP + FP)
+precision <- VP / (VP + FP)
 
 ## Recall: de los que eran realmente "Aprobado", cuántos detectó el modelo
-recall    <- TP / (TP + FN)
+recall    <- VP / (VP + FN)
 
 ## Imprimir resultados / Print results
 cat("Accuracy:  ", round(accuracy  * 100, 1), "%\n")
@@ -365,10 +359,13 @@ Si sí lo supera: ¿cuántos puntos porcentuales ganamos? ¿Vale la complejidad 
 <!--=================-->
 # Tu entregable: la matriz completa
 
+Durante el semestre, el equipo de analítica de una entidad financiera evaluó un árbol de clasificación entrenado para predecir si una solicitud de crédito debía aprobarse o rechazarse. El modelo fue probado sobre 40 solicitudes del conjunto de prueba, de las cuales 22 eran realmente aprobadas y 18 eran realmente rechazadas.
+De las 22 solicitudes que realmente debían aprobarse, el modelo identificó correctamente 18 y clasificó erróneamente 4 como rechazadas. De las 18 solicitudes que realmente debían rechazarse, el modelo clasificó correctamente 14 como rechazadas, pero aprobó incorrectamente las 4 restantes.
+
 ::: {.callout-practice}
 **Actividad en clase — Entrega individual**
 
-Con los resultados de los pasos anteriores, completa esta tabla a mano o en el espacio indicado por el profesor.
+Con los resultados del texto anterior, completa esta tabla a mano en un documento word y cargalo en Intu en el espacio indicado por el profesor.
 
 ---
 
@@ -376,8 +373,8 @@ Con los resultados de los pasos anteriores, completa esta tabla a mano o en el e
 
 |  | Predicción: Aprobado | Predicción: Rechazado |
 |---|---|---|
-| **Real: Aprobado** | TP = _____ | FN = _____ |
-| **Real: Rechazado** | FP = _____ | TN = _____ |
+| **Real: Aprobado** | VP = _____ | FN = _____ |
+| **Real: Rechazado** | FP = _____ | VN = _____ |
 
 ---
 
@@ -388,15 +385,6 @@ Con los resultados de los pasos anteriores, completa esta tabla a mano o en el e
 | Accuracy | (TP + TN) / (TP + FN + FP + TN) | ______% |
 | Precisión | TP / (TP + FP) | ______% |
 | Recall | TP / (TP + FN) | ______% |
-
----
-
-**Baseline:**
-
-- Categoría más frecuente en el test: __________________ 
-- Proporción: ______%  
-- ¿El árbol supera el baseline? ☐ Sí ☐ No  
-- Diferencia de accuracy: ______ puntos porcentuales
 
 ---
 
