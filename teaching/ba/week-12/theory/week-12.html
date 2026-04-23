@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Unidad 9 - Árboles de Regresión</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="week-12_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-12_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-12_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-12_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-12_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-12_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-12_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-12_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-12_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-12_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-12_files/libs/bootstrap/bootstrap-e6bb25874def5e3c119f13f2169c6013.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#objetivo-de-la-semana" id="toc-objetivo-de-la-semana" class="nav-link active" data-scroll-target="#objetivo-de-la-semana"><span class="header-section-number">1</span> Objetivo de la semana</a>
+  <ul class="collapse">
+  <li><a href="#lo-que-cubriremos" id="toc-lo-que-cubriremos" class="nav-link" data-scroll-target="#lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</a></li>
+  </ul></li>
+  <li><a href="#de-clasificación-a-regresión-qué-cambia" id="toc-de-clasificación-a-regresión-qué-cambia" class="nav-link" data-scroll-target="#de-clasificación-a-regresión-qué-cambia"><span class="header-section-number">2</span> De clasificación a regresión: ¿qué cambia?</a></li>
+  <li><a href="#el-árbol-de-regresión-cómo-predice-un-número" id="toc-el-árbol-de-regresión-cómo-predice-un-número" class="nav-link" data-scroll-target="#el-árbol-de-regresión-cómo-predice-un-número"><span class="header-section-number">3</span> El árbol de regresión: cómo predice un número</a>
+  <ul class="collapse">
+  <li><a href="#la-intuición-grupos-homogéneos-y-promedios" id="toc-la-intuición-grupos-homogéneos-y-promedios" class="nav-link" data-scroll-target="#la-intuición-grupos-homogéneos-y-promedios"><span class="header-section-number">3.1</span> La intuición: grupos homogéneos y promedios</a></li>
+  <li><a href="#un-árbol-con-profundidad-1-ejemplo-de-notas" id="toc-un-árbol-con-profundidad-1-ejemplo-de-notas" class="nav-link" data-scroll-target="#un-árbol-con-profundidad-1-ejemplo-de-notas"><span class="header-section-number">3.2</span> Un árbol con profundidad 1: ejemplo de notas</a></li>
+  <li><a href="#qué-pasa-con-más-profundidad" id="toc-qué-pasa-con-más-profundidad" class="nav-link" data-scroll-target="#qué-pasa-con-más-profundidad"><span class="header-section-number">3.3</span> ¿Qué pasa con más profundidad?</a></li>
+  </ul></li>
+  <li><a href="#métricas-de-regresión-qué-tan-lejos-estuvo-el-modelo" id="toc-métricas-de-regresión-qué-tan-lejos-estuvo-el-modelo" class="nav-link" data-scroll-target="#métricas-de-regresión-qué-tan-lejos-estuvo-el-modelo"><span class="header-section-number">4</span> Métricas de regresión: ¿qué tan lejos estuvo el modelo?</a>
+  <ul class="collapse">
+  <li><a href="#mae-error-absoluto-medio" id="toc-mae-error-absoluto-medio" class="nav-link" data-scroll-target="#mae-error-absoluto-medio"><span class="header-section-number">4.1</span> MAE — Error Absoluto Medio</a></li>
+  <li><a href="#rmse-raíz-del-error-cuadrático-medio" id="toc-rmse-raíz-del-error-cuadrático-medio" class="nav-link" data-scroll-target="#rmse-raíz-del-error-cuadrático-medio"><span class="header-section-number">4.2</span> RMSE — Raíz del Error Cuadrático Medio</a></li>
+  <li><a href="#mae-vs.-rmse-cuál-usar" id="toc-mae-vs.-rmse-cuál-usar" class="nav-link" data-scroll-target="#mae-vs.-rmse-cuál-usar"><span class="header-section-number">4.3</span> MAE vs.&nbsp;RMSE: ¿cuál usar?</a></li>
+  </ul></li>
+  <li><a href="#explóralo-tú-mismo-árbol-de-regresión-interactivo" id="toc-explóralo-tú-mismo-árbol-de-regresión-interactivo" class="nav-link" data-scroll-target="#explóralo-tú-mismo-árbol-de-regresión-interactivo"><span class="header-section-number">5</span> Explóralo tú mismo: árbol de regresión interactivo</a></li>
+  <li><a href="#del-resultado-al-negocio-interpretar-las-métricas" id="toc-del-resultado-al-negocio-interpretar-las-métricas" class="nav-link" data-scroll-target="#del-resultado-al-negocio-interpretar-las-métricas"><span class="header-section-number">6</span> Del resultado al negocio: interpretar las métricas</a>
+  <ul class="collapse">
+  <li><a href="#material-adicional-opcional" id="toc-material-adicional-opcional" class="nav-link" data-scroll-target="#material-adicional-opcional"><span class="header-section-number">6.1</span> Material adicional (opcional)</a></li>
+  <li><a href="#checklist-de-preclase" id="toc-checklist-de-preclase" class="nav-link" data-scroll-target="#checklist-de-preclase"><span class="header-section-number">6.2</span> Checklist de preclase</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">6.3</span> Preguntas de comprensión</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 9 - Árboles de Regresión</h1>
+<p class="subtitle lead">Introducción al Business Analytics · Semana 12 · 06278-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a> <span id="webr-status-anchor"></span></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="objetivo-de-la-semana" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Objetivo de la semana</h1>
+<p>El foco está en <strong>regresión supervisada</strong>: cuando la variable de resultado no es una categoría sino un <strong>número continuo</strong>, el árbol de decisión se adapta para predecirlo. Esta semana aprenderemos a construir e interpretar un árbol de regresión y a medir su desempeño con métricas que cuantifican el error en las mismas unidades del resultado.</p>
+<section id="lo-que-cubriremos" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</h2>
+<ul>
+<li>De clasificación a regresión: qué cambia y qué se mantiene igual</li>
+<li>Cómo predice el árbol de regresión: el promedio de la hoja</li>
+<li>Métricas de error: MAE y RMSE — qué miden y cuándo usar cada una</li>
+<li>El baseline de regresión: comparar contra predecir siempre el promedio</li>
+<li>Sobreajuste en regresión: misma trampa, diferente métrica</li>
+</ul>
+<div class="callout-key">
+<p><strong>Conexión con semanas anteriores</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Semana 11</th>
+<th>Semana 12</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Árbol de <strong>clasificación</strong></td>
+<td>Árbol de <strong>regresión</strong></td>
+</tr>
+<tr class="even">
+<td>Variable resultado: categoría (Aprobado/Rechazado)</td>
+<td>Variable resultado: número continuo (nota 0–5.0)</td>
+</tr>
+<tr class="odd">
+<td>Hoja predice: categoría más frecuente</td>
+<td>Hoja predice: promedio de los casos</td>
+</tr>
+<tr class="even">
+<td>Métricas: accuracy, precisión, recall</td>
+<td>Métricas: MAE, RMSE</td>
+</tr>
+<tr class="odd">
+<td>Baseline: clase mayoritaria</td>
+<td>Baseline: predecir siempre el promedio global</td>
+</tr>
+</tbody>
+</table>
+<p>La lógica del árbol es idéntica: preguntas binarias, nodos, hojas, profundidad máxima. Lo que cambia es <strong>qué hay en la hoja</strong> y <strong>cómo medimos el error</strong>.</p>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="de-clasificación-a-regresión-qué-cambia" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> De clasificación a regresión: ¿qué cambia?</h1>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/2Miw4bjzSF0" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<p>La semana pasada el árbol respondía preguntas del tipo “¿a cuál categoría pertenece este caso?”. Esta semana responde preguntas del tipo “¿cuánto vale esta variable para este caso?”.</p>
+<p>El cambio parece pequeño pero tiene consecuencias importantes en cómo leemos los resultados y cómo los convertimos en decisiones.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Pregunta de negocio</th>
+<th>Tipo de árbol</th>
+<th>Variable resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>¿Este cliente pagará el crédito?</td>
+<td>Clasificación</td>
+<td>Sí / No</td>
+</tr>
+<tr class="even">
+<td>¿Este estudiante aprobará la materia?</td>
+<td>Clasificación</td>
+<td>Aprobó / Reprobó</td>
+</tr>
+<tr class="odd">
+<td>¿Cuánto valdrá esta propiedad?</td>
+<td><strong>Regresión</strong></td>
+<td>Precio en millones</td>
+</tr>
+<tr class="even">
+<td>¿Qué nota final sacará este estudiante?</td>
+<td><strong>Regresión</strong></td>
+<td>Nota de 0.0 a 5.0</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>¿Cuándo usar regresión y cuándo clasificación?</strong></p>
+<p>La respuesta no está en el algoritmo sino en la <strong>pregunta de negocio</strong>. Si la respuesta es una categoría discreta (“sí/no”, “alto/bajo”, “A/B/C”), usa clasificación. Si la respuesta es un número continuo con matices (“3.2”, “127,000”, “0.87”), usa regresión. No tiene sentido convertir una nota de 3.8 en “Aprobado” si lo que necesitamos es saber exactamente cuánto sacó el estudiante para calcular promedios o detectar quiénes están en riesgo.</p>
+</div>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-árbol-de-regresión-cómo-predice-un-número" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> El árbol de regresión: cómo predice un número</h1>
+<section id="la-intuición-grupos-homogéneos-y-promedios" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="la-intuición-grupos-homogéneos-y-promedios"><span class="header-section-number">3.1</span> La intuición: grupos homogéneos y promedios</h2>
+<p>El árbol de regresión funciona igual que el de clasificación en su estructura: divide los datos con preguntas binarias buscando grupos internamente homogéneos. La diferencia está en <strong>qué mide la homogeneidad</strong> y <strong>qué devuelve en la hoja</strong>.</p>
+<p>En clasificación, homogeneidad significaba que todos los casos de un grupo tuvieran la misma categoría. En regresión, homogeneidad significa que todos los casos de un grupo tengan <strong>notas similares</strong> — poca varianza dentro del grupo.</p>
+<p>Lo que devuelve la hoja no es una categoría: es el <strong>promedio de las notas</strong> de los estudiantes de entrenamiento que cayeron en ese grupo.</p>
+<div class="callout-key">
+<p><strong>Predicción en hoja de regresión:</strong></p>
+<p><span class="math display">\[\hat{y} = \frac{1}{n} \sum_{i \in \text{hoja}} y_i\]</span></p>
+<p>En palabras: el árbol predice el <strong>promedio</strong> de los valores de resultado de los casos de entrenamiento que pertenecen a esa hoja.</p>
+<p>Si una hoja contiene estudiantes con notas 3.2, 3.5, 3.8 y 4.0, la predicción para cualquier estudiante nuevo que caiga allí es <strong>(3.2 + 3.5 + 3.8 + 4.0) / 4 = 3.625</strong>.</p>
+</div>
+</section>
+<section id="un-árbol-con-profundidad-1-ejemplo-de-notas" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="un-árbol-con-profundidad-1-ejemplo-de-notas"><span class="header-section-number">3.2</span> Un árbol con profundidad 1: ejemplo de notas</h2>
+<p>Usemos <strong>8 estudiantes</strong> con dos variables: nota del parcial 1 (sobre 5.0) y porcentaje de asistencia (%). La variable de resultado es la nota final.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Estudiante</th>
+<th>Parcial 1</th>
+<th>Asistencia (%)</th>
+<th>Nota final</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td>2.0</td>
+<td>55</td>
+<td>2.3</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td>2.5</td>
+<td>60</td>
+<td>2.6</td>
+</tr>
+<tr class="odd">
+<td>C</td>
+<td>2.8</td>
+<td>65</td>
+<td>2.9</td>
+</tr>
+<tr class="even">
+<td>D</td>
+<td>3.0</td>
+<td>70</td>
+<td>3.1</td>
+</tr>
+<tr class="odd">
+<td>E</td>
+<td>3.5</td>
+<td>75</td>
+<td>3.6</td>
+</tr>
+<tr class="even">
+<td>F</td>
+<td>3.8</td>
+<td>80</td>
+<td>3.9</td>
+</tr>
+<tr class="odd">
+<td>G</td>
+<td>4.2</td>
+<td>85</td>
+<td>4.1</td>
+</tr>
+<tr class="even">
+<td>H</td>
+<td>4.5</td>
+<td>90</td>
+<td>4.4</td>
+</tr>
+</tbody>
+</table>
+<p>El árbol prueba todos los posibles cortes y encuentra que <strong>Parcial 1 ≥ 3.3</strong> produce los dos grupos con menor varianza interna:</p>
+<ul>
+<li>Rama izquierda (Parcial 1 &lt; 3.3): A, B, C, D → notas entre 2.3 y 3.1 → <strong>promedio = 2.725</strong></li>
+<li>Rama derecha (Parcial 1 ≥ 3.3): E, F, G, H → notas entre 3.6 y 4.4 → <strong>promedio = 4.0</strong></li>
+</ul>
+<div style="margin:1.5rem 0">
+<svg width="100%" viewbox="0 0 680 320" role="img">
+<title>Árbol de regresión profundidad 1 — predicción de nota final</title>
+<desc>Nodo raíz pregunta si Parcial 1 es mayor o igual a 3.3. Rama izquierda lleva a hoja con promedio 2.73. Rama derecha lleva a hoja con promedio 4.0.</desc>
+<defs>
+  <marker id="ar1" viewbox="0 0 10 10" refx="8" refy="5" markerwidth="6" markerheight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  </marker>
+</defs>
+
+<!-- Nodo raíz -->
+<rect x="190" y="25" width="300" height="66" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="1.3"></rect>
+<text x="340" y="49" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#0C447C">NODO RAÍZ</text>
+<text x="340" y="72" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#042C53">¿Parcial 1 ≥ 3.3?</text>
+
+<!-- Conectores -->
+<line x1="255" y1="91" x2="148" y2="188" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar1)"></line>
+<line x1="425" y1="91" x2="532" y2="188" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar1)"></line>
+
+<!-- Etiquetas de rama -->
+<text x="170" y="144" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No  (&lt; 3.3)</text>
+<text x="510" y="144" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí  (≥ 3.3)</text>
+
+<!-- Hoja izquierda: nota baja -->
+<rect x="32" y="188" width="232" height="90" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="1.2"></rect>
+<text x="148" y="210" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#633806">HOJA · predicción numérica</text>
+<text x="148" y="234" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#412402">ŷ = 2.73</text>
+<text x="148" y="264" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#633806">Casos A, B, C, D  (n = 4)</text>
+
+<!-- Hoja derecha: nota alta -->
+<rect x="416" y="188" width="232" height="90" rx="10" fill="#EAF3DE" stroke="#639922" stroke-width="1.2"></rect>
+<text x="532" y="210" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#3B6D11">HOJA · predicción numérica</text>
+<text x="532" y="234" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#173404">ŷ = 4.00</text>
+<text x="532" y="264" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#27500A">Casos E, F, G, H  (n = 4)</text>
+
+<text x="340" y="306" text-anchor="middle" font-family="inherit" font-size="11" fill="#999">Profundidad = 1 · La predicción es el promedio de notas en cada hoja</text>
+</svg>
+</div>
+<div class="callout-key">
+<p><strong>¿Cómo predice el árbol a un estudiante nuevo?</strong></p>
+<p>Llega un estudiante con Parcial 1 = 2.9:</p>
+<ul>
+<li>¿Parcial 1 ≥ 3.3? → <strong>No</strong> → rama izquierda → predicción: <strong>2.73</strong></li>
+</ul>
+<p>Llega otro con Parcial 1 = 4.0:</p>
+<ul>
+<li>¿Parcial 1 ≥ 3.3? → <strong>Sí</strong> → rama derecha → predicción: <strong>4.00</strong></li>
+</ul>
+<p>El árbol no inventa el número — devuelve el promedio de los estudiantes de entrenamiento que son más similares al caso nuevo según las preguntas que hace.</p>
+</div>
+</section>
+<section id="qué-pasa-con-más-profundidad" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="qué-pasa-con-más-profundidad"><span class="header-section-number">3.3</span> ¿Qué pasa con más profundidad?</h2>
+<p>Con profundidad 2, el árbol puede hacer una segunda pregunta dentro de cada grupo para afinar la predicción:</p>
+<div style="margin:1.5rem 0">
+<svg width="100%" viewbox="0 0 680 445" role="img">
+<title>Árbol de regresión profundidad 2 — predicción de nota final</title>
+<desc>El árbol hace una segunda pregunta en la rama izquierda sobre asistencia, generando tres hojas con promedios más precisos.</desc>
+<defs>
+  <marker id="ar2" viewbox="0 0 10 10" refx="8" refy="5" markerwidth="6" markerheight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  </marker>
+</defs>
+
+<!-- Nodo raíz -->
+<rect x="190" y="22" width="300" height="64" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="1.3"></rect>
+<text x="340" y="44" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#0C447C">NODO RAÍZ · profundidad 0</text>
+<text x="340" y="68" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="13" font-weight="500" fill="#042C53">¿Parcial 1 ≥ 3.3?</text>
+
+<!-- Rama izq raíz -->
+<line x1="258" y1="86" x2="148" y2="168" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar2)"></line>
+<text x="168" y="130" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No</text>
+
+<!-- Rama der raíz: hoja directa -->
+<line x1="422" y1="86" x2="536" y2="168" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar2)"></line>
+<text x="514" y="130" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí</text>
+
+<!-- Hoja derecha nivel 1 -->
+<rect x="412" y="168" width="232" height="82" rx="10" fill="#EAF3DE" stroke="#639922" stroke-width="1.2"></rect>
+<text x="528" y="191" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#3B6D11">HOJA</text>
+<text x="528" y="214" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#173404">ŷ = 4.00</text>
+<text x="528" y="238" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#27500A">E, F, G, H  (n = 4)</text>
+
+<!-- Nodo interno izq (profundidad 1) -->
+<rect x="22" y="168" width="252" height="64" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="1.2"></rect>
+<text x="148" y="190" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#633806">NODO INTERNO · profundidad 1</text>
+<text x="148" y="214" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="13" font-weight="500" fill="#412402">¿Asistencia ≥ 63%?</text>
+
+<!-- Ramas nodo interno izq -->
+<line x1="76" y1="232" x2="52" y2="322" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar2)"></line>
+<line x1="220" y1="232" x2="248" y2="322" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar2)"></line>
+<text x="40" y="280" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No</text>
+<text x="262" y="280" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí</text>
+
+<!-- Hoja 1: nota muy baja (A) -->
+<rect x="-14" y="322" width="160" height="90" rx="10" fill="#FCEBEB" stroke="#E24B4A" stroke-width="1.2"></rect>
+<text x="66" y="344" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#A32D2D">HOJA</text>
+<text x="66" y="368" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#501313">ŷ = 2.45</text>
+<text x="66" y="395" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#791F1F">A, B  (n = 2)</text>
+
+<!-- Hoja 2: nota media baja (C, D) -->
+<rect x="162" y="322" width="172" height="90" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="1.2"></rect>
+<text x="248" y="344" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#633806">HOJA</text>
+<text x="248" y="368" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#412402">ŷ = 3.00</text>
+<text x="248" y="395" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#633806">C, D  (n = 2)</text>
+
+<text x="340" y="432" text-anchor="middle" font-family="inherit" font-size="11" fill="#999">Profundidad = 2 · La segunda pregunta refina la predicción en el grupo de notas bajas</text>
+</svg>
+</div>
+<p>Con profundidad 2, el árbol distingue dentro del grupo de notas bajas: los estudiantes con asistencia menor al 63% predicen <strong>2.45</strong>, los que asisten más predicen <strong>3.00</strong>. Las predicciones son más precisas — pero el modelo también se vuelve más complejo y puede sobreajustarse si los datos son pocos.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="métricas-de-regresión-qué-tan-lejos-estuvo-el-modelo" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Métricas de regresión: ¿qué tan lejos estuvo el modelo?</h1>
+<p>En clasificación medíamos si acertó o falló (correcto/incorrecto). En regresión no hay acierto perfecto: el modelo predijo 3.6 y la nota real fue 3.8. El error es 0.2 — ¿eso es mucho o poco? Las métricas de regresión cuantifican ese error de forma sistemática.</p>
+<p>Antes de ver las métricas, mira este video donde se explica cómo se calculan con un ejemplo paso a paso.</p>
+<!-- TODO: agregar video métricas MAE y RMSE -->
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/bSHrtLHCPvc" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<section id="mae-error-absoluto-medio" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="mae-error-absoluto-medio"><span class="header-section-number">4.1</span> MAE — Error Absoluto Medio</h2>
+<p>El MAE promedia los errores absolutos de todas las predicciones:</p>
+<p><span class="math display">\[\text{MAE} = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|\]</span></p>
+<div class="callout-key">
+<p><strong>Cómo leerlo:</strong> “En promedio, el modelo se equivoca por X unidades.”</p>
+<p>Si el MAE es 0.3 en una escala de 0 a 5.0, el modelo se equivoca en promedio por 0.3 puntos. Eso equivale a decir que una nota real de 3.5 la predice entre 3.2 y 3.8.</p>
+<p><strong>Ventaja:</strong> está en las mismas unidades que la variable de resultado. Fácil de comunicar.</p>
+<p><strong>Limitación:</strong> trata igual un error de 0.1 y uno de 0.9 — no penaliza especialmente los errores grandes.</p>
+</div>
+</section>
+<section id="rmse-raíz-del-error-cuadrático-medio" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="rmse-raíz-del-error-cuadrático-medio"><span class="header-section-number">4.2</span> RMSE — Raíz del Error Cuadrático Medio</h2>
+<p>El RMSE eleva los errores al cuadrado antes de promediarlos y luego saca la raíz:</p>
+<p><span class="math display">\[\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}\]</span></p>
+<div class="callout-key">
+<p><strong>Cómo leerlo:</strong> similar al MAE, pero penaliza más los errores grandes.</p>
+<p>Si el modelo predice 4.5 cuando la nota real es 2.0, ese error de 2.5 puntos pesa mucho más en el RMSE que en el MAE. Por eso el RMSE siempre es ≥ MAE.</p>
+<p><strong>Cuándo usarlo:</strong> cuando los errores grandes son especialmente costosos. Por ejemplo, si el error en identificar a un estudiante en riesgo de reprobar tiene consecuencias graves, el RMSE captura mejor ese riesgo.</p>
+</div>
+</section>
+<section id="mae-vs.-rmse-cuál-usar" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="mae-vs.-rmse-cuál-usar"><span class="header-section-number">4.3</span> MAE vs.&nbsp;RMSE: ¿cuál usar?</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Situación</th>
+<th>Preferir</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Los errores grandes son igual de malos que los pequeños</td>
+<td>MAE</td>
+</tr>
+<tr class="even">
+<td>Los errores grandes son especialmente costosos</td>
+<td>RMSE</td>
+</tr>
+<tr class="odd">
+<td>Comunicar resultados a audiencias no técnicas</td>
+<td>MAE (más intuitivo)</td>
+</tr>
+<tr class="even">
+<td>Detectar modelos con predicciones muy erradas en algunos casos</td>
+<td>RMSE</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Siempre compara contra el baseline.</strong></p>
+<p>El baseline de regresión es el modelo más simple posible: <strong>predecir siempre el promedio global</strong> de la variable de resultado. Si el promedio de notas finales es 3.2, el baseline predice 3.2 para todos.</p>
+<p>Calcula el MAE y RMSE de ese baseline. Si tu árbol no los mejora, no aprendió nada útil — cualquier persona que siempre dijera “3.2” lo haría igual de bien.</p>
+</div>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="explóralo-tú-mismo-árbol-de-regresión-interactivo" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Explóralo tú mismo: árbol de regresión interactivo</h1>
+<p>Experimenta con los parámetros. El playground tiene dos pestañas: el <strong>Mapa de predicción</strong> (cómo varía la predicción en el espacio de datos) y la <strong>Estructura del árbol</strong> (los nodos y valores que predice en cada hoja).</p>
+<p><strong>¿Qué explorar?</strong></p>
+<ol type="1">
+<li>Con profundidad 1: ¿cuántas hojas hay? ¿Cuántos valores distintos puede predecir el árbol?</li>
+<li>Sube la profundidad a 5 o 6: ¿el MAE en train sigue bajando? ¿Y en test? ¿Cuándo empieza el sobreajuste?</li>
+<li>Compara MAE y RMSE: ¿en qué dataset divergen más? ¿Por qué?</li>
+<li>Cambia al tab <strong>Árbol</strong>: ¿puedes leer el valor predicho en cada hoja?</li>
+</ol>
+<div style="margin:1.5rem 0;">
+<style>
+#rpl12 *{box-sizing:border-box;margin:0;padding:0}
+#rpl12{border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;font-family:inherit;background:#fff}
+#rpl12-inner{display:grid;grid-template-columns:270px 1fr;min-height:520px}
+#rpl12-panel{background:#f8f8f6;border-right:1px solid #e0e0e0;padding:16px;display:flex;flex-direction:column;gap:13px}
+#rpl12-right{display:flex;flex-direction:column;min-width:0}
+#rpl12-tabs{display:flex;border-bottom:1px solid #e0e0e0;background:#fafafa}
+.r12tab{padding:9px 18px;font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;color:#888;border-bottom:2px solid transparent;transition:all .15s}
+.r12tab.on{color:#1F4E79;border-bottom-color:#1F4E79;background:#fff}
+.r12tab:hover:not(.on){color:#555}
+#rpl12-vmap,#rpl12-vtree{flex:1;display:none;min-height:300px}
+#rpl12-vmap.vis{display:flex;flex-direction:column}
+#rpl12-vtree.vis{display:block;overflow:auto;padding:8px}
+#rpl12-cv{display:block;flex:1;width:100%}
+#rpl12-tsvg{display:block;width:100%}
+.r12ps{display:flex;flex-direction:column;gap:6px}
+.r12pl{font-size:10px;color:#888;letter-spacing:.04em;text-transform:uppercase;font-weight:500}
+.r12pv{font-size:17px;font-weight:500;color:#111}
+#rpl12-panel select{width:100%;padding:6px 8px;font-size:13px;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111}
+#rpl12-panel input[type=range]{width:100%;accent-color:#1F4E79}
+.r12btn{width:100%;padding:7px 4px;font-size:12px;font-weight:500;border:1px solid #93c5fd;border-radius:8px;background:#dbeafe;color:#1e40af;cursor:pointer;transition:background .15s}
+.r12btn:hover{background:#bfdbfe}
+.r12rst{width:100%;padding:5px 4px;font-size:11px;font-weight:500;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#666;cursor:pointer;transition:background .15s}
+.r12rst:hover{background:#f0f0f0}
+.r12met{display:flex;gap:6px}
+.r12mb{flex:1;background:#f0f4f8;border-radius:8px;padding:6px 4px;text-align:center}
+.r12mv{font-size:13px;font-weight:600;color:#1F4E79}
+.r12ml{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.04em}
+#rpl12-st{padding:7px 14px;font-size:11px;color:#666;border-top:1px solid #e0e0e0;display:flex;align-items:center;min-height:28px}
+</style>
+
+<div id="rpl12">
+<div id="rpl12-inner">
+  <div id="rpl12-panel">
+    <div class="r12ps">
+      <div class="r12pl">Dataset</div>
+      <select id="r12ds">
+        <option value="notas">Notas de estudiantes</option>
+        <option value="casas">Precio de viviendas</option>
+      </select>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">Profundidad máxima</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="r12depth" min="1" max="8" value="3" step="1" style="flex:1">
+        <span class="r12pv" id="r12depthv">3</span>
+      </div>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">Mín. muestras por hoja</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="r12leaf" min="1" max="20" value="5" step="1" style="flex:1">
+        <span class="r12pv" id="r12leafv">5</span>
+      </div>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">Mín. muestras para dividir</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="r12split" min="2" max="30" value="10" step="1" style="flex:1">
+        <span class="r12pv" id="r12splitv">10</span>
+      </div>
+    </div>
+    <button class="r12btn" id="r12run">▶ Entrenar árbol</button>
+    <button class="r12rst" id="r12reset">↺ Reiniciar datos</button>
+    <div class="r12ps">
+      <div class="r12pl">MAE</div>
+      <div class="r12met">
+        <div class="r12mb"><div class="r12mv" id="r12mae-tr">—</div><div class="r12ml">Train</div></div>
+        <div class="r12mb"><div class="r12mv" id="r12mae-te">—</div><div class="r12ml">Test</div></div>
+      </div>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">RMSE</div>
+      <div class="r12met">
+        <div class="r12mb"><div class="r12mv" id="r12rmse-tr">—</div><div class="r12ml">Train</div></div>
+        <div class="r12mb"><div class="r12mv" id="r12rmse-te">—</div><div class="r12ml">Test</div></div>
+      </div>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">Baseline MAE (promedio global)</div>
+      <div class="r12mv" id="r12base" style="font-size:15px;color:#888">—</div>
+    </div>
+  </div>
+
+  <div id="rpl12-right">
+    <div id="rpl12-tabs">
+      <button class="r12tab on" id="r12tab-map" onclick="r12tab('map')">🗺 Mapa de predicción</button>
+      <button class="r12tab" id="r12tab-tree" onclick="r12tab('tree')">🌳 Árbol</button>
+    </div>
+    <div id="rpl12-vmap" class="vis"><canvas id="rpl12-cv"></canvas></div>
+    <div id="rpl12-vtree"><svg id="rpl12-tsvg"></svg></div>
+  </div>
+</div>
+<div id="rpl12-st">Elige un dataset y entrena el árbol para comenzar</div>
+</div>
+
+<script>
+(function(){
+/* ── Paleta de calor para regresión ── */
+function valToColor(v,mn,mx){
+  const t=Math.max(0,Math.min(1,(v-mn)/(mx-mn||1)));
+  const r=Math.round(220-t*150),g=Math.round(60+t*140),b=Math.round(60+t*40);
+  return[r,g,b];
+}
+function rnd(a,b){return a+(b-a)*Math.random();}
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+/* ── Datasets ── */
+function genNotas(){
+  const pts=[];
+  for(let i=0;i<200;i++){
+    const p1=clamp(rnd(1,5)+randn()*0.3,1,5);
+    const asist=clamp(rnd(40,100)+randn()*5,40,100);
+    const nota=clamp(0.3*p1+0.004*asist+0.8+randn()*0.3,0,5);
+    pts.push({x:clamp((p1-1)/4,0.01,0.99),y:clamp((asist-40)/60,0.01,0.99),val:nota});
+  }
+  return{pts,xLabel:'Parcial 1 (normalizado)',yLabel:'Asistencia (normalizado)',unit:'pts',yMin:0,yMax:5};
+}
+function genCasas(){
+  const pts=[];
+  for(let i=0;i<200;i++){
+    const area=clamp(rnd(30,200)+randn()*15,30,200);
+    const estrato=clamp(Math.round(rnd(1,6)+randn()*0.5),1,6);
+    const precio=clamp(20+area*1.1+estrato*12+randn()*15,40,350);
+    pts.push({x:clamp((area-30)/170,0.01,0.99),y:clamp((estrato-1)/5,0.01,0.99),val:precio});
+  }
+  return{pts,xLabel:'Área (normalizado)',yLabel:'Estrato (normalizado)',unit:'M',yMin:40,yMax:350};
+}
+
+/* ── Árbol de regresión ── */
+function variance(pts){
+  if(pts.length<2)return 0;
+  const m=pts.reduce((s,p)=>s+p.val,0)/pts.length;
+  return pts.reduce((s,p)=>s+(p.val-m)**2,0)/pts.length;
+}
+function mean(pts){return pts.length?pts.reduce((s,p)=>s+p.val,0)/pts.length:0;}
+function buildReg(pts,depth,maxD,minL,minS){
+  const m=mean(pts);
+  if(depth>=maxD||pts.length<minS)return{leaf:true,pred:m,n:pts.length,depth};
+  let best=null,bestVar=Infinity;
+  for(const dim of['x','y']){
+    const vs=[...new Set(pts.map(p=>p[dim]))].sort((a,b)=>a-b);
+    for(let i=0;i<vs.length-1;i++){
+      const th=(vs[i]+vs[i+1])/2;
+      const L=pts.filter(p=>p[dim]<th),R=pts.filter(p=>p[dim]>=th);
+      if(L.length<minL||R.length<minL)continue;
+      const v=(L.length*variance(L)+R.length*variance(R))/pts.length;
+      if(v<bestVar){bestVar=v;best={dim,th,L,R};}
+    }
+  }
+  if(!best)return{leaf:true,pred:m,n:pts.length,depth};
+  return{leaf:false,dim:best.dim,th:best.th,
+    left:buildReg(best.L,depth+1,maxD,minL,minS),
+    right:buildReg(best.R,depth+1,maxD,minL,minS),
+    n:pts.length,depth};
+}
+function predReg(tree,p){if(tree.leaf)return tree.pred;return p[tree.dim]<tree.th?predReg(tree.left,p):predReg(tree.right,p);}
+
+/* ── Estado ── */
+let W=0,H=0,data=null,tree=null,trainIdx=[],testIdx=[];
+const cv=document.getElementById('rpl12-cv');
+const cx=cv.getContext('2d');
+
+/* ── Tabs ── */
+window.r12tab=function(t){
+  document.getElementById('rpl12-vmap').classList.toggle('vis',t==='map');
+  document.getElementById('rpl12-vtree').classList.toggle('vis',t==='tree');
+  document.getElementById('r12tab-map').classList.toggle('on',t==='map');
+  document.getElementById('r12tab-tree').classList.toggle('on',t==='tree');
+  if(t==='map'){resize();drawMap();}
+  else if(tree)drawTreeSVG();
+};
+
+/* ── Canvas ── */
+function resize(){
+  const r=cv.parentElement.getBoundingClientRect();
+  W=r.width;H=Math.max(r.height-4,280);
+  cv.width=W;cv.height=H;
+}
+function n2px(nx,ny){const p=36;return{x:p+nx*(W-2*p),y:(H-p)-ny*(H-2*p)};}
+
+function drawMap(){
+  if(!W||!H)return;
+  cx.clearRect(0,0,W,H);
+  if(tree&&data){
+    const img=cx.createImageData(W,H);
+    const pad=36;
+    for(let px=0;px<W;px++)for(let py=0;py<H;py++){
+      const nx=(px-pad)/(W-2*pad),ny=1-(py-pad)/(H-2*pad);
+      if(nx<0||nx>1||ny<0||ny>1)continue;
+      const v=predReg(tree,{x:nx,y:ny});
+      const [r,g,b]=valToColor(v,data.yMin,data.yMax);
+      const idx=4*(py*W+px);img.data[idx]=r;img.data[idx+1]=g;img.data[idx+2]=b;img.data[idx+3]=35;
+    }
+    cx.putImageData(img,0,0);
+  }
+  const pad=36;
+  cx.strokeStyle='#ccc';cx.lineWidth=1;
+  cx.beginPath();cx.moveTo(pad,pad);cx.lineTo(pad,H-pad);cx.lineTo(W-pad,H-pad);cx.stroke();
+  cx.fillStyle='#999';cx.font='11px inherit';cx.textAlign='center';
+  if(data){cx.fillText(data.xLabel,W/2,H-6);cx.save();cx.translate(11,H/2);cx.rotate(-Math.PI/2);cx.fillText(data.yLabel,0,0);cx.restore();}
+  if(data) data.pts.forEach((p,i)=>{
+    const c=n2px(p.x,p.y),isT=testIdx.includes(i);
+    const [r,g,b]=valToColor(p.val,data.yMin,data.yMax);
+    cx.beginPath();cx.arc(c.x,c.y,isT?5:3.5,0,6.28);
+    cx.fillStyle=`rgb(${r},${g},${b})`;cx.fill();
+    cx.strokeStyle=isT?'#000':'#fff';cx.lineWidth=isT?1.5:1;cx.stroke();
+  });
+}
+
+/* ── Árbol SVG ── */
+function drawTreeSVG(){
+  const container=document.getElementById('rpl12-tsvg');
+  const cW=Math.max(container.parentElement.getBoundingClientRect().width||400,400);
+  const NW=130,NH=58,VG=56;
+
+  function leaves(n){return n.leaf?1:leaves(n.left)+leaves(n.right);}
+  function posX(n,lo,hi){
+    if(n.leaf){n._cx=(lo+hi)/2;return;}
+    const tot=leaves(n);
+    posX(n.left,lo,lo+(hi-lo)*leaves(n.left)/tot);
+    posX(n.right,lo+(hi-lo)*leaves(n.left)/tot,hi);
+    n._cx=(n.left._cx+n.right._cx)/2;
+  }
+  function posY(n,d){n._cy=38+d*(NH+VG);if(!n.leaf){posY(n.left,d+1);posY(n.right,d+1);}}
+  function maxY(n){return n.leaf?n._cy:Math.max(maxY(n.left),maxY(n.right));}
+  posX(tree,40,cW-40);posY(tree,0);
+  const svgH=maxY(tree)+NH+36;
+
+  const dimName=d=>{if(!data)return d==='x'?'X':'Y';return d==='x'?data.xLabel.split('(')[0].trim():data.yLabel.split('(')[0].trim();};
+  const unit=data?data.unit:'';
+
+  let lines='',nodes='';
+  function walk(n){
+    if(!n.leaf){
+      lines+=`<line x1="${n._cx}" y1="${n._cy+NH/2}" x2="${n.left._cx}" y2="${n.left._cy-NH/2}" stroke="#bbb" stroke-width="1.2"/>`;
+      lines+=`<line x1="${n._cx}" y1="${n._cy+NH/2}" x2="${n.right._cx}" y2="${n.right._cy-NH/2}" stroke="#bbb" stroke-width="1.2"/>`;
+      const mlx=(n._cx+n.left._cx)/2,mly=(n._cy+NH/2+n.left._cy-NH/2)/2;
+      lines+=`<text x="${mlx-4}" y="${mly}" font-family="inherit" font-size="10" fill="#888" text-anchor="end">No</text>`;
+      const mrx=(n._cx+n.right._cx)/2,mry=(n._cy+NH/2+n.right._cy-NH/2)/2;
+      lines+=`<text x="${mrx+4}" y="${mry}" font-family="inherit" font-size="10" fill="#888">Sí</text>`;
+      walk(n.left);walk(n.right);
+    }
+    const x=n._cx-NW/2,y=n._cy-NH/2;
+    if(n.leaf){
+      nodes+=`<rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="1"/>`;
+      nodes+=`<text x="${n._cx}" y="${y+16}" font-family="inherit" font-size="10" fill="#633806" text-anchor="middle" dominant-baseline="central">HOJA · n=${n.n}</text>`;
+      nodes+=`<text x="${n._cx}" y="${y+36}" font-family="inherit" font-size="14" font-weight="500" fill="#412402" text-anchor="middle" dominant-baseline="central">ŷ = ${n.pred.toFixed(2)} ${unit}</text>`;
+    } else {
+      nodes+=`<rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>`;
+      nodes+=`<text x="${n._cx}" y="${y+16}" font-family="inherit" font-size="10" fill="#0C447C" text-anchor="middle" dominant-baseline="central">prof. ${n.depth}</text>`;
+      nodes+=`<text x="${n._cx}" y="${y+38}" font-family="inherit" font-size="11" font-weight="500" fill="#042C53" text-anchor="middle" dominant-baseline="central">${dimName(n.dim)} &lt; ${n.th.toFixed(2)}</text>`;
+    }
+  }
+  walk(tree);
+  container.setAttribute('viewBox',`0 0 ${cW} ${svgH}`);
+  container.setAttribute('height',svgH);
+  container.innerHTML=lines+nodes;
+}
+
+/* ── Métricas ── */
+function mae(idxs){
+  if(!idxs.length)return null;
+  return idxs.reduce((s,i)=>s+Math.abs(predReg(tree,data.pts[i])-data.pts[i].val),0)/idxs.length;
+}
+function rmse(idxs){
+  if(!idxs.length)return null;
+  return Math.sqrt(idxs.reduce((s,i)=>s+(predReg(tree,data.pts[i])-data.pts[i].val)**2,0)/idxs.length);
+}
+function baselineMAE(idxs){
+  const m=mean(idxs.map(i=>data.pts[i]));
+  return idxs.reduce((s,i)=>s+Math.abs(data.pts[i].val-m),0)/idxs.length;
+}
+function splitTT(n){
+  const idx=Array.from({length:n},(_,i)=>i);
+  for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
+  const cut=Math.floor(n*0.75);return{train:idx.slice(0,cut),test:idx.slice(cut)};
+}
+
+/* ── Cargar dataset ── */
+function loadDS(){
+  const v=document.getElementById('r12ds').value;
+  data=v==='notas'?genNotas():genCasas();
+  const{train,test}=splitTT(data.pts.length);
+  trainIdx=train;testIdx=test;
+  tree=null;
+  ['r12mae-tr','r12mae-te','r12rmse-tr','r12rmse-te','r12base'].forEach(id=>{document.getElementById(id).textContent='—';});
+  document.getElementById('rpl12-tsvg').innerHTML='';
+  resize();drawMap();
+  document.getElementById('rpl12-st').textContent=
+    `${data.pts.length} obs. (${trainIdx.length} entrenamiento, ${testIdx.length} prueba). Puntos con borde negro = conjunto de prueba.`;
+}
+
+/* ── Entrenar ── */
+document.getElementById('r12run').addEventListener('click',()=>{
+  if(!data)return;
+  const maxD=+document.getElementById('r12depth').value;
+  const minL=+document.getElementById('r12leaf').value;
+  const minS=+document.getElementById('r12split').value;
+  tree=buildReg(trainIdx.map(i=>data.pts[i]),0,maxD,minL,minS);
+  const maeT=mae(trainIdx),maeE=mae(testIdx);
+  const rmseT=rmse(trainIdx),rmseE=rmse(testIdx);
+  const base=baselineMAE(testIdx);
+  document.getElementById('r12mae-tr').textContent=maeT?maeT.toFixed(3):'—';
+  document.getElementById('r12mae-te').textContent=maeE?maeE.toFixed(3):'—';
+  document.getElementById('r12rmse-tr').textContent=rmseT?rmseT.toFixed(3):'—';
+  document.getElementById('r12rmse-te').textContent=rmseE?rmseE.toFixed(3):'—';
+  document.getElementById('r12base').textContent=base?base.toFixed(3)+' '+data.unit:'—';
+  drawMap();
+  if(document.getElementById('rpl12-vtree').classList.contains('vis'))drawTreeSVG();
+  document.getElementById('rpl12-st').textContent=
+    `Árbol entrenado: profundidad máx ${maxD}, mín hoja ${minL}, mín split ${minS}.`;
+});
+
+document.getElementById('r12reset').addEventListener('click',loadDS);
+[['r12depth','r12depthv'],['r12leaf','r12leafv'],['r12split','r12splitv']].forEach(([id,vid])=>{
+  document.getElementById(id).addEventListener('input',e=>{document.getElementById(vid).textContent=e.target.value;});
+});
+document.getElementById('r12ds').addEventListener('change',loadDS);
+window.addEventListener('resize',()=>{if(document.getElementById('rpl12-vmap').classList.contains('vis')){resize();drawMap();}});
+setTimeout(()=>{resize();loadDS();},150);
+})();
+</script>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="del-resultado-al-negocio-interpretar-las-métricas" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Del resultado al negocio: interpretar las métricas</h1>
+<p>Un árbol de regresión entrenado sobre 300 estudiantes da estos resultados en el conjunto de prueba (75 estudiantes):</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Métrica</th>
+<th>Baseline (siempre predice promedio)</th>
+<th>Árbol de regresión</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>MAE</td>
+<td>0.48 pts</td>
+<td>0.21 pts</td>
+</tr>
+<tr class="even">
+<td>RMSE</td>
+<td>0.61 pts</td>
+<td>0.28 pts</td>
+</tr>
+</tbody>
+</table>
+<p>El árbol reduce el error a menos de la mitad respecto al baseline. En términos prácticos: en promedio se equivoca por 0.21 puntos en una escala de 5.0. Eso significa que una nota real de 3.5 la predice entre 3.3 y 3.7 — útil para identificar estudiantes en riesgo antes de que sea demasiado tarde.</p>
+<div class="callout-key">
+<p><strong>¿Cuándo es “suficientemente bueno” un MAE?</strong></p>
+<p>Depende del uso. Si el modelo se usa para identificar estudiantes con nota predicha menor a 3.0 y ofrecerles tutorías, un MAE de 0.21 es más que suficiente — el modelo no necesita ser perfecto para ser útil. Si se usa para calcular el promedio exacto de la carrera, el requerimiento de precisión es mayor.</p>
+<p>La pregunta no es “¿el MAE es bajo?” sino “<strong>¿el error del modelo es tolerable para la decisión que quiero tomar?</strong>”</p>
+</div>
+<div class="callout-connect">
+<p><strong>Conexión con semana 9 y semana 11</strong></p>
+<p>El sobreajuste ocurre igual en regresión que en clasificación: el MAE en train baja indefinidamente con más profundidad, pero el MAE en test empieza a subir en algún punto. La señal de sobreajuste es la <strong>brecha creciente entre train y test</strong>, no el valor absoluto de cada uno.</p>
+<p>Revisa en el playground: ¿en qué profundidad empieza a crecer el MAE en test mientras el de train sigue bajando?</p>
+</div>
+<hr>
+<section id="material-adicional-opcional" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="material-adicional-opcional"><span class="header-section-number">6.1</span> Material adicional (opcional)</h2>
+<ul>
+<li><strong>An Introduction to Statistical Learning (ISLR)</strong> — Capítulo 8: árboles de regresión y clasificación — <a href="https://www.statlearning.com">statlearning.com</a></li>
+<li><strong>Towards Data Science: “MAE vs RMSE — when to use which?”</strong> — artículo con ejemplos aplicados</li>
+</ul>
+<hr>
+</section>
+<section id="checklist-de-preclase" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="checklist-de-preclase"><span class="header-section-number">6.2</span> Checklist de preclase</h2>
+<p>Al llegar a clase debes poder explicar:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">¿Qué diferencia hay entre un árbol de clasificación y uno de regresión?</label></li>
+<li><label><input type="checkbox">¿Qué valor devuelve el árbol de regresión en cada hoja?</label></li>
+<li><label><input type="checkbox">¿Cómo se calcula el MAE? ¿Y el RMSE? ¿Qué mide cada uno?</label></li>
+<li><label><input type="checkbox">¿Por qué el RMSE es siempre ≥ al MAE?</label></li>
+<li><label><input type="checkbox">¿Qué es el baseline de regresión? ¿Cómo se construye?</label></li>
+<li><label><input type="checkbox">¿Qué significa que un árbol de regresión esté sobreajustado? ¿Cómo lo detectas?</label></li>
+<li><label><input type="checkbox">¿Cuándo preferirías MAE sobre RMSE para reportar el error?</label></li>
+</ul>
+</section>
+<section id="preguntas-de-comprensión" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="preguntas-de-comprensión"><span class="header-section-number">6.3</span> Preguntas de comprensión</h2>
+<p><strong>1.</strong> Un árbol de regresión predice la nota final de 6 estudiantes del conjunto de prueba. Los resultados son:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Estudiante</th>
+<th>Nota real</th>
+<th>Nota predicha</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>2.8</td>
+<td>3.1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>3.5</td>
+<td>3.3</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>4.0</td>
+<td>3.9</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>1.5</td>
+<td>2.2</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>4.8</td>
+<td>4.6</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>3.2</td>
+<td>3.0</td>
+</tr>
+</tbody>
+</table>
+<p>Calcula el MAE y el RMSE. ¿Cuál estudiante contribuye más al RMSE y por qué?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Errores absolutos: |2.8-3.1|=0.3, |3.5-3.3|=0.2, |4.0-3.9|=0.1, |1.5-2.2|=0.7, |4.8-4.6|=0.2, |3.2-3.0|=0.2</p>
+<p><strong>MAE</strong> = (0.3+0.2+0.1+0.7+0.2+0.2)/6 = 1.7/6 = <strong>0.283</strong></p>
+<p>Errores cuadráticos: 0.09, 0.04, 0.01, 0.49, 0.04, 0.04 → suma = 0.71</p>
+<p><strong>RMSE</strong> = √(0.71/6) = √0.118 = <strong>0.344</strong></p>
+El estudiante 4 (error de 0.7) contribuye más al RMSE: su error cuadrático (0.49) representa el 69% de la suma total de errores cuadráticos. En el MAE su contribución es el 41%. El RMSE penaliza más ese error grande.
+</details>
+<p><strong>2.</strong> Un árbol con profundidad 6 da MAE = 0.08 en train y MAE = 0.39 en test. El baseline tiene MAE = 0.45 en test. ¿Es un buen modelo? ¿Qué harías?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+El modelo mejora el baseline (0.39 &lt; 0.45), así que sí aprendió algo útil. Pero la brecha enorme entre train (0.08) y test (0.39) indica sobreajuste: el árbol memorizó los datos de entrenamiento en vez de aprender un patrón generalizable. Lo que haría es reducir la profundidad máxima o aumentar el mínimo de muestras por hoja hasta que train y test converjan a un valor parecido — aunque eso implique aceptar un MAE en train un poco más alto.
+</details>
+<p><strong>3.</strong> Una facultad quiere usar el modelo para identificar estudiantes en riesgo de reprobar (nota &lt; 3.0) antes del parcial final. ¿Qué métrica priorizarías para evaluar el modelo — MAE o RMSE? ¿Por qué?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+Dependería de si los errores grandes importan más que los pequeños. En este caso, predecir 2.1 cuando la nota real es 2.8 (error = 0.7) es mucho más costoso que predecir 3.3 cuando la real es 3.5 (error = 0.2): en el primer caso el estudiante queda por debajo del umbral de riesgo sin detectarse. Ese tipo de error grave es exactamente lo que el RMSE penaliza más. Sin embargo, si lo que importa es identificar correctamente quién está cerca del 3.0, también sería útil analizar cuántos estudiantes en riesgo real el modelo no detecta — lo que se acerca al concepto de recall que vimos en la semana 11, aplicado a regresión.
+</details>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-12_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

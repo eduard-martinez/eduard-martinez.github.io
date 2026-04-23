@@ -1,0 +1,733 @@
+---
+title: "Unidad 9 - Árboles de Regresión"
+subtitle: "Introducción al Business Analytics · Semana 12 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+<span id="webr-status-anchor"></span>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Objetivo de la semana
+
+El foco está en **regresión supervisada**: cuando la variable de resultado no es una categoría sino un **número continuo**, el árbol de decisión se adapta para predecirlo. Esta semana aprenderemos a construir e interpretar un árbol de regresión y a medir su desempeño con métricas que cuantifican el error en las mismas unidades del resultado.
+
+## Lo que cubriremos
+
+- De clasificación a regresión: qué cambia y qué se mantiene igual
+- Cómo predice el árbol de regresión: el promedio de la hoja
+- Métricas de error: MAE y RMSE — qué miden y cuándo usar cada una
+- El baseline de regresión: comparar contra predecir siempre el promedio
+- Sobreajuste en regresión: misma trampa, diferente métrica
+
+::: {.callout-key}
+**Conexión con semanas anteriores**
+
+| Semana 11 | Semana 12 |
+|---|---|
+| Árbol de **clasificación** | Árbol de **regresión** |
+| Variable resultado: categoría (Aprobado/Rechazado) | Variable resultado: número continuo (nota 0–5.0) |
+| Hoja predice: categoría más frecuente | Hoja predice: promedio de los casos |
+| Métricas: accuracy, precisión, recall | Métricas: MAE, RMSE |
+| Baseline: clase mayoritaria | Baseline: predecir siempre el promedio global |
+
+La lógica del árbol es idéntica: preguntas binarias, nodos, hojas, profundidad máxima. Lo que cambia es **qué hay en la hoja** y **cómo medimos el error**.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# De clasificación a regresión: ¿qué cambia?
+
+{{< video https://www.youtube.com/watch?v=2Miw4bjzSF0 >}}
+
+La semana pasada el árbol respondía preguntas del tipo "¿a cuál categoría pertenece este caso?". Esta semana responde preguntas del tipo "¿cuánto vale esta variable para este caso?".
+
+El cambio parece pequeño pero tiene consecuencias importantes en cómo leemos los resultados y cómo los convertimos en decisiones.
+
+| Pregunta de negocio | Tipo de árbol | Variable resultado |
+|---|---|---|
+| ¿Este cliente pagará el crédito? | Clasificación | Sí / No |
+| ¿Este estudiante aprobará la materia? | Clasificación | Aprobó / Reprobó |
+| ¿Cuánto valdrá esta propiedad? | **Regresión** | Precio en millones |
+| ¿Qué nota final sacará este estudiante? | **Regresión** | Nota de 0.0 a 5.0 |
+
+::: {.callout-warning}
+**¿Cuándo usar regresión y cuándo clasificación?**
+
+La respuesta no está en el algoritmo sino en la **pregunta de negocio**. Si la respuesta es una categoría discreta ("sí/no", "alto/bajo", "A/B/C"), usa clasificación. Si la respuesta es un número continuo con matices ("3.2", "127,000", "0.87"), usa regresión. No tiene sentido convertir una nota de 3.8 en "Aprobado" si lo que necesitamos es saber exactamente cuánto sacó el estudiante para calcular promedios o detectar quiénes están en riesgo.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# El árbol de regresión: cómo predice un número
+
+## La intuición: grupos homogéneos y promedios
+
+El árbol de regresión funciona igual que el de clasificación en su estructura: divide los datos con preguntas binarias buscando grupos internamente homogéneos. La diferencia está en **qué mide la homogeneidad** y **qué devuelve en la hoja**.
+
+En clasificación, homogeneidad significaba que todos los casos de un grupo tuvieran la misma categoría. En regresión, homogeneidad significa que todos los casos de un grupo tengan **notas similares** — poca varianza dentro del grupo.
+
+Lo que devuelve la hoja no es una categoría: es el **promedio de las notas** de los estudiantes de entrenamiento que cayeron en ese grupo.
+
+::: {.callout-key}
+**Predicción en hoja de regresión:**
+
+$$\hat{y} = \frac{1}{n} \sum_{i \in \text{hoja}} y_i$$
+
+En palabras: el árbol predice el **promedio** de los valores de resultado de los casos de entrenamiento que pertenecen a esa hoja.
+
+Si una hoja contiene estudiantes con notas 3.2, 3.5, 3.8 y 4.0, la predicción para cualquier estudiante nuevo que caiga allí es **(3.2 + 3.5 + 3.8 + 4.0) / 4 = 3.625**.
+:::
+
+## Un árbol con profundidad 1: ejemplo de notas
+
+Usemos **8 estudiantes** con dos variables: nota del parcial 1 (sobre 5.0) y porcentaje de asistencia (%). La variable de resultado es la nota final.
+
+| Estudiante | Parcial 1 | Asistencia (%) | Nota final |
+|---|---|---|---|
+| A | 2.0 | 55 | 2.3 |
+| B | 2.5 | 60 | 2.6 |
+| C | 2.8 | 65 | 2.9 |
+| D | 3.0 | 70 | 3.1 |
+| E | 3.5 | 75 | 3.6 |
+| F | 3.8 | 80 | 3.9 |
+| G | 4.2 | 85 | 4.1 |
+| H | 4.5 | 90 | 4.4 |
+
+El árbol prueba todos los posibles cortes y encuentra que **Parcial 1 ≥ 3.3** produce los dos grupos con menor varianza interna:
+
+- Rama izquierda (Parcial 1 < 3.3): A, B, C, D → notas entre 2.3 y 3.1 → **promedio = 2.725**
+- Rama derecha (Parcial 1 ≥ 3.3): E, F, G, H → notas entre 3.6 y 4.4 → **promedio = 4.0**
+
+```{=html}
+<div style="margin:1.5rem 0">
+<svg width="100%" viewBox="0 0 680 320" role="img">
+<title>Árbol de regresión profundidad 1 — predicción de nota final</title>
+<desc>Nodo raíz pregunta si Parcial 1 es mayor o igual a 3.3. Rama izquierda lleva a hoja con promedio 2.73. Rama derecha lleva a hoja con promedio 4.0.</desc>
+<defs>
+  <marker id="ar1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Nodo raíz -->
+<rect x="190" y="25" width="300" height="66" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="1.3"/>
+<text x="340" y="49" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#0C447C">NODO RAÍZ</text>
+<text x="340" y="72" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#042C53">¿Parcial 1 ≥ 3.3?</text>
+
+<!-- Conectores -->
+<line x1="255" y1="91" x2="148" y2="188" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar1)"/>
+<line x1="425" y1="91" x2="532" y2="188" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar1)"/>
+
+<!-- Etiquetas de rama -->
+<text x="170" y="144" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No  (< 3.3)</text>
+<text x="510" y="144" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí  (≥ 3.3)</text>
+
+<!-- Hoja izquierda: nota baja -->
+<rect x="32" y="188" width="232" height="90" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="1.2"/>
+<text x="148" y="210" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#633806">HOJA · predicción numérica</text>
+<text x="148" y="234" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#412402">ŷ = 2.73</text>
+<text x="148" y="264" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#633806">Casos A, B, C, D  (n = 4)</text>
+
+<!-- Hoja derecha: nota alta -->
+<rect x="416" y="188" width="232" height="90" rx="10" fill="#EAF3DE" stroke="#639922" stroke-width="1.2"/>
+<text x="532" y="210" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#3B6D11">HOJA · predicción numérica</text>
+<text x="532" y="234" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#173404">ŷ = 4.00</text>
+<text x="532" y="264" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#27500A">Casos E, F, G, H  (n = 4)</text>
+
+<text x="340" y="306" text-anchor="middle" font-family="inherit" font-size="11" fill="#999">Profundidad = 1 · La predicción es el promedio de notas en cada hoja</text>
+</svg>
+</div>
+```
+
+::: {.callout-key}
+**¿Cómo predice el árbol a un estudiante nuevo?**
+
+Llega un estudiante con Parcial 1 = 2.9:
+
+- ¿Parcial 1 ≥ 3.3? → **No** → rama izquierda → predicción: **2.73**
+
+Llega otro con Parcial 1 = 4.0:
+
+- ¿Parcial 1 ≥ 3.3? → **Sí** → rama derecha → predicción: **4.00**
+
+El árbol no inventa el número — devuelve el promedio de los estudiantes de entrenamiento que son más similares al caso nuevo según las preguntas que hace.
+:::
+
+## ¿Qué pasa con más profundidad?
+
+Con profundidad 2, el árbol puede hacer una segunda pregunta dentro de cada grupo para afinar la predicción:
+
+```{=html}
+<div style="margin:1.5rem 0">
+<svg width="100%" viewBox="0 0 680 445" role="img">
+<title>Árbol de regresión profundidad 2 — predicción de nota final</title>
+<desc>El árbol hace una segunda pregunta en la rama izquierda sobre asistencia, generando tres hojas con promedios más precisos.</desc>
+<defs>
+  <marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Nodo raíz -->
+<rect x="190" y="22" width="300" height="64" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="1.3"/>
+<text x="340" y="44" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#0C447C">NODO RAÍZ · profundidad 0</text>
+<text x="340" y="68" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="13" font-weight="500" fill="#042C53">¿Parcial 1 ≥ 3.3?</text>
+
+<!-- Rama izq raíz -->
+<line x1="258" y1="86" x2="148" y2="168" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar2)"/>
+<text x="168" y="130" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No</text>
+
+<!-- Rama der raíz: hoja directa -->
+<line x1="422" y1="86" x2="536" y2="168" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar2)"/>
+<text x="514" y="130" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí</text>
+
+<!-- Hoja derecha nivel 1 -->
+<rect x="412" y="168" width="232" height="82" rx="10" fill="#EAF3DE" stroke="#639922" stroke-width="1.2"/>
+<text x="528" y="191" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#3B6D11">HOJA</text>
+<text x="528" y="214" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#173404">ŷ = 4.00</text>
+<text x="528" y="238" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#27500A">E, F, G, H  (n = 4)</text>
+
+<!-- Nodo interno izq (profundidad 1) -->
+<rect x="22" y="168" width="252" height="64" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="1.2"/>
+<text x="148" y="190" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#633806">NODO INTERNO · profundidad 1</text>
+<text x="148" y="214" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="13" font-weight="500" fill="#412402">¿Asistencia ≥ 63%?</text>
+
+<!-- Ramas nodo interno izq -->
+<line x1="76"  y1="232" x2="52"  y2="322" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar2)"/>
+<line x1="220" y1="232" x2="248" y2="322" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar2)"/>
+<text x="40"  y="280" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No</text>
+<text x="262" y="280" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí</text>
+
+<!-- Hoja 1: nota muy baja (A) -->
+<rect x="-14" y="322" width="160" height="90" rx="10" fill="#FCEBEB" stroke="#E24B4A" stroke-width="1.2"/>
+<text x="66" y="344" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#A32D2D">HOJA</text>
+<text x="66" y="368" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#501313">ŷ = 2.45</text>
+<text x="66" y="395" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#791F1F">A, B  (n = 2)</text>
+
+<!-- Hoja 2: nota media baja (C, D) -->
+<rect x="162" y="322" width="172" height="90" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="1.2"/>
+<text x="248" y="344" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#633806">HOJA</text>
+<text x="248" y="368" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#412402">ŷ = 3.00</text>
+<text x="248" y="395" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#633806">C, D  (n = 2)</text>
+
+<text x="340" y="432" text-anchor="middle" font-family="inherit" font-size="11" fill="#999">Profundidad = 2 · La segunda pregunta refina la predicción en el grupo de notas bajas</text>
+</svg>
+</div>
+```
+
+Con profundidad 2, el árbol distingue dentro del grupo de notas bajas: los estudiantes con asistencia menor al 63% predicen **2.45**, los que asisten más predicen **3.00**. Las predicciones son más precisas — pero el modelo también se vuelve más complejo y puede sobreajustarse si los datos son pocos.
+
+---
+
+<!--=================-->
+<!--=================-->
+# Métricas de regresión: ¿qué tan lejos estuvo el modelo?
+
+En clasificación medíamos si acertó o falló (correcto/incorrecto). En regresión no hay acierto perfecto: el modelo predijo 3.6 y la nota real fue 3.8. El error es 0.2 — ¿eso es mucho o poco? Las métricas de regresión cuantifican ese error de forma sistemática.
+
+Antes de ver las métricas, mira este video donde se explica cómo se calculan con un ejemplo paso a paso.
+
+<!-- TODO: agregar video métricas MAE y RMSE -->
+{{< video https://youtu.be/bSHrtLHCPvc >}}
+
+## MAE — Error Absoluto Medio
+
+El MAE promedia los errores absolutos de todas las predicciones:
+
+$$\text{MAE} = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|$$
+
+::: {.callout-key}
+**Cómo leerlo:** "En promedio, el modelo se equivoca por X unidades."
+
+Si el MAE es 0.3 en una escala de 0 a 5.0, el modelo se equivoca en promedio por 0.3 puntos. Eso equivale a decir que una nota real de 3.5 la predice entre 3.2 y 3.8.
+
+**Ventaja:** está en las mismas unidades que la variable de resultado. Fácil de comunicar.
+
+**Limitación:** trata igual un error de 0.1 y uno de 0.9 — no penaliza especialmente los errores grandes.
+:::
+
+## RMSE — Raíz del Error Cuadrático Medio
+
+El RMSE eleva los errores al cuadrado antes de promediarlos y luego saca la raíz:
+
+$$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}$$
+
+::: {.callout-key}
+**Cómo leerlo:** similar al MAE, pero penaliza más los errores grandes.
+
+Si el modelo predice 4.5 cuando la nota real es 2.0, ese error de 2.5 puntos pesa mucho más en el RMSE que en el MAE. Por eso el RMSE siempre es ≥ MAE.
+
+**Cuándo usarlo:** cuando los errores grandes son especialmente costosos. Por ejemplo, si el error en identificar a un estudiante en riesgo de reprobar tiene consecuencias graves, el RMSE captura mejor ese riesgo.
+:::
+
+## MAE vs. RMSE: ¿cuál usar?
+
+| Situación | Preferir |
+|---|---|
+| Los errores grandes son igual de malos que los pequeños | MAE |
+| Los errores grandes son especialmente costosos | RMSE |
+| Comunicar resultados a audiencias no técnicas | MAE (más intuitivo) |
+| Detectar modelos con predicciones muy erradas en algunos casos | RMSE |
+
+::: {.callout-warning}
+**Siempre compara contra el baseline.**
+
+El baseline de regresión es el modelo más simple posible: **predecir siempre el promedio global** de la variable de resultado. Si el promedio de notas finales es 3.2, el baseline predice 3.2 para todos.
+
+Calcula el MAE y RMSE de ese baseline. Si tu árbol no los mejora, no aprendió nada útil — cualquier persona que siempre dijera "3.2" lo haría igual de bien.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Explóralo tú mismo: árbol de regresión interactivo
+
+Experimenta con los parámetros. El playground tiene dos pestañas: el **Mapa de predicción** (cómo varía la predicción en el espacio de datos) y la **Estructura del árbol** (los nodos y valores que predice en cada hoja).
+
+**¿Qué explorar?**
+
+1. Con profundidad 1: ¿cuántas hojas hay? ¿Cuántos valores distintos puede predecir el árbol?
+2. Sube la profundidad a 5 o 6: ¿el MAE en train sigue bajando? ¿Y en test? ¿Cuándo empieza el sobreajuste?
+3. Compara MAE y RMSE: ¿en qué dataset divergen más? ¿Por qué?
+4. Cambia al tab **Árbol**: ¿puedes leer el valor predicho en cada hoja?
+
+```{=html}
+<div style="margin:1.5rem 0;">
+<style>
+#rpl12 *{box-sizing:border-box;margin:0;padding:0}
+#rpl12{border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;font-family:inherit;background:#fff}
+#rpl12-inner{display:grid;grid-template-columns:270px 1fr;min-height:520px}
+#rpl12-panel{background:#f8f8f6;border-right:1px solid #e0e0e0;padding:16px;display:flex;flex-direction:column;gap:13px}
+#rpl12-right{display:flex;flex-direction:column;min-width:0}
+#rpl12-tabs{display:flex;border-bottom:1px solid #e0e0e0;background:#fafafa}
+.r12tab{padding:9px 18px;font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;color:#888;border-bottom:2px solid transparent;transition:all .15s}
+.r12tab.on{color:#1F4E79;border-bottom-color:#1F4E79;background:#fff}
+.r12tab:hover:not(.on){color:#555}
+#rpl12-vmap,#rpl12-vtree{flex:1;display:none;min-height:300px}
+#rpl12-vmap.vis{display:flex;flex-direction:column}
+#rpl12-vtree.vis{display:block;overflow:auto;padding:8px}
+#rpl12-cv{display:block;flex:1;width:100%}
+#rpl12-tsvg{display:block;width:100%}
+.r12ps{display:flex;flex-direction:column;gap:6px}
+.r12pl{font-size:10px;color:#888;letter-spacing:.04em;text-transform:uppercase;font-weight:500}
+.r12pv{font-size:17px;font-weight:500;color:#111}
+#rpl12-panel select{width:100%;padding:6px 8px;font-size:13px;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111}
+#rpl12-panel input[type=range]{width:100%;accent-color:#1F4E79}
+.r12btn{width:100%;padding:7px 4px;font-size:12px;font-weight:500;border:1px solid #93c5fd;border-radius:8px;background:#dbeafe;color:#1e40af;cursor:pointer;transition:background .15s}
+.r12btn:hover{background:#bfdbfe}
+.r12rst{width:100%;padding:5px 4px;font-size:11px;font-weight:500;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#666;cursor:pointer;transition:background .15s}
+.r12rst:hover{background:#f0f0f0}
+.r12met{display:flex;gap:6px}
+.r12mb{flex:1;background:#f0f4f8;border-radius:8px;padding:6px 4px;text-align:center}
+.r12mv{font-size:13px;font-weight:600;color:#1F4E79}
+.r12ml{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.04em}
+#rpl12-st{padding:7px 14px;font-size:11px;color:#666;border-top:1px solid #e0e0e0;display:flex;align-items:center;min-height:28px}
+</style>
+
+<div id="rpl12">
+<div id="rpl12-inner">
+  <div id="rpl12-panel">
+    <div class="r12ps">
+      <div class="r12pl">Dataset</div>
+      <select id="r12ds">
+        <option value="notas">Notas de estudiantes</option>
+        <option value="casas">Precio de viviendas</option>
+      </select>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">Profundidad máxima</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="r12depth" min="1" max="8" value="3" step="1" style="flex:1">
+        <span class="r12pv" id="r12depthv">3</span>
+      </div>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">Mín. muestras por hoja</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="r12leaf" min="1" max="20" value="5" step="1" style="flex:1">
+        <span class="r12pv" id="r12leafv">5</span>
+      </div>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">Mín. muestras para dividir</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="r12split" min="2" max="30" value="10" step="1" style="flex:1">
+        <span class="r12pv" id="r12splitv">10</span>
+      </div>
+    </div>
+    <button class="r12btn" id="r12run">▶ Entrenar árbol</button>
+    <button class="r12rst" id="r12reset">↺ Reiniciar datos</button>
+    <div class="r12ps">
+      <div class="r12pl">MAE</div>
+      <div class="r12met">
+        <div class="r12mb"><div class="r12mv" id="r12mae-tr">—</div><div class="r12ml">Train</div></div>
+        <div class="r12mb"><div class="r12mv" id="r12mae-te">—</div><div class="r12ml">Test</div></div>
+      </div>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">RMSE</div>
+      <div class="r12met">
+        <div class="r12mb"><div class="r12mv" id="r12rmse-tr">—</div><div class="r12ml">Train</div></div>
+        <div class="r12mb"><div class="r12mv" id="r12rmse-te">—</div><div class="r12ml">Test</div></div>
+      </div>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">Baseline MAE (promedio global)</div>
+      <div class="r12mv" id="r12base" style="font-size:15px;color:#888">—</div>
+    </div>
+  </div>
+
+  <div id="rpl12-right">
+    <div id="rpl12-tabs">
+      <button class="r12tab on" id="r12tab-map"  onclick="r12tab('map')">🗺 Mapa de predicción</button>
+      <button class="r12tab"    id="r12tab-tree" onclick="r12tab('tree')">🌳 Árbol</button>
+    </div>
+    <div id="rpl12-vmap" class="vis"><canvas id="rpl12-cv"></canvas></div>
+    <div id="rpl12-vtree"><svg id="rpl12-tsvg"></svg></div>
+  </div>
+</div>
+<div id="rpl12-st">Elige un dataset y entrena el árbol para comenzar</div>
+</div>
+
+<script>
+(function(){
+/* ── Paleta de calor para regresión ── */
+function valToColor(v,mn,mx){
+  const t=Math.max(0,Math.min(1,(v-mn)/(mx-mn||1)));
+  const r=Math.round(220-t*150),g=Math.round(60+t*140),b=Math.round(60+t*40);
+  return[r,g,b];
+}
+function rnd(a,b){return a+(b-a)*Math.random();}
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+/* ── Datasets ── */
+function genNotas(){
+  const pts=[];
+  for(let i=0;i<200;i++){
+    const p1=clamp(rnd(1,5)+randn()*0.3,1,5);
+    const asist=clamp(rnd(40,100)+randn()*5,40,100);
+    const nota=clamp(0.3*p1+0.004*asist+0.8+randn()*0.3,0,5);
+    pts.push({x:clamp((p1-1)/4,0.01,0.99),y:clamp((asist-40)/60,0.01,0.99),val:nota});
+  }
+  return{pts,xLabel:'Parcial 1 (normalizado)',yLabel:'Asistencia (normalizado)',unit:'pts',yMin:0,yMax:5};
+}
+function genCasas(){
+  const pts=[];
+  for(let i=0;i<200;i++){
+    const area=clamp(rnd(30,200)+randn()*15,30,200);
+    const estrato=clamp(Math.round(rnd(1,6)+randn()*0.5),1,6);
+    const precio=clamp(20+area*1.1+estrato*12+randn()*15,40,350);
+    pts.push({x:clamp((area-30)/170,0.01,0.99),y:clamp((estrato-1)/5,0.01,0.99),val:precio});
+  }
+  return{pts,xLabel:'Área (normalizado)',yLabel:'Estrato (normalizado)',unit:'M',yMin:40,yMax:350};
+}
+
+/* ── Árbol de regresión ── */
+function variance(pts){
+  if(pts.length<2)return 0;
+  const m=pts.reduce((s,p)=>s+p.val,0)/pts.length;
+  return pts.reduce((s,p)=>s+(p.val-m)**2,0)/pts.length;
+}
+function mean(pts){return pts.length?pts.reduce((s,p)=>s+p.val,0)/pts.length:0;}
+function buildReg(pts,depth,maxD,minL,minS){
+  const m=mean(pts);
+  if(depth>=maxD||pts.length<minS)return{leaf:true,pred:m,n:pts.length,depth};
+  let best=null,bestVar=Infinity;
+  for(const dim of['x','y']){
+    const vs=[...new Set(pts.map(p=>p[dim]))].sort((a,b)=>a-b);
+    for(let i=0;i<vs.length-1;i++){
+      const th=(vs[i]+vs[i+1])/2;
+      const L=pts.filter(p=>p[dim]<th),R=pts.filter(p=>p[dim]>=th);
+      if(L.length<minL||R.length<minL)continue;
+      const v=(L.length*variance(L)+R.length*variance(R))/pts.length;
+      if(v<bestVar){bestVar=v;best={dim,th,L,R};}
+    }
+  }
+  if(!best)return{leaf:true,pred:m,n:pts.length,depth};
+  return{leaf:false,dim:best.dim,th:best.th,
+    left:buildReg(best.L,depth+1,maxD,minL,minS),
+    right:buildReg(best.R,depth+1,maxD,minL,minS),
+    n:pts.length,depth};
+}
+function predReg(tree,p){if(tree.leaf)return tree.pred;return p[tree.dim]<tree.th?predReg(tree.left,p):predReg(tree.right,p);}
+
+/* ── Estado ── */
+let W=0,H=0,data=null,tree=null,trainIdx=[],testIdx=[];
+const cv=document.getElementById('rpl12-cv');
+const cx=cv.getContext('2d');
+
+/* ── Tabs ── */
+window.r12tab=function(t){
+  document.getElementById('rpl12-vmap').classList.toggle('vis',t==='map');
+  document.getElementById('rpl12-vtree').classList.toggle('vis',t==='tree');
+  document.getElementById('r12tab-map').classList.toggle('on',t==='map');
+  document.getElementById('r12tab-tree').classList.toggle('on',t==='tree');
+  if(t==='map'){resize();drawMap();}
+  else if(tree)drawTreeSVG();
+};
+
+/* ── Canvas ── */
+function resize(){
+  const r=cv.parentElement.getBoundingClientRect();
+  W=r.width;H=Math.max(r.height-4,280);
+  cv.width=W;cv.height=H;
+}
+function n2px(nx,ny){const p=36;return{x:p+nx*(W-2*p),y:(H-p)-ny*(H-2*p)};}
+
+function drawMap(){
+  if(!W||!H)return;
+  cx.clearRect(0,0,W,H);
+  if(tree&&data){
+    const img=cx.createImageData(W,H);
+    const pad=36;
+    for(let px=0;px<W;px++)for(let py=0;py<H;py++){
+      const nx=(px-pad)/(W-2*pad),ny=1-(py-pad)/(H-2*pad);
+      if(nx<0||nx>1||ny<0||ny>1)continue;
+      const v=predReg(tree,{x:nx,y:ny});
+      const [r,g,b]=valToColor(v,data.yMin,data.yMax);
+      const idx=4*(py*W+px);img.data[idx]=r;img.data[idx+1]=g;img.data[idx+2]=b;img.data[idx+3]=35;
+    }
+    cx.putImageData(img,0,0);
+  }
+  const pad=36;
+  cx.strokeStyle='#ccc';cx.lineWidth=1;
+  cx.beginPath();cx.moveTo(pad,pad);cx.lineTo(pad,H-pad);cx.lineTo(W-pad,H-pad);cx.stroke();
+  cx.fillStyle='#999';cx.font='11px inherit';cx.textAlign='center';
+  if(data){cx.fillText(data.xLabel,W/2,H-6);cx.save();cx.translate(11,H/2);cx.rotate(-Math.PI/2);cx.fillText(data.yLabel,0,0);cx.restore();}
+  if(data) data.pts.forEach((p,i)=>{
+    const c=n2px(p.x,p.y),isT=testIdx.includes(i);
+    const [r,g,b]=valToColor(p.val,data.yMin,data.yMax);
+    cx.beginPath();cx.arc(c.x,c.y,isT?5:3.5,0,6.28);
+    cx.fillStyle=`rgb(${r},${g},${b})`;cx.fill();
+    cx.strokeStyle=isT?'#000':'#fff';cx.lineWidth=isT?1.5:1;cx.stroke();
+  });
+}
+
+/* ── Árbol SVG ── */
+function drawTreeSVG(){
+  const container=document.getElementById('rpl12-tsvg');
+  const cW=Math.max(container.parentElement.getBoundingClientRect().width||400,400);
+  const NW=130,NH=58,VG=56;
+
+  function leaves(n){return n.leaf?1:leaves(n.left)+leaves(n.right);}
+  function posX(n,lo,hi){
+    if(n.leaf){n._cx=(lo+hi)/2;return;}
+    const tot=leaves(n);
+    posX(n.left,lo,lo+(hi-lo)*leaves(n.left)/tot);
+    posX(n.right,lo+(hi-lo)*leaves(n.left)/tot,hi);
+    n._cx=(n.left._cx+n.right._cx)/2;
+  }
+  function posY(n,d){n._cy=38+d*(NH+VG);if(!n.leaf){posY(n.left,d+1);posY(n.right,d+1);}}
+  function maxY(n){return n.leaf?n._cy:Math.max(maxY(n.left),maxY(n.right));}
+  posX(tree,40,cW-40);posY(tree,0);
+  const svgH=maxY(tree)+NH+36;
+
+  const dimName=d=>{if(!data)return d==='x'?'X':'Y';return d==='x'?data.xLabel.split('(')[0].trim():data.yLabel.split('(')[0].trim();};
+  const unit=data?data.unit:'';
+
+  let lines='',nodes='';
+  function walk(n){
+    if(!n.leaf){
+      lines+=`<line x1="${n._cx}" y1="${n._cy+NH/2}" x2="${n.left._cx}" y2="${n.left._cy-NH/2}" stroke="#bbb" stroke-width="1.2"/>`;
+      lines+=`<line x1="${n._cx}" y1="${n._cy+NH/2}" x2="${n.right._cx}" y2="${n.right._cy-NH/2}" stroke="#bbb" stroke-width="1.2"/>`;
+      const mlx=(n._cx+n.left._cx)/2,mly=(n._cy+NH/2+n.left._cy-NH/2)/2;
+      lines+=`<text x="${mlx-4}" y="${mly}" font-family="inherit" font-size="10" fill="#888" text-anchor="end">No</text>`;
+      const mrx=(n._cx+n.right._cx)/2,mry=(n._cy+NH/2+n.right._cy-NH/2)/2;
+      lines+=`<text x="${mrx+4}" y="${mry}" font-family="inherit" font-size="10" fill="#888">Sí</text>`;
+      walk(n.left);walk(n.right);
+    }
+    const x=n._cx-NW/2,y=n._cy-NH/2;
+    if(n.leaf){
+      nodes+=`<rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="1"/>`;
+      nodes+=`<text x="${n._cx}" y="${y+16}" font-family="inherit" font-size="10" fill="#633806" text-anchor="middle" dominant-baseline="central">HOJA · n=${n.n}</text>`;
+      nodes+=`<text x="${n._cx}" y="${y+36}" font-family="inherit" font-size="14" font-weight="500" fill="#412402" text-anchor="middle" dominant-baseline="central">ŷ = ${n.pred.toFixed(2)} ${unit}</text>`;
+    } else {
+      nodes+=`<rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>`;
+      nodes+=`<text x="${n._cx}" y="${y+16}" font-family="inherit" font-size="10" fill="#0C447C" text-anchor="middle" dominant-baseline="central">prof. ${n.depth}</text>`;
+      nodes+=`<text x="${n._cx}" y="${y+38}" font-family="inherit" font-size="11" font-weight="500" fill="#042C53" text-anchor="middle" dominant-baseline="central">${dimName(n.dim)} &lt; ${n.th.toFixed(2)}</text>`;
+    }
+  }
+  walk(tree);
+  container.setAttribute('viewBox',`0 0 ${cW} ${svgH}`);
+  container.setAttribute('height',svgH);
+  container.innerHTML=lines+nodes;
+}
+
+/* ── Métricas ── */
+function mae(idxs){
+  if(!idxs.length)return null;
+  return idxs.reduce((s,i)=>s+Math.abs(predReg(tree,data.pts[i])-data.pts[i].val),0)/idxs.length;
+}
+function rmse(idxs){
+  if(!idxs.length)return null;
+  return Math.sqrt(idxs.reduce((s,i)=>s+(predReg(tree,data.pts[i])-data.pts[i].val)**2,0)/idxs.length);
+}
+function baselineMAE(idxs){
+  const m=mean(idxs.map(i=>data.pts[i]));
+  return idxs.reduce((s,i)=>s+Math.abs(data.pts[i].val-m),0)/idxs.length;
+}
+function splitTT(n){
+  const idx=Array.from({length:n},(_,i)=>i);
+  for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
+  const cut=Math.floor(n*0.75);return{train:idx.slice(0,cut),test:idx.slice(cut)};
+}
+
+/* ── Cargar dataset ── */
+function loadDS(){
+  const v=document.getElementById('r12ds').value;
+  data=v==='notas'?genNotas():genCasas();
+  const{train,test}=splitTT(data.pts.length);
+  trainIdx=train;testIdx=test;
+  tree=null;
+  ['r12mae-tr','r12mae-te','r12rmse-tr','r12rmse-te','r12base'].forEach(id=>{document.getElementById(id).textContent='—';});
+  document.getElementById('rpl12-tsvg').innerHTML='';
+  resize();drawMap();
+  document.getElementById('rpl12-st').textContent=
+    `${data.pts.length} obs. (${trainIdx.length} entrenamiento, ${testIdx.length} prueba). Puntos con borde negro = conjunto de prueba.`;
+}
+
+/* ── Entrenar ── */
+document.getElementById('r12run').addEventListener('click',()=>{
+  if(!data)return;
+  const maxD=+document.getElementById('r12depth').value;
+  const minL=+document.getElementById('r12leaf').value;
+  const minS=+document.getElementById('r12split').value;
+  tree=buildReg(trainIdx.map(i=>data.pts[i]),0,maxD,minL,minS);
+  const maeT=mae(trainIdx),maeE=mae(testIdx);
+  const rmseT=rmse(trainIdx),rmseE=rmse(testIdx);
+  const base=baselineMAE(testIdx);
+  document.getElementById('r12mae-tr').textContent=maeT?maeT.toFixed(3):'—';
+  document.getElementById('r12mae-te').textContent=maeE?maeE.toFixed(3):'—';
+  document.getElementById('r12rmse-tr').textContent=rmseT?rmseT.toFixed(3):'—';
+  document.getElementById('r12rmse-te').textContent=rmseE?rmseE.toFixed(3):'—';
+  document.getElementById('r12base').textContent=base?base.toFixed(3)+' '+data.unit:'—';
+  drawMap();
+  if(document.getElementById('rpl12-vtree').classList.contains('vis'))drawTreeSVG();
+  document.getElementById('rpl12-st').textContent=
+    `Árbol entrenado: profundidad máx ${maxD}, mín hoja ${minL}, mín split ${minS}.`;
+});
+
+document.getElementById('r12reset').addEventListener('click',loadDS);
+[['r12depth','r12depthv'],['r12leaf','r12leafv'],['r12split','r12splitv']].forEach(([id,vid])=>{
+  document.getElementById(id).addEventListener('input',e=>{document.getElementById(vid).textContent=e.target.value;});
+});
+document.getElementById('r12ds').addEventListener('change',loadDS);
+window.addEventListener('resize',()=>{if(document.getElementById('rpl12-vmap').classList.contains('vis')){resize();drawMap();}});
+setTimeout(()=>{resize();loadDS();},150);
+})();
+</script>
+</div>
+```
+
+---
+
+<!--=================-->
+<!--=================-->
+# Del resultado al negocio: interpretar las métricas
+
+Un árbol de regresión entrenado sobre 300 estudiantes da estos resultados en el conjunto de prueba (75 estudiantes):
+
+| Métrica | Baseline (siempre predice promedio) | Árbol de regresión |
+|---|---|---|
+| MAE | 0.48 pts | 0.21 pts |
+| RMSE | 0.61 pts | 0.28 pts |
+
+El árbol reduce el error a menos de la mitad respecto al baseline. En términos prácticos: en promedio se equivoca por 0.21 puntos en una escala de 5.0. Eso significa que una nota real de 3.5 la predice entre 3.3 y 3.7 — útil para identificar estudiantes en riesgo antes de que sea demasiado tarde.
+
+::: {.callout-key}
+**¿Cuándo es "suficientemente bueno" un MAE?**
+
+Depende del uso. Si el modelo se usa para identificar estudiantes con nota predicha menor a 3.0 y ofrecerles tutorías, un MAE de 0.21 es más que suficiente — el modelo no necesita ser perfecto para ser útil. Si se usa para calcular el promedio exacto de la carrera, el requerimiento de precisión es mayor.
+
+La pregunta no es "¿el MAE es bajo?" sino "**¿el error del modelo es tolerable para la decisión que quiero tomar?**"
+:::
+
+::: {.callout-connect}
+**Conexión con semana 9 y semana 11**
+
+El sobreajuste ocurre igual en regresión que en clasificación: el MAE en train baja indefinidamente con más profundidad, pero el MAE en test empieza a subir en algún punto. La señal de sobreajuste es la **brecha creciente entre train y test**, no el valor absoluto de cada uno.
+
+Revisa en el playground: ¿en qué profundidad empieza a crecer el MAE en test mientras el de train sigue bajando?
+:::
+
+---
+
+## Material adicional (opcional)
+
+- **An Introduction to Statistical Learning (ISLR)** — Capítulo 8: árboles de regresión y clasificación — [statlearning.com](https://www.statlearning.com)
+- **Towards Data Science: "MAE vs RMSE — when to use which?"** — artículo con ejemplos aplicados
+
+---
+
+## Checklist de preclase
+
+Al llegar a clase debes poder explicar:
+
+- [ ] ¿Qué diferencia hay entre un árbol de clasificación y uno de regresión?
+- [ ] ¿Qué valor devuelve el árbol de regresión en cada hoja?
+- [ ] ¿Cómo se calcula el MAE? ¿Y el RMSE? ¿Qué mide cada uno?
+- [ ] ¿Por qué el RMSE es siempre ≥ al MAE?
+- [ ] ¿Qué es el baseline de regresión? ¿Cómo se construye?
+- [ ] ¿Qué significa que un árbol de regresión esté sobreajustado? ¿Cómo lo detectas?
+- [ ] ¿Cuándo preferirías MAE sobre RMSE para reportar el error?
+
+## Preguntas de comprensión
+
+**1.** Un árbol de regresión predice la nota final de 6 estudiantes del conjunto de prueba. Los resultados son:
+
+| Estudiante | Nota real | Nota predicha |
+|---|---|---|
+| 1 | 2.8 | 3.1 |
+| 2 | 3.5 | 3.3 |
+| 3 | 4.0 | 3.9 |
+| 4 | 1.5 | 2.2 |
+| 5 | 4.8 | 4.6 |
+| 6 | 3.2 | 3.0 |
+
+Calcula el MAE y el RMSE. ¿Cuál estudiante contribuye más al RMSE y por qué?
+
+<details>
+<summary>Ver respuesta</summary>
+
+Errores absolutos: |2.8-3.1|=0.3, |3.5-3.3|=0.2, |4.0-3.9|=0.1, |1.5-2.2|=0.7, |4.8-4.6|=0.2, |3.2-3.0|=0.2
+
+**MAE** = (0.3+0.2+0.1+0.7+0.2+0.2)/6 = 1.7/6 = **0.283**
+
+Errores cuadráticos: 0.09, 0.04, 0.01, 0.49, 0.04, 0.04 → suma = 0.71
+
+**RMSE** = √(0.71/6) = √0.118 = **0.344**
+
+El estudiante 4 (error de 0.7) contribuye más al RMSE: su error cuadrático (0.49) representa el 69% de la suma total de errores cuadráticos. En el MAE su contribución es el 41%. El RMSE penaliza más ese error grande.
+</details>
+
+**2.** Un árbol con profundidad 6 da MAE = 0.08 en train y MAE = 0.39 en test. El baseline tiene MAE = 0.45 en test. ¿Es un buen modelo? ¿Qué harías?
+
+<details>
+<summary>Ver respuesta</summary>
+
+El modelo mejora el baseline (0.39 < 0.45), así que sí aprendió algo útil. Pero la brecha enorme entre train (0.08) y test (0.39) indica sobreajuste: el árbol memorizó los datos de entrenamiento en vez de aprender un patrón generalizable. Lo que haría es reducir la profundidad máxima o aumentar el mínimo de muestras por hoja hasta que train y test converjan a un valor parecido — aunque eso implique aceptar un MAE en train un poco más alto.
+</details>
+
+**3.** Una facultad quiere usar el modelo para identificar estudiantes en riesgo de reprobar (nota < 3.0) antes del parcial final. ¿Qué métrica priorizarías para evaluar el modelo — MAE o RMSE? ¿Por qué?
+
+<details>
+<summary>Ver respuesta</summary>
+
+Dependería de si los errores grandes importan más que los pequeños. En este caso, predecir 2.1 cuando la nota real es 2.8 (error = 0.7) es mucho más costoso que predecir 3.3 cuando la real es 3.5 (error = 0.2): en el primer caso el estudiante queda por debajo del umbral de riesgo sin detectarse. Ese tipo de error grave es exactamente lo que el RMSE penaliza más. Sin embargo, si lo que importa es identificar correctamente quién está cerca del 3.0, también sería útil analizar cuántos estudiantes en riesgo real el modelo no detecta — lo que se acerca al concepto de recall que vimos en la semana 11, aplicado a regresión.
+</details>
