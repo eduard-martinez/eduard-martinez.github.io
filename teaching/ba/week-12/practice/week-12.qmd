@@ -62,13 +62,11 @@ require(rpart.plot) # visualizar el árbol de forma clara
 ## Cargar datos / Load data
 #notas <- read.csv("https://eduard-martinez.github.io/teaching/ba/week-12/db/notas_regresion.csv")
 source("https://eduard-martinez.github.io/teaching/ba/week-12/db/notas_regresion.R")
-
 ```
 
-
 ```{webr-r}
-
-skim(notas)
+## inspect data
+head(notas)
 ```
 
 ::: {.callout-key}
@@ -145,9 +143,7 @@ nrow(notas_test)
 ```
 
 ::: {.callout-key}
-**¿Por qué dividir en regresión también?**
-
-Exactamente por la misma razón que en clasificación (Semana 11): el árbol memoriza los datos de entrenamiento. Si medimos el MAE en esos mismos datos, el error parece artificialmente bajo. El conjunto de prueba simula estudiantes futuros que el modelo nunca vio.
+**¿Por qué dividir en regresión también?** Exactamente por la misma razón que en clasificación (Semana 11): el árbol memoriza los datos de entrenamiento. Si medimos el MAE en esos mismos datos, el error parece artificialmente bajo. El conjunto de prueba simula estudiantes futuros que el modelo nunca vio.
 :::
 
 ---
@@ -191,9 +187,24 @@ Las hojas marcadas con `*` muestran el valor que el árbol predice para cualquie
 # Paso 6 — Visualizar el árbol
 
 ```{webr-r}
-## Visualizar el árbol / Plot the tree
-plot(arbol, uniform = TRUE, margin = 0.12)
-text(arbol, use.n = TRUE, cex = 0.75)
+## Visualización básica
+rpart.plot(arbol, type = 4, extra = 101)
+``` 
+
+
+```{webr-r}
+## Visualización mejorada con colores y más detalle
+rpart.plot(
+  x          = arbol,
+  type       = 4,       # muestra las etiquetas en los nodos y hojas
+  extra      = 101,     # muestra n° de observaciones y porcentaje en cada nodo
+  box.palette = "Blues", # gradiente de color: azul claro = nota baja, azul oscuro = nota alta
+  shadow.col = "gray80",
+  nn         = TRUE,    # muestra número de nodo
+  fallen.leaves = TRUE, # alinea todas las hojas al fondo
+  main       = "Árbol de regresión — Predicción de nota final",
+  cex        = 0.85
+)
 ```
 
 ::: {.callout-key}
@@ -217,9 +228,6 @@ Compara este árbol con los diagramas SVG de la teoría. ¿Las hojas muestran ca
 ## In regression no type = "class" needed — returns numbers directly
 predicciones <- predict(object  = arbol,
                         newdata = notas_test)
-
-## Ver las primeras predicciones / Preview first predictions
-head(predicciones)
 ```
 
 ```{webr-r}
@@ -251,20 +259,16 @@ errores_abs <- abs(notas_test$nota_final - predicciones)
 
 ## MAE — Error Absoluto Medio / Mean Absolute Error
 MAE_test <- mean(errores_abs)
-
-## Imprimir / Print
-cat("MAE en test:", round(MAE_test, 3), "\n")
-cat("Interpretación: en promedio, el modelo se equivoca por",
-    round(MAE_test, 3), "puntos en la nota final\n")
+MAE_test
 ```
 
 ```{webr-r}
 ## MAE también en train para comparar / MAE on train set for comparison
 predicciones_train <- predict(object = arbol, newdata = notas_train)
-MAE_train <- mean(abs(notas_train$nota_final - predicciones_train))
 
-cat("MAE en train:", round(MAE_train, 3), "\n")
-cat("MAE en test: ", round(MAE_test,  3), "\n")
+## MAE
+MAE_train <- mean(abs(notas_train$nota_final - predicciones_train))
+MAE_train
 ```
 
 ::: {.callout-key}
@@ -287,11 +291,7 @@ errores_cuad <- (notas_test$nota_final - predicciones)^2
 
 ## RMSE — Raíz del Error Cuadrático Medio / Root Mean Squared Error
 RMSE_test <- sqrt(mean(errores_cuad))
-
-cat("RMSE en test:", round(RMSE_test, 3), "\n")
-cat("MAE  en test:", round(MAE_test,  3), "\n")
-cat("Diferencia:  ", round(RMSE_test - MAE_test, 3),
-    "— cuánto pesan los errores grandes\n")
+RMSE_test
 ```
 
 ::: {.callout-key}
@@ -317,13 +317,7 @@ promedio_train
 ## MAE del baseline en el conjunto de test
 ## Baseline MAE on test set
 MAE_baseline <- mean(abs(notas_test$nota_final - promedio_train))
-
-cat("MAE baseline:", round(MAE_baseline, 3), "\n")
-cat("MAE árbol:   ", round(MAE_test,     3), "\n")
-cat("Mejora:      ", round(MAE_baseline - MAE_test, 3),
-    "puntos menos de error\n")
-cat("Reducción:   ", round((1 - MAE_test/MAE_baseline)*100, 1),
-    "% de reducción del error\n")
+MAE_baseline
 ```
 
 ::: {.callout-warning}

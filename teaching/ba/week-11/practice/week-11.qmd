@@ -64,20 +64,11 @@ Trabajamos con el dataset `credito_icesi`, que contiene solicitudes de crédito 
 ## Cargar datos / Load data
 #credito <- read.csv("https://eduard-martinez.github.io/teaching/ba/week-11/db/credito_clasificacion.csv")
 source("https://eduard-martinez.github.io/teaching/ba/week-11/db/credito_clasificacion.R")
-
-## Verificar dimensiones / Check dimensions
-nrow(credito)
-ncol(credito)
 ```
 
 ```{webr-r}
-## Ver las primeras filas / Preview first rows
+## inspect data
 head(credito)
-```
-
-```{webr-r}
-## Nombres de columnas / Column names
-colnames(credito)
 ```
 
 ::: {.callout-key}
@@ -189,9 +180,23 @@ Cada línea es un nodo. Se lee de arriba hacia abajo:
 # Paso 6 — Visualizar el árbol
 
 ```{webr-r}
-## Visualizar el árbol / Plot the tree
-plot(arbol, uniform = TRUE, margin = 0.12)
-text(arbol, use.n = TRUE, cex = 0.8)
+## Visualización básica
+rpart.plot(arbol, type = 4, extra = 101)
+``` 
+
+```{webr-r}
+## Visualización mejorada con colores y más detalle
+rpart.plot(
+  x          = arbol,
+  type       = 4,       # muestra las etiquetas en los nodos y hojas
+  extra      = 101,     # muestra n° de observaciones y porcentaje en cada nodo
+  box.palette = "Blues", # gradiente de color: azul claro = nota baja, azul oscuro = nota alta
+  shadow.col = "gray80",
+  nn         = TRUE,    # muestra número de nodo
+  fallen.leaves = TRUE, # alinea todas las hojas al fondo
+  main       = "Árbol de Clasificación — Predicción de nota final",
+  cex        = 0.85
+)
 ```
 
 ::: {.callout-key}
@@ -218,9 +223,6 @@ El árbol ya aprendió. Ahora predice sobre las solicitudes que nunca vio durant
 predicciones <- predict(object  = arbol,
                         newdata = credito_test,
                         type    = "class")
-
-## Ver las primeras predicciones / Preview first predictions
-head(predicciones)
 ```
 
 ```{webr-r}
@@ -286,11 +288,6 @@ La estructura es **filas = valor real** y **columnas = predicción del modelo** 
 ## Extraer cada celda de la tabla / Extract each cell from the table
 ## Sintaxis: tabla["nombre_fila", "nombre_columna"]
 ## Syntax:   table["row_name",  "column_name"]
-
-VP <- tabla_confusion["Aprobado",  "Aprobado"]   # real Aprobado, pred Aprobado
-FN <- tabla_confusion["Aprobado",  "Rechazado"]  # real Aprobado, pred Rechazado
-FP <- tabla_confusion["Rechazado", "Aprobado"]   # real Rechazado, pred Aprobado
-VN <- tabla_confusion["Rechazado", "Rechazado"]  # real Rechazado, pred Rechazado
 ```
 
 ::: {.callout-warning}
@@ -304,25 +301,6 @@ Usar los nombres de las categorías es más seguro: si R ordena las filas o colu
 <!--=================-->
 <!--=================-->
 # Paso 10 — Calcular las métricas
-
-```{webr-r}
-## Total de observaciones en prueba / Total test observations
-n_test <- VP + FN + FP + VN
-
-## Accuracy: proporción de casos correctamente clasificados
-accuracy  <- (VP + VN) / n_test
-
-## Precisión: de los que predijo "Aprobado", cuántos lo eran realmente
-precision <- VP / (VP + FP)
-
-## Recall: de los que eran realmente "Aprobado", cuántos detectó el modelo
-recall    <- VP / (VP + FN)
-
-## Imprimir resultados / Print results
-cat("Accuracy:  ", round(accuracy  * 100, 1), "%\n")
-cat("Precisión: ", round(precision * 100, 1), "%\n")
-cat("Recall:    ", round(recall    * 100, 1), "%\n")
-```
 
 ::: {.callout-key}
 **¿Cómo interpretar los tres números juntos?**
@@ -341,22 +319,6 @@ Ahora piensa: ¿cuál error es más costoso para esta entidad financiera — el 
 # Paso 11 — Comparar con el baseline
 
 Antes de concluir que el modelo es bueno, lo comparamos con el modelo más simple posible: predecir siempre la categoría más frecuente del conjunto de prueba.
-
-```{webr-r}
-## Distribución real en el conjunto de prueba / Real distribution in test set
-table(credito_test$decision)
-```
-
-```{webr-r}
-## Proporción de cada categoría / Proportion per category
-prop.table(table(credito_test$decision))
-```
-
-```{webr-r}
-## Accuracy del baseline: predecir siempre la categoría mayoritaria
-## Baseline accuracy: always predict the majority class
-max(prop.table(table(credito_test$decision)))
-```
 
 ::: {.callout-warning}
 **¿El árbol mejora el baseline?**
