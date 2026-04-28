@@ -8,7 +8,7 @@
 
 <meta name="author" content="PhD. Eduard F. Martínez-González">
 
-<title>Práctica guiada — Semana 11: Árboles de Clasificación</title>
+<title>Práctica guiada — Semana 12: Árboles de Regresión</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -24,17 +24,17 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="week-11_files/libs/clipboard/clipboard.min.js"></script>
-<script src="week-11_files/libs/quarto-html/quarto.js" type="module"></script>
-<script src="week-11_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="week-11_files/libs/quarto-html/popper.min.js"></script>
-<script src="week-11_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="week-11_files/libs/quarto-html/anchor.min.js"></script>
-<link href="week-11_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="week-11_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="week-11_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="week-11_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="week-11_files/libs/bootstrap/bootstrap-e6bb25874def5e3c119f13f2169c6013.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="week-12_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-12_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-12_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-12_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-12_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-12_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-12_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-12_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-12_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-12_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-12_files/libs/bootstrap/bootstrap-e6bb25874def5e3c119f13f2169c6013.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <style>html{ scroll-behavior: smooth; }</style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -314,7 +314,7 @@ iframe.qwebr-output-code-browse {
 // Document level settings ----
 
 // Determine if we need to install R packages
-globalThis.qwebrInstallRPackagesList = ['dplyr', 'ggplot2', 'rpart'];
+globalThis.qwebrInstallRPackagesList = ['dplyr', 'ggplot2', 'skimr'];
 
 // Specify possible locations to search for the repository
 globalThis.qwebrPackageRepoURLS = ['https://repo.r-wasm.org/'];
@@ -336,7 +336,7 @@ globalThis.qwebrCustomizedWebROptions = {
 };
 
 // Store cell data
-globalThis.qwebrCellDetails = [{"code":"## Limpiar entorno / Clean environment\nrm(list = ls())\n\n## instalar\ninstall.packages(\"rpart\")  \ninstall.packages(\"rpart.plot\")  \n\n## Cargar paquetes / Load packages\nrequire(dplyr)    # manipulación de datos\nrequire(ggplot2)  # visualización\nrequire(rpart)    # árbol de decisión/regresión\nrequire(rpart.plot) # visualizar el árbol de forma clara","id":1,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-1","message":"false","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"false"}},{"code":"## Cargar datos / Load data\n#credito <- read.csv(\"https://eduard-martinez.github.io/teaching/ba/week-11/db/credito_clasificacion.csv\")\nsource(\"https://eduard-martinez.github.io/teaching/ba/week-11/db/credito_clasificacion.R\")\n\n## Verificar dimensiones / Check dimensions\nnrow(credito)\nncol(credito)","id":2,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-2","message":"false","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"false"}},{"code":"## Ver las primeras filas / Preview first rows\nhead(credito)","id":3,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-3","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Nombres de columnas / Column names\ncolnames(credito)","id":4,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-4","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Distribución de la variable de resultado / Target variable distribution\ntable(credito$decision)","id":5,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-5","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Proporción de cada categoría / Proportion per category\nprop.table(table(credito$decision))","id":6,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-6","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Fijar semilla para reproducibilidad / Set seed for reproducibility\nset.seed(2025)\n\n## Total de filas / Total rows\nn_total <- nrow(credito)\nn_total\n\n## Índices de entrenamiento (75% de los datos) / Training indices (75%)\nidx_train <- sample(x = 1:n_total, size = floor(0.75 * n_total))\n\n## Crear conjuntos / Create sets\ncredito_train <- credito[idx_train, ]\ncredito_test  <- credito[-idx_train, ]\n\n## Verificar tamaños / Check sizes\nnrow(credito_train)\nnrow(credito_test)","id":7,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-7","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Entrenar el árbol / Train the tree\n## method = \"class\" indica clasificación / method = \"class\" for classification\narbol <- rpart(formula = decision ~ ingreso_m + historial + deuda_actual + antiguedad_lab + edad,\n               data    = credito_train,\n               method  = \"class\",\n               control = rpart.control(maxdepth = 3))\n\n## Ver el árbol en texto / Print tree as text\narbol","id":8,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-8","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Visualizar el árbol / Plot the tree\nplot(arbol, uniform = TRUE, margin = 0.12)\ntext(arbol, use.n = TRUE, cex = 0.8)","id":9,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-9","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Predecir en conjunto de prueba / Predict on test set\n## type = \"class\" devuelve la categoría, no probabilidades / returns category label\npredicciones <- predict(object  = arbol,\n                        newdata = credito_test,\n                        type    = \"class\")\n\n## Ver las primeras predicciones / Preview first predictions\nhead(predicciones)","id":10,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-10","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Cuántas predicciones de cada categoría / Count predictions per category\ntable(predicciones)","id":11,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-11","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Comparar predicción vs. valor real — primeras 10 filas\n## Compare prediction vs. real value — first 10 rows\nhead(\n  data.frame(real       = credito_test$decision,\n             prediccion = predicciones),\n  n = 10\n)","id":12,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-12","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Construir la tabla de confusión / Build confusion matrix\n## Filas = valor real, Columnas = predicción del modelo\n## Rows = real value, Cols = model prediction\ntabla_confusion <- table(Real      = credito_test$decision,\n                         Prediccion = predicciones)\n\n## Ver la tabla / Print table\ntabla_confusion","id":13,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-13","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Extraer cada celda de la tabla / Extract each cell from the table\n## Sintaxis: tabla[\"nombre_fila\", \"nombre_columna\"]\n## Syntax:   table[\"row_name\",  \"column_name\"]\n\nVP <- tabla_confusion[\"Aprobado\",  \"Aprobado\"]   # real Aprobado, pred Aprobado\nFN <- tabla_confusion[\"Aprobado\",  \"Rechazado\"]  # real Aprobado, pred Rechazado\nFP <- tabla_confusion[\"Rechazado\", \"Aprobado\"]   # real Rechazado, pred Aprobado\nVN <- tabla_confusion[\"Rechazado\", \"Rechazado\"]  # real Rechazado, pred Rechazado","id":14,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-14","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Total de observaciones en prueba / Total test observations\nn_test <- VP + FN + FP + VN\n\n## Accuracy: proporción de casos correctamente clasificados\naccuracy  <- (VP + VN) / n_test\n\n## Precisión: de los que predijo \"Aprobado\", cuántos lo eran realmente\nprecision <- VP / (VP + FP)\n\n## Recall: de los que eran realmente \"Aprobado\", cuántos detectó el modelo\nrecall    <- VP / (VP + FN)\n\n## Imprimir resultados / Print results\ncat(\"Accuracy:  \", round(accuracy  * 100, 1), \"%\\n\")\ncat(\"Precisión: \", round(precision * 100, 1), \"%\\n\")\ncat(\"Recall:    \", round(recall    * 100, 1), \"%\\n\")","id":15,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-15","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Distribución real en el conjunto de prueba / Real distribution in test set\ntable(credito_test$decision)","id":16,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-16","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Proporción de cada categoría / Proportion per category\nprop.table(table(credito_test$decision))","id":17,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-17","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Accuracy del baseline: predecir siempre la categoría mayoritaria\n## Baseline accuracy: always predict the majority class\nmax(prop.table(table(credito_test$decision)))","id":18,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-18","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}}];
+globalThis.qwebrCellDetails = [{"code":"## Limpiar entorno / Clean environment\nrm(list = ls())\n\n## instalar\ninstall.packages(\"rpart\")  \ninstall.packages(\"rpart.plot\")  \n\n## Cargar paquetes / Load packages\nrequire(dplyr)    # manipulación de datos\nrequire(ggplot2)  # visualización\nrequire(rpart)    # árbol de decisión/regresión\nrequire(rpart.plot) # visualizar el árbol de forma clara","id":1,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-1","message":"false","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"false"}},{"code":"## Cargar datos / Load data\n#notas <- read.csv(\"https://eduard-martinez.github.io/teaching/ba/week-12/db/notas_regresion.csv\")\nsource(\"https://eduard-martinez.github.io/teaching/ba/week-12/db/notas_regresion.R\")","id":2,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-2","message":"false","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"false"}},{"code":"skim(notas)","id":3,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-3","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Resumen de la variable de resultado / Target variable summary\nsummary(notas$nota_final)","id":4,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-4","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Distribución visual / Visual distribution\nggplot(notas, aes(x = nota_final)) +\n  geom_histogram(bins = 20, fill = \"#378ADD\", color = \"white\", alpha = 0.8) +\n  theme_minimal() +\n  labs(title = \"Distribución de la nota final\",\n       x = \"Nota final (0–5.0)\", y = \"Frecuencia\")","id":5,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-5","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Promedio global — este es el baseline / Global mean — this is the baseline\npromedio_global <- mean(notas$nota_final)\npromedio_global","id":6,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-6","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Fijar semilla para reproducibilidad / Set seed for reproducibility\nset.seed(2025)\n\n## Total de filas / Total rows\nn_total <- nrow(notas)\nn_total\n\n## Índices de entrenamiento (75%) / Training indices (75%)\nidx_train <- sample(x = 1:n_total, size = floor(0.75 * n_total))\n\n## Crear conjuntos / Create sets\nnotas_train <- notas[idx_train, ]\nnotas_test  <- notas[-idx_train, ]\n\n## Verificar tamaños / Check sizes\nnrow(notas_train)\nnrow(notas_test)","id":7,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-7","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Entrenar el árbol de regresión / Train the regression tree\n## method = \"anova\" indica regresión / method = \"anova\" for regression\narbol <- rpart(formula = nota_final ~ parcial_1 + parcial_2 + tareas + quices + asistencia,\n               data    = notas_train,\n               method  = \"anova\",\n               control = rpart.control(maxdepth = 3))\n\n## Ver el árbol en texto / Print tree as text\narbol","id":8,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-8","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Visualizar el árbol / Plot the tree\nplot(arbol, uniform = TRUE, margin = 0.12)\ntext(arbol, use.n = TRUE, cex = 0.75)","id":9,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-9","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Predecir en conjunto de prueba / Predict on test set\n## En regresión no se necesita type = \"class\" — devuelve números directamente\n## In regression no type = \"class\" needed — returns numbers directly\npredicciones <- predict(object  = arbol,\n                        newdata = notas_test)\n\n## Ver las primeras predicciones / Preview first predictions\nhead(predicciones)","id":10,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-10","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Comparar predicción vs. valor real — primeras 10 filas\n## Compare prediction vs. real value — first 10 rows\nhead(\n  data.frame(nota_real  = notas_test$nota_final,\n             prediccion = round(predicciones, 2),\n             error      = round(notas_test$nota_final - predicciones, 2)),\n  n = 10\n)","id":11,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-11","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Errores absolutos / Absolute errors\nerrores_abs <- abs(notas_test$nota_final - predicciones)\n\n## MAE — Error Absoluto Medio / Mean Absolute Error\nMAE_test <- mean(errores_abs)\n\n## Imprimir / Print\ncat(\"MAE en test:\", round(MAE_test, 3), \"\\n\")\ncat(\"Interpretación: en promedio, el modelo se equivoca por\",\n    round(MAE_test, 3), \"puntos en la nota final\\n\")","id":12,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-12","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## MAE también en train para comparar / MAE on train set for comparison\npredicciones_train <- predict(object = arbol, newdata = notas_train)\nMAE_train <- mean(abs(notas_train$nota_final - predicciones_train))\n\ncat(\"MAE en train:\", round(MAE_train, 3), \"\\n\")\ncat(\"MAE en test: \", round(MAE_test,  3), \"\\n\")","id":13,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-13","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Errores cuadráticos / Squared errors\nerrores_cuad <- (notas_test$nota_final - predicciones)^2\n\n## RMSE — Raíz del Error Cuadrático Medio / Root Mean Squared Error\nRMSE_test <- sqrt(mean(errores_cuad))\n\ncat(\"RMSE en test:\", round(RMSE_test, 3), \"\\n\")\ncat(\"MAE  en test:\", round(MAE_test,  3), \"\\n\")\ncat(\"Diferencia:  \", round(RMSE_test - MAE_test, 3),\n    \"— cuánto pesan los errores grandes\\n\")","id":14,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-14","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Baseline: predecir siempre el promedio del conjunto de entrenamiento\n## Baseline: always predict the training set mean\npromedio_train <- mean(notas_train$nota_final)\npromedio_train\n\n## MAE del baseline en el conjunto de test\n## Baseline MAE on test set\nMAE_baseline <- mean(abs(notas_test$nota_final - promedio_train))\n\ncat(\"MAE baseline:\", round(MAE_baseline, 3), \"\\n\")\ncat(\"MAE árbol:   \", round(MAE_test,     3), \"\\n\")\ncat(\"Mejora:      \", round(MAE_baseline - MAE_test, 3),\n    \"puntos menos de error\\n\")\ncat(\"Reducción:   \", round((1 - MAE_test/MAE_baseline)*100, 1),\n    \"% de reducción del error\\n\")","id":15,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-15","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Crear data frame de resultados / Create results data frame\nresultados_test <- data.frame(\n  nota_real  = notas_test$nota_final,\n  prediccion = predicciones\n)\n\n## Gráfico predicción vs. real / Prediction vs. actual plot\nggplot(resultados_test, aes(x = nota_real, y = prediccion)) +\n  geom_point(alpha = 0.5, color = \"#378ADD\") +\n  geom_abline(slope = 1, intercept = 0, color = \"#E87722\",\n              linetype = \"dashed\", linewidth = 1) +\n  theme_minimal() +\n  labs(title = \"Predicción vs. Nota real (conjunto de prueba)\",\n       x = \"Nota real\", y = \"Nota predicha\",\n       caption = \"Línea naranja: predicción perfecta (real = predicho)\")","id":16,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-16","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}}];
 
 </script>
 <script type="module">
@@ -1607,14 +1607,14 @@ globalThis.qwebrExecuteCode = async function (
   <li><a href="#paso-2-cargar-los-datos" id="toc-paso-2-cargar-los-datos" class="nav-link" data-scroll-target="#paso-2-cargar-los-datos"><span class="header-section-number">3</span> Paso 2 — Cargar los datos</a></li>
   <li><a href="#paso-3-explorar-la-variable-de-resultado" id="toc-paso-3-explorar-la-variable-de-resultado" class="nav-link" data-scroll-target="#paso-3-explorar-la-variable-de-resultado"><span class="header-section-number">4</span> Paso 3 — Explorar la variable de resultado</a></li>
   <li><a href="#paso-4-dividir-en-entrenamiento-y-prueba" id="toc-paso-4-dividir-en-entrenamiento-y-prueba" class="nav-link" data-scroll-target="#paso-4-dividir-en-entrenamiento-y-prueba"><span class="header-section-number">5</span> Paso 4 — Dividir en entrenamiento y prueba</a></li>
-  <li><a href="#paso-5-entrenar-el-árbol-de-clasificación" id="toc-paso-5-entrenar-el-árbol-de-clasificación" class="nav-link" data-scroll-target="#paso-5-entrenar-el-árbol-de-clasificación"><span class="header-section-number">6</span> Paso 5 — Entrenar el árbol de clasificación</a></li>
+  <li><a href="#paso-5-entrenar-el-árbol-de-regresión" id="toc-paso-5-entrenar-el-árbol-de-regresión" class="nav-link" data-scroll-target="#paso-5-entrenar-el-árbol-de-regresión"><span class="header-section-number">6</span> Paso 5 — Entrenar el árbol de regresión</a></li>
   <li><a href="#paso-6-visualizar-el-árbol" id="toc-paso-6-visualizar-el-árbol" class="nav-link" data-scroll-target="#paso-6-visualizar-el-árbol"><span class="header-section-number">7</span> Paso 6 — Visualizar el árbol</a></li>
   <li><a href="#paso-7-predecir-en-el-conjunto-de-prueba" id="toc-paso-7-predecir-en-el-conjunto-de-prueba" class="nav-link" data-scroll-target="#paso-7-predecir-en-el-conjunto-de-prueba"><span class="header-section-number">8</span> Paso 7 — Predecir en el conjunto de prueba</a></li>
-  <li><a href="#paso-8-construir-la-matriz-de-confusión" id="toc-paso-8-construir-la-matriz-de-confusión" class="nav-link" data-scroll-target="#paso-8-construir-la-matriz-de-confusión"><span class="header-section-number">9</span> Paso 8 — Construir la matriz de confusión</a></li>
-  <li><a href="#paso-9-extraer-vp-fp-vn-fn" id="toc-paso-9-extraer-vp-fp-vn-fn" class="nav-link" data-scroll-target="#paso-9-extraer-vp-fp-vn-fn"><span class="header-section-number">10</span> Paso 9 — Extraer VP, FP, VN, FN</a></li>
-  <li><a href="#paso-10-calcular-las-métricas" id="toc-paso-10-calcular-las-métricas" class="nav-link" data-scroll-target="#paso-10-calcular-las-métricas"><span class="header-section-number">11</span> Paso 10 — Calcular las métricas</a></li>
-  <li><a href="#paso-11-comparar-con-el-baseline" id="toc-paso-11-comparar-con-el-baseline" class="nav-link" data-scroll-target="#paso-11-comparar-con-el-baseline"><span class="header-section-number">12</span> Paso 11 — Comparar con el baseline</a></li>
-  <li><a href="#tu-entregable-la-matriz-completa" id="toc-tu-entregable-la-matriz-completa" class="nav-link" data-scroll-target="#tu-entregable-la-matriz-completa"><span class="header-section-number">13</span> Tu entregable: la matriz completa</a>
+  <li><a href="#paso-8-calcular-el-mae" id="toc-paso-8-calcular-el-mae" class="nav-link" data-scroll-target="#paso-8-calcular-el-mae"><span class="header-section-number">9</span> Paso 8 — Calcular el MAE</a></li>
+  <li><a href="#paso-9-calcular-el-rmse" id="toc-paso-9-calcular-el-rmse" class="nav-link" data-scroll-target="#paso-9-calcular-el-rmse"><span class="header-section-number">10</span> Paso 9 — Calcular el RMSE</a></li>
+  <li><a href="#paso-10-calcular-el-baseline-y-comparar" id="toc-paso-10-calcular-el-baseline-y-comparar" class="nav-link" data-scroll-target="#paso-10-calcular-el-baseline-y-comparar"><span class="header-section-number">11</span> Paso 10 — Calcular el baseline y comparar</a></li>
+  <li><a href="#paso-11-visualizar-predicciones-vs.-valores-reales" id="toc-paso-11-visualizar-predicciones-vs.-valores-reales" class="nav-link" data-scroll-target="#paso-11-visualizar-predicciones-vs.-valores-reales"><span class="header-section-number">12</span> Paso 11 — Visualizar predicciones vs.&nbsp;valores reales</a></li>
+  <li><a href="#tu-entregable-resumen-de-métricas" id="toc-tu-entregable-resumen-de-métricas" class="nav-link" data-scroll-target="#tu-entregable-resumen-de-métricas"><span class="header-section-number">13</span> Tu entregable: resumen de métricas</a>
   <ul class="collapse">
   <li><a href="#checklist" id="toc-checklist" class="nav-link" data-scroll-target="#checklist"><span class="header-section-number">13.1</span> Checklist</a></li>
   <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">13.2</span> Preguntas de comprensión</a></li>
@@ -1912,7 +1912,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Práctica guiada — Semana 11: Árboles de Clasificación</h1>
+<h1 class="title">Práctica guiada — Semana 12: Árboles de Regresión</h1>
 <p class="subtitle lead">Introducción al Business Analytics · 06278-ECO</p>
 </div>
 
@@ -1943,9 +1943,9 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <!--=================-->
 <section id="contexto-de-negocio" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Contexto de negocio</h1>
-<p>Una entidad financiera quiere automatizar la evaluación de solicitudes de crédito. Tienen un historial de 300 solicitudes con características del solicitante y saben si cada una fue <strong>“Aprobada”</strong> o <strong>“Rechazada”</strong> por el comité de crédito. Quieren un modelo que, dadas las características de una solicitud nueva, prediga automáticamente la decisión correcta.</p>
-<p><strong>Nuestro trabajo:</strong> Entrenar un árbol de clasificación, obtener sus predicciones en el conjunto de prueba, y construir la matriz de confusión para evaluar qué tan bien predice el modelo.</p>
-<p><strong>Tu entregable al final de la clase:</strong> La matriz de confusión completa con los valores de TP, FP, TN, FN, las tres métricas calculadas (accuracy, precisión, recall), la comparación con el baseline, y una interpretación escrita de máximo 3 líneas.</p>
+<p>La Dirección Académica de una universidad quiere anticipar el rendimiento de sus estudiantes antes del cierre del semestre. Tienen un historial de 300 estudiantes con sus resultados parciales y quieren construir un modelo que prediga la <strong>nota final numérica</strong> (escala 0–5.0) a partir de las notas de los parciales, tareas, quices y el porcentaje de asistencia.</p>
+<p><strong>Nuestro trabajo:</strong> Entrenar un árbol de regresión, evaluar sus predicciones con MAE y RMSE, comparar contra el baseline y determinar si el modelo es útil para identificar estudiantes en riesgo.</p>
+<p><strong>Tu entregable al final de la clase:</strong> Una tabla con el MAE y RMSE del árbol (train y test), el MAE del baseline, y una interpretación escrita de máximo 3 líneas sobre si el modelo es útil para la decisión de negocio planteada.</p>
 <hr>
 <!--=================-->
 <!--=================-->
@@ -1960,22 +1960,19 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </section>
 <section id="paso-2-cargar-los-datos" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Paso 2 — Cargar los datos</h1>
-<p>Trabajamos con el dataset <code>credito_icesi</code>, que contiene solicitudes de crédito de una entidad financiera colombiana.</p>
 <div id="qwebr-insertion-location-2"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div id="qwebr-insertion-location-3"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-4"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div class="callout-key">
 <p><strong>Variables del dataset:</strong></p>
 <ul>
-<li><code>ingreso_m</code> — Ingreso mensual en millones de pesos</li>
-<li><code>historial</code> — Historial crediticio (1 = positivo, 0 = negativo)</li>
-<li><code>deuda_actual</code> — Deuda vigente en millones de pesos</li>
-<li><code>antiguedad_lab</code> — Años de antigüedad laboral</li>
-<li><code>edad</code> — Edad del solicitante en años</li>
-<li><code>decision</code> — <strong>Variable de resultado</strong>: <code>"Aprobado"</code> si el crédito fue aprobado, <code>"Rechazado"</code> si fue rechazado</li>
+<li><code>parcial_1</code> — Nota del primer parcial (0–5.0)</li>
+<li><code>parcial_2</code> — Nota del segundo parcial (0–5.0)</li>
+<li><code>tareas</code> — Promedio de tareas entregadas (0–5.0)</li>
+<li><code>quices</code> — Promedio de quices (0–5.0)</li>
+<li><code>asistencia</code> — Porcentaje de asistencia al semestre (0–100)</li>
+<li><code>nota_final</code> — <strong>Variable de resultado</strong>: nota final numérica (0–5.0)</li>
 </ul>
 </div>
 <hr>
@@ -1984,15 +1981,17 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </section>
 <section id="paso-3-explorar-la-variable-de-resultado" class="level1" data-number="4">
 <h1 data-number="4"><span class="header-section-number">4</span> Paso 3 — Explorar la variable de resultado</h1>
-<p>Antes de entrenar, siempre revisamos cuántos casos hay de cada categoría. Esto nos permite calcular el <strong>baseline</strong> al final.</p>
+<p>Antes de entrenar, siempre exploramos la distribución de lo que queremos predecir. En regresión esto nos da el <strong>baseline</strong>: si siempre predecimos el promedio, ¿qué tan lejos estamos en promedio?</p>
+<div id="qwebr-insertion-location-4"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div id="qwebr-insertion-location-5"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div id="qwebr-insertion-location-6"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div class="callout-key">
-<p><strong>¿Qué es el baseline?</strong></p>
-<p>El baseline es el resultado que obtendríamos con el modelo más simple posible: predecir siempre la categoría más frecuente. Si el 58% de las solicitudes son “Aprobado”, un modelo que siempre predice “Aprobado” tendría 58% de accuracy sin aprender nada.</p>
-<p>Nuestro árbol debe superar ese porcentaje. Si no lo hace, no está aprendiendo nada útil. <strong>Anota este porcentaje</strong> — lo necesitarás en el entregable final.</p>
+<p><strong>¿Qué es el baseline en regresión?</strong></p>
+<p>El baseline predice siempre el promedio global de la variable de resultado — sin usar ninguna variable predictora. Si el promedio es 3.2, el baseline diría “3.2” para todo estudiante.</p>
+<p>El MAE del baseline mide cuánto nos equivocamos en promedio con esa estrategia simple. Nuestro árbol debe superar ese número para demostrar que aprendió algo útil. <strong>Anota el promedio</strong> — lo calcularás en el Paso 10.</p>
 </div>
 <hr>
 <!--=================-->
@@ -2000,31 +1999,31 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </section>
 <section id="paso-4-dividir-en-entrenamiento-y-prueba" class="level1" data-number="5">
 <h1 data-number="5"><span class="header-section-number">5</span> Paso 4 — Dividir en entrenamiento y prueba</h1>
-<p>El árbol aprende con los datos de entrenamiento. Evaluamos con los datos de prueba — solicitudes que el modelo nunca vio durante el entrenamiento.</p>
 <div id="qwebr-insertion-location-7"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div class="callout-key">
-<p><strong>¿Por qué dividir los datos?</strong></p>
-<p>El árbol memoriza patrones del conjunto de entrenamiento. Si medimos el error en esos mismos datos, el modelo parece perfecto. El conjunto de prueba simula solicitudes futuras y mide la capacidad real de predecir. Esto es el train/test split que vimos en la Semana 9.</p>
+<p><strong>¿Por qué dividir en regresión también?</strong></p>
+<p>Exactamente por la misma razón que en clasificación (Semana 11): el árbol memoriza los datos de entrenamiento. Si medimos el MAE en esos mismos datos, el error parece artificialmente bajo. El conjunto de prueba simula estudiantes futuros que el modelo nunca vio.</p>
 </div>
 <hr>
 <!--=================-->
 <!--=================-->
 </section>
-<section id="paso-5-entrenar-el-árbol-de-clasificación" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> Paso 5 — Entrenar el árbol de clasificación</h1>
+<section id="paso-5-entrenar-el-árbol-de-regresión" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Paso 5 — Entrenar el árbol de regresión</h1>
+<p>La única diferencia respecto a la semana pasada está en el argumento <code>method</code>: aquí usamos <code>"anova"</code> en lugar de <code>"class"</code>, porque la variable de resultado es numérica.</p>
 <div id="qwebr-insertion-location-8"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div class="callout-key">
-<p><strong>¿Cómo leer el output de texto del árbol?</strong></p>
-<p>Cada línea es un nodo. Se lee de arriba hacia abajo:</p>
+<p><strong>¿Cómo leer el output de un árbol de regresión?</strong></p>
+<p>La estructura es la misma que en clasificación, pero ahora en cada nodo aparece:</p>
 <ul>
-<li>El primer nodo (sin sangría) es el <strong>nodo raíz</strong>: la primera pregunta que hace el modelo. Recuerda el diagrama de la teoría — en el ejemplo de los 8 solicitantes era <code>¿Ingreso ≥ 3.5M?</code>. Aquí el árbol eligió otra variable de corte basándose en los 225 datos de entrenamiento.</li>
-<li>El símbolo <code>*</code> al final de una línea indica que es una <strong>hoja</strong>: allí termina esa rama y el árbol da una predicción.</li>
-<li>La columna <code>yval</code> muestra la predicción de ese nodo (Aprobado o Rechazado).</li>
-<li>Los números entre paréntesis muestran cuántas observaciones de entrenamiento cayeron en ese nodo y cómo se distribuyen entre las categorías.</li>
+<li>El <strong>valor medio</strong> (promedio de <code>nota_final</code>) de las observaciones que llegaron a ese nodo.</li>
+<li>El <strong>número de observaciones</strong> en ese nodo.</li>
+<li>La <strong>desviación</strong> (varianza residual) — cuánto varían las notas dentro del grupo.</li>
 </ul>
-<p><strong>Identifica:</strong> ¿Cuál es la primera variable que usa el árbol para dividir? ¿Coincide con la intuición del analista de crédito de la teoría?</p>
+<p>Las hojas marcadas con <code>*</code> muestran el valor que el árbol predice para cualquier estudiante nuevo que caiga allí: el <strong>promedio de las notas</strong> de los estudiantes de entrenamiento de ese grupo.</p>
+<p><strong>Identifica:</strong> ¿Cuál es la primera variable que usa el árbol para dividir? ¿Tiene sentido pedagógico que sea esa variable?</p>
 </div>
 <hr>
 <!--=================-->
@@ -2037,11 +2036,10 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 <div class="callout-key">
 <p><strong>¿Qué muestra el gráfico?</strong></p>
 <ul>
-<li>Cada nodo interno muestra la pregunta que divide: la variable y el umbral de corte.</li>
-<li>Cada hoja (nodo terminal) muestra la predicción: “Aprobado” o “Rechazado”.</li>
-<li><code>use.n = TRUE</code> agrega el conteo de observaciones de entrenamiento que cayeron en cada nodo.</li>
+<li>Los nodos internos muestran la pregunta de división: variable y umbral.</li>
+<li>Las hojas muestran el <strong>valor predicho</strong> (promedio de ese grupo) y el número de observaciones de entrenamiento que cayeron allí.</li>
 </ul>
-<p>Compara este gráfico con los diagramas SVG de la teoría (profundidad 1 y profundidad 2). ¿El árbol que entrenaste aquí tiene más o menos niveles que el ejemplo de la teoría? ¿Cuántas hojas tiene?</p>
+<p>Compara este árbol con los diagramas SVG de la teoría. ¿Las hojas muestran categorías o números? ¿Cuántos valores distintos puede predecir este árbol?</p>
 </div>
 <hr>
 <!--=================-->
@@ -2049,13 +2047,10 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </section>
 <section id="paso-7-predecir-en-el-conjunto-de-prueba" class="level1" data-number="8">
 <h1 data-number="8"><span class="header-section-number">8</span> Paso 7 — Predecir en el conjunto de prueba</h1>
-<p>El árbol ya aprendió. Ahora predice sobre las solicitudes que nunca vio durante el entrenamiento.</p>
 <div id="qwebr-insertion-location-10"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div id="qwebr-insertion-location-11"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-12"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2066,110 +2061,45 @@ Advertencia
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><strong>¿Ves filas donde <code>real</code> y <code>prediccion</code> difieren?</strong> Esos son los errores del modelo. Algunos son FP (predijo Aprobado, era Rechazado) y otros son FN (predijo Rechazado, era Aprobado). La matriz de confusión del siguiente paso los cuenta todos.</p>
+<p><strong>Diferencia clave con la semana pasada</strong></p>
+<p>En clasificación, <code>predict()</code> devolvía una categoría (“Aprobado” / “Rechazado”) y el error era binario: acertó o falló. En regresión, devuelve un número y el error es continuo: puede ser 0.05 o puede ser 1.2. Por eso necesitamos métricas distintas — MAE y RMSE — que cuantifiquen esa magnitud del error.</p>
 </div>
 </div>
 <hr>
 <!--=================-->
 <!--=================-->
 </section>
-<section id="paso-8-construir-la-matriz-de-confusión" class="level1" data-number="9">
-<h1 data-number="9"><span class="header-section-number">9</span> Paso 8 — Construir la matriz de confusión</h1>
-<p>Este es el paso central de la clase. Usamos <code>table()</code> para cruzar los valores reales con las predicciones.</p>
+<section id="paso-8-calcular-el-mae" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Paso 8 — Calcular el MAE</h1>
+<div id="qwebr-insertion-location-12"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div id="qwebr-insertion-location-13"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div class="callout-key">
-<p><strong>Cómo leer esta tabla:</strong></p>
-<p>La estructura es <strong>filas = valor real</strong> y <strong>columnas = predicción del modelo</strong> — igual que los diagramas de la teoría.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Posición</th>
-<th>Nombre</th>
-<th>Significado</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Fila “Aprobado”, Col “Aprobado”</td>
-<td><strong>VP</strong></td>
-<td>Predijo Aprobado y era Aprobado — acierto</td>
-</tr>
-<tr class="even">
-<td>Fila “Aprobado”, Col “Rechazado”</td>
-<td><strong>FN</strong></td>
-<td>Predijo Rechazado pero era Aprobado — se perdió un buen cliente</td>
-</tr>
-<tr class="odd">
-<td>Fila “Rechazado”, Col “Aprobado”</td>
-<td><strong>FP</strong></td>
-<td>Predijo Aprobado pero era Rechazado — riesgo de impago</td>
-</tr>
-<tr class="even">
-<td>Fila “Rechazado”, Col “Rechazado”</td>
-<td><strong>VN</strong></td>
-<td>Predijo Rechazado y era Rechazado — acierto</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Tu tarea:</strong> Extrae los cuatro números de la tabla y anótalos. Los usarás en el paso siguiente y en el entregable.</p>
+<p><strong>¿Cómo leer el MAE?</strong></p>
+<p>El MAE está en las mismas unidades que la nota final. Si el MAE en test es 0.28, el modelo se equivoca en promedio por 0.28 puntos. En una escala de 5.0, eso equivale a decir que una nota real de 3.5 la predice entre 3.2 y 3.8.</p>
+<p>Compara train y test: si el MAE en train es mucho menor que en test, hay sobreajuste — el árbol memorizó los datos de entrenamiento.</p>
 </div>
 <hr>
 <!--=================-->
 <!--=================-->
 </section>
-<section id="paso-9-extraer-vp-fp-vn-fn" class="level1" data-number="10">
-<h1 data-number="10"><span class="header-section-number">10</span> Paso 9 — Extraer VP, FP, VN, FN</h1>
+<section id="paso-9-calcular-el-rmse" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Paso 9 — Calcular el RMSE</h1>
 <div id="qwebr-insertion-location-14"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Advertencia
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><strong>¿Por qué <code>tabla["Aprobado", "Aprobado"]</code> y no <code>tabla[1,1]</code>?</strong></p>
-<p>Usar los nombres de las categorías es más seguro: si R ordena las filas o columnas alfabéticamente de forma distinta a lo que esperamos, <code>tabla[1,1]</code> puede no ser el TP. Los nombres siempre apuntan a la celda correcta.</p>
-</div>
-</div>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-<section id="paso-10-calcular-las-métricas" class="level1" data-number="11">
-<h1 data-number="11"><span class="header-section-number">11</span> Paso 10 — Calcular las métricas</h1>
-<div id="qwebr-insertion-location-15"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div class="callout-key">
-<p><strong>¿Cómo interpretar los tres números juntos?</strong></p>
-<ul>
-<li><strong>Accuracy:</strong> de todas las solicitudes del test, ¿en qué fracción acertó el modelo? Si es 82%, acierta 8 de cada 10.</li>
-<li><strong>Precisión:</strong> de las que predijo “Aprobado”, ¿cuántas realmente lo eran? Una precisión alta protege a la entidad de aprobar malos créditos.</li>
-<li><strong>Recall:</strong> de las que realmente eran “Aprobado”, ¿cuántas detectó? Un recall alto minimiza los buenos clientes rechazados.</li>
-</ul>
-<p>Ahora piensa: ¿cuál error es más costoso para esta entidad financiera — el FP o el FN?</p>
+<p><strong>MAE vs.&nbsp;RMSE: ¿qué te dice la diferencia?</strong></p>
+<p>Si el RMSE es mucho mayor que el MAE, significa que el modelo tiene algunos errores muy grandes que “jalan” el RMSE hacia arriba. Eso merece investigarse: ¿hay estudiantes específicos para los que el modelo falla mucho? ¿Son casos atípicos o un patrón que el árbol no capturó?</p>
+<p>Si RMSE ≈ MAE, los errores son relativamente uniformes — el modelo no tiene predicciones catastróficamente malas.</p>
 </div>
 <hr>
 <!--=================-->
 <!--=================-->
 </section>
-<section id="paso-11-comparar-con-el-baseline" class="level1" data-number="12">
-<h1 data-number="12"><span class="header-section-number">12</span> Paso 11 — Comparar con el baseline</h1>
-<p>Antes de concluir que el modelo es bueno, lo comparamos con el modelo más simple posible: predecir siempre la categoría más frecuente del conjunto de prueba.</p>
-<div id="qwebr-insertion-location-16"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-17"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-18"></div>
+<section id="paso-10-calcular-el-baseline-y-comparar" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Paso 10 — Calcular el baseline y comparar</h1>
+<div id="qwebr-insertion-location-15"></div>
 <noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -2182,74 +2112,98 @@ Advertencia
 </div>
 <div class="callout-body-container callout-body">
 <p><strong>¿El árbol mejora el baseline?</strong></p>
-<p>Compara la accuracy del árbol (Paso 10) con la del baseline (el <code>max()</code> que acabas de calcular). Si el árbol no supera ese número, no aprendió nada útil: cualquier persona que siempre diga “Aprobado” lo haría igual de bien.</p>
-<p>Si sí lo supera: ¿cuántos puntos porcentuales ganamos? ¿Vale la complejidad del modelo?</p>
+<p>Si el MAE del árbol en test es menor que el MAE del baseline, el árbol aprendió algo útil — predice mejor que simplemente decir “todos sacan el promedio”. Si no lo mejora, algo está mal: árbol demasiado superficial, variables poco informativas, o datos insuficientes.</p>
+<p>¿En cuántos puntos mejoró? ¿Vale la pena la complejidad del modelo para esa mejora?</p>
 </div>
 </div>
 <hr>
 <!--=================-->
 <!--=================-->
 </section>
-<section id="tu-entregable-la-matriz-completa" class="level1" data-number="13">
-<h1 data-number="13"><span class="header-section-number">13</span> Tu entregable: la matriz completa</h1>
-<p>Durante el semestre, el equipo de analítica de una entidad financiera evaluó un árbol de clasificación entrenado para predecir si una solicitud de crédito debía aprobarse o rechazarse. El modelo fue probado sobre 40 solicitudes del conjunto de prueba, de las cuales 22 eran realmente aprobadas y 18 eran realmente rechazadas. De las 22 solicitudes que realmente debían aprobarse, el modelo identificó correctamente 18 y clasificó erróneamente 4 como rechazadas. De las 18 solicitudes que realmente debían rechazarse, el modelo clasificó correctamente 14 como rechazadas, pero aprobó incorrectamente las 4 restantes.</p>
+<section id="paso-11-visualizar-predicciones-vs.-valores-reales" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Paso 11 — Visualizar predicciones vs.&nbsp;valores reales</h1>
+<div id="qwebr-insertion-location-16"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-key">
+<p><strong>¿Cómo leer este gráfico?</strong></p>
+<ul>
+<li>Si todos los puntos estuvieran sobre la línea naranja, el modelo sería perfecto.</li>
+<li>Los puntos por encima de la línea son casos donde el modelo sobreestimó la nota.</li>
+<li>Los puntos por debajo son casos donde el modelo subestimó.</li>
+<li>Los puntos muy alejados de la línea son los errores más grandes — los que más pesan en el RMSE.</li>
+</ul>
+<p>Observa: ¿el modelo tiende a sobre- o sub-estimar en algún rango de notas? ¿Los errores más grandes se concentran en notas bajas o altas?</p>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="tu-entregable-resumen-de-métricas" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> Tu entregable: resumen de métricas</h1>
 <div class="callout-practice">
 <p><strong>Actividad en clase — Entrega individual</strong></p>
-<p>Con los resultados del texto anterior, completa esta tabla a mano en un documento word y cargalo en Intu en el espacio indicado por el profesor.</p>
+<p>Con los resultados de los pasos anteriores, completa esta tabla:</p>
 <hr>
-<p><strong>Matriz de confusión (conjunto de prueba):</strong></p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th></th>
-<th>Predicción: Aprobado</th>
-<th>Predicción: Rechazado</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Real: Aprobado</strong></td>
-<td>VP = _____</td>
-<td>FN = _____</td>
-</tr>
-<tr class="even">
-<td><strong>Real: Rechazado</strong></td>
-<td>FP = _____</td>
-<td>VN = _____</td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><strong>Métricas calculadas:</strong></p>
+<p><strong>Métricas del árbol de regresión:</strong></p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Métrica</th>
-<th>Fórmula</th>
-<th>Resultado</th>
+<th>Train</th>
+<th>Test</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Accuracy</td>
-<td>(TP + TN) / (TP + FN + FP + TN)</td>
-<td>______%</td>
+<td>MAE</td>
+<td>______</td>
+<td>______</td>
 </tr>
 <tr class="even">
-<td>Precisión</td>
-<td>TP / (TP + FP)</td>
-<td>______%</td>
+<td>RMSE</td>
+<td>______</td>
+<td>______</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><strong>Comparación con el baseline:</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>MAE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Baseline (predice siempre el promedio)</td>
+<td>______</td>
+</tr>
+<tr class="even">
+<td>Árbol de regresión (test)</td>
+<td>______</td>
 </tr>
 <tr class="odd">
-<td>Recall</td>
-<td>TP / (TP + FN)</td>
+<td>Mejora absoluta</td>
+<td>______ pts</td>
+</tr>
+<tr class="even">
+<td>Reducción porcentual del error</td>
 <td>______%</td>
 </tr>
 </tbody>
 </table>
 <hr>
+<p><strong>¿Hay sobreajuste?</strong></p>
+<ul>
+<li>MAE train: ______ · MAE test: ______</li>
+<li>Diferencia: ______</li>
+<li>¿La diferencia es preocupante? ☐ Sí ☐ No</li>
+</ul>
+<hr>
 <p><strong>Interpretación (máximo 3 líneas):</strong></p>
-<p>Responde: ¿Qué error comete más el modelo — FP o FN? ¿Qué significa ese error en términos del negocio de la entidad financiera? ¿Recomendarías usar este modelo tal como está?</p>
+<p>¿El modelo es útil para identificar estudiantes en riesgo de reprobar (nota &lt; 3.0)? ¿Recomendarías usarlo tal como está o ajustarías la profundidad? ¿Por qué?</p>
 <hr>
 <hr>
 <hr>
@@ -2261,41 +2215,42 @@ Advertencia
 <h2 data-number="13.1" class="anchored" data-anchor-id="checklist"><span class="header-section-number">13.1</span> Checklist</h2>
 <p>Al finalizar esta práctica, debes poder:</p>
 <ul class="task-list">
-<li><label><input type="checkbox">Cargar datos y explorar la distribución de la variable de resultado antes de entrenar</label></li>
+<li><label><input type="checkbox">Cargar datos y explorar la distribución de la variable de resultado numérica</label></li>
 <li><label><input type="checkbox">Dividir en train/test con <code>sample()</code> y <code>set.seed()</code> para reproducibilidad</label></li>
-<li><label><input type="checkbox">Entrenar un árbol con <code>rpart(..., method = "class", control = rpart.control(maxdepth = ...))</code></label></li>
-<li><label><input type="checkbox">Leer el output de texto del árbol: identificar el nodo raíz, las hojas y las predicciones</label></li>
-<li><label><input type="checkbox">Conectar el gráfico del árbol con los diagramas SVG vistos en la teoría</label></li>
-<li><label><input type="checkbox">Obtener predicciones con <code>predict(..., type = "class")</code></label></li>
-<li><label><input type="checkbox">Construir la tabla de confusión con <code>table(Real = ..., Prediccion = ...)</code></label></li>
-<li><label><input type="checkbox">Extraer TP, FP, TN, FN usando los nombres de categoría: <code>tabla["nombre_fila", "nombre_col"]</code></label></li>
-<li><label><input type="checkbox">Calcular accuracy, precisión y recall con las fórmulas</label></li>
-<li><label><input type="checkbox">Calcular el baseline con <code>max(prop.table(...))</code> y comparar con la accuracy del árbol</label></li>
-<li><label><input type="checkbox">Interpretar el tipo de error más frecuente en términos del contexto de negocio</label></li>
+<li><label><input type="checkbox">Entrenar un árbol de regresión con <code>rpart(..., method = "anova")</code></label></li>
+<li><label><input type="checkbox">Explicar la diferencia entre <code>method = "class"</code> (semana 11) y <code>method = "anova"</code> (semana 12)</label></li>
+<li><label><input type="checkbox">Leer el árbol: identificar el valor predicho en cada hoja (promedio del grupo)</label></li>
+<li><label><input type="checkbox">Obtener predicciones numéricas con <code>predict()</code> — sin <code>type = "class"</code></label></li>
+<li><label><input type="checkbox">Calcular MAE con <code>mean(abs(real - predicho))</code></label></li>
+<li><label><input type="checkbox">Calcular RMSE con <code>sqrt(mean((real - predicho)^2))</code></label></li>
+<li><label><input type="checkbox">Calcular el MAE del baseline con <code>mean(abs(real - mean(train)))</code></label></li>
+<li><label><input type="checkbox">Comparar MAE train vs.&nbsp;test para detectar sobreajuste</label></li>
+<li><label><input type="checkbox">Interpretar el gráfico de predicción vs.&nbsp;real</label></li>
+<li><label><input type="checkbox">Conectar el MAE con la decisión de negocio (identificar estudiantes en riesgo)</label></li>
 </ul>
 </section>
 <section id="preguntas-de-comprensión" class="level2" data-number="13.2">
 <h2 data-number="13.2" class="anchored" data-anchor-id="preguntas-de-comprensión"><span class="header-section-number">13.2</span> Preguntas de comprensión</h2>
-<p><strong>1.</strong> En el Paso 5 entrenaste con <code>maxdepth = 3</code>. Si cambias a <code>maxdepth = 1</code>, ¿esperas que la accuracy en test suba o baje? ¿Y si usas <code>maxdepth = 8</code>? ¿Qué concepto de la teoría explica ambos casos?</p>
+<p><strong>1.</strong> En el Paso 5 entrenaste con <code>maxdepth = 3</code>. Si cambias a <code>maxdepth = 1</code>, ¿esperas que el MAE en test suba o baje? ¿Qué pasa con el RMSE? ¿Y si usas <code>maxdepth = 10</code>?</p>
 <details>
 <summary>
 Ver respuesta
 </summary>
-Con <code>maxdepth = 1</code> el árbol hace una sola pregunta — igual que el ejemplo de profundidad 1 de la teoría. Es muy simple: probablemente baja la accuracy en test (subajuste). Con <code>maxdepth = 8</code> el árbol tiene muchos niveles y puede memorizar los 225 datos de entrenamiento: accuracy alta en train, pero puede bajar en test (sobreajuste). El mejor punto suele estar en un valor intermedio donde el árbol generaliza sin memorizar.
+Con <code>maxdepth = 1</code> el árbol hace una sola pregunta y predice solo dos valores distintos — muy simple. El MAE en test subirá (subajuste): el modelo no captura suficiente variación en las notas. Con <code>maxdepth = 10</code> el árbol es muy profundo y puede memorizar los 225 datos de entrenamiento: el MAE en train bajará mucho, pero el MAE en test puede subir (sobreajuste). El mejor punto suele estar en una profundidad intermedia donde train y test tienen MAEs parecidos.
 </details>
-<p><strong>2.</strong> Tu tabla de confusión muestra FP = 8 y FN = 3. Una compañera dice: “Prefiero el modelo con FP = 3 y FN = 8 porque aprueba menos créditos malos.” ¿Tienes razón de preocuparte? ¿Qué depende?</p>
+<p><strong>2.</strong> El árbol da MAE = 0.24 en test y el baseline da MAE = 0.43. Un compañero dice: “El modelo redujo el error casi a la mitad, es excelente.” ¿Estás de acuerdo con esa sola afirmación? ¿Qué más revisarías?</p>
 <details>
 <summary>
 Ver respuesta
 </summary>
-Depende del costo relativo de cada error para la entidad. FP = aprobar a alguien que no pagará → pérdida por impago (costo financiero directo). FN = rechazar a un buen cliente → pérdida de ingresos futuros (costo de oportunidad). Si el costo del impago es mayor que el del cliente perdido, el modelo con FP=3 es preferible aunque tenga más FN. Si rechazar buenos clientes tiene un costo alto (por ejemplo en un mercado competitivo), puede ser mejor tolerar más FP. No hay respuesta universal — es una decisión de negocio.
+La mejora es importante y es una señal positiva. Pero hay que revisar más cosas: primero, si el MAE en train es mucho menor que 0.24 (señal de sobreajuste). Segundo, si el RMSE es mucho mayor que el MAE — indica errores grandes en algunos casos específicos, que podrían ser exactamente los estudiantes en riesgo que más importa predecir bien. Tercero, si el gráfico de predicción vs.&nbsp;real muestra algún sesgo sistemático (el modelo siempre sobreestima notas bajas o subestima notas altas). Un MAE global bueno no garantiza que el modelo funcione bien en el rango crítico (notas cerca de 3.0).
 </details>
-<p><strong>3.</strong> El árbol da 84% de accuracy en test. El baseline es 56%. Un colega dice: “Ganamos 28 puntos porcentuales, el modelo es excelente.” ¿Estás de acuerdo con esa sola afirmación? ¿Qué más revisarías?</p>
+<p><strong>3.</strong> La Dirección Académica quiere usar el modelo para enviar tutorías a estudiantes con nota predicha &lt; 3.0. ¿Prefieren un modelo con MAE bajo o con RMSE bajo? ¿Hay alguna métrica de la semana 11 que también sería relevante aquí?</p>
 <details>
 <summary>
 Ver respuesta
 </summary>
-La mejora sobre el baseline es importante y es una buena señal — el modelo sí aprendió algo. Pero la accuracy sola no es suficiente: hay que revisar precisión y recall para saber qué tipo de errores comete. Si el 84% de accuracy se logra aprobando casi todo (recall muy alto, precisión baja), puede estar asumiendo demasiado riesgo de impago. También conviene verificar que la diferencia entre accuracy en train y en test no sea muy grande (señal de sobreajuste) y que el árbol tenga sentido de negocio: ¿la primera variable de corte que eligió es razonable?
+Para este uso, los errores grandes son especialmente costosos: si el modelo predice 3.4 para un estudiante que en realidad sacará 2.2, ese estudiante no recibe tutorías y reprueba. Ese error grande pesa más en el RMSE — así que preferir un modelo con bajo RMSE tiene sentido. Pero también sería relevante el concepto de <strong>recall</strong> de la semana 11: si convirtiéramos el problema en clasificación (en riesgo / no en riesgo), el recall mediría cuántos estudiantes realmente en riesgo el modelo sí detecta. Un MAE global bajo puede coexistir con un recall bajo si el modelo falla sistemáticamente en el rango crítico de notas bajas.
 </details>
 <!-- Panel Environment -->
 <div id="env-panel" class="collapsed">
@@ -2985,5 +2940,5 @@ qwebrInstance.then(
 
 
 
-<script src="week-11_files/libs/quarto-html/zenscroll-min.js"></script>
+<script src="week-12_files/libs/quarto-html/zenscroll-min.js"></script>
 </body></html>
