@@ -9,13 +9,11 @@ nav_order: 3
 
 ## Universidad ICESI, Colombia
 
-- **Causal Inference for Public Policy**
-  Department of Economics
-  [2025-02 Syllabus](https://eduard-martinez.github.io/teaching/r_uniandes/2022-02/syllabus.pdf)
+- **[Causal Inference for Public Policy](/teaching/causal-inference/)**
+  Department of Economics · 2025-02
 
-- **Introduction to Business Analytics**
-  Department of Economics
-  [2025-02 Syllabus](https://eduard-martinez.github.io/teaching/r_uniandes/2022-02/syllabus.pdf)
+- **[Introduction to Business Analytics](/teaching/business-analytics/)**
+  Department of Economics · 2025-02
 
 ---
 
