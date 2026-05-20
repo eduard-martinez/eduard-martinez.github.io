@@ -7,9 +7,9 @@ description: >
   regression discontinuity, instrumental variables, and synthetic control methods.
 institution: Universidad ICESI
 department: Department of Economics
-term: 2025-02
+term: 2026-01
 instructor: Eduard F. Martínez-González
-year: 2025
+year: 2026
 ---
 
 All course materials — lecture slides, problem sets, and code — are available on GitHub:

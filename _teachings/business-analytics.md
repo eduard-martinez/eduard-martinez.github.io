@@ -7,9 +7,9 @@ description: >
   forecasting, and an introduction to machine learning tools applied to business problems.
 institution: Universidad ICESI
 department: Department of Economics
-term: 2025-02
+term: 2026-01
 instructor: Eduard F. Martínez-González
-year: 2025
+year: 2026
 ---
 
 Course materials will be published during the semester. Stay tuned for updates.

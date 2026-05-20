@@ -10,10 +10,10 @@ nav_order: 3
 ## Universidad ICESI, Colombia
 
 - **[Causal Inference for Public Policy](/teaching/causal-inference/)**
-  Department of Economics · 2025-02
+  Department of Economics · 2026-01
 
 - **[Introduction to Business Analytics](/teaching/business-analytics/)**
-  Department of Economics · 2025-02
+  Department of Economics · 2026-01
 
 ---
 
