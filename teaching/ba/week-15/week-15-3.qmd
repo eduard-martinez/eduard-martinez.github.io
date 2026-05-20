@@ -1,0 +1,435 @@
+---
+title: "Handout 3 - Prompts: cómo formular preguntas a una IA"
+subtitle: "Introducción al Business Analytics · Semana 15 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+<span id="webr-status-anchor"></span>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Objetivo del handout
+
+En el handout 1 pusiste en su sitio a la IA, al ML y a los LLMs. En el handout 2 viste cómo funciona un LLM, sus limitaciones y cómo se vuelve capaz de actuar a través de skills y agentes. Lo que queda es la pregunta más práctica de todas: **¿cómo le hablas a un LLM para que te dé respuestas útiles?**
+
+La calidad de la respuesta de un LLM depende casi por completo de cómo se le pregunta. Dos personas frente al mismo modelo, con la misma intención, obtendrán resultados radicalmente distintos según cómo formulen la pregunta. Eso convierte al **prompt** (la instrucción que le das al modelo) en la pieza decisiva del trabajo.
+
+Y aquí viene la conexión que más importa: **formular bien un problema ya era la habilidad clave de un analista mucho antes de los LLMs**. Saber qué preguntar a los datos, cómo acotar un análisis, qué supuestos hacer explícitos, qué formato debe tener un entregable. Todo lo que el curso ha venido formando es exactamente lo que se necesita para escribir buenos prompts. El *prompt engineering* no es una habilidad nueva; es esa misma habilidad aplicada a una herramienta nueva.
+
+## Lo que cubriremos
+
+- Los seis componentes de un buen prompt (rol, contexto, tarea, formato, restricciones, ejemplos)
+- Tres pares **prompt débil vs. prompt bueno** para ver el contraste con ejemplos concretos
+- Cuatro técnicas adicionales: *chain of thought*, *few-shot*, *role prompting* e iteración
+- Errores comunes de principiante y cómo evitarlos
+- Una plantilla reutilizable que puedes adaptar a cualquier tarea
+- Un caso extendido de microcrédito que integra todo lo anterior
+
+---
+
+<!--=================-->
+<!--=================-->
+# La anatomía de un buen prompt
+
+Un buen prompt tiene seis componentes. No siempre necesitas los seis: depende de la tarea. Pero conocerlos te da una **lista de chequeo mental** para evaluar y mejorar cualquier prompt.
+
+## Rol
+
+::: {.callout-key}
+Dale al LLM un **papel** que asumir: *"Actúa como analista financiero senior"*, *"Eres profesor de econometría"*, *"Eres redactor de un medio económico"*.
+:::
+
+Asignar un rol orienta al modelo sobre el tono, el vocabulario, el nivel de profundidad y los criterios implícitos. No es magia, pero ayuda. Un analista financiero senior responderá distinto a *"explícame qué es el EBITDA"* que un educador de finanzas para principiantes.
+
+## Contexto
+
+::: {.callout-key}
+Dale al LLM la **situación**: qué problema enfrentas, qué datos tienes, qué ya se ha hecho, qué restricciones existen.
+:::
+
+El contexto es lo que un LLM no puede adivinar. Si trabajas en una empresa minorista de Cali con tres canales (tienda física, e-commerce, *marketplace*), el LLM no lo sabe a menos que se lo digas. Sin contexto, el modelo da una respuesta genérica — válida para cualquier empresa, útil para ninguna.
+
+## Tarea
+
+::: {.callout-key}
+Dile al LLM **exactamente** qué quieres que haga, en términos sin ambigüedad.
+:::
+
+*"Hazme un análisis"* es ambiguo. *"Identifica las tres variables que mejor explican el churn en este conjunto de datos y explica cada una en menos de cien palabras"* es preciso. La diferencia se ve en la respuesta.
+
+## Formato esperado
+
+::: {.callout-key}
+Dile al LLM **cómo** quieres la respuesta: tabla con columnas X, Y, Z; lista numerada; párrafos; JSON con campos específicos; máximo doscientas palabras.
+:::
+
+Especificar formato cambia drásticamente la utilidad de la respuesta. Si vas a procesar la respuesta automáticamente, pide JSON. Si la vas a leer tú mismo, pide bullets o prosa según prefieras. Si la vas a comparar con otra, define una estructura idéntica para que la comparación sea posible.
+
+## Restricciones
+
+::: {.callout-key}
+Dile al LLM **qué no debe hacer**: no excederse de cierta longitud, no usar cierto vocabulario, no incluir *disclaimers*, no inventar datos.
+:::
+
+Las restricciones son tan importantes como las instrucciones positivas. *"No incluyas frases del tipo es importante notar que"* o *"no agregues párrafos introductorios"* producen salidas más limpias y procesables.
+
+## Ejemplos (cuando aplique)
+
+::: {.callout-key}
+Muéstrale al LLM **uno o dos ejemplos** del tipo de respuesta que esperas.
+:::
+
+Esta técnica, conocida como *few-shot prompting*, suele ser la más efectiva cuando la tarea es compleja o el formato es muy específico. Si necesitas que el modelo clasifique correos en categorías particulares de tu empresa, mostrarle dos correos clasificados y luego pedirle que clasifique uno nuevo casi siempre mejora la calidad.
+
+## Visualización: los seis componentes
+
+```{=html}
+<div style="margin:1.5rem 0">
+<svg width="100%" viewBox="0 0 720 560" role="img">
+<title>Anatomía de un buen prompt: seis componentes apilados verticalmente</title>
+<desc>Seis bloques apilados de arriba a abajo. Rol, Tarea y Formato aparecen en azul oscuro como componentes recomendados siempre. Contexto, Restricciones y Ejemplos aparecen en naranja como componentes opcionales según el caso. Cada bloque incluye una frase de ejemplo del componente.</desc>
+
+<!-- Encabezado -->
+<text x="80" y="28" text-anchor="start" font-family="inherit" font-size="12" fill="#888" letter-spacing="0.06em">ESTRUCTURA</text>
+<text x="640" y="28" text-anchor="end" font-family="inherit" font-size="12" fill="#888" letter-spacing="0.06em">CUÁNDO USARLO</text>
+
+<!-- 1. ROL (recomendado) -->
+<rect x="80" y="40" width="560" height="72" rx="10" fill="#E6F1FB" stroke="#1F4E79" stroke-width="1.6"/>
+<text x="100" y="65" font-family="inherit" font-size="11" fill="#1F4E79" letter-spacing="0.05em" font-weight="600">1 · ROL</text>
+<text x="100" y="92" font-family="inherit" font-size="13" fill="#0C447C" font-style="italic">"Actúa como analista financiero senior."</text>
+<rect x="540" y="60" width="86" height="22" rx="11" fill="#1F4E79"/>
+<text x="583" y="75" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="10" fill="#FFFFFF" letter-spacing="0.04em">RECOMENDADO</text>
+
+<!-- 2. CONTEXTO (opcional) -->
+<rect x="80" y="124" width="560" height="72" rx="10" fill="#FBE0C4" stroke="#E87722" stroke-width="1.6"/>
+<text x="100" y="149" font-family="inherit" font-size="11" fill="#C2581A" letter-spacing="0.05em" font-weight="600">2 · CONTEXTO</text>
+<text x="100" y="176" font-family="inherit" font-size="13" fill="#5A3A0F" font-style="italic">"Tengo datos mensuales de ventas por categoría y región del último año."</text>
+<rect x="540" y="144" width="86" height="22" rx="11" fill="#E87722"/>
+<text x="583" y="159" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="10" fill="#FFFFFF" letter-spacing="0.04em">SEGÚN CASO</text>
+
+<!-- 3. TAREA (recomendado) -->
+<rect x="80" y="208" width="560" height="72" rx="10" fill="#E6F1FB" stroke="#1F4E79" stroke-width="1.6"/>
+<text x="100" y="233" font-family="inherit" font-size="11" fill="#1F4E79" letter-spacing="0.05em" font-weight="600">3 · TAREA</text>
+<text x="100" y="260" font-family="inherit" font-size="13" fill="#0C447C" font-style="italic">"Identifica las tres categorías con mayor variación mes a mes."</text>
+<rect x="540" y="228" width="86" height="22" rx="11" fill="#1F4E79"/>
+<text x="583" y="243" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="10" fill="#FFFFFF" letter-spacing="0.04em">RECOMENDADO</text>
+
+<!-- 4. FORMATO (recomendado) -->
+<rect x="80" y="292" width="560" height="72" rx="10" fill="#E6F1FB" stroke="#1F4E79" stroke-width="1.6"/>
+<text x="100" y="317" font-family="inherit" font-size="11" fill="#1F4E79" letter-spacing="0.05em" font-weight="600">4 · FORMATO</text>
+<text x="100" y="344" font-family="inherit" font-size="13" fill="#0C447C" font-style="italic">"Entrega la respuesta en tres secciones numeradas, máximo 400 palabras."</text>
+<rect x="540" y="312" width="86" height="22" rx="11" fill="#1F4E79"/>
+<text x="583" y="327" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="10" fill="#FFFFFF" letter-spacing="0.04em">RECOMENDADO</text>
+
+<!-- 5. RESTRICCIONES (opcional) -->
+<rect x="80" y="376" width="560" height="72" rx="10" fill="#FBE0C4" stroke="#E87722" stroke-width="1.6"/>
+<text x="100" y="401" font-family="inherit" font-size="11" fill="#C2581A" letter-spacing="0.05em" font-weight="600">5 · RESTRICCIONES</text>
+<text x="100" y="428" font-family="inherit" font-size="13" fill="#5A3A0F" font-style="italic">"No incluyas párrafos introductorios ni recomendaciones genéricas."</text>
+<rect x="540" y="396" width="86" height="22" rx="11" fill="#E87722"/>
+<text x="583" y="411" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="10" fill="#FFFFFF" letter-spacing="0.04em">SEGÚN CASO</text>
+
+<!-- 6. EJEMPLOS (opcional) -->
+<rect x="80" y="460" width="560" height="72" rx="10" fill="#FBE0C4" stroke="#E87722" stroke-width="1.6"/>
+<text x="100" y="485" font-family="inherit" font-size="11" fill="#C2581A" letter-spacing="0.05em" font-weight="600">6 · EJEMPLOS</text>
+<text x="100" y="512" font-family="inherit" font-size="13" fill="#5A3A0F" font-style="italic">"Reseña: ...  →  Clasificación: mixta."</text>
+<rect x="540" y="480" width="86" height="22" rx="11" fill="#E87722"/>
+<text x="583" y="495" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="10" fill="#FFFFFF" letter-spacing="0.04em">SEGÚN CASO</text>
+
+<!-- Nota inferior -->
+<text x="360" y="552" text-anchor="middle" font-family="inherit" font-size="11" fill="#888" font-style="italic">Tres componentes recomendados siempre · tres componentes según el caso</text>
+</svg>
+</div>
+```
+
+---
+
+<!--=================-->
+<!--=================-->
+# Tres pares de prompts: débil vs. bueno
+
+Las definiciones de la sección anterior se entienden mejor con contrastes. Lo que sigue son tres pares: un *prompt débil* y su versión mejorada. Léelos preguntándote qué componente de la anatomía aporta cada mejora.
+
+## Par 1 · Análisis de ventas
+
+**Prompt débil:**
+
+> *"Hazme un análisis de estas ventas."*
+
+Los problemas son evidentes: sin rol, sin contexto, sin tarea específica, sin formato, sin restricciones. El LLM responderá con un análisis genérico, posiblemente largo, posiblemente irrelevante.
+
+**Prompt mejorado:**
+
+> *"Actúa como analista comercial de una cadena minorista colombiana. Te entrego datos mensuales de ventas por categoría y región del último año. Necesito que identifiques: (1) las tres categorías con mayor variación de ventas mes a mes y la magnitud de esa variación, (2) la región con peor desempeño relativo y posibles hipótesis sobre por qué, (3) una recomendación de seguimiento. Entrega la respuesta en tres secciones claramente numeradas, máximo cuatrocientas palabras en total. No incluyas párrafos introductorios."*
+
+**Qué se mejoró:** rol explícito, contexto del negocio, tres tareas precisas, formato definido (tres secciones numeradas), restricción de longitud, restricción de estilo.
+
+## Par 2 · Clasificación de reseñas
+
+**Prompt débil:**
+
+> *"Clasifica estas reseñas en buenas y malas."*
+
+Los problemas: criterio de clasificación impreciso, formato de salida no especificado, sin ejemplos.
+
+**Prompt mejorado:**
+
+> *"Te entrego diez reseñas de clientes de un restaurante. Clasifica cada una en una de estas tres categorías: 'positiva' (el cliente vuelve y recomienda), 'mixta' (algunos elogios y algunas quejas), 'negativa' (el cliente no vuelve o se queja explícitamente). Devuelve la respuesta como una tabla con dos columnas: número de reseña y categoría asignada. No incluyas la reseña original ni explicaciones.*
+>
+> *Ejemplo:*
+> *Reseña: 'Comida deliciosa pero el servicio fue lento.'*
+> *Clasificación: mixta"*
+
+**Qué se mejoró:** categorías explícitas con criterios, formato exacto (tabla con dos columnas), restricción de qué no incluir, un ejemplo del formato esperado.
+
+## Par 3 · Evaluación de un modelo
+
+**Prompt débil:**
+
+> *"Mi modelo tiene accuracy de 0.92. ¿Es bueno?"*
+
+Los problemas: sin contexto del problema, sin información sobre las clases, sin información sobre los costos asimétricos de error.
+
+**Prompt mejorado:**
+
+> *"Tengo un modelo de clasificación binaria que predice si un cliente abandonará un servicio bancario en los próximos tres meses. La base tiene cien mil clientes, de los cuales solo el 3% efectivamente abandona. El modelo logra accuracy del 92%. El costo de un falso negativo (no detectar a un cliente que sí va a abandonar) es alto: significa perder al cliente sin intentar retenerlo. El costo de un falso positivo (predecir abandono cuando no lo hay) es bajo: una llamada de seguimiento.*
+>
+> *¿Por qué la accuracy del 92% puede ser engañosa en este contexto? ¿Qué métricas adicionales debo mirar y cómo interpretarlas en este caso específico? Responde en tres párrafos cortos: el problema con la accuracy aquí, las métricas alternativas relevantes, y una recomendación de qué umbral de clasificación priorizar."*
+
+**Qué se mejoró:** contexto del problema, datos sobre desbalance de clases, costos asimétricos explícitos, tareas concretas, formato de respuesta definido.
+
+::: {.callout-connect}
+**Conexión con semana 11**
+
+Nótese cómo este último prompt conecta directamente con lo que viste en la semana 11 sobre matriz de confusión: **sin el contexto de los costos, ninguna métrica es interpretable**. Un *accuracy* del 92% sobre clases desbalanceadas no significa lo mismo que un *accuracy* del 92% sobre clases balanceadas. La técnica del prompt no inventa esa relación; la hace explícita.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Técnicas adicionales que vale la pena conocer
+
+## Pedir paso a paso (*chain of thought*)
+
+Cuando la tarea involucra razonamiento (cálculos, decisiones encadenadas, análisis multi-criterio), pedirle al LLM que **explique su razonamiento paso a paso** antes de dar la respuesta final mejora la calidad de la respuesta. La frase mágica es algo del estilo *"razona paso a paso antes de dar la conclusión"*.
+
+No es solo una técnica de prompt: refleja un fenómeno conocido en LLMs. Cuando el modelo genera texto intermedio, ese texto se vuelve parte del contexto que usa para predecir lo siguiente. Esto le permite *"sostener"* razonamientos más largos.
+
+## Dar ejemplos (*few-shot prompting*)
+
+Mostrar uno, dos o tres ejemplos del par *"input → output esperado"* antes de pedir la tarea real. Es la técnica más efectiva cuando la tarea es muy específica de tu organización o cuando el formato esperado es complejo. **Tres ejemplos suelen valer más que cinco párrafos de instrucciones.**
+
+## Asignar un rol (*role prompting*)
+
+Ya vimos esto en la anatomía del prompt, pero merece énfasis. Asignar un rol no es decoración: cambia el registro, el vocabulario y los criterios implícitos del modelo. *"Actúa como auditor escéptico"* produce respuestas distintas a *"actúa como consultor entusiasta"*, aunque les des la misma información.
+
+## Iterar
+
+Casi ningún prompt sale perfecto al primer intento. La técnica más subestimada es **leer la primera respuesta y ajustar el prompt**. Si la respuesta es muy larga, agrega una restricción de longitud. Si confunde un concepto, aclara la definición en el contexto. Si pierde foco, reformula la tarea con más precisión.
+
+::: {.callout-warning}
+Iterar prompts es lo que separa a quien usa LLMs **como buscador** (un solo intento) de quien los usa **como herramienta de trabajo** (varias iteraciones rápidas).
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Errores comunes que cometen los principiantes
+
+**Pedir cosas vagas.** *"Hazme un análisis"*, *"explícame esto"*, *"dame ideas"*. El LLM siempre responde algo, pero algo genérico. La pregunta es precisamente lo que falta.
+
+**No dar contexto suficiente.** Asumir que el LLM sabe cómo es tu empresa, tu sector, tus datos, tus restricciones. No los sabe. Si no se lo dices, te dará una respuesta promedio.
+
+**No especificar el formato.** Aceptar la primera estructura que el modelo proponga y luego luchar para reformatear. Es más eficiente pedir el formato desde el inicio.
+
+**Confundir parecido con correcto.** Una respuesta que suena bien no necesariamente lo es. Esto es especialmente peligroso con datos numéricos, citas o referencias. Conecta directamente con la limitación de **alucinaciones** vista en el handout 2: verifica antes de usar.
+
+**Una sola pasada.** Aceptar la primera respuesta sin iterar. Casi siempre la segunda versión es notablemente mejor si dedicas un minuto a refinar.
+
+**No validar.** Usar la salida del LLM como dato verificado. Sobre todo en contextos auditables o regulatorios, esto es peligroso. El LLM produce borradores, no fuentes primarias.
+
+---
+
+<!--=================-->
+<!--=================-->
+# Plantilla reutilizable
+
+Para empezar, vale la pena tener una plantilla mental que puedas adaptar a casi cualquier tarea. Cuando te quedes atascado con un prompt que no funciona, revisa cada parte y pregúntate cuál falta o cuál está mal especificada.
+
+::: {.callout-key}
+**Plantilla base**
+
+**[ROL]** *Actúa como [tipo de experto].*
+
+**[CONTEXTO]** *Tengo [descripción del problema, los datos, la situación, lo que ya se sabe].*
+
+**[TAREA]** *Quiero que [acción específica, sin ambigüedad].*
+
+**[FORMATO]** *Entrega: (1) ..., (2) ..., (3) ...*
+
+**[RESTRICCIONES]** *No incluyas ..., usa máximo ... palabras, mantén un tono ...*
+:::
+
+No siempre necesitas las cinco partes. Pero si el primer intento no funciona, esta lista te dice exactamente dónde buscar la falla.
+
+---
+
+<!--=================-->
+<!--=================-->
+# Caso extendido: del prompt débil al prompt robusto
+
+Imagina que trabajas como **analista junior en una entidad de microcrédito colombiana**. Tu jefe te pide explorar por qué la tasa de impago ha subido en los últimos dos trimestres. Te entrega un archivo con datos de los créditos otorgados en el último año: monto, plazo, sector económico del cliente, edad, ciudad, score interno y estado del crédito.
+
+## Intento 1: prompt débil
+
+> *"Analiza estos datos y dime por qué subió el impago."*
+
+**Respuesta probable:** un texto largo y genérico hablando de los factores típicos del impago en microcrédito (situación económica, características del cliente, condiciones del crédito) sin tocar lo específico de los datos que tienes, porque el LLM ni siquiera sabe qué columnas hay ni cómo se ven.
+
+**Diagnóstico:** falta contexto sobre los datos, falta tarea precisa, falta formato.
+
+## Intento 2: prompt mejorado
+
+> *"Actúa como analista de riesgo de una entidad de microcrédito colombiana. Tengo una base con ocho mil quinientos créditos otorgados en el último año, con las siguientes columnas: monto otorgado, plazo en meses, sector económico (comercio, servicios, manufactura, agricultura), edad del cliente, ciudad, score interno de 0 a 100, y estado del crédito (al día, en mora 30-60, en mora más de 90, castigado). La tasa global de mora superior a 90 días pasó de 4,2% en el segundo trimestre a 6,8% en el cuarto.*
+>
+> *Quiero que (1) identifiques las cuatro hipótesis más razonables para explicar ese aumento, considerando solo factores observables en mis datos, (2) propongas, para cada hipótesis, una variable o cruce de variables específico que la respaldaría o la descartaría, (3) priorices cuál hipótesis investigaría primero y por qué.*
+>
+> *Entrega en tres secciones numeradas, máximo quinientas palabras. No incluyas párrafos introductorios ni recomendaciones generales sobre microcrédito; quédate específicamente en mis datos."*
+
+**Respuesta esperada:** hipótesis específicas vinculadas a las variables disponibles (deterioro por sector, por ciudad, por rango de monto, por score), cruces concretos para verificar cada una, priorización argumentada. Inmediatamente accionable: el analista sabe qué cruzar primero al volver a R.
+
+**Qué se mejoró:** rol claro (analista de riesgo), contexto detallado (columnas, magnitudes), tarea descompuesta (tres pasos), formato preciso, restricción explícita (quedarse en los datos).
+
+## Reflexión
+
+El primer prompt habría producido una respuesta razonable, pero no útil. El segundo produce un punto de partida concreto para una sesión de análisis en R. **La diferencia no es la capacidad del modelo: es la calidad de la pregunta**. Y eso lo controlas tú.
+
+---
+
+<!--=================-->
+<!--=================-->
+# Síntesis: cinco ideas para llevarte
+
+**Primero**, la calidad del prompt determina la calidad de la respuesta. No es un detalle de uso; es lo central.
+
+**Segundo**, los buenos prompts tienen rol, contexto, tarea, formato, restricciones y, cuando aplica, ejemplos. Es una lista mental de chequeo.
+
+**Tercero**, ser específico no es ser largo. Un prompt corto pero preciso supera a uno largo y vago.
+
+**Cuarto**, iterar es parte del proceso. No esperes que el primer intento sea óptimo; léelo, ajusta, vuelve a pedir.
+
+**Quinto**, la habilidad central no es nueva. Formular bien un problema, decidir el formato del entregable, hacer explícitos los supuestos: es lo mismo que un analista bueno ya hace cuando no hay LLM. El *prompt engineering* aplica esa misma disciplina a una herramienta nueva.
+
+---
+
+## Material adicional (opcional)
+
+- **Anthropic — "Prompt engineering overview"** — documentación oficial con técnicas y ejemplos — [docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview)
+- **OpenAI — "Prompt engineering guide"** — referencia complementaria — [platform.openai.com/docs/guides/prompt-engineering](https://platform.openai.com/docs/guides/prompt-engineering)
+- **DAIR.AI — "Prompt Engineering Guide"** — recurso abierto, cubre técnicas avanzadas — [promptingguide.ai](https://www.promptingguide.ai)
+
+---
+
+## Checklist de preclase
+
+Al llegar a clase debes poder explicar:
+
+- [ ] ¿Cuáles son los seis componentes principales de un prompt y para qué sirve cada uno?
+- [ ] ¿Cómo tomar un prompt débil y mejorarlo identificando exactamente qué le falta?
+- [ ] ¿Qué es *chain of thought* y cuándo conviene pedirlo?
+- [ ] ¿Qué es *few-shot prompting* y cuándo es la mejor opción?
+- [ ] ¿Por qué especificar el formato de salida ahorra trabajo posterior?
+- [ ] ¿Cuáles son al menos tres errores comunes de principiante y cómo evitarlos?
+- [ ] ¿Cómo se conecta la habilidad de hacer prompts con lo que aprendiste en el curso?
+
+## Preguntas de comprensión
+
+**1.** Un compañero te dice *"yo le pregunté lo mismo al LLM y me dio una respuesta inútil; estas herramientas no sirven"*. ¿Cómo le explicarías que el problema probablemente está en la pregunta y no en el modelo?
+
+<details>
+<summary>Ver respuesta</summary>
+
+Le mostraría con un ejemplo concreto. Tomaría su prompt original, lo evaluaría contra los seis componentes (rol, contexto, tarea, formato, restricciones, ejemplos) y le señalaría cuáles faltan. Le pediría que reformulara incluyendo al menos rol, contexto y formato, y volviera a probar. La diferencia suele ser inmediata.
+
+El argumento es que el LLM **hace exactamente lo que se le pide**; si el pedido fue vago, la respuesta es vaga, y eso no significa que el modelo *"no sirva"*.
+</details>
+
+**2.** ¿En qué se parece y en qué se diferencia un buen prompt de una buena especificación de un análisis en R (qué columnas, qué filtros, qué agrupaciones)?
+
+<details>
+<summary>Ver respuesta</summary>
+
+Se parecen en que ambos requieren precisión: qué quieres exactamente, sobre qué datos, con qué estructura de salida. Se diferencian en el lenguaje: la especificación en R se **ejecuta literalmente**; el prompt se **interpreta**. Eso obliga a que el prompt sea más explícito sobre el contexto que un script en R, donde el contexto está implícito en los nombres de las columnas.
+
+En esencia, son la misma disciplina con dos sintaxis distintas: la disciplina de pensar antes de pedir.
+</details>
+
+**3.** Cuando un LLM da una respuesta numérica concreta (un porcentaje, una cifra), ¿qué deberías hacer antes de usarla?
+
+<details>
+<summary>Ver respuesta</summary>
+
+Verificarla en una **fuente primaria**. Los LLMs alucinan con especial frecuencia en datos numéricos. Si vas a usar una cifra en un reporte, presentación o decisión, no basta con que el modelo la haya dado; necesitas la fuente original.
+
+Esto se conecta con lo visto en el handout 2: los LLMs optimizan plausibilidad, no veracidad. **Un número plausible no es necesariamente un número real.**
+</details>
+
+**4.** ¿Por qué decimos que la habilidad de escribir prompts es la misma habilidad que el curso ha venido formando todo el semestre?
+
+<details>
+<summary>Ver respuesta</summary>
+
+Porque las habilidades subyacentes son las mismas: formular bien un problema, descomponerlo en pasos, especificar el formato del entregable, hacer supuestos explícitos, iterar a partir de resultados. Eso es lo que hace un buen analista al planear un EDA, al construir un dashboard, al entrenar un modelo.
+
+El *prompt engineering* es esa misma disciplina aplicada a una herramienta nueva. **Quien no sabe hacer preguntas claras a los datos, tampoco las sabrá hacer a un LLM.**
+</details>
+
+**5.** Toma el siguiente prompt débil y reescríbelo aplicando la plantilla de seis componentes: *"Ayúdame con un modelo para predecir qué clientes van a aceptar una promoción"*. Asume que trabajas en una cadena de retail y tienes datos históricos de campañas anteriores.
+
+<details>
+<summary>Ver respuesta</summary>
+
+Una versión razonable sería: *"Actúa como científico de datos de una cadena de retail colombiana **[ROL]**. Tengo datos de quince mil clientes que recibieron una promoción en los últimos seis meses, con las siguientes columnas: edad, género, ciudad, antigüedad como cliente, gasto promedio mensual, frecuencia de visita, canal preferido, y una variable binaria que indica si aceptó la promoción o no. La tasa global de aceptación fue del 18% **[CONTEXTO]**. Quiero que (1) propongas qué tipo de modelo de clasificación sería el más razonable para este problema y por qué, (2) identifiques cuáles tres variables del conjunto probablemente tendrán mayor poder predictivo y argumentes, (3) anticipes el principal riesgo metodológico que enfrentaré al evaluar el modelo, dado que las clases están desbalanceadas **[TAREA]**. Entrega en tres secciones numeradas, máximo cuatrocientas palabras **[FORMATO]**. No incluyas párrafos introductorios ni código en R; quédate en el razonamiento conceptual **[RESTRICCIONES]**."*
+
+Compara con el original: el nuevo prompt obliga al modelo a aterrizar en tus datos específicos, ordena la respuesta por temas y elimina toda la paja genérica que un prompt vago produciría.
+</details>
+
+---
+
+## Glosario mínimo
+
+::: {.callout-key}
+**Prompt:** instrucción que se le entrega al LLM para obtener una respuesta.
+
+**Prompt engineering:** disciplina de diseñar prompts eficaces para obtener respuestas de calidad.
+
+**Rol (en un prompt):** papel que se le pide al LLM asumir para orientar el tono, vocabulario y criterios de su respuesta.
+
+**Contexto:** información sobre la situación, los datos, las restricciones y los supuestos que el LLM necesita para responder de forma específica.
+
+**Few-shot prompting:** técnica de incluir uno o varios ejemplos del par *"entrada-salida esperada"* antes de pedir la tarea real.
+
+**Chain of thought:** técnica de pedir al LLM que explique su razonamiento paso a paso antes de dar la respuesta final.
+
+**Role prompting:** técnica de asignar un rol específico al LLM al inicio del prompt.
+
+**Iteración:** proceso de refinar un prompt sucesivamente leyendo la respuesta anterior y ajustando.
+
+**Restricción:** límite explícito que se impone al LLM sobre lo que no debe hacer (longitud, tono, contenido a evitar).
+
+**Plantilla de prompt:** estructura reutilizable con los componentes esenciales que se adapta a cada tarea.
+:::
+
+---
+
+*Con este handout cierras la trilogía de la semana 15. Te llevas un mapa para ubicar la IA dentro del panorama tecnológico (handout 1), una comprensión de qué son los LLMs y qué los convierte en agentes (handout 2), y la habilidad concreta de formular buenos prompts (handout 3). Si tuvieras que quedarte con una sola idea de las tres semanas, sería esta: **la calidad del trabajo con IA depende mucho más de la calidad de las preguntas humanas que de la sofisticación de la tecnología**. Eso lo controlas tú.*

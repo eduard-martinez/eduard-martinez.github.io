@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Handout 3 - Prompts: cómo formular preguntas a una IA</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="week-15-3_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-15-3_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-15-3_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-15-3_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="week-15-3_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-15-3_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-15-3_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-15-3_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-15-3_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-15-3_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-15-3_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-15-3_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#objetivo-del-handout" id="toc-objetivo-del-handout" class="nav-link active" data-scroll-target="#objetivo-del-handout"><span class="header-section-number">1</span> Objetivo del handout</a>
+  <ul class="collapse">
+  <li><a href="#lo-que-cubriremos" id="toc-lo-que-cubriremos" class="nav-link" data-scroll-target="#lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</a></li>
+  </ul></li>
+  <li><a href="#la-anatomía-de-un-buen-prompt" id="toc-la-anatomía-de-un-buen-prompt" class="nav-link" data-scroll-target="#la-anatomía-de-un-buen-prompt"><span class="header-section-number">2</span> La anatomía de un buen prompt</a>
+  <ul class="collapse">
+  <li><a href="#rol" id="toc-rol" class="nav-link" data-scroll-target="#rol"><span class="header-section-number">2.1</span> Rol</a></li>
+  <li><a href="#contexto" id="toc-contexto" class="nav-link" data-scroll-target="#contexto"><span class="header-section-number">2.2</span> Contexto</a></li>
+  <li><a href="#tarea" id="toc-tarea" class="nav-link" data-scroll-target="#tarea"><span class="header-section-number">2.3</span> Tarea</a></li>
+  <li><a href="#formato-esperado" id="toc-formato-esperado" class="nav-link" data-scroll-target="#formato-esperado"><span class="header-section-number">2.4</span> Formato esperado</a></li>
+  <li><a href="#restricciones" id="toc-restricciones" class="nav-link" data-scroll-target="#restricciones"><span class="header-section-number">2.5</span> Restricciones</a></li>
+  <li><a href="#ejemplos-cuando-aplique" id="toc-ejemplos-cuando-aplique" class="nav-link" data-scroll-target="#ejemplos-cuando-aplique"><span class="header-section-number">2.6</span> Ejemplos (cuando aplique)</a></li>
+  <li><a href="#visualización-los-seis-componentes" id="toc-visualización-los-seis-componentes" class="nav-link" data-scroll-target="#visualización-los-seis-componentes"><span class="header-section-number">2.7</span> Visualización: los seis componentes</a></li>
+  </ul></li>
+  <li><a href="#tres-pares-de-prompts-débil-vs.-bueno" id="toc-tres-pares-de-prompts-débil-vs.-bueno" class="nav-link" data-scroll-target="#tres-pares-de-prompts-débil-vs.-bueno"><span class="header-section-number">3</span> Tres pares de prompts: débil vs.&nbsp;bueno</a>
+  <ul class="collapse">
+  <li><a href="#par-1-análisis-de-ventas" id="toc-par-1-análisis-de-ventas" class="nav-link" data-scroll-target="#par-1-análisis-de-ventas"><span class="header-section-number">3.1</span> Par 1 · Análisis de ventas</a></li>
+  <li><a href="#par-2-clasificación-de-reseñas" id="toc-par-2-clasificación-de-reseñas" class="nav-link" data-scroll-target="#par-2-clasificación-de-reseñas"><span class="header-section-number">3.2</span> Par 2 · Clasificación de reseñas</a></li>
+  <li><a href="#par-3-evaluación-de-un-modelo" id="toc-par-3-evaluación-de-un-modelo" class="nav-link" data-scroll-target="#par-3-evaluación-de-un-modelo"><span class="header-section-number">3.3</span> Par 3 · Evaluación de un modelo</a></li>
+  </ul></li>
+  <li><a href="#técnicas-adicionales-que-vale-la-pena-conocer" id="toc-técnicas-adicionales-que-vale-la-pena-conocer" class="nav-link" data-scroll-target="#técnicas-adicionales-que-vale-la-pena-conocer"><span class="header-section-number">4</span> Técnicas adicionales que vale la pena conocer</a>
+  <ul class="collapse">
+  <li><a href="#pedir-paso-a-paso-chain-of-thought" id="toc-pedir-paso-a-paso-chain-of-thought" class="nav-link" data-scroll-target="#pedir-paso-a-paso-chain-of-thought"><span class="header-section-number">4.1</span> Pedir paso a paso (<em>chain of thought</em>)</a></li>
+  <li><a href="#dar-ejemplos-few-shot-prompting" id="toc-dar-ejemplos-few-shot-prompting" class="nav-link" data-scroll-target="#dar-ejemplos-few-shot-prompting"><span class="header-section-number">4.2</span> Dar ejemplos (<em>few-shot prompting</em>)</a></li>
+  <li><a href="#asignar-un-rol-role-prompting" id="toc-asignar-un-rol-role-prompting" class="nav-link" data-scroll-target="#asignar-un-rol-role-prompting"><span class="header-section-number">4.3</span> Asignar un rol (<em>role prompting</em>)</a></li>
+  <li><a href="#iterar" id="toc-iterar" class="nav-link" data-scroll-target="#iterar"><span class="header-section-number">4.4</span> Iterar</a></li>
+  </ul></li>
+  <li><a href="#errores-comunes-que-cometen-los-principiantes" id="toc-errores-comunes-que-cometen-los-principiantes" class="nav-link" data-scroll-target="#errores-comunes-que-cometen-los-principiantes"><span class="header-section-number">5</span> Errores comunes que cometen los principiantes</a></li>
+  <li><a href="#plantilla-reutilizable" id="toc-plantilla-reutilizable" class="nav-link" data-scroll-target="#plantilla-reutilizable"><span class="header-section-number">6</span> Plantilla reutilizable</a></li>
+  <li><a href="#caso-extendido-del-prompt-débil-al-prompt-robusto" id="toc-caso-extendido-del-prompt-débil-al-prompt-robusto" class="nav-link" data-scroll-target="#caso-extendido-del-prompt-débil-al-prompt-robusto"><span class="header-section-number">7</span> Caso extendido: del prompt débil al prompt robusto</a>
+  <ul class="collapse">
+  <li><a href="#intento-1-prompt-débil" id="toc-intento-1-prompt-débil" class="nav-link" data-scroll-target="#intento-1-prompt-débil"><span class="header-section-number">7.1</span> Intento 1: prompt débil</a></li>
+  <li><a href="#intento-2-prompt-mejorado" id="toc-intento-2-prompt-mejorado" class="nav-link" data-scroll-target="#intento-2-prompt-mejorado"><span class="header-section-number">7.2</span> Intento 2: prompt mejorado</a></li>
+  <li><a href="#reflexión" id="toc-reflexión" class="nav-link" data-scroll-target="#reflexión"><span class="header-section-number">7.3</span> Reflexión</a></li>
+  </ul></li>
+  <li><a href="#síntesis-cinco-ideas-para-llevarte" id="toc-síntesis-cinco-ideas-para-llevarte" class="nav-link" data-scroll-target="#síntesis-cinco-ideas-para-llevarte"><span class="header-section-number">8</span> Síntesis: cinco ideas para llevarte</a>
+  <ul class="collapse">
+  <li><a href="#material-adicional-opcional" id="toc-material-adicional-opcional" class="nav-link" data-scroll-target="#material-adicional-opcional"><span class="header-section-number">8.1</span> Material adicional (opcional)</a></li>
+  <li><a href="#checklist-de-preclase" id="toc-checklist-de-preclase" class="nav-link" data-scroll-target="#checklist-de-preclase"><span class="header-section-number">8.2</span> Checklist de preclase</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">8.3</span> Preguntas de comprensión</a></li>
+  <li><a href="#glosario-mínimo" id="toc-glosario-mínimo" class="nav-link" data-scroll-target="#glosario-mínimo"><span class="header-section-number">8.4</span> Glosario mínimo</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Handout 3 - Prompts: cómo formular preguntas a una IA</h1>
+<p class="subtitle lead">Introducción al Business Analytics · Semana 15 · 06278-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a> <span id="webr-status-anchor"></span></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="objetivo-del-handout" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Objetivo del handout</h1>
+<p>En el handout 1 pusiste en su sitio a la IA, al ML y a los LLMs. En el handout 2 viste cómo funciona un LLM, sus limitaciones y cómo se vuelve capaz de actuar a través de skills y agentes. Lo que queda es la pregunta más práctica de todas: <strong>¿cómo le hablas a un LLM para que te dé respuestas útiles?</strong></p>
+<p>La calidad de la respuesta de un LLM depende casi por completo de cómo se le pregunta. Dos personas frente al mismo modelo, con la misma intención, obtendrán resultados radicalmente distintos según cómo formulen la pregunta. Eso convierte al <strong>prompt</strong> (la instrucción que le das al modelo) en la pieza decisiva del trabajo.</p>
+<p>Y aquí viene la conexión que más importa: <strong>formular bien un problema ya era la habilidad clave de un analista mucho antes de los LLMs</strong>. Saber qué preguntar a los datos, cómo acotar un análisis, qué supuestos hacer explícitos, qué formato debe tener un entregable. Todo lo que el curso ha venido formando es exactamente lo que se necesita para escribir buenos prompts. El <em>prompt engineering</em> no es una habilidad nueva; es esa misma habilidad aplicada a una herramienta nueva.</p>
+<section id="lo-que-cubriremos" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</h2>
+<ul>
+<li>Los seis componentes de un buen prompt (rol, contexto, tarea, formato, restricciones, ejemplos)</li>
+<li>Tres pares <strong>prompt débil vs.&nbsp;prompt bueno</strong> para ver el contraste con ejemplos concretos</li>
+<li>Cuatro técnicas adicionales: <em>chain of thought</em>, <em>few-shot</em>, <em>role prompting</em> e iteración</li>
+<li>Errores comunes de principiante y cómo evitarlos</li>
+<li>Una plantilla reutilizable que puedes adaptar a cualquier tarea</li>
+<li>Un caso extendido de microcrédito que integra todo lo anterior</li>
+</ul>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="la-anatomía-de-un-buen-prompt" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> La anatomía de un buen prompt</h1>
+<p>Un buen prompt tiene seis componentes. No siempre necesitas los seis: depende de la tarea. Pero conocerlos te da una <strong>lista de chequeo mental</strong> para evaluar y mejorar cualquier prompt.</p>
+<section id="rol" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="rol"><span class="header-section-number">2.1</span> Rol</h2>
+<div class="callout-key">
+<p>Dale al LLM un <strong>papel</strong> que asumir: <em>“Actúa como analista financiero senior”</em>, <em>“Eres profesor de econometría”</em>, <em>“Eres redactor de un medio económico”</em>.</p>
+</div>
+<p>Asignar un rol orienta al modelo sobre el tono, el vocabulario, el nivel de profundidad y los criterios implícitos. No es magia, pero ayuda. Un analista financiero senior responderá distinto a <em>“explícame qué es el EBITDA”</em> que un educador de finanzas para principiantes.</p>
+</section>
+<section id="contexto" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="contexto"><span class="header-section-number">2.2</span> Contexto</h2>
+<div class="callout-key">
+<p>Dale al LLM la <strong>situación</strong>: qué problema enfrentas, qué datos tienes, qué ya se ha hecho, qué restricciones existen.</p>
+</div>
+<p>El contexto es lo que un LLM no puede adivinar. Si trabajas en una empresa minorista de Cali con tres canales (tienda física, e-commerce, <em>marketplace</em>), el LLM no lo sabe a menos que se lo digas. Sin contexto, el modelo da una respuesta genérica — válida para cualquier empresa, útil para ninguna.</p>
+</section>
+<section id="tarea" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="tarea"><span class="header-section-number">2.3</span> Tarea</h2>
+<div class="callout-key">
+<p>Dile al LLM <strong>exactamente</strong> qué quieres que haga, en términos sin ambigüedad.</p>
+</div>
+<p><em>“Hazme un análisis”</em> es ambiguo. <em>“Identifica las tres variables que mejor explican el churn en este conjunto de datos y explica cada una en menos de cien palabras”</em> es preciso. La diferencia se ve en la respuesta.</p>
+</section>
+<section id="formato-esperado" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="formato-esperado"><span class="header-section-number">2.4</span> Formato esperado</h2>
+<div class="callout-key">
+<p>Dile al LLM <strong>cómo</strong> quieres la respuesta: tabla con columnas X, Y, Z; lista numerada; párrafos; JSON con campos específicos; máximo doscientas palabras.</p>
+</div>
+<p>Especificar formato cambia drásticamente la utilidad de la respuesta. Si vas a procesar la respuesta automáticamente, pide JSON. Si la vas a leer tú mismo, pide bullets o prosa según prefieras. Si la vas a comparar con otra, define una estructura idéntica para que la comparación sea posible.</p>
+</section>
+<section id="restricciones" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="restricciones"><span class="header-section-number">2.5</span> Restricciones</h2>
+<div class="callout-key">
+<p>Dile al LLM <strong>qué no debe hacer</strong>: no excederse de cierta longitud, no usar cierto vocabulario, no incluir <em>disclaimers</em>, no inventar datos.</p>
+</div>
+<p>Las restricciones son tan importantes como las instrucciones positivas. <em>“No incluyas frases del tipo es importante notar que”</em> o <em>“no agregues párrafos introductorios”</em> producen salidas más limpias y procesables.</p>
+</section>
+<section id="ejemplos-cuando-aplique" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="ejemplos-cuando-aplique"><span class="header-section-number">2.6</span> Ejemplos (cuando aplique)</h2>
+<div class="callout-key">
+<p>Muéstrale al LLM <strong>uno o dos ejemplos</strong> del tipo de respuesta que esperas.</p>
+</div>
+<p>Esta técnica, conocida como <em>few-shot prompting</em>, suele ser la más efectiva cuando la tarea es compleja o el formato es muy específico. Si necesitas que el modelo clasifique correos en categorías particulares de tu empresa, mostrarle dos correos clasificados y luego pedirle que clasifique uno nuevo casi siempre mejora la calidad.</p>
+</section>
+<section id="visualización-los-seis-componentes" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="visualización-los-seis-componentes"><span class="header-section-number">2.7</span> Visualización: los seis componentes</h2>
+<div style="margin:1.5rem 0">
+<svg width="100%" viewbox="0 0 720 560" role="img">
+<title>Anatomía de un buen prompt: seis componentes apilados verticalmente</title>
+<desc>Seis bloques apilados de arriba a abajo. Rol, Tarea y Formato aparecen en azul oscuro como componentes recomendados siempre. Contexto, Restricciones y Ejemplos aparecen en naranja como componentes opcionales según el caso. Cada bloque incluye una frase de ejemplo del componente.</desc>
+
+<!-- Encabezado -->
+<text x="80" y="28" text-anchor="start" font-family="inherit" font-size="12" fill="#888" letter-spacing="0.06em">ESTRUCTURA</text>
+<text x="640" y="28" text-anchor="end" font-family="inherit" font-size="12" fill="#888" letter-spacing="0.06em">CUÁNDO USARLO</text>
+
+<!-- 1. ROL (recomendado) -->
+<rect x="80" y="40" width="560" height="72" rx="10" fill="#E6F1FB" stroke="#1F4E79" stroke-width="1.6"></rect>
+<text x="100" y="65" font-family="inherit" font-size="11" fill="#1F4E79" letter-spacing="0.05em" font-weight="600">1 · ROL</text>
+<text x="100" y="92" font-family="inherit" font-size="13" fill="#0C447C" font-style="italic">"Actúa como analista financiero senior."</text>
+<rect x="540" y="60" width="86" height="22" rx="11" fill="#1F4E79"></rect>
+<text x="583" y="75" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="10" fill="#FFFFFF" letter-spacing="0.04em">RECOMENDADO</text>
+
+<!-- 2. CONTEXTO (opcional) -->
+<rect x="80" y="124" width="560" height="72" rx="10" fill="#FBE0C4" stroke="#E87722" stroke-width="1.6"></rect>
+<text x="100" y="149" font-family="inherit" font-size="11" fill="#C2581A" letter-spacing="0.05em" font-weight="600">2 · CONTEXTO</text>
+<text x="100" y="176" font-family="inherit" font-size="13" fill="#5A3A0F" font-style="italic">"Tengo datos mensuales de ventas por categoría y región del último año."</text>
+<rect x="540" y="144" width="86" height="22" rx="11" fill="#E87722"></rect>
+<text x="583" y="159" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="10" fill="#FFFFFF" letter-spacing="0.04em">SEGÚN CASO</text>
+
+<!-- 3. TAREA (recomendado) -->
+<rect x="80" y="208" width="560" height="72" rx="10" fill="#E6F1FB" stroke="#1F4E79" stroke-width="1.6"></rect>
+<text x="100" y="233" font-family="inherit" font-size="11" fill="#1F4E79" letter-spacing="0.05em" font-weight="600">3 · TAREA</text>
+<text x="100" y="260" font-family="inherit" font-size="13" fill="#0C447C" font-style="italic">"Identifica las tres categorías con mayor variación mes a mes."</text>
+<rect x="540" y="228" width="86" height="22" rx="11" fill="#1F4E79"></rect>
+<text x="583" y="243" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="10" fill="#FFFFFF" letter-spacing="0.04em">RECOMENDADO</text>
+
+<!-- 4. FORMATO (recomendado) -->
+<rect x="80" y="292" width="560" height="72" rx="10" fill="#E6F1FB" stroke="#1F4E79" stroke-width="1.6"></rect>
+<text x="100" y="317" font-family="inherit" font-size="11" fill="#1F4E79" letter-spacing="0.05em" font-weight="600">4 · FORMATO</text>
+<text x="100" y="344" font-family="inherit" font-size="13" fill="#0C447C" font-style="italic">"Entrega la respuesta en tres secciones numeradas, máximo 400 palabras."</text>
+<rect x="540" y="312" width="86" height="22" rx="11" fill="#1F4E79"></rect>
+<text x="583" y="327" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="10" fill="#FFFFFF" letter-spacing="0.04em">RECOMENDADO</text>
+
+<!-- 5. RESTRICCIONES (opcional) -->
+<rect x="80" y="376" width="560" height="72" rx="10" fill="#FBE0C4" stroke="#E87722" stroke-width="1.6"></rect>
+<text x="100" y="401" font-family="inherit" font-size="11" fill="#C2581A" letter-spacing="0.05em" font-weight="600">5 · RESTRICCIONES</text>
+<text x="100" y="428" font-family="inherit" font-size="13" fill="#5A3A0F" font-style="italic">"No incluyas párrafos introductorios ni recomendaciones genéricas."</text>
+<rect x="540" y="396" width="86" height="22" rx="11" fill="#E87722"></rect>
+<text x="583" y="411" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="10" fill="#FFFFFF" letter-spacing="0.04em">SEGÚN CASO</text>
+
+<!-- 6. EJEMPLOS (opcional) -->
+<rect x="80" y="460" width="560" height="72" rx="10" fill="#FBE0C4" stroke="#E87722" stroke-width="1.6"></rect>
+<text x="100" y="485" font-family="inherit" font-size="11" fill="#C2581A" letter-spacing="0.05em" font-weight="600">6 · EJEMPLOS</text>
+<text x="100" y="512" font-family="inherit" font-size="13" fill="#5A3A0F" font-style="italic">"Reseña: ...  →  Clasificación: mixta."</text>
+<rect x="540" y="480" width="86" height="22" rx="11" fill="#E87722"></rect>
+<text x="583" y="495" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="10" fill="#FFFFFF" letter-spacing="0.04em">SEGÚN CASO</text>
+
+<!-- Nota inferior -->
+<text x="360" y="552" text-anchor="middle" font-family="inherit" font-size="11" fill="#888" font-style="italic">Tres componentes recomendados siempre · tres componentes según el caso</text>
+</svg>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="tres-pares-de-prompts-débil-vs.-bueno" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Tres pares de prompts: débil vs.&nbsp;bueno</h1>
+<p>Las definiciones de la sección anterior se entienden mejor con contrastes. Lo que sigue son tres pares: un <em>prompt débil</em> y su versión mejorada. Léelos preguntándote qué componente de la anatomía aporta cada mejora.</p>
+<section id="par-1-análisis-de-ventas" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="par-1-análisis-de-ventas"><span class="header-section-number">3.1</span> Par 1 · Análisis de ventas</h2>
+<p><strong>Prompt débil:</strong></p>
+<blockquote class="blockquote">
+<p><em>“Hazme un análisis de estas ventas.”</em></p>
+</blockquote>
+<p>Los problemas son evidentes: sin rol, sin contexto, sin tarea específica, sin formato, sin restricciones. El LLM responderá con un análisis genérico, posiblemente largo, posiblemente irrelevante.</p>
+<p><strong>Prompt mejorado:</strong></p>
+<blockquote class="blockquote">
+<p><em>“Actúa como analista comercial de una cadena minorista colombiana. Te entrego datos mensuales de ventas por categoría y región del último año. Necesito que identifiques: (1) las tres categorías con mayor variación de ventas mes a mes y la magnitud de esa variación, (2) la región con peor desempeño relativo y posibles hipótesis sobre por qué, (3) una recomendación de seguimiento. Entrega la respuesta en tres secciones claramente numeradas, máximo cuatrocientas palabras en total. No incluyas párrafos introductorios.”</em></p>
+</blockquote>
+<p><strong>Qué se mejoró:</strong> rol explícito, contexto del negocio, tres tareas precisas, formato definido (tres secciones numeradas), restricción de longitud, restricción de estilo.</p>
+</section>
+<section id="par-2-clasificación-de-reseñas" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="par-2-clasificación-de-reseñas"><span class="header-section-number">3.2</span> Par 2 · Clasificación de reseñas</h2>
+<p><strong>Prompt débil:</strong></p>
+<blockquote class="blockquote">
+<p><em>“Clasifica estas reseñas en buenas y malas.”</em></p>
+</blockquote>
+<p>Los problemas: criterio de clasificación impreciso, formato de salida no especificado, sin ejemplos.</p>
+<p><strong>Prompt mejorado:</strong></p>
+<blockquote class="blockquote">
+<p><em>“Te entrego diez reseñas de clientes de un restaurante. Clasifica cada una en una de estas tres categorías: ‘positiva’ (el cliente vuelve y recomienda), ‘mixta’ (algunos elogios y algunas quejas), ‘negativa’ (el cliente no vuelve o se queja explícitamente). Devuelve la respuesta como una tabla con dos columnas: número de reseña y categoría asignada. No incluyas la reseña original ni explicaciones.</em></p>
+<p><em>Ejemplo:</em> <em>Reseña: ‘Comida deliciosa pero el servicio fue lento.’</em> <em>Clasificación: mixta”</em></p>
+</blockquote>
+<p><strong>Qué se mejoró:</strong> categorías explícitas con criterios, formato exacto (tabla con dos columnas), restricción de qué no incluir, un ejemplo del formato esperado.</p>
+</section>
+<section id="par-3-evaluación-de-un-modelo" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="par-3-evaluación-de-un-modelo"><span class="header-section-number">3.3</span> Par 3 · Evaluación de un modelo</h2>
+<p><strong>Prompt débil:</strong></p>
+<blockquote class="blockquote">
+<p><em>“Mi modelo tiene accuracy de 0.92. ¿Es bueno?”</em></p>
+</blockquote>
+<p>Los problemas: sin contexto del problema, sin información sobre las clases, sin información sobre los costos asimétricos de error.</p>
+<p><strong>Prompt mejorado:</strong></p>
+<blockquote class="blockquote">
+<p><em>“Tengo un modelo de clasificación binaria que predice si un cliente abandonará un servicio bancario en los próximos tres meses. La base tiene cien mil clientes, de los cuales solo el 3% efectivamente abandona. El modelo logra accuracy del 92%. El costo de un falso negativo (no detectar a un cliente que sí va a abandonar) es alto: significa perder al cliente sin intentar retenerlo. El costo de un falso positivo (predecir abandono cuando no lo hay) es bajo: una llamada de seguimiento.</em></p>
+<p><em>¿Por qué la accuracy del 92% puede ser engañosa en este contexto? ¿Qué métricas adicionales debo mirar y cómo interpretarlas en este caso específico? Responde en tres párrafos cortos: el problema con la accuracy aquí, las métricas alternativas relevantes, y una recomendación de qué umbral de clasificación priorizar.”</em></p>
+</blockquote>
+<p><strong>Qué se mejoró:</strong> contexto del problema, datos sobre desbalance de clases, costos asimétricos explícitos, tareas concretas, formato de respuesta definido.</p>
+<div class="callout-connect">
+<p><strong>Conexión con semana 11</strong></p>
+<p>Nótese cómo este último prompt conecta directamente con lo que viste en la semana 11 sobre matriz de confusión: <strong>sin el contexto de los costos, ninguna métrica es interpretable</strong>. Un <em>accuracy</em> del 92% sobre clases desbalanceadas no significa lo mismo que un <em>accuracy</em> del 92% sobre clases balanceadas. La técnica del prompt no inventa esa relación; la hace explícita.</p>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="técnicas-adicionales-que-vale-la-pena-conocer" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Técnicas adicionales que vale la pena conocer</h1>
+<section id="pedir-paso-a-paso-chain-of-thought" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="pedir-paso-a-paso-chain-of-thought"><span class="header-section-number">4.1</span> Pedir paso a paso (<em>chain of thought</em>)</h2>
+<p>Cuando la tarea involucra razonamiento (cálculos, decisiones encadenadas, análisis multi-criterio), pedirle al LLM que <strong>explique su razonamiento paso a paso</strong> antes de dar la respuesta final mejora la calidad de la respuesta. La frase mágica es algo del estilo <em>“razona paso a paso antes de dar la conclusión”</em>.</p>
+<p>No es solo una técnica de prompt: refleja un fenómeno conocido en LLMs. Cuando el modelo genera texto intermedio, ese texto se vuelve parte del contexto que usa para predecir lo siguiente. Esto le permite <em>“sostener”</em> razonamientos más largos.</p>
+</section>
+<section id="dar-ejemplos-few-shot-prompting" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="dar-ejemplos-few-shot-prompting"><span class="header-section-number">4.2</span> Dar ejemplos (<em>few-shot prompting</em>)</h2>
+<p>Mostrar uno, dos o tres ejemplos del par <em>“input → output esperado”</em> antes de pedir la tarea real. Es la técnica más efectiva cuando la tarea es muy específica de tu organización o cuando el formato esperado es complejo. <strong>Tres ejemplos suelen valer más que cinco párrafos de instrucciones.</strong></p>
+</section>
+<section id="asignar-un-rol-role-prompting" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="asignar-un-rol-role-prompting"><span class="header-section-number">4.3</span> Asignar un rol (<em>role prompting</em>)</h2>
+<p>Ya vimos esto en la anatomía del prompt, pero merece énfasis. Asignar un rol no es decoración: cambia el registro, el vocabulario y los criterios implícitos del modelo. <em>“Actúa como auditor escéptico”</em> produce respuestas distintas a <em>“actúa como consultor entusiasta”</em>, aunque les des la misma información.</p>
+</section>
+<section id="iterar" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="iterar"><span class="header-section-number">4.4</span> Iterar</h2>
+<p>Casi ningún prompt sale perfecto al primer intento. La técnica más subestimada es <strong>leer la primera respuesta y ajustar el prompt</strong>. Si la respuesta es muy larga, agrega una restricción de longitud. Si confunde un concepto, aclara la definición en el contexto. Si pierde foco, reformula la tarea con más precisión.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Iterar prompts es lo que separa a quien usa LLMs <strong>como buscador</strong> (un solo intento) de quien los usa <strong>como herramienta de trabajo</strong> (varias iteraciones rápidas).</p>
+</div>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="errores-comunes-que-cometen-los-principiantes" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Errores comunes que cometen los principiantes</h1>
+<p><strong>Pedir cosas vagas.</strong> <em>“Hazme un análisis”</em>, <em>“explícame esto”</em>, <em>“dame ideas”</em>. El LLM siempre responde algo, pero algo genérico. La pregunta es precisamente lo que falta.</p>
+<p><strong>No dar contexto suficiente.</strong> Asumir que el LLM sabe cómo es tu empresa, tu sector, tus datos, tus restricciones. No los sabe. Si no se lo dices, te dará una respuesta promedio.</p>
+<p><strong>No especificar el formato.</strong> Aceptar la primera estructura que el modelo proponga y luego luchar para reformatear. Es más eficiente pedir el formato desde el inicio.</p>
+<p><strong>Confundir parecido con correcto.</strong> Una respuesta que suena bien no necesariamente lo es. Esto es especialmente peligroso con datos numéricos, citas o referencias. Conecta directamente con la limitación de <strong>alucinaciones</strong> vista en el handout 2: verifica antes de usar.</p>
+<p><strong>Una sola pasada.</strong> Aceptar la primera respuesta sin iterar. Casi siempre la segunda versión es notablemente mejor si dedicas un minuto a refinar.</p>
+<p><strong>No validar.</strong> Usar la salida del LLM como dato verificado. Sobre todo en contextos auditables o regulatorios, esto es peligroso. El LLM produce borradores, no fuentes primarias.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="plantilla-reutilizable" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Plantilla reutilizable</h1>
+<p>Para empezar, vale la pena tener una plantilla mental que puedas adaptar a casi cualquier tarea. Cuando te quedes atascado con un prompt que no funciona, revisa cada parte y pregúntate cuál falta o cuál está mal especificada.</p>
+<div class="callout-key">
+<p><strong>Plantilla base</strong></p>
+<p><strong><a href="#rol">ROL</a></strong> <em>Actúa como [tipo de experto].</em></p>
+<p><strong><a href="#contexto">CONTEXTO</a></strong> <em>Tengo [descripción del problema, los datos, la situación, lo que ya se sabe].</em></p>
+<p><strong><a href="#tarea">TAREA</a></strong> <em>Quiero que [acción específica, sin ambigüedad].</em></p>
+<p><strong>[FORMATO]</strong> <em>Entrega: (1) …, (2) …, (3) …</em></p>
+<p><strong><a href="#restricciones">RESTRICCIONES</a></strong> <em>No incluyas …, usa máximo … palabras, mantén un tono …</em></p>
+</div>
+<p>No siempre necesitas las cinco partes. Pero si el primer intento no funciona, esta lista te dice exactamente dónde buscar la falla.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="caso-extendido-del-prompt-débil-al-prompt-robusto" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Caso extendido: del prompt débil al prompt robusto</h1>
+<p>Imagina que trabajas como <strong>analista junior en una entidad de microcrédito colombiana</strong>. Tu jefe te pide explorar por qué la tasa de impago ha subido en los últimos dos trimestres. Te entrega un archivo con datos de los créditos otorgados en el último año: monto, plazo, sector económico del cliente, edad, ciudad, score interno y estado del crédito.</p>
+<section id="intento-1-prompt-débil" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="intento-1-prompt-débil"><span class="header-section-number">7.1</span> Intento 1: prompt débil</h2>
+<blockquote class="blockquote">
+<p><em>“Analiza estos datos y dime por qué subió el impago.”</em></p>
+</blockquote>
+<p><strong>Respuesta probable:</strong> un texto largo y genérico hablando de los factores típicos del impago en microcrédito (situación económica, características del cliente, condiciones del crédito) sin tocar lo específico de los datos que tienes, porque el LLM ni siquiera sabe qué columnas hay ni cómo se ven.</p>
+<p><strong>Diagnóstico:</strong> falta contexto sobre los datos, falta tarea precisa, falta formato.</p>
+</section>
+<section id="intento-2-prompt-mejorado" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="intento-2-prompt-mejorado"><span class="header-section-number">7.2</span> Intento 2: prompt mejorado</h2>
+<blockquote class="blockquote">
+<p><em>“Actúa como analista de riesgo de una entidad de microcrédito colombiana. Tengo una base con ocho mil quinientos créditos otorgados en el último año, con las siguientes columnas: monto otorgado, plazo en meses, sector económico (comercio, servicios, manufactura, agricultura), edad del cliente, ciudad, score interno de 0 a 100, y estado del crédito (al día, en mora 30-60, en mora más de 90, castigado). La tasa global de mora superior a 90 días pasó de 4,2% en el segundo trimestre a 6,8% en el cuarto.</em></p>
+<p><em>Quiero que (1) identifiques las cuatro hipótesis más razonables para explicar ese aumento, considerando solo factores observables en mis datos, (2) propongas, para cada hipótesis, una variable o cruce de variables específico que la respaldaría o la descartaría, (3) priorices cuál hipótesis investigaría primero y por qué.</em></p>
+<p><em>Entrega en tres secciones numeradas, máximo quinientas palabras. No incluyas párrafos introductorios ni recomendaciones generales sobre microcrédito; quédate específicamente en mis datos.”</em></p>
+</blockquote>
+<p><strong>Respuesta esperada:</strong> hipótesis específicas vinculadas a las variables disponibles (deterioro por sector, por ciudad, por rango de monto, por score), cruces concretos para verificar cada una, priorización argumentada. Inmediatamente accionable: el analista sabe qué cruzar primero al volver a R.</p>
+<p><strong>Qué se mejoró:</strong> rol claro (analista de riesgo), contexto detallado (columnas, magnitudes), tarea descompuesta (tres pasos), formato preciso, restricción explícita (quedarse en los datos).</p>
+</section>
+<section id="reflexión" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="reflexión"><span class="header-section-number">7.3</span> Reflexión</h2>
+<p>El primer prompt habría producido una respuesta razonable, pero no útil. El segundo produce un punto de partida concreto para una sesión de análisis en R. <strong>La diferencia no es la capacidad del modelo: es la calidad de la pregunta</strong>. Y eso lo controlas tú.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="síntesis-cinco-ideas-para-llevarte" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Síntesis: cinco ideas para llevarte</h1>
+<p><strong>Primero</strong>, la calidad del prompt determina la calidad de la respuesta. No es un detalle de uso; es lo central.</p>
+<p><strong>Segundo</strong>, los buenos prompts tienen rol, contexto, tarea, formato, restricciones y, cuando aplica, ejemplos. Es una lista mental de chequeo.</p>
+<p><strong>Tercero</strong>, ser específico no es ser largo. Un prompt corto pero preciso supera a uno largo y vago.</p>
+<p><strong>Cuarto</strong>, iterar es parte del proceso. No esperes que el primer intento sea óptimo; léelo, ajusta, vuelve a pedir.</p>
+<p><strong>Quinto</strong>, la habilidad central no es nueva. Formular bien un problema, decidir el formato del entregable, hacer explícitos los supuestos: es lo mismo que un analista bueno ya hace cuando no hay LLM. El <em>prompt engineering</em> aplica esa misma disciplina a una herramienta nueva.</p>
+<hr>
+<section id="material-adicional-opcional" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="material-adicional-opcional"><span class="header-section-number">8.1</span> Material adicional (opcional)</h2>
+<ul>
+<li><strong>Anthropic — “Prompt engineering overview”</strong> — documentación oficial con técnicas y ejemplos — <a href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview">docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview</a></li>
+<li><strong>OpenAI — “Prompt engineering guide”</strong> — referencia complementaria — <a href="https://platform.openai.com/docs/guides/prompt-engineering">platform.openai.com/docs/guides/prompt-engineering</a></li>
+<li><strong>DAIR.AI — “Prompt Engineering Guide”</strong> — recurso abierto, cubre técnicas avanzadas — <a href="https://www.promptingguide.ai">promptingguide.ai</a></li>
+</ul>
+<hr>
+</section>
+<section id="checklist-de-preclase" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="checklist-de-preclase"><span class="header-section-number">8.2</span> Checklist de preclase</h2>
+<p>Al llegar a clase debes poder explicar:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">¿Cuáles son los seis componentes principales de un prompt y para qué sirve cada uno?</label></li>
+<li><label><input type="checkbox">¿Cómo tomar un prompt débil y mejorarlo identificando exactamente qué le falta?</label></li>
+<li><label><input type="checkbox">¿Qué es <em>chain of thought</em> y cuándo conviene pedirlo?</label></li>
+<li><label><input type="checkbox">¿Qué es <em>few-shot prompting</em> y cuándo es la mejor opción?</label></li>
+<li><label><input type="checkbox">¿Por qué especificar el formato de salida ahorra trabajo posterior?</label></li>
+<li><label><input type="checkbox">¿Cuáles son al menos tres errores comunes de principiante y cómo evitarlos?</label></li>
+<li><label><input type="checkbox">¿Cómo se conecta la habilidad de hacer prompts con lo que aprendiste en el curso?</label></li>
+</ul>
+</section>
+<section id="preguntas-de-comprensión" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="preguntas-de-comprensión"><span class="header-section-number">8.3</span> Preguntas de comprensión</h2>
+<p><strong>1.</strong> Un compañero te dice <em>“yo le pregunté lo mismo al LLM y me dio una respuesta inútil; estas herramientas no sirven”</em>. ¿Cómo le explicarías que el problema probablemente está en la pregunta y no en el modelo?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Le mostraría con un ejemplo concreto. Tomaría su prompt original, lo evaluaría contra los seis componentes (rol, contexto, tarea, formato, restricciones, ejemplos) y le señalaría cuáles faltan. Le pediría que reformulara incluyendo al menos rol, contexto y formato, y volviera a probar. La diferencia suele ser inmediata.</p>
+El argumento es que el LLM <strong>hace exactamente lo que se le pide</strong>; si el pedido fue vago, la respuesta es vaga, y eso no significa que el modelo <em>“no sirva”</em>.
+</details>
+<p><strong>2.</strong> ¿En qué se parece y en qué se diferencia un buen prompt de una buena especificación de un análisis en R (qué columnas, qué filtros, qué agrupaciones)?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Se parecen en que ambos requieren precisión: qué quieres exactamente, sobre qué datos, con qué estructura de salida. Se diferencian en el lenguaje: la especificación en R se <strong>ejecuta literalmente</strong>; el prompt se <strong>interpreta</strong>. Eso obliga a que el prompt sea más explícito sobre el contexto que un script en R, donde el contexto está implícito en los nombres de las columnas.</p>
+En esencia, son la misma disciplina con dos sintaxis distintas: la disciplina de pensar antes de pedir.
+</details>
+<p><strong>3.</strong> Cuando un LLM da una respuesta numérica concreta (un porcentaje, una cifra), ¿qué deberías hacer antes de usarla?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Verificarla en una <strong>fuente primaria</strong>. Los LLMs alucinan con especial frecuencia en datos numéricos. Si vas a usar una cifra en un reporte, presentación o decisión, no basta con que el modelo la haya dado; necesitas la fuente original.</p>
+Esto se conecta con lo visto en el handout 2: los LLMs optimizan plausibilidad, no veracidad. <strong>Un número plausible no es necesariamente un número real.</strong>
+</details>
+<p><strong>4.</strong> ¿Por qué decimos que la habilidad de escribir prompts es la misma habilidad que el curso ha venido formando todo el semestre?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Porque las habilidades subyacentes son las mismas: formular bien un problema, descomponerlo en pasos, especificar el formato del entregable, hacer supuestos explícitos, iterar a partir de resultados. Eso es lo que hace un buen analista al planear un EDA, al construir un dashboard, al entrenar un modelo.</p>
+El <em>prompt engineering</em> es esa misma disciplina aplicada a una herramienta nueva. <strong>Quien no sabe hacer preguntas claras a los datos, tampoco las sabrá hacer a un LLM.</strong>
+</details>
+<p><strong>5.</strong> Toma el siguiente prompt débil y reescríbelo aplicando la plantilla de seis componentes: <em>“Ayúdame con un modelo para predecir qué clientes van a aceptar una promoción”</em>. Asume que trabajas en una cadena de retail y tienes datos históricos de campañas anteriores.</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Una versión razonable sería: <em>“Actúa como científico de datos de una cadena de retail colombiana <strong><a href="#rol">ROL</a></strong>. Tengo datos de quince mil clientes que recibieron una promoción en los últimos seis meses, con las siguientes columnas: edad, género, ciudad, antigüedad como cliente, gasto promedio mensual, frecuencia de visita, canal preferido, y una variable binaria que indica si aceptó la promoción o no. La tasa global de aceptación fue del 18% <strong><a href="#contexto">CONTEXTO</a></strong>. Quiero que (1) propongas qué tipo de modelo de clasificación sería el más razonable para este problema y por qué, (2) identifiques cuáles tres variables del conjunto probablemente tendrán mayor poder predictivo y argumentes, (3) anticipes el principal riesgo metodológico que enfrentaré al evaluar el modelo, dado que las clases están desbalanceadas <strong><a href="#tarea">TAREA</a></strong>. Entrega en tres secciones numeradas, máximo cuatrocientas palabras <strong>[FORMATO]</strong>. No incluyas párrafos introductorios ni código en R; quédate en el razonamiento conceptual <strong><a href="#restricciones">RESTRICCIONES</a></strong>.”</em></p>
+Compara con el original: el nuevo prompt obliga al modelo a aterrizar en tus datos específicos, ordena la respuesta por temas y elimina toda la paja genérica que un prompt vago produciría.
+</details>
+<hr>
+</section>
+<section id="glosario-mínimo" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="glosario-mínimo"><span class="header-section-number">8.4</span> Glosario mínimo</h2>
+<div class="callout-key">
+<p><strong>Prompt:</strong> instrucción que se le entrega al LLM para obtener una respuesta.</p>
+<p><strong>Prompt engineering:</strong> disciplina de diseñar prompts eficaces para obtener respuestas de calidad.</p>
+<p><strong>Rol (en un prompt):</strong> papel que se le pide al LLM asumir para orientar el tono, vocabulario y criterios de su respuesta.</p>
+<p><strong>Contexto:</strong> información sobre la situación, los datos, las restricciones y los supuestos que el LLM necesita para responder de forma específica.</p>
+<p><strong>Few-shot prompting:</strong> técnica de incluir uno o varios ejemplos del par <em>“entrada-salida esperada”</em> antes de pedir la tarea real.</p>
+<p><strong>Chain of thought:</strong> técnica de pedir al LLM que explique su razonamiento paso a paso antes de dar la respuesta final.</p>
+<p><strong>Role prompting:</strong> técnica de asignar un rol específico al LLM al inicio del prompt.</p>
+<p><strong>Iteración:</strong> proceso de refinar un prompt sucesivamente leyendo la respuesta anterior y ajustando.</p>
+<p><strong>Restricción:</strong> límite explícito que se impone al LLM sobre lo que no debe hacer (longitud, tono, contenido a evitar).</p>
+<p><strong>Plantilla de prompt:</strong> estructura reutilizable con los componentes esenciales que se adapta a cada tarea.</p>
+</div>
+<hr>
+<p><em>Con este handout cierras la trilogía de la semana 15. Te llevas un mapa para ubicar la IA dentro del panorama tecnológico (handout 1), una comprensión de qué son los LLMs y qué los convierte en agentes (handout 2), y la habilidad concreta de formular buenos prompts (handout 3). Si tuvieras que quedarte con una sola idea de las tres semanas, sería esta: <strong>la calidad del trabajo con IA depende mucho más de la calidad de las preguntas humanas que de la sofisticación de la tecnología</strong>. Eso lo controlas tú.</em></p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-15-3_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

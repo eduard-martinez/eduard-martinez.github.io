@@ -1,0 +1,439 @@
+---
+title: "Handout 2 - LLMs, Skills y Agentes"
+subtitle: "Introducción al Business Analytics · Semana 15 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+<span id="webr-status-anchor"></span>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Objetivo del handout
+
+En el handout 1 ubicaste los **LLMs** dentro del mapa más amplio de la inteligencia artificial: son una rama específica del Deep Learning, especializada en lenguaje. Pero esa ubicación no te dice mucho sobre **qué hacen, cómo se comportan ni por qué fallan**.
+
+Como futuro analista, vas a interactuar con LLMs todos los días: para resumir documentos, redactar memos, explorar ideas, generar reportes y clasificar textos. Más importante aún, vas a estar en reuniones donde un proveedor proponga *"integrar IA"* en algún proceso de la empresa, y tu trabajo será evaluar si esa propuesta tiene sentido.
+
+Este handout te lleva desde la intuición básica del LLM hasta los conceptos que verás constantemente en propuestas y herramientas: **skills, agentes, MCP**. Al final deberías poder leer una propuesta de "asistente de IA con agentes" y saber qué preguntas hacer.
+
+## Lo que cubriremos
+
+- Qué es un LLM y la intuición de "predecir la siguiente palabra"
+- Las cinco limitaciones críticas: alucinaciones, sesgos, no-determinismo, knowledge cutoff, ventana de contexto
+- Por qué los LLMs **no** se evalúan con matriz de confusión
+- Qué es un **Skill** y cómo convierte un LLM generalista en especialista
+- Qué es un **agente** y el ciclo pensar-actuar-observar
+- Qué es **MCP** y por qué importa como infraestructura
+
+---
+
+<!--=================-->
+<!--=================-->
+# El LLM: qué es y cómo funciona
+
+## Qué significa "Large Language Model"
+
+::: {.callout-key}
+Un **LLM** es un modelo de lenguaje de gran tamaño: un sistema entrenado con cantidades masivas de texto, capaz de entender y producir lenguaje natural.
+:::
+
+El nombre tiene tres partes. **Large** se refiere al volumen: tanto en datos de entrenamiento (miles de millones de documentos) como en el número de parámetros internos del modelo (cientos de miles de millones en los modelos más grandes). **Language** porque está especializado en texto. **Model** porque, igual que un árbol o un k-means, es un modelo estadístico: aprende patrones de los datos con los que fue entrenado.
+
+## La intuición central: predecir la siguiente palabra
+
+Aunque las capacidades de un LLM parecen mágicas, su mecánica básica es sorprendentemente simple: **dado un texto, predecir cuál es la siguiente palabra más probable**.
+
+Si le das *"La capital de Colombia es"*, el modelo asignará alta probabilidad a "Bogotá" como siguiente palabra, baja a "Caracas" y muy baja a "guitarra". Una vez genera "Bogotá", repite el procedimiento usando ahora *"La capital de Colombia es Bogotá"* para decidir la siguiente palabra, y así sucesivamente hasta completar una respuesta.
+
+Esa es toda la mecánica básica. Lo que parece pensamiento, lo que parece razonamiento, lo que parece creatividad, surge de aplicar millones de veces ese acto simple de predicción.
+
+## Cómo se entrena (sin entrar en fórmulas)
+
+El entrenamiento de un LLM consiste, en lo esencial, en mostrarle al modelo enormes cantidades de texto (libros, artículos, código, conversaciones) y pedirle que prediga la siguiente palabra de cada secuencia. Cuando se equivoca, se ajustan sus parámetros internos para que la próxima vez se equivoque menos. Repite ese proceso billones de veces.
+
+Después de ese entrenamiento base hay una fase adicional donde personas entrenan al modelo a seguir instrucciones, a rechazar pedidos peligrosos y a responder de forma útil. Esa fase es la que convierte un modelo que solo completa texto en un asistente conversacional.
+
+::: {.callout-warning}
+No necesitas entender más matemática que esto: el modelo **no consulta internet en tiempo real**, **no piensa** y **no entiende** en el sentido humano. Predice texto plausible basado en patrones aprendidos de su corpus.
+:::
+
+## Por qué de una tarea simple emergen capacidades complejas
+
+Predecir la siguiente palabra parece trivial, pero ejecutarlo bien sobre cualquier texto humano requiere capacidades sorprendentes. Para predecir bien la siguiente palabra de un párrafo sobre derecho tributario, el modelo tuvo que aprender vocabulario legal, estructuras argumentativas y lógica de citas. Para predecir bien la siguiente palabra de un código en R, tuvo que aprender sintaxis, convenciones y patrones de programación. Para resumir un correo, tuvo que aprender qué información suele ser central en una comunicación de negocios.
+
+Esas capacidades **emergen** del entrenamiento sin que nadie las programara explícitamente. Esa es la sorpresa fundamental de los LLMs: una tarea simple, escalada a un tamaño suficientemente grande con datos suficientemente diversos, produce un sistema con capacidades que parecen muy distintas a la tarea original.
+
+## Diferencia clave con un modelo de ML clásico
+
+::: {.callout-connect}
+**Comparación con el árbol de la semana 11**
+
+El árbol que entrenaste en la semana 11 tenía un **objetivo claro y medible**: predecir correctamente una etiqueta binaria. Podías calcular accuracy, precisión y recall. Podías comparar dos árboles entre sí con esas métricas.
+
+Un LLM tiene un objetivo de entrenamiento distinto: **producir texto plausible**. No "verdadero", no "correcto", no "útil". Plausible — es decir, parecido al texto humano sobre el que se entrenó.
+
+Esa diferencia, que puede parecer sutil, explica casi todas las limitaciones que veremos a continuación.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Limitaciones críticas que un analista debe conocer
+
+## Alucinaciones
+
+Una **alucinación** es cuando el LLM produce una afirmación con seguridad y aplomo, pero que es falsa. Ocurre porque el modelo está optimizado para plausibilidad, no para veracidad. Si un texto suena como algo que un experto diría, el modelo lo produce, aunque el contenido sea inventado.
+
+Las alucinaciones aparecen con más frecuencia en citas bibliográficas (el modelo inventa autores, años o títulos), en datos numéricos específicos (tasas, porcentajes, cifras que parecen exactas pero no lo son), en hechos verificables sobre personas, empresas o eventos poco conocidos, y en referencias legales o jurisprudencia.
+
+::: {.callout-warning}
+**Regla práctica para un analista:** cualquier dato concreto que provenga de un LLM y que vaya a usarse para una decisión debe verificarse en una fuente primaria. Si el LLM dice *"la tasa de impago del sector hipotecario en Colombia fue de X% en cierto año"*, no uses esa cifra sin verificarla con la Superintendencia Financiera o un informe oficial.
+:::
+
+## Sesgos
+
+Los LLMs heredan los sesgos de su corpus de entrenamiento. Si en los textos con los que se entrenó hay sesgos de género en descripciones laborales, esos sesgos aparecen en las respuestas. Si las descripciones de ciertos sectores demográficos son más negativas que otras, el modelo lo replica.
+
+En decisiones de contratación, evaluación crediticia o segmentación, este punto deja de ser académico y se vuelve un **riesgo legal y reputacional**. Un LLM que ayuda a redactar evaluaciones de desempeño puede, sutilmente, describir de forma distinta a hombres y mujeres. Un LLM que sugiere candidatos puede priorizar perfiles parecidos a los históricamente contratados, perpetuando el sesgo en lugar de corregirlo.
+
+## No-determinismo
+
+A diferencia de un árbol de clasificación, donde dos veces el mismo *input* dan exactamente el mismo *output*, **un LLM puede dar respuestas distintas a la misma pregunta**. Esto se llama **no-determinismo** y es una característica de diseño, no un error.
+
+Para un analista de negocio esto tiene implicaciones serias. Si pides al LLM que clasifique mil correos y lo corres dos veces, no obtendrás exactamente la misma clasificación. Para procesos auditables (reportes regulatorios, decisiones de crédito), esta variabilidad es un problema que hay que controlar. Existen configuraciones que la reducen, pero rara vez la eliminan por completo.
+
+## Knowledge cutoff
+
+Un LLM solo conoce información hasta cierta fecha: el momento en que terminó su corpus de entrenamiento. Después de esa fecha, simplemente no tiene datos. Si le preguntas por un evento reciente, puede no saber, equivocarse o inventar.
+
+La implicación práctica es directa: para preguntas dependientes de información actual (cotizaciones, eventos recientes, regulaciones nuevas), un LLM puro es insuficiente. Hay soluciones (conectar el LLM a búsqueda web, a bases de datos internas, a APIs), pero requieren diseño deliberado.
+
+## Ventana de contexto limitada
+
+El LLM tiene un límite de cuánto texto puede leer y mantener "en mente" para responder. Esa **ventana**, aunque cada vez es más grande, no es infinita. Si le entregas un documento de 500 páginas y haces preguntas sobre la página 3, puede responder bien. Si le entregas 5.000 páginas, posiblemente no.
+
+Esto importa para el diseño de aplicaciones: cuando un sistema necesita razonar sobre muchos documentos, no basta con "subírselos todos al LLM". Hay arquitecturas (como **RAG**, *retrieval augmented generation*) que recuperan solo los fragmentos relevantes para cada pregunta. Como analista no necesitas implementarlas, pero sí saber que existen y cuándo se necesitan.
+
+## La ausencia de matriz de confusión natural
+
+::: {.callout-connect}
+**Contraste explícito con la semana 11**
+
+Cuando entrenaste un árbol, podías comparar dos versiones del modelo con métricas claras: accuracy, precisión, recall, F1. Eran cifras objetivas, calculables sobre el conjunto de prueba. Te daban una base sólida para decidir cuál modelo era mejor.
+
+Con un LLM, **¿cómo decides si una versión de un asistente es mejor que otra?** No hay un equivalente directo. ¿Es mejor un resumen *"más fiel"* o *"más conciso"*? ¿Es mejor una respuesta *"más formal"* o *"más cercana"*? Las evaluaciones de LLMs combinan métricas automáticas imperfectas, evaluación humana cara y juicio cualitativo. Es un problema metodológico abierto.
+
+**Para un analista:** no esperes obtener una matriz de confusión limpia para un LLM. La evaluación es más subjetiva, más cara y más difícil de auditar. Eso no significa que no se pueda evaluar; significa que requiere diseñar criterios desde el principio y aceptar que la rigurosidad será menor que la de un modelo clásico.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Skills: cómo se especializa un LLM
+
+## Definición
+
+::: {.callout-key}
+Un **Skill** es un módulo de instrucciones especializadas que se le proporciona a un LLM para que siga un protocolo específico en una tarea concreta. Equivale a entregarle al modelo un **manual de operación** para un caso de uso particular.
+:::
+
+## La analogía intuitiva
+
+Imagina que contratas a un empleado talentoso y generalista. Es inteligente, sabe escribir bien, entiende contexto, aprende rápido. Pero cuando llega a la empresa el primer día, **no sabe** el formato de los memos corporativos, no conoce el tono de la comunicación con clientes, no maneja la terminología interna. Lo que haces es darle un **manual**: así escribimos memos aquí, así estructuramos reportes, así respondemos correos.
+
+Un Skill es exactamente eso para un LLM. El modelo es el empleado talentoso pero generalista. El Skill es el manual que lo convierte en especialista para una tarea específica de tu organización.
+
+## Por qué los Skills importan en un entorno empresarial
+
+Sin Skills, cada usuario obtiene resultados distintos del mismo LLM. Uno le pide un memo y obtiene un texto largo en prosa formal; otro le pide un memo y obtiene un listado de bullets. La variabilidad es enemiga de la operación. Los Skills resuelven cuatro problemas a la vez.
+
+**Primero**, estandarizan la salida: todos los memos generados siguen el mismo formato corporativo, sin importar quién lo pida. **Segundo**, reducen la variabilidad: dos personas distintas que piden lo mismo obtienen resultados consistentes. **Tercero**, encapsulan conocimiento organizacional: el manual de cómo se escribe un análisis financiero en tu empresa queda codificado y reutilizable. Y **cuarto**, bajan la barrera de entrada: un empleado nuevo no necesita memorizar el formato; el Skill lo aplica automáticamente.
+
+## Ejemplo concreto
+
+Imagina que el equipo de finanzas de una empresa genera todos los meses un análisis de cierre con la misma estructura: contexto del periodo, principales variaciones, alertas, conclusiones y anexos. Antes de los LLMs, cada analista lo redactaba de memoria, y la consistencia dependía de la disciplina individual.
+
+Con un Skill, el equipo define una vez el manual: *"Cuando se te pida un análisis de cierre mensual, sigue esta estructura, usa este tono, incluye estas secciones, evita estas palabras, presenta los números con este formato"*. Luego cualquier persona del equipo le entrega los datos del mes al LLM, invoca el Skill, y obtiene un borrador que ya cumple la convención corporativa. El analista revisa y ajusta, pero **no parte de cero**.
+
+---
+
+<!--=================-->
+<!--=================-->
+# Agentes: cuando el LLM no solo habla, también actúa
+
+## La diferencia fundamental
+
+Un LLM, por sí solo, **solo produce texto**. Le preguntas algo, te responde algo. Punto. No abre archivos, no envía correos, no consulta bases de datos.
+
+Un **agente** combina un LLM con la capacidad de **ejecutar acciones**. Le preguntas algo, y en lugar de solo responder, el agente decide qué pasos tomar: buscar información, leer un documento, llamar a una API, escribir en un archivo, mandar un correo. Es la diferencia entre un consultor que te da consejos en una reunión y un asistente que va y ejecuta las tareas por ti.
+
+## El ciclo del agente
+
+Los agentes funcionan en un ciclo simple de tres pasos que se repite hasta completar la tarea o llegar a un límite.
+
+```{=html}
+<div style="margin:1.5rem 0">
+<svg width="100%" viewBox="0 0 720 480" role="img">
+<title>Ciclo del agente: pensar, actuar, observar</title>
+<desc>Tres nodos dispuestos en triángulo. Pensar arriba en el centro, Actuar abajo a la derecha, Observar abajo a la izquierda. Flechas en sentido horario los conectan. En el centro, una etiqueta Objetivo. Debajo del nodo Actuar, ejemplos de herramientas externas a las que el agente puede invocar.</desc>
+
+<defs>
+  <marker id="ag1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Nodo PENSAR (arriba) -->
+<rect x="280" y="40" width="160" height="68" rx="12" fill="#E6F1FB" stroke="#1F4E79" stroke-width="1.5"/>
+<text x="360" y="65" text-anchor="middle" font-family="inherit" font-size="11" fill="#1F4E79" letter-spacing="0.05em">PASO 1</text>
+<text x="360" y="89" text-anchor="middle" font-family="inherit" font-size="16" font-weight="600" fill="#0C447C">Pensar</text>
+
+<!-- Nodo ACTUAR (abajo derecha) -->
+<rect x="490" y="240" width="170" height="68" rx="12" fill="#FBE0C4" stroke="#E87722" stroke-width="1.5"/>
+<text x="575" y="265" text-anchor="middle" font-family="inherit" font-size="11" fill="#C2581A" letter-spacing="0.05em">PASO 2</text>
+<text x="575" y="289" text-anchor="middle" font-family="inherit" font-size="16" font-weight="600" fill="#5A3A0F">Actuar</text>
+
+<!-- Nodo OBSERVAR (abajo izquierda) -->
+<rect x="60" y="240" width="170" height="68" rx="12" fill="#CFE0F1" stroke="#2E75B6" stroke-width="1.5"/>
+<text x="145" y="265" text-anchor="middle" font-family="inherit" font-size="11" fill="#1A4C7A" letter-spacing="0.05em">PASO 3</text>
+<text x="145" y="289" text-anchor="middle" font-family="inherit" font-size="16" font-weight="600" fill="#0C447C">Observar</text>
+
+<!-- Flecha Pensar → Actuar (curva descendente derecha) -->
+<path d="M 440 95 Q 540 130 545 235" fill="none" stroke="#888" stroke-width="1.6" marker-end="url(#ag1)"/>
+<text x="525" y="155" text-anchor="middle" font-family="inherit" font-size="11" fill="#666" font-style="italic">decide siguiente paso</text>
+
+<!-- Flecha Actuar → Observar (horizontal inferior) -->
+<line x1="485" y1="278" x2="240" y2="278" stroke="#888" stroke-width="1.6" marker-end="url(#ag1)"/>
+<text x="362" y="298" text-anchor="middle" font-family="inherit" font-size="11" fill="#666" font-style="italic">retorna resultado</text>
+
+<!-- Flecha Observar → Pensar (curva ascendente izquierda) -->
+<path d="M 175 235 Q 175 130 280 95" fill="none" stroke="#888" stroke-width="1.6" marker-end="url(#ag1)"/>
+<text x="160" y="155" text-anchor="middle" font-family="inherit" font-size="11" fill="#666" font-style="italic">información nueva</text>
+
+<!-- Etiqueta central OBJETIVO -->
+<rect x="305" y="155" width="110" height="40" rx="20" fill="#FFFFFF" stroke="#888" stroke-width="1" stroke-dasharray="3 2"/>
+<text x="360" y="180" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="13" font-weight="500" fill="#444">Objetivo</text>
+
+<!-- Línea descendente desde Actuar hacia las herramientas -->
+<line x1="575" y1="308" x2="575" y2="358" stroke="#BA7517" stroke-width="1.2" stroke-dasharray="4 3"/>
+
+<!-- Zona de herramientas debajo de Actuar -->
+<text x="575" y="378" text-anchor="middle" font-family="inherit" font-size="11" font-weight="500" fill="#7A4810" letter-spacing="0.05em">HERRAMIENTAS EXTERNAS</text>
+
+<rect x="430" y="395" width="100" height="32" rx="6" fill="#FFFFFF" stroke="#BA7517" stroke-width="1"/>
+<text x="480" y="416" text-anchor="middle" font-family="inherit" font-size="11" fill="#5A3A0F">búsqueda web</text>
+
+<rect x="540" y="395" width="100" height="32" rx="6" fill="#FFFFFF" stroke="#BA7517" stroke-width="1"/>
+<text x="590" y="416" text-anchor="middle" font-family="inherit" font-size="11" fill="#5A3A0F">leer archivos</text>
+
+<rect x="430" y="435" width="100" height="32" rx="6" fill="#FFFFFF" stroke="#BA7517" stroke-width="1"/>
+<text x="480" y="456" text-anchor="middle" font-family="inherit" font-size="11" fill="#5A3A0F">enviar correo</text>
+
+<rect x="540" y="435" width="100" height="32" rx="6" fill="#FFFFFF" stroke="#BA7517" stroke-width="1"/>
+<text x="590" y="456" text-anchor="middle" font-family="inherit" font-size="11" fill="#5A3A0F">consultar BD</text>
+
+</svg>
+</div>
+```
+
+En la práctica, **pensar** significa que el agente analiza la tarea, divide el objetivo en pasos y decide cuál es el siguiente. **Actuar** significa que ejecuta ese paso, ya sea buscar algo, abrir un archivo o llamar a una herramienta. **Observar** significa que mira el resultado de la acción y se pregunta si funcionó, qué información obtuvo, qué cambió en el contexto. Y vuelve a pensar, con la información nueva, para decidir el siguiente paso.
+
+## Ejemplos reales de agentes
+
+**Claude Code, Cursor y herramientas similares** son agentes que ayudan a desarrolladores. Reciben una instrucción del estilo *"agrega autenticación a este proyecto"* y autónomamente leen los archivos del repositorio, deciden qué modificar, escriben el código, ejecutan pruebas y reportan resultados. **No solo sugieren código: lo aplican.**
+
+**Agentes corporativos de monitoreo** son sistemas que vigilan continuamente correos, reseñas o redes sociales, clasifican lo que llega, y según el tipo abren un ticket en el sistema de soporte, escalan a un humano o responden automáticamente.
+
+**Asistentes de research** son agentes que reciben una pregunta de investigación, buscan en múltiples fuentes, leen los resultados, los sintetizan y entregan un informe con referencias.
+
+Lo importante de cada ejemplo no es la apariencia mágica, sino la combinación: un LLM como *"cerebro"* que decide qué hacer, y un conjunto de **herramientas** que ese cerebro puede invocar.
+
+## Por qué los riesgos se amplifican con agentes
+
+Aquí conviene detenerse. Un LLM que solo produce texto puede equivocarse en lo que **dice**: alucinar, sesgar, errar. Las consecuencias suelen ser limitadas, porque alguien lee la respuesta, evalúa y decide qué hacer.
+
+Un agente que **actúa** puede equivocarse en lo que **hace**: borrar un archivo, enviar un correo a la lista equivocada, ejecutar una transacción, modificar una base de datos. Las consecuencias son mucho más serias y, a menudo, **irreversibles**.
+
+::: {.callout-warning}
+**Los tres principios de un agente bien diseñado**
+
+- **Permisos restringidos:** el agente solo puede hacer lo que se le autoriza explícitamente. No tiene acceso completo al sistema.
+- **Supervisión humana:** para acciones críticas (enviar un correo, ejecutar una compra), el agente pide confirmación antes de actuar.
+- **Auditabilidad:** cada acción del agente queda registrada para que después se pueda revisar qué hizo y por qué.
+
+Como analista, cuando alguien proponga *"implementemos un agente que automatice X"*, la pregunta que debes hacer es: **¿qué permisos va a tener? ¿qué pasa si se equivoca? ¿cómo se audita?**
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# MCP: el estándar para conectar agentes con herramientas
+
+::: {.callout-key}
+**MCP (Model Context Protocol)** es un estándar abierto que define cómo un agente de IA se conecta con herramientas externas: bases de datos, servicios de correo, sistemas internos, APIs corporativas.
+:::
+
+La analogía útil es la del **USB**. Antes del USB, cada periférico requería un conector distinto y un *driver* específico. El USB estandarizó la conexión y permitió que cualquier dispositivo se conectara a cualquier computadora sin tener que reinventar la integración cada vez.
+
+MCP cumple ese papel para los agentes de IA. Antes, cada integración entre un LLM y una herramienta externa requería desarrollo a medida. Con MCP, hay un estándar común: si una herramienta expone un *"servidor MCP"*, cualquier agente compatible puede usarla.
+
+Como analista no vas a construir servidores MCP. Pero sí vas a ser **usuario** de ellos: cuando conectes tu calendario, tu correo, tu Drive o las bases de datos de tu empresa a un agente, la conexión probablemente pase por MCP. Saber que existe te permite entender propuestas y hacer mejores preguntas.
+
+---
+
+<!--=================-->
+<!--=================-->
+# Marco de decisión: qué herramienta para qué tarea
+
+| Tarea | Herramienta adecuada |
+|---|---|
+| Predecir churn con datos estructurados | **ML clásico** (árbol, ensamble) |
+| Segmentar clientes sin etiqueta previa | **ML no supervisado** (k-means) |
+| Resumir 500 reseñas de clientes en lenguaje natural | **LLM** |
+| Estandarizar memos siguiendo formato corporativo | **LLM + Skill** |
+| Monitorear reseñas, clasificar y abrir tickets automáticamente | **Agente** |
+| Conectar el agente con el sistema de tickets de la empresa | **MCP** |
+
+::: {.callout-warning}
+**Regla general:** empieza por la herramienta más simple que resuelva el problema.
+
+- No introduzcas un agente cuando un Skill basta.
+- No introduzcas un Skill cuando una respuesta directa del LLM basta.
+- No introduzcas un LLM cuando un árbol resuelve mejor.
+:::
+
+---
+
+<!--=================-->
+<!--=================-->
+# Síntesis: cinco ideas para llevarte
+
+**Primero**, un LLM predice texto plausible, no verdad. Esa es la mecánica básica que explica casi todo lo demás.
+
+**Segundo**, las limitaciones más importantes son alucinaciones, sesgo, no-determinismo, knowledge cutoff y ventana de contexto. Cada una tiene implicaciones para el analista.
+
+**Tercero**, los Skills convierten un LLM generalista en especialista. Son el manual operativo que estandariza salidas en una organización.
+
+**Cuarto**, un agente combina un LLM con la capacidad de actuar, ciclando entre pensar, actuar y observar. Eso amplifica tanto la utilidad como los riesgos.
+
+**Quinto**, MCP estandariza la conexión entre agentes y herramientas externas. Es infraestructura, no producto, pero conocerla cambia la calidad de las preguntas que harás en una reunión técnica.
+
+---
+
+## Material adicional (opcional)
+
+- **Anthropic — "Building effective agents"** — guía sobre cuándo conviene un agente y cuándo basta una solución más simple — [anthropic.com/research/building-effective-agents](https://www.anthropic.com/research/building-effective-agents)
+- **Model Context Protocol — documentación oficial** — [modelcontextprotocol.io](https://modelcontextprotocol.io)
+- **Stanford HAI — "AI Index Report"** — panorámica anual del estado del campo — [aiindex.stanford.edu](https://aiindex.stanford.edu)
+
+---
+
+## Checklist de preclase
+
+Al llegar a clase debes poder explicar:
+
+- [ ] ¿Por qué decimos que un LLM "predice la siguiente palabra"?
+- [ ] ¿Qué es una alucinación y por qué ocurre?
+- [ ] ¿Por qué un mismo prompt puede dar respuestas distintas?
+- [ ] ¿Qué es la *knowledge cutoff* y qué problemas genera?
+- [ ] ¿Por qué un LLM no se evalúa con una matriz de confusión limpia?
+- [ ] ¿Qué es un Skill y por qué es útil en una empresa?
+- [ ] ¿Cuáles son los tres pasos del ciclo de un agente?
+- [ ] ¿Por qué los riesgos de un agente son mayores que los de un LLM puro?
+- [ ] ¿Qué es MCP y cuál es la analogía que mejor lo explica?
+
+## Preguntas de comprensión
+
+**1.** Un proveedor te ofrece *"un agente que responde correos del servicio al cliente y resuelve la mayoría sin intervención humana"*. ¿Qué tres preguntas críticas le harías antes de proceder?
+
+<details>
+<summary>Ver respuesta</summary>
+
+Algunas preguntas razonables: ¿qué tipo de correos puede resolver y cuáles escala?, ¿cómo se entrena o ajusta el agente para el contexto específico de la empresa?, ¿qué pasa si el agente responde algo incorrecto a un cliente?, ¿cómo se audita lo que dijo el agente?, ¿qué permisos tiene (puede mover plata, anular pedidos, acceder a datos personales)?, ¿cómo se mide su desempeño dado que no hay matriz de confusión limpia?
+
+Lo central es entender **el alcance**, **el control humano** y **el plan de fallo**.
+</details>
+
+**2.** ¿Por qué un mismo *prompt* puede dar respuestas distintas en un LLM, mientras que un mismo *input* siempre da el mismo *output* en un árbol de clasificación?
+
+<details>
+<summary>Ver respuesta</summary>
+
+El árbol es determinista por construcción: recorre las mismas ramas y llega siempre al mismo nodo hoja. El LLM, en su generación, **muestrea** palabras con cierta aleatoriedad (controlada por parámetros como la "temperatura"). Esa aleatoriedad introduce variabilidad.
+
+Se puede reducir, pero rara vez eliminar, y eso es decisión de diseño: cierta variabilidad permite respuestas más naturales y creativas, a costa de reproducibilidad.
+</details>
+
+**3.** ¿En qué se diferencia un Skill de un *prompt* particularmente largo y detallado? ¿No son lo mismo?
+
+<details>
+<summary>Ver respuesta</summary>
+
+Conceptualmente comparten algo: ambos dan instrucciones al modelo. La diferencia operativa es que un Skill se **define una vez, se nombra, se invoca y se mantiene** como un componente reutilizable. Un prompt largo lo escribe cada usuario cada vez.
+
+Un Skill bien diseñado además puede contener archivos de referencia, ejemplos y reglas complejas que serían poco prácticos de repetir manualmente. Es la diferencia entre escribir las mismas instrucciones cada lunes y tener un manual al que los empleados acuden.
+</details>
+
+**4.** Si los LLMs alucinan, ¿significa que no son confiables para decisiones de negocio? Argumenta a favor y en contra.
+
+<details>
+<summary>Ver respuesta</summary>
+
+**A favor de "no son confiables":** cualquier dato verificable que produzcan debe verificarse, y eso anula buena parte del ahorro de tiempo en decisiones rigurosas.
+
+**En contra:** la alucinación es un riesgo conocido y manejable. Para muchas tareas (resumir, redactar, explorar opciones, clasificar texto) la alucinación es un riesgo menor que se mitiga con revisión humana.
+
+La clave no es *"confiar o no confiar"*, sino **calibrar la confianza según el tipo de tarea** y construir flujos donde el LLM aporta velocidad y el humano aporta verificación.
+</details>
+
+**5.** Una empresa quiere usar un agente que lea automáticamente los correos del CEO, identifique los que requieren atención urgente, y elabore borradores de respuesta. ¿Qué riesgos específicos identificas y cómo mitigarías cada uno?
+
+<details>
+<summary>Ver respuesta</summary>
+
+Algunos riesgos relevantes: (a) clasificar mal un correo urgente como no urgente y dejarlo pasar; (b) clasificar un correo confidencial sin que el agente tenga claros los límites de quién puede ver qué; (c) generar un borrador con información incorrecta (alucinación) que el CEO firme sin revisar a profundidad; (d) que el agente envíe el correo por sí mismo sin confirmación humana, generando consecuencias irreversibles.
+
+Mitigaciones: permisos restringidos (**el agente lee y propone, pero no envía**); supervisión humana obligatoria en cualquier respuesta antes de enviarla; auditoría de toda acción del agente; reglas explícitas sobre qué tipos de correo nunca debe procesar (legales, RRHH, regulatorios); calibración del clasificador con casos históricos.
+</details>
+
+---
+
+## Glosario mínimo
+
+::: {.callout-key}
+**LLM (Large Language Model):** modelo de Deep Learning entrenado para procesar y generar lenguaje natural.
+
+**Token:** unidad básica de texto con la que opera un LLM. Puede ser una palabra, parte de una palabra o un signo.
+
+**Alucinación:** afirmación con apariencia de verdadera producida por un LLM, pero falsa.
+
+**Knowledge cutoff:** fecha límite hasta la que el LLM tiene información en su corpus de entrenamiento.
+
+**Ventana de contexto:** cantidad máxima de texto que el LLM puede procesar a la vez.
+
+**Skill:** módulo de instrucciones especializadas que adapta un LLM a una tarea o protocolo específico.
+
+**Agente:** sistema que combina un LLM con la capacidad de ejecutar acciones, operando en ciclos de pensar-actuar-observar.
+
+**MCP (Model Context Protocol):** estándar abierto para conectar agentes con herramientas externas.
+
+**RAG (Retrieval Augmented Generation):** técnica que combina un LLM con búsqueda de información externa para responder con datos actualizados o específicos.
+
+**No-determinismo:** propiedad de un sistema de dar respuestas distintas al mismo *input*.
+:::
+
+---
+
+*En el **handout 3** trabajaremos la habilidad central para sacar provecho de los LLMs, los Skills y los agentes: la formulación de prompts. Es, en buena medida, la misma habilidad que has venido formando todo el semestre cuando aprendiste a hacer preguntas bien planteadas a los datos.*

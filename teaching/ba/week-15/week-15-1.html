@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Handout 1 - Inteligencia Artificial y Machine Learning</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="week-15-1_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-15-1_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-15-1_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-15-1_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="week-15-1_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-15-1_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-15-1_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-15-1_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-15-1_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-15-1_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-15-1_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-15-1_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#objetivo-del-handout" id="toc-objetivo-del-handout" class="nav-link active" data-scroll-target="#objetivo-del-handout"><span class="header-section-number">1</span> Objetivo del handout</a>
+  <ul class="collapse">
+  <li><a href="#lo-que-cubriremos" id="toc-lo-que-cubriremos" class="nav-link" data-scroll-target="#lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</a></li>
+  </ul></li>
+  <li><a href="#las-definiciones-una-por-una" id="toc-las-definiciones-una-por-una" class="nav-link" data-scroll-target="#las-definiciones-una-por-una"><span class="header-section-number">2</span> Las definiciones, una por una</a>
+  <ul class="collapse">
+  <li><a href="#inteligencia-artificial-ia" id="toc-inteligencia-artificial-ia" class="nav-link" data-scroll-target="#inteligencia-artificial-ia"><span class="header-section-number">2.1</span> Inteligencia Artificial (IA)</a></li>
+  <li><a href="#machine-learning-ml" id="toc-machine-learning-ml" class="nav-link" data-scroll-target="#machine-learning-ml"><span class="header-section-number">2.2</span> Machine Learning (ML)</a></li>
+  <li><a href="#deep-learning" id="toc-deep-learning" class="nav-link" data-scroll-target="#deep-learning"><span class="header-section-number">2.3</span> Deep Learning</a></li>
+  <li><a href="#llms-large-language-models" id="toc-llms-large-language-models" class="nav-link" data-scroll-target="#llms-large-language-models"><span class="header-section-number">2.4</span> LLMs (Large Language Models)</a></li>
+  <li><a href="#el-mapa-visual-círculos-concéntricos" id="toc-el-mapa-visual-círculos-concéntricos" class="nav-link" data-scroll-target="#el-mapa-visual-círculos-concéntricos"><span class="header-section-number">2.5</span> El mapa visual: círculos concéntricos</a></li>
+  </ul></li>
+  <li><a href="#ia-que-no-es-ml-ejemplos-históricos-que-importan" id="toc-ia-que-no-es-ml-ejemplos-históricos-que-importan" class="nav-link" data-scroll-target="#ia-que-no-es-ml-ejemplos-históricos-que-importan"><span class="header-section-number">3</span> IA que no es ML: ejemplos históricos que importan</a>
+  <ul class="collapse">
+  <li><a href="#sistemas-expertos-para-diagnóstico-médico" id="toc-sistemas-expertos-para-diagnóstico-médico" class="nav-link" data-scroll-target="#sistemas-expertos-para-diagnóstico-médico"><span class="header-section-number">3.1</span> Sistemas expertos para diagnóstico médico</a></li>
+  <li><a href="#motores-clásicos-de-ajedrez" id="toc-motores-clásicos-de-ajedrez" class="nav-link" data-scroll-target="#motores-clásicos-de-ajedrez"><span class="header-section-number">3.2</span> Motores clásicos de ajedrez</a></li>
+  <li><a href="#gps-y-navegación" id="toc-gps-y-navegación" class="nav-link" data-scroll-target="#gps-y-navegación"><span class="header-section-number">3.3</span> GPS y navegación</a></li>
+  <li><a href="#reconocedores-de-voz-anteriores-al-deep-learning" id="toc-reconocedores-de-voz-anteriores-al-deep-learning" class="nav-link" data-scroll-target="#reconocedores-de-voz-anteriores-al-deep-learning"><span class="header-section-number">3.4</span> Reconocedores de voz anteriores al Deep Learning</a></li>
+  </ul></li>
+  <li><a href="#tres-situaciones-tres-tipos-de-ia" id="toc-tres-situaciones-tres-tipos-de-ia" class="nav-link" data-scroll-target="#tres-situaciones-tres-tipos-de-ia"><span class="header-section-number">4</span> Tres situaciones, tres tipos de IA</a>
+  <ul class="collapse">
+  <li><a href="#caso-1-entidad-financiera-prediciendo-impago" id="toc-caso-1-entidad-financiera-prediciendo-impago" class="nav-link" data-scroll-target="#caso-1-entidad-financiera-prediciendo-impago"><span class="header-section-number">4.1</span> Caso 1 · Entidad financiera prediciendo impago</a></li>
+  <li><a href="#caso-2-cadena-minorista-segmentando-clientes" id="toc-caso-2-cadena-minorista-segmentando-clientes" class="nav-link" data-scroll-target="#caso-2-cadena-minorista-segmentando-clientes"><span class="header-section-number">4.2</span> Caso 2 · Cadena minorista segmentando clientes</a></li>
+  <li><a href="#caso-3-validación-tributaria-por-reglas" id="toc-caso-3-validación-tributaria-por-reglas" class="nav-link" data-scroll-target="#caso-3-validación-tributaria-por-reglas"><span class="header-section-number">4.3</span> Caso 3 · Validación tributaria por reglas</a></li>
+  </ul></li>
+  <li><a href="#limitaciones-y-riesgos-por-categoría" id="toc-limitaciones-y-riesgos-por-categoría" class="nav-link" data-scroll-target="#limitaciones-y-riesgos-por-categoría"><span class="header-section-number">5</span> Limitaciones y riesgos por categoría</a>
+  <ul class="collapse">
+  <li><a href="#ml-clásico" id="toc-ml-clásico" class="nav-link" data-scroll-target="#ml-clásico"><span class="header-section-number">5.1</span> ML clásico</a></li>
+  <li><a href="#deep-learning-1" id="toc-deep-learning-1" class="nav-link" data-scroll-target="#deep-learning-1"><span class="header-section-number">5.2</span> Deep Learning</a></li>
+  <li><a href="#sistemas-basados-en-reglas" id="toc-sistemas-basados-en-reglas" class="nav-link" data-scroll-target="#sistemas-basados-en-reglas"><span class="header-section-number">5.3</span> Sistemas basados en reglas</a></li>
+  <li><a href="#llms" id="toc-llms" class="nav-link" data-scroll-target="#llms"><span class="header-section-number">5.4</span> LLMs</a></li>
+  </ul></li>
+  <li><a href="#marco-de-decisión-cuándo-usar-qué" id="toc-marco-de-decisión-cuándo-usar-qué" class="nav-link" data-scroll-target="#marco-de-decisión-cuándo-usar-qué"><span class="header-section-number">6</span> Marco de decisión: ¿cuándo usar qué?</a></li>
+  <li><a href="#síntesis-cinco-ideas-para-llevarte" id="toc-síntesis-cinco-ideas-para-llevarte" class="nav-link" data-scroll-target="#síntesis-cinco-ideas-para-llevarte"><span class="header-section-number">7</span> Síntesis: cinco ideas para llevarte</a>
+  <ul class="collapse">
+  <li><a href="#material-adicional-opcional" id="toc-material-adicional-opcional" class="nav-link" data-scroll-target="#material-adicional-opcional"><span class="header-section-number">7.1</span> Material adicional (opcional)</a></li>
+  <li><a href="#checklist-de-preclase" id="toc-checklist-de-preclase" class="nav-link" data-scroll-target="#checklist-de-preclase"><span class="header-section-number">7.2</span> Checklist de preclase</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">7.3</span> Preguntas de comprensión</a></li>
+  <li><a href="#glosario-mínimo" id="toc-glosario-mínimo" class="nav-link" data-scroll-target="#glosario-mínimo"><span class="header-section-number">7.4</span> Glosario mínimo</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Handout 1 - Inteligencia Artificial y Machine Learning</h1>
+<p class="subtitle lead">Introducción al Business Analytics · Semana 15 · 06278-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="objetivo-del-handout" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Objetivo del handout</h1>
+<p>El foco está en <strong>ubicar lo que aprendiste en el semestre dentro del mapa más amplio de la IA</strong>. La palabra “IA” se usa todos los días en la prensa, en reuniones gerenciales y en propuestas de proveedores — pero designa cosas muy distintas. Confundirlas lleva a decisiones de inversión equivocadas y a proyectos que fracasan no por falta de tecnología, sino por falta de claridad conceptual.</p>
+<p>Este handout te da el mapa. No para que te conviertas en ingeniero de IA, sino para que como analista puedas hacer la pregunta correcta cuando te toque opinar, decidir o explicar.</p>
+<section id="lo-que-cubriremos" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</h2>
+<ul>
+<li>Las definiciones de IA, Machine Learning, Deep Learning y LLMs como círculos concéntricos</li>
+<li>Ejemplos vigentes de <strong>IA que no es ML</strong>: sistemas expertos, motores de ajedrez, GPS</li>
+<li>Tres casos de negocio que ilustran cuándo conviene cada tipo de IA</li>
+<li>Riesgos característicos de cada categoría</li>
+<li>Un marco simple de decisión para elegir herramienta según problema</li>
+</ul>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="las-definiciones-una-por-una" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Las definiciones, una por una</h1>
+<p>Antes de cualquier debate sobre qué tecnología elegir, conviene tener las definiciones limpias. Vamos en orden, de lo más amplio a lo más específico.</p>
+<section id="inteligencia-artificial-ia" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="inteligencia-artificial-ia"><span class="header-section-number">2.1</span> Inteligencia Artificial (IA)</h2>
+<div class="callout-key">
+<p><strong>Inteligencia Artificial</strong> es el campo que estudia cómo lograr que las máquinas realicen tareas que asociamos con la inteligencia humana: percibir, razonar, decidir, planificar, aprender, comunicarse.</p>
+</div>
+<p>La definición es amplia a propósito. Bajo ese paraguas caben enfoques muy distintos: desde un sistema basado en reglas escritas por humanos hasta un modelo que aprende patrones por sí solo. Lo único que comparten es la <strong>intención</strong>: que la máquina haga algo que normalmente requeriría una persona pensando.</p>
+<p>Conviene resistir la tentación de creer que IA es siempre lo más nuevo o lo más avanzado. Un corrector ortográfico es IA. Un sistema que valida si una declaración de renta sigue el reglamento de la DIAN también lo es. Y un modelo de lenguaje que escribe poemas también. Son IA de naturalezas completamente distintas, y precisamente por eso conviene afinar el vocabulario.</p>
+</section>
+<section id="machine-learning-ml" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="machine-learning-ml"><span class="header-section-number">2.2</span> Machine Learning (ML)</h2>
+<div class="callout-key">
+<p><strong>Machine Learning</strong> es un subcampo de la IA en el que la máquina <strong>aprende patrones a partir de datos</strong>, sin que un humano le escriba reglas explícitas.</p>
+</div>
+<p>En la semana 11 entrenaste un árbol para predecir, por ejemplo, si un cliente abandona o no un servicio. En ningún momento le dijiste al árbol <em>“si la edad es mayor a 40 y el saldo es menor a un millón, entonces abandona”</em>. Le entregaste los datos y el algoritmo encontró esa regla (u otra parecida) por sí solo.</p>
+<p>Esa es la idea central de ML: en lugar de programar las reglas, <strong>programas el procedimiento que descubre las reglas a partir de ejemplos</strong>. Eso lo distingue de un sistema basado en reglas tradicional, donde un experto humano escribe cada condición a mano.</p>
+</section>
+<section id="deep-learning" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="deep-learning"><span class="header-section-number">2.3</span> Deep Learning</h2>
+<div class="callout-key">
+<p><strong>Deep Learning</strong> es un subcampo del ML que usa <strong>redes neuronales con muchas capas</strong> para aprender patrones especialmente complejos, sobre todo en datos no estructurados como imágenes, audio o texto.</p>
+</div>
+<p>El nombre viene de “profundo” porque las redes tienen muchas capas apiladas. No necesitas entender la matemática para tener la intuición: cada capa aprende una representación más abstracta que la anterior. En reconocimiento de imágenes, las primeras capas detectan bordes, las intermedias detectan formas y las últimas detectan objetos completos. En texto, las capas iniciales aprenden patrones léxicos y las finales aprenden relaciones semánticas.</p>
+<p>El árbol que entrenaste <strong>no es Deep Learning</strong>. Es ML clásico. Es perfectamente válido y para muchísimos problemas de negocio es la mejor opción. Confundir “ML” con “Deep Learning” es uno de los errores más comunes en conversaciones de proyecto.</p>
+</section>
+<section id="llms-large-language-models" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="llms-large-language-models"><span class="header-section-number">2.4</span> LLMs (Large Language Models)</h2>
+<div class="callout-key">
+<p>Un <strong>LLM</strong> es un modelo de Deep Learning entrenado sobre cantidades enormes de texto, especializado en producir y entender lenguaje.</p>
+</div>
+<p>ChatGPT, Claude, Gemini y Llama son ejemplos visibles de LLMs. Son la categoría más comentada en los últimos años, pero conceptualmente son una <strong>rama específica</strong> del Deep Learning, no un campo aparte ni superior. En el handout 2 entraremos en detalle sobre cómo funcionan, qué los caracteriza y para qué sirven.</p>
+</section>
+<section id="el-mapa-visual-círculos-concéntricos" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="el-mapa-visual-círculos-concéntricos"><span class="header-section-number">2.5</span> El mapa visual: círculos concéntricos</h2>
+<p>La forma más útil de retener todo lo anterior es visualizarlo como cuatro círculos uno dentro del otro. Cada uno está contenido en el anterior, lo que significa que <strong>todo LLM es Deep Learning, todo Deep Learning es ML, y todo ML es IA — pero el reverso no es cierto</strong>.</p>
+<div style="margin:1.5rem 0">
+<svg width="100%" viewbox="0 0 700 480" role="img">
+<title>Diagrama de círculos concéntricos: IA contiene ML, ML contiene Deep Learning, Deep Learning contiene LLMs</title>
+<desc>Cuatro círculos concéntricos que muestran la jerarquía. El círculo más externo es Inteligencia Artificial. Adentro está Machine Learning. Adentro de ML está Deep Learning. En el centro están los LLMs. Entre el círculo de IA y el de ML aparecen ejemplos de IA que no es ML: sistemas expertos, IA simbólica y búsqueda en grafos.</desc>
+
+<!-- Círculo IA (más externo) -->
+<circle cx="350" cy="230" r="220" fill="#E6F1FB" stroke="#1F4E79" stroke-width="1.8"></circle>
+<text x="350" y="38" text-anchor="middle" font-family="inherit" font-size="14" font-weight="600" fill="#1F4E79" letter-spacing="0.06em">INTELIGENCIA ARTIFICIAL</text>
+
+<!-- Círculo ML -->
+<circle cx="350" cy="230" r="158" fill="#CFE0F1" stroke="#2E75B6" stroke-width="1.6"></circle>
+<text x="350" y="98" text-anchor="middle" font-family="inherit" font-size="13" font-weight="600" fill="#1A4C7A" letter-spacing="0.05em">MACHINE LEARNING</text>
+
+<!-- Círculo Deep Learning -->
+<circle cx="350" cy="230" r="100" fill="#FBE0C4" stroke="#E87722" stroke-width="1.6"></circle>
+<text x="350" y="155" text-anchor="middle" font-family="inherit" font-size="12" font-weight="600" fill="#C2581A" letter-spacing="0.05em">DEEP LEARNING</text>
+
+<!-- Círculo LLMs (más interno) -->
+<circle cx="350" cy="230" r="48" fill="#F0CFA5" stroke="#BA7517" stroke-width="1.6"></circle>
+<text x="350" y="234" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="700" fill="#5A3A0F">LLMs</text>
+
+<!-- Anotaciones de IA que no es ML (entre IA y ML, en la parte inferior) -->
+<text x="148" y="395" text-anchor="middle" font-family="inherit" font-size="12" fill="#1F4E79" font-style="italic">Sistemas expertos</text>
+<text x="350" y="425" text-anchor="middle" font-family="inherit" font-size="12" fill="#1F4E79" font-style="italic">IA simbólica</text>
+<text x="555" y="395" text-anchor="middle" font-family="inherit" font-size="12" fill="#1F4E79" font-style="italic">Búsqueda en grafos</text>
+
+<!-- Líneas indicadoras hacia el anillo IA -->
+<line x1="148" y1="383" x2="178" y2="358" stroke="#1F4E79" stroke-width="0.8" opacity="0.5"></line>
+<line x1="350" y1="413" x2="350" y2="392" stroke="#1F4E79" stroke-width="0.8" opacity="0.5"></line>
+<line x1="555" y1="383" x2="525" y2="358" stroke="#1F4E79" stroke-width="0.8" opacity="0.5"></line>
+
+<!-- Nota inferior -->
+<text x="350" y="465" text-anchor="middle" font-family="inherit" font-size="11" fill="#888" font-style="italic">Todo lo que está adentro pertenece también al círculo exterior — pero no al revés</text>
+</svg>
+</div>
+<p>Cada vez que escuches la palabra “IA”, visualiza este diagrama y pregúntate en qué círculo está lo que se está discutiendo. Es uno de los ejercicios más útiles que puedes hacer para construir criterio.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="ia-que-no-es-ml-ejemplos-históricos-que-importan" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> IA que no es ML: ejemplos históricos que importan</h1>
+<p>Una de las confusiones más comunes hoy es creer que IA y ML son sinónimos. No lo son. Hay décadas de IA anterior al boom del ML y muchos sistemas en producción que siguen siendo IA sin ser ML. Veamos cuatro ejemplos que pertenecen al anillo exterior del diagrama anterior — el espacio entre el círculo de IA y el círculo de ML.</p>
+<section id="sistemas-expertos-para-diagnóstico-médico" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="sistemas-expertos-para-diagnóstico-médico"><span class="header-section-number">3.1</span> Sistemas expertos para diagnóstico médico</h2>
+<p>En los años setenta y ochenta se construyeron sistemas como <strong>MYCIN</strong>, donde médicos especialistas escribieron miles de reglas del tipo <em>“si el paciente presenta el síntoma X y el resultado del laboratorio Y, entonces considera la enfermedad Z con cierta probabilidad”</em>. El sistema razonaba combinando esas reglas. Es IA porque imita razonamiento experto, pero no es ML: ningún algoritmo aprendió las reglas, fueron escritas a mano por humanos.</p>
+</section>
+<section id="motores-clásicos-de-ajedrez" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="motores-clásicos-de-ajedrez"><span class="header-section-number">3.2</span> Motores clásicos de ajedrez</h2>
+<p>Programas como <strong>Deep Blue</strong>, el que derrotó a Kasparov en 1997, funcionaban evaluando millones de jugadas posibles y eligiendo la mejor según una función de evaluación diseñada por humanos. Es IA porque la máquina toma decisiones estratégicas, pero no es ML clásico. Los motores más recientes (como AlphaZero) sí usan ML, pero esa generación previa no.</p>
+</section>
+<section id="gps-y-navegación" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="gps-y-navegación"><span class="header-section-number">3.3</span> GPS y navegación</h2>
+<p>Cuando Google Maps calcula la mejor ruta entre tu casa y la universidad, está aplicando algoritmos de búsqueda en grafos (variantes de Dijkstra o A*). Eso es IA: la máquina resuelve un problema que requeriría pensamiento humano. Pero no es ML: el algoritmo no aprendió a buscar rutas a partir de ejemplos; sigue un procedimiento matemático bien definido.</p>
+</section>
+<section id="reconocedores-de-voz-anteriores-al-deep-learning" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="reconocedores-de-voz-anteriores-al-deep-learning"><span class="header-section-number">3.4</span> Reconocedores de voz anteriores al Deep Learning</h2>
+<p>Antes de que llegaran los modelos profundos, los sistemas de reconocimiento de voz combinaban modelos acústicos, diccionarios fonéticos y reglas gramaticales codificadas. Eran IA, pero no ML en el sentido moderno.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Tener estos ejemplos a la mano evita un error muy frecuente: creer que cualquier solución “inteligente” requiere entrenar un modelo con datos. A veces un buen sistema basado en reglas resuelve mejor el problema, con menos costo, menos riesgo y mucho más fácil de auditar.</p>
+</div>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="tres-situaciones-tres-tipos-de-ia" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Tres situaciones, tres tipos de IA</h1>
+<p>Las definiciones tienen su mejor traducción en ejemplos. Lo que sigue son tres casos de negocio realistas. Léelos preguntándote: <em>“¿en qué círculo del diagrama cae esto?”</em>.</p>
+<section id="caso-1-entidad-financiera-prediciendo-impago" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="caso-1-entidad-financiera-prediciendo-impago"><span class="header-section-number">4.1</span> Caso 1 · Entidad financiera prediciendo impago</h2>
+<p>Un banco quiere anticipar qué clientes incumplirán el pago de un crédito de consumo. Tiene años de historial: edad, ingreso, score crediticio, antigüedad laboral, número de productos, historial de pagos, ciudad. Entrena un árbol de clasificación (o un ensamble) sobre esos datos. El modelo aprende patrones del tipo <em>“clientes con tres o más productos activos y antigüedad laboral menor a un año en cierto rango de ingreso tienen mayor probabilidad de impago”</em>.</p>
+<p>Esto es <strong>ML clásico supervisado</strong>, lo mismo que viste en la semana 11. La etiqueta “impagó / no impagó” existe en los datos históricos, y eso permite entrenar y evaluar con matriz de confusión. Es la herramienta correcta porque los datos son estructurados y la pregunta es predictiva.</p>
+</section>
+<section id="caso-2-cadena-minorista-segmentando-clientes" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="caso-2-cadena-minorista-segmentando-clientes"><span class="header-section-number">4.2</span> Caso 2 · Cadena minorista segmentando clientes</h2>
+<p>Una cadena de retail tiene datos transaccionales de millones de clientes: frecuencia de visita, ticket promedio, categorías compradas, sensibilidad a promociones. Quiere agruparlos en perfiles para diseñar campañas distintas. No tiene una etiqueta de “tipo de cliente”: el objetivo es <strong>descubrir</strong> los grupos.</p>
+<p>Esto es <strong>ML no supervisado</strong>, como el k-means de la semana 10. Es la herramienta correcta porque no hay etiqueta y el objetivo es exploratorio: descubrir estructura, no predecir un resultado.</p>
+</section>
+<section id="caso-3-validación-tributaria-por-reglas" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="caso-3-validación-tributaria-por-reglas"><span class="header-section-number">4.3</span> Caso 3 · Validación tributaria por reglas</h2>
+<p>La administración tributaria de un país necesita validar que cada declaración de renta cumpla con docenas de condiciones del estatuto: que los topes deducibles no se excedan, que ciertos códigos sean coherentes con la actividad económica del contribuyente, que las cifras sumen lo que deben sumar. Las reglas están escritas en una norma legal. Si un caso las viola, debe marcarse para revisión humana.</p>
+<p>Aquí <strong>no conviene ML</strong>. El conocimiento ya existe formalizado en una norma. Un sistema basado en reglas es más transparente, más auditable, más fácil de actualizar cuando cambie la ley y mucho más defendible ante un contribuyente que pregunte por qué su declaración fue marcada. Es IA, pero IA no-ML. Confundir esto y querer “entrenar un modelo” sería una mala decisión técnica y regulatoria.</p>
+<div class="callout-connect">
+<p><strong>Conexión con semanas 10 y 11</strong></p>
+<p>El Caso 1 es exactamente el tipo de problema que abordaste con árboles (semana 11). El Caso 2 es el tipo de problema que abordaste con k-means (semana 10). El Caso 3 muestra algo nuevo: no todo problema de “automatización inteligente” merece ML. A veces el mejor sistema es el más simple y el más auditable.</p>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="limitaciones-y-riesgos-por-categoría" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Limitaciones y riesgos por categoría</h1>
+<p>Cada tipo de IA tiene sus propias debilidades. Como analista, lo que más vale es <strong>saber qué puede salir mal en cada caso</strong>.</p>
+<section id="ml-clásico" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="ml-clásico"><span class="header-section-number">5.1</span> ML clásico</h2>
+<p>Depende fuertemente de la calidad de los datos. Si los datos históricos están sesgados (por ejemplo, si solo otorgaste crédito a un perfil específico de cliente), el modelo aprende ese sesgo. Si las condiciones del negocio cambian (lo que se llama <em>concept drift</em>), el modelo se vuelve obsoleto. Y en problemas con muchas variables y poca data, sobreajusta — lo que conociste como <strong>overfitting</strong> en la semana 11.</p>
+</section>
+<section id="deep-learning-1" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="deep-learning-1"><span class="header-section-number">5.2</span> Deep Learning</h2>
+<p>Necesita volúmenes enormes de datos y poder de cómputo. Sus decisiones son más difíciles de interpretar que las de un árbol. Para una entidad financiera o un sector regulado, esa opacidad puede ser un obstáculo serio, porque las decisiones automatizadas deben poder explicarse al cliente y al regulador.</p>
+</section>
+<section id="sistemas-basados-en-reglas" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="sistemas-basados-en-reglas"><span class="header-section-number">5.3</span> Sistemas basados en reglas</h2>
+<p>Son frágiles cuando el mundo no se ajusta a las reglas. Mantenerlos cuesta: cada cambio normativo o de negocio obliga a tocar el código. No generalizan: si surge un caso que las reglas no previeron, el sistema falla — a veces en silencio, a veces de forma ruidosa.</p>
+</section>
+<section id="llms" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="llms"><span class="header-section-number">5.4</span> LLMs</h2>
+<p>Los veremos en detalle en el handout 2, pero conviene adelantar lo central: <strong>alucinan</strong> (afirman cosas falsas con seguridad), <strong>heredan sesgos</strong> del corpus de entrenamiento, <strong>no son deterministas</strong> y <strong>no se evalúan con métricas tan limpias</strong> como una matriz de confusión.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>No existe la categoría perfecta. Cada tecnología tiene sus modos de fallar, y elegir bien implica anticipar cuáles de esos fallos resultan tolerables en tu contexto y cuáles no.</p>
+</div>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="marco-de-decisión-cuándo-usar-qué" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Marco de decisión: ¿cuándo usar qué?</h1>
+<p>Como analista, conviene tener una pauta rápida para orientar conversaciones técnicas. La tabla siguiente sintetiza el criterio.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Tu situación</th>
+<th>Herramienta de primera elección</th>
+<th>Por qué</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Datos estructurados con etiquetas históricas y quieres predecir (impago, churn, conversión)</td>
+<td><strong>ML supervisado clásico</strong> (regresión, árboles, ensambles)</td>
+<td>Interpretable, evaluable con matriz de confusión, barato</td>
+</tr>
+<tr class="even">
+<td>Datos sin etiquetas y quieres descubrir estructura (segmentos, anomalías)</td>
+<td><strong>ML no supervisado</strong> (k-means, clustering, anomalías)</td>
+<td>El objetivo es exploratorio, no predictivo</td>
+</tr>
+<tr class="odd">
+<td>Reglas conocidas, estables y verificables (normativa, validaciones formales)</td>
+<td><strong>Sistema basado en reglas</strong></td>
+<td>Auditable, trazable, fácil de actualizar al cambio de ley</td>
+</tr>
+<tr class="even">
+<td>Texto no estructurado (resumir, generar, responder en lenguaje natural)</td>
+<td><strong>LLMs</strong></td>
+<td>El terreno cambia: evaluación distinta, ver handout 2</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>No asumas que la herramienta más nueva es la mejor. Un árbol simple bien entrenado con buenos datos suele ganarle a un modelo sofisticado mal entrenado. Y un sistema de reglas bien diseñado puede ser superior a un modelo complejo para problemas regulados.</p>
+</div>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="síntesis-cinco-ideas-para-llevarte" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Síntesis: cinco ideas para llevarte</h1>
+<p><strong>Primero</strong>, IA es el campo amplio. ML es un subcampo donde la máquina aprende patrones de datos. Deep Learning es un subcampo del ML. Los LLMs son un caso particular del Deep Learning. Visualízalo siempre como círculos concéntricos.</p>
+<p><strong>Segundo</strong>, hay IA que no es ML. Sistemas expertos, motores de ajedrez clásicos, GPS y validadores de reglas son ejemplos vigentes y útiles.</p>
+<p><strong>Tercero</strong>, lo que entrenaste en este curso es ML clásico. Es una rama pequeña pero poderosa, y para muchísimos problemas de negocio es la opción correcta.</p>
+<p><strong>Cuarto</strong>, la herramienta se elige por el problema, no al revés. La pregunta no es <em>“¿cómo aplicamos IA?”</em> sino <em>“¿qué tipo de problema tenemos y qué tipo de IA encaja?”</em>.</p>
+<p><strong>Quinto</strong>, cada categoría tiene sus propias formas de fallar. Conocerlas es lo que separa a un analista con criterio de un consumidor pasivo de tecnología.</p>
+<hr>
+<section id="material-adicional-opcional" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="material-adicional-opcional"><span class="header-section-number">7.1</span> Material adicional (opcional)</h2>
+<ul>
+<li><strong>Russell &amp; Norvig, <em>Artificial Intelligence: A Modern Approach</em></strong> — referencia clásica del campo, especialmente los capítulos 1 y 2 para la visión histórica</li>
+<li><strong>Google ML Crash Course</strong> — definiciones y ejemplos interactivos — <a href="https://developers.google.com/machine-learning/crash-course">developers.google.com/machine-learning/crash-course</a></li>
+<li><strong>An Introduction to Statistical Learning (ISLR)</strong> — Capítulo 1: panorámica del aprendizaje estadístico — <a href="https://www.statlearning.com">statlearning.com</a></li>
+</ul>
+<hr>
+</section>
+<section id="checklist-de-preclase" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="checklist-de-preclase"><span class="header-section-number">7.2</span> Checklist de preclase</h2>
+<p>Antes de pasar al handout 2 debes poder explicar con tus propias palabras:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">¿Cuál es la diferencia entre IA, ML, Deep Learning y LLMs?</label></li>
+<li><label><input type="checkbox">¿Puedes dar al menos dos ejemplos de IA que no sea ML?</label></li>
+<li><label><input type="checkbox">¿Es el árbol de clasificación de la semana 11 Deep Learning? ¿Por qué?</label></li>
+<li><label><input type="checkbox">Frente a un problema de negocio, ¿puedes identificar si conviene ML supervisado, ML no supervisado, reglas o LLM?</label></li>
+<li><label><input type="checkbox">¿Puedes nombrar al menos un riesgo característico de cada categoría?</label></li>
+<li><label><input type="checkbox">¿Por qué un sistema basado en reglas puede ser superior a un modelo de ML en ciertos contextos?</label></li>
+<li><label><input type="checkbox">¿Por qué decimos que la limpieza de datos no es IA?</label></li>
+</ul>
+<p>Si alguna pregunta te deja en silencio, vuelve a la sección correspondiente antes de continuar.</p>
+</section>
+<section id="preguntas-de-comprensión" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="preguntas-de-comprensión"><span class="header-section-number">7.3</span> Preguntas de comprensión</h2>
+<p><strong>1.</strong> Un gerente de una startup colombiana propone “implementar IA para todo lo que se pueda automatizar en la empresa”. ¿Qué preguntas le harías antes de aceptar la propuesta y por qué?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Conviene desagregar la frase “IA para todo”. Las preguntas razonables son: ¿qué tareas específicas se quieren automatizar?, ¿hay datos históricos para esas tareas?, ¿están etiquetados?, ¿el problema tiene reglas conocidas o requiere aprender patrones?, ¿qué costo tiene equivocarse?, ¿cómo se va a evaluar el sistema?</p>
+<p>Sin esas respuestas, “IA para todo” es una intención sin proyecto. Cada tarea posiblemente requerirá una herramienta distinta: algunas ML supervisado, otras reglas, otras LLMs, otras simplemente buena automatización tradicional.</p>
+</details>
+<p><strong>2.</strong> Compara el árbol de clasificación que entrenaste en la semana 11 con un sistema basado en reglas escritas por un experto humano. ¿En qué se parecen y en qué se diferencian?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Ambos pueden expresar su lógica como una serie de reglas si-entonces y ambos pueden auditarse en términos de qué condiciones llevaron a qué decisión. La diferencia central es el <strong>origen de las reglas</strong>: en el árbol, las reglas las descubrió el algoritmo a partir de datos históricos; en el sistema experto, las escribió una persona con conocimiento del dominio.</p>
+<p>Eso tiene implicaciones: el árbol se actualiza reentrenando con nuevos datos; el sistema experto, reescribiendo reglas. El árbol depende de la calidad de los datos; el experto depende del conocimiento del especialista.</p>
+</details>
+<p><strong>3.</strong> Una empresa quiere reducir el tiempo que toma responder los correos del servicio al cliente. ¿Es un problema de ML clásico, de LLMs, de reglas, o una combinación? Argumenta.</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Probablemente una combinación. <strong>Clasificar</strong> el correo en una categoría (queja, solicitud, consulta de saldo) puede hacerse con ML supervisado o con un LLM. <strong>Redactar</strong> la respuesta en lenguaje natural es claramente terreno de LLM. <strong>Validar</strong> que ciertos correos críticos (reclamos formales, casos legales) escalen siempre a un humano se hace mejor con reglas.</p>
+<p>La pregunta interesante no es “qué tecnología usar” sino “qué pieza del flujo resuelve cada tecnología mejor”.</p>
+</details>
+<p><strong>4.</strong> ¿Por qué decimos que la limpieza de datos no es IA, si para muchos proyectos de IA es la fase más larga y más decisiva?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Porque la limpieza no involucra que la máquina razone, aprenda o decida: es transformación y verificación. Pero es absolutamente necesaria para que cualquier proyecto de IA funcione. Eso explica una verdad incómoda del oficio: gran parte del trabajo de un analista o científico de datos no es modelar, es preparar.</p>
+<p>Por eso este curso empezó por ahí. Sin datos limpios no hay IA buena, por sofisticada que sea.</p>
+</details>
+<p><strong>5.</strong> Recibes la propuesta de un proveedor que ofrece “un modelo de Deep Learning para predecir cuándo un cliente abandonará el servicio, con accuracy superior al 95%”. Solo tienes 800 registros históricos. ¿Qué te genera dudas en esa propuesta?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Varias señales de alerta. Primero, <strong>Deep Learning con 800 registros</strong> es típicamente exagerado: redes neuronales profundas necesitan miles o decenas de miles de ejemplos para funcionar bien. Un árbol o una regresión logística probablemente rendiría igual o mejor con esa cantidad de datos, y sería interpretable. Segundo, el <strong>95% de accuracy</strong> debe leerse con cuidado: si las clases están desbalanceadas (por ejemplo, solo 5% de clientes abandona), un modelo que prediga “no abandona” para todos ya alcanza 95% sin aprender nada. Tercero, el proveedor no menciona <strong>cómo se evaluó</strong> ese 95% — ¿train o test? ¿con qué partición? Sin esos detalles, la cifra no significa nada.</p>
+</details>
+<hr>
+</section>
+<section id="glosario-mínimo" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="glosario-mínimo"><span class="header-section-number">7.4</span> Glosario mínimo</h2>
+<div class="callout-key">
+<p><strong>Inteligencia Artificial (IA):</strong> campo que estudia cómo lograr que las máquinas realicen tareas asociadas con la inteligencia humana.</p>
+<p><strong>Machine Learning (ML):</strong> subcampo de la IA donde la máquina aprende patrones a partir de datos, sin reglas escritas por humanos.</p>
+<p><strong>Deep Learning:</strong> subcampo del ML basado en redes neuronales con muchas capas, especialmente útil para datos no estructurados.</p>
+<p><strong>LLM (Large Language Model):</strong> modelo de Deep Learning especializado en lenguaje, entrenado sobre grandes cantidades de texto.</p>
+<p><strong>Sistema basado en reglas:</strong> programa que toma decisiones siguiendo condiciones lógicas escritas por humanos. Es IA, no es ML.</p>
+<p><strong>ML supervisado:</strong> aprendizaje a partir de datos con etiqueta conocida. Predecir impago, churn o conversión.</p>
+<p><strong>ML no supervisado:</strong> aprendizaje a partir de datos sin etiqueta. Segmentar clientes, detectar anomalías.</p>
+<p><strong>Overfitting:</strong> cuando un modelo se ajusta tan bien a los datos de entrenamiento que pierde capacidad de generalizar.</p>
+<p><strong>Datos estructurados:</strong> datos organizados en filas y columnas, como una tabla de ventas.</p>
+<p><strong>Datos no estructurados:</strong> texto libre, imágenes, audio, video. Requieren procesamiento especializado.</p>
+</div>
+<hr>
+<p><em>En el <strong>handout 2</strong> entraremos en cómo funcionan los LLMs, qué pueden y no pueden hacer, y cómo se convierten en agentes capaces de actuar. En el <strong>handout 3</strong> abordaremos la habilidad más importante para trabajar con ellos: formular buenos prompts.</em></p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-15-1_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

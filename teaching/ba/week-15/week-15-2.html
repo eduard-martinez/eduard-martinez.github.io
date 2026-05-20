@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Handout 2 - LLMs, Skills y Agentes</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="week-15-2_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-15-2_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-15-2_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-15-2_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="week-15-2_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-15-2_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-15-2_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-15-2_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-15-2_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-15-2_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-15-2_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-15-2_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#objetivo-del-handout" id="toc-objetivo-del-handout" class="nav-link active" data-scroll-target="#objetivo-del-handout"><span class="header-section-number">1</span> Objetivo del handout</a>
+  <ul class="collapse">
+  <li><a href="#lo-que-cubriremos" id="toc-lo-que-cubriremos" class="nav-link" data-scroll-target="#lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</a></li>
+  </ul></li>
+  <li><a href="#el-llm-qué-es-y-cómo-funciona" id="toc-el-llm-qué-es-y-cómo-funciona" class="nav-link" data-scroll-target="#el-llm-qué-es-y-cómo-funciona"><span class="header-section-number">2</span> El LLM: qué es y cómo funciona</a>
+  <ul class="collapse">
+  <li><a href="#qué-significa-large-language-model" id="toc-qué-significa-large-language-model" class="nav-link" data-scroll-target="#qué-significa-large-language-model"><span class="header-section-number">2.1</span> Qué significa “Large Language Model”</a></li>
+  <li><a href="#la-intuición-central-predecir-la-siguiente-palabra" id="toc-la-intuición-central-predecir-la-siguiente-palabra" class="nav-link" data-scroll-target="#la-intuición-central-predecir-la-siguiente-palabra"><span class="header-section-number">2.2</span> La intuición central: predecir la siguiente palabra</a></li>
+  <li><a href="#cómo-se-entrena-sin-entrar-en-fórmulas" id="toc-cómo-se-entrena-sin-entrar-en-fórmulas" class="nav-link" data-scroll-target="#cómo-se-entrena-sin-entrar-en-fórmulas"><span class="header-section-number">2.3</span> Cómo se entrena (sin entrar en fórmulas)</a></li>
+  <li><a href="#por-qué-de-una-tarea-simple-emergen-capacidades-complejas" id="toc-por-qué-de-una-tarea-simple-emergen-capacidades-complejas" class="nav-link" data-scroll-target="#por-qué-de-una-tarea-simple-emergen-capacidades-complejas"><span class="header-section-number">2.4</span> Por qué de una tarea simple emergen capacidades complejas</a></li>
+  <li><a href="#diferencia-clave-con-un-modelo-de-ml-clásico" id="toc-diferencia-clave-con-un-modelo-de-ml-clásico" class="nav-link" data-scroll-target="#diferencia-clave-con-un-modelo-de-ml-clásico"><span class="header-section-number">2.5</span> Diferencia clave con un modelo de ML clásico</a></li>
+  </ul></li>
+  <li><a href="#limitaciones-críticas-que-un-analista-debe-conocer" id="toc-limitaciones-críticas-que-un-analista-debe-conocer" class="nav-link" data-scroll-target="#limitaciones-críticas-que-un-analista-debe-conocer"><span class="header-section-number">3</span> Limitaciones críticas que un analista debe conocer</a>
+  <ul class="collapse">
+  <li><a href="#alucinaciones" id="toc-alucinaciones" class="nav-link" data-scroll-target="#alucinaciones"><span class="header-section-number">3.1</span> Alucinaciones</a></li>
+  <li><a href="#sesgos" id="toc-sesgos" class="nav-link" data-scroll-target="#sesgos"><span class="header-section-number">3.2</span> Sesgos</a></li>
+  <li><a href="#no-determinismo" id="toc-no-determinismo" class="nav-link" data-scroll-target="#no-determinismo"><span class="header-section-number">3.3</span> No-determinismo</a></li>
+  <li><a href="#knowledge-cutoff" id="toc-knowledge-cutoff" class="nav-link" data-scroll-target="#knowledge-cutoff"><span class="header-section-number">3.4</span> Knowledge cutoff</a></li>
+  <li><a href="#ventana-de-contexto-limitada" id="toc-ventana-de-contexto-limitada" class="nav-link" data-scroll-target="#ventana-de-contexto-limitada"><span class="header-section-number">3.5</span> Ventana de contexto limitada</a></li>
+  <li><a href="#la-ausencia-de-matriz-de-confusión-natural" id="toc-la-ausencia-de-matriz-de-confusión-natural" class="nav-link" data-scroll-target="#la-ausencia-de-matriz-de-confusión-natural"><span class="header-section-number">3.6</span> La ausencia de matriz de confusión natural</a></li>
+  </ul></li>
+  <li><a href="#skills-cómo-se-especializa-un-llm" id="toc-skills-cómo-se-especializa-un-llm" class="nav-link" data-scroll-target="#skills-cómo-se-especializa-un-llm"><span class="header-section-number">4</span> Skills: cómo se especializa un LLM</a>
+  <ul class="collapse">
+  <li><a href="#definición" id="toc-definición" class="nav-link" data-scroll-target="#definición"><span class="header-section-number">4.1</span> Definición</a></li>
+  <li><a href="#la-analogía-intuitiva" id="toc-la-analogía-intuitiva" class="nav-link" data-scroll-target="#la-analogía-intuitiva"><span class="header-section-number">4.2</span> La analogía intuitiva</a></li>
+  <li><a href="#por-qué-los-skills-importan-en-un-entorno-empresarial" id="toc-por-qué-los-skills-importan-en-un-entorno-empresarial" class="nav-link" data-scroll-target="#por-qué-los-skills-importan-en-un-entorno-empresarial"><span class="header-section-number">4.3</span> Por qué los Skills importan en un entorno empresarial</a></li>
+  <li><a href="#ejemplo-concreto" id="toc-ejemplo-concreto" class="nav-link" data-scroll-target="#ejemplo-concreto"><span class="header-section-number">4.4</span> Ejemplo concreto</a></li>
+  </ul></li>
+  <li><a href="#agentes-cuando-el-llm-no-solo-habla-también-actúa" id="toc-agentes-cuando-el-llm-no-solo-habla-también-actúa" class="nav-link" data-scroll-target="#agentes-cuando-el-llm-no-solo-habla-también-actúa"><span class="header-section-number">5</span> Agentes: cuando el LLM no solo habla, también actúa</a>
+  <ul class="collapse">
+  <li><a href="#la-diferencia-fundamental" id="toc-la-diferencia-fundamental" class="nav-link" data-scroll-target="#la-diferencia-fundamental"><span class="header-section-number">5.1</span> La diferencia fundamental</a></li>
+  <li><a href="#el-ciclo-del-agente" id="toc-el-ciclo-del-agente" class="nav-link" data-scroll-target="#el-ciclo-del-agente"><span class="header-section-number">5.2</span> El ciclo del agente</a></li>
+  <li><a href="#ejemplos-reales-de-agentes" id="toc-ejemplos-reales-de-agentes" class="nav-link" data-scroll-target="#ejemplos-reales-de-agentes"><span class="header-section-number">5.3</span> Ejemplos reales de agentes</a></li>
+  <li><a href="#por-qué-los-riesgos-se-amplifican-con-agentes" id="toc-por-qué-los-riesgos-se-amplifican-con-agentes" class="nav-link" data-scroll-target="#por-qué-los-riesgos-se-amplifican-con-agentes"><span class="header-section-number">5.4</span> Por qué los riesgos se amplifican con agentes</a></li>
+  </ul></li>
+  <li><a href="#mcp-el-estándar-para-conectar-agentes-con-herramientas" id="toc-mcp-el-estándar-para-conectar-agentes-con-herramientas" class="nav-link" data-scroll-target="#mcp-el-estándar-para-conectar-agentes-con-herramientas"><span class="header-section-number">6</span> MCP: el estándar para conectar agentes con herramientas</a></li>
+  <li><a href="#marco-de-decisión-qué-herramienta-para-qué-tarea" id="toc-marco-de-decisión-qué-herramienta-para-qué-tarea" class="nav-link" data-scroll-target="#marco-de-decisión-qué-herramienta-para-qué-tarea"><span class="header-section-number">7</span> Marco de decisión: qué herramienta para qué tarea</a></li>
+  <li><a href="#síntesis-cinco-ideas-para-llevarte" id="toc-síntesis-cinco-ideas-para-llevarte" class="nav-link" data-scroll-target="#síntesis-cinco-ideas-para-llevarte"><span class="header-section-number">8</span> Síntesis: cinco ideas para llevarte</a>
+  <ul class="collapse">
+  <li><a href="#material-adicional-opcional" id="toc-material-adicional-opcional" class="nav-link" data-scroll-target="#material-adicional-opcional"><span class="header-section-number">8.1</span> Material adicional (opcional)</a></li>
+  <li><a href="#checklist-de-preclase" id="toc-checklist-de-preclase" class="nav-link" data-scroll-target="#checklist-de-preclase"><span class="header-section-number">8.2</span> Checklist de preclase</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">8.3</span> Preguntas de comprensión</a></li>
+  <li><a href="#glosario-mínimo" id="toc-glosario-mínimo" class="nav-link" data-scroll-target="#glosario-mínimo"><span class="header-section-number">8.4</span> Glosario mínimo</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Handout 2 - LLMs, Skills y Agentes</h1>
+<p class="subtitle lead">Introducción al Business Analytics · Semana 15 · 06278-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a> <span id="webr-status-anchor"></span></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="objetivo-del-handout" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Objetivo del handout</h1>
+<p>En el handout 1 ubicaste los <strong>LLMs</strong> dentro del mapa más amplio de la inteligencia artificial: son una rama específica del Deep Learning, especializada en lenguaje. Pero esa ubicación no te dice mucho sobre <strong>qué hacen, cómo se comportan ni por qué fallan</strong>.</p>
+<p>Como futuro analista, vas a interactuar con LLMs todos los días: para resumir documentos, redactar memos, explorar ideas, generar reportes y clasificar textos. Más importante aún, vas a estar en reuniones donde un proveedor proponga <em>“integrar IA”</em> en algún proceso de la empresa, y tu trabajo será evaluar si esa propuesta tiene sentido.</p>
+<p>Este handout te lleva desde la intuición básica del LLM hasta los conceptos que verás constantemente en propuestas y herramientas: <strong>skills, agentes, MCP</strong>. Al final deberías poder leer una propuesta de “asistente de IA con agentes” y saber qué preguntas hacer.</p>
+<section id="lo-que-cubriremos" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</h2>
+<ul>
+<li>Qué es un LLM y la intuición de “predecir la siguiente palabra”</li>
+<li>Las cinco limitaciones críticas: alucinaciones, sesgos, no-determinismo, knowledge cutoff, ventana de contexto</li>
+<li>Por qué los LLMs <strong>no</strong> se evalúan con matriz de confusión</li>
+<li>Qué es un <strong>Skill</strong> y cómo convierte un LLM generalista en especialista</li>
+<li>Qué es un <strong>agente</strong> y el ciclo pensar-actuar-observar</li>
+<li>Qué es <strong>MCP</strong> y por qué importa como infraestructura</li>
+</ul>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="el-llm-qué-es-y-cómo-funciona" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> El LLM: qué es y cómo funciona</h1>
+<section id="qué-significa-large-language-model" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="qué-significa-large-language-model"><span class="header-section-number">2.1</span> Qué significa “Large Language Model”</h2>
+<div class="callout-key">
+<p>Un <strong>LLM</strong> es un modelo de lenguaje de gran tamaño: un sistema entrenado con cantidades masivas de texto, capaz de entender y producir lenguaje natural.</p>
+</div>
+<p>El nombre tiene tres partes. <strong>Large</strong> se refiere al volumen: tanto en datos de entrenamiento (miles de millones de documentos) como en el número de parámetros internos del modelo (cientos de miles de millones en los modelos más grandes). <strong>Language</strong> porque está especializado en texto. <strong>Model</strong> porque, igual que un árbol o un k-means, es un modelo estadístico: aprende patrones de los datos con los que fue entrenado.</p>
+</section>
+<section id="la-intuición-central-predecir-la-siguiente-palabra" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="la-intuición-central-predecir-la-siguiente-palabra"><span class="header-section-number">2.2</span> La intuición central: predecir la siguiente palabra</h2>
+<p>Aunque las capacidades de un LLM parecen mágicas, su mecánica básica es sorprendentemente simple: <strong>dado un texto, predecir cuál es la siguiente palabra más probable</strong>.</p>
+<p>Si le das <em>“La capital de Colombia es”</em>, el modelo asignará alta probabilidad a “Bogotá” como siguiente palabra, baja a “Caracas” y muy baja a “guitarra”. Una vez genera “Bogotá”, repite el procedimiento usando ahora <em>“La capital de Colombia es Bogotá”</em> para decidir la siguiente palabra, y así sucesivamente hasta completar una respuesta.</p>
+<p>Esa es toda la mecánica básica. Lo que parece pensamiento, lo que parece razonamiento, lo que parece creatividad, surge de aplicar millones de veces ese acto simple de predicción.</p>
+</section>
+<section id="cómo-se-entrena-sin-entrar-en-fórmulas" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="cómo-se-entrena-sin-entrar-en-fórmulas"><span class="header-section-number">2.3</span> Cómo se entrena (sin entrar en fórmulas)</h2>
+<p>El entrenamiento de un LLM consiste, en lo esencial, en mostrarle al modelo enormes cantidades de texto (libros, artículos, código, conversaciones) y pedirle que prediga la siguiente palabra de cada secuencia. Cuando se equivoca, se ajustan sus parámetros internos para que la próxima vez se equivoque menos. Repite ese proceso billones de veces.</p>
+<p>Después de ese entrenamiento base hay una fase adicional donde personas entrenan al modelo a seguir instrucciones, a rechazar pedidos peligrosos y a responder de forma útil. Esa fase es la que convierte un modelo que solo completa texto en un asistente conversacional.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>No necesitas entender más matemática que esto: el modelo <strong>no consulta internet en tiempo real</strong>, <strong>no piensa</strong> y <strong>no entiende</strong> en el sentido humano. Predice texto plausible basado en patrones aprendidos de su corpus.</p>
+</div>
+</div>
+</section>
+<section id="por-qué-de-una-tarea-simple-emergen-capacidades-complejas" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="por-qué-de-una-tarea-simple-emergen-capacidades-complejas"><span class="header-section-number">2.4</span> Por qué de una tarea simple emergen capacidades complejas</h2>
+<p>Predecir la siguiente palabra parece trivial, pero ejecutarlo bien sobre cualquier texto humano requiere capacidades sorprendentes. Para predecir bien la siguiente palabra de un párrafo sobre derecho tributario, el modelo tuvo que aprender vocabulario legal, estructuras argumentativas y lógica de citas. Para predecir bien la siguiente palabra de un código en R, tuvo que aprender sintaxis, convenciones y patrones de programación. Para resumir un correo, tuvo que aprender qué información suele ser central en una comunicación de negocios.</p>
+<p>Esas capacidades <strong>emergen</strong> del entrenamiento sin que nadie las programara explícitamente. Esa es la sorpresa fundamental de los LLMs: una tarea simple, escalada a un tamaño suficientemente grande con datos suficientemente diversos, produce un sistema con capacidades que parecen muy distintas a la tarea original.</p>
+</section>
+<section id="diferencia-clave-con-un-modelo-de-ml-clásico" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="diferencia-clave-con-un-modelo-de-ml-clásico"><span class="header-section-number">2.5</span> Diferencia clave con un modelo de ML clásico</h2>
+<div class="callout-connect">
+<p><strong>Comparación con el árbol de la semana 11</strong></p>
+<p>El árbol que entrenaste en la semana 11 tenía un <strong>objetivo claro y medible</strong>: predecir correctamente una etiqueta binaria. Podías calcular accuracy, precisión y recall. Podías comparar dos árboles entre sí con esas métricas.</p>
+<p>Un LLM tiene un objetivo de entrenamiento distinto: <strong>producir texto plausible</strong>. No “verdadero”, no “correcto”, no “útil”. Plausible — es decir, parecido al texto humano sobre el que se entrenó.</p>
+<p>Esa diferencia, que puede parecer sutil, explica casi todas las limitaciones que veremos a continuación.</p>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="limitaciones-críticas-que-un-analista-debe-conocer" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Limitaciones críticas que un analista debe conocer</h1>
+<section id="alucinaciones" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="alucinaciones"><span class="header-section-number">3.1</span> Alucinaciones</h2>
+<p>Una <strong>alucinación</strong> es cuando el LLM produce una afirmación con seguridad y aplomo, pero que es falsa. Ocurre porque el modelo está optimizado para plausibilidad, no para veracidad. Si un texto suena como algo que un experto diría, el modelo lo produce, aunque el contenido sea inventado.</p>
+<p>Las alucinaciones aparecen con más frecuencia en citas bibliográficas (el modelo inventa autores, años o títulos), en datos numéricos específicos (tasas, porcentajes, cifras que parecen exactas pero no lo son), en hechos verificables sobre personas, empresas o eventos poco conocidos, y en referencias legales o jurisprudencia.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Regla práctica para un analista:</strong> cualquier dato concreto que provenga de un LLM y que vaya a usarse para una decisión debe verificarse en una fuente primaria. Si el LLM dice <em>“la tasa de impago del sector hipotecario en Colombia fue de X% en cierto año”</em>, no uses esa cifra sin verificarla con la Superintendencia Financiera o un informe oficial.</p>
+</div>
+</div>
+</section>
+<section id="sesgos" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="sesgos"><span class="header-section-number">3.2</span> Sesgos</h2>
+<p>Los LLMs heredan los sesgos de su corpus de entrenamiento. Si en los textos con los que se entrenó hay sesgos de género en descripciones laborales, esos sesgos aparecen en las respuestas. Si las descripciones de ciertos sectores demográficos son más negativas que otras, el modelo lo replica.</p>
+<p>En decisiones de contratación, evaluación crediticia o segmentación, este punto deja de ser académico y se vuelve un <strong>riesgo legal y reputacional</strong>. Un LLM que ayuda a redactar evaluaciones de desempeño puede, sutilmente, describir de forma distinta a hombres y mujeres. Un LLM que sugiere candidatos puede priorizar perfiles parecidos a los históricamente contratados, perpetuando el sesgo en lugar de corregirlo.</p>
+</section>
+<section id="no-determinismo" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="no-determinismo"><span class="header-section-number">3.3</span> No-determinismo</h2>
+<p>A diferencia de un árbol de clasificación, donde dos veces el mismo <em>input</em> dan exactamente el mismo <em>output</em>, <strong>un LLM puede dar respuestas distintas a la misma pregunta</strong>. Esto se llama <strong>no-determinismo</strong> y es una característica de diseño, no un error.</p>
+<p>Para un analista de negocio esto tiene implicaciones serias. Si pides al LLM que clasifique mil correos y lo corres dos veces, no obtendrás exactamente la misma clasificación. Para procesos auditables (reportes regulatorios, decisiones de crédito), esta variabilidad es un problema que hay que controlar. Existen configuraciones que la reducen, pero rara vez la eliminan por completo.</p>
+</section>
+<section id="knowledge-cutoff" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="knowledge-cutoff"><span class="header-section-number">3.4</span> Knowledge cutoff</h2>
+<p>Un LLM solo conoce información hasta cierta fecha: el momento en que terminó su corpus de entrenamiento. Después de esa fecha, simplemente no tiene datos. Si le preguntas por un evento reciente, puede no saber, equivocarse o inventar.</p>
+<p>La implicación práctica es directa: para preguntas dependientes de información actual (cotizaciones, eventos recientes, regulaciones nuevas), un LLM puro es insuficiente. Hay soluciones (conectar el LLM a búsqueda web, a bases de datos internas, a APIs), pero requieren diseño deliberado.</p>
+</section>
+<section id="ventana-de-contexto-limitada" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="ventana-de-contexto-limitada"><span class="header-section-number">3.5</span> Ventana de contexto limitada</h2>
+<p>El LLM tiene un límite de cuánto texto puede leer y mantener “en mente” para responder. Esa <strong>ventana</strong>, aunque cada vez es más grande, no es infinita. Si le entregas un documento de 500 páginas y haces preguntas sobre la página 3, puede responder bien. Si le entregas 5.000 páginas, posiblemente no.</p>
+<p>Esto importa para el diseño de aplicaciones: cuando un sistema necesita razonar sobre muchos documentos, no basta con “subírselos todos al LLM”. Hay arquitecturas (como <strong>RAG</strong>, <em>retrieval augmented generation</em>) que recuperan solo los fragmentos relevantes para cada pregunta. Como analista no necesitas implementarlas, pero sí saber que existen y cuándo se necesitan.</p>
+</section>
+<section id="la-ausencia-de-matriz-de-confusión-natural" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="la-ausencia-de-matriz-de-confusión-natural"><span class="header-section-number">3.6</span> La ausencia de matriz de confusión natural</h2>
+<div class="callout-connect">
+<p><strong>Contraste explícito con la semana 11</strong></p>
+<p>Cuando entrenaste un árbol, podías comparar dos versiones del modelo con métricas claras: accuracy, precisión, recall, F1. Eran cifras objetivas, calculables sobre el conjunto de prueba. Te daban una base sólida para decidir cuál modelo era mejor.</p>
+<p>Con un LLM, <strong>¿cómo decides si una versión de un asistente es mejor que otra?</strong> No hay un equivalente directo. ¿Es mejor un resumen <em>“más fiel”</em> o <em>“más conciso”</em>? ¿Es mejor una respuesta <em>“más formal”</em> o <em>“más cercana”</em>? Las evaluaciones de LLMs combinan métricas automáticas imperfectas, evaluación humana cara y juicio cualitativo. Es un problema metodológico abierto.</p>
+<p><strong>Para un analista:</strong> no esperes obtener una matriz de confusión limpia para un LLM. La evaluación es más subjetiva, más cara y más difícil de auditar. Eso no significa que no se pueda evaluar; significa que requiere diseñar criterios desde el principio y aceptar que la rigurosidad será menor que la de un modelo clásico.</p>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="skills-cómo-se-especializa-un-llm" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Skills: cómo se especializa un LLM</h1>
+<section id="definición" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="definición"><span class="header-section-number">4.1</span> Definición</h2>
+<div class="callout-key">
+<p>Un <strong>Skill</strong> es un módulo de instrucciones especializadas que se le proporciona a un LLM para que siga un protocolo específico en una tarea concreta. Equivale a entregarle al modelo un <strong>manual de operación</strong> para un caso de uso particular.</p>
+</div>
+</section>
+<section id="la-analogía-intuitiva" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="la-analogía-intuitiva"><span class="header-section-number">4.2</span> La analogía intuitiva</h2>
+<p>Imagina que contratas a un empleado talentoso y generalista. Es inteligente, sabe escribir bien, entiende contexto, aprende rápido. Pero cuando llega a la empresa el primer día, <strong>no sabe</strong> el formato de los memos corporativos, no conoce el tono de la comunicación con clientes, no maneja la terminología interna. Lo que haces es darle un <strong>manual</strong>: así escribimos memos aquí, así estructuramos reportes, así respondemos correos.</p>
+<p>Un Skill es exactamente eso para un LLM. El modelo es el empleado talentoso pero generalista. El Skill es el manual que lo convierte en especialista para una tarea específica de tu organización.</p>
+</section>
+<section id="por-qué-los-skills-importan-en-un-entorno-empresarial" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="por-qué-los-skills-importan-en-un-entorno-empresarial"><span class="header-section-number">4.3</span> Por qué los Skills importan en un entorno empresarial</h2>
+<p>Sin Skills, cada usuario obtiene resultados distintos del mismo LLM. Uno le pide un memo y obtiene un texto largo en prosa formal; otro le pide un memo y obtiene un listado de bullets. La variabilidad es enemiga de la operación. Los Skills resuelven cuatro problemas a la vez.</p>
+<p><strong>Primero</strong>, estandarizan la salida: todos los memos generados siguen el mismo formato corporativo, sin importar quién lo pida. <strong>Segundo</strong>, reducen la variabilidad: dos personas distintas que piden lo mismo obtienen resultados consistentes. <strong>Tercero</strong>, encapsulan conocimiento organizacional: el manual de cómo se escribe un análisis financiero en tu empresa queda codificado y reutilizable. Y <strong>cuarto</strong>, bajan la barrera de entrada: un empleado nuevo no necesita memorizar el formato; el Skill lo aplica automáticamente.</p>
+</section>
+<section id="ejemplo-concreto" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="ejemplo-concreto"><span class="header-section-number">4.4</span> Ejemplo concreto</h2>
+<p>Imagina que el equipo de finanzas de una empresa genera todos los meses un análisis de cierre con la misma estructura: contexto del periodo, principales variaciones, alertas, conclusiones y anexos. Antes de los LLMs, cada analista lo redactaba de memoria, y la consistencia dependía de la disciplina individual.</p>
+<p>Con un Skill, el equipo define una vez el manual: <em>“Cuando se te pida un análisis de cierre mensual, sigue esta estructura, usa este tono, incluye estas secciones, evita estas palabras, presenta los números con este formato”</em>. Luego cualquier persona del equipo le entrega los datos del mes al LLM, invoca el Skill, y obtiene un borrador que ya cumple la convención corporativa. El analista revisa y ajusta, pero <strong>no parte de cero</strong>.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="agentes-cuando-el-llm-no-solo-habla-también-actúa" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Agentes: cuando el LLM no solo habla, también actúa</h1>
+<section id="la-diferencia-fundamental" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="la-diferencia-fundamental"><span class="header-section-number">5.1</span> La diferencia fundamental</h2>
+<p>Un LLM, por sí solo, <strong>solo produce texto</strong>. Le preguntas algo, te responde algo. Punto. No abre archivos, no envía correos, no consulta bases de datos.</p>
+<p>Un <strong>agente</strong> combina un LLM con la capacidad de <strong>ejecutar acciones</strong>. Le preguntas algo, y en lugar de solo responder, el agente decide qué pasos tomar: buscar información, leer un documento, llamar a una API, escribir en un archivo, mandar un correo. Es la diferencia entre un consultor que te da consejos en una reunión y un asistente que va y ejecuta las tareas por ti.</p>
+</section>
+<section id="el-ciclo-del-agente" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="el-ciclo-del-agente"><span class="header-section-number">5.2</span> El ciclo del agente</h2>
+<p>Los agentes funcionan en un ciclo simple de tres pasos que se repite hasta completar la tarea o llegar a un límite.</p>
+<div style="margin:1.5rem 0">
+<svg width="100%" viewbox="0 0 720 480" role="img">
+<title>Ciclo del agente: pensar, actuar, observar</title>
+<desc>Tres nodos dispuestos en triángulo. Pensar arriba en el centro, Actuar abajo a la derecha, Observar abajo a la izquierda. Flechas en sentido horario los conectan. En el centro, una etiqueta Objetivo. Debajo del nodo Actuar, ejemplos de herramientas externas a las que el agente puede invocar.</desc>
+
+<defs>
+  <marker id="ag1" viewbox="0 0 10 10" refx="8" refy="5" markerwidth="7" markerheight="7" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  </marker>
+</defs>
+
+<!-- Nodo PENSAR (arriba) -->
+<rect x="280" y="40" width="160" height="68" rx="12" fill="#E6F1FB" stroke="#1F4E79" stroke-width="1.5"></rect>
+<text x="360" y="65" text-anchor="middle" font-family="inherit" font-size="11" fill="#1F4E79" letter-spacing="0.05em">PASO 1</text>
+<text x="360" y="89" text-anchor="middle" font-family="inherit" font-size="16" font-weight="600" fill="#0C447C">Pensar</text>
+
+<!-- Nodo ACTUAR (abajo derecha) -->
+<rect x="490" y="240" width="170" height="68" rx="12" fill="#FBE0C4" stroke="#E87722" stroke-width="1.5"></rect>
+<text x="575" y="265" text-anchor="middle" font-family="inherit" font-size="11" fill="#C2581A" letter-spacing="0.05em">PASO 2</text>
+<text x="575" y="289" text-anchor="middle" font-family="inherit" font-size="16" font-weight="600" fill="#5A3A0F">Actuar</text>
+
+<!-- Nodo OBSERVAR (abajo izquierda) -->
+<rect x="60" y="240" width="170" height="68" rx="12" fill="#CFE0F1" stroke="#2E75B6" stroke-width="1.5"></rect>
+<text x="145" y="265" text-anchor="middle" font-family="inherit" font-size="11" fill="#1A4C7A" letter-spacing="0.05em">PASO 3</text>
+<text x="145" y="289" text-anchor="middle" font-family="inherit" font-size="16" font-weight="600" fill="#0C447C">Observar</text>
+
+<!-- Flecha Pensar → Actuar (curva descendente derecha) -->
+<path d="M 440 95 Q 540 130 545 235" fill="none" stroke="#888" stroke-width="1.6" marker-end="url(#ag1)"></path>
+<text x="525" y="155" text-anchor="middle" font-family="inherit" font-size="11" fill="#666" font-style="italic">decide siguiente paso</text>
+
+<!-- Flecha Actuar → Observar (horizontal inferior) -->
+<line x1="485" y1="278" x2="240" y2="278" stroke="#888" stroke-width="1.6" marker-end="url(#ag1)"></line>
+<text x="362" y="298" text-anchor="middle" font-family="inherit" font-size="11" fill="#666" font-style="italic">retorna resultado</text>
+
+<!-- Flecha Observar → Pensar (curva ascendente izquierda) -->
+<path d="M 175 235 Q 175 130 280 95" fill="none" stroke="#888" stroke-width="1.6" marker-end="url(#ag1)"></path>
+<text x="160" y="155" text-anchor="middle" font-family="inherit" font-size="11" fill="#666" font-style="italic">información nueva</text>
+
+<!-- Etiqueta central OBJETIVO -->
+<rect x="305" y="155" width="110" height="40" rx="20" fill="#FFFFFF" stroke="#888" stroke-width="1" stroke-dasharray="3 2"></rect>
+<text x="360" y="180" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="13" font-weight="500" fill="#444">Objetivo</text>
+
+<!-- Línea descendente desde Actuar hacia las herramientas -->
+<line x1="575" y1="308" x2="575" y2="358" stroke="#BA7517" stroke-width="1.2" stroke-dasharray="4 3"></line>
+
+<!-- Zona de herramientas debajo de Actuar -->
+<text x="575" y="378" text-anchor="middle" font-family="inherit" font-size="11" font-weight="500" fill="#7A4810" letter-spacing="0.05em">HERRAMIENTAS EXTERNAS</text>
+
+<rect x="430" y="395" width="100" height="32" rx="6" fill="#FFFFFF" stroke="#BA7517" stroke-width="1"></rect>
+<text x="480" y="416" text-anchor="middle" font-family="inherit" font-size="11" fill="#5A3A0F">búsqueda web</text>
+
+<rect x="540" y="395" width="100" height="32" rx="6" fill="#FFFFFF" stroke="#BA7517" stroke-width="1"></rect>
+<text x="590" y="416" text-anchor="middle" font-family="inherit" font-size="11" fill="#5A3A0F">leer archivos</text>
+
+<rect x="430" y="435" width="100" height="32" rx="6" fill="#FFFFFF" stroke="#BA7517" stroke-width="1"></rect>
+<text x="480" y="456" text-anchor="middle" font-family="inherit" font-size="11" fill="#5A3A0F">enviar correo</text>
+
+<rect x="540" y="435" width="100" height="32" rx="6" fill="#FFFFFF" stroke="#BA7517" stroke-width="1"></rect>
+<text x="590" y="456" text-anchor="middle" font-family="inherit" font-size="11" fill="#5A3A0F">consultar BD</text>
+
+</svg>
+</div>
+<p>En la práctica, <strong>pensar</strong> significa que el agente analiza la tarea, divide el objetivo en pasos y decide cuál es el siguiente. <strong>Actuar</strong> significa que ejecuta ese paso, ya sea buscar algo, abrir un archivo o llamar a una herramienta. <strong>Observar</strong> significa que mira el resultado de la acción y se pregunta si funcionó, qué información obtuvo, qué cambió en el contexto. Y vuelve a pensar, con la información nueva, para decidir el siguiente paso.</p>
+</section>
+<section id="ejemplos-reales-de-agentes" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="ejemplos-reales-de-agentes"><span class="header-section-number">5.3</span> Ejemplos reales de agentes</h2>
+<p><strong>Claude Code, Cursor y herramientas similares</strong> son agentes que ayudan a desarrolladores. Reciben una instrucción del estilo <em>“agrega autenticación a este proyecto”</em> y autónomamente leen los archivos del repositorio, deciden qué modificar, escriben el código, ejecutan pruebas y reportan resultados. <strong>No solo sugieren código: lo aplican.</strong></p>
+<p><strong>Agentes corporativos de monitoreo</strong> son sistemas que vigilan continuamente correos, reseñas o redes sociales, clasifican lo que llega, y según el tipo abren un ticket en el sistema de soporte, escalan a un humano o responden automáticamente.</p>
+<p><strong>Asistentes de research</strong> son agentes que reciben una pregunta de investigación, buscan en múltiples fuentes, leen los resultados, los sintetizan y entregan un informe con referencias.</p>
+<p>Lo importante de cada ejemplo no es la apariencia mágica, sino la combinación: un LLM como <em>“cerebro”</em> que decide qué hacer, y un conjunto de <strong>herramientas</strong> que ese cerebro puede invocar.</p>
+</section>
+<section id="por-qué-los-riesgos-se-amplifican-con-agentes" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="por-qué-los-riesgos-se-amplifican-con-agentes"><span class="header-section-number">5.4</span> Por qué los riesgos se amplifican con agentes</h2>
+<p>Aquí conviene detenerse. Un LLM que solo produce texto puede equivocarse en lo que <strong>dice</strong>: alucinar, sesgar, errar. Las consecuencias suelen ser limitadas, porque alguien lee la respuesta, evalúa y decide qué hacer.</p>
+<p>Un agente que <strong>actúa</strong> puede equivocarse en lo que <strong>hace</strong>: borrar un archivo, enviar un correo a la lista equivocada, ejecutar una transacción, modificar una base de datos. Las consecuencias son mucho más serias y, a menudo, <strong>irreversibles</strong>.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Los tres principios de un agente bien diseñado</strong></p>
+<ul>
+<li><strong>Permisos restringidos:</strong> el agente solo puede hacer lo que se le autoriza explícitamente. No tiene acceso completo al sistema.</li>
+<li><strong>Supervisión humana:</strong> para acciones críticas (enviar un correo, ejecutar una compra), el agente pide confirmación antes de actuar.</li>
+<li><strong>Auditabilidad:</strong> cada acción del agente queda registrada para que después se pueda revisar qué hizo y por qué.</li>
+</ul>
+<p>Como analista, cuando alguien proponga <em>“implementemos un agente que automatice X”</em>, la pregunta que debes hacer es: <strong>¿qué permisos va a tener? ¿qué pasa si se equivoca? ¿cómo se audita?</strong></p>
+</div>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="mcp-el-estándar-para-conectar-agentes-con-herramientas" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> MCP: el estándar para conectar agentes con herramientas</h1>
+<div class="callout-key">
+<p><strong>MCP (Model Context Protocol)</strong> es un estándar abierto que define cómo un agente de IA se conecta con herramientas externas: bases de datos, servicios de correo, sistemas internos, APIs corporativas.</p>
+</div>
+<p>La analogía útil es la del <strong>USB</strong>. Antes del USB, cada periférico requería un conector distinto y un <em>driver</em> específico. El USB estandarizó la conexión y permitió que cualquier dispositivo se conectara a cualquier computadora sin tener que reinventar la integración cada vez.</p>
+<p>MCP cumple ese papel para los agentes de IA. Antes, cada integración entre un LLM y una herramienta externa requería desarrollo a medida. Con MCP, hay un estándar común: si una herramienta expone un <em>“servidor MCP”</em>, cualquier agente compatible puede usarla.</p>
+<p>Como analista no vas a construir servidores MCP. Pero sí vas a ser <strong>usuario</strong> de ellos: cuando conectes tu calendario, tu correo, tu Drive o las bases de datos de tu empresa a un agente, la conexión probablemente pase por MCP. Saber que existe te permite entender propuestas y hacer mejores preguntas.</p>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="marco-de-decisión-qué-herramienta-para-qué-tarea" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Marco de decisión: qué herramienta para qué tarea</h1>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Tarea</th>
+<th>Herramienta adecuada</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Predecir churn con datos estructurados</td>
+<td><strong>ML clásico</strong> (árbol, ensamble)</td>
+</tr>
+<tr class="even">
+<td>Segmentar clientes sin etiqueta previa</td>
+<td><strong>ML no supervisado</strong> (k-means)</td>
+</tr>
+<tr class="odd">
+<td>Resumir 500 reseñas de clientes en lenguaje natural</td>
+<td><strong>LLM</strong></td>
+</tr>
+<tr class="even">
+<td>Estandarizar memos siguiendo formato corporativo</td>
+<td><strong>LLM + Skill</strong></td>
+</tr>
+<tr class="odd">
+<td>Monitorear reseñas, clasificar y abrir tickets automáticamente</td>
+<td><strong>Agente</strong></td>
+</tr>
+<tr class="even">
+<td>Conectar el agente con el sistema de tickets de la empresa</td>
+<td><strong>MCP</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Regla general:</strong> empieza por la herramienta más simple que resuelva el problema.</p>
+<ul>
+<li>No introduzcas un agente cuando un Skill basta.</li>
+<li>No introduzcas un Skill cuando una respuesta directa del LLM basta.</li>
+<li>No introduzcas un LLM cuando un árbol resuelve mejor.</li>
+</ul>
+</div>
+</div>
+<hr>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="síntesis-cinco-ideas-para-llevarte" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Síntesis: cinco ideas para llevarte</h1>
+<p><strong>Primero</strong>, un LLM predice texto plausible, no verdad. Esa es la mecánica básica que explica casi todo lo demás.</p>
+<p><strong>Segundo</strong>, las limitaciones más importantes son alucinaciones, sesgo, no-determinismo, knowledge cutoff y ventana de contexto. Cada una tiene implicaciones para el analista.</p>
+<p><strong>Tercero</strong>, los Skills convierten un LLM generalista en especialista. Son el manual operativo que estandariza salidas en una organización.</p>
+<p><strong>Cuarto</strong>, un agente combina un LLM con la capacidad de actuar, ciclando entre pensar, actuar y observar. Eso amplifica tanto la utilidad como los riesgos.</p>
+<p><strong>Quinto</strong>, MCP estandariza la conexión entre agentes y herramientas externas. Es infraestructura, no producto, pero conocerla cambia la calidad de las preguntas que harás en una reunión técnica.</p>
+<hr>
+<section id="material-adicional-opcional" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="material-adicional-opcional"><span class="header-section-number">8.1</span> Material adicional (opcional)</h2>
+<ul>
+<li><strong>Anthropic — “Building effective agents”</strong> — guía sobre cuándo conviene un agente y cuándo basta una solución más simple — <a href="https://www.anthropic.com/research/building-effective-agents">anthropic.com/research/building-effective-agents</a></li>
+<li><strong>Model Context Protocol — documentación oficial</strong> — <a href="https://modelcontextprotocol.io">modelcontextprotocol.io</a></li>
+<li><strong>Stanford HAI — “AI Index Report”</strong> — panorámica anual del estado del campo — <a href="https://aiindex.stanford.edu">aiindex.stanford.edu</a></li>
+</ul>
+<hr>
+</section>
+<section id="checklist-de-preclase" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="checklist-de-preclase"><span class="header-section-number">8.2</span> Checklist de preclase</h2>
+<p>Al llegar a clase debes poder explicar:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">¿Por qué decimos que un LLM “predice la siguiente palabra”?</label></li>
+<li><label><input type="checkbox">¿Qué es una alucinación y por qué ocurre?</label></li>
+<li><label><input type="checkbox">¿Por qué un mismo prompt puede dar respuestas distintas?</label></li>
+<li><label><input type="checkbox">¿Qué es la <em>knowledge cutoff</em> y qué problemas genera?</label></li>
+<li><label><input type="checkbox">¿Por qué un LLM no se evalúa con una matriz de confusión limpia?</label></li>
+<li><label><input type="checkbox">¿Qué es un Skill y por qué es útil en una empresa?</label></li>
+<li><label><input type="checkbox">¿Cuáles son los tres pasos del ciclo de un agente?</label></li>
+<li><label><input type="checkbox">¿Por qué los riesgos de un agente son mayores que los de un LLM puro?</label></li>
+<li><label><input type="checkbox">¿Qué es MCP y cuál es la analogía que mejor lo explica?</label></li>
+</ul>
+</section>
+<section id="preguntas-de-comprensión" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="preguntas-de-comprensión"><span class="header-section-number">8.3</span> Preguntas de comprensión</h2>
+<p><strong>1.</strong> Un proveedor te ofrece <em>“un agente que responde correos del servicio al cliente y resuelve la mayoría sin intervención humana”</em>. ¿Qué tres preguntas críticas le harías antes de proceder?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Algunas preguntas razonables: ¿qué tipo de correos puede resolver y cuáles escala?, ¿cómo se entrena o ajusta el agente para el contexto específico de la empresa?, ¿qué pasa si el agente responde algo incorrecto a un cliente?, ¿cómo se audita lo que dijo el agente?, ¿qué permisos tiene (puede mover plata, anular pedidos, acceder a datos personales)?, ¿cómo se mide su desempeño dado que no hay matriz de confusión limpia?</p>
+Lo central es entender <strong>el alcance</strong>, <strong>el control humano</strong> y <strong>el plan de fallo</strong>.
+</details>
+<p><strong>2.</strong> ¿Por qué un mismo <em>prompt</em> puede dar respuestas distintas en un LLM, mientras que un mismo <em>input</em> siempre da el mismo <em>output</em> en un árbol de clasificación?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>El árbol es determinista por construcción: recorre las mismas ramas y llega siempre al mismo nodo hoja. El LLM, en su generación, <strong>muestrea</strong> palabras con cierta aleatoriedad (controlada por parámetros como la “temperatura”). Esa aleatoriedad introduce variabilidad.</p>
+Se puede reducir, pero rara vez eliminar, y eso es decisión de diseño: cierta variabilidad permite respuestas más naturales y creativas, a costa de reproducibilidad.
+</details>
+<p><strong>3.</strong> ¿En qué se diferencia un Skill de un <em>prompt</em> particularmente largo y detallado? ¿No son lo mismo?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Conceptualmente comparten algo: ambos dan instrucciones al modelo. La diferencia operativa es que un Skill se <strong>define una vez, se nombra, se invoca y se mantiene</strong> como un componente reutilizable. Un prompt largo lo escribe cada usuario cada vez.</p>
+Un Skill bien diseñado además puede contener archivos de referencia, ejemplos y reglas complejas que serían poco prácticos de repetir manualmente. Es la diferencia entre escribir las mismas instrucciones cada lunes y tener un manual al que los empleados acuden.
+</details>
+<p><strong>4.</strong> Si los LLMs alucinan, ¿significa que no son confiables para decisiones de negocio? Argumenta a favor y en contra.</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p><strong>A favor de “no son confiables”:</strong> cualquier dato verificable que produzcan debe verificarse, y eso anula buena parte del ahorro de tiempo en decisiones rigurosas.</p>
+<p><strong>En contra:</strong> la alucinación es un riesgo conocido y manejable. Para muchas tareas (resumir, redactar, explorar opciones, clasificar texto) la alucinación es un riesgo menor que se mitiga con revisión humana.</p>
+La clave no es <em>“confiar o no confiar”</em>, sino <strong>calibrar la confianza según el tipo de tarea</strong> y construir flujos donde el LLM aporta velocidad y el humano aporta verificación.
+</details>
+<p><strong>5.</strong> Una empresa quiere usar un agente que lea automáticamente los correos del CEO, identifique los que requieren atención urgente, y elabore borradores de respuesta. ¿Qué riesgos específicos identificas y cómo mitigarías cada uno?</p>
+<details>
+<summary>
+Ver respuesta
+</summary>
+<p>Algunos riesgos relevantes: (a) clasificar mal un correo urgente como no urgente y dejarlo pasar; (b) clasificar un correo confidencial sin que el agente tenga claros los límites de quién puede ver qué; (c) generar un borrador con información incorrecta (alucinación) que el CEO firme sin revisar a profundidad; (d) que el agente envíe el correo por sí mismo sin confirmación humana, generando consecuencias irreversibles.</p>
+Mitigaciones: permisos restringidos (<strong>el agente lee y propone, pero no envía</strong>); supervisión humana obligatoria en cualquier respuesta antes de enviarla; auditoría de toda acción del agente; reglas explícitas sobre qué tipos de correo nunca debe procesar (legales, RRHH, regulatorios); calibración del clasificador con casos históricos.
+</details>
+<hr>
+</section>
+<section id="glosario-mínimo" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="glosario-mínimo"><span class="header-section-number">8.4</span> Glosario mínimo</h2>
+<div class="callout-key">
+<p><strong>LLM (Large Language Model):</strong> modelo de Deep Learning entrenado para procesar y generar lenguaje natural.</p>
+<p><strong>Token:</strong> unidad básica de texto con la que opera un LLM. Puede ser una palabra, parte de una palabra o un signo.</p>
+<p><strong>Alucinación:</strong> afirmación con apariencia de verdadera producida por un LLM, pero falsa.</p>
+<p><strong>Knowledge cutoff:</strong> fecha límite hasta la que el LLM tiene información en su corpus de entrenamiento.</p>
+<p><strong>Ventana de contexto:</strong> cantidad máxima de texto que el LLM puede procesar a la vez.</p>
+<p><strong>Skill:</strong> módulo de instrucciones especializadas que adapta un LLM a una tarea o protocolo específico.</p>
+<p><strong>Agente:</strong> sistema que combina un LLM con la capacidad de ejecutar acciones, operando en ciclos de pensar-actuar-observar.</p>
+<p><strong>MCP (Model Context Protocol):</strong> estándar abierto para conectar agentes con herramientas externas.</p>
+<p><strong>RAG (Retrieval Augmented Generation):</strong> técnica que combina un LLM con búsqueda de información externa para responder con datos actualizados o específicos.</p>
+<p><strong>No-determinismo:</strong> propiedad de un sistema de dar respuestas distintas al mismo <em>input</em>.</p>
+</div>
+<hr>
+<p><em>En el <strong>handout 3</strong> trabajaremos la habilidad central para sacar provecho de los LLMs, los Skills y los agentes: la formulación de prompts. Es, en buena medida, la misma habilidad que has venido formando todo el semestre cuando aprendiste a hacer preguntas bien planteadas a los datos.</em></p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-15-2_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
