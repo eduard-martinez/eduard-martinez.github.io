@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Diagnóstico Empresarial 3i</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <section id="login-view" class="login-view">
+    <div class="login-card">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-label="Logo Icesi">I</div>
+        <div>
+          <p class="eyebrow">Instrumento digital de captura</p>
+          <h1>Diagnóstico Empresarial 3i</h1>
+        </div>
+      </div>
+      <p class="subtitle">Ingrese con los últimos tres dígitos de su cédula. El sistema reconocerá automáticamente su perfil.</p>
+      <form id="login-form" class="login-form">
+        <label for="login-code">Últimos tres dígitos *</label>
+        <input id="login-code" type="password" inputmode="numeric" maxlength="3" autocomplete="one-time-code" placeholder="Ejemplo: 345" required />
+        <button class="btn btn-primary" type="submit">Ingresar</button>
+      </form>
+      <p class="hint">Perfiles habilitados: 3 entrevistadores y 1 administrador. No comparta su código operativo.</p>
+    </div>
+  </section>
+
+  <div id="app-shell" class="app-shell hidden">
+    <header class="topbar">
+      <div class="topbar-brand">
+        <div class="brand-mark small" aria-label="Logo Icesi">I</div>
+        <div>
+          <p class="eyebrow">Diagnóstico Empresarial 3i</p>
+          <h1 id="welcome-title">Bienvenido</h1>
+          <p id="role-subtitle" class="subtitle">Sistema local de captura y consolidación incremental</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span id="current-user-pill" class="status-pill neutral">Usuario</span>
+        <span id="connection-status" class="status-pill">Verificando conexión...</span>
+        <button id="btn-dashboard" class="btn btn-secondary" type="button">Panel principal</button>
+        <button id="btn-retry-sync" class="btn btn-secondary" type="button">Sincronizar pendientes</button>
+        <button id="btn-download-backup" class="btn btn-secondary" type="button">Descargar respaldo</button>
+        <label class="btn btn-secondary file-button">
+          Restaurar respaldo
+          <input id="backup-file" type="file" accept="application/json" />
+        </label>
+        <button id="btn-logout" class="btn btn-danger-outline" type="button">Salir</button>
+      </div>
+    </header>
+
+    <main id="surveyor-dashboard" class="dashboard-view hidden">
+      <section class="panel dashboard-hero">
+        <div>
+          <p class="eyebrow">Panel principal del encuestador</p>
+          <h2 id="dashboard-title">Mis entrevistas</h2>
+          <p class="subtitle">Cree, retome y envíe entrevistas por nodo. Las respuestas solo se sincronizan cuando haga clic en “Enviar nodo”.</p>
+        </div>
+        <div class="dashboard-actions">
+          <button id="btn-refresh-remote" class="btn btn-secondary" type="button">Actualizar estados desde Google Sheets</button>
+        </div>
+      </section>
+
+      <section class="stats-grid" aria-label="Resumen de entrevistas">
+        <article class="stat-card"><span class="stat-label">Total asignadas/locales</span><strong id="stat-total">0</strong></article>
+        <article class="stat-card"><span class="stat-label">Pendientes</span><strong id="stat-pending">0</strong></article>
+        <article class="stat-card"><span class="stat-label">En progreso</span><strong id="stat-progress">0</strong></article>
+        <article class="stat-card"><span class="stat-label">Completadas</span><strong id="stat-completed">0</strong></article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header large">
+          <div>
+            <p class="eyebrow">Nueva entrevista</p>
+            <h2>Crear entrevista</h2>
+          </div>
+          <span class="required-note">* Campos obligatorios</span>
+        </div>
+        <form id="new-interview-form" class="form-grid three-cols">
+          <div class="field">
+            <label for="new-company-id">ID único de empresa *</label>
+            <input id="new-company-id" type="text" placeholder="Ejemplo: 001" required />
+            <small id="company-lookup-hint" class="field-hint">Ingrese el ID para autocompletar la razón social.</small>
+          </div>
+          <div class="field">
+            <label for="new-company-name">Razón social *</label>
+            <input id="new-company-name" type="text" placeholder="Se autocompleta desde el diccionario" readonly required />
+          </div>
+          <div class="field field-actions">
+            <button class="btn btn-primary" type="submit">Crear entrevista</button>
+          </div>
+        </form>
+        <p class="hint">No se permite crear dos entrevistas activas con el mismo ID de empresa e ID de entrevistador.</p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header large">
+          <div>
+            <p class="eyebrow">Continuidad del trabajo de campo</p>
+            <h2>Entrevistas pendientes, en progreso y finalizadas</h2>
+          </div>
+        </div>
+        <div id="interview-list" class="interview-list"></div>
+      </section>
+    </main>
+
+    <main id="admin-dashboard" class="dashboard-view hidden">
+      <section class="panel dashboard-hero">
+        <div>
+          <p class="eyebrow">Panel administrador</p>
+          <h2>Seguimiento general de campo</h2>
+          <p class="subtitle">Vista de consolidación incremental por empresa, entrevistador y nodo enviada a Google Sheets.</p>
+        </div>
+        <div class="dashboard-actions">
+          <button id="btn-admin-refresh" class="btn btn-primary" type="button">Actualizar consolidado</button>
+        </div>
+      </section>
+      <section class="stats-grid">
+        <article class="stat-card"><span class="stat-label">Empresas en consolidado</span><strong id="admin-total">0</strong></article>
+        <article class="stat-card"><span class="stat-label">Completas</span><strong id="admin-complete">0</strong></article>
+        <article class="stat-card"><span class="stat-label">Incompletas</span><strong id="admin-incomplete">0</strong></article>
+        <article class="stat-card"><span class="stat-label">Avance promedio</span><strong id="admin-percent">0%</strong></article>
+      </section>
+      <section class="panel">
+        <div class="panel-header large">
+          <div>
+            <p class="eyebrow">Estado por empresa</p>
+            <h2>Consolidado de nodos</h2>
+          </div>
+        </div>
+        <div class="table-wrap"><table id="admin-table" class="admin-table"></table></div>
+      </section>
+    </main>
+
+    <main id="interview-view" class="layout hidden">
+      <aside class="sidebar" aria-label="Panel de navegación">
+        <section class="panel compact">
+          <div class="panel-header"><h2>Entrevista</h2></div>
+          <div class="session-card">
+            <label>ID base</label><input id="interview-id" type="text" readonly />
+            <label>ID empresa</label><input id="active-company-id" type="text" readonly />
+            <label>Razón social</label><input id="active-company-name" type="text" readonly />
+            <p id="autosave-status" class="hint">Guardado local activo. Sincronización solo con “Enviar nodo”.</p>
+          </div>
+          <div class="button-row vertical">
+            <button id="btn-back-dashboard" class="btn btn-secondary" type="button">Volver al panel</button>
+            <button id="btn-delete-interview" class="btn btn-danger-outline" type="button">Eliminar entrevista completa</button>
+          </div>
+        </section>
+
+        <section class="panel compact">
+          <div class="panel-header"><h2>Estado por nodo</h2></div>
+          <div id="node-list" class="node-list"></div>
+        </section>
+
+        <section class="panel compact">
+          <div class="panel-header"><h2>Módulos</h2></div>
+          <div id="module-list" class="module-list"></div>
+        </section>
+
+        <section class="panel compact">
+          <div class="panel-header"><h2>Sincronización</h2></div>
+          <p id="queue-status" class="queue-status">Sin registros pendientes.</p>
+        </section>
+      </aside>
+
+      <section class="content">
+        <section class="panel">
+          <div class="panel-header large">
+            <div>
+              <p class="eyebrow">Identificación</p>
+              <h2>DATOS DE LA ENTREVISTA</h2>
+            </div>
+            <span class="required-note">* Campos obligatorios</span>
+          </div>
+          <div class="metadata-grid">
+            <div class="field"><label>ID único de empresa</label><input id="company-id-display" type="text" readonly /></div>
+            <div class="field"><label>ID entrevistador</label><input id="surveyor-id-display" type="text" readonly /></div>
+            <div class="field"><label>Entrevistador</label><input id="surveyor-name-display" type="text" readonly /></div>
+            <div class="field"><label>Fecha de creación</label><input id="created-at-display" type="text" readonly /></div>
+            <div class="field"><label>Última modificación</label><input id="updated-at-display" type="text" readonly /></div>
+          </div>
+          <div id="company-form" class="form-grid"></div>
+
+          <div class="subsection-title">ENTREVISTADO DEL NODO ACTUAL</div>
+          <div class="form-grid four-cols">
+            <div class="field"><label for="node-label">Nodo</label><input id="node-label" type="text" readonly /></div>
+            <div class="field"><label for="interviewee-name">Nombre del entrevistado *</label><input id="interviewee-name" data-interview-field="nombre" type="text" /></div>
+            <div class="field"><label for="interviewee-role">Cargo *</label><input id="interviewee-role" data-interview-field="cargo" type="text" /></div>
+            <div class="field"><label for="interview-date">Fecha *</label><input id="interview-date" data-interview-field="fecha" type="date" /></div>
+          </div>
+        </section>
+
+        <section class="panel instrument-panel">
+          <div class="panel-header large sticky-panel-header">
+            <div>
+              <p id="current-node-title" class="eyebrow">Nodo</p>
+              <h2 id="current-module-title">Módulo</h2>
+            </div>
+            <div class="progress-box" aria-live="polite">
+              <span id="module-progress-text">0/0 respondidas</span>
+              <div class="progress-track"><div id="module-progress-bar" class="progress-bar"></div></div>
+            </div>
+          </div>
+          <div id="skip-warning" class="skip-warning hidden"></div>
+          <div id="question-list" class="question-list"></div>
+          <div class="bottom-actions">
+            <button id="btn-prev-module" class="btn btn-secondary" type="button">Módulo anterior</button>
+            <button id="btn-next-module" class="btn btn-secondary" type="button">Siguiente módulo</button>
+            <button id="btn-delete-node" class="btn btn-danger-outline" type="button">Eliminar nodo actual</button>
+            <button id="btn-submit-node" class="btn btn-primary" type="button">Enviar nodo actual</button>
+            <button id="btn-submit-all" class="btn btn-primary-outline" type="button">Enviar empresa completa</button>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="data.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
