@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Episodio 01 · LLMs desde el siguiente token</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar__in">
+    <div class="brand"><span class="dot"></span>Curso · IA aplicada</div>
+    <nav class="series" aria-label="Serie de episodios">
+      <span class="now">LLMs</span><span class="sep">/</span>
+      <span>Prompts</span><span class="sep">/</span>
+      <span>Agents</span><span class="sep">/</span>
+      <span>Skills</span><span class="sep">/</span>
+      <span>Loops</span><span class="sep">/</span>
+      <span>Claude&nbsp;Code</span>
+    </nav>
+  </div>
+</header>
+
+<main class="shell">
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="eyebrow">Episodio 01 — Fundamentos</p>
+    <h1>Todo empieza con el <span class="em">siguiente token</span>.</h1>
+    <p class="lede">Antes de prompts, agentes o Claude Code, hay una sola máquina debajo de todo. En este episodio lo abrimos: qué es un LLM, de qué está hecho, cómo decide, y qué controlas tú cuando lo usas.</p>
+
+    <div class="predictor" role="img" aria-label="Un modelo de lenguaje completando la palabra que sigue en una frase, con probabilidades para cada candidato.">
+      <p class="predictor__label">// Lo único que hace un modelo de lenguaje</p>
+      <div class="sentence">
+        <span class="tok t1">Un</span> <span class="tok t2">modelo</span> <span class="tok t3">predice</span> <span class="tok t4">el</span> <span class="tok t5">siguiente</span> <span class="blank">token<span class="caret"></span></span>
+      </div>
+      <div class="dist" aria-hidden="true">
+        <div class="bar lead"><span class="name">token</span><span class="track"><span class="fill" style="width:88%"></span></span><span class="pct">38%</span></div>
+        <div class="bar"><span class="name">paso</span><span class="track"><span class="fill" style="width:44%"></span></span><span class="pct">19%</span></div>
+        <div class="bar"><span class="name">carácter</span><span class="track"><span class="fill" style="width:33%"></span></span><span class="pct">14%</span></div>
+        <div class="bar"><span class="name">número</span><span class="track"><span class="fill" style="width:26%"></span></span><span class="pct">11%</span></div>
+        <div class="bar"><span class="name">elemento</span><span class="track"><span class="fill" style="width:19%"></span></span><span class="pct">8%</span></div>
+      </div>
+      <p class="predictor__note"><b>Eso es, literalmente, todo.</b> Un LLM mira el texto que lleva y estima qué token viene después. Repite ese paso miles de veces y aparece una respuesta. El resto del episodio explica por qué eso alcanza para tanto.</p>
+    </div>
+
+    <dl class="meta">
+      <div><dt>Nivel</dt><dd>Principiante → Intermedio</dd></div>
+      <div><dt>Duración</dt><dd>≈ 90 minutos</dd></div>
+      <div><dt>Requisitos</dt><dd>Solo curiosidad</dd></div>
+      <div><dt>Formato</dt><dd>Teoría + práctica en Claude</dd></div>
+    </dl>
+
+    <div class="banner">
+      <span class="ic">i</span>
+      <div>Este episodio es la base del curso: el temario módulo por módulo, con un <b>ejercicio para hacer en Claude</b> donde aparece el icono ▶. Léela de arriba abajo, porque cada módulo prepara el siguiente.</div>
+    </div>
+  </section>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- TOC -->
+    <aside class="toc" aria-label="Contenido del episodio">
+      <h4>Temario</h4>
+      <ol>
+        <li><a href="#m1">¿Qué es un LLM?</a></li>
+        <li><a href="#m2">Tokens: la unidad atómica</a></li>
+        <li><a href="#m3">Qué pasa por dentro</a></li>
+        <li><a href="#m4">Cómo aprende: entrenamiento</a></li>
+        <li><a href="#m5">Parámetros que tú controlas</a></li>
+        <li><a href="#m6">La ventana de contexto</a></li>
+        <li><a href="#m7">Capacidades y límites</a></li>
+        <li><a href="#m8">El ecosistema y qué sigue</a></li>
+        <li><a href="#lab">Ejercicios en Claude</a></li>
+      </ol>
+    </aside>
+
+    <!-- LESSONS -->
+    <div class="lessons">
+
+      <section class="lesson" id="m1">
+        <div class="lesson__head">
+          <span class="lesson__num">01</span>
+          <div>
+            <h2 class="lesson__title">¿Qué es un LLM?</h2>
+            <p class="lesson__goal">Termina sabiendo qué es —y qué no es— un modelo de lenguaje, y la única idea que explica todo lo demás.</p>
+          </div>
+        </div>
+        <ul class="topics">
+          <li>Definición en una frase, y luego la versión técnica: <b>Large Language Model</b>.</li>
+          <li>La idea central: <b>predecir el siguiente token</b> a partir del texto anterior.</li>
+          <li>Breve historia sin nostalgia: reglas → estadística → redes neuronales → <b>Transformers</b>.</li>
+          <li>Por qué justo ahora: la combinación de <b>datos + cómputo + escala</b>.</li>
+          <li>Qué <b>no</b> es: no es una base de datos, no "busca" en internet, no entiende como un humano, no tiene intenciones.</li>
+        </ul>
+      </section>
+
+      <section class="lesson" id="m2">
+        <div class="lesson__head">
+          <span class="lesson__num">02</span>
+          <div>
+            <h2 class="lesson__title">Tokens: la unidad atómica</h2>
+            <p class="lesson__goal">El concepto más rentable de todo el episodio. Si entiendes tokens, entiendes costos, límites y la mitad de los problemas.</p>
+          </div>
+        </div>
+        <ul class="topics">
+          <li>Qué es un token: <b>ni una palabra ni una letra</b>, sino un pedazo.</li>
+          <li>Tokenización: cómo el texto se convierte en <b>números</b> (BPE, a vista de pájaro).</li>
+          <li>Tokens e idiomas: por qué el español y otros idiomas <b>gastan más tokens</b> que el inglés.</li>
+          <li>El <b>vocabulario</b> del modelo y por qué emojis o código se parten raro.</li>
+          <li>Consecuencias prácticas: <b>precio</b>, <b>velocidad</b> y <b>límites</b> se miden en tokens, no en palabras.</li>
+        </ul>
+        <div class="exercise">
+          <span class="exercise__tag">Ejercicio en Claude</span>
+          <p>Pegaremos la misma frase en español y en inglés y le pediremos a Claude que estime los tokens de cada una, para <em>ver</em> con números por qué el idioma importa.</p>
+        </div>
+
+        <div class="calc" style="max-width:none;margin:0;padding:0">
+          <div class="card">
+            <p class="label">// Herramienta · contá los tokens en vivo</p>
+            <div class="examples" id="examples">
+              <button class="ex-btn" data-key="en">Frase en inglés</button>
+              <button class="ex-btn" data-key="es">Frase en español</button>
+              <button class="ex-btn" data-key="code">Un poco de código</button>
+              <button class="ex-btn" data-key="num">Números</button>
+              <button class="ex-btn" data-key="emoji">Emojis y símbolos</button>
+            </div>
+            <textarea id="input" spellcheck="false" aria-label="Texto para analizar">The quick brown fox jumps over the lazy dog.</textarea>
+
+            <div class="stats" aria-live="polite">
+              <div class="stat"><div class="v" id="s-chars">0</div><div class="k">Caracteres</div></div>
+              <div class="stat"><div class="v" id="s-words">0</div><div class="k">Palabras</div></div>
+              <div class="stat accent"><div class="v" id="s-tokens">0</div><div class="k">Tokens (est.)</div></div>
+              <div class="stat"><div class="v" id="s-ratio">0</div><div class="k">Car. / token</div></div>
+            </div>
+
+            <div class="vizhead">
+              <p class="label" style="margin:0">// Visualización ilustrativa</p>
+              <button class="toggle" id="toggleViz">Ocultar</button>
+            </div>
+            <div class="viz" id="viz"></div>
+
+            <div class="cost">
+              <label for="price">Si el modelo cuesta</label>
+              <span class="price"><span class="cur">$</span><input id="price" type="number" min="0" step="0.5" value="3" inputmode="decimal"></span>
+              <label>por millón de tokens…</label>
+              <div class="result" id="costResult">$0.00<span>esta entrada</span></div>
+            </div>
+
+            <p class="note"><b>Es una estimación.</b> El conteo exacto depende del tokenizador de cada modelo, así que tómalo como una guía cercana, no como una cifra oficial. Prueba la <b>misma frase en inglés y en español</b> con los botones de arriba para ver el "impuesto lingüístico" con tus propios ojos. El precio es un ejemplo editable, porque las tarifas reales cambian con el tiempo y el modelo.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lesson" id="m3">
+        <div class="lesson__head">
+          <span class="lesson__num">03</span>
+          <div>
+            <h2 class="lesson__title">Qué pasa por dentro</h2>
+            <p class="lesson__goal">La intuición de cómo funciona un Transformer, sin una sola ecuación que dé miedo.</p>
+          </div>
+        </div>
+        <ul class="topics">
+          <li><b>Embeddings</b>: convertir palabras en vectores, donde el significado se vuelve geometría.</li>
+          <li>El <b>Transformer</b> de un vistazo: capas que transforman texto en predicciones.</li>
+          <li><b>Atención</b> (<span class="mono">attention</span>): cómo el modelo decide a qué partes del texto "mirar".</li>
+          <li>Qué son los <b>parámetros</b>: los miles de millones de "pesos" ajustados durante el entrenamiento.</li>
+          <li>Generación <b>autoregresiva</b>: la respuesta se construye un token a la vez, realimentándose.</li>
+        </ul>
+
+        <div class="emb">
+          <div class="banner" style="margin-top:24px">
+            <span class="ic">&asymp;</span>
+            <div><b>Para un economista:</b> piénsalo como un análisis de factores latentes. El <b>embedding</b> ubica cada palabra en un espacio de dimensión reducida donde la cercanía geométrica refleja relación semántica. La métrica estándar de "cercanía" es la <b>similitud coseno</b> —un producto punto normalizado, pariente del coeficiente de correlación.</div>
+          </div>
+
+          <p class="emb-kick" style="margin-top:24px">// Interactivo · proximidad = significado</p>
+          <p class="emb-lede">Pasa el cursor —o toca— una palabra para resaltar sus tres vecinos más cercanos. Fíjate en que se agrupan por significado —animales con animales, lugares con lugares— sin que nadie lo haya programado.</p>
+          <div class="legend" id="legend"></div>
+          <div class="viz"><svg id="map" viewBox="0 0 760 460" role="img" aria-label="Mapa semántico de palabras"></svg></div>
+          <div class="readout" id="mapread"></div>
+
+          <p class="emb-kick" style="margin-top:26px">// Interactivo · relaciones = direcciones</p>
+          <p class="emb-lede">Lo más sorprendente: las relaciones entre palabras son <b>direcciones</b> en el espacio. A "rey" réstale "hombre" y súmale "mujer", y aterrizas cerca de "reina". Elige una analogía o ármala tú mismo.</p>
+          <div class="controls">
+            <button class="pbtn" type="button">rey &minus; hombre + mujer</button>
+            <button class="pbtn" type="button">París &minus; Francia + España</button>
+            <button class="pbtn" type="button">Madrid &minus; España + Italia</button>
+            <button class="pbtn" type="button">reina &minus; mujer + hombre</button>
+          </div>
+          <div class="custom">
+            resultado &asymp;
+            <select id="selA" aria-label="palabra A"></select>
+            <span class="op">&minus;</span>
+            <select id="selB" aria-label="palabra B"></select>
+            <span class="op">+</span>
+            <select id="selC" aria-label="palabra C"></select>
+          </div>
+          <div class="viz ana"><svg id="ana" viewBox="0 0 760 300" role="img" aria-label="Aritmética de vectores"></svg></div>
+          <div class="readout" id="anaread"></div>
+
+          <div class="banner warn" style="margin-top:20px">
+            <span class="ic">!</span>
+            <div><b>Honestidad metodológica:</b> que "rey &minus; hombre + mujer &asymp; reina" es un hallazgo clásico de los embeddings tipo word2vec/GloVe (Mikolov et al., 2013). Aquí las coordenadas son un <b>juguete en 2D</b> dispuesto para que el mecanismo se vea; en un modelo real esta estructura <b>emerge del entrenamiento</b>. Y en los LLMs actuales el embedding es <b>contextual</b>: "banco" no tiene el mismo vector en "banco del río" que en "banco central".</div>
+          </div>
+
+          <div class="exercise">
+            <span class="exercise__tag">Pruébalo en Claude</span>
+            <p>Pídele a Claude: <code>Dame 6 términos semánticamente cercanos a "inferencia causal" y explica brevemente cada relación.</code> Observa que responde por <b>significado</b>, no por coincidencia de caracteres —justo lo que permiten los embeddings.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lesson" id="m4">
+        <div class="lesson__head">
+          <span class="lesson__num">04</span>
+          <div>
+            <h2 class="lesson__title">Cómo aprende: el entrenamiento</h2>
+            <p class="lesson__goal">De dónde sale el "conocimiento" del modelo y por qué a veces se equivoca con total seguridad.</p>
+          </div>
+        </div>
+        <ul class="topics">
+          <li><b>Pre-entrenamiento</b>: leer cantidades enormes de texto prediciendo el siguiente token.</li>
+          <li><b>Fine-tuning</b>: especializar el modelo para seguir instrucciones y conversar.</li>
+          <li><b>RLHF</b> y alineación: cómo se hace que un modelo sea <b>útil, honesto y seguro</b>.</li>
+          <li><b>Knowledge cutoff</b>: la fecha de corte del conocimiento y qué implica.</li>
+          <li>Por qué "saber" para un LLM es distinto de "recordar un dato" puntual.</li>
+        </ul>
+      </section>
+
+      <section class="lesson" id="m5">
+        <div class="lesson__head">
+          <span class="lesson__num">05</span>
+          <div>
+            <h2 class="lesson__title">Parámetros que tú controlas</h2>
+            <p class="lesson__goal">Las perillas reales de la inferencia. Aquí dejas de ser espectador y empiezas a manejar el modelo.</p>
+          </div>
+        </div>
+        <ul class="topics">
+          <li><span class="mono">temperature</span> (entre 0 y 1 en Claude): el dial entre respuestas <b>predecibles</b> (cerca de 0) y <b>creativas</b> (cerca de 1).</li>
+          <li><span class="mono">top_p</span> y <span class="mono">top_k</span>: otra forma de controlar cuánto se arriesga al elegir el token. Regla práctica: mueve <b>temperature o top_p</b>, no ambos a la vez.</li>
+          <li><span class="mono">max_tokens</span>: cuánto puede escribir como máximo (obligatorio en la API), y por qué a veces se corta a media respuesta.</li>
+          <li><span class="mono">stop_sequences</span>: textos que, al aparecer, cortan la generación. Y el <b>system prompt</b>: el rol y el contexto que pesan sobre toda la conversación.</li>
+          <li><b>Dato clave:</b> en Opus 4.7 y posteriores (incluido <span class="mono">Opus 4.8</span>), <span class="mono">temperature</span>, <span class="mono">top_p</span> y <span class="mono">top_k</span> <b>ya no se aceptan</b> —el modelo muestrea solo y, en su lugar, controlas un <b>nivel de esfuerzo</b>. <span class="mono">Sonnet 4.6</span> y <span class="mono">Haiku 4.5</span> sí usan las perillas clásicas.</li>
+        </ul>
+        <div class="exercise">
+          <span class="exercise__tag">Ejercicio en Claude</span>
+          <p>Le pediremos a Claude la misma frase creativa varias veces "como si la temperatura fuera baja" y luego "alta", para sentir en la práctica qué cambia ese parámetro.</p>
+        </div>
+      </section>
+
+      <section class="lesson" id="m6">
+        <div class="lesson__head">
+          <span class="lesson__num">06</span>
+          <div>
+            <h2 class="lesson__title">La ventana de contexto</h2>
+            <p class="lesson__goal">La "memoria de trabajo" del modelo: qué cabe, qué se olvida y cómo aprovecharla bien.</p>
+          </div>
+        </div>
+        <ul class="topics">
+          <li>Qué es el <b>context window</b> y por qué se mide en tokens.</li>
+          <li>Tokens de <b>entrada</b> vs. tokens de <b>salida</b>: las dos mitades del presupuesto. La <b>salida cuesta ~5× más</b> que la entrada (en Opus 4.8, $5 vs. $25 por millón de tokens), porque leer el contexto es paralelo y generar texto es secuencial.</li>
+          <li>Por qué el modelo no "recuerda" entre conversaciones distintas.</li>
+          <li>Qué pasa cuando se llena: truncado, pérdida de información y el efecto <span class="mono">lost in the middle</span>.</li>
+          <li>Tácticas para gestionar contexto largo (la antesala de RAG y del episodio de Agents).</li>
+        </ul>
+
+        <figure style="margin:26px 0 0">
+          <svg viewBox="0 0 720 360" role="img" aria-label="Curva de atención en forma de U: el modelo atiende mejor el inicio y el final del contexto, y peor el centro." style="width:100%;height:auto;display:block">
+            <!-- zona de peligro -->
+            <rect x="315" y="44" width="126" height="252" fill="var(--t4)" opacity="0.5"/>
+            <line x1="315" y1="44" x2="315" y2="296" stroke="var(--t4i)" stroke-width="1" stroke-dasharray="3 4" opacity="0.45"/>
+            <line x1="441" y1="44" x2="441" y2="296" stroke="var(--t4i)" stroke-width="1" stroke-dasharray="3 4" opacity="0.45"/>
+            <!-- eje X -->
+            <line x1="64" y1="296" x2="692" y2="296" stroke="var(--line)" stroke-width="1.5"/>
+            <line x1="64" y1="296" x2="64" y2="300" stroke="var(--line)" stroke-width="1.5"/>
+            <line x1="221" y1="296" x2="221" y2="300" stroke="var(--line)" stroke-width="1.5"/>
+            <line x1="378" y1="296" x2="378" y2="300" stroke="var(--line)" stroke-width="1.5"/>
+            <line x1="535" y1="296" x2="535" y2="300" stroke="var(--line)" stroke-width="1.5"/>
+            <line x1="692" y1="296" x2="692" y2="300" stroke="var(--line)" stroke-width="1.5"/>
+            <!-- curva en U -->
+            <path d="M64 44 L127 110 L190 163 L252 206 L315 236 L378 249 L441 236 L504 206 L566 163 L629 110 L692 44" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+            <circle cx="64" cy="44" r="4" fill="var(--accent)"/>
+            <circle cx="692" cy="44" r="4" fill="var(--accent)"/>
+            <circle cx="378" cy="249" r="5" fill="var(--t4i)"/>
+            <!-- eje Y -->
+            <text x="22" y="170" transform="rotate(-90 22 170)" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" letter-spacing="1" fill="var(--muted)">ATENCIÓN</text>
+            <!-- etiquetas superiores -->
+            <text x="66" y="34" font-family="'IBM Plex Mono', monospace" font-size="10.5" letter-spacing="1" fill="var(--accent-ink)">INICIO</text>
+            <text x="690" y="34" text-anchor="end" font-family="'IBM Plex Mono', monospace" font-size="10.5" letter-spacing="1" fill="var(--accent-ink)">FINAL</text>
+            <text x="378" y="80" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" letter-spacing="1.2" fill="var(--t4i)">ZONA DE PELIGRO</text>
+            <text x="378" y="98" text-anchor="middle" font-family="'IBM Plex Sans', sans-serif" font-size="11.5" font-style="italic" fill="var(--t4i)">lost in the middle</text>
+            <!-- etiquetas eje X -->
+            <text x="64" y="316" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="var(--muted)">0%</text>
+            <text x="221" y="316" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="var(--muted)">25%</text>
+            <text x="378" y="316" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="var(--muted)">50%</text>
+            <text x="535" y="316" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="var(--muted)">75%</text>
+            <text x="692" y="316" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="var(--muted)">100%</text>
+            <text x="378" y="340" text-anchor="middle" font-family="'IBM Plex Sans', sans-serif" font-size="12" fill="var(--ink-2)">Posición de la información dentro de la ventana de contexto</text>
+          </svg>
+          <figcaption style="font-size:14.5px;color:var(--muted);line-height:1.55;margin-top:14px">
+            <b style="color:var(--ink)">La curva de atención en forma de “U”.</b> El modelo recupera con más precisión lo que está al <b style="color:var(--ink)">inicio</b> y al <b style="color:var(--ink)">final</b> del contexto; lo que cae en el centro (≈40–60%) es lo que más se le escapa. La táctica que sigue de aquí: poné las restricciones e instrucciones clave al principio y la tarea concreta al final. Fenómeno documentado por Liu et&nbsp;al. (2023).
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="lesson" id="m7">
+        <div class="lesson__head">
+          <span class="lesson__num">07</span>
+          <div>
+            <h2 class="lesson__title">Capacidades y límites</h2>
+            <p class="lesson__goal">Una imagen honesta: qué hace excelente, dónde falla y cómo trabajar con esas fallas en vez de chocar con ellas.</p>
+          </div>
+        </div>
+        <ul class="topics">
+          <li>En qué brillan: lenguaje, resumen, transformación, código, razonamiento guiado.</li>
+          <li><b>Alucinaciones</b>: qué son, por qué ocurren y cómo reducirlas.</li>
+          <li><b>Sesgos</b>: reflejan los datos con que se entrenó. Un modelo que puntúa crédito puede replicar desigualdades históricas con apariencia de objetividad —realidad estadística, no debate moral.</li>
+          <li>Los límites del <b>razonamiento</b> y por qué a veces "se inventa" pasos.</li>
+          <li><b>No determinismo</b> y uso responsable: cuándo confiar y cuándo verificar.</li>
+        </ul>
+        <div class="exercise">
+          <span class="exercise__tag">Ejercicio en Claude</span>
+          <p>Provocaremos (a propósito) una alucinación con una pregunta tramposa y luego la corregiremos cambiando cómo preguntamos. Aprender a <em>detectarlas</em> es la meta.</p>
+        </div>
+      </section>
+
+      <section class="lesson" id="m8">
+        <div class="lesson__head">
+          <span class="lesson__num">08</span>
+          <div>
+            <h2 class="lesson__title">El ecosistema y qué sigue</h2>
+            <p class="lesson__goal">Ubicarte en el mapa: qué modelos existen, cómo elegir y cómo este episodio conecta con el resto del curso.</p>
+          </div>
+        </div>
+        <ul class="topics">
+          <li><b>La familia Claude</b>, la que usaremos en todo el curso: <span class="mono">Haiku 4.5</span> (rápido y barato), <span class="mono">Sonnet 4.6</span> (el equilibrado, el que más usarás) y <span class="mono">Opus 4.8</span> (máxima capacidad). Otras familias —GPT, Gemini, Llama— juegan parecido y los conceptos se trasladan.</li>
+          <li><b>Cómo elegir</b>: empieza en Sonnet; sube a Opus cuando el razonamiento es duro o equivocarse sale caro; baja a Haiku cuando importan el volumen y la velocidad. (Ej.: clasificar miles de registros → Haiku; diseñar una estrategia de identificación → Opus.)</li>
+          <li><b>La frontera, con asterisco</b>: por encima existe el nivel "Mythos" (<span class="mono">Fable 5</span>, <span class="mono">Mythos 5</span>), pero su acceso está hoy restringido o suspendido —en la práctica, <b>Opus 4.8 es el más capaz que puedes usar</b>.</li>
+          <li><b>Multimodalidad</b>: los modelos Claude actuales entienden texto e imágenes, no solo texto.</li>
+          <li>El puente con el resto del curso: <b>LLMs → Prompts → Agents → Skills → Loops → Claude Code</b>. Cada bloque se apoya en el anterior.</li>
+        </ul>
+      </section>
+
+      <!-- EJERCICIOS -->
+      <div class="divider" id="lab">
+        <span class="mono">Práctica</span>
+        <h3>Ejercicios en Claude</h3>
+        <span class="ln"></span>
+      </div>
+
+      <div class="lab">
+        <h3>Lo que haremos con las manos</h3>
+        <p>Cada módulo tiene su práctica, pero aquí están juntas: prompts listos para pegar en Claude y comprobar tú mismo cada concepto.</p>
+        <div class="lab__grid">
+          <div class="lab__item"><span class="n">EJ&nbsp;1</span><div><h5>Cuenta tokens</h5><p>Misma frase en dos idiomas → ver por qué el idioma cambia el costo.</p></div></div>
+          <div class="lab__item"><span class="n">EJ&nbsp;2</span><div><h5>Sube y baja la "temperatura"</h5><p>Pedir creatividad controlada y notar el cambio de variedad.</p></div></div>
+          <div class="lab__item"><span class="n">EJ&nbsp;3</span><div><h5>Caza la alucinación</h5><p>Forzar un error y luego corregirlo cambiando la pregunta.</p></div></div>
+          <div class="lab__item"><span class="n">EJ&nbsp;4</span><div><h5>Prueba la ventana de contexto</h5><p>Dar mucha información y ver qué recuerda y qué se pierde.</p></div></div>
+          <div class="lab__item"><span class="n">EJ&nbsp;5</span><div><h5>Mismo objetivo, dos prompts</h5><p>Comparar un prompt vago contra uno claro (anticipo del Episodio 02).</p></div></div>
+        </div>
+      </div>
+
+    </div><!-- /lessons -->
+  </div><!-- /body -->
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <a class="next" href="curso-indice.html" aria-label="Volver al índice del curso">
+      <span><small>Siguiente en el curso</small><strong>Episodio 02 · Prompts</strong></span>
+      <span class="go">Próximamente →</span>
+    </a>
+    <p class="colophon">Episodio 01 de la serie · LLMs · Prompts · Agents · Skills · Loops · Claude Code.</p>
+  </footer>
+
+</main>
+
+<script>
+  // Resalta el módulo activo en el temario mientras se hace scroll. Si falla, los enlaces siguen funcionando.
+  (function(){
+    try{
+      var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+      var map = {};
+      links.forEach(function(a){
+        var id = a.getAttribute('href').slice(1);
+        var el = document.getElementById(id);
+        if(el) map[id] = a;
+      });
+      if(!('IntersectionObserver' in window)) return;
+      var obs = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if(e.isIntersecting){
+            links.forEach(function(l){ l.classList.remove('active'); });
+            var a = map[e.target.id];
+            if(a) a.classList.add('active');
+          }
+        });
+      }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+      Object.keys(map).forEach(function(id){ obs.observe(document.getElementById(id)); });
+    }catch(err){ /* silencio: degrada a enlaces normales */ }
+  })();
+</script>
+
+<script>
+/* Calculadora de tokens (estimación ilustrativa). Portada de calculadora-tokens.html. */
+(function(){
+  var examples = {
+    en: "The quick brown fox jumps over the lazy dog.",
+    es: "El rápido zorro café salta sobre el perro perezoso.",
+    code: "function suma(a, b) {\n  return a + b;\n}",
+    num: "El pedido 4839201 costó $1,250.75 el 14/03/2026.",
+    emoji: "Hola 👋🏽 ¿todo bien? 🚀✨ #IA @claude 100%"
+  };
+
+  var input = document.getElementById('input');
+  if(!input) return;
+  var sChars = document.getElementById('s-chars');
+  var sWords = document.getElementById('s-words');
+  var sTokens = document.getElementById('s-tokens');
+  var sRatio = document.getElementById('s-ratio');
+  var viz = document.getElementById('viz');
+  var price = document.getElementById('price');
+  var costResult = document.getElementById('costResult');
+  var toggleBtn = document.getElementById('toggleViz');
+  var vizVisible = true;
+
+  function estimateTokens(t){
+    if(!t) return 0;
+    var words = (t.trim().match(/\S+/g) || []).length;
+    var chars = t.length;
+    var nonAscii = (t.match(/[^\x00-\x7F]/g) || []).length;
+    var digits = (t.match(/\d/g) || []).length;
+    var est = (chars/4)*0.5 + (words*1.3)*0.5;
+    est += nonAscii * 0.75;   // tildes, ñ, emojis cuestan más
+    est += digits * 0.20;     // los números se fragmentan
+    return Math.max(words, Math.round(est));
+  }
+
+  function chipTokens(text){
+    var out = [];
+    var parts = text.match(/(\s+|\S+)/g) || [];
+    for(var i=0;i<parts.length;i++){
+      var p = parts[i];
+      if(/^\s+$/.test(p)){ out.push({space:true}); continue; }
+      var sub = p.match(/([A-Za-zÀ-ÿ]+|\d+|[^\sA-Za-zÀ-ÿ\d]+)/g) || [p];
+      for(var j=0;j<sub.length;j++){
+        var s = sub[j];
+        if(/^[A-Za-zÀ-ÿ]+$/.test(s)){
+          var k=0; while(k<s.length){ out.push({t:s.slice(k,k+6)}); k+=6; }
+        } else if(/^\d+$/.test(s)){
+          var n=0; while(n<s.length){ out.push({t:s.slice(n,n+3)}); n+=3; }
+        } else {
+          var chars = Array.from(s);
+          for(var c=0;c<chars.length;c++){ out.push({t:chars[c]}); }
+        }
+      }
+    }
+    return out;
+  }
+
+  function renderViz(text){
+    viz.innerHTML = '';
+    if(!text.trim()){
+      var e = document.createElement('span'); e.className='empty';
+      e.textContent = 'Escribe algo para ver cómo se parte en tokens…';
+      viz.appendChild(e); return;
+    }
+    var toks = chipTokens(text);
+    var color = 1;
+    for(var i=0;i<toks.length;i++){
+      if(toks[i].space){
+        var sp = document.createElement('span'); sp.className='sp'; viz.appendChild(sp); continue;
+      }
+      var chip = document.createElement('span');
+      chip.className = 'chip t' + color;
+      chip.textContent = toks[i].t;
+      viz.appendChild(chip);
+      color = color % 5 + 1;
+    }
+  }
+
+  function update(){
+    var t = input.value;
+    var chars = t.length;
+    var words = (t.trim().match(/\S+/g) || []).length;
+    var tokens = estimateTokens(t);
+    sChars.textContent = chars;
+    sWords.textContent = words;
+    sTokens.textContent = tokens;
+    sRatio.textContent = tokens ? (chars/tokens).toFixed(1) : '0';
+    if(vizVisible) renderViz(t);
+    updateCost(tokens);
+  }
+
+  function updateCost(tokens){
+    var p = parseFloat(price.value);
+    if(isNaN(p) || p < 0){ costResult.innerHTML = '—<span>esta entrada</span>'; return; }
+    var cost = (tokens / 1000000) * p;
+    var txt = cost < 0.01 ? cost.toFixed(5) : cost.toFixed(4);
+    costResult.innerHTML = '$' + txt + '<span>esta entrada</span>';
+  }
+
+  document.getElementById('examples').addEventListener('click', function(e){
+    var btn = e.target.closest('.ex-btn');
+    if(!btn) return;
+    input.value = examples[btn.getAttribute('data-key')] || '';
+    update();
+    input.focus();
+  });
+
+  toggleBtn.addEventListener('click', function(){
+    vizVisible = !vizVisible;
+    viz.style.display = vizVisible ? '' : 'none';
+    toggleBtn.textContent = vizVisible ? 'Ocultar' : 'Mostrar';
+    if(vizVisible) renderViz(input.value);
+  });
+
+  input.addEventListener('input', update);
+  price.addEventListener('input', update);
+  update();
+})();
+</script>
+
+<script>
+/* Embeddings: mapa semántico + aritmética de vectores. Portado de llms-embeddings.html. */
+document.addEventListener('DOMContentLoaded', function(){
+  if(!document.getElementById('map')) return;
+
+  /* ---- datos: coordenadas ilustrativas en 2D (espacio de datos 0–100) ---- */
+  const WORDS=[
+    // animales
+    {l:"caballo",x:8,y:16,c:"a"},{l:"perro",x:15,y:10,c:"a"},{l:"gato",x:22,y:14,c:"a"},
+    {l:"ratón",x:12,y:22,c:"a"},{l:"vaca",x:20,y:22,c:"a"},{l:"león",x:26,y:8,c:"a"},
+    // realeza y personas (paralelogramos de género y estatus)
+    {l:"niño",x:24,y:34,c:"r"},{l:"niña",x:38,y:34,c:"r"},
+    {l:"hombre",x:24,y:46,c:"r"},{l:"mujer",x:38,y:46,c:"r"},
+    {l:"rey",x:24,y:60,c:"r"},{l:"reina",x:38,y:60,c:"r"},
+    {l:"príncipe",x:24,y:72,c:"r"},{l:"princesa",x:38,y:72,c:"r"},
+    // comida
+    {l:"vino",x:55,y:34,c:"f"},{l:"manzana",x:60,y:38,c:"f"},{l:"pan",x:52,y:40,c:"f"},
+    {l:"queso",x:58,y:44,c:"f"},{l:"café",x:50,y:48,c:"f"},
+    // lugares (países / capitales: paralelogramo "capital de")
+    {l:"Francia",x:70,y:58,c:"l"},{l:"España",x:81,y:58,c:"l"},{l:"Italia",x:92,y:58,c:"l"},
+    {l:"París",x:70,y:72,c:"l"},{l:"Madrid",x:81,y:72,c:"l"},{l:"Roma",x:92,y:72,c:"l"},
+    // números
+    {l:"uno",x:50,y:88,c:"n"},{l:"dos",x:55,y:92,c:"n"},{l:"tres",x:60,y:86,c:"n"},{l:"cuatro",x:56,y:96,c:"n"}
+  ];
+  const CATS={
+    a:{name:"Animales",fill:"#D5EFE8",ink:"#1C7C66"},
+    r:{name:"Realeza y personas",fill:"#E6E1FF",ink:"#5B45D9"},
+    f:{name:"Comida",fill:"#FBE6C4",ink:"#92600F"},
+    l:{name:"Lugares",fill:"#D8E7FB",ink:"#2C5F9E"},
+    n:{name:"Números",fill:"#FBD8DF",ink:"#B23A57"}
+  };
+
+  const W=760,H=460,LEFT=52,RIGHT=52,TOP=46,BOT=50,PW=W-LEFT-RIGHT,PH=H-TOP-BOT;
+  const px=x=>LEFT+(x/100)*PW, py=y=>TOP+(1-y/100)*PH;
+  const dist=(p,q)=>Math.hypot(p.x-q.x,p.y-q.y);
+  const byL=l=>WORDS.find(w=>w.l===l);
+  let pinned=null;
+
+  /* ---- leyenda ---- */
+  (function(){
+    const order=['a','r','l','f','n'];
+    document.getElementById('legend').innerHTML=order.map(k=>
+      `<span class="lg"><span class="sw" style="background:${CATS[k].fill};border:1px solid ${CATS[k].ink}"></span>${CATS[k].name}</span>`).join('');
+  })();
+
+  /* ---- mapa semántico ---- */
+  const map=document.getElementById('map');
+  function buildMap(){
+    let grid='';
+    for(let g=0;g<=100;g+=20){
+      grid+=`<line x1="${px(g)}" y1="${py(0)}" x2="${px(g)}" y2="${py(100)}" stroke="#EFEEE9" stroke-width="1"></line>`;
+      grid+=`<line x1="${px(0)}" y1="${py(g)}" x2="${px(100)}" y2="${py(g)}" stroke="#EFEEE9" stroke-width="1"></line>`;
+    }
+    const nodes=WORDS.map((w,i)=>{
+      const c=CATS[w.c];
+      return `<g class="node" data-i="${i}" tabindex="0"><circle cx="${px(w.x)}" cy="${py(w.y)}" r="6.5" fill="${c.fill}" stroke="${c.ink}" stroke-width="1.5"></circle><text class="nlab" x="${px(w.x)}" y="${py(w.y)-12}" text-anchor="middle" fill="${c.ink}">${w.l}</text></g>`;
+    }).join('');
+    map.innerHTML=grid+'<g id="links"></g>'+nodes;
+    map.querySelectorAll('.node').forEach(g=>{
+      const i=+g.dataset.i;
+      g.addEventListener('mouseenter',()=>focus(i));
+      g.addEventListener('mouseleave',()=>{if(pinned===null)clearFocus();});
+      g.addEventListener('focus',()=>focus(i));
+      g.addEventListener('click',()=>{pinned=(pinned===i)?null:i;pinned===null?clearFocus():focus(i);});
+    });
+  }
+  function focus(i){
+    const me=WORDS[i];
+    const nbrs=WORDS.map((w,j)=>({j,d:dist(me,w)})).filter(o=>o.j!==i).sort((a,b)=>a.d-b.d).slice(0,3).map(o=>o.j);
+    map.querySelectorAll('.node').forEach(g=>{
+      const j=+g.dataset.i;
+      g.classList.toggle('is-focus',j===i);
+      g.classList.toggle('is-nbr',nbrs.includes(j));
+      g.classList.toggle('is-dim',j!==i&&!nbrs.includes(j));
+    });
+    const me_x=px(me.x),me_y=py(me.y);
+    document.getElementById('links').innerHTML=nbrs.map(j=>`<line x1="${me_x}" y1="${me_y}" x2="${px(WORDS[j].x)}" y2="${py(WORDS[j].y)}" class="link"></line>`).join('');
+    document.getElementById('mapread').innerHTML=`<b>${me.l}</b> &rarr; vecinos más cercanos: `+nbrs.map(j=>`<span class="chip">${WORDS[j].l}</span>`).join(' ');
+  }
+  function clearFocus(){
+    map.querySelectorAll('.node').forEach(g=>g.classList.remove('is-focus','is-nbr','is-dim'));
+    const lk=document.getElementById('links'); if(lk) lk.innerHTML='';
+    document.getElementById('mapread').innerHTML='Pasa el cursor &mdash;o toca&mdash; una palabra para ver sus tres vecinos más cercanos.';
+  }
+
+  /* ---- aritmética de vectores ---- */
+  const ANALOGIES=[
+    {a:"rey",b:"hombre",c:"mujer"},
+    {a:"París",b:"Francia",c:"España"},
+    {a:"Madrid",b:"España",c:"Italia"},
+    {a:"reina",b:"mujer",c:"hombre"}
+  ];
+  const selA=document.getElementById('selA'),selB=document.getElementById('selB'),selC=document.getElementById('selC');
+  function fillSelect(sel){
+    const order=['r','l','a','f','n'];
+    let html='';
+    order.forEach(k=>{
+      html+=`<optgroup label="${CATS[k].name}">`;
+      WORDS.filter(w=>w.c===k).forEach(w=>{html+=`<option value="${w.l}">${w.l}</option>`;});
+      html+='</optgroup>';
+    });
+    sel.innerHTML=html;
+  }
+  function runAnalogy(aL,bL,cL){
+    const A=byL(aL),B=byL(bL),C=byL(cL);
+    const r={x:A.x-B.x+C.x,y:A.y-B.y+C.y};
+    const N=WORDS.filter(w=>![aL,bL,cL].includes(w.l)).map(w=>({w,d:dist(w,r)})).sort((a,b)=>a.d-b.d)[0].w;
+    drawAnalogy(A,B,C,r,N);
+    document.getElementById('anaread').innerHTML=
+      `<span class="chip">${aL} &minus; ${bL} + ${cL}</span> &rarr; palabra más cercana al resultado: <b>${N.l}</b><br><span class="sub">La flecha sólida es la relación <span class="mono">${bL} &rarr; ${aL}</span>; la punteada aplica esa misma dirección desde <span class="mono">${cL}</span>.</span>`;
+  }
+  function drawAnalogy(A,B,C,r,N){
+    const pts=[A,B,C,r];
+    const minx=Math.min.apply(null,pts.map(p=>p.x)),maxx=Math.max.apply(null,pts.map(p=>p.x));
+    const miny=Math.min.apply(null,pts.map(p=>p.y)),maxy=Math.max.apply(null,pts.map(p=>p.y));
+    const AW=760,AH=300,m=72;
+    const sc=Math.min((AW-2*m)/((maxx-minx)||1),(AH-2*m)/((maxy-miny)||1));
+    const cx=(minx+maxx)/2,cy=(miny+maxy)/2;
+    const X=x=>AW/2+(x-cx)*sc, Y=y=>AH/2-(y-cy)*sc;
+    const dot=(p,f,s)=>`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="7" fill="${f}" stroke="${s}" stroke-width="1.5"></circle>`;
+    const lab=(p,t,dy,col,wt)=>`<text x="${X(p.x)}" y="${Y(p.y)+dy}" text-anchor="middle" fill="${col}" font-weight="${wt}" style="font-family:'IBM Plex Mono',monospace;font-size:12.5px">${t}</text>`;
+    const ca=CATS[A.c],cb=CATS[B.c],cc=CATS[C.c];
+    let s='<defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#5A4FCF"></path></marker></defs>';
+    s+=`<polygon points="${X(B.x)},${Y(B.y)} ${X(A.x)},${Y(A.y)} ${X(r.x)},${Y(r.y)} ${X(C.x)},${Y(C.y)}" fill="#ECEAFE" stroke="#D9D4FB" stroke-width="1"></polygon>`;
+    s+=`<line x1="${X(B.x)}" y1="${Y(B.y)}" x2="${X(A.x)}" y2="${Y(A.y)}" stroke="#5A4FCF" stroke-width="2.5" marker-end="url(#ah)"></line>`;
+    s+=`<line x1="${X(C.x)}" y1="${Y(C.y)}" x2="${X(r.x)}" y2="${Y(r.y)}" stroke="#5A4FCF" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#ah)"></line>`;
+    s+=dot(B,cb.fill,cb.ink)+lab(B,B.l,-13,cb.ink,600);
+    s+=dot(A,ca.fill,ca.ink)+lab(A,A.l,-13,ca.ink,600);
+    s+=dot(C,cc.fill,cc.ink)+lab(C,C.l,24,cc.ink,600);
+    s+=`<circle cx="${X(r.x)}" cy="${Y(r.y)}" r="11" fill="none" stroke="#3E33B8" stroke-width="2.5"></circle>`;
+    s+=lab(r,'resultado',-17,'#6B6B76',500);
+    s+=lab(r,N.l,28,'#3E33B8',700);
+    document.getElementById('ana').innerHTML=s;
+  }
+  function setPreset(p){selA.value=p.a;selB.value=p.b;selC.value=p.c;runAnalogy(p.a,p.b,p.c);}
+
+  document.querySelectorAll('.pbtn').forEach((btn,k)=>btn.addEventListener('click',()=>setPreset(ANALOGIES[k])));
+  [selA,selB,selC].forEach(s=>s.addEventListener('change',()=>runAnalogy(selA.value,selB.value,selC.value)));
+
+  /* ---- init ---- */
+  buildMap(); clearFocus();
+  fillSelect(selA); fillSelect(selB); fillSelect(selC);
+  setPreset(ANALOGIES[0]);
+});
+</script>
+
+</body>
+</html>

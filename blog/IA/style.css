@@ -1,0 +1,398 @@
+/* =============================================================
+   CURSO · IA APLICADA — Hoja de estilos compartida (style.css)
+   -------------------------------------------------------------
+   Edita el DISEÑO aquí una sola vez y se actualiza en todas las
+   páginas (índice, clases y la calculadora). El CONTENIDO vive
+   en los archivos .html / .md; el ESTILO vive aquí.
+
+   Índice:
+     1. Tokens (variables de color, tipografía, medidas)
+     2. Base y primitivas (body, enlaces, foco, .mono)
+     3. Barra superior (topbar)
+     4. Hero  — compartido por índice y clases
+     5. Página de CLASE (predictor, meta, banner, toc,
+        lecciones, ejercicios, laboratorio)
+     6. Página de ÍNDICE (tarjetas de clase)
+     7. Componente CALCULADORA (.calc) — portable
+     8. Pie de página
+   ============================================================= */
+
+
+/* ============================================================
+   1. TOKENS
+   ============================================================ */
+:root{
+  --bg:#F4F4F1;
+  --surface:#FFFFFF;
+  --ink:#19191F;
+  --ink-2:#3A3A44;
+  --muted:#6B6B76;
+  --line:#E5E4DF;
+  --line-2:#EFEEE9;
+  --accent:#5A4FCF;
+  --accent-ink:#3E33B8;
+  --accent-wash:#ECEAFE;
+
+  /* paleta de tokens — solo se usa en el motivo de tokenización */
+  --t1:#E6E1FF; --t1i:#5B45D9;
+  --t2:#D5EFE8; --t2i:#1C7C66;
+  --t3:#FBE6C4; --t3i:#92600F;
+  --t4:#FBD8DF; --t4i:#B23A57;
+  --t5:#D8E7FB; --t5i:#2C5F9E;
+
+  --maxw:1120px;
+  --radius:14px;
+}
+/* el índice usa un ancho un poco menor */
+body.indice{ --maxw:1000px; }
+
+
+/* ============================================================
+   2. BASE Y PRIMITIVAS
+   ============================================================ */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion: no-preference){ html{scroll-behavior:smooth} }
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+
+a{color:inherit}
+.mono{font-family:"IBM Plex Mono", ui-monospace, monospace}
+
+:focus-visible{outline:3px solid var(--accent); outline-offset:3px; border-radius:4px}
+
+
+/* ============================================================
+   3. BARRA SUPERIOR
+   ============================================================ */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  background:rgba(244,244,241,.82);
+  backdrop-filter:saturate(140%) blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.topbar__in{
+  max-width:var(--maxw); margin:0 auto; padding:13px 24px;
+  display:flex; align-items:center; gap:18px; justify-content:space-between;
+}
+.brand{display:flex; align-items:center; gap:10px; font-family:"Space Grotesk",sans-serif; font-weight:700; letter-spacing:-.01em}
+.brand .dot{width:11px;height:11px;border-radius:3px;background:var(--accent);box-shadow:3px 0 0 var(--t3),6px 0 0 var(--t2)}
+
+/* hilo de la serie (en las clases) */
+.series{display:flex; gap:6px; flex-wrap:wrap; align-items:center; font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted)}
+.series span{padding:3px 8px; border-radius:20px; white-space:nowrap}
+.series .now{background:var(--accent); color:#fff}
+.series .sep{padding:0; color:var(--line)}
+@media (max-width:860px){ .series{display:none} }
+
+/* progreso (en el índice) */
+.topbar .prog{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted)}
+
+
+/* ============================================================
+   4. HERO  (compartido por índice y clases)
+   ============================================================ */
+.shell{max-width:var(--maxw); margin:0 auto; padding:0 24px}
+
+.hero{padding:64px 0 40px; border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:12.5px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--accent-ink); margin:0 0 20px;
+}
+.hero h1{
+  font-family:"Space Grotesk",sans-serif; font-weight:700;
+  font-size:clamp(2.4rem, 6vw, 4.3rem); line-height:1.03; letter-spacing:-.025em;
+  margin:0; max-width:18ch;
+}
+.hero h1 .em{color:var(--accent)}
+.hero p.lede{font-size:clamp(1.05rem,2.2vw,1.28rem); color:var(--ink-2); max-width:60ch; margin:24px 0 0}
+
+
+/* ============================================================
+   5. PÁGINA DE CLASE
+   ============================================================ */
+
+/* --- tarjeta "predictor" (motivo del siguiente token) --- */
+.predictor{
+  margin-top:42px; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:26px 26px 22px;
+  box-shadow:0 1px 0 rgba(25,25,31,.03), 0 18px 40px -28px rgba(25,25,31,.25);
+}
+.predictor__label{font-family:"IBM Plex Mono",monospace; font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 16px}
+.sentence{font-family:"Space Grotesk",sans-serif; font-size:clamp(1.1rem,3.2vw,1.7rem); line-height:1.5; font-weight:500}
+.tok{padding:.06em .34em; border-radius:6px; margin:0 1px; white-space:nowrap}
+.tok.t1{background:var(--t1);color:var(--t1i)} .tok.t2{background:var(--t2);color:var(--t2i)}
+.tok.t3{background:var(--t3);color:var(--t3i)} .tok.t4{background:var(--t4);color:var(--t4i)}
+.tok.t5{background:var(--t5);color:var(--t5i)}
+.blank{display:inline-block; min-width:2.4em; border-bottom:3px solid var(--accent); color:var(--accent); font-weight:700; text-align:center}
+.caret{display:inline-block;width:2px;height:1.05em;background:var(--accent);vertical-align:-.16em;margin-left:1px;animation:blink 1.1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion: reduce){ .caret{animation:none} }
+
+.dist{margin-top:24px; display:flex; flex-direction:column; gap:9px}
+.bar{display:grid; grid-template-columns:108px 1fr 46px; align-items:center; gap:12px; font-size:14px}
+.bar .name{font-family:"IBM Plex Mono",monospace; color:var(--ink-2)}
+.bar .track{height:11px; background:var(--line-2); border-radius:20px; overflow:hidden}
+.bar .fill{height:100%; border-radius:20px; background:linear-gradient(90deg,#8d83ef,var(--accent))}
+.bar.lead .fill{background:linear-gradient(90deg,#6c61e6,var(--accent-ink))}
+.bar .pct{font-family:"IBM Plex Mono",monospace; color:var(--muted); text-align:right; font-size:13px}
+.predictor__note{margin:20px 0 0; font-size:14.5px; color:var(--muted)}
+.predictor__note b{color:var(--ink)}
+@media (max-width:520px){ .bar{grid-template-columns:84px 1fr 40px; gap:8px} }
+
+/* --- tira de metadatos (nivel, duración…) --- */
+.meta{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+  border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+  margin:36px 0 8px; background:var(--surface);
+}
+.meta div{padding:18px 20px; border-right:1px solid var(--line)}
+.meta div:last-child{border-right:0}
+.meta dt{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 5px}
+.meta dd{margin:0; font-weight:600; font-size:15px}
+@media (max-width:720px){ .meta{grid-template-columns:1fr 1fr} .meta div:nth-child(2){border-right:0} .meta div:nth-child(1),.meta div:nth-child(2){border-bottom:1px solid var(--line)} }
+
+/* --- banner informativo --- */
+.banner{
+  display:flex; gap:14px; align-items:flex-start;
+  background:var(--accent-wash); border:1px solid #D9D4FB; color:var(--accent-ink);
+  border-radius:var(--radius); padding:16px 18px; margin:30px 0 4px; font-size:15px;
+}
+.banner .ic{flex:0 0 auto; width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;margin-top:1px}
+.banner b{color:var(--accent-ink)}
+
+/* --- rejilla: índice lateral + contenido --- */
+.body{display:grid; grid-template-columns:230px 1fr; gap:48px; padding:54px 0 30px; align-items:start}
+@media (max-width:920px){ .body{grid-template-columns:1fr; gap:8px} }
+
+/* --- índice lateral (TOC) --- */
+.toc{position:sticky; top:84px}
+.toc h4{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0 0 14px}
+.toc ol{list-style:none; margin:0; padding:0; counter-reset:t}
+.toc li{counter-increment:t; margin:0}
+.toc a{
+  display:flex; gap:10px; align-items:baseline; text-decoration:none;
+  padding:7px 0; color:var(--muted); font-size:14px; line-height:1.35;
+  border-left:2px solid transparent; padding-left:14px; margin-left:-2px;
+  transition:color .15s, border-color .15s;
+}
+.toc a::before{content:counter(t,decimal-leading-zero); font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--line);}
+.toc a:hover{color:var(--ink)}
+.toc a.active{color:var(--ink); border-left-color:var(--accent); font-weight:600}
+.toc a.active::before{color:var(--accent)}
+@media (max-width:920px){
+  .toc{position:static; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:18px 18px}
+  .toc ol{columns:2; column-gap:18px}
+  .toc a{padding:5px 0 5px 12px}
+}
+@media (max-width:520px){ .toc ol{columns:1} }
+
+/* --- lecciones --- */
+.lessons{display:flex; flex-direction:column; gap:18px; min-width:0}
+.lesson{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:30px 32px; scroll-margin-top:84px;
+}
+.lesson__head{display:flex; gap:18px; align-items:flex-start}
+.lesson__num{
+  flex:0 0 auto; font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:1.05rem;
+  width:42px; height:42px; border-radius:11px; display:grid; place-items:center;
+  background:var(--ink); color:#fff; letter-spacing:-.02em;
+}
+.lesson__title{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:1.5rem; letter-spacing:-.02em; margin:4px 0 0; line-height:1.15}
+.lesson__goal{margin:10px 0 0; color:var(--ink-2); font-size:15.5px}
+.topics{list-style:none; margin:22px 0 0; padding:0; display:grid; gap:11px}
+.topics li{position:relative; padding-left:26px; font-size:15.5px; color:var(--ink-2)}
+.topics li::before{
+  content:""; position:absolute; left:2px; top:.62em; width:8px; height:8px;
+  border-radius:2px; background:var(--accent); transform:rotate(45deg);
+}
+.topics li b{color:var(--ink); font-weight:600}
+.topics .mono{font-size:14px; color:var(--accent-ink); background:var(--accent-wash); padding:.05em .4em; border-radius:5px}
+
+/* --- caja de ejercicio --- */
+.exercise{
+  margin-top:22px; border:1px dashed #C9C3F2; background:#F6F4FE;
+  border-radius:11px; padding:16px 18px;
+}
+.exercise__tag{
+  display:inline-flex; align-items:center; gap:7px; font-family:"IBM Plex Mono",monospace;
+  font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent-ink); font-weight:500;
+}
+.exercise__tag::before{content:"▶"; font-size:9px}
+.exercise p{margin:9px 0 0; font-size:14.5px; color:var(--ink-2)}
+.exercise code{font-family:"IBM Plex Mono",monospace; font-size:13.5px; background:#fff; border:1px solid var(--line); padding:.08em .35em; border-radius:5px}
+
+/* --- separador de sección --- */
+.divider{display:flex; align-items:center; gap:16px; margin:14px 2px 0}
+.divider h3{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:1.15rem; margin:0; letter-spacing:-.01em; white-space:nowrap}
+.divider .ln{height:1px; background:var(--line); flex:1}
+.divider .mono{color:var(--muted); font-size:11px; letter-spacing:.14em; text-transform:uppercase}
+
+/* --- bloque oscuro de laboratorio --- */
+.lab{background:var(--ink); color:#EDEDF2; border-radius:var(--radius); padding:34px 32px; margin-top:18px}
+.lab h3{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:1.45rem; margin:0; letter-spacing:-.02em}
+.lab > p{color:#AFAFBC; margin:10px 0 24px; font-size:15.5px}
+.lab__grid{display:grid; gap:12px}
+.lab__item{display:flex; gap:16px; align-items:flex-start; padding:16px 18px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09); border-radius:11px}
+.lab__item .n{font-family:"IBM Plex Mono",monospace; color:var(--t3); font-size:13px; flex:0 0 auto; padding-top:2px}
+.lab__item h5{margin:0; font-size:15.5px; font-weight:600; color:#fff}
+.lab__item p{margin:5px 0 0; font-size:14px; color:#A9A9B8}
+
+
+/* ============================================================
+   6. PÁGINA DE ÍNDICE
+   ============================================================ */
+.pills{display:flex; flex-wrap:wrap; gap:10px; margin-top:30px}
+.pill{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-2); background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:7px 14px}
+.pill b{color:var(--ink)}
+
+.sec{padding:48px 0 80px}
+.sec__head{display:flex; align-items:baseline; gap:14px; margin-bottom:8px}
+.sec__head h2{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:1.1rem; letter-spacing:-.01em; margin:0}
+.sec__head .ln{height:1px; background:var(--line); flex:1}
+.sec__head .mono{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+
+.classes{display:flex; flex-direction:column; gap:12px; margin-top:24px}
+.class{
+  display:flex; align-items:center; gap:22px; text-decoration:none;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:22px 26px; transition:border-color .15s, transform .15s, box-shadow .15s;
+}
+.class .num{flex:0 0 auto; font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:1.1rem; width:46px; height:46px; border-radius:12px; display:grid; place-items:center; letter-spacing:-.02em}
+.class .body{flex:1; min-width:0; display:block; grid-template-columns:none; gap:0; padding:0}
+.class .body h3{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:1.3rem; letter-spacing:-.02em; margin:0; line-height:1.15}
+.class .body p{margin:6px 0 0; font-size:15px; color:var(--muted)}
+.class .meta-r{flex:0 0 auto; display:flex; align-items:center; gap:16px}
+.badge{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.06em; text-transform:uppercase; padding:5px 11px; border-radius:20px; white-space:nowrap}
+.badge.ready{background:var(--accent-wash); color:var(--accent-ink)}
+.badge.soon{background:var(--line-2); color:var(--muted)}
+.class .arrow{font-family:"Space Grotesk",sans-serif; font-weight:700; color:var(--accent); font-size:1.2rem; opacity:0; transform:translateX(-4px); transition:opacity .15s, transform .15s}
+
+.class.is-ready .num{background:var(--ink); color:#fff}
+.class.is-ready:hover{border-color:var(--accent); transform:translateY(-2px); box-shadow:0 18px 40px -28px rgba(90,79,207,.5)}
+.class.is-ready:hover .arrow{opacity:1; transform:translateX(0)}
+.class.is-soon{cursor:default}
+.class.is-soon .num{background:var(--line-2); color:var(--muted)}
+.class.is-soon .body h3{color:var(--ink-2)}
+
+@media (max-width:620px){
+  .class{gap:16px; padding:18px 18px; align-items:flex-start}
+  .class .meta-r{flex-direction:column; align-items:flex-end; gap:8px}
+  .class .arrow{display:none}
+}
+
+
+/* ============================================================
+   7. COMPONENTE CALCULADORA  (.calc) — portable y embebible
+   ============================================================ */
+.calc{max-width:720px; margin:40px auto; padding:0 20px}
+.calc h1{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:clamp(1.8rem,5vw,2.6rem); letter-spacing:-.02em; margin:0; line-height:1.05}
+.calc .sub{color:var(--ink-2); margin:14px 0 0; font-size:1.02rem; max-width:56ch}
+
+.calc .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:24px; margin-top:28px; box-shadow:0 1px 0 rgba(25,25,31,.03), 0 18px 40px -30px rgba(25,25,31,.22)}
+.calc .label{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 10px}
+
+.calc .examples{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px}
+.calc .ex-btn{font-family:"IBM Plex Sans",sans-serif; font-size:13px; color:var(--ink-2); background:var(--bg); border:1px solid var(--line); border-radius:20px; padding:6px 13px; cursor:pointer; transition:all .14s}
+.calc .ex-btn:hover{border-color:var(--accent); color:var(--accent-ink); background:var(--accent-wash)}
+
+.calc textarea{width:100%; min-height:120px; resize:vertical; font-family:"IBM Plex Sans",sans-serif; font-size:16px; line-height:1.6; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:11px; padding:14px 16px; outline:none; transition:border-color .14s}
+.calc textarea:focus{border-color:var(--accent)}
+
+.calc .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:0; border:1px solid var(--line); border-radius:11px; overflow:hidden; margin-top:18px; background:var(--bg)}
+.calc .stat{padding:16px 14px; border-right:1px solid var(--line); text-align:center}
+.calc .stat:last-child{border-right:0}
+.calc .stat .v{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:1.7rem; line-height:1; letter-spacing:-.02em}
+.calc .stat.accent .v{color:var(--accent)}
+.calc .stat .k{font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-top:7px}
+@media (max-width:560px){ .calc .stats{grid-template-columns:1fr 1fr} .calc .stat:nth-child(2){border-right:0} .calc .stat:nth-child(1),.calc .stat:nth-child(2){border-bottom:1px solid var(--line)} }
+
+.calc .vizhead{display:flex; align-items:center; justify-content:space-between; gap:12px; margin:24px 0 12px; flex-wrap:wrap}
+.calc .toggle{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--accent-ink); background:none; border:1px solid var(--line); border-radius:20px; padding:5px 12px; cursor:pointer}
+.calc .toggle:hover{border-color:var(--accent)}
+.calc .viz{background:var(--bg); border:1px solid var(--line); border-radius:11px; padding:16px; min-height:54px; line-height:2.2}
+.calc .viz .chip{font-family:"IBM Plex Mono",monospace; font-size:14px; padding:.16em .42em; border-radius:5px; margin:2px 1px; display:inline-block; white-space:pre}
+.calc .viz .chip.t1{background:var(--t1);color:var(--t1i)} .calc .viz .chip.t2{background:var(--t2);color:var(--t2i)}
+.calc .viz .chip.t3{background:var(--t3);color:var(--t3i)} .calc .viz .chip.t4{background:var(--t4);color:var(--t4i)}
+.calc .viz .chip.t5{background:var(--t5);color:var(--t5i)}
+.calc .viz .sp{display:inline-block; width:.5em}
+.calc .viz .empty{color:var(--muted); font-size:14px; font-family:"IBM Plex Sans",sans-serif}
+
+.calc .cost{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:22px; padding-top:20px; border-top:1px solid var(--line-2)}
+.calc .cost label{font-size:14px; color:var(--ink-2)}
+.calc .cost .price{position:relative}
+.calc .cost .price .cur{position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--muted); font-family:"IBM Plex Mono",monospace; font-size:14px}
+.calc .cost input{width:110px; font-family:"IBM Plex Mono",monospace; font-size:14px; padding:8px 10px 8px 24px; border:1px solid var(--line); border-radius:8px; background:var(--bg); outline:none}
+.calc .cost input:focus{border-color:var(--accent)}
+.calc .cost .result{margin-left:auto; font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:1.1rem; color:var(--accent)}
+.calc .cost .result span{font-family:"IBM Plex Mono",monospace; font-weight:400; font-size:12px; color:var(--muted); display:block; text-align:right; margin-top:2px}
+
+.calc .note{margin-top:18px; font-size:13px; color:var(--muted); line-height:1.55}
+.calc .note b{color:var(--ink-2)}
+
+
+/* ============================================================
+   8. PIE DE PÁGINA
+   ============================================================ */
+.foot{border-top:1px solid var(--line); margin-top:48px; padding:34px 0 70px; color:var(--muted); font-size:13px}
+.next{
+  display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:22px 26px; text-decoration:none;
+}
+.next small{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.next strong{font-family:"Space Grotesk",sans-serif; font-size:1.25rem; display:block; margin-top:4px; letter-spacing:-.01em; color:var(--ink)}
+.next .go{font-family:"Space Grotesk",sans-serif; font-weight:700; color:var(--accent); font-size:1.05rem}
+.colophon{margin-top:22px; font-size:13px; color:var(--muted)}
+
+
+/* ============================================================
+   9. COMPONENTE EMBEDDINGS (.emb) — mapa semántico + aritmética
+      Portado de llms-embeddings.html para integrarlo en llms.html.
+      (La calculadora vive en la sección 7; este widget es aparte.)
+   ============================================================ */
+.emb-kick{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 8px}
+.emb-lede{font-size:15.5px; color:var(--ink-2); margin:0 0 6px}
+.emb-lede b{color:var(--ink)}
+
+.emb .legend{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 8px}
+.emb .lg{display:inline-flex; align-items:center; gap:7px; font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-2); background:var(--bg); border:1px solid var(--line); border-radius:20px; padding:5px 11px}
+.emb .lg .sw{width:11px; height:11px; border-radius:3px}
+
+.emb .viz{margin-top:8px; background:var(--bg); border:1px solid var(--line); border-radius:11px; padding:6px; overflow-x:auto}
+.emb .viz svg{display:block; width:100%; min-width:560px; height:auto}
+.emb .viz.ana svg{min-width:480px}
+
+.emb .readout{margin-top:14px; font-size:14.5px; color:var(--ink-2); min-height:1.5em; line-height:1.6}
+.emb .readout .chip{font-family:"IBM Plex Mono",monospace; font-size:12.5px; background:var(--accent-wash); color:var(--accent-ink); padding:.1em .5em; border-radius:6px; margin:0 1px; white-space:nowrap}
+.emb .readout .sub{color:var(--muted); font-size:13.5px}
+.emb .readout b{color:var(--ink)}
+
+.emb .node{cursor:pointer}
+.emb .node .nlab{font-family:"IBM Plex Mono",monospace; font-size:11px; transition:opacity .15s}
+.emb .node circle{transition:opacity .15s}
+.emb .node.is-focus circle{stroke-width:2.6}
+.emb .node.is-focus .nlab{font-weight:600}
+.emb .node.is-dim{opacity:.16}
+.emb .link{stroke:var(--accent); stroke-width:1.6; stroke-dasharray:3 4; opacity:.75}
+
+.emb .controls{display:flex; flex-wrap:wrap; gap:8px; margin:2px 0 6px}
+.emb .pbtn{font-family:"IBM Plex Mono",monospace; font-size:13px; color:var(--ink-2); background:var(--bg); border:1px solid var(--line); border-radius:20px; padding:7px 13px; cursor:pointer; transition:all .14s}
+.emb .pbtn:hover{border-color:var(--accent); color:var(--accent-ink); background:var(--accent-wash)}
+.emb .custom{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:10px 0 0; font-family:"IBM Plex Mono",monospace; font-size:14px; color:var(--muted)}
+.emb .custom select{font-family:"IBM Plex Mono",monospace; font-size:14px; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:7px 9px; cursor:pointer}
+.emb .custom select:focus{outline:none; border-color:var(--accent)}
+.emb .custom .op{color:var(--accent); font-weight:700}
+
+/* variante de aviso para .banner (honestidad metodológica) */
+.banner.warn{background:#FFF8EC; border-color:#F3E2BE; color:#7A5410}
+.banner.warn .ic{background:#C8902A}
+.banner.warn b{color:#7A5410}

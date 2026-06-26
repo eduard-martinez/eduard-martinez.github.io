@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code para EDA · IA aplicada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ===== Episodio Claude Code — estilos locales (namespaced .cc-) ===== */
+  .cc-term{margin-top:42px;background:var(--ink);border-radius:var(--radius);padding:22px 22px 20px;font-family:"IBM Plex Mono",monospace;font-size:14px;line-height:1.85;color:#EDEDF2;box-shadow:0 1px 0 rgba(25,25,31,.03),0 18px 40px -28px rgba(25,25,31,.5);overflow-x:auto}
+  .cc-term .dots{display:flex;gap:6px;margin-bottom:16px}
+  .cc-term .dots i{width:11px;height:11px;border-radius:50%;display:inline-block;background:#3A3A44}
+  .cc-term .row{white-space:pre-wrap;margin:0}
+  .cc-term .pr{color:#8D83EF}
+  .cc-term .ev{color:var(--t3)}
+  .cc-term .ok{color:var(--t2)}
+  .cc-term .mut{color:#9A9AA6}
+  .cc-term .hl{color:#fff}
+  .cc-term .note{display:block;margin-top:15px;padding-top:14px;border-top:1px solid rgba(255,255,255,.09);color:#A9A9B8;font-family:"IBM Plex Sans",sans-serif;font-size:13.5px;line-height:1.5}
+  .cc-term .caret{display:inline-block;width:8px;height:1.05em;background:#8D83EF;vertical-align:-.16em;animation:blink 1.1s steps(2) infinite}
+
+  /* bloque de código claro dentro de lecciones */
+  .cc-code{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:18px 0 0;font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.7;color:var(--ink-2);overflow-x:auto;white-space:pre}
+  .cc-code .c{color:var(--muted)}
+  .cc-code .k{color:var(--accent-ink)}
+  .cc-code .s{color:var(--t2i)}
+  .cc-code__ttl{display:block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+
+  /* tabla mito/realidad ocasional */
+  .cc-vs{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin:18px 0 0}
+  .cc-vs > div{padding:15px 17px}
+  .cc-vs .myth{background:#FBF1F2;border-right:1px solid var(--line)}
+  .cc-vs .real{background:#F1F8F4}
+  .cc-vs h6{margin:0 0 7px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+  .cc-vs .myth h6{color:var(--t4i)}
+  .cc-vs .real h6{color:var(--t2i)}
+  .cc-vs p{margin:0;font-size:14px;color:var(--ink-2);line-height:1.5}
+  .cc-vs code{font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:#fff;border:1px solid var(--line);padding:.05em .35em;border-radius:5px}
+  @media (max-width:560px){ .cc-vs{grid-template-columns:1fr} .cc-vs .myth{border-right:0;border-bottom:1px solid var(--line)} }
+
+  /* segundo recuadro de ejercicio: variante que no es la primera "aplicación" */
+  .exercise + .exercise{margin-top:12px}
+  @media (prefers-reduced-motion: reduce){ .cc-term .caret{animation:none} }
+</style>
+</head>
+<body>
+
+<!-- ===================== TOPBAR ===================== -->
+<header class="topbar">
+  <div class="topbar__in">
+    <a class="brand" href="curso-indice.html" style="text-decoration:none">
+      <span class="dot"></span> IA aplicada
+    </a>
+    <nav class="series" aria-label="Serie del curso">
+      <span>LLMs</span><span class="sep">·</span>
+      <span class="now">Claude Code</span><span class="sep">·</span>
+      <span>Tools y loops</span><span class="sep">·</span>
+      <span>Agentes</span><span class="sep">·</span>
+      <span>Skills</span>
+    </nav>
+  </div>
+</header>
+
+<div class="shell">
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <p class="eyebrow">Episodio 02 · Claude Code</p>
+    <h1>De la ventana de chat a un <span class="em">agente local</span> sobre tus datos</h1>
+    <p class="lede">Un modelo en el navegador está ciego: no ve tus columnas, ni los tipos, ni los faltantes, y no puede correr un <span class="mono">summary()</span>. Claude Code es el mismo modelo, pero operando dentro de tu máquina — lee el error real de la terminal, ejecuta tu código y verifica el resultado. En este episodio lo usamos para hacer EDA y descriptivas sobre microdatos confidenciales, con el rigor que tu trabajo exige.</p>
+
+    <div class="cc-term" role="img" aria-label="Sesión de Claude Code ejecutando un perfilado de datos en un bucle de planificar, ejecutar, observar y corregir">
+      <div class="dots"><i></i><i></i><i></i></div>
+      <p class="row"><span class="pr">$</span> claude</p>
+      <p class="row"><span class="pr">&gt;</span> <span class="hl">Perfila output/datasets/user_base.rds y dame %NA por columna</span></p>
+      <p class="row"> </p>
+      <p class="row"><span class="ev">●</span> <span class="hl">Plan</span> <span class="mut">(solo lectura)</span>   leer estructura → contar NA → tabla resumen</p>
+      <p class="row"><span class="ev">●</span> <span class="hl">Ejecuta</span>   Rscript perfilar.R</p>
+      <p class="row"><span class="ev">●</span> <span class="hl">Observa</span>   ingresos: 59% en 0 (centinela) · edad: 3 valores &gt; 120</p>
+      <p class="row"><span class="ev">●</span> <span class="hl">Corrige</span>   documenta cero-centinela, marca edad inválida, re-ejecuta <span class="ok">✓</span><span class="caret"></span></p>
+      <span class="note">El agente no devuelve tus filas: corre localmente y entrega solo el agregado. Ese principio —orquestar acciones sobre los datos sin sacarlos de tu máquina— es el hilo de todo el episodio.</span>
+    </div>
+  </section>
+
+  <!-- ===================== META ===================== -->
+  <dl class="meta">
+    <div><dt>Nivel</dt><dd>Intermedio</dd></div>
+    <div><dt>Modalidad</dt><dd>Teoría + práctica en vivo</dd></div>
+    <div><dt>Stack del ejemplo</dt><dd>R · <span class="mono">user_base.rds</span></dd></div>
+    <div><dt>Requisitos</dt><dd>Claude Code (Pro/Max) + un repo</dd></div>
+  </dl>
+
+  <!-- ===================== BANNER ===================== -->
+  <div class="banner">
+    <span class="ic">!</span>
+    <div>Todo el episodio trabaja sobre <b>tu propio proyecto</b>. Claude Code corre localmente: escribe y ejecuta código en tu máquina. Para microdatos confidenciales el patrón se repite — el agente devuelve <b>agregados, nunca tus filas</b>.</div>
+  </div>
+
+  <!-- ===================== BODY ===================== -->
+  <div class="body">
+
+    <!-- ---------- TOC ---------- -->
+    <aside class="toc" aria-label="Contenido del episodio">
+      <h4>En este episodio</h4>
+      <ol>
+        <li><a href="#agente-local">Del navegador al agente local</a></li>
+        <li><a href="#cabina">Cabina de mando: comandos y contexto</a></li>
+        <li><a href="#confidencial">Microdatos confidenciales</a></li>
+        <li><a href="#memoria">Memoria: CLAUDE.md y auto-memory</a></li>
+        <li><a href="#bucle">El bucle de corrección, en vivo</a></li>
+        <li><a href="#escalar">Escalar descriptivas con control</a></li>
+        <li><a href="#calculadora">La calculadora prohibida</a></li>
+        <li><a href="#reutilizar">Réplica reproducible y Skills</a></li>
+      </ol>
+    </aside>
+
+    <!-- ---------- LESSONS ---------- -->
+    <div class="lessons">
+
+      <!-- ====== ARCO A ====== -->
+      <div class="divider"><h3>Del chat al agente</h3><span class="ln"></span><span class="mono">Partes 1–2</span></div>
+
+      <!-- ===== PARTE 1 ===== -->
+      <section class="lesson" id="agente-local">
+        <div class="lesson__head">
+          <div class="lesson__num">1</div>
+          <div>
+            <h2 class="lesson__title">Del navegador al agente local</h2>
+            <p class="lesson__goal">Por qué un agente que ve tu proyecto y ejecuta cambia el flujo de trabajo, y cómo arrancar tu primera sesión.</p>
+          </div>
+        </div>
+
+        <ul class="topics">
+          <li><b>El modelo del navegador está ciego.</b> No tiene visibilidad de tu estructura de directorios, ignora qué versiones de paquetes tienes instaladas y —lo más crítico— no puede probar si el código que propone corre. Pegar errores en rojo y cruzar los dedos es el ciclo viejo.</li>
+          <li><b>Claude Code es un agente local.</b> Lee el error directo de la terminal, inspecciona los archivos, ejecuta tu script y verifica la salida. El mecanismo es un bucle: <b>planificar → ejecutar localmente → observar resultados → corregir</b>, hasta que el código corre.</li>
+          <li><b>Se instala donde trabajas.</b> macOS, Linux y —ojo con un mito frecuente— <b>Windows de forma nativa</b> (PowerShell o CMD). WSL es opcional, útil si quieres toolchains de Linux o el sandbox; <span class="mono">no es un requisito</span>.</li>
+          <li><b>Plan mode es tu hábito de control.</b> Es un modo de <b>solo lectura</b>: Claude explora y te presenta un plan, sin escribir nada hasta que apruebas. Para quien le teme a soltar un agente sobre sus datos, es la red de seguridad más barata que existe.</li>
+        </ul>
+
+        <div class="exercise">
+          <span class="exercise__tag">Aplicación en vivo</span>
+          <p>Abre la terminal en la carpeta de tu proyecto y corre <code>claude</code>. Genera el manifiesto base con <code>/init</code> y pídele una <b>mirada estructural</b>: «describe el árbol del repo y para qué sirve cada carpeta» — todavía sin abrir los datos crudos.</p>
+        </div>
+        <div class="exercise">
+          <span class="exercise__tag">Aplicación en vivo</span>
+          <p>Entra en plan mode con <code>/plan</code> antes de cualquier tarea sobre la base. Verás que Claude propone los pasos y espera tu visto bueno. Adóptalo como el <b>arranque por defecto</b> del resto del episodio.</p>
+        </div>
+      </section>
+
+      <!-- ===== PARTE 2 ===== -->
+      <section class="lesson" id="cabina">
+        <div class="lesson__head">
+          <div class="lesson__num">2</div>
+          <div>
+            <h2 class="lesson__title">Cabina de mando: comandos y ventana de contexto</h2>
+            <p class="lesson__goal">Para tu audiencia, controlar el contexto es controlar el costo y la fiabilidad. Aquí está el tablero.</p>
+          </div>
+        </div>
+
+        <ul class="topics">
+          <li><b>La superficie de comandos.</b> Escribe <span class="mono">/</span> para ver todo; un comando solo se reconoce al inicio del mensaje y lo que sigue son sus argumentos. <code>/help</code> lista lo disponible.</li>
+          <li><b>La ventana de contexto es un recurso finito.</b> Todo consume tokens: el system prompt, el <span class="mono">CLAUDE.md</span>, cada salida de herramienta, los archivos que lee. Cuando se llena, la adherencia baja y el costo sube (re-lee el historial). Por eso se <b>vigila</b> y se <b>administra</b>.</li>
+          <li><b>El dial de esfuerzo</b> (<code>/effort</code>): <span class="mono">low → medium → high → xhigh → max</span>, más <span class="mono">ultracode</span> (propio de Claude Code: combina razonamiento <span class="mono">xhigh</span> con orquestación de workflows). Para limpiar nombres de variables o descriptivas básicas, <span class="mono">low</span>/<span class="mono">medium</span> basta.</li>
+          <li><b>El bucle de aprobación</b> (permission modes): <span class="mono">default</span> pregunta antes de actuar; <span class="mono">acceptEdits</span> acepta ediciones de archivos; <span class="mono">plan</span> es solo lectura; <span class="mono">bypassPermissions</span> salta los permisos (úsalo con cuidado). Nada se escribe a disco sin tu OK en el modo por defecto.</li>
+        </ul>
+
+        <div class="exercise">
+          <span class="exercise__tag">Aplicación en vivo · vigilar el contexto</span>
+          <p>Tras perfilar muchas columnas, corre <code>/context</code>: muestra en una grilla a color <b>qué está llenando la ventana</b> y avisa de saturación. Luego <code>/compact</code> lo resume para liberar espacio, o <code>/clear</code> arranca tarea nueva <b>conservando la memoria del proyecto</b>. Para una pregunta al margen que no infle el historial, <code>/btw</code>.</p>
+        </div>
+        <div class="exercise">
+          <span class="exercise__tag">Aplicación en vivo · costo y recuperación</span>
+          <p>Revisa gasto y límites del plan con <code>/usage</code> (alias <code>/cost</code>). Y si Claude se desvía, <code>/diff</code> te muestra los cambios antes de quedártelos, y <code>/rewind</code> devuelve <b>código y/o conversación</b> a un punto previo.</p>
+        </div>
+      </section>
+
+      <!-- ====== ARCO B ====== -->
+      <div class="divider"><h3>Gobernar al agente</h3><span class="ln"></span><span class="mono">Partes 3–4</span></div>
+
+      <!-- ===== PARTE 3 ===== -->
+      <section class="lesson" id="confidencial">
+        <div class="lesson__head">
+          <div class="lesson__num">3</div>
+          <div>
+            <h2 class="lesson__title">Microdatos confidenciales: la barrera de acceso</h2>
+            <p class="lesson__goal">Tu caso real (SISBEN, CSJ, registros fiscales): cómo bloquear de verdad qué puede leer Claude, y por qué el archivo "ignore" no alcanza.</p>
+          </div>
+        </div>
+
+        <ul class="topics">
+          <li><b>Los archivos "ignore" no son una barrera de acceso.</b> <span class="mono">.claudeignore</span> y <span class="mono">.gitignore</span> reducen la inclusión <i>automática</i> al contexto y a las búsquedas, pero no impiden una lectura si la pides directamente. Construir tu privacidad sobre ellos es un error documentado.</li>
+          <li><b>El mecanismo real:</b> <span class="mono">permissions.deny</span> en <span class="mono">.claude/settings.json</span>. Los archivos que matchean quedan fuera del descubrimiento y la búsqueda, y las lecturas sobre ellos se deniegan. Reemplaza el viejo <span class="mono">ignorePatterns</span>; la sintaxis es estilo gitignore.</li>
+          <li><b>Un solo deny no basta — piensa en capas.</b> Una regla <span class="mono">Read(...)</span> bloquea la herramienta <i>Read</i>, pero el modelo todavía podría leer por <i>Bash</i>. Muro real = regla <span class="mono">Read(...)</span> + negar el equivalente en Bash + <b>sandbox</b> (macOS/Linux), que cierra ese escape a nivel de sistema operativo.</li>
+          <li><b>El patrón más fuerte: ejecuta local, devuelve agregados.</b> Claude escribe el código, corre contra los datos en tu máquina y solo vuelve una tabla agregada. Las filas confidenciales nunca van al modelo ni a la nube. Es el mismo principio que la calculadora prohibida (Parte 7): el modelo orquesta, la máquina toca los datos.</li>
+          <li><b>Siguiente nivel (opcional): MCP a una base local.</b> En vez de cargar un <span class="mono">.rds</span> gigante al contexto, conectas Claude a una base local (DuckDB / Postgres) por MCP: él escribe el <span class="mono">SQL</span>, la base lo ejecuta y devuelve el agregado. Ideal para descriptivas sobre datos sensibles, sin mover una sola fila.</li>
+        </ul>
+
+        <div class="cc-vs" aria-hidden="false">
+          <div class="myth">
+            <h6>Mito</h6>
+            <p>«Pongo mis <code>.rds</code> en <code>.claudeignore</code> y Claude no los lee.»</p>
+          </div>
+          <div class="real">
+            <h6>Realidad</h6>
+            <p>Se probó que Claude lee archivos listados en <code>.claudeignore</code>. El bloqueo real es <code>permissions.deny</code> (+ Bash + sandbox).</p>
+          </div>
+        </div>
+
+        <div class="cc-code"><span class="cc-code__ttl">.claude/settings.json</span><span class="c"># Bloquea la lectura de las bases del proyecto</span>
+{
+  <span class="k">"permissions"</span>: {
+    <span class="k">"deny"</span>: [
+      <span class="s">"Read(./output/datasets/*.rds)"</span>,
+      <span class="s">"Read(./data/**)"</span>,
+      <span class="s">"Read(./**/*.parquet)"</span>
+    ]
+  }
+}</div>
+
+        <div class="exercise">
+          <span class="exercise__tag">Aplicación en vivo · mini-experimento de seguridad</span>
+          <p>Escribe el <code>deny</code> de arriba, reinicia la sesión y pídele a Claude que lea el <code>.rds</code>. <b>Velo rechazado.</b> Luego conversen el hueco de Bash y, en mac/Linux, activa <code>/sandbox</code> para cerrarlo. Audita las reglas vigentes con <code>/permissions</code>.</p>
+        </div>
+      </section>
+
+      <!-- ===== PARTE 4 ===== -->
+      <section class="lesson" id="memoria">
+        <div class="lesson__head">
+          <div class="lesson__num">4</div>
+          <div>
+            <h2 class="lesson__title">Memoria: <span class="mono" style="font-size:.85em">CLAUDE.md</span> y auto-memory</h2>
+            <p class="lesson__goal">Los dos sistemas de memoria de Claude Code, qué garantiza cada uno, y cómo escribir tu manifiesto de EDA.</p>
+          </div>
+        </div>
+
+        <ul class="topics">
+          <li><b><span class="mono">CLAUDE.md</span> — lo escribes tú.</b> Se carga <b>completo en cada sesión, sin importar el largo</b>. Las ~200 líneas son una <b>recomendación de adherencia, no un corte</b>: archivos más largos consumen más contexto y se siguen peor, pero no se truncan.</li>
+          <li><b>Es una guía, no una constitución vinculante.</b> Claude lo lee y suele seguirlo, pero no hay garantía de cumplimiento estricto. Para <b>bloquear</b> algo pase lo que pase —que jamás cambie la semilla, que no borre un <span class="mono">.rds</span>— se usan <b>hooks</b> o <b>permisos</b>, no el manifiesto.</li>
+          <li><b>Auto-memory — la escribe Claude.</b> Una bitácora autónoma (<span class="mono">MEMORY.md</span>) donde anota resoluciones técnicas y convenciones que descubre. <b>Aquí sí</b> vive un corte real: se cargan las <b>primeras 200 líneas o 25 KB</b>; los archivos por tema se leen bajo demanda. Gestiónala con <code>/memory</code>.</li>
+          <li><b>Directivas concretas y verificables.</b> Nada de «limpia los datos». Sí: semilla fija <span class="mono">20260625</span>; reportar missingness, nunca borrar en silencio; figuras en <span class="mono">ggplot</span> a 300 dpi; tablas en LaTeX con tu house style.</li>
+        </ul>
+
+        <div class="cc-code"><span class="cc-code__ttl">CLAUDE.md — extracto (convenciones de EDA)</span><span class="c"># Datos &amp; reproducibilidad</span>
+- Semilla aleatoria fija: <span class="s">set.seed(20260625)</span>.
+- La <span class="k">missingness</span> se REPORTA, nunca se borra en silencio.
+- Ingreso: <span class="s">ingresos==0</span> e <span class="s">ingresos_hogar==0</span> son CENTINELA
+  (subreporte de SISBEN, ~59% y ~42%) → describir distribuciones, no medias.
+- Sexo: <span class="s">fcoalesce(mujer_obs, mujer_imp)</span>; nota al pie:
+  "observado en SISBEN o, si no, inferido del primer nombre".
+
+<span class="c"># Salidas</span>
+- Figuras: <span class="k">ggplot</span>, tema minimalista, PNG a 300 dpi.
+- Tablas: <span class="k">tabular</span> de LaTeX (dobles reglas, filas auxiliares en itálica).</div>
+
+        <div class="exercise">
+          <span class="exercise__tag">Aplicación en vivo · guiar vs. garantizar</span>
+          <p>Escribe tu <code>CLAUDE.md</code> con esas convenciones. Luego añade un hook <code>PreToolUse</code> que <b>bloquee de verdad</b> borrar o sobrescribir el <code>.rds</code> fuente — y comprueba la diferencia: el manifiesto orienta, el hook impide.</p>
+        </div>
+        <div class="cc-code"><span class="cc-code__ttl">.claude/settings.json — hook que protege el dato fuente</span>{
+  <span class="k">"hooks"</span>: {
+    <span class="k">"PreToolUse"</span>: [{
+      <span class="k">"matcher"</span>: <span class="s">"Bash"</span>,
+      <span class="k">"hooks"</span>: [{ <span class="k">"type"</span>: <span class="s">"command"</span>,
+        <span class="k">"command"</span>: <span class="s">"./.claude/guard-datasets.sh"</span> }]
+    }]
+  }
+}
+<span class="c"># guard-datasets.sh sale con código 2 si el comando intenta rm/mv/&gt; sobre *.rds</span></div>
+      </section>
+
+      <!-- ====== ARCO C ====== -->
+      <div class="divider"><h3>Trabajar en vivo</h3><span class="ln"></span><span class="mono">Partes 5–6</span></div>
+
+      <!-- ===== PARTE 5 ===== -->
+      <section class="lesson" id="bucle">
+        <div class="lesson__head">
+          <div class="lesson__num">5</div>
+          <div>
+            <h2 class="lesson__title">El bucle de corrección, en vivo</h2>
+            <p class="lesson__goal">Dejar que el agente diagnostique y arregle una anomalía real de EDA — y auditar que no rompió la metodología.</p>
+          </div>
+        </div>
+
+        <ul class="topics">
+          <li><b>Cómo trabaja el bucle.</b> Lee la anomalía o el error, inspecciona (p. ej. abre la matriz de correlaciones o un <span class="mono">str()</span>), corrige y re-ejecuta — sin detenerse hasta que corre.</li>
+          <li><b>El riesgo metodológico.</b> Un agente que «solo quiere que deje de dar error» puede tirar <span class="mono">NA</span> en silencio, forzar mal un tipo, o tratar el cero-centinela como dato real. En economía empírica, cambiar cómo se tratan los atípicos o los faltantes puede cambiar la conclusión. La confianza ciega no es metodología.</li>
+          <li><b>La reproducibilidad no viene del agente.</b> El agente es <b>no-determinista</b>: corre dos veces y escribe código distinto. Lo reproducible es el <b>artefacto</b> — el script versionado, las semillas fijas <i>en el código</i> y el historial de <span class="mono">git</span>. Claude es el colaborador que escribe el artefacto; git es tu red de seguridad y tu bitácora auditable.</li>
+        </ul>
+
+        <div class="exercise">
+          <span class="exercise__tag">Aplicación en vivo</span>
+          <p>Provoca un momento real: un <code>summary()</code> con la media de <code>ingresos</code> arrastrada por ceros y <code>edad</code> con valores imposibles, o un <code>join</code> que infla filas. Deja que lo diagnostique y arregle. Después <b>audita el diff</b>: ¿borró filas? ¿recodificó faltantes como cero? ¿tocó la semilla? Si algo no cuadra, <code>/rewind</code>.</p>
+        </div>
+      </section>
+
+      <!-- ===== PARTE 6 ===== -->
+      <section class="lesson" id="escalar">
+        <div class="lesson__head">
+          <div class="lesson__num">6</div>
+          <div>
+            <h2 class="lesson__title">Escalar descriptivas sin perder el control</h2>
+            <p class="lesson__goal">Cuándo conviene un subagente, qué aísla de verdad, y qué features tienen letra chica para tu plan.</p>
+          </div>
+        </div>
+
+        <ul class="topics">
+          <li><b>El uso canónico de un subagente</b> es aislar salida voluminosa: perfilar 80 columnas genera muchísimo texto que no quieres en tu conversación principal. El subagente lo hace en su propia ventana y te <b>devuelve solo el resumen</b>.</li>
+          <li><b>El aislamiento es de contexto, no de archivos.</b> Por defecto los subagentes comparten el mismo directorio de trabajo; lo que está aislado es la <b>ventana de contexto</b>. El aislamiento por <span class="mono">git worktree</span> existe pero es <b>opt-in</b> (<span class="mono">isolation: worktree</span>); sin él, varios agentes en paralelo <i>sí</i> pueden pisarse archivos.</li>
+          <li><b>"Cientos de agentes" tiene nombre y letra chica.</b> Es <i>dynamic workflows</i>: está en <b>research preview</b> y solo en planes <b>Enterprise, Team y Max</b>. No lo asumas como capacidad universal.</li>
+          <li><b>Defensas contra el bucle infinito.</b> Restringe herramientas con <span class="mono">tools</span>/<span class="mono">disallowedTools</span>, vigila con <code>/context</code>, poda con <code>/compact</code>, y mantén el esfuerzo bajo para tareas repetitivas.</li>
+        </ul>
+
+        <div class="exercise">
+          <span class="exercise__tag">Aplicación en vivo</span>
+          <p>Pide un subagente que <b>perfile todas las columnas</b> de <code>user_base.rds</code> (tipo, % NA, rango, cardinalidad) y <b>devuelva solo la tabla resumen</b> — no el detalle columna por columna. Limita sus herramientas a lectura y ejecución, y revisa el consumo con <code>/context</code> antes y después.</p>
+        </div>
+      </section>
+
+      <!-- ====== ARCO D ====== -->
+      <div class="divider"><h3>Rigor y reutilización</h3><span class="ln"></span><span class="mono">Partes 7–8</span></div>
+
+      <!-- ===== PARTE 7 ===== -->
+      <section class="lesson" id="calculadora">
+        <div class="lesson__head">
+          <div class="lesson__num">7</div>
+          <div>
+            <h2 class="lesson__title">La calculadora prohibida</h2>
+            <p class="lesson__goal">La trampa más letal del paradigma: pedirle al modelo que calcule. Nunca lo hagas.</p>
+          </div>
+        </div>
+
+        <ul class="topics">
+          <li><b>El modelo no calcula.</b> Por avanzado que sea —Opus 4.8, lanzado el 28 de mayo de 2026— sigue siendo un motor predictivo de lenguaje: estima probabilidades de palabras, no hace matemáticas dentro de su red neuronal.</li>
+          <li><b>La alucinación numérica.</b> Si en el chat le pides «¿cuál es la mediana del ingreso del hogar?», puede devolver un número <b>plausible pero inventado</b>, envuelto en lenguaje académico impecable. En EDA es peor, porque una media o un % «se sienten» fáciles y uno se tienta.</li>
+          <li><b>La regla operativa: escribir → ejecutar → leer.</b> El modelo <b>programa</b> el cálculo en un script local (R/Python), <b>lo ejecuta</b> en la terminal forzando al intérprete a hacer el cálculo duro, y su única responsabilidad luego es <b>leer el resultado exportado y reportarlo</b>. El trabajo pesado se delega siempre al software estadístico.</li>
+        </ul>
+
+        <div class="cc-vs">
+          <div class="myth">
+            <h6>Mal · el chat como calculadora</h6>
+            <p>«Dame la mediana de <code>ingresos_hogar</code> y el % de NA.» → número inventado.</p>
+          </div>
+          <div class="real">
+            <h6>Bien · puente al intérprete</h6>
+            <p>«Escribe y ejecuta el script que calcule mediana, DE y % NA por grupo <code>treated</code>, exporta a CSV, y reporta lo exportado.»</p>
+          </div>
+        </div>
+
+        <div class="exercise">
+          <span class="exercise__tag">Aplicación en vivo</span>
+          <p>Haz el contraste tú mismo: primero pídele la mediana «de memoria» en el chat; luego pídele el patrón escribir-ejecutar-leer para una <b>tabla de descriptivas</b> (media, DE, cuantiles, % NA, por grupo <code>treated</code>). Compara, y nota cuál puedes defender ante un referee.</p>
+        </div>
+      </section>
+
+      <!-- ===== PARTE 8 ===== -->
+      <section class="lesson" id="reutilizar">
+        <div class="lesson__head">
+          <div class="lesson__num">8</div>
+          <div>
+            <h2 class="lesson__title">Réplica reproducible y Skills</h2>
+            <p class="lesson__goal">Empaquetar el EDA para que corra en cualquier máquina, y capturar tus convenciones como capacidades reutilizables.</p>
+          </div>
+        </div>
+
+        <ul class="topics">
+          <li><b>Paquete de réplica.</b> Claude escanea el directorio y detecta dependencias frágiles —rutas absolutas a tu escritorio—, las convierte en <b>rutas relativas</b>, arma un entorno reproducible y escribe un <b>script maestro</b> que va del microdato crudo al reporte con un solo comando.</li>
+          <li><b>Skills ≠ subagentes.</b> Una Skill es una <b>capacidad reutilizable</b> (instrucciones + scripts) que carga <b>bajo demanda en el contexto principal</b> de la conversación — no es un subagente aislado. Le das a Claude un procedimiento que sabe invocar cuando aplica.</li>
+          <li><b>Tus comandos propios son Skills.</b> Lo que repites —generar un codebook, armar una tabla con tu house style— se captura una vez como Skill y queda disponible como comando en cada sesión y para tu equipo (vía control de versiones).</li>
+        </ul>
+
+        <div class="exercise">
+          <span class="exercise__tag">Aplicación en vivo · reporte reproducible</span>
+          <p>Pídele armar un <b>reporte de EDA reproducible</b>: del <code>user_base.rds</code> crudo a un PDF/HTML de descriptivas con figuras <code>ggplot</code> a 300 dpi, ejecutable con un script maestro. Que detecte y corrija cualquier ruta absoluta.</p>
+        </div>
+        <div class="exercise">
+          <span class="exercise__tag">Aplicación en vivo · una Skill</span>
+          <p>Crea una Skill <b>«generador de codebook»</b> (o «tabla de descriptivas con house style»: dobles reglas, filas auxiliares en itálica, etiquetas en inglés). Invócala sobre la base y verifica que la salida sale consistente sin re-explicar el formato.</p>
+        </div>
+      </section>
+
+      <!-- ===== LAB OSCURO: cierre ===== -->
+      <div class="lab">
+        <h3>Tu sesión de práctica, de principio a fin</h3>
+        <p>Las ocho aplicaciones, en orden. Hazlas sobre tu propio repo; el agente trabaja localmente y tus microdatos no salen de tu máquina.</p>
+        <div class="lab__grid">
+          <div class="lab__item"><span class="n">01</span><div><h5>Arranca y planifica</h5><p><span class="mono">claude</span> + <span class="mono">/init</span> + <span class="mono">/plan</span>: mirada estructural y plan antes de tocar nada.</p></div></div>
+          <div class="lab__item"><span class="n">02</span><div><h5>Maneja la cabina</h5><p><span class="mono">/context</span>, <span class="mono">/compact</span>, <span class="mono">/clear</span>, <span class="mono">/usage</span>, <span class="mono">/rewind</span>, <span class="mono">/effort</span>.</p></div></div>
+          <div class="lab__item"><span class="n">03</span><div><h5>Cierra el acceso</h5><p><span class="mono">permissions.deny</span> sobre tus <span class="mono">.rds</span>, intenta leerlo, falla, y activa <span class="mono">/sandbox</span>.</p></div></div>
+          <div class="lab__item"><span class="n">04</span><div><h5>Escribe la memoria</h5><p><span class="mono">CLAUDE.md</span> con convenciones de EDA + un hook que protege el dato fuente.</p></div></div>
+          <div class="lab__item"><span class="n">05</span><div><h5>Corrige y audita</h5><p>Arregla una anomalía real y revisa el diff: ni filas borradas ni NA recodificados.</p></div></div>
+          <div class="lab__item"><span class="n">06</span><div><h5>Escala con control</h5><p>Un subagente perfila todas las columnas y devuelve solo el resumen.</p></div></div>
+          <div class="lab__item"><span class="n">07</span><div><h5>Nunca calculadora</h5><p>El patrón escribir-ejecutar-leer para tu tabla de descriptivas.</p></div></div>
+          <div class="lab__item"><span class="n">08</span><div><h5>Empaqueta y reutiliza</h5><p>Reporte reproducible (crudo → PDF) + una Skill con tu house style.</p></div></div>
+        </div>
+      </div>
+
+    </div><!-- /.lessons -->
+  </div><!-- /.body -->
+
+  <!-- ===================== FOOT ===================== -->
+  <footer class="foot">
+    <a class="next" href="clase-03-tools-loops.html">
+      <div>
+        <small>Siguiente episodio</small>
+        <strong>Tools y loops</strong>
+      </div>
+      <span class="go">→</span>
+    </a>
+    <p class="colophon">Serie <b>IA aplicada</b> · Claude Code para investigación empírica. El verdadero salto no es una IA que imite a un economista brillante, sino orquestar acciones complejas localmente — para enfocar la energía en el diseño empírico y en la validez de las preguntas causales.</p>
+  </footer>
+
+</div><!-- /.shell -->
+
+<script>
+  // TOC activo con IntersectionObserver
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+    var map = {};
+    links.forEach(function (a) { map[a.getAttribute('href').slice(1)] = a; });
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (l) { l.classList.remove('active'); });
+          var a = map[e.target.id];
+          if (a) a.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+    document.querySelectorAll('.lesson[id]').forEach(function (s) { obs.observe(s); });
+  })();
+</script>
+
+</body>
+</html>
