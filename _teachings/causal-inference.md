@@ -59,25 +59,25 @@ Correlation vs. causation; Rubin Causal Model; fundamental problem of causal inf
 Randomization by design, internal validity, the three properties of RCTs, SUTVA, stratification and clusters, statistical power, ATE / ITT / TOT under noncompliance, threats to validity (attrition, spillovers, John Henry and Hawthorne effects).
 *Anchor paper:* Duflo, Hanna & Ryan (2012, AER) — *Incentives Work: Getting Teachers to Come to School*.
 *R activity:* Partial replication of Tables 1–3 with `haven`, `fixest`, `broom`.
-[Slides — week 2](https://github.com/eduard-martinez/causal-inference/blob/main/slides/week-02/week-02.pdf)
+[Slides — week 2](https://github.com/eduard-martinez/causal-inference/blob/main/slides/week-02/week-02.pdf) · [Replication code — week 2](https://github.com/eduard-martinez/causal-inference/raw/main/replication/week-02.zip)
 
 **Week 3 — Instrumental Variables (IV).**
 Endogenous variables and noncompliance; relevance, independence, exclusion; Wald estimator and 2SLS; heterogeneous effects (compliers, never-takers, always-takers, defiers); monotonicity and the LATE theorem (Imbens & Angrist, 1994); weak-instrument diagnostics.
 *Anchor paper:* Angrist (1990, AER) — *Lifetime Earnings and the Vietnam Era Draft Lottery*.
 *R activity:* IV with `AER::ivreg` and `fixest::feols`.
-[Slides — week 3](https://github.com/eduard-martinez/causal-inference/blob/main/slides/week-03/week-03.pdf)
+[Slides — week 3](https://github.com/eduard-martinez/causal-inference/blob/main/slides/week-03/week-03.pdf) · [Replication code — week 3](https://github.com/eduard-martinez/causal-inference/raw/main/replication/week-03.zip)
 
 **Week 4 — Sharp Regression Discontinuity (RD).**
 Quasi-random variation around a threshold; identification under continuity (Hahn, Todd & Van der Klaauw, 2001); local polynomial estimation; bandwidth selection (CCT, IK); robust inference (Calonico, Cattaneo & Titiunik, 2014); McCrary density test and placebo cutoffs.
 *Anchor paper:* Lee (2008, JoE) — *Randomized Experiments from Non-random Selection in U.S. House Elections*.
 *R activity:* `rdrobust` and `rddensity`.
-[Slides — week 4](https://github.com/eduard-martinez/causal-inference/blob/main/slides/week-04/week-04.pdf)
+[Slides — week 4](https://github.com/eduard-martinez/causal-inference/blob/main/slides/week-04/week-04.pdf) · [Replication code — week 4](https://github.com/eduard-martinez/causal-inference/raw/main/replication/week-04.zip)
 
 **Week 5 — Fuzzy Regression Discontinuity.**
 From Sharp to Fuzzy; Fuzzy RD as local IV with `Z = 1{X ≥ c}`; identification of the local LATE; 2SLS with local polynomial regression; interpretation as effect on compliers at the threshold.
 *Anchor paper:* Pop-Eleches & Urquiola (2013, AER) — *Going to a Better School: Effects and Behavioral Responses*.
 *R activity:* Fuzzy RD with `rdrobust` and manipulation diagnostics.
-[Slides — week 5](https://github.com/eduard-martinez/causal-inference/blob/main/slides/week-05/week-05.pdf)
+[Slides — week 5](https://github.com/eduard-martinez/causal-inference/blob/main/slides/week-05/week-05.pdf) · [Replication code — week 5](https://github.com/eduard-martinez/causal-inference/raw/main/replication/week-05.zip)
 
 ### Module 3 — Panel data methods
 
@@ -85,16 +85,19 @@ From Sharp to Fuzzy; Fuzzy RD as local IV with `Z = 1{X ≥ c}`; identification 
 Panel structure and unobserved heterogeneity; within estimator and the demeaning transformation; unit and time fixed effects; cluster-robust standard errors; limits — observed heterogeneity that varies over time, dynamic effects.
 *Readings:* Cunningham (2021), ch. 8; Angrist & Pischke (2009), ch. 5.
 *R activity:* Panel with `fixest::feols`.
+[Slides — week 6](https://github.com/eduard-martinez/causal-inference/blob/main/slides/week-06/week-06.pdf) · [Replication code — week 6](https://github.com/eduard-martinez/causal-inference/raw/main/replication/week-06.zip)
 
 **Week 7 — Difference-in-Differences (DiD).**
 Canonical 2×2 DiD; parallel-trends assumption; DiD as panel with fixed effects; multi-period DiD; triple differences; limitations of TWFE under staggered adoption (introduction to Goodman-Bacon, 2021).
 *Anchor paper:* Card & Krueger (1994, AER) — *Minimum Wages and Employment* (NJ–PA).
 *R activity:* DiD with `fixest` and a simple event study.
+[Slides — week 7](https://github.com/eduard-martinez/causal-inference/blob/main/slides/week-07/week-07.pdf) · [Replication code — week 7](https://github.com/eduard-martinez/causal-inference/raw/main/replication/week-07.zip)
 
 **Week 8 — Event Study.**
 Event-study specifications with relative dummies; pre-trends as visual test of parallel trends; leads and lags; staggered-treatment bias (Goodman-Bacon, 2021; de Chaisemartin & D'Haultfœuille, 2020; Sun & Abraham, 2021; Callaway & Sant'Anna, 2021); modern robust estimators.
 *Readings:* Borusyak, Jaravel & Spiess (2024); Roth, Sant'Anna, Bilinski & Poe (2023).
 *R activity:* Event-study with `fixest::sunab` and the `did` package.
+[Slides — week 8](https://github.com/eduard-martinez/causal-inference/blob/main/slides/week-08/week-08.pdf)
 
 ### Module 4 — Selection on observables
 
@@ -105,8 +108,12 @@ Selection on observables and unconfoundedness; the propensity score (Rosenbaum &
 
 ## Problem sets
 
-- [**Problem set 1** — Foundations, RCT and IV (weeks 1–3)](https://github.com/eduard-martinez/causal-inference/tree/main/problem-sets/pset-1)
-- [**Problem set 2** — RD, Panel and DiD (weeks 4–7)](https://github.com/eduard-martinez/causal-inference/tree/main/problem-sets/pset-2)
+- **Problem set 1** — Foundations, RCT and IV (weeks 1–3):
+  [PDF](https://github.com/eduard-martinez/causal-inference/blob/main/problem-sets/pset-1/pset-1.pdf) ·
+  [datasets](https://github.com/eduard-martinez/causal-inference/tree/main/problem-sets/pset-1) (`datos_1_observacional.csv`, `datos_2_piloto.csv`, `datos_3_sisben.csv`)
+- **Problem set 2** — RD, Panel and DiD (weeks 4–7):
+  [PDF](https://github.com/eduard-martinez/causal-inference/blob/main/problem-sets/pset-2/pset-2.pdf) ·
+  [datasets](https://github.com/eduard-martinez/causal-inference/tree/main/problem-sets/pset-2) (`datos_jornada_unica.csv`)
 
 Each problem set has a **mathematical component** (40%) — formal derivations of identification properties — and an **applied component in R** (60%) — Monte Carlo simulation plus partial replication of an anchor paper. Submitted as a single PDF plus a reproducible `.R` script.
 
@@ -121,9 +128,21 @@ Each problem set has a **mathematical component** (40%) — formal derivations o
 
 The final project is built around a policy-relevant research question chosen by the student. After the proposal is approved, the instructor provides a synthetic dataset and a policy context aligned with the question. Deliverables: proposal (10%), 10-page mini-paper with diagnostics and robustness (60%), oral defense in the last week (30%).
 
+Five worked example proposals, each with its accompanying synthetic dataset, are available in the repo: [final-project datasets](https://github.com/eduard-martinez/causal-inference/tree/main/final-project/datasets) (`Propuesta_1`–`Propuesta_5` + `Dataset_1`–`Dataset_5`).
+
 ## Methodology
 
 Each class is organized in three parts: (1) **theoretical exposition** of the model and its identification assumptions; (2) **guided R applications** with prepared datasets and code, anchored on a canonical empirical paper; (3) **student-led discussion** of a related empirical paper from the bibliography (15-minute presentation covering the research question, identification strategy, and main results).
+
+## Reading library
+
+The repository includes a curated library of empirical papers organized by method, used for the student-led presentations and as references for the problem sets and final project:
+
+- [**Instrumental Variables (IV)**](https://github.com/eduard-martinez/causal-inference/tree/main/papers/IV) — 12 papers (Angrist & Krueger 1991; Acemoglu et al. 2019; Deryugina et al. 2019; Finkelstein et al. 2012; Bhuller et al. 2020; Duranton & Turner 2011; …).
+- [**Randomized Controlled Trials (RCT)**](https://github.com/eduard-martinez/causal-inference/tree/main/papers/RCT) — 9 papers (Duflo, Hanna & Ryan 2012; Miguel & Kremer 2004; PROGRESA; Banerjee et al. 2015; Haushofer & Shapiro 2016; Björkman & Svensson 2009; …).
+- [**RCT + IV (noncompliance)**](https://github.com/eduard-martinez/causal-inference/tree/main/papers/RCT%20%2B%20IV) — 8 papers (Angrist 1990 draft lottery; Kling, Liebman & Katz 2007 MTO; Crépon et al. 2015; Ashraf, Karlan & Yin 2006; …).
+- [**Sharp Regression Discontinuity**](https://github.com/eduard-martinez/causal-inference/tree/main/papers/RD%20-%20Sharp) — 6 papers (Lee 2008; Pop-Eleches & Urquiola 2013; Ludwig & Miller 2007; Bronzini & Iachini 2014; …).
+- [**Fuzzy Regression Discontinuity**](https://github.com/eduard-martinez/causal-inference/tree/main/papers/RD%20-%20Fuzzy) — 7 papers (Barrera et al. 2018; Brollo et al. 2013; Card, Dobkin & Maestas 2008; Khanna 2023; Battistin et al. 2009; …).
 
 ## Core bibliography
 
@@ -132,5 +151,7 @@ Each class is organized in three parts: (1) **theoretical exposition** of the mo
 - Imbens, G. W., & Rubin, D. B. (2015). *Causal Inference for Statistics, Social, and Biomedical Sciences*. Cambridge University Press.
 - Hernán, M., & Robins, J. (2020). *Causal Inference: What If*. Chapman & Hall/CRC.
 - Gertler, P., Martinez, S., Premand, P., Rawlings, L., & Vermeersch, C. (2017). *La evaluación de impacto en la práctica* (2ª ed.). Banco Mundial.
+
+Course copies of the three core texts (Cunningham; Angrist & Pischke; Gertler et al.) are in the repo's [`books/`](https://github.com/eduard-martinez/causal-inference/tree/main/books) folder.
 
 The full reference list — including the foundational papers for IV, RD, DiD, event studies and PSM — is in the [course syllabus](https://github.com/eduard-martinez/causal-inference/blob/main/syllabus/syllabus.pdf).
