@@ -5,46 +5,52 @@ title: Blog
 description: Notes, tutorials, and workshop materials on R programming, data wrangling, and spatial data analysis.
 nav: true
 nav_order: 4
-pagination:
-  enabled: true
-  collection: posts
-  per_page: 5
-  sort_field: date
-  sort_reverse: true
 ---
 
-<div class="post">
+<style>
+  .entry-list { margin-top: 0.5rem; }
+  .entry-list .group {
+    color: var(--global-theme-color);
+    font-weight: 700;
+    font-size: 1.22rem;
+    border-bottom: 1px solid var(--global-divider-color);
+    padding-bottom: 0.4rem;
+    margin: 2.4rem 0 1.2rem;
+  }
+  .entry-list .group:first-of-type { margin-top: 0.5rem; }
+  .entry-list .entry { margin-bottom: 1.25rem; }
+  .entry-list .entry .ttl { font-size: 1.08rem; font-weight: 600; line-height: 1.35; }
+  .entry-list .entry .ttl a { color: var(--global-text-color); }
+  .entry-list .entry .ttl a:hover { color: var(--global-theme-color); text-decoration: none; }
+  .entry-list .entry .meta { display: block; color: var(--global-text-color-light); font-size: 0.85rem; margin: 0.12rem 0 0.35rem; }
+  .entry-list .entry .desc { margin: 0; }
+  .entry-list .entry .links { margin: 0.1rem 0 0; font-size: 0.92rem; }
+</style>
 
-{% assign blog_name_size = site.blog_name | size %}
-{% assign blog_description_size = site.blog_description | size %}
+<div class="entry-list">
 
-{% if blog_name_size > 0 or blog_description_size > 0 %}
-<div class="header-bar">
-  <h1>{{ site.blog_name }}</h1>
-  <h2>{{ site.blog_description }}</h2>
-</div>
-{% endif %}
+  <div class="group">R programming &amp; data</div>
+  {% for post in site.posts %}
+    {% unless post.tags contains 'spatial-data' %}
+    <div class="entry">
+      <span class="ttl"><a href="{{ post.url | relative_url }}">{{ post.title }}</a></span>
+      <span class="meta">{{ post.date | date: "%B %d, %Y" }}</span>
+      {% if post.description %}<p class="desc">{{ post.description }}</p>{% endif %}
+      <p class="links"><a href="{{ post.url | relative_url }}">Read post &rarr;</a></p>
+    </div>
+    {% endunless %}
+  {% endfor %}
 
-{% if page.pagination.enabled %}
-{% assign postlist = paginator.posts %}
-{% else %}
-{% assign postlist = site.posts %}
-{% endif %}
-
-<ul class="post-list">
-{% for post in postlist %}
-  <li>
-    <h3>
-      <a class="post-title" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-    </h3>
-    <p class="post-meta">{{ post.date | date: '%B %d, %Y' }}</p>
-    <p class="post-description">{{ post.description }}</p>
-  </li>
-{% endfor %}
-</ul>
-
-{% if page.pagination.enabled %}
-{% include pagination.liquid %}
-{% endif %}
+  <div class="group">Spatial data &amp; GIS</div>
+  {% for post in site.posts %}
+    {% if post.tags contains 'spatial-data' %}
+    <div class="entry">
+      <span class="ttl"><a href="{{ post.url | relative_url }}">{{ post.title }}</a></span>
+      <span class="meta">{{ post.date | date: "%B %d, %Y" }}</span>
+      {% if post.description %}<p class="desc">{{ post.description }}</p>{% endif %}
+      <p class="links"><a href="{{ post.url | relative_url }}">Read post &rarr;</a></p>
+    </div>
+    {% endif %}
+  {% endfor %}
 
 </div>
