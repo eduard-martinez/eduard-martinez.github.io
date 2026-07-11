@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diccionario de datos — Curso Nivelatorio de R (CIENFI · Universidad Icesi) · Curso Nivelatorio de R</title>
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../assets/curso-page.css">
+</head>
+<body class="fullcontent quarto-light">
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<main class="content" id="quarto-document-content">
+<div class="page-wrap">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Diccionario de datos — Curso Nivelatorio de R (CIENFI · Universidad Icesi)</h1>
+
+</div>
+</header>
+
+<div class="curso-logo"><img src="../figures/icesi_logo.png" alt="Universidad Icesi"></div>
+<div class="curso-meta"><span class="curso-chip">Datos del curso</span></div>
+<p class="curso-backlink"><a href="../index.html">← Volver al inicio del curso</a></p>
+
+<p>Tres bases acompañan el curso. Las dos primeras (innovación empresarial) se usan
+en las Unidades 2 y 3 y en el <strong>proyecto final</strong>; la tercera (GEIH) se usa en las
+Unidades 3 y 4 para descriptivas y regresiones.</p>
+<hr />
+<h2 id="1-innovacion_empresascsv--microdatos-a-nivel-de-firma">1. <code>innovacion_empresas.csv</code> — microdatos a nivel de firma</h2>
+<p>Una fila por empresa (datos ficticios con fines docentes, inspirados en encuestas
+tipo EDIT/DANE). <strong>Base "sucia" a propósito</strong>: hay que limpiarla antes de
+analizarla (categorías inconsistentes, tipos mal leídos, faltantes, valores
+extremos y filas duplicadas).</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Descripción</th>
+<th>Notas de calidad (lo que hay que arreglar)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id_empresa</code></td>
+<td>Identificador de la empresa (E0001…E0500).</td>
+<td>Algunos en minúscula o con espacio final; <strong>hay filas duplicadas</strong>.</td>
+</tr>
+<tr>
+<td><code>cod_sector</code></td>
+<td>Código de sector (C, G, J, M, F, I, H). <strong>Llave para cruzar.</strong></td>
+<td>Limpio y confiable.</td>
+</tr>
+<tr>
+<td><code>sector_nombre</code></td>
+<td>Nombre del sector.</td>
+<td>Mismo sector escrito de varias formas (mayúsculas, espacios, sinónimos).</td>
+</tr>
+<tr>
+<td><code>departamento</code></td>
+<td>Departamento de la empresa.</td>
+<td>Variantes de un mismo departamento (<code>Bogota</code>, <code>BOGOTA</code>, <code>Bogota D.C.</code>…).</td>
+</tr>
+<tr>
+<td><code>anio</code></td>
+<td>Año de referencia (2022).</td>
+<td>Constante (corte transversal).</td>
+</tr>
+<tr>
+<td><code>tamano</code></td>
+<td>Tamaño: Micro / Pequeña / Mediana / Grande.</td>
+<td>Mayúsculas/acentos inconsistentes; algunos vacíos.</td>
+</tr>
+<tr>
+<td><code>num_empleados</code></td>
+<td>Número de empleados.</td>
+<td>Leído como texto; faltantes (<code>""</code>, <code>ND</code>, <code>n/d</code>), negativos y ceros (errores).</td>
+</tr>
+<tr>
+<td><code>ventas_millones</code></td>
+<td>Ventas anuales (millones COP).</td>
+<td>Decimal con coma (<code>857,3</code>); faltantes; ceros y outliers altos.</td>
+</tr>
+<tr>
+<td><code>gasto_id_millones</code></td>
+<td>Gasto en I+D (millones COP).</td>
+<td>Muchos faltantes (firmas que no invierten en I+D): NA con sentido.</td>
+</tr>
+<tr>
+<td><code>innova_producto</code></td>
+<td>¿Introdujo innovación de producto?</td>
+<td>Codificación mixta: <code>Si/si/SI/No/no/NO/1/0</code>, espacios, faltantes.</td>
+</tr>
+<tr>
+<td><code>innova_proceso</code></td>
+<td>¿Innovación de proceso?</td>
+<td>Igual que arriba.</td>
+</tr>
+<tr>
+<td><code>innova_organizacional</code></td>
+<td>¿Innovación organizacional?</td>
+<td>Igual que arriba.</td>
+</tr>
+<tr>
+<td><code>exporta</code></td>
+<td>¿La empresa exporta?</td>
+<td>Igual que arriba.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tareas sugeridas:</strong> estandarizar nombres (<code>janitor::clean_names()</code>), recodificar
+categorías, convertir tipos (texto → número, texto → lógico), tratar faltantes,
+detectar y decidir qué hacer con outliers/duplicados, y construir un indicador
+<code>innovadora</code> (= TRUE si innovó en producto, proceso u organización).</p>
+<hr />
+<h2 id="2-sectores_agregadocsv--base-agregada-por-sector">2. <code>sectores_agregado.csv</code> — base agregada por sector</h2>
+<p>Una fila por sector (7 filas). <strong>Base limpia</strong>, de referencia nacional, para
+cruzar con la base de firmas.</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cod_sector</code></td>
+<td>Código de sector. <strong>Llave para cruzar.</strong></td>
+</tr>
+<tr>
+<td><code>sector_desc</code></td>
+<td>Nombre canónico del sector.</td>
+</tr>
+<tr>
+<td><code>num_empresas_sector</code></td>
+<td>Total nacional de empresas del sector.</td>
+</tr>
+<tr>
+<td><code>valor_agregado_mmcop</code></td>
+<td>Valor agregado del sector (miles de millones COP).</td>
+</tr>
+<tr>
+<td><code>inversion_id_mmcop</code></td>
+<td>Inversión total en I+D del sector (miles de millones COP).</td>
+</tr>
+<tr>
+<td><code>tasa_innovacion_sectorial</code></td>
+<td>Tasa de innovación de referencia del sector (0–1).</td>
+</tr>
+<tr>
+<td><code>crecimiento_anual_pct</code></td>
+<td>Crecimiento anual del sector (%).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cruce sugerido:</strong> limpiar la base de firmas → construir indicadores por
+sector (p. ej. tasa de innovación de la muestra, ventas promedio, empleo total)
+con <code>group_by(cod_sector) |&gt; summarise(...)</code> → unirlos con esta base mediante
+<code>left_join(..., by = "cod_sector")</code> y comparar la muestra con el referente
+nacional.</p>
+<hr />
+<h2 id="3-geih_nivelacioncsv--extracto-docente-de-la-geih-dane">3. <code>geih_nivelacion.csv</code> — extracto docente de la GEIH (DANE)</h2>
+<p>Una fila por <strong>persona ocupada</strong> (21.821 filas). Extracto real de la Gran
+Encuesta Integrada de Hogares (GEIH, cabeceras, enero), simplificado con fines
+docentes: variables renombradas y muestra restringida a ocupados de 18 a 65 años
+con ingreso laboral positivo. <strong>Base limpia</strong>: lista para descriptivas y
+regresiones (Unidades 3 y 4).</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Identificador de la persona (1…21821).</td>
+</tr>
+<tr>
+<td><code>sexo</code></td>
+<td><code>hombre</code> / <code>mujer</code>.</td>
+</tr>
+<tr>
+<td><code>edad</code></td>
+<td>Edad en años (18–65).</td>
+</tr>
+<tr>
+<td><code>anios_educacion</code></td>
+<td>Años de educación aprobados (0–26).</td>
+</tr>
+<tr>
+<td><code>nivel_educativo</code></td>
+<td>Máximo nivel alcanzado: <code>ninguno</code>, <code>primaria</code>, <code>secundaria</code>, <code>media</code>, <code>superior</code>.</td>
+</tr>
+<tr>
+<td><code>departamento</code></td>
+<td>Departamento de residencia (24 cabeceras GEIH).</td>
+</tr>
+<tr>
+<td><code>ingreso_laboral</code></td>
+<td>Ingreso laboral mensual (COP). Tiene <strong>outliers reales</strong>: úsela con <code>log()</code>.</td>
+</tr>
+<tr>
+<td><code>horas_semana</code></td>
+<td>Horas normalmente trabajadas por semana.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Usos sugeridos:</strong> descriptivas por grupo (brecha de ingresos por sexo y nivel
+educativo), histogramas y boxplots de ingreso (en niveles vs. en logs), y la
+ecuación de Mincer: <code>log(ingreso_laboral) ~ anios_educacion + edad</code>.</p>
+<p><em>Generado con <code>_preparar_geih.R</code> a partir de los microdatos originales del DANE
+(módulos "Características generales" y "Ocupados"). El ingreso corresponde a
+<code>INGLABO</code> y las horas a <code>P6800</code>; la llave del cruce es directorio–secuencia–orden.</em></p>
+
+<footer class="curso-footer">
+Curso Nivelatorio de Programación en R · CIENFI — Universidad Icesi ·
+<a href="mailto:efmartinez@icesi.edu.co">efmartinez@icesi.edu.co</a>
+</footer>
+
+</div>
+</main>
+</div>
+</body></html>

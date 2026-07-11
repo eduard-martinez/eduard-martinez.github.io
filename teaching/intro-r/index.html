@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Curso Nivelatorio de Programación en R</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="index_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="index_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Curso Nivelatorio de Programación en R</h1>
+<p class="subtitle lead">Manejo y análisis de datos para investigación aplicada</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div style="text-align:center; margin-top:-0.4em; margin-bottom:0.4em;">
+<p><img src="figures/icesi_logo.png" alt="Universidad Icesi" width="150"></p>
+</div>
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-bottom:1.4em;">
+<p>Maestría en Economía y en Ciencias Administrativas · Econometría I &nbsp;|&nbsp; CIENFI — Universidad Icesi<br> <strong>Profesor:</strong> PhD. Eduard F. Martínez-González &nbsp;|&nbsp; <a href="mailto:efmartinez@icesi.edu.co" style="color:#0055a5;">efmartinez@icesi.edu.co</a> &nbsp;|&nbsp; <a href="https://eduard-martinez.github.io" style="color:#0055a5;">eduard-martinez.github.io</a></p>
+</div>
+<section id="bienvenida" class="level2">
+<h2 class="anchored" data-anchor-id="bienvenida">Bienvenida</h2>
+<p>Este es un curso <strong>breve e intensivo</strong> para llegar a la Maestría con una base común de R: importar, limpiar, transformar, cruzar, describir y visualizar datos, estimar regresiones básicas y —sobre todo— trabajar de forma <strong>ordenada y reproducible</strong>, como se trabaja en la investigación aplicada. No hace falta experiencia previa en programación.</p>
+<div class="callout-key">
+<p><strong>La lógica del curso: ver → replicar → aplicar</strong></p>
+<p>Cada unidad se recorre en tres pasos:</p>
+<ol type="1">
+<li><strong>Ver</strong> la teoría (los documentos tienen código ejecutable en el navegador: no necesita instalar nada para empezar a probar) y el video de apoyo.</li>
+<li><strong>Replicar</strong> la práctica guiada en RStudio, dentro de su propio proyecto.</li>
+<li><strong>Aplicar</strong> en la tarea con su cuestionario y en la actividad con IA.</li>
+</ol>
+<p>Las sesiones sincrónicas <em>abren</em> cada bloque; el grueso del aprendizaje ocurre haciendo.</p>
+</div>
+</section>
+<section id="las-cuatro-unidades" class="level2">
+<h2 class="anchored" data-anchor-id="las-cuatro-unidades">Las cuatro unidades</h2>
+<p><strong>Unidad 1 — Fundamentos de R y flujo de trabajo reproducible.</strong> Qué hace R cuando ejecutamos código, cómo leer errores y warnings, vectores y data frames, y la base de todo el curso: proyectos de RStudio, carpetas ordenadas y scripts con estilo.</p>
+<p><strong>Unidad 2 — Manejo de datos con tidyverse.</strong> El 80% del trabajo empírico real: importar y diagnosticar, limpiar una base sucia con decisiones documentadas, transformar con <code>dplyr</code>, agrupar y cruzar bases con <code>join</code>.</p>
+<p><strong>Unidad 3 — Visualización y estadísticas descriptivas.</strong> De la base limpia al hallazgo comunicable con <code>ggplot2</code> y tablas descriptivas, trabajando sobre un extracto real de la GEIH (DANE).</p>
+<p><strong>Unidad 4 — Regresiones básicas y flujo de trabajo empírico.</strong> La ecuación de Mincer en la GEIH: <code>lm</code>, interpretación con unidades (y sin causalidad injustificada), <code>fixest</code>, tablas con <code>modelsummary</code> y el pipeline reproducible completo.</p>
+<section id="materiales-por-unidad" class="level3">
+<h3 class="anchored" data-anchor-id="materiales-por-unidad">Materiales por unidad</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Unidad</th>
+<th>Teoría</th>
+<th>Video guía</th>
+<th>Práctica</th>
+<th>Tarea</th>
+<th>Cuestionario</th>
+<th>Actividad IA</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1. Fundamentos</strong></td>
+<td><a href="unidad-1-fundamentos/teoria/teoria_unidad-1.html">Ver teoría</a></td>
+<td><a href="https://www.youtube.com/watch?v=_UnjI5eTkNc&amp;t=963s">Ver video</a></td>
+<td><a href="unidad-1-fundamentos/practica/practica_unidad-1.html">Práctica 1</a></td>
+<td><a href="unidad-1-fundamentos/tarea/tarea_unidad-1.html">Tarea 1</a></td>
+<td><a href="unidad-1-fundamentos/tarea/cuestionario_unidad-1.html">Cuestionario 1</a></td>
+<td><a href="unidad-1-fundamentos/actividad_ia_unidad-1.html">Primero tú, luego la IA</a></td>
+</tr>
+<tr class="even">
+<td><strong>2. Manejo de datos</strong></td>
+<td><a href="unidad-2-manejo-datos/teoria/teoria_unidad-2.html">Ver teoría</a></td>
+<td><a href="https://www.youtube.com/watch?v=MVNvoBbELKs&amp;t=1801s">Ver video</a></td>
+<td><a href="unidad-2-manejo-datos/practica/practica_unidad-2.html">Práctica 2</a></td>
+<td><a href="unidad-2-manejo-datos/tarea/tarea_unidad-2.html">Tarea 2</a></td>
+<td><a href="unidad-2-manejo-datos/tarea/cuestionario_unidad-2.html">Cuestionario 2</a></td>
+<td><a href="unidad-2-manejo-datos/actividad_ia_unidad-2.html">El código corre… pero está mal</a></td>
+</tr>
+<tr class="odd">
+<td><strong>3. Visualización</strong></td>
+<td><a href="unidad-3-visualizacion/teoria/teoria_unidad-3.html">Ver teoría</a></td>
+<td><a href="https://www.youtube.com/watch?v=sCfhUTHA4fQ">Ver video</a></td>
+<td><a href="unidad-3-visualizacion/practica/practica_unidad-3.html">Práctica 3</a></td>
+<td><a href="unidad-3-visualizacion/tarea/tarea_unidad-3.html">Tarea 3</a></td>
+<td><a href="unidad-3-visualizacion/tarea/cuestionario_unidad-3.html">Cuestionario 3</a></td>
+<td><a href="unidad-3-visualizacion/actividad_ia_unidad-3.html">Mejora esta figura</a></td>
+</tr>
+<tr class="even">
+<td><strong>4. Regresiones</strong></td>
+<td><a href="unidad-4-regresiones/teoria/teoria_unidad-4.html">Ver teoría</a></td>
+<td><span style="color:#88898c;">— (sin video)</span></td>
+<td><a href="unidad-4-regresiones/practica/practica_unidad-4.html">Práctica 4</a></td>
+<td><a href="unidad-4-regresiones/tarea/tarea_unidad-4.html">Tarea 4</a></td>
+<td><a href="unidad-4-regresiones/tarea/cuestionario_unidad-4.html">Cuestionario 4</a></td>
+<td><a href="unidad-4-regresiones/actividad_ia_unidad-4.html">Crítica al econometrista artificial</a></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="calendario-julio-de-2026" class="level2">
+<h2 class="anchored" data-anchor-id="calendario-julio-de-2026">Calendario (julio de 2026)</h2>
+<p>Sesiones sincrónicas de 10:00 a 12:00.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Ses.</th>
+<th>Fecha</th>
+<th>Modalidad</th>
+<th>Contenido / hito</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Martes 14 jul</td>
+<td>Sincrónica</td>
+<td>Unidad 1: R, RStudio y proyectos; arranque de la Unidad 2</td>
+</tr>
+<tr class="even">
+<td>—</td>
+<td>14–21 jul</td>
+<td>Asincrónica</td>
+<td>Teoría y práctica U1 · Tarea 1 · Actividad IA 1</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>Martes 21 jul</td>
+<td>Sincrónica</td>
+<td>Unidad 2: limpieza, dplyr y joins sobre la base de firmas</td>
+</tr>
+<tr class="even">
+<td>—</td>
+<td>21–27 jul</td>
+<td>Asincrónica</td>
+<td>Práctica U2 · Tarea 2 · Actividad IA 2 · teoría U3</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Lunes 27 jul</td>
+<td>Sincrónica</td>
+<td>Unidades 3 y 4: gráficos, descriptivas y regresiones; <strong>lanzamiento del proyecto final</strong></td>
+</tr>
+<tr class="even">
+<td>—</td>
+<td>27–31 jul</td>
+<td>Asincrónica</td>
+<td>Tareas 3 y 4 · Actividades IA 3 y 4 · proyecto en parejas</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>Viernes 31 jul</td>
+<td>Sincrónica</td>
+<td><strong>Sustentación de proyectos finales</strong></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="evaluación" class="level2">
+<h2 class="anchored" data-anchor-id="evaluación">Evaluación</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Componente</th>
+<th>Peso</th>
+<th>Uso de IA permitido</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Tareas 1–4 (script + cuestionario)</td>
+<td>40%</td>
+<td>Para entender y depurar, declarado</td>
+</tr>
+<tr class="even">
+<td>Actividades con IA</td>
+<td>10%</td>
+<td>Diseñadas para usar IA con verificación</td>
+</tr>
+<tr class="odd">
+<td>Proyecto final (pipeline reproducible + informe)</td>
+<td>35%</td>
+<td>Integrada, con apéndice de uso</td>
+</tr>
+<tr class="even">
+<td>Sustentación oral (defensa del código)</td>
+<td>15%</td>
+<td><strong>Sin IA</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="callout-practice">
+<p><strong>La política de IA en una frase</strong></p>
+<p>Primero su cerebro, luego la IA; todo lo que la IA produzca se <strong>verifica</strong>; y todo uso se <strong>declara</strong>. Los niveles permitidos por entrega y la lista de verificación están en la <a href="ia/guia_uso_ia.html">Guía de uso de IA</a>.</p>
+</div>
+</section>
+<section id="proyecto-final" class="level2">
+<h2 class="anchored" data-anchor-id="proyecto-final">Proyecto final</h2>
+<p>Un análisis empírico completo en parejas sobre la base de <strong>innovación empresarial</strong>: limpiar con decisiones documentadas, construir indicadores por sector y compararlos con el referente nacional, graficar, estimar la relación innovación–ventas e interpretarla — todo en un proyecto reproducible que se defiende oralmente. <a href="proyecto_final/enunciado_proyecto_final.html">Enunciado</a> · <a href="proyecto_final/rubrica_proyecto_final.html">Rúbrica</a>.</p>
+</section>
+<section id="datos-del-curso" class="level2">
+<h2 class="anchored" data-anchor-id="datos-del-curso">Datos del curso</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Base</th>
+<th>Grano</th>
+<th>Se usa en</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="datos/innovacion_empresas.csv">innovacion_empresas.csv</a></td>
+<td>Firma (506, <em>deliberadamente sucia</em>)</td>
+<td>U1, U2 y proyecto final</td>
+</tr>
+<tr class="even">
+<td><a href="datos/sectores_agregado.csv">sectores_agregado.csv</a></td>
+<td>Sector (7, referente limpio)</td>
+<td>U2 y proyecto final</td>
+</tr>
+<tr class="odd">
+<td><a href="datos/geih_nivelacion.csv">geih_nivelacion.csv</a></td>
+<td>Persona ocupada (21.821, <strong>GEIH real</strong>)</td>
+<td>U3 y U4</td>
+</tr>
+</tbody>
+</table>
+<p>Descripción variable a variable: <a href="datos/diccionario_datos.html">diccionario de datos</a>.</p>
+</section>
+<section id="guías-del-curso" class="level2">
+<h2 class="anchored" data-anchor-id="guías-del-curso">Guías del curso</h2>
+<ul>
+<li><a href="programa/programa_curso.html">Programa completo del curso</a> — objetivos, metodología, bibliografía</li>
+<li><a href="buenas_practicas/guia_estilo_scripts.html">Guía de estilo de scripts</a> — cómo se escribe un script en este curso</li>
+<li><a href="buenas_practicas/guia_organizacion_proyecto.html">Guía de organización de proyectos</a> — carpetas, reglas y la prueba de reproducibilidad</li>
+<li><a href="buenas_practicas/plantilla_proyecto.html">Plantilla de proyecto</a> — estructura lista para copiar (descargable)</li>
+<li><a href="ia/guia_uso_ia.html">Guía de uso de IA</a> — reglas, niveles, prompts y lista de verificación</li>
+</ul>
+</section>
+<section id="antes-de-la-primera-sesión" class="level2">
+<h2 class="anchored" data-anchor-id="antes-de-la-primera-sesión">Antes de la primera sesión</h2>
+<p>Instale <a href="https://cran.r-project.org/">R</a> y <a href="https://posit.co/download/rstudio-desktop/">RStudio Desktop</a>, y luego los paquetes del curso (en la consola de RStudio):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"tidyverse"</span>, <span class="st">"rio"</span>, <span class="st">"readxl"</span>, <span class="st">"janitor"</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"skimr"</span>, <span class="st">"pacman"</span>, <span class="st">"fixest"</span>, <span class="st">"modelsummary"</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Con eso está listo. Si algo falla en la instalación, escríbame <strong>antes</strong> de la primera sesión: <a href="mailto:efmartinez@icesi.edu.co">efmartinez@icesi.edu.co</a>.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="index_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

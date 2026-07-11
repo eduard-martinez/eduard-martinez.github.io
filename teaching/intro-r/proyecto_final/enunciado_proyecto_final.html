@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyecto final — Innovación empresarial · Curso Nivelatorio de R</title>
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../assets/curso-page.css">
+</head>
+<body class="fullcontent quarto-light">
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<main class="content" id="quarto-document-content">
+<div class="page-wrap">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Proyecto final — Innovación empresarial</h1>
+
+</div>
+</header>
+
+<div class="curso-logo"><img src="../figures/icesi_logo.png" alt="Universidad Icesi"></div>
+<div class="curso-meta"><span class="curso-chip">Proyecto final</span></div>
+<p class="curso-backlink"><a href="../index.html">← Volver al inicio del curso</a></p>
+
+<p><strong>Curso Nivelatorio de R · CIENFI · Universidad Icesi</strong>
+<strong>Modalidad:</strong> parejas · <strong>Nivel de uso de IA:</strong> N3 (IA integrada, con declaración y sustentación sin IA)</p>
+<p>El proyecto integra todo el curso: un análisis empírico completo, de la base
+cruda a una tabla de regresión, dentro de un proyecto reproducible que se
+sustenta oralmente.</p>
+<hr />
+<h2 id="los-datos">Los datos</h2>
+<p>Dos bases (en <code>datos/</code> del curso, descripción completa en el
+<a href="../datos/diccionario_datos.html">diccionario</a>):</p>
+<ul>
+<li><strong><code>innovacion_empresas.csv</code></strong> — microdatos a nivel de firma (una fila por
+empresa), <em>deliberadamente desordenados</em>: categorías inconsistentes, tipos
+mal leídos, faltantes, valores extremos y filas duplicadas. Datos ficticios
+con fines docentes, inspirados en encuestas tipo EDIT del DANE.</li>
+<li><strong><code>sectores_agregado.csv</code></strong> — base agregada por sector (referente nacional,
+limpia), para cruzar con la anterior mediante la llave <code>cod_sector</code>.</li>
+</ul>
+<h2 id="lo-que-deben-hacer">Lo que deben hacer</h2>
+<p>Trabajen sobre una copia de la <a href="../buenas_practicas/plantilla_proyecto.html">plantilla de proyecto</a>
+del curso. El análisis se organiza en el pipeline de tres scripts:</p>
+<p><strong><code>01_limpieza.R</code> — Del crudo al análisis (Unidad 2)</strong></p>
+<ol type="1">
+<li>Importar y <strong>diagnosticar</strong> la base de firmas (<code>glimpse</code>, <code>skim</code>).</li>
+<li><strong>Limpiar</strong> con decisiones documentadas (el "acta de limpieza" en
+comentarios): duplicados, categorías de texto, tipos (empleados y ventas),
+faltantes, valores imposibles y outliers.</li>
+<li>Construir el indicador <strong><code>innovadora</code></strong> (producto, proceso u organizacional).</li>
+<li>Exportar la base limpia a <code>datos/procesados/</code>.</li>
+</ol>
+<p><strong><code>02_descriptivas.R</code> — Los hechos (Unidades 2 y 3)</strong></p>
+<ol start="5" type="1">
+<li>Construir indicadores <strong>por sector</strong> (<code>group_by</code> + <code>summarise</code>): número de
+firmas, tasa de innovación, ventas (usen medianas: hay outliers), empleo.</li>
+<li><strong>Cruzar</strong> con la base agregada (<code>left_join</code> por <code>cod_sector</code>) y comparar la
+muestra con el referente nacional.</li>
+<li>Producir <strong>al menos 2 gráficos</strong> exportados con <code>ggsave()</code> (por ejemplo:
+tasa de la muestra vs. referente por sector; distribución de ventas por
+condición de innovadora) y <strong>1 tabla descriptiva</strong> exportada.</li>
+</ol>
+<p><strong><code>03_regresiones.R</code> — La pregunta (Unidad 4)</strong></p>
+<ol start="8" type="1">
+<li>Estimar al menos <strong>dos especificaciones</strong> de la pregunta <em>"¿las firmas
+innovadoras venden más?"</em>:
+<ul>
+<li><code>log(ventas_millones) ~ innovadora</code></li>
+<li><code>log(ventas_millones) ~ innovadora + log(num_empleados)</code> (control de tamaño)</li>
+</ul></li>
+<li>Producir la tabla con <code>msummary()</code> (nombres legibles, N y R², estrellas)
+exportada a <code>output/tablas/</code>.</li>
+<li><strong>Interpretar</strong> en comentarios: magnitud en % (<code>exp(β)−1</code>), lenguaje de
+asociación (no causal), y una frase sobre por qué cambia el N entre
+modelos.</li>
+</ol>
+<h2 id="entregables-por-pareja">Entregables (por pareja)</h2>
+<ol type="1">
+<li>La <strong>carpeta del proyecto</strong> completa (estructura de la plantilla, los tres
+scripts numerados, <code>datos/procesados/</code> y <code>output/</code> regenerables).</li>
+<li>El <strong>README.md</strong> diligenciado: qué hace el proyecto, cómo se corre, acta
+resumida de limpieza y <strong>apéndice de uso de IA</strong> (herramientas, prompts
+clave, qué verificaron de cada sugerencia).</li>
+<li>Una <strong>presentación corta (5–8 min)</strong> con los principales hallazgos.</li>
+</ol>
+<p><strong>Antes de entregar, la prueba de fuego:</strong> <code>Session → Restart R</code>, correr
+<code>01 → 02 → 03</code> en orden. Si algo falla, no está listo.</p>
+<h2 id="la-sustentación-sin-ia">La sustentación (sin IA)</h2>
+<p>Cada pareja presenta sus resultados y <strong>defiende su código en vivo</strong>: el
+profesor elige 2–3 bloques de sus scripts y ustedes explican qué hace cada
+línea, qué decisión de limpieza hay detrás y qué pasaría si se cambiara. "Eso
+lo generó la IA" no es una explicación — declarar el uso de IA es legítimo;
+no poder explicar el propio código, no.</p>
+<h2 id="preguntas-guía-para-la-presentación">Preguntas guía (para la presentación)</h2>
+<ul>
+<li>¿Qué problemas tenía la base y qué decidieron hacer con cada uno?</li>
+<li>¿Qué sectores de la muestra innovan más y cómo se comparan con el referente
+nacional?</li>
+<li>¿Las firmas innovadoras venden más? ¿Cuánto más, controlando por tamaño?
+¿Por qué NO pueden decir que la innovación <em>causa</em> mayores ventas?</li>
+</ul>
+<p>La rúbrica de calificación está en <a href="rubrica_proyecto_final.html">rubrica_proyecto_final.md</a>.</p>
+
+<footer class="curso-footer">
+Curso Nivelatorio de Programación en R · CIENFI — Universidad Icesi ·
+<a href="mailto:efmartinez@icesi.edu.co">efmartinez@icesi.edu.co</a>
+</footer>
+
+</div>
+</main>
+</div>
+</body></html>

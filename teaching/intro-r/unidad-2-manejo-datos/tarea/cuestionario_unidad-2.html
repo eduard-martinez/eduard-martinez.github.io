@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuestionario · Unidad 2 — Manejo de datos</title>
+<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="../../assets/curso-page.css">
+<link rel="stylesheet" href="../../assets/examen.css">
+</head>
+<body class="fullcontent quarto-light">
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<main class="content" id="quarto-document-content">
+<div class="page-wrap">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Cuestionario · Unidad 2</h1>
+<p class="subtitle lead">Manejo de datos con tidyverse</p>
+</div>
+</header>
+
+<div class="curso-logo"><img src="../../figures/icesi_logo.png" alt="Universidad Icesi"></div>
+<div class="curso-meta"><span class="curso-chip">Unidad 2 · Cuestionario evaluativo</span></div>
+<p class="curso-backlink"><a href="../../index.html">← Volver al inicio del curso</a></p>
+
+<div id="examen-root"></div>
+
+<footer class="curso-footer">
+Curso Nivelatorio de Programación en R · CIENFI — Universidad Icesi ·
+<a href="mailto:efmartinez@icesi.edu.co">efmartinez@icesi.edu.co</a>
+</footer>
+
+</div>
+</main>
+</div>
+
+<script>
+window.EXAMEN = {
+  parteId: "cuestionario_u2",
+  titulo: "Cuestionario — Unidad 2: Manejo de datos con dplyr",
+  descripcion: "Trabajarás con el data frame firmas (sector, ventas e innovación). En las preguntas de código se evalúa el resultado: cualquier código que produzca la misma salida es válido.",
+  packages: ["dplyr"],
+  setup: `firmas <- data.frame(
+  cod_sector = c("C", "C", "G", "J", "J", "G", "C", "J"),
+  ventas     = c(5200, 480, 1250, 980, 7400, 310, 1600, 90),
+  innova     = c("si", "no", "si", "si", "no", "no", "si", "si"),
+  stringsAsFactors = FALSE)`,
+  preguntas: [
+    { tema: "Filtrar filas", tipo: "escribir_codigo",
+      enunciado: "Escribe una expresión que devuelva solo las filas de `firmas` cuyo `cod_sector` sea `\"C\"`. Puedes usar `dplyr` (con `%>%`) o la forma que prefieras.",
+      solucion: "firmas %>% filter(cod_sector == \"C\")",
+      respuestas: ["firmas %>% filter(cod_sector == \"C\")", "filter(firmas, cod_sector == \"C\")"] },
+
+    { tema: "Agrupar y contar", tipo: "escribir_codigo",
+      enunciado: "Escribe una expresión que devuelva **cuántas firmas hay por cada `cod_sector`** (una tabla con el sector y su conteo).",
+      solucion: "firmas %>% count(cod_sector)",
+      respuestas: ["firmas %>% count(cod_sector)", "firmas %>% group_by(cod_sector) %>% summarise(n = n())"] },
+
+    { tema: "Crear variables", tipo: "escribir_codigo",
+      enunciado: "Escribe una expresión que devuelva `firmas` **con una columna nueva** `ventas_miles` igual a `ventas` dividido entre 1000.",
+      solucion: "firmas %>% mutate(ventas_miles = ventas / 1000)",
+      respuestas: ["firmas %>% mutate(ventas_miles = ventas / 1000)"] },
+
+    { tema: "Resumen", tipo: "escribir_codigo",
+      enunciado: "Escribe una expresión que devuelva la **mediana** de la columna `ventas` de `firmas`.",
+      solucion: "median(firmas$ventas)",
+      respuestas: ["median(firmas$ventas)", "firmas %>% summarise(mediana = median(ventas))"] },
+
+    { tema: "Verbos de dplyr", tipo: "opcion_multiple",
+      enunciado: "¿Qué verbo de `dplyr` selecciona **filas** según una condición?",
+      opciones: ["`select()`", "`filter()`", "`arrange()`", "`mutate()`"],
+      correcta: 1 },
+
+    { tema: "Joins", tipo: "opcion_multiple",
+      enunciado: "`a %>% left_join(b, by = \"id\")` conserva…",
+      opciones: [
+        "Solo las filas cuya llave está en **ambas** tablas",
+        "**Todas** las filas de la tabla `a` (y agrega columnas de `b` donde haya coincidencia)",
+        "Todas las filas de la tabla `b`",
+        "Solo las columnas en común"
+      ],
+      correcta: 1 },
+
+    { tema: "Joins", tipo: "verdadero_falso",
+      enunciado: "Si la tabla de la **derecha** tiene la llave `by` **repetida**, un `left_join()` puede **multiplicar** las filas de la izquierda.",
+      correcta: true }
+  ]
+};
+</script>
+<script src="../../assets/curso-config.js"></script>
+<script src="../../assets/examen-core.js"></script>
+<script src="../../assets/examen-webr.js"></script>
+<script src="../../assets/examen.js"></script>
+</body></html>

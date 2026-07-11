@@ -1,0 +1,874 @@
+---
+title: "Unidad 3 - Visualización y estadísticas descriptivas"
+subtitle: "Curso Nivelatorio de R · CIENFI · Universidad Icesi"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="../../index.html" style="color:#555; text-decoration:none; margin-right:16px;">Inicio del curso</a>
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;">\@emartigo</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;">GitHub: eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;">eduard-martinez.github.io</a>
+<span id="webr-status-anchor"></span>
+</div>
+
+```{webr-r}
+#| context: setup
+## mini base tipo GEIH: 16 ocupados (la fila 16 es un outlier de ingreso)
+geih_mini <- data.frame(
+  sexo  = rep(c("mujer","hombre"), times = 8),
+  edad  = c(24,30,28,45,35,52,41,23,58,33,26,39,48,61,30,44),
+  anios_educacion = c(11,5,16,11,18,8,11,13,5,16,14,11,9,3,16,18),
+  nivel_educativo = c("media","primaria","superior","media","superior","secundaria","media","superior",
+                      "primaria","superior","superior","media","secundaria","primaria","superior","superior"),
+  ingreso_laboral = c(1300000,1000000,2800000,1600000,3500000,1200000,1400000,1500000,
+                      900000,3200000,1800000,1450000,1100000,800000,2400000,25000000)
+)
+
+## mini serie de desempleo para la seccion de geom_line()
+desempleo <- data.frame(
+  anio = 2015:2024,
+  tasa = c(8.9, 9.2, 9.4, 9.7, 10.5, 15.9, 13.8, 11.2, 10.2, 10.2)
+)
+```
+
+<!--=================-->
+# Objetivo de la unidad
+
+En la Unidad 1 aprendimos a trabajar con objetos y scripts; en la Unidad 2, a importar y limpiar una base de datos. Esta unidad cierra ese ciclo: **pasar de la base limpia al hallazgo comunicable**. El objetivo NO es memorizar geometrías de ggplot2: es aprender a elegir el gráfico (o la tabla) que **responde una pregunta concreta**, y a presentarlo de forma que otra persona lo entienda sin que usted esté al lado explicando.
+
+::: {.callout-key}
+**¿Por qué gráficos y descriptivas en una Maestría en Economía?**
+
+Porque en economía aplicada las estadísticas descriptivas y los gráficos no son un adorno: son la **sección 2 de todo paper** — la sección de "Datos y hechos estilizados". Antes de estimar cualquier modelo, un buen trabajo empírico describe sus variables, documenta los patrones básicos (¿quién gana más? ¿cómo se distribuye el ingreso?) y convence al lector de que hay algo que vale la pena explicar. Si las descriptivas no se entienden, nadie va a creer las regresiones que vienen después.
+:::
+
+## El hilo conductor: la brecha de ingresos en la GEIH
+
+Toda la unidad gira alrededor de una pregunta empírica real, con datos reales: **¿cuánto ganan los ocupados en Colombia, y cómo difiere ese ingreso por sexo y por educación?** De esa pregunta grande se desprenden las que iremos respondiendo sección por sección: ¿cómo se **distribuye** el ingreso laboral (adelanto: de forma nada simétrica)? ¿Ganan distinto hombres y mujeres, y cambia la respuesta entre **promedios** y **medianas**? ¿Más educación se asocia con más ingreso? ¿La brecha por sexo aparece también **dentro** de cada nivel educativo?
+
+## Lo que aprenderemos en esta unidad
+
+- **Construir gráficos por capas con ggplot2:** la [gramática de gráficos]{.term} — datos + mapeos (`aes`) + geometrías + personalización — y el operador `+` para sumar capas.
+- **Elegir el gráfico según la pregunta:** distribuciones (histograma, densidad, boxplot), comparaciones entre categorías (barras), relaciones (dispersión) y evolución en el tiempo (líneas).
+- **Resumir la base con estadísticas descriptivas:** `summary()`/`skim()`, tablas de frecuencia, descriptivas por grupo y tablas listas para informe con `modelsummary`.
+- **Comunicar y exportar:** títulos, unidades, fuente de datos, temas, facetas y `ggsave()` — con la regla del curso: todo gráfico de un informe nace de un script.
+
+::: {.callout-connect}
+**Conexión con la Unidad 2**
+
+En la unidad anterior usamos `group_by()` + `summarise()` para construir tablas resumen; esta unidad convierte esas tablas en gráficos que se leen en segundos. La tabla con el ingreso mediano por sexo se vuelve un `geom_col()` que se lee en 3 segundos; la tabla de 10 filas por nivel educativo y sexo se vuelve un `geom_col(position = "dodge")` que muestra la brecha de un vistazo. El flujo siempre es el mismo: **primero preparar los datos con dplyr, luego graficar con ggplot2**.
+:::
+
+<!--=================-->
+# La base de la unidad: un extracto de la GEIH
+
+La [GEIH]{.term} (Gran Encuesta Integrada de Hogares) es la encuesta del DANE con la que se miden la ocupación, el desempleo y los ingresos laborales en Colombia. En esta unidad (y en la Unidad 4) trabajaremos con `geih_nivelacion.csv`, un **extracto real** de la GEIH preparado para el curso: **21.821 personas ocupadas** de 18 a 65 años, con ingreso laboral positivo, residentes en cabeceras. Una fila por persona; la base ya está limpia. La descripción completa está en el [diccionario de datos](../../datos/diccionario_datos.html) del curso.
+
+| Variable | Descripción |
+|---|---|
+| `id` | Identificador de la persona (1…21.821) |
+| `sexo` | `hombre` / `mujer` |
+| `edad` | Edad en años (18–65) |
+| `anios_educacion` | Años de educación aprobados (0–26) |
+| `nivel_educativo` | `ninguno`, `primaria`, `secundaria`, `media`, `superior` |
+| `departamento` | Departamento de residencia (24 cabeceras GEIH) |
+| `ingreso_laboral` | Ingreso laboral mensual (COP) |
+| `horas_semana` | Horas normalmente trabajadas por semana |
+
+En RStudio, dentro del proyecto del curso, la importamos y le damos el primer vistazo (Unidad 2):
+
+```r
+## llamar/instalar librerias
+require(pacman)
+p_load(tidyverse, rio, janitor, skimr)
+
+## importar el extracto de la GEIH
+geih <- import("datos/originales/geih_nivelacion.csv")
+
+glimpse(geih)
+skim(geih)
+```
+
+**Qué buscar en el output:** `glimpse()` debe mostrar 21.821 filas, 8 columnas y tipos correctos (el ingreso numérico, no texto). `skim()` agrega mínimos, máximos, percentiles y un mini-histograma por variable. Fíjese en el ingreso laboral: la media queda muy por encima del percentil 50. Esa distancia es la primera pista de toda la unidad.
+
+::: {.callout-warning}
+**El ingreso laboral tiene outliers reales**
+
+En toda encuesta de hogares, unas pocas personas reportan ingresos decenas de veces mayores que la mediana. No son errores de digitación: son [outliers]{.term} reales. La consecuencia práctica es que **los gráficos y promedios en niveles engañan**: el histograma queda "aplastado" contra la izquierda y el promedio se infla. La solución habitual en economía es trabajar con `log(ingreso_laboral)`; lo veremos de frente en la sección *Niveles o logaritmos*.
+:::
+
+::: {.callout-workflow}
+**Cómo leer esta unidad: dos tipos de código**
+
+Los bloques **interactivos** (con botón *Run code*) corren en su navegador con webR; como el navegador **no puede leer archivos de su disco**, usan `geih_mini`, una mini base de 16 personas que imita la estructura de la GEIH — incluido un outlier de ingreso. `geih_mini` **ya viene cargada en el documento**: se crea automáticamente al abrir la página (igual que la mini serie `desempleo` que usaremos más adelante), así que ninguna celda visible la construye — usted solo la usa. Los bloques **estáticos** (sin botón) se corren **en RStudio**, sobre la base completa: son los que van en sus scripts. Lo único que debe ejecutar una vez, antes del primer gráfico, es la celda de librerías de esta sección: webR comparte el environment en toda la página.
+:::
+
+Cargue las librerías de la unidad y conozca la mini base — no hay que construirla: ya está en memoria, solo la imprimimos:
+
+```{webr-r}
+## cargar librerias de la unidad (una sola vez por pagina)
+library(dplyr)
+library(ggplot2)
+
+## la mini base ya viene cargada en el documento: conozcala
+geih_mini
+```
+
+**Nota importante:** la persona 16 gana 25 millones — nuestro outlier de juguete. Reproduce, a escala, el mismo fenómeno que encontrará en la base completa. Las conclusiones económicas serias, eso sí, se verifican siempre con la base real en la práctica de la unidad.
+
+<!--=================-->
+# La gramática de gráficos
+
+En Excel seleccionamos datos y elegimos "gráfico de barras" de un menú: rápido, pero rígido. ggplot2 sigue otra lógica, la [gramática de gráficos]{.term} (*grammar of graphics*, de ahí las dos "g"): todo gráfico se arma con la misma fórmula — **datos + mapeos estéticos (`aes`) + geometrías + personalización** — y las piezas se conectan **por capas** con el operador `+`.
+
+::: {.callout-key}
+**La construcción es acumulativa (por capas)**
+
+Piense en amoblar un cuarto: (1) **Datos** → `ggplot(data = mi_tabla)` → entra al cuarto vacío: R reserva el lienzo para esa tabla, pero no pinta nada. (2) **Mapeos** → `aes(x = ..., y = ...)` → decide qué va en qué pared: qué variable define cada eje (y el color, el tamaño...). Aparecen los ejes, el interior sigue vacío. (3) **Geometría** → `geom_col()`, `geom_point()`, `geom_line()`... → por fin llegan los muebles: las barras, los puntos, las líneas. Cada capa adicional (títulos, temas, facetas) se suma con `+`.
+:::
+
+## Construcción paso a paso
+
+Construyamos el primer gráfico de la brecha: el ingreso mediano por sexo. **Paso 0** es preparar la tabla con dplyr (lo que ya sabemos de la Unidad 2):
+
+```{webr-r}
+## paso 0: ingreso mediano por sexo (dplyr, Unidad 2)
+brecha_sexo <- geih_mini %>%
+  group_by(sexo) %>%
+  summarise(ingreso_mediano = median(ingreso_laboral), .groups = "drop")
+
+brecha_sexo   ## -> tabla de 2 filas que vamos a graficar
+```
+
+**Paso 1 — Solo los datos: el lienzo en blanco.** R muestra un rectángulo gris vacío: ya sabe *qué tabla* vamos a graficar, pero no qué variables ni cómo representarlas.
+
+```{webr-r}
+ggplot(data = brecha_sexo)
+```
+
+**Paso 2 — Agregar el mapeo: aparecen los ejes.** R ya sabe *qué* mostrar, pero no *cómo* dibujarlo. (`mapping = aes(...)` es la forma completa; en la práctica se abrevia `aes(...)`.)
+
+```{webr-r}
+ggplot(data = brecha_sexo, mapping = aes(x = sexo, y = ingreso_mediano))
+```
+
+**Paso 3 — Agregar la geometría: aparecen las barras.**
+
+```{webr-r}
+ggplot(data = brecha_sexo, mapping = aes(x = sexo, y = ingreso_mediano)) +
+  geom_col()
+```
+
+Lea el código como una frase: la primera línea dice *qué tabla* grafico; `aes()`, *qué variable va en cada eje*; `geom_col()`, *cómo se dibujan los datos*. El operador `+` se lee "y además agrega esta capa" — en las siguientes secciones seguiremos sumando capas: colores, títulos, temas y facetas.
+
+::: {.callout-practice}
+**Ejercicio mental: leer código antes de ejecutarlo**
+
+Prediga qué muestra el paso 3 si reemplaza `geom_col()` por `geom_point()`. Misma tabla, mismos ejes... solo cambia la pieza de [geometría]{.term}. **Respuesta:** el mismo gráfico, pero con dos puntos flotantes en lugar de barras. La lógica de construcción es siempre la misma; lo único que cambia es cómo se dibujan los datos.
+:::
+
+<!--=================-->
+# Geometrías según la pregunta
+
+La geometría no se elige por gusto estético: se elige según la **pregunta** que el gráfico debe responder. Esta tabla es el mapa de la sección (y una buena candidata para imprimir):
+
+| Pregunta | Geometría en ggplot2 |
+|---|---|
+| ¿Cómo se **distribuye** una variable numérica? | `geom_histogram()`, `geom_density()`, `geom_boxplot()` |
+| ¿Cómo **comparo un valor** entre categorías? | `geom_col()` |
+| ¿Qué **relación** hay entre dos variables numéricas? | `geom_point()` (+ `geom_smooth()`) |
+| ¿Cómo **evoluciona** una variable en el tiempo? | `geom_line()` |
+
+## Distribución de una variable: histograma, densidad y boxplot
+
+**Pregunta típica:** "¿el ingreso se concentra en valores bajos o altos? ¿hay valores extremos?" El [histograma]{.term} parte el rango de la variable en intervalos (*bins*) y cuenta cuántas observaciones caen en cada uno; la densidad es su versión suavizada — muestra la forma sin depender del número de bins:
+
+```{webr-r}
+## histograma del ingreso laboral (solo se mapea x; el conteo lo calcula R)
+ggplot(geih_mini, aes(x = ingreso_laboral)) +
+  geom_histogram(bins = 10, fill = "steelblue", color = "white")
+
+## densidad: la forma suavizada (con 16 obs. es tosca; con 21.821 brilla)
+ggplot(geih_mini, aes(x = ingreso_laboral)) +
+  geom_density(fill = "steelblue", alpha = 0.4)
+```
+
+**Cómo interpretar:** casi todas las personas quedan apiladas a la izquierda y hay una barra solitaria cerca de 25 millones: el outlier. El histograma "en niveles" queda aplastado — la advertencia de la sección anterior, ahora en imagen. Repita el ejercicio en RStudio con la base completa (`ggplot(geih, aes(x = ingreso_laboral)) + geom_histogram(bins = 60)`): se ve igual de mal, y esa es la lección. La retomaremos en *Niveles o logaritmos*.
+
+El [boxplot]{.term} (diagrama de caja) resume la distribución en cinco números: la caja va del cuartil 1 al cuartil 3, la línea central es la **mediana**, los "bigotes" cubren el rango típico y los puntos sueltos marcan candidatos a atípicos. Su gran ventaja: permite **comparar** distribuciones entre grupos.
+
+```{webr-r}
+## comparar la distribucion del ingreso entre hombres y mujeres
+ggplot(geih_mini, aes(x = sexo, y = ingreso_laboral)) +
+  geom_boxplot(fill = "steelblue", alpha = 0.5)
+```
+
+**Cómo interpretar:** el punto aislado en el grupo de los hombres es el outlier de 25 millones. Quitándolo, las cajas son comparables — y la mediana de las mujeres queda incluso un poco más arriba en esta mini base. Anote esa observación: será central en la sección de estadísticas descriptivas.
+
+::: {.callout-key}
+**¿Histograma, densidad o boxplot?**
+
+**Histograma:** conteos por intervalo, la primera radiografía de UNA variable. **Densidad:** la forma suave, ideal con muchas observaciones o para superponer grupos. **Boxplot:** mediana, cuartiles y atípicos de un vistazo — imbatible para comparar una distribución **entre grupos** (por sexo, por nivel educativo, por departamento).
+:::
+
+### Mini-ejercicio: la distribución de la edad
+
+```{webr-r}
+## Haga un histograma de la edad con bins = 8.
+## ¿La edad tiene el mismo problema de outliers que el ingreso?
+## Su codigo aqui
+```
+
+**Resultado esperado:** la edad se reparte de forma mucho más pareja entre los 18 y los 65 años. No todas las variables tienen colas largas: el ingreso sí, la edad no — la decisión de escala se toma variable por variable.
+
+## Comparar categorías: geom_col() (y su diferencia con geom_bar())
+
+**Pregunta típica:** "¿qué grupo gana más?" — y su prima: "¿cuántas personas hay en cada grupo?" Hay dos funciones de barras que confunden a todo el mundo: `geom_bar()` recibe solo `x` y **cuenta filas**; `geom_col()` recibe `x` e `y` y **dibuja un valor que usted ya calculó**. Compárelas:
+
+```{webr-r}
+## geom_bar(): cuantas personas hay por nivel educativo (R cuenta las filas)
+ggplot(geih_mini, aes(x = nivel_educativo)) +
+  geom_bar(fill = "steelblue")
+```
+
+```{webr-r}
+## geom_col(): un valor ya calculado, con las barras ORDENADAS con reorder()
+ingreso_nivel <- geih_mini %>%
+  group_by(nivel_educativo) %>%
+  summarise(mediana = median(ingreso_laboral), .groups = "drop")
+
+ggplot(ingreso_nivel, aes(x = reorder(nivel_educativo, mediana), y = mediana)) +
+  geom_col(fill = "steelblue")
+```
+
+**¿Qué pasó?** `reorder(nivel_educativo, mediana)` ordena las categorías de menor a mayor mediana — el orden alfabético que trae por defecto casi nunca es el orden útil. Y note el resultado: primaria < secundaria < media < superior. **La educación paga**: nuestro primer hecho estilizado, en un gráfico.
+
+::: {.callout-key}
+**geom_bar() vs. geom_col()**
+
+Regla práctica: si el paso anterior fue un `group_by() + summarise()`, lo que sigue es `geom_col()`. Si quiere contar filas directamente desde la base, `geom_bar()`.
+:::
+
+En la base real hay categorías de sobra (24 departamentos); la receta estándar es ordenar, filtrar y voltear — con nombres largos, poner la categoría en el eje Y evita etiquetas ilegibles en diagonal:
+
+```r
+## top 10 departamentos por ingreso mediano: barras horizontales y ordenadas
+geih %>%
+  group_by(departamento) %>%
+  summarise(mediana = median(ingreso_laboral), .groups = "drop") %>%
+  slice_max(mediana, n = 10) %>%
+  ggplot(aes(x = mediana, y = reorder(departamento, mediana))) +
+  geom_col(fill = "steelblue")
+```
+
+### Mini-ejercicio: la brecha en barras
+
+Calcule el ingreso **promedio** por sexo en `geih_mini` y grafíquelo con barras ordenadas con `reorder()`.
+
+```{webr-r}
+## Paso 1: tabla con group_by() + summarise()
+## Paso 2: geom_col() con reorder()
+## Su codigo aqui
+```
+
+**Pregunta de análisis:** según su gráfico, ¿quién gana más y por cuánto? Guarde la respuesta: en la sección de estadísticas descriptivas verá que la mediana cuenta otra historia — y entenderá por qué.
+
+## Relación entre dos variables: geom_point()
+
+**Pregunta típica:** "¿más años de educación se asocian con más ingreso?" Cada punto del gráfico de dispersión es una observación (aquí, una persona). Y con una capa más, `geom_smooth(method = "lm")`, superponemos la recta de mínimos cuadrados que mejor resume la nube (`se = FALSE` oculta la banda de confianza):
+
+```{webr-r}
+## dispersion: educacion vs ingreso
+ggplot(geih_mini, aes(x = anios_educacion, y = ingreso_laboral)) +
+  geom_point(size = 3)
+
+## la misma nube, con la recta que la resume
+ggplot(geih_mini, aes(x = anios_educacion, y = ingreso_laboral)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+**Cómo interpretar:** la nube sube hacia la derecha — a más educación, más ingreso —, pero el outlier estira el eje Y y "jala" la recta hacia arriba: los valores extremos no solo dañan gráficos, también sesgan rectas.
+
+::: {.callout-connect}
+**Anticipo de la Unidad 4**
+
+Esa recta ES una regresión: la versión visual de `lm(ingreso_laboral ~ anios_educacion)`. En la Unidad 4 la estimaremos formalmente — con el ingreso en logaritmos, en la ecuación de Mincer — e interpretaremos su pendiente y su significancia. Si entiende `geom_smooth()`, ya tiene la intuición de lo que viene.
+:::
+
+### Mini-ejercicio: edad e ingreso
+
+```{webr-r}
+## Grafique edad (x) vs ingreso_laboral (y) con puntos y la recta lm.
+## ¿La relacion es tan clara como con la educacion?
+## Su codigo aqui
+```
+
+## Evolución en el tiempo: geom_line()
+
+**Pregunta típica:** "¿cómo ha cambiado el desempleo en la última década?" Nuestro extracto de la GEIH es un corte transversal (un solo mes), así que usamos `desempleo`, una mini serie que ya viene cargada en el documento: la tasa de desempleo anual de Colombia (cifras aproximadas, con fines ilustrativos):
+
+```{webr-r}
+## la serie ya viene cargada: conozcala y grafiquela
+desempleo
+
+ggplot(desempleo, aes(x = anio, y = tasa)) +
+  geom_line(color = "steelblue", linewidth = 1) +
+  geom_point(size = 2)
+```
+
+**Cómo interpretar:** `geom_line()` conecta los puntos en el orden del eje X y `geom_point()` marca cada año; el pico de 2020 (pandemia) se lee de inmediato — eso es lo que una línea hace mejor que cualquier tabla. **Nota importante:** con un eje X numérico la línea se conecta sola; si X fuera texto (`"T1"`, `"T2"`, ...) habría que agregar `group = 1` dentro de `aes()`.
+
+### Mini-ejercicio: título y contexto
+
+```{webr-r}
+## Vuelva a graficar la serie y agreguele con labs() un titulo que comunique
+## el hallazgo (no "Grafico de desempleo") y ejes con unidades.
+## Su codigo aqui
+```
+
+::: {.callout-practice}
+**Decisión de geometría.** ¿Qué geometría usaría para cada pregunta?
+
+1. ¿Cuántos ocupados hay en cada nivel educativo? 2. ¿El ingreso se concentra en valores bajos o altos? 3. ¿Cómo comparo la distribución del ingreso entre hombres y mujeres? 4. ¿Más horas de trabajo se asocian con más ingreso? 5. ¿Cómo ha evolucionado el desempleo desde 2015?
+
+**Respuestas:** 1. `geom_bar()`. 2. `geom_histogram()` o `geom_density()`. 3. `geom_boxplot()` con `x = sexo`. 4. `geom_point()` + `geom_smooth()`. 5. `geom_line()`.
+:::
+
+<!--=================-->
+# Estéticas: dentro y fuera de aes()
+
+Las [estéticas]{.term} son los atributos visuales con los que un gráfico codifica información: `color` (puntos, líneas y contornos), `fill` (relleno de barras y cajas), `size` (tamaño), `alpha` (transparencia) y `shape` (forma del punto). La confusión más común de todo ggplot2 es **cuándo va algo dentro de [aes]{.term} y cuándo fuera**.
+
+::: {.callout-key}
+**La regla fundamental**
+
+**Dentro de `aes()`** cuando el atributo **depende de una variable** de la base ("que el color cambie según el sexo de cada persona"): R asigna los colores y crea la leyenda. **Fuera de `aes()`** cuando es **un valor fijo** para todo el gráfico ("que todos los puntos sean azules").
+:::
+
+```{webr-r}
+## Caso 1 - valor FIJO, fuera de aes(): todos los puntos iguales
+ggplot(geih_mini, aes(x = anios_educacion, y = ingreso_laboral)) +
+  geom_point(color = "steelblue", size = 3)
+
+## Caso 2 - variable MAPEADA, dentro de aes(): un color por sexo (y leyenda)
+ggplot(geih_mini, aes(x = anios_educacion, y = ingreso_laboral, color = sexo)) +
+  geom_point(size = 3)
+```
+
+**¿Qué pasó?** En el caso 2, R asignó un color a cada categoría de `sexo` y creó la leyenda automáticamente: el gráfico ahora responde dos preguntas a la vez (la relación educación–ingreso y si el patrón difiere por sexo). En la base completa hay otro uso clave: con 21.821 puntos el gráfico de dispersión es una mancha, y la transparencia deja ver dónde se concentra la masa:
+
+```r
+## alpha revela la densidad de la nube (RStudio, base completa)
+ggplot(geih, aes(x = anios_educacion, y = log(ingreso_laboral))) +
+  geom_point(alpha = 0.1)
+```
+
+::: {.callout-warning}
+**El error clásico: `aes(color = "blue")`**
+
+```{webr-r}
+## ejecute y observe la leyenda extraña
+ggplot(geih_mini, aes(x = anios_educacion, y = ingreso_laboral, color = "blue")) +
+  geom_point(size = 3)
+```
+
+Los puntos NO salen azules: salen rojizos, con una leyenda absurda que dice `"blue"`. Al escribirlo **dentro** de `aes()`, R interpreta `"blue"` como una variable constante ficticia y le asigna el primer color de su paleta. **Regla práctica:** un valor literal — texto entre comillas o un número (`"blue"`, `3`, `0.5`) — casi siempre va **fuera** de `aes()`.
+:::
+
+### Mini-ejercicio: corrija el gráfico
+
+```{webr-r}
+## Este codigo intenta pintar TODAS las barras de morado, pero algo salio mal.
+## Corrijalo para que queden moradas de verdad (y sin leyenda extraña).
+ggplot(geih_mini, aes(x = nivel_educativo, fill = "purple")) +
+  geom_bar()
+```
+
+<!--=================-->
+# Personalización para comunicar
+
+Un gráfico sin título, sin unidades y sin fuente es como un informe sin conclusiones: técnicamente "completo", pero mudo. Esta sección convierte gráficos correctos en gráficos **presentables**.
+
+## Etiquetas, temas y ejes legibles
+
+`labs()` controla todos los textos del gráfico; los temas (`theme_*()`) controlan fondo, grillas y tipografía; y `scale_y_continuous()` reescribe las etiquetas del eje — porque nadie lee "2500000" de corrido:
+
+```{webr-r}
+## tabla base + grafico con textos completos, eje legible y tema sobrio
+ingreso_nivel <- geih_mini %>%
+  group_by(nivel_educativo) %>%
+  summarise(mediana = median(ingreso_laboral), .groups = "drop")
+
+ggplot(ingreso_nivel, aes(x = reorder(nivel_educativo, mediana), y = mediana)) +
+  geom_col(fill = "steelblue") +
+  scale_y_continuous(labels = function(x) paste0(x / 1e6, " M")) +
+  labs(title    = "La educacion paga: el ingreso mediano sube con cada nivel",
+       subtitle = "Ocupados de la mini base de ejercicios",
+       x        = "Nivel educativo",
+       y        = "Ingreso laboral mediano (millones de COP)",
+       caption  = "Fuente: mini base con estructura de la GEIH (DANE).") +
+  theme_minimal()
+```
+
+**Buenas prácticas de cada elemento:** el **título** dice la idea principal ("La educación paga", no "Gráfico de barras del ingreso"); el **subtítulo** da contexto (población, período, filtros); los **ejes** siempre llevan **unidades**; el **caption** lleva la **fuente de datos** — en este curso, un gráfico sin fuente está incompleto. Para las etiquetas del eje usamos aquí una función propia (`function(x) paste0(x / 1e6, " M")`); en RStudio, el paquete `scales` trae etiquetas listas — `label_number(big.mark = ".", decimal.mark = ",")` para separador de miles, o `label_number(scale = 1e-6, suffix = " M")`, que usaremos en la sección de exportar.
+
+::: {.callout-key}
+**¿Qué tema usar?**
+
+`theme_minimal()`: limpio y moderno, nuestra opción por defecto para informes. `theme_bw()`: fondo blanco con borde, el estándar en papers académicos. `theme_classic()`: sin grillas, para publicaciones muy sobrias. `theme_gray()` (el default): evítelo en entregas — delata el gráfico "sin terminar".
+:::
+
+## Facetas: el mismo gráfico por subgrupos
+
+Una [faceta]{.term} repite el mismo gráfico para cada subgrupo, en paneles separados que comparten escala — comparar se vuelve inmediato:
+
+```{webr-r}
+## la misma distribucion, un panel por sexo
+ggplot(geih_mini, aes(x = ingreso_laboral)) +
+  geom_histogram(bins = 8, fill = "steelblue", color = "white") +
+  facet_wrap(~ sexo)
+```
+
+`facet_wrap(~ variable)` parte el gráfico por una variable (con `scales = "free_y"` si los grupos difieren mucho en tamaño); `facet_grid(filas ~ columnas)` cruza dos. Sobre la base completa, un solo gráfico responde la pregunta del hilo conductor:
+
+```r
+## distribucion del ingreso (en logs) por sexo y nivel educativo: 10 paneles
+ggplot(geih, aes(x = log(ingreso_laboral))) +
+  geom_histogram(bins = 40, fill = "steelblue", color = "white") +
+  facet_grid(sexo ~ nivel_educativo) +
+  theme_bw()
+```
+
+**Cómo interpretar:** cada columna es un nivel educativo, cada fila un sexo. ¿La distribución de los hombres está desplazada a la derecha de la de las mujeres *dentro* de cada nivel educativo? Eso es exactamente lo que este gráfico permite ver.
+
+::: {.callout-key}
+**¿Color o facetas?**
+
+**Color en el mismo panel:** pocas categorías (2–4) y comparación directa — por ejemplo, dos densidades superpuestas con `fill = sexo` y `alpha`. **Facetas:** más categorías, o cuando quiere comparar **distribuciones completas** sin que las capas se tapen entre sí. Si el gráfico con colores parece un espagueti, la respuesta son facetas.
+:::
+
+### Mini-ejercicio integrador
+
+Construya un boxplot del ingreso por sexo en `geih_mini` con: título que comunique el hallazgo, ejes con unidades, fuente en el caption y `theme_minimal()`.
+
+```{webr-r}
+## Su codigo aqui
+```
+
+<!--=================-->
+# Exportar gráficos
+
+En el panel *Plots* de RStudio hay un botón *Export* para guardar el gráfico con clic. **No lo use para trabajo serio**: el tamaño depende de cómo tenga la ventana ese día, la resolución es baja y no queda rastro en el script — no es reproducible. La herramienta correcta es `ggsave()`: asignamos el gráfico a un objeto y lo exportamos a `output/figuras/` del proyecto (Unidad 1):
+
+```r
+## figura central de la unidad: brecha por sexo dentro de cada nivel educativo
+tab_brecha <- geih %>%
+  group_by(nivel_educativo, sexo) %>%
+  summarise(mediana = median(ingreso_laboral), .groups = "drop")
+
+g_brecha <- ggplot(tab_brecha,
+                   aes(x = reorder(nivel_educativo, mediana), y = mediana, fill = sexo)) +
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = label_number(scale = 1e-6, suffix = " M")) +
+  labs(title    = "La brecha por sexo aparece en todos los niveles educativos",
+       subtitle = "Ingreso laboral mediano de los ocupados, cabeceras",
+       x = "Nivel educativo", y = "Ingreso mediano (millones de COP)",
+       fill = NULL, caption = "Fuente: GEIH (DANE), extracto docente del curso.") +
+  theme_minimal()
+
+## exportar: reproducible y con dimensiones controladas
+ggsave(filename = "output/figuras/fig_brecha_sexo_educacion.png",
+       plot     = g_brecha,
+       width    = 8, height = 5, dpi = 300)
+```
+
+**¿Qué hace cada argumento?** `filename` es una ruta **relativa** dentro del proyecto, y su extensión define el formato (`.png` para Word/HTML, `.pdf` para LaTeX). `plot` es el objeto a guardar: si se omite, `ggsave()` guarda el último gráfico mostrado — funciona, pero sea explícito. `width` y `height` van en pulgadas, y `dpi = 300` es resolución de imprenta, suficiente para cualquier informe. De paso: `position = "dodge"` (en `geom_col()`) pone las barras de hombres y mujeres lado a lado en lugar de apiladas.
+
+::: {.callout-workflow}
+**Regla del curso: todo gráfico de un informe nace de un script**
+
+Nada de capturas de pantalla ni del botón *Export*. En la estructura del curso, el script `02_descriptivas.R` genera **todas** las figuras del proyecto y las exporta a `output/figuras/` con nombres descriptivos (`fig_brecha_sexo_educacion.png`, no `Rplot01.png`). ¿La ganancia? Si mañana cambia la base — un mes más de GEIH, un filtro distinto —, corre el script y todas las figuras se actualizan solas. Es la reproducibilidad de la Unidad 1, aplicada a los resultados.
+:::
+
+<!--=================-->
+# Estadísticas descriptivas
+
+Los gráficos muestran la **forma**; las tablas dan los **números exactos**. La sección de "Datos" de un paper (o de su proyecto final) necesita ambos. Vamos de lo general a lo específico: resumen global → tablas de frecuencia → descriptivas por grupo → tabla lista para informe.
+
+## Resumen global: summary() y skim()
+
+```{webr-r}
+summary(geih_mini)
+```
+
+**Cómo interpretar:** para cada variable numérica, `summary()` reporta mínimo, cuartiles, mediana, media y máximo. Mire el ingreso: la media (≈ 3,2 millones) **duplica con creces** la mediana (≈ 1,5 millones). Cuando media y mediana se separan tanto, la distribución es asimétrica — y el promedio deja de ser "el valor típico". En RStudio, `skim()` (paquete `skimr`) agrega faltantes, percentiles y mini-histogramas:
+
+```r
+skim(geih)   ## resumen enriquecido de la base completa
+```
+
+## Tablas de frecuencia: table() y tabyl()
+
+```{webr-r}
+## contar personas por nivel educativo
+table(geih_mini$nivel_educativo)
+```
+
+En RStudio, `tabyl()` (paquete `janitor`) devuelve conteos y porcentajes en un solo paso, y permite tablas cruzadas con formato de informe:
+
+```r
+## frecuencias con janitor
+geih %>% tabyl(nivel_educativo)
+
+## tabla cruzada: composicion educativa por sexo (porcentajes por columna)
+geih %>%
+  tabyl(nivel_educativo, sexo) %>%
+  adorn_percentages("col") %>%
+  adorn_pct_formatting(digits = 1)
+```
+
+## Descriptivas por grupo: group_by() + summarise()
+
+El corazón de la sección — y el reencuentro con la Unidad 2. La pregunta del hilo conductor, en números:
+
+```{webr-r}
+## ingreso por sexo: promedio, mediana, dispersion y tamaño de grupo
+geih_mini %>%
+  group_by(sexo) %>%
+  summarise(promedio = mean(ingreso_laboral),
+            mediana  = median(ingreso_laboral),
+            desv_est = sd(ingreso_laboral),
+            n        = n())
+```
+
+**Cómo interpretar (mire con calma, esto es lo importante):** en **promedio**, los hombres de la mini base ganan ≈ 4,5 millones y las mujeres 1,9 — la brecha parece enorme. En **mediana**, los hombres ganan ≈ 1,5 millones y las mujeres 1,6 — ¡la comparación se invierte! La diferencia es **una sola persona**: el outlier de 25 millones, que infla el promedio (y la desviación estándar) del grupo de los hombres.
+
+::: {.callout-key}
+**¿Promedio o mediana? Reporte ambos y explique la diferencia**
+
+Con distribuciones asimétricas como el ingreso, la media es sensible a los valores extremos y la mediana no. Que la brecha cambie de tamaño (o de signo) según el estadístico **ya es un hallazgo**, no un problema técnico: dice que la parte alta de la distribución difiere entre grupos. Compruébelo en la base real: la dirección de la brecha por sexo se mantiene con ambos estadísticos, pero su **magnitud** cambia — por eso los papers de distribución del ingreso reportan medianas, percentiles o logaritmos, no solo promedios.
+:::
+
+Sobre la base completa, el mismo patrón responde las tres preguntas del hilo conductor:
+
+```r
+## brecha por sexo
+geih %>%
+  group_by(sexo) %>%
+  summarise(promedio = mean(ingreso_laboral), mediana = median(ingreso_laboral),
+            desv_est = sd(ingreso_laboral), n = n())
+
+## retorno a la educacion
+geih %>%
+  group_by(nivel_educativo) %>%
+  summarise(mediana = median(ingreso_laboral), n = n())
+
+## la brecha por sexo DENTRO de cada nivel educativo
+geih %>%
+  group_by(nivel_educativo, sexo) %>%
+  summarise(mediana = median(ingreso_laboral), n = n(), .groups = "drop")
+```
+
+**Nota importante:** la tercera tabla es exactamente la que graficamos con `geom_col(position = "dodge")` en la sección de exportar. Tabla y gráfico son dos vistas del mismo `summarise()`.
+
+### Mini-ejercicio: descriptivas por nivel educativo
+
+```{webr-r}
+## Calcule por nivel educativo: mediana, promedio y numero de personas.
+## Ordene de mayor a menor mediana. ¿En que nivel difieren mas promedio y
+## mediana? ¿Por que? (pista: ¿donde "vive" el outlier?)
+## Su codigo aqui
+```
+
+## Tablas listas para informe: modelsummary
+
+Copiar números de la consola a Word, uno por uno, es la fuente de errores más vieja del trabajo empírico. El paquete `modelsummary` produce tablas de descriptivas **exportables** directamente a `output/tablas/`:
+
+```r
+## tablas de descriptivas para el informe
+p_load(modelsummary)
+
+## opcion 1: resumen automatico de toda la base (tipo skim, pero exportable)
+datasummary_skim(geih, output = "output/tablas/tab_resumen_geih.html")
+
+## opcion 2: tabla a la medida — la formula se lee "filas ~ columnas"
+datasummary(ingreso_laboral + edad + anios_educacion + horas_semana ~ sexo * (Mean + Median + SD),
+            data   = geih,
+            output = "output/tablas/tab_descriptivas_sexo.docx")
+```
+
+**Cómo leer la fórmula de `datasummary()`:** a la izquierda del `~` van las variables (las filas); a la derecha, los estadísticos (las columnas: `Mean`, `Median`, `SD`, `N`, `Min`, `Max`...); `sexo * (...)` parte cada estadístico en una columna por sexo — la tabla de la brecha, lista para pegar en el informe. La extensión del `output` decide el formato: `.docx` para Word, `.html`, `.tex` para LaTeX.
+
+::: {.callout-workflow}
+**Las tablas también nacen de scripts**
+
+La misma regla de las figuras aplica a las tablas: el script `02_descriptivas.R` las genera y las exporta a `output/tablas/`. En la Unidad 4, `modelsummary()` (la función hermana de `datasummary()`) hará lo mismo con las tablas de regresión. Su informe final no debe tener un solo número transcrito a mano.
+:::
+
+<!--=================-->
+# Niveles o logaritmos
+
+Ya lo vimos tres veces: el histograma aplastado, el boxplot lleno de atípicos, el promedio que duplica la mediana. Los tres son síntomas de lo mismo: la distribución del ingreso es **asimétrica a la derecha**, con una cola larga de valores altos. La transformación estándar en economía es el logaritmo. Compare los dos histogramas:
+
+```{webr-r}
+## en niveles: el outlier aplasta al resto
+ggplot(geih_mini, aes(x = ingreso_laboral)) +
+  geom_histogram(bins = 10, fill = "steelblue", color = "white")
+
+## en logaritmos: la distribucion "respira"
+ggplot(geih_mini, aes(x = log(ingreso_laboral))) +
+  geom_histogram(bins = 10, fill = "steelblue", color = "white")
+```
+
+**¿Qué hizo el logaritmo?** Comprimió la cola derecha: el outlier de 25 millones sigue ahí, pero ya no domina el eje — en logs, la distancia entre 2,5 y 25 millones es la misma que entre 250 mil y 2,5 millones. Además, las comparaciones se vuelven multiplicativas: pasar de 1 a 2 millones y de 10 a 20 son el **mismo salto** (una duplicación), que es como solemos pensar los cambios en variables económicas. Compruebe el contraste con los 21.821 ocupados — en logs, el ingreso toma la clásica forma de campana:
+
+```r
+ggplot(geih, aes(x = ingreso_laboral)) + geom_histogram(bins = 60)
+ggplot(geih, aes(x = log(ingreso_laboral))) + geom_histogram(bins = 60)
+```
+
+**Nota importante:** `log(0)` es `-Inf` y el logaritmo de un negativo es `NaN` (Unidad 1). Por eso el extracto del curso se restringe a ocupados con **ingreso laboral positivo**: el log siempre está definido. Con otras bases, ese chequeo es suyo.
+
+::: {.callout-connect}
+**Hacia la Unidad 4: los logs no son cosmética**
+
+En la próxima unidad estimaremos la ecuación de Mincer: `log(ingreso_laboral) ~ anios_educacion + edad`. Con el ingreso en logs, el coeficiente de educación se interpreta (aproximadamente) como el **cambio porcentual** del ingreso por un año adicional de educación — el "retorno a la educación". La decisión de escala que tomamos hoy al graficar define cómo se leerán los coeficientes mañana.
+:::
+
+<!--=================-->
+# Buenas prácticas de comunicación
+
+::: {.callout-key}
+**Un buen gráfico responde UNA pregunta**
+
+Antes de escribir una línea de código, escriba la pregunta que el gráfico debe responder. Si necesita comunicar tres ideas, haga tres gráficos: uno por pregunta. El gráfico que intenta decirlo todo termina no diciendo nada.
+:::
+
+::: {.callout-warning}
+**Los cinco errores que más se repiten en informes**
+
+**1. Eje Y truncado en gráficos de barras.** En una barra, la **altura ES el dato**: si el eje arranca en 1.400.000 en vez de 0, una diferencia del 5% se ve como del 200%. ggplot2 inicia las barras en cero por defecto: no lo "arregle" recortando el eje. La excepción son las **líneas** de tendencia, donde acercar el eje al rango de los datos puede ser legítimo — siempre declarándolo.
+
+**2. Demasiadas categorías sin ordenar.** 24 departamentos en orden alfabético = un gráfico que nadie lee. La receta de esta unidad: `reorder()` para ordenar por valor, top 10 con `slice_max()` (o agrupar el resto en "otros") y barras horizontales para nombres largos.
+
+**3. Colores sin significado.** El color debe **codificar una variable** (sexo, nivel educativo) o no estar. Cinco barras de cinco colores "porque se ve bonito" agregan ruido, no información; y evite el contraste rojo–verde como única distinción (es invisible para buena parte de los lectores daltónicos). En caso de duda: un solo color sobrio.
+
+**4. Gráfico sin título, unidades ni fuente.** ¿Ingreso en COP corrientes o en millones? ¿Todo el país o solo cabeceras? ¿Datos de quién? Un gráfico que no responde esas preguntas por sí solo obliga al lector a adivinar. `labs()` completo — título con la idea, ejes con unidades, caption con la fuente — **siempre**.
+
+**5. La torta (pie) casi nunca es la respuesta.** El ojo humano es malo comparando ángulos y áreas: con más de tres categorías, o con valores parecidos, la torta es ilegible. Unas barras ordenadas comunican lo mismo, mejor, en todos los casos. Dato revelador: ggplot2 ni siquiera trae un `geom_pie()`.
+:::
+
+**Antes de compartir cualquier gráfico, pregúntese:** ¿el título dice el hallazgo? ¿los ejes tienen unidades? ¿está la fuente? ¿cada color significa algo? ¿alguien sin contexto entiende la idea en 30 segundos? Si alguna respuesta es "no", el gráfico no está listo.
+
+<!--=================-->
+# Checklist de salida
+
+Antes de pasar a la Unidad 4, verifique que puede:
+
+- [ ] Explicar la fórmula de todo gráfico ggplot2 (datos + `aes()` + geometrías) y el papel del operador `+`
+- [ ] Elegir la geometría según la pregunta: distribución, comparación entre categorías, relación entre dos variables, evolución en el tiempo
+- [ ] Leer un histograma y un boxplot: forma, mediana, cuartiles y atípicos
+- [ ] Distinguir cuándo una estética va dentro de `aes()` (mapear una variable) y cuándo fuera (fijar un valor)
+- [ ] Ordenar barras con `reorder()` y explicar la diferencia entre `geom_col()` y `geom_bar()`
+- [ ] Completar un gráfico con `labs()` (título, ejes con unidades, fuente), un tema sobrio y un eje Y legible
+- [ ] Partir un gráfico por subgrupos con `facet_wrap()`/`facet_grid()` y justificar cuándo facetas y cuándo color
+- [ ] Exportar figuras reproducibles con `ggsave()` a `output/figuras/`
+- [ ] Calcular descriptivas por grupo (media, mediana, sd, n) con `group_by()` + `summarise()`, y tablas de frecuencia con `table()`/`tabyl()`
+- [ ] Producir una tabla de descriptivas exportable con `modelsummary` y explicar por qué el ingreso se analiza en logaritmos
+
+Si algún punto le genera dudas, vuelva a la sección correspondiente y ejecute los mini-ejercicios de nuevo.
+
+<!--=================-->
+# Preguntas de comprensión
+
+1. Quiere comparar la distribución del ingreso laboral entre los cinco niveles educativos **en un solo gráfico**. ¿Usaría histogramas o boxplots? ¿Por qué?
+2. En la GEIH, la brecha de ingresos por sexo medida con el **promedio** resulta mayor que la medida con la **mediana**. ¿Qué propiedad de la distribución del ingreso explica esa diferencia, y cuál de los dos estadísticos reportaría en un informe?
+3. Tiene el ingreso mediano por nivel educativo, separado por sexo. ¿Cuándo preferiría **facetas** (`facet_wrap()`) y cuándo **color** (`fill = sexo`) dentro del mismo panel?
+4. ¿Qué produce cada uno de estos tres códigos, y cuál es casi siempre un error?: `aes(color = sexo)`, `geom_point(color = "blue")`, `aes(color = "blue")`.
+5. Para graficar cuántos ocupados hay por departamento **directamente desde la base**, ¿usaría `geom_bar()` o `geom_col()`? ¿Y para graficar una tabla que ya construyó con `group_by()` + `summarise()`?
+
+<!--=================-->
+# Recursos de aprendizaje de la unidad
+
+- **Video (asincrónico):** [Visualización de datos](https://www.youtube.com/watch?v=sCfhUTHA4fQ) — Eduard Martínez
+- **Lectura guía:** [R for Data Science (2.ª ed.)](https://r4ds.hadley.nz/data-visualize.html) — cap. *Data visualization* ([versión en español, 1.ª ed.](https://es.r4ds.hadley.nz/))
+- **¿Qué gráfico usar?:** [from Data to Viz](https://www.data-to-viz.com/) — árbol de decisión según sus datos · [R Graph Gallery](https://r-graph-gallery.com) — ejemplos con código listo para adaptar
+- **Referencia rápida:** [Cheatsheet de ggplot2](https://rstudio.github.io/cheatsheets/data-visualization.pdf)
+- **Material ampliado:** [Semana 5 del curso de Business Analytics](https://eduard-martinez.github.io/teaching/ba/week-05/theory/week-05.html) — Visualización de datos con ggplot2
+- **Guías del curso:** [Guía de estilo de scripts](../../buenas_practicas/guia_estilo_scripts.html) · [Guía de organización de proyectos](../../buenas_practicas/guia_organizacion_proyecto.html) · [Guía de uso de IA](../../ia/guia_uso_ia.html)
+
+```{=html}
+<!-- Panel Environment (CSS en styles.css) -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">&#x1F4E6; Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
+  </div>
+</div>
+
+<script type="module">
+/* ── Toggle colapsar / expandir ── */
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '▲' : '▼';
+};
+
+/* ── Consultar el environment de R ── */
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Env panel error:', e);
+    return [];
+  }
+}
+
+/* ── Renderizar la lista de objetos ── */
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. × ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+/* ── Actualizar panel ── */
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+/* ── Mover webR Status despues de los links de contacto ── */
+function moveWebRStatus() {
+  const anchor = document.getElementById('webr-status-anchor');
+  const statusArea = document.getElementById('qwebr-status-message-area');
+  if (anchor && statusArea) {
+    const wrapper = statusArea.closest('.quarto-title-meta');
+    if (wrapper) {
+      wrapper.style.display = 'inline';
+      wrapper.style.fontSize = '13px';
+      wrapper.style.marginLeft = '30px';
+      anchor.parentNode.insertBefore(wrapper, anchor);
+    }
+  }
+}
+
+/* ── Esperar webR y conectar hooks ── */
+async function init() {
+  /* Esperar a que mainWebR exista */
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
+  moveWebRStatus();
+
+  /* Esperar a que los botones Run esten habilitados (todas las celdas ocultas ejecutadas) */
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  /* Monkey-patch qwebrComputeEngine para detectar ejecucion */
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  /* Expandir panel y hacer primer scan */
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+```

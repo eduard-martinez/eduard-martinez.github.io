@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía de organización de proyectos — Curso Nivelatorio de R · Curso Nivelatorio de R</title>
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../assets/curso-page.css">
+</head>
+<body class="fullcontent quarto-light">
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<main class="content" id="quarto-document-content">
+<div class="page-wrap">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Guía de organización de proyectos — Curso Nivelatorio de R</h1>
+
+</div>
+</header>
+
+<div class="curso-logo"><img src="../figures/icesi_logo.png" alt="Universidad Icesi"></div>
+<div class="curso-meta"><span class="curso-chip">Buenas prácticas</span></div>
+<p class="curso-backlink"><a href="../index.html">← Volver al inicio del curso</a></p>
+
+<p><strong>CIENFI · Universidad Icesi · Prof. Eduard F. Martínez-González</strong></p>
+<p>Cómo se organiza una carpeta de análisis de datos para que el trabajo sea
+<strong>reproducible</strong>: que otra persona (o usted en seis meses) pueda tomar la
+carpeta, correr los scripts en orden y obtener exactamente los mismos
+resultados. Esta estructura se usa en las tareas y se <strong>califica</strong> en el
+proyecto final.</p>
+<hr />
+<h2 id="1-un-análisis--un-proyecto-de-rstudio">1. Un análisis = un proyecto de RStudio</h2>
+<ul>
+<li>Cree siempre un proyecto: <code>File → New Project → New Directory</code>.</li>
+<li>El archivo <code>.Rproj</code> fija el working directory en la raíz de la carpeta:
+por eso <strong>todas las rutas del código son relativas</strong> a esa raíz.</li>
+<li>La prueba definitiva: la carpeta completa debe poder copiarse a otro
+computador y correr <strong>sin cambiar una sola línea</strong>.</li>
+</ul>
+<h2 id="2-estructura-básica-tareas-del-curso">2. Estructura básica (tareas del curso)</h2>
+<pre><code>nivelacion_r/
+├── nivelacion_r.Rproj
+├── datos/
+│   ├── originales/        # datos crudos: NUNCA se modifican
+│   └── procesados/        # bases limpias generadas por scripts
+├── scripts/               # codigo numerado en orden de ejecucion
+│   ├── 01_limpieza.R
+│   ├── 02_descriptivas.R
+│   └── 03_regresiones.R
+├── output/
+│   ├── figuras/           # .png exportados con ggsave()
+│   └── tablas/            # .docx/.tex exportados con msummary()
+└── README.md              # que hace el proyecto y como correrlo</code></pre>
+<h2 id="3-estructura-extendida-proyectos-de-investigación">3. Estructura extendida (proyectos de investigación)</h2>
+<p>Para proyectos más grandes (tesis, trabajo de asistente de investigación), cada
+<strong>etapa</strong> del pipeline se vuelve una carpeta numerada con sus propias
+subcarpetas <code>code / input / output</code>:</p>
+<pre><code>mi_proyecto/
+├── 01_import_data/
+│   ├── code/              # scripts que importan
+│   ├── input/             # datos originales (intocables)
+│   └── output/            # datos importados
+├── 02_process_data/
+│   ├── code/              # limpieza y estandarizacion
+│   └── output/            # bases procesadas
+├── 03_combine_data/
+│   ├── code/              # cruces (joins) entre fuentes
+│   └── output/            # base final de analisis
+├── 04_main_regressions/
+│   ├── code/              # modelos y tablas
+│   └── output/            # resultados finales
+├── 99_others/             # material complementario (PDFs, notas)
+├── README.md
+└── mi_proyecto.Rproj</code></pre>
+<p>La lógica es la misma en ambas estructuras: <strong>el número dice el orden de
+ejecución</strong> y el output de una etapa es el input de la siguiente.</p>
+<h2 id="4-las-cinco-reglas-que-no-se-negocian">4. Las cinco reglas que no se negocian</h2>
+<ol type="1">
+<li><strong>Los datos originales son intocables.</strong> Nunca se editan a mano, nunca se
+sobreescriben. Toda transformación ocurre en un script y su resultado se
+guarda en <code>procesados/</code> (u <code>output/</code> de la etapa). Si mañana descubre un
+error de limpieza, vuelve a correr; si dañó el original, no hay vuelta.</li>
+<li><strong>Los scripts se numeran en orden de ejecución</strong> (<code>01_</code>, <code>02_</code>, ...). Correr
+<code>01 → 02 → 03</code> en una sesión limpia debe reproducir todo.</li>
+<li><strong>Ningún script depende de la memoria de otro.</strong> Cada script <strong>lee de
+disco</strong> lo que necesita (con <code>import()</code>) y <strong>escribe a disco</strong> lo que
+produce (con <code>export()</code>). Nada de "ese objeto quedó en el Environment".</li>
+<li><strong>Todo resultado del informe nace de un script.</strong> Figuras con <code>ggsave()</code> a
+<code>output/figuras/</code>, tablas con <code>msummary()</code>/<code>export()</code> a <code>output/tablas/</code>.
+Prohibido el pantallazo de la consola y el copiar-pegar.</li>
+<li><strong>README.md siempre.</strong> Mínimo: qué hace el proyecto, qué datos usa (y de
+dónde salen), en qué orden se corren los scripts, y qué produce cada uno.</li>
+</ol>
+<h2 id="5-convenciones-de-nombres-de-archivos-y-columnas">5. Convenciones de nombres de archivos y columnas</h2>
+<ul>
+<li>Minúsculas, sin espacios, sin tildes, palabras con <code>_</code> (<strong>snake_case</strong>):
+<code>innovacion_empresas.csv</code>, <code>firmas_limpias.rds</code>, <code>tasa_innovacion_sector.png</code>.</li>
+<li>Nombres de columnas igual: <code>janitor::clean_names()</code> inmediatamente después de
+importar cualquier base.</li>
+<li>Datos procesados en <strong><code>.rds</code></strong> (conserva los tipos de columna: lo que guardó
+es lo que recupera). El <code>.csv</code> es para compartir con otros programas.</li>
+<li>Fechas en formato <code>YYYY-MM-DD</code> (ordenan solas y no hay ambigüedad).</li>
+</ul>
+<h2 id="6-la-prueba-de-fuego-antes-de-entregar">6. La prueba de fuego (antes de entregar)</h2>
+<ol type="1">
+<li><code>Session → Restart R</code> (sesión limpia, Environment vacío)</li>
+<li>Correr los scripts <strong>en orden</strong>, completos</li>
+<li>¿Se regeneraron <code>datos/procesados/</code> y <code>output/</code> sin errores?</li>
+</ol>
+<p>Si algo falló, encontró exactamente lo que hay que arreglar: una ruta absoluta,
+un objeto fantasma que vivía en la memoria, un paquete que no estaba en
+<code>p_load()</code>.</p>
+<h2 id="7-plantilla-lista-para-usar">7. Plantilla lista para usar</h2>
+<p>La carpeta <a href="plantilla_proyecto.html"><code>plantilla_proyecto/</code></a> de este curso trae la
+estructura básica ya armada (carpetas + esqueletos de los tres scripts +
+README). Cópiela, renómbrela y trabaje sobre ella — así arranca el proyecto
+final.</p>
+
+<footer class="curso-footer">
+Curso Nivelatorio de Programación en R · CIENFI — Universidad Icesi ·
+<a href="mailto:efmartinez@icesi.edu.co">efmartinez@icesi.edu.co</a>
+</footer>
+
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,966 @@
+---
+title: "Unidad 2 - Manejo de datos con tidyverse"
+subtitle: "Curso Nivelatorio de R · CIENFI · Universidad Icesi"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="../../index.html" style="color:#555; text-decoration:none; margin-right:16px;">Inicio del curso</a>
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;">\@emartigo</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;">GitHub: eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;">eduard-martinez.github.io</a>
+<span id="webr-status-anchor"></span>
+</div>
+
+```{webr-r}
+#| context: setup
+
+## Mini base de firmas: version miniatura (y limpia) de innovacion_empresas.csv
+firmas <- data.frame(
+  id_empresa   = c("E001", "E002", "E003", "E004", "E005", "E006", "E007", "E008"),
+  cod_sector   = c("C", "C", "G", "G", "J", "J", "I", "C"),
+  departamento = c("Valle del Cauca", "Antioquia", "Valle del Cauca", "Bogota D.C.",
+                   "Bogota D.C.", "Antioquia", "Valle del Cauca", "Bogota D.C."),
+  tamano    = c("Grande", "Pequena", "Mediana", "Micro", "Mediana", "Grande", "Pequena", "Mediana"),
+  empleados = c(320, 35, 80, 9, 60, 410, 28, 95),
+  ventas    = c(5200, 480, 1250, 95, 980, 7400, 310, 1600),
+  innova    = c("si", "no", "si", "no", "si", "si", "no", "no"),
+  gasto_id  = c(210, 0, 35, NA, 60, 380, NA, 12))
+
+## Mini base sucia (seccion "Limpiar una base sucia")
+firmas_sucia <- data.frame(
+  id_empresa = c("E101", "E102", "E103", "E104", "E105", "E106", "E107", "E108", "E103"),
+  sector     = c("Industria", "industria ", "COMERCIO", "Comercio", "servicios",
+                 "SERVICIOS", " Industria", "comercio", "COMERCIO"),
+  ventas     = c("1200", "850", "ND", "2300", "$1500", "970", "640", "1100", "ND"),
+  empleados  = c(50, 12, 80, 150, 9000, 45, 30, 65, 80),
+  gasto_id   = c(35, NA, 8, 120, NA, 22, 5, NA, 8),
+  innova     = c("Si", "si", "SI", "No", " no", "NO", "si ", "No", "SI"))
+
+## Tabla de caracteristicas sectoriales (seccion de joins)
+info_sector <- data.frame(
+  cod_sector      = c("C", "G", "M"),
+  sector_desc     = c("Manufactura", "Comercio", "Prof. y cientificas"),
+  crecimiento_pct = c(6.5, 2.1, -0.1))
+
+## Tabla defectuosa con llave duplicada (seccion de joins)
+info_dup <- data.frame(cod_sector = c("C", "C", "G"),
+                       gremio     = c("ANDI", "ACOPI", "FENALCO"))
+
+## Tabla de salarios por sector, millones COP (mini-ejercicio de joins)
+salario_sector <- data.frame(cod_sector   = c("C", "G", "I"),
+                             salario_prom = c(2.1, 1.8, 1.4))
+
+## Base sucia del mini-ejercicio de limpieza
+firmas_b <- data.frame(
+  id_empresa = c("F01", "F02", "F03", "F04", "F05", "F02"),
+  ciudad     = c("cali", "CALI ", "Palmira", "palmira", " CALI", "CALI "),
+  ventas     = c("320", "150", "ND", "480", "$275", "150"),
+  exporta    = c("Si", "no", "SI", "No", " si", "no"))
+```
+
+<!--=================-->
+# Objetivo de la unidad
+
+En la Unidad 1 aprendimos el idioma: objetos, vectores, data frames y proyectos reproducibles. En esta unidad empieza el trabajo real. Un secreto a voces de la investigación aplicada: **el manejo de datos ocupa alrededor del 80% del tiempo de un proyecto empírico**. Estimar la regresión toma minutos; dejar la base lista para estimarla toma días. Esta unidad existe para que esos días sean los menos posibles.
+
+::: {.callout-key}
+**¿Por qué esto importa en economía aplicada?**
+
+Las bases con las que trabajará en la Maestría —encuestas de hogares como la GEIH, paneles de firmas tipo EDIT o Supersociedades, registros administrativos de salud, impuestos o educación— **nunca llegan listas**: traen categorías escritas de tres formas distintas, números leídos como texto, faltantes sin documentar, duplicados y valores imposibles, y la información suele venir repartida en varias tablas que hay que cruzar. La calidad de cualquier resultado —una descriptiva, un gráfico, un coeficiente— nunca supera la calidad de la base sobre la que se calcula.
+:::
+
+::: {.callout-workflow}
+**El ciclo de manejo de datos (el mapa de esta unidad)**
+
+**Importar** el archivo a un data frame → **diagnosticar** la base antes de tocarla (`glimpse()`, `skim()`) → **limpiar** duplicados, texto, tipos, faltantes y outliers → **transformar** (filtrar, crear variables, agrupar y resumir con [dplyr]{.term}) → **cruzar** tablas con una [llave]{.term} común (`left_join()`). No es una lista para memorizar: es el orden natural en el que trabajaremos de aquí en adelante, y el índice de este documento.
+:::
+
+## Lo que aprenderemos en esta unidad
+
+- **Importar y diagnosticar:** leer archivos con `import()` (rio), `read_csv()` y `read_excel()`; radiografiar con `glimpse()` y `skim()`; estandarizar nombres con `clean_names()`
+- **Transformar con dplyr:** encadenar con el [pipe]{.term} `%>%`; usar `select()`, `rename()`, `filter()`, `arrange()` y `mutate()` (con `ifelse()` y `case_when()`)
+- **Limpiar una base sucia:** un flujo de 5 pasos —duplicados, texto, tipos, faltantes y outliers— con cada decisión justificada y documentada
+- **Agrupar, resumir y cruzar:** tablas por grupo con `group_by()` + `summarise()`, `count()` y `n_distinct()`; uniones con `left_join()`; reorganización con `pivot_longer()` / `pivot_wider()`
+
+<!--=================-->
+# Importar datos y primer diagnóstico
+
+En la Unidad 1 escribimos los datos a mano con `c()` y `data.frame()`. En la práctica, los datos viven en **archivos** —un `.csv` descargado del DANE, un Excel enviado por un ministerio— y el primer paso de todo análisis es importarlos al [Environment]{.term}.
+
+## La base del curso: `innovacion_empresas.csv`
+
+::: {.callout-key}
+**Conozca la base que nos acompañará toda la unidad**
+
+`innovacion_empresas.csv` contiene **microdatos ficticios a nivel de firma**, inspirados en encuestas de innovación tipo EDIT (DANE): una fila por empresa, con su sector, departamento, tamaño, empleados, ventas, gasto en I+D e indicadores de innovación y exportación. La base está **sucia a propósito**: la misma categoría escrita de varias formas (`Si`, `si `, `SI`, `1`), columnas numéricas que llegan como texto, faltantes, valores imposibles y filas duplicadas. No es un capricho pedagógico: así llegan las bases reales.
+:::
+
+La importamos en RStudio, dentro del proyecto del curso y con rutas relativas (regla de oro de la Unidad 1). El estándar del curso es `import()` (paquete `rio`), que detecta el formato por la extensión (.csv, .xlsx, .dta, .rds, ...) y elige el lector adecuado; las alternativas específicas de cada formato también son válidas. Este bloque se corre en RStudio (no es ejecutable aquí):
+
+```r
+## [RStudio] llamar/instalar librerias
+require(pacman)
+p_load(tidyverse, rio, janitor, skimr)
+
+## importar la base del curso (ruta relativa a la raiz del proyecto)
+firmas <- import("datos/originales/innovacion_empresas.csv")
+## equivalentes segun el formato:
+firmas <- read_csv("datos/originales/innovacion_empresas.csv")   # readr (tidyverse)
+firmas <- read_excel("datos/originales/firmas.xlsx", sheet = 1)  # readxl, para Excel
+```
+
+## Primer diagnóstico: radiografiar antes de tocar
+
+Importar sin diagnosticar es como recibir un paciente sin examinarlo. Tres funciones "lupa" dan la radiografía:
+
+- **`glimpse()`** (dplyr): la versión mejorada del `str()` de la Unidad 1: filas, columnas, tipo de cada variable y primeros valores. Aquí salta la primera alarma de nuestra base: `ventas_millones` y `num_empleados` llegan como `<chr>` (texto).
+- **`skim()`** (skimr): resumen por variable: faltantes (`n_missing`), valores distintos (`n_unique`) y, para las numéricas, mínimo, máximo y percentiles.
+- **`clean_names()`** (janitor): estandariza los nombres de columnas a `snake_case` (`Ventas (millones $)` pasa a `ventas_millones`). Con Excel institucionales le ahorrará muchos dolores de cabeza.
+
+```r
+## [RStudio] diagnostico de la base recien importada
+glimpse(firmas)
+skim(firmas)
+firmas <- clean_names(firmas)
+```
+
+::: {.callout-practice}
+**Cómo leer la salida de `skim()`**
+
+Léala de arriba a abajo buscando lo que no cuadra: un `n_unique` mayor de lo esperado en una categórica delata variantes de escritura (¿15 valores para 7 sectores?); una columna de números en el bloque `character` delata un problema de tipo; un `n_missing` alto exige entender los faltantes antes de tratarlos; y un `p0` o `p100` absurdo delata valores imposibles u [outliers]{.term}. Cada hallazgo se anota: ese listado es el insumo del flujo de limpieza de la sección 5.
+:::
+
+La rutina completa al importar —estándar del curso— es siempre la misma: `import()` con ruta relativa → `glimpse()` → `skim()` → `clean_names()` → anotar los problemas en el script. Cinco minutos de diagnóstico evitan horas de depurar resultados absurdos río abajo.
+
+## La mini base de los ejercicios interactivos
+
+Los bloques interactivos de este documento corren con **webR en su navegador**, que no puede leer archivos de su disco. Por eso los ejercicios usan una **versión miniatura de la base del curso** (8 firmas, nombres abreviados), ya construida con `data.frame()` dentro de este documento. Ejecute el bloque para verla y radiografiarla:
+
+```{webr-r}
+## la mini base ya viene precargada en este documento
+firmas
+## cargar dplyr y radiografiar
+library(dplyr)
+glimpse(firmas)
+```
+
+## Mini-ejercicio: Diagnóstico exprés
+
+Responda con código, no mirando la tabla:
+
+```{webr-r}
+# 1. ¿Cuantas filas y columnas tiene la mini base?     (use dim)
+# 2. ¿Cuantos NA tiene la columna gasto_id?            (use sum + is.na)
+# 3. ¿Que valores toma la variable tamano?             (use unique)
+```
+
+**Resultados esperados:** 8 filas y 8 columnas; 2 faltantes en `gasto_id`; cuatro tamaños de firma.
+
+<!--=================-->
+# El pipe (%>%)
+
+Antes de los verbos de dplyr, el conector que los une. Suponga que quiere el promedio de ventas, redondeado. La forma tradicional anida funciones y se lee al revés de como se piensa: la primera operación (`mean`) queda en el centro y la última (`round`) al principio. El [pipe]{.term} `%>%` endereza la lectura:
+
+```{webr-r}
+ventas_millones <- c(5200, 480, 1250, 95, 980, 7400, 310, 1600)
+
+# funciones anidadas: se leen de adentro hacia afuera
+round(mean(ventas_millones), 1)
+# con pipe: se lee de izquierda a derecha
+ventas_millones %>% mean() %>% round(1)
+```
+
+**Cómo leerlo:** el pipe toma lo que está a su izquierda y lo pasa como **primer argumento** de la función de la derecha. En voz alta, `%>%` se lee "**luego**": "tome las ventas, *luego* calcule el promedio, *luego* redondee". El código se convierte en una oración.
+
+Con data frames el pipe muestra todo su poder. Un anticipo de la próxima sección (no se preocupe aún por los verbos; fíjese en cómo **se lee**):
+
+```{webr-r}
+firmas %>%
+  filter(innova == "si") %>%
+  select(id_empresa, cod_sector, ventas) %>%
+  arrange(desc(ventas))
+```
+
+"Tome las firmas, *luego* quédese con las que innovan, *luego* seleccione tres columnas, *luego* ordénelas de mayores a menores ventas". Cuatro pasos, cero objetos intermedios, y cualquier lector —incluido usted en seis meses— entiende el flujo de un vistazo.
+
+::: {.callout-key}
+**El estándar del curso es `%>%`**
+
+Existen dos pipes en R: `%>%` (del paquete `magrittr`, se carga automáticamente con `dplyr`/`tidyverse`) y `|>` (el nativo de R desde la versión 4.1). Para lo que haremos aquí son equivalentes, pero **el estándar del curso es `%>%`**: es el que verá en todo nuestro material y en la mayoría de la ayuda en línea. Si encuentra `|>` en otro material, léalo igual: "luego".
+:::
+
+Dos hábitos que adoptaremos desde ya: el atajo `Ctrl + Shift + M` (Windows/Linux) o `Cmd + Shift + M` (Mac) escribe `%>%` en RStudio; y después de cada `%>%` se salta de línea — un paso del flujo por línea, para que los scripts se lean como recetas.
+
+<!--=================-->
+# Transformaciones básicas con dplyr
+
+[dplyr]{.term} es el paquete central del [tidyverse]{.term} para manipular data frames. Su filosofía: en vez de la notación de corchetes de la Unidad 1, ofrece **verbos** —funciones cuyo nombre dice exactamente qué hacen— que comparten una misma lógica: `resultado <- datos %>% verbo(argumentos)`.
+
+::: {.callout-key}
+**Los verbos NO modifican el objeto original**
+
+Todos devuelven una **copia transformada**. Si no guarda el resultado con `<-`, la transformación se imprime en la consola y se pierde: `firmas` seguirá intacta en el [Environment]{.term} hasta que usted la sobreescriba explícitamente. Es una red de seguridad: puede experimentar sin miedo a dañar los datos.
+:::
+
+## select(): elegir columnas
+
+Devuelve solo las columnas pedidas, en el orden pedido; con el signo `-` **excluye**:
+
+```{webr-r}
+# quedarse con tres columnas
+firmas %>% select(id_empresa, ventas, gasto_id)
+# todas EXCEPTO departamento y tamano
+firmas %>% select(-departamento, -tamano)
+
+# Practique: seleccione id_empresa, cod_sector y empleados (en ese orden)
+```
+
+## rename(): renombrar columnas
+
+Cambia el nombre sin tocar el contenido; la sintaxis es `nuevo_nombre = nombre_viejo`:
+
+```{webr-r}
+firmas %>%
+  rename(gasto_id_millones = gasto_id, ventas_millones = ventas) %>%
+  names()
+# Practique: renombre tamano a tamano_firma
+```
+
+¿Cuándo renombrar? Nombres poco descriptivos (`x1`, `var2`), con mayúsculas o espacios, o para unificar nomenclatura antes de cruzar bases. El estándar sigue siendo `snake_case`.
+
+## filter(): filtrar filas
+
+Devuelve solo las filas que cumplen una condición; las demás se descartan:
+
+```{webr-r}
+# firmas del sector manufacturero (codigo C)
+firmas %>% filter(cod_sector == "C")
+# firmas con ventas superiores a 1.000 millones
+firmas %>% filter(ventas > 1000)
+```
+
+Los operadores de comparación son los de la Unidad 1 (`==`, `!=`, `>`, `>=`, `<`, `<=`), más uno nuevo: `%in%` pregunta si el valor **pertenece a un conjunto**. Las condiciones se combinan con `&` (ambas) y `|` (al menos una):
+
+```{webr-r}
+# manufactureras Y con ventas altas (ambas condiciones)
+firmas %>% filter(cod_sector == "C" & ventas > 1000)
+# de Valle del Cauca O de Antioquia: con %in% es mas limpio que con |
+firmas %>% filter(departamento %in% c("Valle del Cauca", "Antioquia"))
+```
+
+::: {.callout-warning}
+**Error clásico: `=` no es `==`**
+
+`filter(firmas, cod_sector = "C")` falla: `=` asigna, `==` compara. Dentro de `filter()`, comparar es **siempre** con dos signos igual. R se lo recuerda en el mensaje de error (`Did you mean cod_sector == "C"?`): léalo.
+:::
+
+::: {.callout-connect}
+**De la Unidad 1 a `filter()`**
+
+En la Unidad 1 filtramos con indexación lógica: `personas[personas$ingreso > 1500000, ]`. `filter(firmas, ventas > 1000)` hace **exactamente lo mismo**: construye un vector de `TRUE`/`FALSE` y conserva las filas con `TRUE`. Solo cambia la sintaxis: sin corchetes, sin repetir el nombre de la base, y encadenable con `%>%`. Si entendió la indexación lógica, ya entendió `filter()`.
+:::
+
+```{webr-r}
+# Practique:
+# P1. Firmas del sector C                                  -> 3 filas
+# P2. Firmas que innovan Y venden mas de 1.000 millones    -> 3 filas
+# P3. Firmas de Valle del Cauca o Antioquia (use %in%)     -> 5 filas
+```
+
+## arrange(): ordenar filas
+
+Reorganiza las filas según una o más columnas; es el paso final típico antes de presentar una tabla:
+
+```{webr-r}
+# de mayores a menores ventas (sin desc() seria ascendente)
+firmas %>% arrange(desc(ventas))
+# por sector (A-Z) y, dentro de cada sector, por ventas descendentes
+firmas %>% arrange(cod_sector, desc(ventas))
+
+# Practique: ordene por gasto_id descendente. ¿Donde quedan los NA?
+```
+
+Un detalle útil del ejercicio: `arrange()` manda los `NA` **siempre al final**, con o sin `desc()`.
+
+## mutate(): crear variables
+
+Añade columnas calculadas; las originales se conservan y el número de filas no cambia:
+
+```{webr-r}
+# productividad laboral e intensidad de I+D
+firmas %>%
+  mutate(ventas_empleado = ventas / empleados,
+         intensidad_id   = gasto_id / ventas) %>%
+  select(id_empresa, ventas_empleado, intensidad_id)
+```
+
+Observe las firmas E004 y E007: como `gasto_id` es `NA`, la intensidad también queda `NA`. **El `NA` se propaga en los cálculos** — no desaparece solo, y eso es deseable: nos obliga a decidir qué hacer con él (sección 5).
+
+**Clasificar con `ifelse()`.** Para una variable de **dos** categorías: "para cada fila, si la condición se cumple escriba lo primero; si no, lo segundo".
+
+```{webr-r}
+# etiquetar firmas grandes y pequenas segun ventas
+firmas %>%
+  mutate(escala = ifelse(ventas > 1000, "grande", "pequena")) %>%
+  select(id_empresa, ventas, escala)
+```
+
+### Clasificar con case_when(): ramas planas
+
+Con **tres o más** categorías, los `ifelse()` anidados se vuelven ilegibles. `case_when()` los reemplaza con ramas planas, una condición por línea:
+
+```{webr-r}
+firmas %>%
+  mutate(categoria = case_when(
+    ventas >= 2000 ~ "grande",
+    ventas >= 500  ~ "mediana",
+    TRUE           ~ "pequena"
+  )) %>% select(id_empresa, ventas, categoria)
+```
+
+::: {.callout-practice}
+**Cómo leer (y escribir) un `case_when()`**
+
+Cada rama es `condicion ~ valor` y se evalúan **en orden**: la primera que se cumple gana (una firma con ventas de 3.000 es "grande", no "mediana", aunque cumpla ambas). La última rama, `TRUE ~ "pequena"`, recoge "todo lo demás"; sin ella, esas filas quedarían en `NA`. Estilo del curso: **ramas planas**, una por línea, alineadas — un `case_when()` bien escrito se lee como una tabla de reglas.
+:::
+
+## Mini-ejercicio: Construyendo variables de análisis
+
+Complete los espacios `___`:
+
+```{webr-r}
+firmas_mut <- firmas %>%
+  mutate(ventas_empleado = ___ / ___,
+         escala = case_when(
+           empleados >= 200 ~ "grande",
+           empleados >= 50  ~ "mediana",
+           ___              ~ "pequena"
+         ))
+firmas_mut %>% select(id_empresa, empleados, escala, ventas_empleado)
+```
+
+**Pista y verificación:** la última rama debe capturar "todo lo demás". Resultado esperado: 2 firmas grandes (E001, E006), 3 medianas (E003, E005, E008) y 3 pequeñas. Revise el panel [Environment]{.term}: `firmas_mut` debe existir con 10 columnas y `firmas` seguir intacta con 8.
+
+**Hasta aquí hemos visto:** los verbos transforman una base que se supone confiable. La realidad es menos amable: antes de transformar hay que limpiar.
+
+<!--=================-->
+# Limpiar una base sucia
+
+Esta sección es el corazón de la unidad. Trabajaremos con `firmas_sucia`, una mini base que concentra —en 9 filas— los mismos problemas de la base real del curso y que ya viene cargada en este documento. Ejecute el bloque para verla y obsérvela con ojo clínico:
+
+```{webr-r}
+## la base sucia ya viene cargada: asi llegan los datos en la vida real
+firmas_sucia
+```
+
+::: {.callout-key}
+**Los cinco problemas de esta base (los mismos de la base real)**
+
+1. **Una fila duplicada:** la firma E103 aparece dos veces, idéntica
+2. **Texto inconsistente:** `sector` e `innova` mezclan mayúsculas y espacios invisibles (`"industria "`, `" no"`)
+3. **Números como texto:** `ventas` es `character`, con un `"$1500"` y un `"ND"` (no disponible)
+4. **Faltantes:** `gasto_id` tiene `NA` que hay que interpretar antes de tratar
+5. **Un outlier:** una firma reporta 9.000 empleados — sospechoso, por decir lo menos
+
+Los corregiremos **en este orden**: primero filas (duplicados), luego columnas (texto, tipos) y al final las decisiones difíciles (faltantes, outliers). Los pasos son secuenciales: **ejecute los bloques en orden**.
+:::
+
+Primero, el diagnóstico con herramientas que ya conocemos — cinco líneas, cinco problemas confirmados:
+
+```{webr-r}
+nrow(firmas_sucia)                  # ¿cuantas filas?
+sum(duplicated(firmas_sucia))       # ¿cuantas son copias exactas de otra?
+unique(firmas_sucia$innova)         # ¿que valores toma innova?
+class(firmas_sucia$ventas)          # ¿de que tipo es ventas?
+summary(firmas_sucia$empleados)     # ¿rangos razonables?
+```
+
+Ahora sí: partimos de `firmas_sucia` (que **no** tocaremos — regla de la Unidad 1: los datos originales son intocables) y construiremos `firmas_limpia` paso a paso.
+
+## Paso 1: eliminar duplicados con distinct()
+
+```{webr-r}
+firmas_limpia <- firmas_sucia %>% distinct()
+# verificar: ¿cuantas filas se fueron?
+nrow(firmas_sucia) - nrow(firmas_limpia)
+```
+
+`distinct()` compara cada fila completa con las anteriores y conserva solo la primera aparición: si el resultado es 1, eliminamos exactamente el duplicado de E103. ¿Por qué es lo primero? Porque una fila duplicada infla **todo** lo que calcule después: sumas, promedios, conteos. Para declarar duplicados usando solo algunas columnas: `distinct(firmas_sucia, id_empresa, .keep_all = TRUE)`.
+
+## Paso 2: estandarizar el texto
+
+::: {.callout-warning}
+**"Industria" ≠ "industria " ≠ " Industria"**
+
+Para R son **tres categorías distintas** — y dos se diferencian por un espacio que usted no puede ver. Si agrupa por sector sin estandarizar, obtendrá 8 grupos en vez de 3, los totales no cuadrarán y **R no emitirá ningún error**. Es el error más silencioso y frecuente del trabajo con encuestas.
+:::
+
+Tres funciones de base R resuelven casi todo: `tolower()` / `toupper()` unifican mayúsculas y minúsculas; `trimws()` elimina espacios al inicio y al final; `gsub(patron, reemplazo, texto)` busca un patrón y lo reemplaza (la usaremos en el paso 3).
+
+```{webr-r}
+firmas_limpia <- firmas_limpia %>%
+  mutate(sector = tolower(trimws(sector)),
+         innova = tolower(trimws(innova)))
+# verificar: deben quedar 3 sectores y 2 categorias de innova
+table(firmas_limpia$sector)
+table(firmas_limpia$innova)
+```
+
+Lea la línea de adentro hacia afuera: primero `trimws()` quita espacios, luego `tolower()` pasa a minúsculas. La verificación con `table()` no es opcional: **cada paso de limpieza termina con un chequeo**.
+
+## Paso 3: corregir los tipos
+
+`ventas` llegó como texto por culpa de dos valores: `"ND"` (texto puro) y `"$1500"` (número con símbolo). La estrategia: declarar el texto-basura como `NA`, quitar el símbolo y solo entonces convertir:
+
+```{webr-r}
+firmas_limpia <- firmas_limpia %>%
+  mutate(ventas = na_if(ventas, "ND"),          # "ND" -> NA explicito
+         ventas = gsub("\\$", "", ventas),      # quitar el simbolo $
+         ventas = as.numeric(ventas))           # ahora si, texto -> numero
+class(firmas_limpia$ventas)
+summary(firmas_limpia$ventas)
+```
+
+Tres funciones nuevas, cada una con su rol: `na_if(x, "ND")` convierte un valor específico en `NA` (la forma **explícita y documentada** de declarar un faltante); `gsub("\\$", "", x)` reemplaza el símbolo `$` por nada (se escribe `\\$` porque `$` tiene significado especial en expresiones regulares); `as.numeric()` convierte texto a número — lo que no pueda convertir queda en `NA` **con un warning**: si aparece, revise qué valor se le escapó.
+
+En la base real hay un problema adicional: decimales con coma (`"857,3"`). Para eso, `parse_number()` de readr es la navaja suiza — entiende monedas, separadores de miles y comas decimales:
+
+```r
+## [RStudio] convertir ventas_millones con decimales de coma ("857,3")
+firmas <- firmas %>%
+  mutate(ventas_millones = parse_number(ventas_millones, locale = locale(decimal_mark = ",")))
+```
+
+## Paso 4: tratar los faltantes
+
+Ya sabemos que un [NA]{.term} se propaga: `mean()` de una columna con faltantes devuelve `NA`, salvo con `na.rm = TRUE`. Pero antes de "removerlos" hay que hacerse una pregunta que es de economía, no de R:
+
+::: {.callout-key}
+**¿Este NA es información o es un error?**
+
+Un faltante **puede tener sentido económico**. En las encuestas de innovación, la firma que no invierte en I+D simplemente no responde el módulo de gasto: su `NA` en `gasto_id` significa, casi con certeza, "**no invierte**", y recodificarlo a `0` es defendible. En cambio, el `"ND"` de `ventas` es **no respuesta**: la firma vende (está viva), pero no sabemos cuánto; ponerle un `0` sería inventar un dato falso — ahí el `NA` debe **quedarse** y manejarse con `na.rm = TRUE`. Misma sintaxis, decisiones opuestas: la diferencia no está en el código, está en entender **cómo se generaron los datos**.
+:::
+
+```{webr-r}
+# ¿cuantos faltantes hay y donde?
+sum(is.na(firmas_limpia$ventas))
+sum(is.na(firmas_limpia$gasto_id))
+# el NA se contagia; na.rm = TRUE lo excluye del calculo
+mean(firmas_limpia$ventas)
+mean(firmas_limpia$ventas, na.rm = TRUE)
+```
+
+Aplicamos las dos decisiones, cada una con su justificación escrita:
+
+```{webr-r}
+## DECISION (gasto_id): NA = la firma no reporto el modulo de I+D porque no
+## invierte (patron estandar en encuestas tipo EDIT) -> recodificar a 0.
+## DECISION (ventas): NA = no respuesta -> se conserva y se usa na.rm = TRUE.
+firmas_limpia <- firmas_limpia %>%
+  mutate(gasto_id = ifelse(is.na(gasto_id), 0, gasto_id))
+sum(is.na(firmas_limpia$gasto_id))   # debe ser 0
+```
+
+## Paso 5: detectar y decidir sobre los outliers
+
+```{webr-r}
+summary(firmas_limpia$empleados)
+```
+
+El máximo es 9.000 empleados — en una base donde la mediana ronda los 60 y esa misma firma reporta ventas de 1.500 millones. Una firma de 9.000 empleados facturaría órdenes de magnitud más: es casi con certeza un error de digitación (¿eran 90? ¿900?). Sin evidencia para corregirlo, la decisión conservadora es convertirlo en `NA`:
+
+```{webr-r}
+## ACTA DE LIMPIEZA (E105): empleados = 9000 es implausible dado el nivel de
+## ventas (1500 millones); probable error de digitacion. Sin evidencia para
+## corregir el valor, se convierte en NA. [Decision documentada: 2026-07-08]
+firmas_limpia <- firmas_limpia %>%
+  mutate(empleados = ifelse(empleados > 5000, NA, empleados))
+summary(firmas_limpia$empleados)
+```
+
+::: {.callout-workflow}
+**El "acta de limpieza": decisiones que quedan escritas**
+
+Ante un valor extremo hay tres opciones: **corregirlo** (solo con evidencia), **convertirlo en NA** (si es implausible pero el resto de la fila sirve) o **dejarlo** (si es raro pero posible: en ingresos y ventas, los valores extremos reales son la norma). Cualquiera que elija, la regla del curso es una sola: **toda decisión de limpieza queda documentada como comentario en el script** — problema encontrado, decisión y justificación, como el bloque `## ACTA DE LIMPIEZA` de arriba. Ese registro permite que un coautor (o usted en seis meses) reproduzca y defienda la base final. En la Maestría, "¿qué le hizo a los datos?" es una pregunta que le harán siempre.
+:::
+
+## Mini-ejercicio: Su primer flujo de limpieza completo
+
+Otra base sucia —`firmas_b`, ya cargada en este documento—, mismos vicios. Ejecute el bloque para verla y complete el flujo (los `___`) encadenando todo con `%>%`:
+
+```{webr-r}
+## ver la base (ya viene cargada)
+firmas_b
+
+firmas_b_limpia <- firmas_b %>%
+  distinct() %>%
+  mutate(ciudad  = tolower(___(ciudad)),
+         exporta = ___(trimws(exporta)),
+         ventas  = na_if(ventas, "___"),
+         ventas  = as.numeric(gsub("\\$", "", ventas)))
+mean(firmas_b_limpia$ventas, na.rm = TRUE)
+```
+
+**Verificación:** 5 filas (había 1 duplicado), `ciudad` con 2 valores, `exporta` con 2, `ventas` numérica con 1 `NA` y promedio de 306.25. Cinco problemas, un solo pipe.
+
+<!--=================-->
+# Agrupar y resumir
+
+Con la base limpia empieza la parte gratificante: convertir microdatos en **estadísticas que respondan preguntas**. ¿Cuál es la tasa de innovación por sector? ¿Las ventas promedio? Ese es el trabajo del dúo `group_by()` + `summarise()`. Volvemos a la mini base limpia `firmas`.
+
+## summarise(): colapsar la base en un resumen
+
+A diferencia de `mutate()` (que conserva las filas), `summarise()` **colapsa** todas las filas en una sola, con los estadísticos que le pidamos:
+
+```{webr-r}
+firmas %>%
+  summarise(n_firmas    = n(),
+            ventas_prom = mean(ventas),
+            gasto_prom  = mean(gasto_id, na.rm = TRUE))
+```
+
+**Qué pasó:** 8 filas entraron, 1 salió. `n()` es una función especial que cuenta las filas del grupo (aquí, toda la base). Y note el `na.rm = TRUE` en `gasto_id`: la lección del paso 4, aplicada.
+
+## group_by() + summarise(): el dúo central
+
+Un resumen global esconde la heterogeneidad — y la heterogeneidad es donde vive la economía. `group_by()` marca la base como agrupada; el `summarise()` siguiente calcula **dentro de cada grupo**:
+
+```{webr-r}
+firmas %>%
+  group_by(cod_sector) %>%
+  summarise(n_firmas    = n(),
+            ventas_prom = mean(ventas),
+            tasa_innova = mean(innova == "si"),
+            .groups = "drop")
+```
+
+**Cómo leer el resultado:** una fila por sector, con su número de firmas, sus ventas promedio y su tasa de innovación. Este es el hilo conductor de la unidad: la misma tabla, sobre la base real, es el entregable de la práctica. Dos detalles importantes:
+
+- **`mean(innova == "si")` es una proporción.** La comparación produce `TRUE`/`FALSE`, que R trata como `1`/`0`; su promedio es la fracción de firmas innovadoras. Es el mismo truco de la Unidad 1 (`sum()` de una comparación cuenta; `mean()` promedia) y lo usará constantemente.
+- **`.groups = "drop"` desagrupa el resultado.** Sin él, la tabla queda "marcada" como agrupada y puede producir resultados inesperados después. Estándar del curso: todo `summarise()` con `group_by()` cierra con `.groups = "drop"`.
+
+::: {.callout-key}
+**Granularidad: ¿a qué nivel está cada tabla?**
+
+`summarise()` sin agrupar produce 1 fila (toda la base); con `group_by(cod_sector)`, 1 fila por sector; con `group_by(cod_sector, tamano)`, 1 fila por cada combinación sector × tamaño. Antes de calcular, pregúntese: ¿mi unidad de análisis es la firma o el sector? Media base de los errores de interpretación viene de confundir el nivel de la tabla.
+:::
+
+## count() y n_distinct(): los atajos de conteo
+
+Cuando solo necesita frecuencias, `count()` abrevia el `group_by() + summarise(n = n())`; cuando necesita el **número** de valores distintos, `n_distinct()` dentro de `summarise()`:
+
+```{webr-r}
+# ¿cuantas firmas hay por sector? (sort = TRUE ordena de mayor a menor)
+firmas %>% count(cod_sector, sort = TRUE)
+# ¿en cuantos departamentos opera cada sector?
+firmas %>%
+  group_by(cod_sector) %>%
+  summarise(n_dptos = n_distinct(departamento), .groups = "drop")
+```
+
+::: {.callout-connect}
+**Hacia la Unidad 3: de la tabla al gráfico**
+
+Las tablas agrupadas que acabamos de construir son el **insumo directo** de la visualización. En la Unidad 3, la tabla de tasa de innovación por sector se convertirá en un gráfico de barras de `ggplot2` en cinco líneas. El flujo estándar del trabajo empírico es exactamente este: base limpia → `group_by() + summarise()` → gráfico. Lo que hicimos en esta unidad es la mitad invisible de cada figura que verá en un paper.
+:::
+
+## Mini-ejercicio: Preguntas al estilo de un informe
+
+```{webr-r}
+# P1. ¿Cuantas firmas hay por departamento? (una linea con count)
+# P2. Ventas promedio y empleo total por tamano de firma
+#     (group_by + summarise; recuerde .groups = "drop")
+# P3. ¿Cual sector tiene la mayor tasa de innovacion?
+#     (pista: al final, arrange(desc(tasa_innova)))
+```
+
+**Pistas y verificación:** P1: tres departamentos; Valle del Cauca y Bogotá D.C. empatan con 3 firmas. P2: `summarise(ventas_prom = mean(ventas), empleo_total = sum(empleados), .groups = "drop")`. P3: el sector J (todas sus firmas innovan: tasa = 1); si su tabla dice otra cosa, revise si escribió `mean(innova == "si")` con `==`.
+
+<!--=================-->
+# Cruzar bases: joins
+
+Hasta ahora toda la información vivía en una sola tabla. En la práctica casi nunca es así: los microdatos de firmas están en una base y las características de los sectores (crecimiento, valor agregado, referentes nacionales) en otra. Para analizarlas juntas hay que **cruzarlas**.
+
+::: {.callout-key}
+**La llave: la columna que conecta dos tablas**
+
+Un [join]{.term} une dos tablas emparejando filas que comparten el valor de una [llave]{.term} (*key*): una o más columnas presentes en ambas. En nuestra base, la llave natural es `cod_sector`: identifica al sector en los microdatos de firmas **y** en la base agregada sectorial. Antes de cruzar, pregúntese siempre: ¿cuál es la llave? ¿está limpia en ambas tablas? (Un `"c "` con espacio jamás emparejará con `"C"` — por eso la limpieza va primero.)
+:::
+
+## left_join(): el estándar del curso
+
+`left_join(x, y, by = "llave")` conserva **todas** las filas de la tabla izquierda (`x`) y les pega las columnas de `y` donde encuentra pareja. El cruce típico: indicadores por sector (calculados con lo que ya sabemos) más una tabla de características sectoriales (`info_sector`, que ya viene cargada en este documento):
+
+```{webr-r}
+# tabla izquierda: indicadores de la muestra por sector
+resumen_sector <- firmas %>%
+  group_by(cod_sector) %>%
+  summarise(n_firmas    = n(),
+            tasa_innova = mean(innova == "si"),
+            .groups = "drop")
+# tabla derecha: caracteristicas del sector (ya viene cargada)
+info_sector
+# el cruce
+resumen_sector %>% left_join(info_sector, by = "cod_sector")
+```
+
+**Lea el resultado con cuidado — ahí está toda la teoría de joins:** los sectores `C` y `G` encontraron pareja y recibieron las columnas nuevas; `J` e `I` **no existen en `info_sector`**, así que sus filas sobreviven (es un *left* join) pero con `NA` en las columnas nuevas — un `NA` inesperado tras un join es síntoma de llaves que no emparejaron; y el sector `M`, que existe solo en la tabla derecha, fue **descartado** silenciosamente.
+
+## El peligro: llaves duplicadas multiplican filas
+
+¿Y si la llave se repite en la tabla derecha? Cada fila de la izquierda se empareja con **todas** sus parejas — y la base se infla:
+
+```{webr-r}
+# tabla derecha defectuosa (ya cargada): observe que el sector C aparece dos veces
+info_dup
+
+cruce <- resumen_sector %>% left_join(info_dup, by = "cod_sector")
+nrow(resumen_sector)   # 4 filas antes
+nrow(cruce)            # 5 filas despues: ¡el sector C se duplico!
+```
+
+::: {.callout-warning}
+**Regla de oro: verifique el número de filas antes y después del join**
+
+Si cruza una base de 500 firmas con una tabla sectorial y termina con 1.480 filas, no ganó datos: **duplicó firmas**, y todo promedio posterior quedará contaminado sin que R proteste. El chequeo cuesta una línea (`nrow()` antes y después) y es obligatorio en este curso. Si las filas aumentaron, la llave está duplicada en la tabla derecha: revísela con `count(tabla, llave) %>% filter(n > 1)`.
+:::
+
+**Las variantes: inner y full.** Dos parientes de `left_join()` que conviene reconocer: `inner_join(x, y)` conserva **solo** las filas con pareja en ambas tablas (útil cuando únicamente sirven los casos completos) y `full_join(x, y)` conserva **todas** las filas de ambas (útil para auditar qué hay y qué falta en cada tabla). En la duda, `left_join()` con la base de análisis a la izquierda: perder observaciones sin darse cuenta es peor que cargar unos `NA` visibles.
+
+## El cruce en la base real del curso
+
+Con la base real, el flujo completo —limpiar, agregar, cruzar— se ve así (se corre en RStudio):
+
+```r
+## [RStudio] indicadores de la muestra por sector
+resumen_sector <- firmas %>%
+  group_by(cod_sector) %>%
+  summarise(n_firmas    = n(),
+            tasa_innova = mean(innova_producto == "si", na.rm = TRUE),
+            .groups = "drop")
+
+## importar la base agregada sectorial y cruzar por cod_sector
+sectores <- import("datos/originales/sectores_agregado.csv")
+resumen_full <- resumen_sector %>% left_join(sectores, by = "cod_sector")
+
+## verificacion obligatoria: el cruce no debe cambiar el numero de filas
+nrow(resumen_sector) == nrow(resumen_full)
+```
+
+El premio: `resumen_full` permite comparar la tasa de innovación **de nuestra muestra** con la `tasa_innovacion_sectorial` **de referencia nacional**, sector por sector. Esa comparación —imposible con las tablas separadas— es el tipo de pregunta que justifica todo el cruce.
+
+## Mini-ejercicio: Un cruce con trampa
+
+```{webr-r}
+# tabla de referencia con salarios por sector, en millones COP (ya viene cargada)
+salario_sector
+
+# P1. Cruce resumen_sector con salario_sector usando left_join
+#     (si resumen_sector no esta en su Environment, corra el primer bloque de la seccion)
+# P2. ¿Cuantas filas tiene el resultado? ¿Que sector quedo con NA y por que?
+```
+
+**Verificación:** 4 filas (las mismas de `resumen_sector`) y el sector `J` con `salario_prom = NA`, porque no aparece en la tabla de salarios. Ningún `NA` de un join se ignora: se explica.
+
+<!--=================-->
+# Reorganizar con tidyr
+
+A veces el problema no es el contenido de la base sino su **forma**. Compare dos maneras de guardar las ventas anuales de dos firmas:
+
+**Formato ancho** (una columna por año):
+
+| id_empresa | ventas_2021 | ventas_2022 | ventas_2023 |
+|------------|-------------|-------------|-------------|
+| E001 | 4800 | 5200 | 5600 |
+| E002 | 430  | 480  | 510  |
+
+**Formato largo** (una fila por firma-año):
+
+| id_empresa | anio | ventas |
+|------------|------|--------|
+| E001 | 2021 | 4800 |
+| E001 | 2022 | 5200 |
+| E001 | 2023 | 5600 |
+| ...  | ...  | ...  |
+
+La información es idéntica; la utilidad no. El [formato largo]{.term} es el que esperan `ggplot2`, los verbos de dplyr (¿cómo calcularía el crecimiento promedio por año en la tabla ancha?) y los modelos de datos panel de la Maestría (la unidad firma-año es una fila). El ancho es cómodo para leer y típico de los Excel institucionales. El paquete `tidyr` (parte del tidyverse) traduce entre ambos; como no está disponible en webR, estos bloques se corren en RStudio:
+
+```r
+## [RStudio] de ancho a largo: pivot_longer()
+ventas_largas <- ventas_anchas %>%
+  pivot_longer(cols         = starts_with("ventas_"),  # columnas a apilar
+               names_to     = "anio",                  # sus nombres -> nueva columna
+               names_prefix = "ventas_",               # quitar el prefijo
+               values_to    = "ventas")                # sus valores -> nueva columna
+
+## [RStudio] el viaje de vuelta: pivot_wider()
+ventas_anchas <- ventas_largas %>%
+  pivot_wider(names_from = anio, values_from = ventas, names_prefix = "ventas_")
+```
+
+::: {.callout-key}
+**Regla práctica: largo para analizar, ancho para presentar**
+
+Si va a graficar, agrupar, resumir o estimar: **largo**. Si va a pegar una tabla compacta en un informe: **ancho**. El síntoma clásico de que necesita `pivot_longer()` es tener información en los **nombres** de las columnas (`ventas_2021`, `ventas_2022`, ...): los años son datos, y los datos van en celdas, no en encabezados.
+:::
+
+<!--=================-->
+# Errores comunes
+
+Los cinco errores que más tiempo cuestan en esta unidad. Reconocerlos a la primera es media depuración.
+
+## 1. Confundir `=` con `==`
+
+```r
+firmas %>% filter(cod_sector = "C")    # Error: `=` asigna
+firmas %>% filter(cod_sector == "C")   # Correcto: `==` compara
+```
+
+Dentro de `filter()` (y de cualquier condición), comparar es con dos signos igual. El mensaje de error de dplyr incluso sugiere la corrección: léalo antes de pedir ayuda.
+
+## 2. Olvidar guardar el resultado
+
+```r
+firmas %>% mutate(ventas_empleado = ventas / empleados)             # INCORRECTO: se imprime y se pierde
+firmas <- firmas %>% mutate(ventas_empleado = ventas / empleados)   # CORRECTO: se asigna con <-
+```
+
+Los verbos de dplyr **nunca** modifican el objeto original: devuelven una copia. Si tras "crear" una variable R dice `object 'ventas_empleado' not found`, casi seguro faltó el `<-`. Verifíquelo en el panel [Environment]{.term}.
+
+## 3. filter() descarta los NA silenciosamente
+
+El más traicionero. Una condición evaluada sobre `NA` no da `TRUE` ni `FALSE`: da `NA`, y `filter()` solo conserva los `TRUE`:
+
+```{webr-r}
+nrow(firmas)                                          # 8 firmas
+# ¿gasto en I+D superior a 20? las filas con NA tambien desaparecen
+firmas %>% filter(gasto_id > 20) %>% nrow()           # 4, no 6
+# para conservar las filas con NA, pidalo explicitamente
+firmas %>% filter(gasto_id > 20 | is.na(gasto_id)) %>% nrow()
+```
+
+Ni error ni warning: las firmas E004 y E007 (con `gasto_id = NA`) se esfumaron sin dejar rastro. Regla práctica: si una columna tiene faltantes, decida **explícitamente** si las filas con `NA` entran o salen del filtro.
+
+## 4. Un join con llave duplicada multiplica filas
+
+Lo vimos en la sección de joins y merece repetirse: si la llave se repite en la tabla derecha, cada fila de la izquierda se empareja con todas sus copias y la base crece sin avisar. El antídoto cuesta una línea: `nrow()` antes y después del join; si el número cambió, busque la llave duplicada en la tabla derecha.
+
+## 5. Creer que group_by() "hace algo" por sí solo
+
+```{webr-r}
+firmas_agrupada <- firmas %>% group_by(cod_sector)
+firmas_agrupada
+```
+
+Mismas 8 filas, mismos valores: lo único nuevo es la marca `# Groups: cod_sector [4]` sobre la tabla. `group_by()` no calcula ni colapsa nada — solo **prepara el terreno** para que el siguiente `summarise()` (o `mutate()`) trabaje grupo por grupo. Y su reverso: un objeto que quedó agrupado sin que usted lo recuerde puede alterar cálculos posteriores. Por eso el estándar del curso cierra cada resumen con `.groups = "drop"`.
+
+<!--=================-->
+# Checklist de salida
+
+Antes de pasar a la Unidad 3, verifique que puede:
+
+- [ ] Importar un `.csv` o un Excel con `import()` / `read_csv()` / `read_excel()` usando rutas relativas, y diagnosticarlo con `glimpse()`, `skim()` y `clean_names()`
+- [ ] Leer y escribir cadenas con `%>%` como una oración ("tome..., luego..., luego...")
+- [ ] Usar `select()`, `rename()`, `filter()`, `arrange()` y `mutate()`, y guardar el resultado con `<-`
+- [ ] Combinar condiciones en `filter()` con `&`, `|` y `%in%`
+- [ ] Crear variables categóricas con `ifelse()` (dos ramas) y `case_when()` (ramas planas)
+- [ ] Ejecutar el flujo de limpieza de 5 pasos: `distinct()`, texto, tipos, faltantes y outliers
+- [ ] Argumentar cuándo un `NA` se recodifica a 0 y cuándo se conserva, según cómo se generaron los datos
+- [ ] Construir tablas por grupo con `group_by()` + `summarise()` (cerrando con `.groups = "drop"`), `count()` y `n_distinct()`
+- [ ] Cruzar dos bases con `left_join()`, verificar `nrow()` antes y después, y explicar los `NA` resultantes
+- [ ] Distinguir el formato ancho del largo y pasar de uno a otro con `pivot_longer()` / `pivot_wider()`
+
+Si algún punto le genera dudas, vuelva a la sección correspondiente y ejecute los mini-ejercicios de nuevo.
+
+<!--=================-->
+# Preguntas de comprensión
+
+1. Una colega le dice que su base "tiene 5 regiones", pero el diccionario de datos afirma que son 3. ¿Qué pudo haber pasado, con qué funciones lo diagnosticaría y con cuáles lo corregiría?
+2. En la base del curso, `gasto_id_millones` tiene cerca del 40% de valores faltantes. Un compañero propone recodificarlos todos a 0; otro propone eliminar esas filas. ¿Qué necesita saber sobre **cómo se recolectaron los datos** para decidir, y por qué la misma regla no aplicaría a los faltantes de `ventas_millones`?
+3. `filter(firmas, ventas > 1000)` devuelve menos filas de las que usted esperaba y ningún mensaje de error. ¿Qué pasó con las firmas cuyo valor de `ventas` es `NA` y cómo cambiaría el código para conservarlas?
+4. Después de un `left_join()`, su base pasó de 500 a 1.480 filas. Explique qué ocurrió, por qué contamina cualquier promedio posterior y qué verificación de una línea lo habría detectado a tiempo.
+5. `mutate(prom = mean(ventas))` y `summarise(prom = mean(ventas))` usan la misma fórmula, pero producen resultados de tamaños distintos. ¿Qué devuelve cada uno y en qué situación usaría cada cual?
+
+<!--=================-->
+# Recursos de aprendizaje de la unidad
+
+- **Video (asincrónico):** [Transformación de datos con dplyr](https://www.youtube.com/watch?v=MVNvoBbELKs&t=1801s) — Eduard Martínez
+- **Lectura guía:** [R for Data Science (2.ª ed.)](https://r4ds.hadley.nz/) — caps. [*Data transformation*](https://r4ds.hadley.nz/data-transform.html) y [*Joins*](https://r4ds.hadley.nz/joins) ([versión en español, 1.ª ed.](https://es.r4ds.hadley.nz/))
+- **Referencia rápida:** [Cheatsheets de Posit](https://posit.co/resources/cheatsheets/) — *dplyr* (data transformation) y *tidyr* (data tidying)
+- **Material ampliado:** [Semana 4](https://eduard-martinez.github.io/teaching/ba/week-04/theory/week-04.html) y [Semana 6](https://eduard-martinez.github.io/teaching/ba/week-06/theory/week-06.html) del curso de Business Analytics — transformación de datos y calidad/limpieza
+- **Guías del curso:** [Guía de estilo de scripts](../../buenas_practicas/guia_estilo_scripts.html) · [Guía de organización de proyectos](../../buenas_practicas/guia_organizacion_proyecto.html) · [Guía de uso de IA](../../ia/guia_uso_ia.html)
+
+```{=html}
+<!-- Panel Environment (CSS en styles.css) -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">&#x1F4E6; Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
+  </div>
+</div>
+
+<script type="module">
+/* ── Toggle colapsar / expandir ── */
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '▲' : '▼';
+};
+
+/* ── Consultar el environment de R ── */
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Env panel error:', e);
+    return [];
+  }
+}
+
+/* ── Renderizar la lista de objetos ── */
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. × ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+/* ── Actualizar panel ── */
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+/* ── Mover webR Status despues de los links de contacto ── */
+function moveWebRStatus() {
+  const anchor = document.getElementById('webr-status-anchor');
+  const statusArea = document.getElementById('qwebr-status-message-area');
+  if (anchor && statusArea) {
+    const wrapper = statusArea.closest('.quarto-title-meta');
+    if (wrapper) {
+      wrapper.style.display = 'inline';
+      wrapper.style.fontSize = '13px';
+      wrapper.style.marginLeft = '30px';
+      anchor.parentNode.insertBefore(wrapper, anchor);
+    }
+  }
+}
+
+/* ── Esperar webR y conectar hooks ── */
+async function init() {
+  /* Esperar a que mainWebR exista */
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
+  moveWebRStatus();
+
+  /* Esperar a que los botones Run esten habilitados (todas las celdas ocultas ejecutadas) */
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  /* Monkey-patch qwebrComputeEngine para detectar ejecucion */
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  /* Expandir panel y hacer primer scan */
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+```

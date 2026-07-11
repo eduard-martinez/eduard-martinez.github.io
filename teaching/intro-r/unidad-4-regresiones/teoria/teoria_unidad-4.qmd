@@ -1,0 +1,612 @@
+---
+title: "Unidad 4 - Regresiones básicas y flujo de trabajo empírico"
+subtitle: "Curso Nivelatorio de R · CIENFI · Universidad Icesi"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="../../index.html" style="color:#555; text-decoration:none; margin-right:16px;">Inicio del curso</a>
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;">\@emartigo</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;">GitHub: eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;">eduard-martinez.github.io</a>
+<span id="webr-status-anchor"></span>
+</div>
+
+```{webr-r}
+#| context: setup
+
+## mini base de la unidad: 10 personas ocupadas (se carga al abrir la pagina)
+mini <- data.frame(
+  ingreso   = c(900, 1100, 1000, 1500, 1300, 2100, 1800, 2600, 2400, 3200),  # miles COP
+  educacion = c(5, 6, 8, 10, 11, 13, 14, 16, 16, 18),                        # anios
+  edad      = c(45, 22, 35, 28, 50, 33, 41, 27, 38, 44),
+  sexo      = c("mujer", "hombre", "mujer", "hombre", "mujer",
+                "hombre", "mujer", "hombre", "mujer", "hombre")
+)
+```
+
+<!--=================-->
+# Objetivo de la unidad
+
+Esta unidad cierra el ciclo del curso: de la pregunta económica a la **tabla de regresión**, pasando por un proyecto ordenado que cualquiera puede reproducir. El foco NO es la teoría econométrica —para eso están Econometría I y II—: es la **mecánica en R** (estimar, leer, tabular, exportar) y la **disciplina de interpretación** (qué dice y qué NO dice un coeficiente).
+
+::: {.callout-key}
+**¿Qué vamos a poder hacer al final?**
+
+Con el extracto de la GEIH que conocimos en la Unidad 3, vamos a responder la pregunta más clásica de la economía laboral: **¿cuánto más ingreso está asociado a un año adicional de educación?** (la ecuación de Mincer). Al final de la unidad usted podrá:
+
+- Estimar una regresión lineal con `lm()` y leer completa la salida de `summary()`
+- Interpretar coeficientes en niveles y en logaritmos, con sus unidades
+- Incluir variables categóricas (dummies) y controles
+- Estimar con errores estándar robustos y efectos fijos usando `fixest`
+- Producir una tabla de regresión profesional con `modelsummary` y exportarla
+- Organizar todo lo anterior en un **pipeline reproducible** de scripts numerados
+:::
+
+## Lo que aprenderemos en esta unidad
+
+**1. Estimar e interpretar** — `lm()`, fórmulas, `summary()`, coeficientes, R², significancia
+
+**2. Especificaciones típicas** — logaritmos, dummies, controles, efectos fijos básicos
+
+**3. Comunicar resultados** — tablas con `modelsummary`, exportar a Word/LaTeX
+
+**4. El flujo de trabajo empírico** — del dato crudo a la tabla final en scripts numerados
+
+<!--=================-->
+# De la descriptiva a la regresión
+
+En la Unidad 3 vimos que el ingreso laboral crece con la educación. Un diagrama de dispersión con una recta ajustada ya *sugiere* la relación:
+
+```r
+## en RStudio, con la base completa
+geih <- import("datos/originales/geih_nivelacion.csv")
+
+ggplot(geih, aes(x = anios_educacion, y = log(ingreso_laboral))) +
+  geom_point(alpha = 0.1) +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(x = "Años de educación", y = "Log del ingreso laboral") +
+  theme_minimal()
+```
+
+La correlación entre años de educación y el log del ingreso en nuestra base es **0.45**: positiva y fuerte. Pero la correlación no tiene unidades interpretables en pesos ni permite "controlar" por otras variables. Para eso está la regresión.
+
+::: {.callout-key}
+**¿Qué hace una regresión lineal?**
+
+La regresión `y ~ x` encuentra la recta que mejor resume la relación promedio entre `x` y `y` (mínimos cuadrados ordinarios, [MCO]{.term}/OLS). El coeficiente de `x` responde: *"en promedio, ¿cuánto cambia `y` cuando `x` aumenta en una unidad?"*. Toda la econometría que verán en la Maestría se construye sobre esta idea.
+:::
+
+## Probemos con una mini base
+
+En el navegador podemos estimar nuestra primera regresión. La mini base `mini` **ya viene cargada** en esta página: 10 personas ocupadas con su ingreso mensual (miles de COP), años de educación, edad y sexo.
+
+```{webr-r}
+# la mini base ya esta cargada en la pagina: mirela primero
+mini
+
+# Correlacion
+cor(mini$educacion, mini$ingreso)
+
+# Primera regresion: ingreso ~ educacion
+modelo_1 <- lm(ingreso ~ educacion, data = mini)
+modelo_1
+```
+
+**Lectura:** el intercepto y el coeficiente de `educacion` definen la recta. Cada año adicional de educación está asociado, en promedio, a ese coeficiente adicional en miles de pesos.
+
+<!--=================-->
+# La función lm() y la salida de summary()
+
+## Sintaxis de fórmulas
+
+`lm()` usa la sintaxis de [fórmula]{.term} de R, que leeremos así durante toda la Maestría:
+
+```r
+lm(y ~ x1 + x2 + x3, data = base)
+#  |    |__ variables explicativas (separadas por +)
+#  |__ variable dependiente
+```
+
+## El modelo es un objeto
+
+Como todo en R, el modelo estimado **es un objeto**: podemos guardarlo, inspeccionarlo y extraerle piezas.
+
+```{webr-r}
+modelo_1 <- lm(ingreso ~ educacion, data = mini)
+
+# La salida completa
+summary(modelo_1)
+
+# Piezas del objeto
+coef(modelo_1)        # solo los coeficientes
+residuals(modelo_1)   # residuos (observado - predicho)
+fitted(modelo_1)      # valores predichos
+```
+
+## Cómo leer summary() — la tabla que verá mil veces
+
+La tabla `Coefficients` de `summary()` tiene cuatro columnas que hay que saber leer:
+
+| Columna | Qué es | Cómo leerla |
+|---|---|---|
+| `Estimate` | El coeficiente estimado | El cambio promedio en `y` por unidad de `x` |
+| `Std. Error` | Error estándar | La incertidumbre del estimado |
+| `t value` | Estimate / Std. Error | Qué tan lejos de cero está el coeficiente, en errores estándar |
+| `Pr(>|t|)` | Valor p | Probabilidad de ver un coeficiente así de grande si el verdadero fuera cero |
+
+Debajo de la tabla, dos cifras que siempre miramos:
+
+- **`Multiple R-squared`:** proporción de la variación de `y` que "explica" el modelo (entre 0 y 1)
+- **La nota de observaciones eliminadas por `NA`** (si aparece): ¿con cuántos datos se estimó realmente?
+
+::: {.callout-warning}
+**Significancia estadística ≠ importancia económica**
+
+Un coeficiente puede ser "significativo" (`***`) y a la vez económicamente irrelevante, sobre todo con muestras grandes como la GEIH (21.821 observaciones): con suficientes datos, casi todo es "significativo". La pregunta que importa es la **magnitud**: ¿cuántos pesos? ¿qué porcentaje? Siempre interprete el `Estimate` con sus unidades antes de mirar las estrellas.
+:::
+
+<!--=================-->
+# Interpretación de coeficientes
+
+Esta es la habilidad central de la unidad. La interpretación depende de las unidades de `y` y de `x`.
+
+## Nivel-nivel: y ~ x
+
+```r
+lm(ingreso_laboral ~ anios_educacion, data = geih)
+```
+
+**Interpretación:** un año adicional de educación está asociado a un cambio de `Estimate` **pesos** en el ingreso mensual, en promedio.
+
+## Log-nivel: log(y) ~ x — la forma estándar para ingresos
+
+En la Unidad 3 vimos que el ingreso es muy asimétrico (outliers reales). Por eso, en economía laboral la variable dependiente estándar es el **logaritmo** del ingreso:
+
+```r
+## en RStudio, con la base completa
+modelo_mincer <- lm(log(ingreso_laboral) ~ anios_educacion, data = geih)
+summary(modelo_mincer)
+```
+
+Con nuestra base, el resultado es:
+
+```
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)
+(Intercept)     12.5760     0.0145   869.2   <2e-16 ***
+anios_educacion  0.0931     0.0012    75.1   <2e-16 ***
+
+Multiple R-squared: 0.205,  N = 21,821
+```
+
+**Interpretación:** un año adicional de educación está asociado a un ingreso laboral **9,3% mayor**, en promedio. (Regla: en `log(y) ~ x`, el coeficiente × 100 se lee como cambio porcentual de `y` por unidad de `x`; la aproximación es buena para coeficientes pequeños, digamos |β| < 0,2.)
+
+::: {.callout-key}
+**La ecuación de Mincer**
+
+Acabamos de estimar la versión más simple de la [ecuación de Mincer]{.term}, uno de los resultados empíricos más replicados de la economía: el **retorno a la educación** ronda el 8–12% por año en la mayoría de países. Nuestro 9,3% con la GEIH cae exactamente en ese rango — buena señal de que el flujo de datos que construimos en las Unidades 2 y 3 está bien hecho.
+:::
+
+## Mini-ejercicio: interprete usted
+
+```{webr-r}
+# Estime el modelo en logs (la mini base ya esta cargada)
+modelo_log <- lm(log(ingreso) ~ educacion, data = mini)
+coef(modelo_log)
+
+# Pregunta: complete la frase con el numero correcto:
+# "Un anio adicional de educacion esta asociado a un ingreso ___% mayor"
+```
+
+::: {.callout-warning}
+**Asociación NO es causalidad**
+
+Nada en `lm()` convierte una correlación en un efecto causal. Las personas con más educación difieren en muchas cosas que no observamos (habilidad, contexto familiar, redes). Por eso en este curso decimos siempre **"está asociado a"**, nunca "la educación *causa*" o "el *efecto* de la educación". Identificar efectos causales es, precisamente, el contenido de sus cursos de econometría e inferencia causal — aquí solo preparamos la mecánica.
+:::
+
+<!--=================-->
+# Regresión múltiple: controles y dummies
+
+## Agregar controles
+
+Agregar variables a la fórmula "controla" por ellas: el coeficiente de educación pasa a compararse entre personas de la **misma edad**:
+
+```r
+modelo_2 <- lm(log(ingreso_laboral) ~ anios_educacion + edad, data = geih)
+```
+
+## Variables categóricas: dummies
+
+¿Qué pasa si incluimos `sexo`, que es texto (`"hombre"`/`"mujer"`)? R la convierte automáticamente en una variable [dummy]{.term} (0/1), dejando una categoría como **referencia** (la primera en orden alfabético):
+
+```r
+modelo_3 <- lm(log(ingreso_laboral) ~ anios_educacion + edad + sexo, data = geih)
+summary(modelo_3)
+```
+
+Resultado con nuestra base:
+
+```
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)
+(Intercept)     12.2820     0.0244   504.2   <2e-16 ***
+anios_educacion  0.1043     0.0012    84.8   <2e-16 ***
+edad             0.0092     0.0004    21.6   <2e-16 ***
+sexomujer       -0.4109     0.0104   -39.7   <2e-16 ***
+
+Multiple R-squared: 0.271
+```
+
+**Lectura de `sexomujer`:** manteniendo educación y edad constantes, las mujeres tienen un ingreso laboral **41 puntos log (≈ 34%) menor** que los hombres (la categoría de referencia). Para dummies con coeficientes grandes, la conversión exacta a porcentaje es `exp(β) − 1`: `exp(-0.411) - 1 = -0.337`.
+
+::: {.callout-practice}
+**¿Quién es la categoría de referencia?**
+
+El coeficiente de una dummy siempre se lee **contra la referencia**. Si quiere cambiarla:
+
+```r
+geih <- mutate(geih, sexo = relevel(factor(sexo), ref = "mujer"))
+```
+
+Y verifique siempre en la salida qué categoría aparece (aquí `sexomujer` → la referencia es `hombre`).
+:::
+
+## Mini-ejercicio: dummies en acción
+
+```{webr-r}
+# la mini base tambien trae la variable sexo
+modelo_d <- lm(log(ingreso) ~ educacion + sexo, data = mini)
+coef(modelo_d)
+
+# Preguntas:
+# 1. ¿Cual es la categoria de referencia de sexo?
+# 2. ¿El coeficiente de la dummy compara a favor o en contra de la referencia?
+```
+
+::: {.callout-connect}
+**Hacia la brecha "no explicada"**
+
+En la Unidad 3 vimos la brecha *bruta* de ingresos por sexo (en medias y medianas). La regresión nos da la brecha *condicional*: la que queda después de controlar por educación y edad. Que la brecha condicional siga siendo grande (−34%) es el punto de partida de una literatura enorme en economía laboral — y un buen ejemplo de cómo descriptivas y regresiones cuentan juntas una historia.
+:::
+
+<!--=================-->
+# Errores estándar robustos y fixest
+
+## El estándar moderno en economía aplicada
+
+En los cursos de la Maestría (y en los papers que leerán) las regresiones casi nunca se estiman con `lm()` a secas, por dos razones prácticas:
+
+1. Los errores estándar clásicos asumen varianza constante ([homocedasticidad]{.term}); con datos de ingresos eso casi nunca se cumple → se usan errores **robustos**
+2. Es rutinario incluir [efectos fijos]{.term} (de región, de año, de firma) para comparar "dentro de" grupos
+
+El paquete `fixest` resuelve ambas cosas con una sintaxis compacta y es hoy el estándar en economía aplicada:
+
+```r
+## en RStudio
+library(fixest)
+
+## efectos fijos de departamento van despues de |
+modelo_fe <- feols(log(ingreso_laboral) ~ anios_educacion + edad + sexo | departamento,
+                   data = geih, vcov = "hetero")
+modelo_fe
+```
+
+Resultado con nuestra base:
+
+```
+OLS estimation, Dep. Var.: log(ingreso_laboral)
+Observations: 21,821
+Fixed-effects: departamento: 24
+Standard-errors: Heteroskedasticity-robust
+                 Estimate Std. Error t value  Pr(>|t|)
+anios_educacion  0.102590   0.001326  77.35  < 2.2e-16 ***
+edad             0.009322   0.000450  20.73  < 2.2e-16 ***
+sexomujer       -0.413327   0.010544 -39.20  < 2.2e-16 ***
+```
+
+**Lectura nueva:** con efectos fijos de departamento, el coeficiente de educación compara personas **del mismo departamento**. Que el retorno apenas cambie (10,3%) nos dice que la relación educación-ingreso no está explicada por diferencias entre departamentos.
+
+::: {.callout-practice}
+**¿lm() o feols()?**
+
+- `lm()`: para entender la mecánica y para modelos simples — es base R, siempre disponible
+- `feols()`: para el trabajo aplicado real — errores robustos (`vcov = "hetero"`) o agrupados (`vcov = ~grupo`) y efectos fijos con `|`
+
+En este curso presentamos ambos; en Econometría I profundizarán en el *porqué* de cada corrección.
+:::
+
+<!--=================-->
+# Tablas de regresión para informes
+
+Copiar y pegar la consola en Word está **prohibido** en este curso (y en la vida). La tabla profesional —varios modelos lado a lado, estrellas, número de observaciones— se produce con `modelsummary`:
+
+```r
+## en RStudio
+library(modelsummary)
+
+modelos <- list("(1) Simple"      = modelo_mincer,
+                "(2) + Controles" = modelo_3,
+                "(3) + EF depto"  = modelo_fe)
+
+msummary(modelos,
+         coef_rename = c(anios_educacion = "Años de educación",
+                         edad = "Edad", sexomujer = "Mujer"),
+         gof_map = c("nobs", "r.squared"),
+         stars = TRUE,
+         output = "output/tablas/tabla_mincer.docx")
+```
+
+Con `output = "...docx"` la tabla queda lista para Word; con `.tex` para LaTeX; sin `output` se previsualiza en el Viewer.
+
+::: {.callout-workflow}
+**La regla de la tabla final**
+
+Toda tabla de regresión de un informe debe:
+
+1. Nacer de un script (reproducible de datos crudos a tabla)
+2. Mostrar **N** (¿cambia entre columnas? ¿por qué? — casi siempre son `NA` que entran y salen de la muestra)
+3. Decir qué errores estándar usa (nota al pie)
+4. Tener nombres de variables legibles (no `anios_educacion`, sino "Años de educación")
+:::
+
+<!--=================-->
+# El flujo de trabajo empírico completo
+
+Cerramos el curso conectando todo: la estructura de proyecto de la Unidad 1, la limpieza de la Unidad 2, las descriptivas de la Unidad 3 y las regresiones de esta unidad, en un [pipeline]{.term} de scripts numerados:
+
+```
+mi_proyecto/
+├── mi_proyecto.Rproj
+├── datos/
+│   ├── originales/geih_nivelacion.csv      # intocable
+│   └── procesados/geih_limpia.rds          # lo produce 01
+├── scripts/
+│   ├── 01_limpieza.R        # crudo -> procesado (decisiones documentadas)
+│   ├── 02_descriptivas.R    # procesado -> figuras y tabla descriptiva
+│   └── 03_regresiones.R     # procesado -> tabla de regresion
+├── output/
+│   ├── figuras/             # .png de 02
+│   └── tablas/              # .docx de 02 y 03
+└── README.md                # que hace el proyecto y en que orden se corre
+```
+
+::: {.callout-key}
+**La prueba de fuego de la reproducibilidad**
+
+Antes de entregar cualquier trabajo empírico (el proyecto final de este curso, una tarea de la Maestría, un paper), haga esta prueba:
+
+1. Cierre RStudio por completo
+2. Abra el proyecto de nuevo (`.Rproj`)
+3. Corra los scripts **en orden** (`01_`, `02_`, `03_`) sin tocar nada más
+
+Si todo corre y las tablas/figuras del `output/` se regeneran idénticas, su análisis es reproducible. Si algo falla —una ruta absoluta, un objeto que "estaba en memoria", un paquete sin cargar—, encontró exactamente lo que hay que arreglar.
+:::
+
+Cada script del pipeline sigue la plantilla de la Unidad 1 (encabezado, `p_load()`, rutas, secciones numeradas) y **termina exportando**: el `01` exporta la base limpia a `datos/procesados/`, el `02` y el `03` exportan a `output/`. Ningún script depende de objetos que otro dejó "en memoria": cada uno **lee de disco** lo que necesita.
+
+::: {.callout-connect}
+**El proyecto final ejercita exactamente esto**
+
+El [proyecto final del curso](../../proyecto_final/enunciado_proyecto_final.html) le pide este pipeline completo sobre la base de innovación empresarial: limpiar (U2), describir y graficar (U3), estimar e interpretar una regresión sencilla (U4), todo dentro de un proyecto ordenado (U1) que se sustenta oralmente.
+:::
+
+<!--=================-->
+# Errores comunes
+
+**1. Regresar el ingreso en niveles con outliers.** Un solo ingreso de 68 millones arrastra la recta. La convención: `log(ingreso)`. Si duda, mire el histograma en niveles y en logs (Unidad 3).
+
+**2. Leer las estrellas como importancia.** Con N = 21.821 casi todo es `***`. La pregunta es la **magnitud**: ¿9% es mucho o poco? Compárelo con algo (otros países, otros grupos, el costo de estudiar).
+
+**3. Lenguaje causal sin diseño causal.** "El efecto de la educación sobre el ingreso es 10%" — NO con estos datos. Escriba "asociado a". Su futuro profesor de econometría (y cualquier evaluador) lo notará de inmediato.
+
+**4. No mirar cuántas observaciones usó el modelo.** Si `y` o algún control tiene `NA`, `lm()` elimina esas filas en silencio. Si el N cambia entre columnas de su tabla, sus modelos no son comparables sin una nota que lo explique.
+
+**5. Interpretar una dummy sin saber la referencia.** `sexomujer = -0.41` no significa nada hasta decir "respecto a los hombres". Verifique la categoría de referencia antes de escribir una sola frase.
+
+<!--=================-->
+# Checklist de salida
+
+Antes del proyecto final, verifique que puede:
+
+- [ ] Escribir una fórmula `y ~ x1 + x2` y estimarla con `lm()`
+- [ ] Leer las cuatro columnas de la tabla de `summary()` y el R²
+- [ ] Interpretar un coeficiente en nivel-nivel y en log-nivel, **con unidades**
+- [ ] Interpretar una dummy respecto a su categoría de referencia
+- [ ] Estimar con `feols()` errores robustos y efectos fijos, y explicar qué cambia
+- [ ] Producir una tabla con `msummary()` y exportarla a Word
+- [ ] Organizar un análisis completo en scripts numerados que pasan la prueba de reproducibilidad
+- [ ] Escribir una interpretación sin lenguaje causal injustificado
+
+<!--=================-->
+# Preguntas de comprensión
+
+1. En `log(ingreso) ~ anios_educacion`, el coeficiente es 0.093. Escriba la interpretación completa en una frase (con unidades y "asociado a").
+2. ¿Por qué preferimos `log(ingreso_laboral)` a `ingreso_laboral` como variable dependiente en esta base?
+3. El coeficiente de `sexomujer` pasa de −0.41 a −0.41 al agregar efectos fijos de departamento. ¿Qué nos dice eso sobre la brecha de género entre departamentos?
+4. Su compañero reporta: "la educación aumenta el ingreso en 10%; el efecto es altamente significativo". Señale los dos problemas de esa frase.
+5. En su tabla final, el modelo (1) tiene N = 21.821 y el modelo (2) tiene N = 19.407. ¿Qué pasó y por qué importa?
+
+<!--=================-->
+# Recursos de aprendizaje de la unidad
+
+- **Lectura principal:** Wooldridge, *Introducción a la econometría* — caps. 2 a 4 (regresión simple y múltiple, la referencia de Econometría I)
+- **Libro en línea (gratuito):** [The Effect](https://theeffectbook.net/) de Nick Huntington-Klein — caps. 4 y 13 para regresión aplicada con R y una excelente discusión de causalidad
+- **Documentación:** [fixest — vignette oficial](https://lrberge.github.io/fixest/) · [modelsummary](https://modelsummary.com/)
+- **Referencia rápida:** `?lm`, `?feols` y la [cheatsheet de modelado de Posit](https://posit.co/resources/cheatsheets/)
+- **Material del profesor:** [Workshop de R para investigación aplicada](https://eduard-martinez.github.io/teaching/) (talleres EAFIT/Magdalena)
+- **Guías del curso:** [Guía de estilo de scripts](../../buenas_practicas/guia_estilo_scripts.html) · [Guía de organización de proyectos](../../buenas_practicas/guia_organizacion_proyecto.html) · [Guía de uso de IA](../../ia/guia_uso_ia.html)
+
+```{=html}
+<!-- Panel Environment (CSS en styles.css) -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">&#x1F4E6; Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
+  </div>
+</div>
+
+<script type="module">
+/* ── Toggle colapsar / expandir ── */
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '▲' : '▼';
+};
+
+/* ── Consultar el environment de R ── */
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Env panel error:', e);
+    return [];
+  }
+}
+
+/* ── Renderizar la lista de objetos ── */
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. × ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+/* ── Actualizar panel ── */
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+/* ── Mover webR Status despues de los links de contacto ── */
+function moveWebRStatus() {
+  const anchor = document.getElementById('webr-status-anchor');
+  const statusArea = document.getElementById('qwebr-status-message-area');
+  if (anchor && statusArea) {
+    const wrapper = statusArea.closest('.quarto-title-meta');
+    if (wrapper) {
+      wrapper.style.display = 'inline';
+      wrapper.style.fontSize = '13px';
+      wrapper.style.marginLeft = '30px';
+      anchor.parentNode.insertBefore(wrapper, anchor);
+    }
+  }
+}
+
+/* ── Esperar webR y conectar hooks ── */
+async function init() {
+  /* Esperar a que mainWebR exista */
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
+  moveWebRStatus();
+
+  /* Esperar a que los botones Run esten habilitados (todas las celdas ocultas ejecutadas) */
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  /* Monkey-patch qwebrComputeEngine para detectar ejecucion */
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  /* Expandir panel y hacer primer scan */
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+```

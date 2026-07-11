@@ -1,0 +1,3241 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Unidad 3 - Visualización y estadísticas descriptivas</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="teoria_unidad-3_files/libs/clipboard/clipboard.min.js"></script>
+<script src="teoria_unidad-3_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="teoria_unidad-3_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="teoria_unidad-3_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="teoria_unidad-3_files/libs/quarto-html/popper.min.js"></script>
+<script src="teoria_unidad-3_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="teoria_unidad-3_files/libs/quarto-html/anchor.min.js"></script>
+<link href="teoria_unidad-3_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="teoria_unidad-3_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="teoria_unidad-3_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="teoria_unidad-3_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="teoria_unidad-3_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+<style type="text/css">
+.monaco-editor pre {
+  background-color: unset !important;
+}
+
+.qwebr-editor-toolbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.qwebr-editor-toolbar-left-buttons, .qwebr-editor-toolbar-right-buttons {
+  display: flex;
+}
+
+.qwebr-non-interactive-loading-container.qwebr-cell-needs-evaluation, .qwebr-non-interactive-loading-container.qwebr-cell-evaluated {
+  justify-content: center;
+  display: flex;
+  background-color: rgba(250, 250, 250, 0.65);
+  border: 1px solid rgba(233, 236, 239, 0.65);
+  border-radius: 0.5rem;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.qwebr-r-project-logo {
+  color: #2767B0; /* R Project's blue color */
+}
+
+.qwebr-icon-status-spinner {
+  color: #7894c4;
+}
+
+.qwebr-icon-run-code {
+  color: #0d9c29
+}
+
+body.quarto-light .qwebr-output-code-stdout {
+  color: #111;
+}
+
+body.quarto-dark .qwebr-output-code-stdout {
+  color: #EEE;
+}
+
+.qwebr-output-code-stderr {
+  color: #db4133;
+}
+
+body.quarto-light .qwebr-editor {
+  border: 1px solid #EEEEEE;
+}
+
+body.quarto-light .qwebr-editor-toolbar {
+  background-color: #EEEEEE;
+  padding: 0.2rem 0.5rem;
+}
+
+body.quarto-dark .qwebr-editor {
+  border: 1px solid #111;
+}
+
+body.quarto-dark .qwebr-editor-toolbar {
+  background-color: #111;
+  padding: 0.2rem 0.5rem;
+}
+
+.qwebr-button {
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+  text-align: center;
+  padding: 0.375rem 0.75rem;
+  font-size: .9rem;
+  border-radius: 0.25rem;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+body.quarto-light .qwebr-button {
+  background-color: #EEEEEE;
+  color: #000;
+  border-color: #dee2e6;
+  border: 1px solid rgba(0,0,0,0);
+}
+
+body.quarto-dark .qwebr-button {
+  background-color: #111;
+  color: #EEE;
+  border-color: #dee2e6;
+  border: 1px solid rgba(0,0,0,0);
+}
+
+body.quarto-light .qwebr-button:hover {
+  color: #000;
+  background-color: #d9dce0;
+  border-color: #c8ccd0;
+}
+
+body.quarto-dark .qwebr-button:hover {
+  color: #d9dce0;
+  background-color: #323232;
+  border-color: #d9dce0;
+}
+
+.qwebr-button:disabled,.qwebr-button.disabled,fieldset:disabled .qwebr-button {
+  pointer-events: none;
+  opacity: .65
+}
+
+.qwebr-button-reset {
+  color: #696969; /*#4682b4;*/
+}
+
+.qwebr-button-copy {
+  color: #696969;
+}
+
+/* Style the code highlight lines */
+body.quarto-light .qwebr-editor-highlight-line {
+  background-color: lightblue;
+}
+
+body.quarto-dark .qwebr-editor-highlight-line {
+  background-color: darkblue;
+}
+
+/* Style the modal pop-up */
+
+/* The Modal (background) */
+.qwebr-modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
+
+/* Modal Content */
+.qwebr-modal-content {
+  background-color: #fefefe;
+  margin: 5% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.qwebr-modal-content-code {
+  max-height: 50vh;
+  min-height: 5vh;
+  overflow: scroll;
+  border: 1px solid #888;
+}
+
+/* The Close Button */
+.qwebr-modal-close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.qwebr-modal-close:hover,
+.qwebr-modal-close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.qwebr-download-btn {
+  margin-top: 10px;
+  text-decoration: none !important;
+}
+
+/* Styling to download image that is created */
+
+.qwebr-canvas-image {
+  position: relative;
+  display: inline-block;
+  margin: 10px;
+}
+
+.qwebr-canvas-image-download-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: none;
+}
+
+figure:hover .qwebr-canvas-image-download-btn {
+  display: block;
+}
+
+/* Custom styling for RevealJS Presentations*/
+
+/* Reset the style of the interactive area */
+.reveal div.qwebr-interactive-area {
+  display: block;
+  box-shadow: none;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Provide space to entries */
+.reveal div.qwebr-output-code-area pre div {
+  margin: 1px 2px 1px 10px;
+}
+
+/* Collapse the inside code tags to avoid extra space between line outputs */
+.reveal pre div code.qwebr-output-code-stdout, .reveal pre div code.qwebr-output-code-stderr {
+  padding: 0;
+  display: contents;
+}
+
+body.reveal.quarto-light pre div code.qwebr-output-code-stdout {
+  color: #111;
+}
+
+body.reveal.quarto-dark pre div code.qwebr-output-code-stdout {
+  color: #EEEEEE;
+}
+
+.reveal pre div code.qwebr-output-code-stderr {
+  color: #db4133;
+}
+
+
+/* Create a border around console and output (does not effect graphs) */
+body.reveal.quarto-light div.qwebr-console-area {
+  border: 1px solid #EEEEEE;
+  box-shadow: 2px 2px 10px #EEEEEE;
+}
+
+body.reveal.quarto-dark div.qwebr-console-area {
+  border: 1px solid #111;
+  box-shadow: 2px 2px 10px #111;
+}
+
+
+/* Cap output height and allow text to scroll */
+/* TODO: Is there a better way to fit contents/max it parallel to the monaco editor size? */
+.reveal div.qwebr-output-code-area pre {
+  max-height: 400px;
+  overflow: scroll;
+}
+
+iframe.qwebr-output-code-browse {
+  width: 100%;
+
+  /*
+    TODO: How to make the height automatic according to the widget size,
+    or respect the quarto code block options?
+  */
+  min-height: 500px;
+}
+
+</style>
+<script type="module">
+// Document level settings ----
+
+// Determine if we need to install R packages
+globalThis.qwebrInstallRPackagesList = ['dplyr', 'ggplot2'];
+
+// Specify possible locations to search for the repository
+globalThis.qwebrPackageRepoURLS = ['https://repo.r-wasm.org/'];
+
+// Check to see if we have an empty array, if we do set to skip the installation.
+globalThis.qwebrSetupRPackages = !(qwebrInstallRPackagesList.indexOf("") !== -1);
+globalThis.qwebrAutoloadRPackages = true;
+
+// Display a startup message?
+globalThis.qwebrShowStartupMessage = true;
+globalThis.qwebrShowHeaderMessage = false;
+
+// Describe the webR settings that should be used
+globalThis.qwebrCustomizedWebROptions = {
+  "baseURL": "https://webr.r-wasm.org/v0.5.2/",
+  "serviceWorkerUrl": "",
+  "homedir": "/home/web_user", 
+  "channelType": "ChannelType.Automatic"
+};
+
+// Store cell data
+globalThis.qwebrCellDetails = [{"code":"## mini base tipo GEIH: 16 ocupados (la fila 16 es un outlier de ingreso)\ngeih_mini <- data.frame(\n  sexo  = rep(c(\"mujer\",\"hombre\"), times = 8),\n  edad  = c(24,30,28,45,35,52,41,23,58,33,26,39,48,61,30,44),\n  anios_educacion = c(11,5,16,11,18,8,11,13,5,16,14,11,9,3,16,18),\n  nivel_educativo = c(\"media\",\"primaria\",\"superior\",\"media\",\"superior\",\"secundaria\",\"media\",\"superior\",\n                      \"primaria\",\"superior\",\"superior\",\"media\",\"secundaria\",\"primaria\",\"superior\",\"superior\"),\n  ingreso_laboral = c(1300000,1000000,2800000,1600000,3500000,1200000,1400000,1500000,\n                      900000,3200000,1800000,1450000,1100000,800000,2400000,25000000)\n)\n\n## mini serie de desempleo para la seccion de geom_line()\ndesempleo <- data.frame(\n  anio = 2015:2024,\n  tasa = c(8.9, 9.2, 9.4, 9.7, 10.5, 15.9, 13.8, 11.2, 10.2, 10.2)\n)","id":1,"options":{"autorun":"true","classes":"","comment":"","context":"setup","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-1","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## cargar librerias de la unidad (una sola vez por pagina)\nlibrary(dplyr)\nlibrary(ggplot2)\n\n## la mini base ya viene cargada en el documento: conozcala\ngeih_mini","id":2,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-2","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## paso 0: ingreso mediano por sexo (dplyr, Unidad 2)\nbrecha_sexo <- geih_mini %>%\n  group_by(sexo) %>%\n  summarise(ingreso_mediano = median(ingreso_laboral), .groups = \"drop\")\n\nbrecha_sexo   ## -> tabla de 2 filas que vamos a graficar","id":3,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-3","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ggplot(data = brecha_sexo)","id":4,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-4","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ggplot(data = brecha_sexo, mapping = aes(x = sexo, y = ingreso_mediano))","id":5,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-5","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ggplot(data = brecha_sexo, mapping = aes(x = sexo, y = ingreso_mediano)) +\n  geom_col()","id":6,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-6","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## histograma del ingreso laboral (solo se mapea x; el conteo lo calcula R)\nggplot(geih_mini, aes(x = ingreso_laboral)) +\n  geom_histogram(bins = 10, fill = \"steelblue\", color = \"white\")\n\n## densidad: la forma suavizada (con 16 obs. es tosca; con 21.821 brilla)\nggplot(geih_mini, aes(x = ingreso_laboral)) +\n  geom_density(fill = \"steelblue\", alpha = 0.4)","id":7,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-7","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## comparar la distribucion del ingreso entre hombres y mujeres\nggplot(geih_mini, aes(x = sexo, y = ingreso_laboral)) +\n  geom_boxplot(fill = \"steelblue\", alpha = 0.5)","id":8,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-8","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Haga un histograma de la edad con bins = 8.\n## ¿La edad tiene el mismo problema de outliers que el ingreso?\n## Su codigo aqui","id":9,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-9","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## geom_bar(): cuantas personas hay por nivel educativo (R cuenta las filas)\nggplot(geih_mini, aes(x = nivel_educativo)) +\n  geom_bar(fill = \"steelblue\")","id":10,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-10","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## geom_col(): un valor ya calculado, con las barras ORDENADAS con reorder()\ningreso_nivel <- geih_mini %>%\n  group_by(nivel_educativo) %>%\n  summarise(mediana = median(ingreso_laboral), .groups = \"drop\")\n\nggplot(ingreso_nivel, aes(x = reorder(nivel_educativo, mediana), y = mediana)) +\n  geom_col(fill = \"steelblue\")","id":11,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-11","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Paso 1: tabla con group_by() + summarise()\n## Paso 2: geom_col() con reorder()\n## Su codigo aqui","id":12,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-12","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## dispersion: educacion vs ingreso\nggplot(geih_mini, aes(x = anios_educacion, y = ingreso_laboral)) +\n  geom_point(size = 3)\n\n## la misma nube, con la recta que la resume\nggplot(geih_mini, aes(x = anios_educacion, y = ingreso_laboral)) +\n  geom_point(size = 3) +\n  geom_smooth(method = \"lm\", se = FALSE)","id":13,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-13","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Grafique edad (x) vs ingreso_laboral (y) con puntos y la recta lm.\n## ¿La relacion es tan clara como con la educacion?\n## Su codigo aqui","id":14,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-14","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## la serie ya viene cargada: conozcala y grafiquela\ndesempleo\n\nggplot(desempleo, aes(x = anio, y = tasa)) +\n  geom_line(color = \"steelblue\", linewidth = 1) +\n  geom_point(size = 2)","id":15,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-15","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Vuelva a graficar la serie y agreguele con labs() un titulo que comunique\n## el hallazgo (no \"Grafico de desempleo\") y ejes con unidades.\n## Su codigo aqui","id":16,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-16","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Caso 1 - valor FIJO, fuera de aes(): todos los puntos iguales\nggplot(geih_mini, aes(x = anios_educacion, y = ingreso_laboral)) +\n  geom_point(color = \"steelblue\", size = 3)\n\n## Caso 2 - variable MAPEADA, dentro de aes(): un color por sexo (y leyenda)\nggplot(geih_mini, aes(x = anios_educacion, y = ingreso_laboral, color = sexo)) +\n  geom_point(size = 3)","id":17,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-17","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ejecute y observe la leyenda extraña\nggplot(geih_mini, aes(x = anios_educacion, y = ingreso_laboral, color = \"blue\")) +\n  geom_point(size = 3)","id":18,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-18","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Este codigo intenta pintar TODAS las barras de morado, pero algo salio mal.\n## Corrijalo para que queden moradas de verdad (y sin leyenda extraña).\nggplot(geih_mini, aes(x = nivel_educativo, fill = \"purple\")) +\n  geom_bar()","id":19,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-19","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## tabla base + grafico con textos completos, eje legible y tema sobrio\ningreso_nivel <- geih_mini %>%\n  group_by(nivel_educativo) %>%\n  summarise(mediana = median(ingreso_laboral), .groups = \"drop\")\n\nggplot(ingreso_nivel, aes(x = reorder(nivel_educativo, mediana), y = mediana)) +\n  geom_col(fill = \"steelblue\") +\n  scale_y_continuous(labels = function(x) paste0(x / 1e6, \" M\")) +\n  labs(title    = \"La educacion paga: el ingreso mediano sube con cada nivel\",\n       subtitle = \"Ocupados de la mini base de ejercicios\",\n       x        = \"Nivel educativo\",\n       y        = \"Ingreso laboral mediano (millones de COP)\",\n       caption  = \"Fuente: mini base con estructura de la GEIH (DANE).\") +\n  theme_minimal()","id":20,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-20","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## la misma distribucion, un panel por sexo\nggplot(geih_mini, aes(x = ingreso_laboral)) +\n  geom_histogram(bins = 8, fill = \"steelblue\", color = \"white\") +\n  facet_wrap(~ sexo)","id":21,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-21","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Su codigo aqui","id":22,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-22","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"summary(geih_mini)","id":23,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-23","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## contar personas por nivel educativo\ntable(geih_mini$nivel_educativo)","id":24,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-24","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ingreso por sexo: promedio, mediana, dispersion y tamaño de grupo\ngeih_mini %>%\n  group_by(sexo) %>%\n  summarise(promedio = mean(ingreso_laboral),\n            mediana  = median(ingreso_laboral),\n            desv_est = sd(ingreso_laboral),\n            n        = n())","id":25,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-25","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Calcule por nivel educativo: mediana, promedio y numero de personas.\n## Ordene de mayor a menor mediana. ¿En que nivel difieren mas promedio y\n## mediana? ¿Por que? (pista: ¿donde \"vive\" el outlier?)\n## Su codigo aqui","id":26,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-26","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## en niveles: el outlier aplasta al resto\nggplot(geih_mini, aes(x = ingreso_laboral)) +\n  geom_histogram(bins = 10, fill = \"steelblue\", color = \"white\")\n\n## en logaritmos: la distribucion \"respira\"\nggplot(geih_mini, aes(x = log(ingreso_laboral))) +\n  geom_histogram(bins = 10, fill = \"steelblue\", color = \"white\")","id":27,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-27","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}}];
+
+</script>
+<script type="module">
+// Declare startupMessageQWebR globally
+globalThis.qwebrStartupMessage = document.createElement("p");
+
+// Verify if OffScreenCanvas is supported
+globalThis.qwebrOffScreenCanvasSupport = function() {
+  return typeof OffscreenCanvas !== 'undefined'
+}
+
+// Function to set the button text
+globalThis.qwebrSetInteractiveButtonState = function(buttonText, enableCodeButton = true) {
+  document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+    btn.innerHTML = buttonText;
+    btn.disabled = !enableCodeButton;
+  });
+}
+
+// Function to update the status message in non-interactive cells
+globalThis.qwebrUpdateStatusMessage = function(message) {
+  document.querySelectorAll(".qwebr-status-text.qwebr-cell-needs-evaluation").forEach((elem) => {
+    elem.innerText = message;
+  });
+}
+
+// Function to update the status message
+globalThis.qwebrUpdateStatusHeader = function(message) {
+  qwebrStartupMessage.innerHTML = `
+    <i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i>
+    <span>${message}</span>`;
+}
+
+// Function to return true if element is found, false if not
+globalThis.qwebrCheckHTMLElementExists = function(selector) {
+  const element = document.querySelector(selector);
+  return !!element;
+}
+
+// Function that detects whether reveal.js slides are present
+globalThis.qwebrIsRevealJS = function() {
+  // If the '.reveal .slides' selector exists, RevealJS is likely present
+  return qwebrCheckHTMLElementExists('.reveal .slides');
+}
+
+// Initialize the Quarto sidebar element
+function qwebrSetupQuartoSidebar() {
+  var newSideBarDiv = document.createElement('div');
+  newSideBarDiv.id = 'quarto-margin-sidebar';
+  newSideBarDiv.className = 'sidebar margin-sidebar';
+  newSideBarDiv.style.top = '0px';
+  newSideBarDiv.style.maxHeight = 'calc(0px + 100vh)';
+
+  return newSideBarDiv;
+}
+
+// Position the sidebar in the document
+function qwebrPlaceQuartoSidebar() {
+  // Get the reference to the element with id 'quarto-document-content'
+  var referenceNode = document.getElementById('quarto-document-content');
+
+  // Create the new div element
+  var newSideBarDiv = qwebrSetupQuartoSidebar();
+
+  // Insert the new div before the 'quarto-document-content' element
+  referenceNode.parentNode.insertBefore(newSideBarDiv, referenceNode);
+}
+
+function qwebrPlaceMessageContents(content, html_location = "title-block-header", revealjs_location = "title-slide") {
+
+  // Get references to header elements
+  const headerHTML = document.getElementById(html_location);
+  const headerRevealJS = document.getElementById(revealjs_location);
+
+  // Determine where to insert the quartoTitleMeta element
+  if (headerHTML || headerRevealJS) {
+    // Append to the existing "title-block-header" element or "title-slide" div
+    (headerHTML || headerRevealJS).appendChild(content);
+  } else {
+    // If neither headerHTML nor headerRevealJS is found, insert after "webr-monaco-editor-init" script
+    const monacoScript = document.getElementById("qwebr-monaco-editor-init");
+    const header = document.createElement("header");
+    header.setAttribute("id", "title-block-header");
+    header.appendChild(content);
+    monacoScript.after(header);
+  }
+}
+
+
+
+function qwebrOffScreenCanvasSupportWarningMessage() {
+  
+  // Verify canvas is supported.
+  if(qwebrOffScreenCanvasSupport()) return;
+
+  // Create the main container div
+  var calloutContainer = document.createElement('div');
+  calloutContainer.classList.add('callout', 'callout-style-default', 'callout-warning', 'callout-titled');
+
+  // Create the header div
+  var headerDiv = document.createElement('div');
+  headerDiv.classList.add('callout-header', 'd-flex', 'align-content-center');
+
+  // Create the icon container div
+  var iconContainer = document.createElement('div');
+  iconContainer.classList.add('callout-icon-container');
+
+  // Create the icon element
+  var iconElement = document.createElement('i');
+  iconElement.classList.add('callout-icon');
+
+  // Append the icon element to the icon container
+  iconContainer.appendChild(iconElement);
+
+  // Create the title container div
+  var titleContainer = document.createElement('div');
+  titleContainer.classList.add('callout-title-container', 'flex-fill');
+  titleContainer.innerText = 'Warning: Web Browser Does Not Support Graphing!';
+
+  // Append the icon container and title container to the header div
+  headerDiv.appendChild(iconContainer);
+  headerDiv.appendChild(titleContainer);
+
+  // Create the body container div
+  var bodyContainer = document.createElement('div');
+  bodyContainer.classList.add('callout-body-container', 'callout-body');
+
+  // Create the paragraph element for the body content
+  var paragraphElement = document.createElement('p');
+  paragraphElement.innerHTML = 'This web browser does not have support for displaying graphs through the <code>quarto-webr</code> extension since it lacks an <code>OffScreenCanvas</code>. Please upgrade your web browser to one that supports <code>OffScreenCanvas</code>.';
+
+  // Append the paragraph element to the body container
+  bodyContainer.appendChild(paragraphElement);
+
+  // Append the header div and body container to the main container div
+  calloutContainer.appendChild(headerDiv);
+  calloutContainer.appendChild(bodyContainer);
+
+  // Append the main container div to the document depending on format
+  qwebrPlaceMessageContents(calloutContainer, "title-block-header"); 
+
+}
+
+
+// Function that attaches the document status message and diagnostics
+function displayStartupMessage(showStartupMessage, showHeaderMessage) {
+  if (!showStartupMessage) {
+    return;
+  }
+
+  // Create the outermost div element for metadata
+  const quartoTitleMeta = document.createElement("div");
+  quartoTitleMeta.classList.add("quarto-title-meta");
+
+  // Create the first inner div element
+  const firstInnerDiv = document.createElement("div");
+  firstInnerDiv.setAttribute("id", "qwebr-status-message-area");
+
+  // Create the second inner div element for "WebR Status" heading and contents
+  const secondInnerDiv = document.createElement("div");
+  secondInnerDiv.setAttribute("id", "qwebr-status-message-title");
+  secondInnerDiv.classList.add("quarto-title-meta-heading");
+  secondInnerDiv.innerText = "WebR Status";
+
+  // Create another inner div for contents
+  const secondInnerDivContents = document.createElement("div");
+  secondInnerDivContents.setAttribute("id", "qwebr-status-message-body");
+  secondInnerDivContents.classList.add("quarto-title-meta-contents");
+
+  // Describe the WebR state
+  qwebrStartupMessage.innerText = "🟡 Loading...";
+  qwebrStartupMessage.setAttribute("id", "qwebr-status-message-text");
+  // Add `aria-live` to auto-announce the startup status to screen readers
+  qwebrStartupMessage.setAttribute("aria-live", "assertive");
+
+  // Append the startup message to the contents
+  secondInnerDivContents.appendChild(qwebrStartupMessage);
+
+  // Add a status indicator for COOP and COEP Headers if needed
+  if (showHeaderMessage) {
+    const crossOriginMessage = document.createElement("p");
+    crossOriginMessage.innerText = `${crossOriginIsolated ? '🟢' : '🟡'} COOP & COEP Headers`;
+    crossOriginMessage.setAttribute("id", "qwebr-coop-coep-header");
+    secondInnerDivContents.appendChild(crossOriginMessage);
+  }
+
+  // Combine the inner divs and contents
+  firstInnerDiv.appendChild(secondInnerDiv);
+  firstInnerDiv.appendChild(secondInnerDivContents);
+  quartoTitleMeta.appendChild(firstInnerDiv);
+
+  // Place message on webpage
+  qwebrPlaceMessageContents(quartoTitleMeta); 
+}
+
+function qwebrAddCommandHistoryModal() {
+  // Create the modal div
+  var modalDiv = document.createElement('div');
+  modalDiv.id = 'qwebr-history-modal';
+  modalDiv.className = 'qwebr-modal';
+
+  // Create the modal content div
+  var modalContentDiv = document.createElement('div');
+  modalContentDiv.className = 'qwebr-modal-content';
+
+  // Create the span for closing the modal
+  var closeSpan = document.createElement('span');
+  closeSpan.id = 'qwebr-command-history-close-btn';
+  closeSpan.className = 'qwebr-modal-close';
+  closeSpan.innerHTML = '&times;';
+
+  // Create the h1 element for the modal
+  var modalH1 = document.createElement('h1');
+  modalH1.textContent = 'R History Command Contents';
+
+  // Create an anchor element for downloading the Rhistory file 
+  var downloadLink = document.createElement('a');
+  downloadLink.href = '#';
+  downloadLink.id = 'qwebr-download-history-btn';
+  downloadLink.className = 'qwebr-download-btn';
+
+  // Create an 'i' element for the icon
+  var icon = document.createElement('i');
+  icon.className = 'bi bi-file-code';
+
+  // Append the icon to the anchor element
+  downloadLink.appendChild(icon);
+
+  // Add the text 'Download R History' to the anchor element
+  downloadLink.appendChild(document.createTextNode(' Download R History File'));
+
+  // Create the pre for command history contents
+  var commandContentsPre = document.createElement('pre');
+  commandContentsPre.id = 'qwebr-command-history-contents';
+  commandContentsPre.className = 'qwebr-modal-content-code';
+
+  // Append the close span, h1, and history contents pre to the modal content div
+  modalContentDiv.appendChild(closeSpan);
+  modalContentDiv.appendChild(modalH1);
+  modalContentDiv.appendChild(downloadLink);
+  modalContentDiv.appendChild(commandContentsPre);
+
+  // Append the modal content div to the modal div
+  modalDiv.appendChild(modalContentDiv);
+
+  // Append the modal div to the body
+  document.body.appendChild(modalDiv);
+}
+
+function qwebrRegisterRevealJSCommandHistoryModal() {
+  // Select the <ul> element inside the <div> with data-panel="Custom0"
+  let ulElement = document.querySelector('div[data-panel="Custom0"] > ul.slide-menu-items');
+
+  // Find the last <li> element with class slide-tool-item
+  let lastItem = ulElement.querySelector('li.slide-tool-item:last-child');
+
+  // Calculate the next data-item value
+  let nextItemValue = 0;
+  if (lastItem) {
+      nextItemValue = parseInt(lastItem.dataset.item) + 1;
+  }
+
+  // Create a new <li> element
+  let newListItem = document.createElement('li');
+  newListItem.className = 'slide-tool-item';
+  newListItem.dataset.item = nextItemValue.toString(); // Set the next available data-item value
+
+  // Create the <a> element inside the <li>
+  let newLink = document.createElement('a');
+  newLink.href = '#';
+  newLink.id = 'qwebrRHistoryButton'; // Set the ID for the new link
+  
+  // Create the <kbd> element inside the <a>
+  let newKbd = document.createElement('kbd');
+  newKbd.textContent = ' '; // Set to empty as we are not registering a keyboard shortcut
+
+  // Create text node for the link text
+  let newText = document.createTextNode(' View R History');
+
+  // Append <kbd> and text node to <a>
+  newLink.appendChild(newKbd);
+  newLink.appendChild(newText);
+
+  // Append <a> to <li>
+  newListItem.appendChild(newLink);
+
+  // Append <li> to <ul>
+  ulElement.appendChild(newListItem);
+}
+
+// Handle setting up the R history modal
+function qwebrCodeLinks() {
+
+  if (qwebrIsRevealJS()) {
+    qwebrRegisterRevealJSCommandHistoryModal();
+    return;
+  }
+
+  // Create the container div
+  var containerDiv = document.createElement('div');
+  containerDiv.className = 'quarto-code-links';
+
+  // Create the h2 element
+  var h2 = document.createElement('h2');
+  h2.textContent = 'webR Code Links';
+
+  // Create the ul element
+  var ul = document.createElement('ul');
+
+  // Create the li element
+  var li = document.createElement('li');
+
+  // Create the a_history_btn element
+  var a_history_btn = document.createElement('a');
+  a_history_btn.href = 'javascript:void(0)';
+  a_history_btn.setAttribute('id', 'qwebrRHistoryButton');
+
+  // Create the i_history_btn element
+  var i_history_btn = document.createElement('i');
+  i_history_btn.className = 'bi bi-file-code';
+
+  // Create the text node for the link text
+  var text_history_btn = document.createTextNode('View R History');
+
+  // Append the icon element and link text to the a element
+  a_history_btn.appendChild(i_history_btn);
+  a_history_btn.appendChild(text_history_btn);
+
+  // Append the a element to the li element
+  li.appendChild(a_history_btn);
+
+  // Append the li element to the ul element
+  ul.appendChild(li);
+
+  // Append the h2 and ul elements to the container div
+  containerDiv.appendChild(h2);
+  containerDiv.appendChild(ul);
+
+  // Append the container div to the element with the ID 'quarto-margin-sidebar'
+  var sidebar = document.getElementById('quarto-margin-sidebar');
+    
+  // If the sidebar element is not found, create it
+  if(!sidebar) {
+    qwebrPlaceQuartoSidebar();
+  }
+  
+  // Re-select the sidebar element (if it was just created)
+  sidebar = document.getElementById('quarto-margin-sidebar');   
+
+
+  // If the sidebar element exists, append the container div to it
+  if(sidebar) {
+    // Append the container div to the sidebar
+    sidebar.appendChild(containerDiv);
+    // Force the sidebar to be clickable by removing the 'zindex-bottom' class
+    // added in pre-release: https://github.com/quarto-dev/quarto-cli/commit/f0c53a1ffcaa1de4eccbf07803b096898248adcc
+    sidebar.className = 'sidebar margin-sidebar';
+  } else {
+    // Get a debugger ...
+    console.warn('Element with ID "quarto-margin-sidebar" not found.');
+  }
+}
+
+// Call the function to append the code links for qwebR into the right sidebar
+qwebrCodeLinks();
+
+// Add the command history modal
+qwebrAddCommandHistoryModal();
+
+displayStartupMessage(qwebrShowStartupMessage, qwebrShowHeaderMessage);
+qwebrOffScreenCanvasSupportWarningMessage();
+</script>
+<script type="module">
+// Define a global storage and retrieval solution ----
+
+// Store commands executed in R
+globalThis.qwebrRCommandHistory = [];
+
+// Function to retrieve the command history
+globalThis.qwebrFormatRHistory = function() {
+   return qwebrRCommandHistory.join("\n\n");
+}
+
+// Retrieve HTML Elements ----
+
+// Get the command modal
+const command_history_modal = document.getElementById("qwebr-history-modal");
+
+// Get the button that opens the command modal
+const command_history_btn = document.getElementById("qwebrRHistoryButton");
+
+// Get the <span> element that closes the command modal
+const command_history_close_span = document.getElementById("qwebr-command-history-close-btn");
+
+// Get the download button for r history information
+const command_history_download_btn = document.getElementById("qwebr-download-history-btn");
+
+// Plug in command history into modal/download button ----
+
+// Function to populate the modal with command history
+function populateCommandHistoryModal() {
+    document.getElementById("qwebr-command-history-contents").innerHTML = qwebrFormatRHistory() || "No commands have been executed yet.";
+}
+
+// Function to format the current date and time to
+// a string with the format YYYY-MM-DD-HH-MM-SS
+function formatDateTime() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+}
+
+
+// Function to convert document title with datetime to a safe filename
+function safeFileName() {
+    // Get the current page title
+    let pageTitle = document.title;
+
+    // Combine the current page title with the current date and time
+    let pageNameWithDateTime = `Rhistory-${pageTitle}-${formatDateTime()}`;
+
+    // Replace unsafe characters with safe alternatives
+    let safeFilename = pageNameWithDateTime.replace(/[\\/:\*\?! "<>\|]/g, '-');
+
+    return safeFilename;
+}
+
+
+// Function to download list contents as text file
+function downloadRHistory() {
+    // Get the current page title + datetime and use it as the filename
+    const filename = `${safeFileName()}.R`;
+
+    // Get the text contents of the R History list
+    const text = qwebrFormatRHistory();
+
+    // Create a new Blob object with the text contents
+    const blob = new Blob([text], { type: 'text/plain' });
+  
+    // Create a new anchor element for the download
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+
+    // Append the anchor to the body, click it, and remove it
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// Register event handlers ----
+
+// When the user clicks the View R History button, open the command modal
+command_history_btn.onclick = function() {
+    populateCommandHistoryModal();
+    command_history_modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the command modal
+command_history_close_span.onclick = function() {
+    command_history_modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the command modal, close it
+window.onclick = function(event) {
+    if (event.target == command_history_modal) {
+        command_history_modal.style.display = "none";
+    }
+}
+
+// Add an onclick event listener to the download button so that
+// the user can download the R history as a text file
+command_history_download_btn.onclick = function() {
+    downloadRHistory();
+};
+</script>
+<script type="module">
+// Supported Evaluation Types for Context
+globalThis.EvalTypes = Object.freeze({
+  Interactive: 'interactive',
+  Setup: 'setup',
+  Output: 'output',
+});
+
+// Function that obtains the font size for a given element 
+globalThis.qwebrCurrentFontSizeOnElement = function(element, cssProperty = 'font-size') {
+
+  const currentFontSize = parseFloat(
+    window
+    .getComputedStyle(element)
+    .getPropertyValue(cssProperty)
+  );
+  
+  return currentFontSize;
+}
+
+// Function to determine font scaling
+globalThis.qwebrScaledFontSize = function(div, qwebrOptions) {
+  // Determine if we should compute font-size using RevealJS's `--r-main-font-size` 
+  // or if we can directly use the document's `font-size`.
+  const cssProperty = document.body.classList.contains('reveal') ? 
+    "--r-main-font-size" : "font-size";
+  
+  // Get the current font size on the div element
+  const elementFontSize = qwebrCurrentFontSizeOnElement(div, cssProperty);
+
+  // Determine the scaled font size value
+  const scaledFontSize = ((qwebrOptions['editor-font-scale'] ?? 1) * elementFontSize) ?? 17.5;
+
+  return scaledFontSize;
+}
+
+
+// Function that dispatches the creation request
+globalThis.qwebrCreateHTMLElement = function (
+  cellData
+) {
+
+  // Extract key components
+  const evalType = cellData.options.context;
+  const qwebrCounter = cellData.id;
+
+  // We make an assumption that insertion points are defined by the Lua filter as:
+  // qwebr-insertion-location-{qwebrCounter} 
+  const elementLocator = document.getElementById(`qwebr-insertion-location-${qwebrCounter}`);
+
+  // Figure out the routine to use to insert the element.
+  let qwebrElement;
+  switch ( evalType ) {
+    case EvalTypes.Interactive:
+      qwebrElement = qwebrCreateInteractiveElement(qwebrCounter, cellData.options);
+      break;
+    case EvalTypes.Output: 
+      qwebrElement = qwebrCreateNonInteractiveOutputElement(qwebrCounter, cellData.options);
+      break;
+    case EvalTypes.Setup: 
+      qwebrElement = qwebrCreateNonInteractiveSetupElement(qwebrCounter, cellData.options);
+      break;
+    default: 
+      qwebrElement = document.createElement('div');
+      qwebrElement.textContent = 'Error creating `quarto-webr` element';
+  }
+
+  // Insert the dynamically generated object at the document location.
+  elementLocator.appendChild(qwebrElement);
+};
+
+// Function that setups the interactive element creation
+globalThis.qwebrCreateInteractiveElement = function (qwebrCounter, qwebrOptions) {
+
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = 'qwebr-interactive-area-' + qwebrCounter;
+  mainDiv.className = `qwebr-interactive-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+
+  // Create toolbar div
+  var toolbarDiv = document.createElement('div');
+  toolbarDiv.className = 'qwebr-editor-toolbar';
+  toolbarDiv.id = 'qwebr-editor-toolbar-' + qwebrCounter;
+
+  // Create a div to hold the left buttons
+  var leftButtonsDiv = document.createElement('div');
+  leftButtonsDiv.className = 'qwebr-editor-toolbar-left-buttons';
+
+  // Create a div to hold the right buttons
+  var rightButtonsDiv = document.createElement('div');
+  rightButtonsDiv.className = 'qwebr-editor-toolbar-right-buttons';
+
+  // Create Run Code button
+  var runCodeButton = document.createElement('button');
+  runCodeButton.className = 'btn btn-default qwebr-button qwebr-button-run';
+  runCodeButton.disabled = true;
+  runCodeButton.type = 'button';
+  runCodeButton.id = 'qwebr-button-run-' + qwebrCounter;
+  runCodeButton.textContent = '🟡 Loading webR...';
+  runCodeButton.title = `Run code (Shift + Enter)`;
+
+  // Append buttons to the leftButtonsDiv
+  leftButtonsDiv.appendChild(runCodeButton);
+
+  // Create Reset button
+  var resetButton = document.createElement('button');
+  resetButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-reset';
+  resetButton.type = 'button';
+  resetButton.id = 'qwebr-button-reset-' + qwebrCounter;
+  resetButton.title = 'Start over';
+  resetButton.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i>';
+
+  // Create Copy button
+  var copyButton = document.createElement('button');
+  copyButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-copy';
+  copyButton.type = 'button';
+  copyButton.id = 'qwebr-button-copy-' + qwebrCounter;
+  copyButton.title = 'Copy code';
+  copyButton.innerHTML = '<i class="fa-regular fa-copy"></i>';
+
+  // Append buttons to the rightButtonsDiv
+  rightButtonsDiv.appendChild(resetButton);
+  rightButtonsDiv.appendChild(copyButton);
+
+  // Create console area div
+  var consoleAreaDiv = document.createElement('div');
+  consoleAreaDiv.id = 'qwebr-console-area-' + qwebrCounter;
+  consoleAreaDiv.className = 'qwebr-console-area';
+
+  // Create editor div
+  var editorDiv = document.createElement('div');
+  editorDiv.id = 'qwebr-editor-' + qwebrCounter;
+  editorDiv.className = 'qwebr-editor';
+
+  // Create output code area div
+  var outputCodeAreaDiv = document.createElement('div');
+  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
+  outputCodeAreaDiv.className = 'qwebr-output-code-area';
+  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
+
+  // Create pre element inside output code area
+  var preElement = document.createElement('pre');
+  preElement.style.visibility = 'hidden';
+  outputCodeAreaDiv.appendChild(preElement);
+
+  // Create output graph area div
+  var outputGraphAreaDiv = document.createElement('div');
+  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
+  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
+
+  // Append buttons to the toolbar
+  toolbarDiv.appendChild(leftButtonsDiv);
+  toolbarDiv.appendChild(rightButtonsDiv);
+
+  // Append all elements to the main div
+  mainDiv.appendChild(toolbarDiv);
+  consoleAreaDiv.appendChild(editorDiv);
+  consoleAreaDiv.appendChild(outputCodeAreaDiv);
+  mainDiv.appendChild(consoleAreaDiv);
+  mainDiv.appendChild(outputGraphAreaDiv);
+
+  return mainDiv;
+}
+
+// Function that adds output structure for non-interactive output
+globalThis.qwebrCreateNonInteractiveOutputElement = function(qwebrCounter, qwebrOptions) {
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = 'qwebr-noninteractive-area-' + qwebrCounter;
+  mainDiv.className = `qwebr-noninteractive-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+  
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+  
+  // Create a status container div
+  var statusContainer = createLoadingContainer(qwebrCounter);
+
+  // Create output code area div
+  var outputCodeAreaDiv = document.createElement('div');
+  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
+  outputCodeAreaDiv.className = 'qwebr-output-code-area';
+  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
+
+  // Create pre element inside output code area
+  var preElement = document.createElement('pre');
+  preElement.style.visibility = 'hidden';
+  outputCodeAreaDiv.appendChild(preElement);
+
+  // Create output graph area div
+  var outputGraphAreaDiv = document.createElement('div');
+  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
+  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
+
+  // Append all elements to the main div
+  mainDiv.appendChild(statusContainer);
+  mainDiv.appendChild(outputCodeAreaDiv);
+  mainDiv.appendChild(outputGraphAreaDiv);
+
+  return mainDiv;
+};
+
+// Function that adds a stub in the page to indicate a setup cell was used.
+globalThis.qwebrCreateNonInteractiveSetupElement = function(qwebrCounter, qwebrOptions) {
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = `qwebr-noninteractive-setup-area-${qwebrCounter}`;
+  mainDiv.className = `qwebr-noninteractive-setup-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+
+
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+
+  // Create a status container div
+  var statusContainer = createLoadingContainer(qwebrCounter);
+
+  // Append status onto the main div
+  mainDiv.appendChild(statusContainer);
+
+  return mainDiv;
+}
+
+
+// Function to create loading container with specified ID
+globalThis.createLoadingContainer = function(qwebrCounter) {
+
+  // Create a status container
+  const container = document.createElement('div');
+  container.id = `qwebr-non-interactive-loading-container-${qwebrCounter}`;
+  container.className = 'qwebr-non-interactive-loading-container qwebr-cell-needs-evaluation';
+
+  // Create an R project logo to indicate its a code space
+  const rProjectIcon = document.createElement('i');
+  rProjectIcon.className = 'fa-brands fa-r-project fa-3x qwebr-r-project-logo';
+
+  // Setup a loading icon from font awesome
+  const spinnerIcon = document.createElement('i');
+  spinnerIcon.className = 'fa-solid fa-spinner fa-spin fa-1x qwebr-icon-status-spinner';
+
+  // Add a section for status text
+  const statusText = document.createElement('p');
+  statusText.id = `qwebr-status-text-${qwebrCounter}`;
+  statusText.className = `qwebr-status-text qwebr-cell-needs-evaluation`;
+  statusText.innerText = 'Loading webR...';
+
+  // Incorporate an inner container
+  const innerContainer = document.createElement('div');
+
+  // Append elements to the inner container
+  innerContainer.appendChild(spinnerIcon);
+  innerContainer.appendChild(statusText);
+
+  // Append elements to the main container
+  container.appendChild(rProjectIcon);
+  container.appendChild(innerContainer);
+
+  return container;
+}
+</script>
+<script type="module">
+// Function to install a single package
+async function qwebrInstallRPackage(packageName) {
+  await mainWebR.evalRVoid(`webr::install('${packageName}');`);
+}
+
+// Function to load a single package
+async function qwebrLoadRPackage(packageName) {
+  await mainWebR.evalRVoid(`require('${packageName}', quietly = TRUE)`);
+}
+
+// Generic function to process R packages
+async function qwebrProcessRPackagesWithStatus(packages, processType, displayStatusMessageUpdate = true) {
+  // Switch between contexts
+  const messagePrefix = processType === 'install' ? 'Installing' : 'Loading';
+
+  // Modify button state
+  qwebrSetInteractiveButtonState(`🟡 ${messagePrefix} package ...`, false);
+
+  // Iterate over packages
+  for (let i = 0; i < packages.length; i++) {
+    const activePackage = packages[i];
+    const formattedMessage = `${messagePrefix} package ${i + 1} out of ${packages.length}: ${activePackage}`;
+
+    // Display the update in header
+    if (displayStatusMessageUpdate) {
+      qwebrUpdateStatusHeader(formattedMessage);
+    }
+
+    // Display the update in non-active areas
+    qwebrUpdateStatusMessage(formattedMessage);
+
+    // Run package installation
+    if (processType === 'install') {
+      await qwebrInstallRPackage(activePackage);
+    } else {
+      await qwebrLoadRPackage(activePackage);
+    }
+  }
+
+  // Clean slate
+  if (processType === 'load') {
+    await mainWebR.flush();
+  }
+}
+
+// Start a timer
+const initializeWebRTimerStart = performance.now();
+
+// Encase with a dynamic import statement
+globalThis.qwebrInstance = import(qwebrCustomizedWebROptions.baseURL + "webr.mjs").then(
+  async ({ WebR, ChannelType }) => {
+    // Populate WebR options with defaults or new values based on `webr` meta
+    globalThis.mainWebR = new WebR(qwebrCustomizedWebROptions);
+
+    // Initialization WebR
+    await mainWebR.init();
+
+    // Setup a shelter
+    globalThis.mainWebRCodeShelter = await new mainWebR.Shelter();
+
+    // Setup a pager to allow processing help documentation
+    await mainWebR.evalRVoid('webr::pager_install()');
+
+    // Setup a viewer to allow processing htmlwidgets.
+    // This might not be available in old webr version
+    await mainWebR.evalRVoid('try({ webr::viewer_install() })');
+
+    // Override the existing install.packages() to use webr::install()
+    await mainWebR.evalRVoid('webr::shim_install()');
+
+    // Specify the repositories to pull from
+    // Note: webR does not use the `repos` option, but instead uses `webr_pkg_repos`
+    // inside of `install()`. However, other R functions still pull from `repos`.
+    await mainWebR.evalRVoid(`
+      options(
+        webr_pkg_repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')}),
+        repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')})
+      )
+    `);
+
+    // Check to see if any packages need to be installed
+    if (qwebrSetupRPackages) {
+      // Obtain only a unique list of packages
+      const uniqueRPackageList = Array.from(new Set(qwebrInstallRPackagesList));
+
+      // Install R packages one at a time (either silently or with a status update)
+      await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'install', qwebrShowStartupMessage);
+
+      if (qwebrAutoloadRPackages) {
+        // Load R packages one at a time (either silently or with a status update)
+        await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'load', qwebrShowStartupMessage);
+      }
+    }
+  }
+);
+
+// Stop timer
+const initializeWebRTimerEnd = performance.now();
+
+</script>
+<script type="module">
+// Function to verify a given JavaScript Object is empty
+globalThis.qwebrIsObjectEmpty = function (arr) {
+    return Object.keys(arr).length === 0;
+}
+
+// Global version of the Escape HTML function that converts HTML
+// characters to their HTML entities.
+globalThis.qwebrEscapeHTMLCharacters = function(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+};
+
+// Passthrough results
+globalThis.qwebrIdentity = function(x) {
+    return x;
+};
+
+// Append a comment
+globalThis.qwebrPrefixComment = function(x, comment) {
+    return `${comment}${x}`;
+};
+
+// Function to store the code in the history
+globalThis.qwebrLogCodeToHistory = function(codeToRun, options) {
+    qwebrRCommandHistory.push(
+        `# Ran code in ${options.label} at ${new Date().toLocaleString()} ----\n${codeToRun}`
+    );
+};
+
+// Function to attach a download button onto the canvas
+// allowing the user to download the image.
+function qwebrImageCanvasDownloadButton(canvas, canvasContainer) {
+
+    // Create the download button
+    const downloadButton = document.createElement('button');
+    downloadButton.className = 'qwebr-canvas-image-download-btn';
+    downloadButton.textContent = 'Download Image';
+    canvasContainer.appendChild(downloadButton);
+
+    // Trigger a download of the image when the button is clicked
+    downloadButton.addEventListener('click', function() {
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = 'qwebr-canvas-image.png';
+        link.click();
+    });
+}
+
+
+// Function to parse the pager results
+globalThis.qwebrParseTypePager = async function (msg) {
+
+    // Split out the event data
+    const { path, title, deleteFile } = msg.data;
+
+    // Process the pager data by reading the information from disk
+    const paged_data = await mainWebR.FS.readFile(path).then((data) => {
+        // Obtain the file content
+        let content = new TextDecoder().decode(data);
+
+        // Remove excessive backspace characters until none remain
+        while(content.match(/.[\b]/)){
+            content = content.replace(/.[\b]/g, '');
+        }
+
+        // Returned cleaned data
+        return content;
+    });
+
+    // Unlink file if needed
+    if (deleteFile) {
+        await mainWebR.FS.unlink(path);
+    }
+
+    // Return extracted data with spaces
+    return paged_data;
+};
+
+
+// Function to parse the browse results
+globalThis.qwebrParseTypeBrowse = async function (msg) {
+
+    // msg.type === "browse"
+    const path = msg.data.url;
+
+    // Process the browse data by reading the information from disk
+    const browse_data = await mainWebR.FS.readFile(path).then((data) => {
+        // Obtain the file content
+        let content = new TextDecoder().decode(data);
+
+        return content;
+    });
+
+    // Return extracted data as-is
+    return browse_data;
+};
+
+// Function to run the code using webR and parse the output
+globalThis.qwebrComputeEngine = async function(
+    codeToRun,
+    elements,
+    options) {
+
+    // Call into the R compute engine that persists within the document scope.
+    // To be prepared for all scenarios, the following happens:
+    // 1. We setup a canvas device to write to by making a namespace call into the {webr} package
+    // 2. We use values inside of the options array to set the figure size.
+    // 3. We capture the output stream information (STDOUT and STERR)
+    // 4. We disable the current device's image creation.
+    // 5. Piece-wise parse the results into the different output areas
+
+    // Create a pager variable for help/file contents
+    let pager = [];
+
+    // Handle how output is processed
+    let showMarkup = options.results === "markup" && options.output !== "asis";
+    let processOutput;
+
+    if (showMarkup) {
+        processOutput = qwebrEscapeHTMLCharacters;
+    } else {
+        processOutput = qwebrIdentity;
+    }
+
+    // ----
+    // Convert from Inches to Pixels by using DPI (dots per inch)
+    // for bitmap devices (dpi * inches = pixels)
+    let fig_width = options["fig-width"] * options["dpi"];
+    let fig_height = options["fig-height"] * options["dpi"];
+
+    // Initialize webR
+    await mainWebR.init();
+
+    // Configure capture output
+    let captureOutputOptions = {
+        withAutoprint: true,
+        captureStreams: true,
+        captureConditions: false,
+        // env: webR.objs.emptyEnv, // maintain a global environment for webR v0.2.0
+    };
+
+    // Determine if the browser supports OffScreen
+    if (qwebrOffScreenCanvasSupport()) {
+        // Mirror default options of webr::canvas()
+        // with changes to figure height and width.
+        captureOutputOptions.captureGraphics = {
+            width: fig_width,
+            height: fig_height,
+            bg: "white", // default: transparent
+            pointsize: 12,
+            capture: true
+        };
+    }  else {
+        // Disable generating graphics
+        captureOutputOptions.captureGraphics = false;
+    }
+
+    // Store the code to run in history
+    qwebrLogCodeToHistory(codeToRun, options);
+
+    // Setup a webR canvas by making a namespace call into the {webr} package
+    // Evaluate the R code
+    // Remove the active canvas silently
+    const result = await mainWebRCodeShelter.captureR(
+        `${codeToRun}`,
+        captureOutputOptions
+    );
+
+    // -----
+
+    // Start attempting to parse the result data
+    processResultOutput:try {
+
+        // Avoid running through output processing
+        if (options.results === "hide" || options.output === "false") {
+            break processResultOutput;
+        }
+
+        // Merge output streams of STDOUT and STDErr (messages and errors are combined.)
+        // Require both `warning` and `message` to be true to display `STDErr`.
+        const out = result.output
+        .filter(
+            evt => evt.type === "stdout" ||
+            ( evt.type === "stderr" && (options.warning === "true" && options.message === "true"))
+        )
+        .map((evt, index) => {
+            const className = `qwebr-output-code-${evt.type}`;
+            const outputResult = qwebrPrefixComment(processOutput(evt.data), options.comment);
+            return `<code id="${className}-editor-${elements.id}-result-${index + 1}" class="${className}">${outputResult}</code>`;
+        })
+        .join("\n");
+
+
+        // Clean the state
+        // We're now able to process pager events.
+        // As a result, we cannot maintain a true 1-to-1 output order
+        // without individually feeding each line
+        const msgs = await mainWebR.flush();
+
+        // Use `map` to process the filtered "pager" events asynchronously
+        const pager = [];
+        const browse = [];
+
+        await Promise.all(
+            msgs.map(
+                async (msg) => {
+
+                    const msgType = msg.type || "unknown";
+
+                    switch(msgType) {
+                        case 'pager':
+                            const pager_data = await qwebrParseTypePager(msg);
+                            pager.push(pager_data);
+                            break;
+                        case 'browse':
+                            const browse_data = await qwebrParseTypeBrowse(msg);
+                            browse.push(browse_data);
+                            break;
+                    }
+                    return;
+                }
+            )
+        );
+
+        // Nullify the output area of content
+        elements.outputCodeDiv.innerHTML = "";
+        elements.outputGraphDiv.innerHTML = "";
+
+        // Design an output object for messages
+        const pre = document.createElement("pre");
+        if (/\S/.test(out)) {
+            // Display results as HTML elements to retain output styling
+            const div = document.createElement("div");
+            div.innerHTML = out;
+
+            // Calculate a scaled font-size value
+            const scaledFontSize = qwebrScaledFontSize(
+                elements.outputCodeDiv, options);
+
+            // Override output code cell size
+            pre.style.fontSize = `${scaledFontSize}px`;
+            pre.appendChild(div);
+        } else {
+            // If nothing is present, hide the element.
+            pre.style.visibility = "hidden";
+        }
+
+        elements.outputCodeDiv.appendChild(pre);
+
+        // Determine if we have graphs to display
+        if (result.images.length > 0) {
+
+            // Create figure element
+            const figureElement = document.createElement("figure");
+            figureElement.className = "qwebr-canvas-image";
+
+            // Place each rendered graphic onto a canvas element
+            result.images.forEach((img) => {
+
+                // Construct canvas for object
+                const canvas = document.createElement("canvas");
+
+                // Add an image download button
+                qwebrImageCanvasDownloadButton(canvas, figureElement);
+
+                // Set canvas size to image
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                // Apply output truncations
+                canvas.style.width = options["out-width"] ? options["out-width"] : `${fig_width}px`;
+                if (options["out-height"]) {
+                    canvas.style.height = options["out-height"];
+                }
+
+                // Apply styling
+                canvas.style.display = "block";
+                canvas.style.margin = "auto";
+
+                // Draw image onto Canvas
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                // Append canvas to figure output area
+                figureElement.appendChild(canvas);
+
+            });
+
+            if (options['fig-cap']) {
+                // Create figcaption element
+                const figcaptionElement = document.createElement('figcaption');
+                figcaptionElement.innerText = options['fig-cap'];
+                // Append figcaption to figure
+                figureElement.appendChild(figcaptionElement);
+            }
+
+            elements.outputGraphDiv.appendChild(figureElement);
+
+        }
+
+        // Display the pager data
+        if (pager.length > 0) {
+            // Use the `pre` element to preserve whitespace.
+            pager.forEach((paged_data, index) => {
+                const pre_pager = document.createElement("pre");
+                pre_pager.innerText = paged_data;
+                pre_pager.classList.add("qwebr-output-code-pager");
+                pre_pager.setAttribute("id", `qwebr-output-code-pager-editor-${elements.id}-result-${index + 1}`);
+                elements.outputCodeDiv.appendChild(pre_pager);
+            });
+        }
+
+        // Display the browse data
+        if (browse.length > 0) {
+            // Use the `pre` element to preserve whitespace.
+            browse.forEach((browse_data, index) => {
+                const iframe_browse = document.createElement('iframe');
+                iframe_browse.classList.add("qwebr-output-code-browse");
+                iframe_browse.setAttribute("id", `qwebr-output-code-browse-editor-${elements.id}-result-${index + 1}`);
+                iframe_browse.style.width = "100%";
+                iframe_browse.style.minHeight = "500px";
+                elements.outputCodeDiv.appendChild(iframe_browse);
+
+                iframe_browse.contentWindow.document.open();
+                iframe_browse.contentWindow.document.write(browse_data);
+                iframe_browse.contentWindow.document.close();
+            });
+        }
+    } finally {
+        // Clean up the remaining code
+        mainWebRCodeShelter.purge();
+    }
+};
+
+// Function to execute the code (accepts code as an argument)
+globalThis.qwebrExecuteCode = async function (
+    codeToRun,
+    id,
+    options = {}) {
+
+    // If options are not passed, we fall back on the bare minimum to handle the computation
+    if (qwebrIsObjectEmpty(options)) {
+        options = {
+            "context": "interactive",
+            "fig-width": 7, "fig-height": 5,
+            "out-width": "700px", "out-height": "",
+            "dpi": 72,
+            "results": "markup",
+            "warning": "true", "message": "true",
+        };
+    }
+
+    // Next, we access the compute areas values
+    const elements = {
+        runButton: document.getElementById(`qwebr-button-run-${id}`),
+        outputCodeDiv: document.getElementById(`qwebr-output-code-area-${id}`),
+        outputGraphDiv: document.getElementById(`qwebr-output-graph-area-${id}`),
+        id: id,
+    }
+
+    // Disallowing execution of other code cells
+    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+        btn.disabled = true;
+    });
+
+    if (options.context == EvalTypes.Interactive) {
+        // Emphasize the active code cell
+        elements.runButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i> <span>Run Code</span>';
+    }
+
+    // Evaluate the code and parse the output into the document
+    await qwebrComputeEngine(codeToRun, elements, options);
+
+    // Switch to allowing execution of code
+    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+        btn.disabled = false;
+    });
+
+    if (options.context == EvalTypes.Interactive) {
+        // Revert to the initial code cell state
+        elements.runButton.innerHTML = '<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>';
+    }
+}
+
+</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#objetivo-de-la-unidad" id="toc-objetivo-de-la-unidad" class="nav-link active" data-scroll-target="#objetivo-de-la-unidad"><span class="header-section-number">1</span> Objetivo de la unidad</a>
+  <ul class="collapse">
+  <li><a href="#el-hilo-conductor-la-brecha-de-ingresos-en-la-geih" id="toc-el-hilo-conductor-la-brecha-de-ingresos-en-la-geih" class="nav-link" data-scroll-target="#el-hilo-conductor-la-brecha-de-ingresos-en-la-geih"><span class="header-section-number">1.1</span> El hilo conductor: la brecha de ingresos en la GEIH</a></li>
+  <li><a href="#lo-que-aprenderemos-en-esta-unidad" id="toc-lo-que-aprenderemos-en-esta-unidad" class="nav-link" data-scroll-target="#lo-que-aprenderemos-en-esta-unidad"><span class="header-section-number">1.2</span> Lo que aprenderemos en esta unidad</a></li>
+  </ul></li>
+  <li><a href="#la-base-de-la-unidad-un-extracto-de-la-geih" id="toc-la-base-de-la-unidad-un-extracto-de-la-geih" class="nav-link" data-scroll-target="#la-base-de-la-unidad-un-extracto-de-la-geih"><span class="header-section-number">2</span> La base de la unidad: un extracto de la GEIH</a></li>
+  <li><a href="#la-gramática-de-gráficos" id="toc-la-gramática-de-gráficos" class="nav-link" data-scroll-target="#la-gramática-de-gráficos"><span class="header-section-number">3</span> La gramática de gráficos</a>
+  <ul class="collapse">
+  <li><a href="#construcción-paso-a-paso" id="toc-construcción-paso-a-paso" class="nav-link" data-scroll-target="#construcción-paso-a-paso"><span class="header-section-number">3.1</span> Construcción paso a paso</a></li>
+  </ul></li>
+  <li><a href="#geometrías-según-la-pregunta" id="toc-geometrías-según-la-pregunta" class="nav-link" data-scroll-target="#geometrías-según-la-pregunta"><span class="header-section-number">4</span> Geometrías según la pregunta</a>
+  <ul class="collapse">
+  <li><a href="#distribución-de-una-variable-histograma-densidad-y-boxplot" id="toc-distribución-de-una-variable-histograma-densidad-y-boxplot" class="nav-link" data-scroll-target="#distribución-de-una-variable-histograma-densidad-y-boxplot"><span class="header-section-number">4.1</span> Distribución de una variable: histograma, densidad y boxplot</a>
+  <ul class="collapse">
+  <li><a href="#mini-ejercicio-la-distribución-de-la-edad" id="toc-mini-ejercicio-la-distribución-de-la-edad" class="nav-link" data-scroll-target="#mini-ejercicio-la-distribución-de-la-edad"><span class="header-section-number">4.1.1</span> Mini-ejercicio: la distribución de la edad</a></li>
+  </ul></li>
+  <li><a href="#comparar-categorías-geom_col-y-su-diferencia-con-geom_bar" id="toc-comparar-categorías-geom_col-y-su-diferencia-con-geom_bar" class="nav-link" data-scroll-target="#comparar-categorías-geom_col-y-su-diferencia-con-geom_bar"><span class="header-section-number">4.2</span> Comparar categorías: geom_col() (y su diferencia con geom_bar())</a>
+  <ul class="collapse">
+  <li><a href="#mini-ejercicio-la-brecha-en-barras" id="toc-mini-ejercicio-la-brecha-en-barras" class="nav-link" data-scroll-target="#mini-ejercicio-la-brecha-en-barras"><span class="header-section-number">4.2.1</span> Mini-ejercicio: la brecha en barras</a></li>
+  </ul></li>
+  <li><a href="#relación-entre-dos-variables-geom_point" id="toc-relación-entre-dos-variables-geom_point" class="nav-link" data-scroll-target="#relación-entre-dos-variables-geom_point"><span class="header-section-number">4.3</span> Relación entre dos variables: geom_point()</a>
+  <ul class="collapse">
+  <li><a href="#mini-ejercicio-edad-e-ingreso" id="toc-mini-ejercicio-edad-e-ingreso" class="nav-link" data-scroll-target="#mini-ejercicio-edad-e-ingreso"><span class="header-section-number">4.3.1</span> Mini-ejercicio: edad e ingreso</a></li>
+  </ul></li>
+  <li><a href="#evolución-en-el-tiempo-geom_line" id="toc-evolución-en-el-tiempo-geom_line" class="nav-link" data-scroll-target="#evolución-en-el-tiempo-geom_line"><span class="header-section-number">4.4</span> Evolución en el tiempo: geom_line()</a>
+  <ul class="collapse">
+  <li><a href="#mini-ejercicio-título-y-contexto" id="toc-mini-ejercicio-título-y-contexto" class="nav-link" data-scroll-target="#mini-ejercicio-título-y-contexto"><span class="header-section-number">4.4.1</span> Mini-ejercicio: título y contexto</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#estéticas-dentro-y-fuera-de-aes" id="toc-estéticas-dentro-y-fuera-de-aes" class="nav-link" data-scroll-target="#estéticas-dentro-y-fuera-de-aes"><span class="header-section-number">5</span> Estéticas: dentro y fuera de aes()</a>
+  <ul class="collapse">
+  <li><a href="#mini-ejercicio-corrija-el-gráfico" id="toc-mini-ejercicio-corrija-el-gráfico" class="nav-link" data-scroll-target="#mini-ejercicio-corrija-el-gráfico"><span class="header-section-number">5.0.1</span> Mini-ejercicio: corrija el gráfico</a></li>
+  </ul></li>
+  <li><a href="#personalización-para-comunicar" id="toc-personalización-para-comunicar" class="nav-link" data-scroll-target="#personalización-para-comunicar"><span class="header-section-number">6</span> Personalización para comunicar</a>
+  <ul class="collapse">
+  <li><a href="#etiquetas-temas-y-ejes-legibles" id="toc-etiquetas-temas-y-ejes-legibles" class="nav-link" data-scroll-target="#etiquetas-temas-y-ejes-legibles"><span class="header-section-number">6.1</span> Etiquetas, temas y ejes legibles</a></li>
+  <li><a href="#facetas-el-mismo-gráfico-por-subgrupos" id="toc-facetas-el-mismo-gráfico-por-subgrupos" class="nav-link" data-scroll-target="#facetas-el-mismo-gráfico-por-subgrupos"><span class="header-section-number">6.2</span> Facetas: el mismo gráfico por subgrupos</a>
+  <ul class="collapse">
+  <li><a href="#mini-ejercicio-integrador" id="toc-mini-ejercicio-integrador" class="nav-link" data-scroll-target="#mini-ejercicio-integrador"><span class="header-section-number">6.2.1</span> Mini-ejercicio integrador</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#exportar-gráficos" id="toc-exportar-gráficos" class="nav-link" data-scroll-target="#exportar-gráficos"><span class="header-section-number">7</span> Exportar gráficos</a></li>
+  <li><a href="#estadísticas-descriptivas" id="toc-estadísticas-descriptivas" class="nav-link" data-scroll-target="#estadísticas-descriptivas"><span class="header-section-number">8</span> Estadísticas descriptivas</a>
+  <ul class="collapse">
+  <li><a href="#resumen-global-summary-y-skim" id="toc-resumen-global-summary-y-skim" class="nav-link" data-scroll-target="#resumen-global-summary-y-skim"><span class="header-section-number">8.1</span> Resumen global: summary() y skim()</a></li>
+  <li><a href="#tablas-de-frecuencia-table-y-tabyl" id="toc-tablas-de-frecuencia-table-y-tabyl" class="nav-link" data-scroll-target="#tablas-de-frecuencia-table-y-tabyl"><span class="header-section-number">8.2</span> Tablas de frecuencia: table() y tabyl()</a></li>
+  <li><a href="#descriptivas-por-grupo-group_by-summarise" id="toc-descriptivas-por-grupo-group_by-summarise" class="nav-link" data-scroll-target="#descriptivas-por-grupo-group_by-summarise"><span class="header-section-number">8.3</span> Descriptivas por grupo: group_by() + summarise()</a>
+  <ul class="collapse">
+  <li><a href="#mini-ejercicio-descriptivas-por-nivel-educativo" id="toc-mini-ejercicio-descriptivas-por-nivel-educativo" class="nav-link" data-scroll-target="#mini-ejercicio-descriptivas-por-nivel-educativo"><span class="header-section-number">8.3.1</span> Mini-ejercicio: descriptivas por nivel educativo</a></li>
+  </ul></li>
+  <li><a href="#tablas-listas-para-informe-modelsummary" id="toc-tablas-listas-para-informe-modelsummary" class="nav-link" data-scroll-target="#tablas-listas-para-informe-modelsummary"><span class="header-section-number">8.4</span> Tablas listas para informe: modelsummary</a></li>
+  </ul></li>
+  <li><a href="#niveles-o-logaritmos" id="toc-niveles-o-logaritmos" class="nav-link" data-scroll-target="#niveles-o-logaritmos"><span class="header-section-number">9</span> Niveles o logaritmos</a></li>
+  <li><a href="#buenas-prácticas-de-comunicación" id="toc-buenas-prácticas-de-comunicación" class="nav-link" data-scroll-target="#buenas-prácticas-de-comunicación"><span class="header-section-number">10</span> Buenas prácticas de comunicación</a></li>
+  <li><a href="#checklist-de-salida" id="toc-checklist-de-salida" class="nav-link" data-scroll-target="#checklist-de-salida"><span class="header-section-number">11</span> Checklist de salida</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">12</span> Preguntas de comprensión</a></li>
+  <li><a href="#recursos-de-aprendizaje-de-la-unidad" id="toc-recursos-de-aprendizaje-de-la-unidad" class="nav-link" data-scroll-target="#recursos-de-aprendizaje-de-la-unidad"><span class="header-section-number">13</span> Recursos de aprendizaje de la unidad</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
+<script type="module" id="qwebr-monaco-editor-init">
+
+  // Configure the Monaco Editor's loader
+  require.config({
+    paths: {
+      'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs'
+    }
+  });
+</script>
+<script type="module">
+// Function to update Monaco Editors when body class changes
+function updateMonacoEditorsOnBodyClassChange() {
+    // Select the body element
+    const body = document.querySelector('body');
+
+    // Options for the observer (which mutations to observe)
+    const observerOptions = {
+        attributes: true,  // Observe changes to attributes
+        attributeFilter: ['class'] // Only observe changes to the 'class' attribute
+    };
+
+    // Callback function to execute when mutations are observed
+    const bodyClassChangeCallback = function(mutationsList, observer) {
+        for(let mutation of mutationsList) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                // Class attribute has changed
+                // Update all Monaco Editors on the page
+                updateMonacoEditorTheme();
+            }
+        }
+    };
+
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver(bodyClassChangeCallback);
+
+    // Start observing the target node for configured mutations
+    observer.observe(body, observerOptions);
+}
+
+// Function to update all instances of Monaco Editors on the page
+function updateMonacoEditorTheme() {
+    // Determine what VS Theme to use
+    const vsThemeToUse = document.body.classList.contains("quarto-dark") ? 'vs-dark' : 'vs' ;
+
+    // Iterate through all initialized Monaco Editors
+    qwebrEditorInstances.forEach( function(editorInstance) { 
+        editorInstance.updateOptions({ theme: vsThemeToUse }); 
+    });
+}
+
+// Call the function to start observing changes to body class
+updateMonacoEditorsOnBodyClassChange();
+</script>
+<script type="module">
+// Global array to store Monaco Editor instances
+globalThis.qwebrEditorInstances = [];
+
+function isValidCodeLineNumbers(stringCodeLineNumbers) {
+  // Regular expression to match valid input strings
+  const regex = /^(\d+(-\d+)?)(,\d+(-\d+)?)*$/;
+  return regex.test(stringCodeLineNumbers);
+}
+
+// Function that builds and registers a Monaco Editor instance    
+globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
+
+  const initialCode = cellData.code;
+  const qwebrCounter = cellData.id;
+  const qwebrOptions = cellData.options;
+
+  // Retrieve the previously created document elements
+  let runButton = document.getElementById(`qwebr-button-run-${qwebrCounter}`);
+  let resetButton = document.getElementById(`qwebr-button-reset-${qwebrCounter}`);
+  let copyButton = document.getElementById(`qwebr-button-copy-${qwebrCounter}`);
+  let editorDiv = document.getElementById(`qwebr-editor-${qwebrCounter}`);
+
+  // Load the Monaco Editor and create an instance
+  let editor;
+  require(['vs/editor/editor.main'], function () {
+    editor = monaco.editor.create(editorDiv, {
+      value: initialCode,
+      language: 'r',
+      theme: 'vs-light',
+      automaticLayout: true,           // Works wonderfully with RevealJS
+      scrollBeyondLastLine: false,
+      minimap: {
+        enabled: false
+      },
+      fontSize: qwebrScaledFontSize(editorDiv, qwebrOptions),         
+      renderLineHighlight: "none",      // Disable current line highlighting
+      hideCursorInOverviewRuler: true,  // Remove cursor indictor in right hand side scroll bar
+      readOnly: qwebrOptions['read-only'] ?? false,
+      quickSuggestions: qwebrOptions['editor-quick-suggestions'] ?? false,
+      wordWrap: (qwebrOptions['editor-word-wrap'] == 'true' ? "on" : "off")
+    });
+
+    // Store the official counter ID to be used in keyboard shortcuts
+    editor.__qwebrCounter = qwebrCounter;
+
+    // Store the official div container ID
+    editor.__qwebrEditorId = `qwebr-editor-${qwebrCounter}`;
+
+    // Store the initial code value and options
+    editor.__qwebrinitialCode = initialCode;
+    editor.__qwebrOptions = qwebrOptions;
+
+    // Set at the model level the preferred end of line (EOL) character to LF.
+    // This prevent `\r\n` from being given to the webR engine if the user is on Windows.
+    // See details in: https://github.com/coatless/quarto-webr/issues/94
+    // Associated error text: 
+    // Error: <text>:1:7 unexpected input
+
+    // Retrieve the underlying model
+    const model = editor.getModel();
+    // Set EOL for the model
+    model.setEOL(monaco.editor.EndOfLineSequence.LF);
+    
+    // Dynamically modify the height of the editor window if new lines are added.
+    let ignoreEvent = false;
+    const updateHeight = () => {
+      // Increment editor height by 2 to prevent vertical scroll bar from appearing
+      const contentHeight = editor.getContentHeight() + 2;
+
+      // Retrieve editor-max-height option
+      const maxEditorHeight = qwebrOptions['editor-max-height'];
+
+      // If editor-max-height is missing, allow infinite growth. Otherwise, threshold.
+      const editorHeight = !maxEditorHeight ?  contentHeight : Math.min(contentHeight, maxEditorHeight);
+
+      // We're avoiding a width change
+      //editorDiv.style.width = `${width}px`;
+      editorDiv.style.height = `${editorHeight}px`;
+      try {
+        ignoreEvent = true;
+
+        // The key to resizing is this call
+        editor.layout();
+      } finally {
+        ignoreEvent = false;
+      }
+    };
+
+    // Function to generate decorations to highlight lines
+    // in the editor based on input string.
+    function decoratorHighlightLines(codeLineNumbers) {
+      // Store the lines to be lighlight
+      let linesToHighlight = [];
+      
+      // Parse the codeLineNumbers string to get the line numbers to highlight
+      // First, split the string by commas
+      codeLineNumbers.split(',').forEach(part => {
+        // Check if we have a range of lines
+        if (part.includes('-')) {
+            // Handle range of lines (e.g., "6-8")
+            const [start, end] = part.split('-').map(Number);
+            for (let i = start; i <= end; i++) {
+                linesToHighlight.push(i);
+            }
+        } else {
+            // Handle single line (e.g., "7")
+            linesToHighlight.push(Number(part));
+        }
+      });
+  
+      // Create monaco decorations for the lines to highlight
+      const decorations = linesToHighlight.map(lineNumber => ({
+          range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+          options: {
+              isWholeLine: true,
+              className: 'qwebr-editor-highlight-line'
+          }
+      }));
+  
+      // Return decorations to be applied to the editor
+      return decorations;
+    }
+
+    // Ensure that the editor-code-line-numbers option is set and valid
+    // then apply styling
+    if (qwebrOptions['editor-code-line-numbers']) {
+      // Remove all whitespace from the string
+      const codeLineNumbers = qwebrOptions['editor-code-line-numbers'].replace(/\s/g,'');
+      // Check if the string is valid for line numbers, e.g., "1,3-5,7"
+      if (isValidCodeLineNumbers(codeLineNumbers)) {
+        // Apply the decorations to the editor
+        editor.createDecorationsCollection(decoratorHighlightLines(codeLineNumbers));
+      } else {
+        // Warn the user that the input is invalid
+        console.warn(`Invalid "editor-code-line-numbers" value in code cell ${qwebrOptions['label']}: ${codeLineNumbers}`);
+      }
+    }
+
+    // Helper function to check if selected text is empty
+    function isEmptyCodeText(selectedCodeText) {
+      return (selectedCodeText === null || selectedCodeText === undefined || selectedCodeText === "");
+    }
+
+    // Registry of keyboard shortcuts that should be re-added to each editor window
+    // when focus changes.
+    const addWebRKeyboardShortCutCommands = () => {
+      // Add a keydown event listener for Shift+Enter to run all code in cell
+      editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
+
+        // Retrieve all text inside the editor
+        qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
+      });
+
+      // Add a keydown event listener for CMD/Ctrl+Enter to run selected code
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+
+        // Get the selected text from the editor
+        const selectedText = editor.getModel().getValueInRange(editor.getSelection());
+        // Check if no code is selected
+        if (isEmptyCodeText(selectedText)) {
+          // Obtain the current cursor position
+          let currentPosition = editor.getPosition();
+          // Retrieve the current line content
+          let currentLine = editor.getModel().getLineContent(currentPosition.lineNumber);
+
+          // Propose a new position to move the cursor to
+          let newPosition = new monaco.Position(currentPosition.lineNumber + 1, 1);
+
+          // Check if the new position is beyond the last line of the editor
+          if (newPosition.lineNumber > editor.getModel().getLineCount()) {
+            // Add a new line at the end of the editor
+            editor.executeEdits("addNewLine", [{
+            range: new monaco.Range(newPosition.lineNumber, 1, newPosition.lineNumber, 1),
+            text: "\n", 
+            forceMoveMarkers: true,
+            }]);
+          }
+          
+          // Run the entire line of code.
+          qwebrExecuteCode(currentLine, editor.__qwebrCounter, editor.__qwebrOptions);
+
+          // Move cursor to new position
+          editor.setPosition(newPosition);
+        } else {
+          // Code to run when Ctrl+Enter is pressed with selected code
+          qwebrExecuteCode(selectedText, editor.__qwebrCounter, editor.__qwebrOptions);
+        }
+      });
+    }
+
+    // Register an on focus event handler for when a code cell is selected to update
+    // what keyboard shortcut commands should work.
+    // This is a workaround to fix a regression that happened with multiple
+    // editor windows since Monaco 0.32.0 
+    // https://github.com/microsoft/monaco-editor/issues/2947
+    editor.onDidFocusEditorText(addWebRKeyboardShortCutCommands);
+
+    // Register an on change event for when new code is added to the editor window
+    editor.onDidContentSizeChange(updateHeight);
+
+    // Manually re-update height to account for the content we inserted into the call
+    updateHeight();
+
+    // Store the editor instance in the global dictionary
+    qwebrEditorInstances[editor.__qwebrCounter] = editor;
+
+  });
+
+  // Add a click event listener to the run button
+  runButton.onclick = function () {
+    qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
+  };
+
+  // Add a click event listener to the reset button
+  copyButton.onclick = function () {
+    // Retrieve current code data
+    const data = editor.getValue();
+    
+    // Write code data onto the clipboard.
+    navigator.clipboard.writeText(data || "");
+  };
+  
+  // Add a click event listener to the copy button
+  resetButton.onclick = function () {
+    editor.setValue(editor.__qwebrinitialCode);
+  };
+  
+}
+</script>
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 3 - Visualización y estadísticas descriptivas</h1>
+<p class="subtitle lead">Curso Nivelatorio de R · CIENFI · Universidad Icesi</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="../../index.html" style="color:#555; text-decoration:none; margin-right:16px;">Inicio del curso</a> <a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;">@emartigo</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;">GitHub: eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;">eduard-martinez.github.io</a> <span id="webr-status-anchor"></span></p>
+</div>
+<div id="qwebr-insertion-location-1"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<!--=================-->
+<section id="objetivo-de-la-unidad" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Objetivo de la unidad</h1>
+<p>En la Unidad 1 aprendimos a trabajar con objetos y scripts; en la Unidad 2, a importar y limpiar una base de datos. Esta unidad cierra ese ciclo: <strong>pasar de la base limpia al hallazgo comunicable</strong>. El objetivo NO es memorizar geometrías de ggplot2: es aprender a elegir el gráfico (o la tabla) que <strong>responde una pregunta concreta</strong>, y a presentarlo de forma que otra persona lo entienda sin que usted esté al lado explicando.</p>
+<div class="callout-key">
+<p><strong>¿Por qué gráficos y descriptivas en una Maestría en Economía?</strong></p>
+<p>Porque en economía aplicada las estadísticas descriptivas y los gráficos no son un adorno: son la <strong>sección 2 de todo paper</strong> — la sección de “Datos y hechos estilizados”. Antes de estimar cualquier modelo, un buen trabajo empírico describe sus variables, documenta los patrones básicos (¿quién gana más? ¿cómo se distribuye el ingreso?) y convence al lector de que hay algo que vale la pena explicar. Si las descriptivas no se entienden, nadie va a creer las regresiones que vienen después.</p>
+</div>
+<section id="el-hilo-conductor-la-brecha-de-ingresos-en-la-geih" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="el-hilo-conductor-la-brecha-de-ingresos-en-la-geih"><span class="header-section-number">1.1</span> El hilo conductor: la brecha de ingresos en la GEIH</h2>
+<p>Toda la unidad gira alrededor de una pregunta empírica real, con datos reales: <strong>¿cuánto ganan los ocupados en Colombia, y cómo difiere ese ingreso por sexo y por educación?</strong> De esa pregunta grande se desprenden las que iremos respondiendo sección por sección: ¿cómo se <strong>distribuye</strong> el ingreso laboral (adelanto: de forma nada simétrica)? ¿Ganan distinto hombres y mujeres, y cambia la respuesta entre <strong>promedios</strong> y <strong>medianas</strong>? ¿Más educación se asocia con más ingreso? ¿La brecha por sexo aparece también <strong>dentro</strong> de cada nivel educativo?</p>
+</section>
+<section id="lo-que-aprenderemos-en-esta-unidad" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="lo-que-aprenderemos-en-esta-unidad"><span class="header-section-number">1.2</span> Lo que aprenderemos en esta unidad</h2>
+<ul>
+<li><strong>Construir gráficos por capas con ggplot2:</strong> la <span class="term">gramática de gráficos</span> — datos + mapeos (<code>aes</code>) + geometrías + personalización — y el operador <code>+</code> para sumar capas.</li>
+<li><strong>Elegir el gráfico según la pregunta:</strong> distribuciones (histograma, densidad, boxplot), comparaciones entre categorías (barras), relaciones (dispersión) y evolución en el tiempo (líneas).</li>
+<li><strong>Resumir la base con estadísticas descriptivas:</strong> <code>summary()</code>/<code>skim()</code>, tablas de frecuencia, descriptivas por grupo y tablas listas para informe con <code>modelsummary</code>.</li>
+<li><strong>Comunicar y exportar:</strong> títulos, unidades, fuente de datos, temas, facetas y <code>ggsave()</code> — con la regla del curso: todo gráfico de un informe nace de un script.</li>
+</ul>
+<div class="callout-connect">
+<p><strong>Conexión con la Unidad 2</strong></p>
+<p>En la unidad anterior usamos <code>group_by()</code> + <code>summarise()</code> para construir tablas resumen; esta unidad convierte esas tablas en gráficos que se leen en segundos. La tabla con el ingreso mediano por sexo se vuelve un <code>geom_col()</code> que se lee en 3 segundos; la tabla de 10 filas por nivel educativo y sexo se vuelve un <code>geom_col(position = "dodge")</code> que muestra la brecha de un vistazo. El flujo siempre es el mismo: <strong>primero preparar los datos con dplyr, luego graficar con ggplot2</strong>.</p>
+</div>
+<!--=================-->
+</section>
+</section>
+<section id="la-base-de-la-unidad-un-extracto-de-la-geih" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> La base de la unidad: un extracto de la GEIH</h1>
+<p>La <span class="term">GEIH</span> (Gran Encuesta Integrada de Hogares) es la encuesta del DANE con la que se miden la ocupación, el desempleo y los ingresos laborales en Colombia. En esta unidad (y en la Unidad 4) trabajaremos con <code>geih_nivelacion.csv</code>, un <strong>extracto real</strong> de la GEIH preparado para el curso: <strong>21.821 personas ocupadas</strong> de 18 a 65 años, con ingreso laboral positivo, residentes en cabeceras. Una fila por persona; la base ya está limpia. La descripción completa está en el <a href="../../datos/diccionario_datos.html">diccionario de datos</a> del curso.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>id</code></td>
+<td>Identificador de la persona (1…21.821)</td>
+</tr>
+<tr class="even">
+<td><code>sexo</code></td>
+<td><code>hombre</code> / <code>mujer</code></td>
+</tr>
+<tr class="odd">
+<td><code>edad</code></td>
+<td>Edad en años (18–65)</td>
+</tr>
+<tr class="even">
+<td><code>anios_educacion</code></td>
+<td>Años de educación aprobados (0–26)</td>
+</tr>
+<tr class="odd">
+<td><code>nivel_educativo</code></td>
+<td><code>ninguno</code>, <code>primaria</code>, <code>secundaria</code>, <code>media</code>, <code>superior</code></td>
+</tr>
+<tr class="even">
+<td><code>departamento</code></td>
+<td>Departamento de residencia (24 cabeceras GEIH)</td>
+</tr>
+<tr class="odd">
+<td><code>ingreso_laboral</code></td>
+<td>Ingreso laboral mensual (COP)</td>
+</tr>
+<tr class="even">
+<td><code>horas_semana</code></td>
+<td>Horas normalmente trabajadas por semana</td>
+</tr>
+</tbody>
+</table>
+<p>En RStudio, dentro del proyecto del curso, la importamos y le damos el primer vistazo (Unidad 2):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">## llamar/instalar librerias</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(pacman)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">p_load</span>(tidyverse, rio, janitor, skimr)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## importar el extracto de la GEIH</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>geih <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"datos/originales/geih_nivelacion.csv"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(geih)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(geih)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Qué buscar en el output:</strong> <code>glimpse()</code> debe mostrar 21.821 filas, 8 columnas y tipos correctos (el ingreso numérico, no texto). <code>skim()</code> agrega mínimos, máximos, percentiles y un mini-histograma por variable. Fíjese en el ingreso laboral: la media queda muy por encima del percentil 50. Esa distancia es la primera pista de toda la unidad.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>El ingreso laboral tiene outliers reales</strong></p>
+<p>En toda encuesta de hogares, unas pocas personas reportan ingresos decenas de veces mayores que la mediana. No son errores de digitación: son <span class="term">outliers</span> reales. La consecuencia práctica es que <strong>los gráficos y promedios en niveles engañan</strong>: el histograma queda “aplastado” contra la izquierda y el promedio se infla. La solución habitual en economía es trabajar con <code>log(ingreso_laboral)</code>; lo veremos de frente en la sección <em>Niveles o logaritmos</em>.</p>
+</div>
+</div>
+<div class="callout-workflow">
+<p><strong>Cómo leer esta unidad: dos tipos de código</strong></p>
+<p>Los bloques <strong>interactivos</strong> (con botón <em>Run code</em>) corren en su navegador con webR; como el navegador <strong>no puede leer archivos de su disco</strong>, usan <code>geih_mini</code>, una mini base de 16 personas que imita la estructura de la GEIH — incluido un outlier de ingreso. <code>geih_mini</code> <strong>ya viene cargada en el documento</strong>: se crea automáticamente al abrir la página (igual que la mini serie <code>desempleo</code> que usaremos más adelante), así que ninguna celda visible la construye — usted solo la usa. Los bloques <strong>estáticos</strong> (sin botón) se corren <strong>en RStudio</strong>, sobre la base completa: son los que van en sus scripts. Lo único que debe ejecutar una vez, antes del primer gráfico, es la celda de librerías de esta sección: webR comparte el environment en toda la página.</p>
+</div>
+<p>Cargue las librerías de la unidad y conozca la mini base — no hay que construirla: ya está en memoria, solo la imprimimos:</p>
+<div id="qwebr-insertion-location-2"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Nota importante:</strong> la persona 16 gana 25 millones — nuestro outlier de juguete. Reproduce, a escala, el mismo fenómeno que encontrará en la base completa. Las conclusiones económicas serias, eso sí, se verifican siempre con la base real en la práctica de la unidad.</p>
+<!--=================-->
+</section>
+<section id="la-gramática-de-gráficos" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> La gramática de gráficos</h1>
+<p>En Excel seleccionamos datos y elegimos “gráfico de barras” de un menú: rápido, pero rígido. ggplot2 sigue otra lógica, la <span class="term">gramática de gráficos</span> (<em>grammar of graphics</em>, de ahí las dos “g”): todo gráfico se arma con la misma fórmula — <strong>datos + mapeos estéticos (<code>aes</code>) + geometrías + personalización</strong> — y las piezas se conectan <strong>por capas</strong> con el operador <code>+</code>.</p>
+<div class="callout-key">
+<p><strong>La construcción es acumulativa (por capas)</strong></p>
+<p>Piense en amoblar un cuarto: (1) <strong>Datos</strong> → <code>ggplot(data = mi_tabla)</code> → entra al cuarto vacío: R reserva el lienzo para esa tabla, pero no pinta nada. (2) <strong>Mapeos</strong> → <code>aes(x = ..., y = ...)</code> → decide qué va en qué pared: qué variable define cada eje (y el color, el tamaño…). Aparecen los ejes, el interior sigue vacío. (3) <strong>Geometría</strong> → <code>geom_col()</code>, <code>geom_point()</code>, <code>geom_line()</code>… → por fin llegan los muebles: las barras, los puntos, las líneas. Cada capa adicional (títulos, temas, facetas) se suma con <code>+</code>.</p>
+</div>
+<section id="construcción-paso-a-paso" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="construcción-paso-a-paso"><span class="header-section-number">3.1</span> Construcción paso a paso</h2>
+<p>Construyamos el primer gráfico de la brecha: el ingreso mediano por sexo. <strong>Paso 0</strong> es preparar la tabla con dplyr (lo que ya sabemos de la Unidad 2):</p>
+<div id="qwebr-insertion-location-3"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Paso 1 — Solo los datos: el lienzo en blanco.</strong> R muestra un rectángulo gris vacío: ya sabe <em>qué tabla</em> vamos a graficar, pero no qué variables ni cómo representarlas.</p>
+<div id="qwebr-insertion-location-4"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Paso 2 — Agregar el mapeo: aparecen los ejes.</strong> R ya sabe <em>qué</em> mostrar, pero no <em>cómo</em> dibujarlo. (<code>mapping = aes(...)</code> es la forma completa; en la práctica se abrevia <code>aes(...)</code>.)</p>
+<div id="qwebr-insertion-location-5"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Paso 3 — Agregar la geometría: aparecen las barras.</strong></p>
+<div id="qwebr-insertion-location-6"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>Lea el código como una frase: la primera línea dice <em>qué tabla</em> grafico; <code>aes()</code>, <em>qué variable va en cada eje</em>; <code>geom_col()</code>, <em>cómo se dibujan los datos</em>. El operador <code>+</code> se lee “y además agrega esta capa” — en las siguientes secciones seguiremos sumando capas: colores, títulos, temas y facetas.</p>
+<div class="callout-practice">
+<p><strong>Ejercicio mental: leer código antes de ejecutarlo</strong></p>
+<p>Prediga qué muestra el paso 3 si reemplaza <code>geom_col()</code> por <code>geom_point()</code>. Misma tabla, mismos ejes… solo cambia la pieza de <span class="term">geometría</span>. <strong>Respuesta:</strong> el mismo gráfico, pero con dos puntos flotantes en lugar de barras. La lógica de construcción es siempre la misma; lo único que cambia es cómo se dibujan los datos.</p>
+</div>
+<!--=================-->
+</section>
+</section>
+<section id="geometrías-según-la-pregunta" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Geometrías según la pregunta</h1>
+<p>La geometría no se elige por gusto estético: se elige según la <strong>pregunta</strong> que el gráfico debe responder. Esta tabla es el mapa de la sección (y una buena candidata para imprimir):</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Pregunta</th>
+<th>Geometría en ggplot2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>¿Cómo se <strong>distribuye</strong> una variable numérica?</td>
+<td><code>geom_histogram()</code>, <code>geom_density()</code>, <code>geom_boxplot()</code></td>
+</tr>
+<tr class="even">
+<td>¿Cómo <strong>comparo un valor</strong> entre categorías?</td>
+<td><code>geom_col()</code></td>
+</tr>
+<tr class="odd">
+<td>¿Qué <strong>relación</strong> hay entre dos variables numéricas?</td>
+<td><code>geom_point()</code> (+ <code>geom_smooth()</code>)</td>
+</tr>
+<tr class="even">
+<td>¿Cómo <strong>evoluciona</strong> una variable en el tiempo?</td>
+<td><code>geom_line()</code></td>
+</tr>
+</tbody>
+</table>
+<section id="distribución-de-una-variable-histograma-densidad-y-boxplot" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="distribución-de-una-variable-histograma-densidad-y-boxplot"><span class="header-section-number">4.1</span> Distribución de una variable: histograma, densidad y boxplot</h2>
+<p><strong>Pregunta típica:</strong> “¿el ingreso se concentra en valores bajos o altos? ¿hay valores extremos?” El <span class="term">histograma</span> parte el rango de la variable en intervalos (<em>bins</em>) y cuenta cuántas observaciones caen en cada uno; la densidad es su versión suavizada — muestra la forma sin depender del número de bins:</p>
+<div id="qwebr-insertion-location-7"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Cómo interpretar:</strong> casi todas las personas quedan apiladas a la izquierda y hay una barra solitaria cerca de 25 millones: el outlier. El histograma “en niveles” queda aplastado — la advertencia de la sección anterior, ahora en imagen. Repita el ejercicio en RStudio con la base completa (<code>ggplot(geih, aes(x = ingreso_laboral)) + geom_histogram(bins = 60)</code>): se ve igual de mal, y esa es la lección. La retomaremos en <em>Niveles o logaritmos</em>.</p>
+<p>El <span class="term">boxplot</span> (diagrama de caja) resume la distribución en cinco números: la caja va del cuartil 1 al cuartil 3, la línea central es la <strong>mediana</strong>, los “bigotes” cubren el rango típico y los puntos sueltos marcan candidatos a atípicos. Su gran ventaja: permite <strong>comparar</strong> distribuciones entre grupos.</p>
+<div id="qwebr-insertion-location-8"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Cómo interpretar:</strong> el punto aislado en el grupo de los hombres es el outlier de 25 millones. Quitándolo, las cajas son comparables — y la mediana de las mujeres queda incluso un poco más arriba en esta mini base. Anote esa observación: será central en la sección de estadísticas descriptivas.</p>
+<div class="callout-key">
+<p><strong>¿Histograma, densidad o boxplot?</strong></p>
+<p><strong>Histograma:</strong> conteos por intervalo, la primera radiografía de UNA variable. <strong>Densidad:</strong> la forma suave, ideal con muchas observaciones o para superponer grupos. <strong>Boxplot:</strong> mediana, cuartiles y atípicos de un vistazo — imbatible para comparar una distribución <strong>entre grupos</strong> (por sexo, por nivel educativo, por departamento).</p>
+</div>
+<section id="mini-ejercicio-la-distribución-de-la-edad" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="mini-ejercicio-la-distribución-de-la-edad"><span class="header-section-number">4.1.1</span> Mini-ejercicio: la distribución de la edad</h3>
+<div id="qwebr-insertion-location-9"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Resultado esperado:</strong> la edad se reparte de forma mucho más pareja entre los 18 y los 65 años. No todas las variables tienen colas largas: el ingreso sí, la edad no — la decisión de escala se toma variable por variable.</p>
+</section>
+</section>
+<section id="comparar-categorías-geom_col-y-su-diferencia-con-geom_bar" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="comparar-categorías-geom_col-y-su-diferencia-con-geom_bar"><span class="header-section-number">4.2</span> Comparar categorías: geom_col() (y su diferencia con geom_bar())</h2>
+<p><strong>Pregunta típica:</strong> “¿qué grupo gana más?” — y su prima: “¿cuántas personas hay en cada grupo?” Hay dos funciones de barras que confunden a todo el mundo: <code>geom_bar()</code> recibe solo <code>x</code> y <strong>cuenta filas</strong>; <code>geom_col()</code> recibe <code>x</code> e <code>y</code> y <strong>dibuja un valor que usted ya calculó</strong>. Compárelas:</p>
+<div id="qwebr-insertion-location-10"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div id="qwebr-insertion-location-11"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>¿Qué pasó?</strong> <code>reorder(nivel_educativo, mediana)</code> ordena las categorías de menor a mayor mediana — el orden alfabético que trae por defecto casi nunca es el orden útil. Y note el resultado: primaria &lt; secundaria &lt; media &lt; superior. <strong>La educación paga</strong>: nuestro primer hecho estilizado, en un gráfico.</p>
+<div class="callout-key">
+<p><strong>geom_bar() vs.&nbsp;geom_col()</strong></p>
+<p>Regla práctica: si el paso anterior fue un <code>group_by() + summarise()</code>, lo que sigue es <code>geom_col()</code>. Si quiere contar filas directamente desde la base, <code>geom_bar()</code>.</p>
+</div>
+<p>En la base real hay categorías de sobra (24 departamentos); la receta estándar es ordenar, filtrar y voltear — con nombres largos, poner la categoría en el eje Y evita etiquetas ilegibles en diagonal:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## top 10 departamentos por ingreso mediano: barras horizontales y ordenadas</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>geih <span class="sc">%&gt;%</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(departamento) <span class="sc">%&gt;%</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mediana =</span> <span class="fu">median</span>(ingreso_laboral), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(mediana, <span class="at">n =</span> <span class="dv">10</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mediana, <span class="at">y =</span> <span class="fu">reorder</span>(departamento, mediana))) <span class="sc">+</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"steelblue"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="mini-ejercicio-la-brecha-en-barras" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="mini-ejercicio-la-brecha-en-barras"><span class="header-section-number">4.2.1</span> Mini-ejercicio: la brecha en barras</h3>
+<p>Calcule el ingreso <strong>promedio</strong> por sexo en <code>geih_mini</code> y grafíquelo con barras ordenadas con <code>reorder()</code>.</p>
+<div id="qwebr-insertion-location-12"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Pregunta de análisis:</strong> según su gráfico, ¿quién gana más y por cuánto? Guarde la respuesta: en la sección de estadísticas descriptivas verá que la mediana cuenta otra historia — y entenderá por qué.</p>
+</section>
+</section>
+<section id="relación-entre-dos-variables-geom_point" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="relación-entre-dos-variables-geom_point"><span class="header-section-number">4.3</span> Relación entre dos variables: geom_point()</h2>
+<p><strong>Pregunta típica:</strong> “¿más años de educación se asocian con más ingreso?” Cada punto del gráfico de dispersión es una observación (aquí, una persona). Y con una capa más, <code>geom_smooth(method = "lm")</code>, superponemos la recta de mínimos cuadrados que mejor resume la nube (<code>se = FALSE</code> oculta la banda de confianza):</p>
+<div id="qwebr-insertion-location-13"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Cómo interpretar:</strong> la nube sube hacia la derecha — a más educación, más ingreso —, pero el outlier estira el eje Y y “jala” la recta hacia arriba: los valores extremos no solo dañan gráficos, también sesgan rectas.</p>
+<div class="callout-connect">
+<p><strong>Anticipo de la Unidad 4</strong></p>
+<p>Esa recta ES una regresión: la versión visual de <code>lm(ingreso_laboral ~ anios_educacion)</code>. En la Unidad 4 la estimaremos formalmente — con el ingreso en logaritmos, en la ecuación de Mincer — e interpretaremos su pendiente y su significancia. Si entiende <code>geom_smooth()</code>, ya tiene la intuición de lo que viene.</p>
+</div>
+<section id="mini-ejercicio-edad-e-ingreso" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="mini-ejercicio-edad-e-ingreso"><span class="header-section-number">4.3.1</span> Mini-ejercicio: edad e ingreso</h3>
+<div id="qwebr-insertion-location-14"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</section>
+</section>
+<section id="evolución-en-el-tiempo-geom_line" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="evolución-en-el-tiempo-geom_line"><span class="header-section-number">4.4</span> Evolución en el tiempo: geom_line()</h2>
+<p><strong>Pregunta típica:</strong> “¿cómo ha cambiado el desempleo en la última década?” Nuestro extracto de la GEIH es un corte transversal (un solo mes), así que usamos <code>desempleo</code>, una mini serie que ya viene cargada en el documento: la tasa de desempleo anual de Colombia (cifras aproximadas, con fines ilustrativos):</p>
+<div id="qwebr-insertion-location-15"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Cómo interpretar:</strong> <code>geom_line()</code> conecta los puntos en el orden del eje X y <code>geom_point()</code> marca cada año; el pico de 2020 (pandemia) se lee de inmediato — eso es lo que una línea hace mejor que cualquier tabla. <strong>Nota importante:</strong> con un eje X numérico la línea se conecta sola; si X fuera texto (<code>"T1"</code>, <code>"T2"</code>, …) habría que agregar <code>group = 1</code> dentro de <code>aes()</code>.</p>
+<section id="mini-ejercicio-título-y-contexto" class="level3" data-number="4.4.1">
+<h3 data-number="4.4.1" class="anchored" data-anchor-id="mini-ejercicio-título-y-contexto"><span class="header-section-number">4.4.1</span> Mini-ejercicio: título y contexto</h3>
+<div id="qwebr-insertion-location-16"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-practice">
+<p><strong>Decisión de geometría.</strong> ¿Qué geometría usaría para cada pregunta?</p>
+<ol type="1">
+<li>¿Cuántos ocupados hay en cada nivel educativo? 2. ¿El ingreso se concentra en valores bajos o altos? 3. ¿Cómo comparo la distribución del ingreso entre hombres y mujeres? 4. ¿Más horas de trabajo se asocian con más ingreso? 5. ¿Cómo ha evolucionado el desempleo desde 2015?</li>
+</ol>
+<p><strong>Respuestas:</strong> 1. <code>geom_bar()</code>. 2. <code>geom_histogram()</code> o <code>geom_density()</code>. 3. <code>geom_boxplot()</code> con <code>x = sexo</code>. 4. <code>geom_point()</code> + <code>geom_smooth()</code>. 5. <code>geom_line()</code>.</p>
+</div>
+<!--=================-->
+</section>
+</section>
+</section>
+<section id="estéticas-dentro-y-fuera-de-aes" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Estéticas: dentro y fuera de aes()</h1>
+<p>Las <span class="term">estéticas</span> son los atributos visuales con los que un gráfico codifica información: <code>color</code> (puntos, líneas y contornos), <code>fill</code> (relleno de barras y cajas), <code>size</code> (tamaño), <code>alpha</code> (transparencia) y <code>shape</code> (forma del punto). La confusión más común de todo ggplot2 es <strong>cuándo va algo dentro de <span class="term">aes</span> y cuándo fuera</strong>.</p>
+<div class="callout-key">
+<p><strong>La regla fundamental</strong></p>
+<p><strong>Dentro de <code>aes()</code></strong> cuando el atributo <strong>depende de una variable</strong> de la base (“que el color cambie según el sexo de cada persona”): R asigna los colores y crea la leyenda. <strong>Fuera de <code>aes()</code></strong> cuando es <strong>un valor fijo</strong> para todo el gráfico (“que todos los puntos sean azules”).</p>
+</div>
+<div id="qwebr-insertion-location-17"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>¿Qué pasó?</strong> En el caso 2, R asignó un color a cada categoría de <code>sexo</code> y creó la leyenda automáticamente: el gráfico ahora responde dos preguntas a la vez (la relación educación–ingreso y si el patrón difiere por sexo). En la base completa hay otro uso clave: con 21.821 puntos el gráfico de dispersión es una mancha, y la transparencia deja ver dónde se concentra la masa:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## alpha revela la densidad de la nube (RStudio, base completa)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(geih, <span class="fu">aes</span>(<span class="at">x =</span> anios_educacion, <span class="at">y =</span> <span class="fu">log</span>(ingreso_laboral))) <span class="sc">+</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.1</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>El error clásico: <code>aes(color = "blue")</code></strong></p>
+<div id="qwebr-insertion-location-18"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>Los puntos NO salen azules: salen rojizos, con una leyenda absurda que dice <code>"blue"</code>. Al escribirlo <strong>dentro</strong> de <code>aes()</code>, R interpreta <code>"blue"</code> como una variable constante ficticia y le asigna el primer color de su paleta. <strong>Regla práctica:</strong> un valor literal — texto entre comillas o un número (<code>"blue"</code>, <code>3</code>, <code>0.5</code>) — casi siempre va <strong>fuera</strong> de <code>aes()</code>.</p>
+</div>
+</div>
+<section id="mini-ejercicio-corrija-el-gráfico" class="level3" data-number="5.0.1">
+<h3 data-number="5.0.1" class="anchored" data-anchor-id="mini-ejercicio-corrija-el-gráfico"><span class="header-section-number">5.0.1</span> Mini-ejercicio: corrija el gráfico</h3>
+<div id="qwebr-insertion-location-19"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<!--=================-->
+</section>
+</section>
+<section id="personalización-para-comunicar" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Personalización para comunicar</h1>
+<p>Un gráfico sin título, sin unidades y sin fuente es como un informe sin conclusiones: técnicamente “completo”, pero mudo. Esta sección convierte gráficos correctos en gráficos <strong>presentables</strong>.</p>
+<section id="etiquetas-temas-y-ejes-legibles" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="etiquetas-temas-y-ejes-legibles"><span class="header-section-number">6.1</span> Etiquetas, temas y ejes legibles</h2>
+<p><code>labs()</code> controla todos los textos del gráfico; los temas (<code>theme_*()</code>) controlan fondo, grillas y tipografía; y <code>scale_y_continuous()</code> reescribe las etiquetas del eje — porque nadie lee “2500000” de corrido:</p>
+<div id="qwebr-insertion-location-20"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Buenas prácticas de cada elemento:</strong> el <strong>título</strong> dice la idea principal (“La educación paga”, no “Gráfico de barras del ingreso”); el <strong>subtítulo</strong> da contexto (población, período, filtros); los <strong>ejes</strong> siempre llevan <strong>unidades</strong>; el <strong>caption</strong> lleva la <strong>fuente de datos</strong> — en este curso, un gráfico sin fuente está incompleto. Para las etiquetas del eje usamos aquí una función propia (<code>function(x) paste0(x / 1e6, " M")</code>); en RStudio, el paquete <code>scales</code> trae etiquetas listas — <code>label_number(big.mark = ".", decimal.mark = ",")</code> para separador de miles, o <code>label_number(scale = 1e-6, suffix = " M")</code>, que usaremos en la sección de exportar.</p>
+<div class="callout-key">
+<p><strong>¿Qué tema usar?</strong></p>
+<p><code>theme_minimal()</code>: limpio y moderno, nuestra opción por defecto para informes. <code>theme_bw()</code>: fondo blanco con borde, el estándar en papers académicos. <code>theme_classic()</code>: sin grillas, para publicaciones muy sobrias. <code>theme_gray()</code> (el default): evítelo en entregas — delata el gráfico “sin terminar”.</p>
+</div>
+</section>
+<section id="facetas-el-mismo-gráfico-por-subgrupos" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="facetas-el-mismo-gráfico-por-subgrupos"><span class="header-section-number">6.2</span> Facetas: el mismo gráfico por subgrupos</h2>
+<p>Una <span class="term">faceta</span> repite el mismo gráfico para cada subgrupo, en paneles separados que comparten escala — comparar se vuelve inmediato:</p>
+<div id="qwebr-insertion-location-21"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><code>facet_wrap(~ variable)</code> parte el gráfico por una variable (con <code>scales = "free_y"</code> si los grupos difieren mucho en tamaño); <code>facet_grid(filas ~ columnas)</code> cruza dos. Sobre la base completa, un solo gráfico responde la pregunta del hilo conductor:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## distribucion del ingreso (en logs) por sexo y nivel educativo: 10 paneles</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(geih, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log</span>(ingreso_laboral))) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">40</span>, <span class="at">fill =</span> <span class="st">"steelblue"</span>, <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(sexo <span class="sc">~</span> nivel_educativo) <span class="sc">+</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Cómo interpretar:</strong> cada columna es un nivel educativo, cada fila un sexo. ¿La distribución de los hombres está desplazada a la derecha de la de las mujeres <em>dentro</em> de cada nivel educativo? Eso es exactamente lo que este gráfico permite ver.</p>
+<div class="callout-key">
+<p><strong>¿Color o facetas?</strong></p>
+<p><strong>Color en el mismo panel:</strong> pocas categorías (2–4) y comparación directa — por ejemplo, dos densidades superpuestas con <code>fill = sexo</code> y <code>alpha</code>. <strong>Facetas:</strong> más categorías, o cuando quiere comparar <strong>distribuciones completas</strong> sin que las capas se tapen entre sí. Si el gráfico con colores parece un espagueti, la respuesta son facetas.</p>
+</div>
+<section id="mini-ejercicio-integrador" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="mini-ejercicio-integrador"><span class="header-section-number">6.2.1</span> Mini-ejercicio integrador</h3>
+<p>Construya un boxplot del ingreso por sexo en <code>geih_mini</code> con: título que comunique el hallazgo, ejes con unidades, fuente en el caption y <code>theme_minimal()</code>.</p>
+<div id="qwebr-insertion-location-22"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<!--=================-->
+</section>
+</section>
+</section>
+<section id="exportar-gráficos" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Exportar gráficos</h1>
+<p>En el panel <em>Plots</em> de RStudio hay un botón <em>Export</em> para guardar el gráfico con clic. <strong>No lo use para trabajo serio</strong>: el tamaño depende de cómo tenga la ventana ese día, la resolución es baja y no queda rastro en el script — no es reproducible. La herramienta correcta es <code>ggsave()</code>: asignamos el gráfico a un objeto y lo exportamos a <code>output/figuras/</code> del proyecto (Unidad 1):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## figura central de la unidad: brecha por sexo dentro de cada nivel educativo</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>tab_brecha <span class="ot">&lt;-</span> geih <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(nivel_educativo, sexo) <span class="sc">%&gt;%</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mediana =</span> <span class="fu">median</span>(ingreso_laboral), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>g_brecha <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(tab_brecha,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(nivel_educativo, mediana), <span class="at">y =</span> mediana, <span class="at">fill =</span> sexo)) <span class="sc">+</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">label_number</span>(<span class="at">scale =</span> <span class="fl">1e-6</span>, <span class="at">suffix =</span> <span class="st">" M"</span>)) <span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title    =</span> <span class="st">"La brecha por sexo aparece en todos los niveles educativos"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Ingreso laboral mediano de los ocupados, cabeceras"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Nivel educativo"</span>, <span class="at">y =</span> <span class="st">"Ingreso mediano (millones de COP)"</span>,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="cn">NULL</span>, <span class="at">caption =</span> <span class="st">"Fuente: GEIH (DANE), extracto docente del curso."</span>) <span class="sc">+</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="do">## exportar: reproducible y con dimensiones controladas</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">filename =</span> <span class="st">"output/figuras/fig_brecha_sexo_educacion.png"</span>,</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">plot     =</span> g_brecha,</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">width    =</span> <span class="dv">8</span>, <span class="at">height =</span> <span class="dv">5</span>, <span class="at">dpi =</span> <span class="dv">300</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>¿Qué hace cada argumento?</strong> <code>filename</code> es una ruta <strong>relativa</strong> dentro del proyecto, y su extensión define el formato (<code>.png</code> para Word/HTML, <code>.pdf</code> para LaTeX). <code>plot</code> es el objeto a guardar: si se omite, <code>ggsave()</code> guarda el último gráfico mostrado — funciona, pero sea explícito. <code>width</code> y <code>height</code> van en pulgadas, y <code>dpi = 300</code> es resolución de imprenta, suficiente para cualquier informe. De paso: <code>position = "dodge"</code> (en <code>geom_col()</code>) pone las barras de hombres y mujeres lado a lado en lugar de apiladas.</p>
+<div class="callout-workflow">
+<p><strong>Regla del curso: todo gráfico de un informe nace de un script</strong></p>
+<p>Nada de capturas de pantalla ni del botón <em>Export</em>. En la estructura del curso, el script <code>02_descriptivas.R</code> genera <strong>todas</strong> las figuras del proyecto y las exporta a <code>output/figuras/</code> con nombres descriptivos (<code>fig_brecha_sexo_educacion.png</code>, no <code>Rplot01.png</code>). ¿La ganancia? Si mañana cambia la base — un mes más de GEIH, un filtro distinto —, corre el script y todas las figuras se actualizan solas. Es la reproducibilidad de la Unidad 1, aplicada a los resultados.</p>
+</div>
+<!--=================-->
+</section>
+<section id="estadísticas-descriptivas" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Estadísticas descriptivas</h1>
+<p>Los gráficos muestran la <strong>forma</strong>; las tablas dan los <strong>números exactos</strong>. La sección de “Datos” de un paper (o de su proyecto final) necesita ambos. Vamos de lo general a lo específico: resumen global → tablas de frecuencia → descriptivas por grupo → tabla lista para informe.</p>
+<section id="resumen-global-summary-y-skim" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="resumen-global-summary-y-skim"><span class="header-section-number">8.1</span> Resumen global: summary() y skim()</h2>
+<div id="qwebr-insertion-location-23"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Cómo interpretar:</strong> para cada variable numérica, <code>summary()</code> reporta mínimo, cuartiles, mediana, media y máximo. Mire el ingreso: la media (≈ 3,2 millones) <strong>duplica con creces</strong> la mediana (≈ 1,5 millones). Cuando media y mediana se separan tanto, la distribución es asimétrica — y el promedio deja de ser “el valor típico”. En RStudio, <code>skim()</code> (paquete <code>skimr</code>) agrega faltantes, percentiles y mini-histogramas:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(geih)   <span class="do">## resumen enriquecido de la base completa</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="tablas-de-frecuencia-table-y-tabyl" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="tablas-de-frecuencia-table-y-tabyl"><span class="header-section-number">8.2</span> Tablas de frecuencia: table() y tabyl()</h2>
+<div id="qwebr-insertion-location-24"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>En RStudio, <code>tabyl()</code> (paquete <code>janitor</code>) devuelve conteos y porcentajes en un solo paso, y permite tablas cruzadas con formato de informe:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## frecuencias con janitor</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>geih <span class="sc">%&gt;%</span> <span class="fu">tabyl</span>(nivel_educativo)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="do">## tabla cruzada: composicion educativa por sexo (porcentajes por columna)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>geih <span class="sc">%&gt;%</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tabyl</span>(nivel_educativo, sexo) <span class="sc">%&gt;%</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_percentages</span>(<span class="st">"col"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_pct_formatting</span>(<span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="descriptivas-por-grupo-group_by-summarise" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="descriptivas-por-grupo-group_by-summarise"><span class="header-section-number">8.3</span> Descriptivas por grupo: group_by() + summarise()</h2>
+<p>El corazón de la sección — y el reencuentro con la Unidad 2. La pregunta del hilo conductor, en números:</p>
+<div id="qwebr-insertion-location-25"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Cómo interpretar (mire con calma, esto es lo importante):</strong> en <strong>promedio</strong>, los hombres de la mini base ganan ≈ 4,5 millones y las mujeres 1,9 — la brecha parece enorme. En <strong>mediana</strong>, los hombres ganan ≈ 1,5 millones y las mujeres 1,6 — ¡la comparación se invierte! La diferencia es <strong>una sola persona</strong>: el outlier de 25 millones, que infla el promedio (y la desviación estándar) del grupo de los hombres.</p>
+<div class="callout-key">
+<p><strong>¿Promedio o mediana? Reporte ambos y explique la diferencia</strong></p>
+<p>Con distribuciones asimétricas como el ingreso, la media es sensible a los valores extremos y la mediana no. Que la brecha cambie de tamaño (o de signo) según el estadístico <strong>ya es un hallazgo</strong>, no un problema técnico: dice que la parte alta de la distribución difiere entre grupos. Compruébelo en la base real: la dirección de la brecha por sexo se mantiene con ambos estadísticos, pero su <strong>magnitud</strong> cambia — por eso los papers de distribución del ingreso reportan medianas, percentiles o logaritmos, no solo promedios.</p>
+</div>
+<p>Sobre la base completa, el mismo patrón responde las tres preguntas del hilo conductor:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## brecha por sexo</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>geih <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(sexo) <span class="sc">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">promedio =</span> <span class="fu">mean</span>(ingreso_laboral), <span class="at">mediana =</span> <span class="fu">median</span>(ingreso_laboral),</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">desv_est =</span> <span class="fu">sd</span>(ingreso_laboral), <span class="at">n =</span> <span class="fu">n</span>())</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="do">## retorno a la educacion</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>geih <span class="sc">%&gt;%</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(nivel_educativo) <span class="sc">%&gt;%</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mediana =</span> <span class="fu">median</span>(ingreso_laboral), <span class="at">n =</span> <span class="fu">n</span>())</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="do">## la brecha por sexo DENTRO de cada nivel educativo</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>geih <span class="sc">%&gt;%</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(nivel_educativo, sexo) <span class="sc">%&gt;%</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mediana =</span> <span class="fu">median</span>(ingreso_laboral), <span class="at">n =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Nota importante:</strong> la tercera tabla es exactamente la que graficamos con <code>geom_col(position = "dodge")</code> en la sección de exportar. Tabla y gráfico son dos vistas del mismo <code>summarise()</code>.</p>
+<section id="mini-ejercicio-descriptivas-por-nivel-educativo" class="level3" data-number="8.3.1">
+<h3 data-number="8.3.1" class="anchored" data-anchor-id="mini-ejercicio-descriptivas-por-nivel-educativo"><span class="header-section-number">8.3.1</span> Mini-ejercicio: descriptivas por nivel educativo</h3>
+<div id="qwebr-insertion-location-26"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</section>
+</section>
+<section id="tablas-listas-para-informe-modelsummary" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="tablas-listas-para-informe-modelsummary"><span class="header-section-number">8.4</span> Tablas listas para informe: modelsummary</h2>
+<p>Copiar números de la consola a Word, uno por uno, es la fuente de errores más vieja del trabajo empírico. El paquete <code>modelsummary</code> produce tablas de descriptivas <strong>exportables</strong> directamente a <code>output/tablas/</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## tablas de descriptivas para el informe</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">p_load</span>(modelsummary)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="do">## opcion 1: resumen automatico de toda la base (tipo skim, pero exportable)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">datasummary_skim</span>(geih, <span class="at">output =</span> <span class="st">"output/tablas/tab_resumen_geih.html"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="do">## opcion 2: tabla a la medida — la formula se lee "filas ~ columnas"</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">datasummary</span>(ingreso_laboral <span class="sc">+</span> edad <span class="sc">+</span> anios_educacion <span class="sc">+</span> horas_semana <span class="sc">~</span> sexo <span class="sc">*</span> (Mean <span class="sc">+</span> Median <span class="sc">+</span> SD),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">data   =</span> geih,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">output =</span> <span class="st">"output/tablas/tab_descriptivas_sexo.docx"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Cómo leer la fórmula de <code>datasummary()</code>:</strong> a la izquierda del <code>~</code> van las variables (las filas); a la derecha, los estadísticos (las columnas: <code>Mean</code>, <code>Median</code>, <code>SD</code>, <code>N</code>, <code>Min</code>, <code>Max</code>…); <code>sexo * (...)</code> parte cada estadístico en una columna por sexo — la tabla de la brecha, lista para pegar en el informe. La extensión del <code>output</code> decide el formato: <code>.docx</code> para Word, <code>.html</code>, <code>.tex</code> para LaTeX.</p>
+<div class="callout-workflow">
+<p><strong>Las tablas también nacen de scripts</strong></p>
+<p>La misma regla de las figuras aplica a las tablas: el script <code>02_descriptivas.R</code> las genera y las exporta a <code>output/tablas/</code>. En la Unidad 4, <code>modelsummary()</code> (la función hermana de <code>datasummary()</code>) hará lo mismo con las tablas de regresión. Su informe final no debe tener un solo número transcrito a mano.</p>
+</div>
+<!--=================-->
+</section>
+</section>
+<section id="niveles-o-logaritmos" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Niveles o logaritmos</h1>
+<p>Ya lo vimos tres veces: el histograma aplastado, el boxplot lleno de atípicos, el promedio que duplica la mediana. Los tres son síntomas de lo mismo: la distribución del ingreso es <strong>asimétrica a la derecha</strong>, con una cola larga de valores altos. La transformación estándar en economía es el logaritmo. Compare los dos histogramas:</p>
+<div id="qwebr-insertion-location-27"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>¿Qué hizo el logaritmo?</strong> Comprimió la cola derecha: el outlier de 25 millones sigue ahí, pero ya no domina el eje — en logs, la distancia entre 2,5 y 25 millones es la misma que entre 250 mil y 2,5 millones. Además, las comparaciones se vuelven multiplicativas: pasar de 1 a 2 millones y de 10 a 20 son el <strong>mismo salto</strong> (una duplicación), que es como solemos pensar los cambios en variables económicas. Compruebe el contraste con los 21.821 ocupados — en logs, el ingreso toma la clásica forma de campana:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(geih, <span class="fu">aes</span>(<span class="at">x =</span> ingreso_laboral)) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">60</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(geih, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log</span>(ingreso_laboral))) <span class="sc">+</span> <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">60</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Nota importante:</strong> <code>log(0)</code> es <code>-Inf</code> y el logaritmo de un negativo es <code>NaN</code> (Unidad 1). Por eso el extracto del curso se restringe a ocupados con <strong>ingreso laboral positivo</strong>: el log siempre está definido. Con otras bases, ese chequeo es suyo.</p>
+<div class="callout-connect">
+<p><strong>Hacia la Unidad 4: los logs no son cosmética</strong></p>
+<p>En la próxima unidad estimaremos la ecuación de Mincer: <code>log(ingreso_laboral) ~ anios_educacion + edad</code>. Con el ingreso en logs, el coeficiente de educación se interpreta (aproximadamente) como el <strong>cambio porcentual</strong> del ingreso por un año adicional de educación — el “retorno a la educación”. La decisión de escala que tomamos hoy al graficar define cómo se leerán los coeficientes mañana.</p>
+</div>
+<!--=================-->
+</section>
+<section id="buenas-prácticas-de-comunicación" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Buenas prácticas de comunicación</h1>
+<div class="callout-key">
+<p><strong>Un buen gráfico responde UNA pregunta</strong></p>
+<p>Antes de escribir una línea de código, escriba la pregunta que el gráfico debe responder. Si necesita comunicar tres ideas, haga tres gráficos: uno por pregunta. El gráfico que intenta decirlo todo termina no diciendo nada.</p>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Los cinco errores que más se repiten en informes</strong></p>
+<p><strong>1. Eje Y truncado en gráficos de barras.</strong> En una barra, la <strong>altura ES el dato</strong>: si el eje arranca en 1.400.000 en vez de 0, una diferencia del 5% se ve como del 200%. ggplot2 inicia las barras en cero por defecto: no lo “arregle” recortando el eje. La excepción son las <strong>líneas</strong> de tendencia, donde acercar el eje al rango de los datos puede ser legítimo — siempre declarándolo.</p>
+<p><strong>2. Demasiadas categorías sin ordenar.</strong> 24 departamentos en orden alfabético = un gráfico que nadie lee. La receta de esta unidad: <code>reorder()</code> para ordenar por valor, top 10 con <code>slice_max()</code> (o agrupar el resto en “otros”) y barras horizontales para nombres largos.</p>
+<p><strong>3. Colores sin significado.</strong> El color debe <strong>codificar una variable</strong> (sexo, nivel educativo) o no estar. Cinco barras de cinco colores “porque se ve bonito” agregan ruido, no información; y evite el contraste rojo–verde como única distinción (es invisible para buena parte de los lectores daltónicos). En caso de duda: un solo color sobrio.</p>
+<p><strong>4. Gráfico sin título, unidades ni fuente.</strong> ¿Ingreso en COP corrientes o en millones? ¿Todo el país o solo cabeceras? ¿Datos de quién? Un gráfico que no responde esas preguntas por sí solo obliga al lector a adivinar. <code>labs()</code> completo — título con la idea, ejes con unidades, caption con la fuente — <strong>siempre</strong>.</p>
+<p><strong>5. La torta (pie) casi nunca es la respuesta.</strong> El ojo humano es malo comparando ángulos y áreas: con más de tres categorías, o con valores parecidos, la torta es ilegible. Unas barras ordenadas comunican lo mismo, mejor, en todos los casos. Dato revelador: ggplot2 ni siquiera trae un <code>geom_pie()</code>.</p>
+</div>
+</div>
+<p><strong>Antes de compartir cualquier gráfico, pregúntese:</strong> ¿el título dice el hallazgo? ¿los ejes tienen unidades? ¿está la fuente? ¿cada color significa algo? ¿alguien sin contexto entiende la idea en 30 segundos? Si alguna respuesta es “no”, el gráfico no está listo.</p>
+<!--=================-->
+</section>
+<section id="checklist-de-salida" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Checklist de salida</h1>
+<p>Antes de pasar a la Unidad 4, verifique que puede:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Explicar la fórmula de todo gráfico ggplot2 (datos + <code>aes()</code> + geometrías) y el papel del operador <code>+</code></label></li>
+<li><label><input type="checkbox">Elegir la geometría según la pregunta: distribución, comparación entre categorías, relación entre dos variables, evolución en el tiempo</label></li>
+<li><label><input type="checkbox">Leer un histograma y un boxplot: forma, mediana, cuartiles y atípicos</label></li>
+<li><label><input type="checkbox">Distinguir cuándo una estética va dentro de <code>aes()</code> (mapear una variable) y cuándo fuera (fijar un valor)</label></li>
+<li><label><input type="checkbox">Ordenar barras con <code>reorder()</code> y explicar la diferencia entre <code>geom_col()</code> y <code>geom_bar()</code></label></li>
+<li><label><input type="checkbox">Completar un gráfico con <code>labs()</code> (título, ejes con unidades, fuente), un tema sobrio y un eje Y legible</label></li>
+<li><label><input type="checkbox">Partir un gráfico por subgrupos con <code>facet_wrap()</code>/<code>facet_grid()</code> y justificar cuándo facetas y cuándo color</label></li>
+<li><label><input type="checkbox">Exportar figuras reproducibles con <code>ggsave()</code> a <code>output/figuras/</code></label></li>
+<li><label><input type="checkbox">Calcular descriptivas por grupo (media, mediana, sd, n) con <code>group_by()</code> + <code>summarise()</code>, y tablas de frecuencia con <code>table()</code>/<code>tabyl()</code></label></li>
+<li><label><input type="checkbox">Producir una tabla de descriptivas exportable con <code>modelsummary</code> y explicar por qué el ingreso se analiza en logaritmos</label></li>
+</ul>
+<p>Si algún punto le genera dudas, vuelva a la sección correspondiente y ejecute los mini-ejercicios de nuevo.</p>
+<!--=================-->
+</section>
+<section id="preguntas-de-comprensión" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Preguntas de comprensión</h1>
+<ol type="1">
+<li>Quiere comparar la distribución del ingreso laboral entre los cinco niveles educativos <strong>en un solo gráfico</strong>. ¿Usaría histogramas o boxplots? ¿Por qué?</li>
+<li>En la GEIH, la brecha de ingresos por sexo medida con el <strong>promedio</strong> resulta mayor que la medida con la <strong>mediana</strong>. ¿Qué propiedad de la distribución del ingreso explica esa diferencia, y cuál de los dos estadísticos reportaría en un informe?</li>
+<li>Tiene el ingreso mediano por nivel educativo, separado por sexo. ¿Cuándo preferiría <strong>facetas</strong> (<code>facet_wrap()</code>) y cuándo <strong>color</strong> (<code>fill = sexo</code>) dentro del mismo panel?</li>
+<li>¿Qué produce cada uno de estos tres códigos, y cuál es casi siempre un error?: <code>aes(color = sexo)</code>, <code>geom_point(color = "blue")</code>, <code>aes(color = "blue")</code>.</li>
+<li>Para graficar cuántos ocupados hay por departamento <strong>directamente desde la base</strong>, ¿usaría <code>geom_bar()</code> o <code>geom_col()</code>? ¿Y para graficar una tabla que ya construyó con <code>group_by()</code> + <code>summarise()</code>?</li>
+</ol>
+<!--=================-->
+</section>
+<section id="recursos-de-aprendizaje-de-la-unidad" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> Recursos de aprendizaje de la unidad</h1>
+<ul>
+<li><strong>Video (asincrónico):</strong> <a href="https://www.youtube.com/watch?v=sCfhUTHA4fQ">Visualización de datos</a> — Eduard Martínez</li>
+<li><strong>Lectura guía:</strong> <a href="https://r4ds.hadley.nz/data-visualize.html">R for Data Science (2.ª ed.)</a> — cap. <em>Data visualization</em> (<a href="https://es.r4ds.hadley.nz/">versión en español, 1.ª ed.</a>)</li>
+<li><strong>¿Qué gráfico usar?:</strong> <a href="https://www.data-to-viz.com/">from Data to Viz</a> — árbol de decisión según sus datos · <a href="https://r-graph-gallery.com">R Graph Gallery</a> — ejemplos con código listo para adaptar</li>
+<li><strong>Referencia rápida:</strong> <a href="https://rstudio.github.io/cheatsheets/data-visualization.pdf">Cheatsheet de ggplot2</a></li>
+<li><strong>Material ampliado:</strong> <a href="https://eduard-martinez.github.io/teaching/ba/week-05/theory/week-05.html">Semana 5 del curso de Business Analytics</a> — Visualización de datos con ggplot2</li>
+<li><strong>Guías del curso:</strong> <a href="../../buenas_practicas/guia_estilo_scripts.html">Guía de estilo de scripts</a> · <a href="../../buenas_practicas/guia_organizacion_proyecto.html">Guía de organización de proyectos</a> · <a href="../../ia/guia_uso_ia.html">Guía de uso de IA</a></li>
+</ul>
+<!-- Panel Environment (CSS en styles.css) -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">📦 Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">🔄</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">▲</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
+  </div>
+</div>
+
+<script type="module">
+/* ── Toggle colapsar / expandir ── */
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '▲' : '▼';
+};
+
+/* ── Consultar el environment de R ── */
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Env panel error:', e);
+    return [];
+  }
+}
+
+/* ── Renderizar la lista de objetos ── */
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. × ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+/* ── Actualizar panel ── */
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+/* ── Mover webR Status despues de los links de contacto ── */
+function moveWebRStatus() {
+  const anchor = document.getElementById('webr-status-anchor');
+  const statusArea = document.getElementById('qwebr-status-message-area');
+  if (anchor && statusArea) {
+    const wrapper = statusArea.closest('.quarto-title-meta');
+    if (wrapper) {
+      wrapper.style.display = 'inline';
+      wrapper.style.fontSize = '13px';
+      wrapper.style.marginLeft = '30px';
+      anchor.parentNode.insertBefore(wrapper, anchor);
+    }
+  }
+}
+
+/* ── Esperar webR y conectar hooks ── */
+async function init() {
+  /* Esperar a que mainWebR exista */
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
+  moveWebRStatus();
+
+  /* Esperar a que los botones Run esten habilitados (todas las celdas ocultas ejecutadas) */
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  /* Monkey-patch qwebrComputeEngine para detectar ejecucion */
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  /* Expandir panel y hacer primer scan */
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script type="module">
+// Handle cell initialization initialization
+qwebrCellDetails.map(
+  (entry) => {
+    // Handle the creation of the element
+    qwebrCreateHTMLElement(entry);
+    // In the event of interactive, initialize the monaco editor
+    if (entry.options.context == EvalTypes.Interactive) {
+      qwebrCreateMonacoEditorInstance(entry);
+    }
+  }
+);
+
+// Identify non-interactive cells (in order)
+const filteredEntries = qwebrCellDetails.filter(entry => {
+  const contextOption = entry.options && entry.options.context;
+  return ['output', 'setup'].includes(contextOption) || (contextOption == "interactive" && entry.options && entry.options.autorun === 'true');
+});
+
+// Condition non-interactive cells to only be run after webR finishes its initialization.
+qwebrInstance.then(
+  async () => {
+    const nHiddenCells = filteredEntries.length;
+    var currentHiddenCell = 0;
+
+
+    // Modify button state
+    qwebrSetInteractiveButtonState(`🟡 Running hidden code cells ...`, false);
+
+    // Begin processing non-interactive sections
+    // Due to the iteration policy, we must use a for() loop.
+    // Otherwise, we would need to switch to using reduce with an empty
+    // starting promise
+    for (const entry of filteredEntries) {
+
+      // Determine cell being examined
+      currentHiddenCell = currentHiddenCell + 1;
+      const formattedMessage = `Evaluating hidden cell ${currentHiddenCell} out of ${nHiddenCells}`;
+
+      // Update the document status header
+      if (qwebrShowStartupMessage) {
+        qwebrUpdateStatusHeader(formattedMessage);
+      }
+
+      // Display the update in non-active areas
+      qwebrUpdateStatusMessage(formattedMessage);
+
+      // Extract details on the active cell
+      const evalType = entry.options.context;
+      const cellCode = entry.code;
+      const qwebrCounter = entry.id;
+
+      if (['output', 'setup'].includes(evalType)) {
+        // Disable further global status updates
+        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
+        activeContainer.classList.remove('qwebr-cell-needs-evaluation');
+        activeContainer.classList.add('qwebr-cell-evaluated');
+
+        // Update status on the code cell
+        const activeStatus = document.getElementById(`qwebr-status-text-${qwebrCounter}`);
+        activeStatus.innerText = " Evaluating hidden code cell...";
+        activeStatus.classList.remove('qwebr-cell-needs-evaluation');
+        activeStatus.classList.add('qwebr-cell-evaluated');
+      }
+
+      switch (evalType) {
+        case 'interactive':
+          // TODO: Make this more standardized.
+          // At the moment, we're overriding the interactive status update by pretending its
+          // output-like. 
+          const tempOptions = entry.options;
+          tempOptions["context"] = "output"
+          // Run the code in a non-interactive state that is geared to displaying output
+          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, tempOptions);
+          break;
+        case 'output':
+          // Run the code in a non-interactive state that is geared to displaying output
+          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, entry.options);
+          break;
+        case 'setup':
+          const activeDiv = document.getElementById(`qwebr-noninteractive-setup-area-${qwebrCounter}`);
+
+          // Store code in history
+          qwebrLogCodeToHistory(cellCode, entry.options);
+
+          // Run the code in a non-interactive state with all output thrown away
+          await mainWebR.evalRVoid(`${cellCode}`);
+          break;
+        default: 
+          break; 
+      }
+
+      if (['output', 'setup'].includes(evalType)) {
+        // Disable further global status updates
+        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
+        // Disable visibility
+        activeContainer.style.visibility = 'hidden';
+        activeContainer.style.display = 'none';
+      }
+    }
+  }
+).then(
+  () => {
+    // Release document status as ready
+
+    if (qwebrShowStartupMessage) {
+      qwebrStartupMessage.innerText = "🟢 Ready!"
+    }
+  
+    qwebrSetInteractiveButtonState(
+      `<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>`, 
+      true
+    );  
+  }
+);
+</script>
+
+
+
+
+<script src="teoria_unidad-3_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

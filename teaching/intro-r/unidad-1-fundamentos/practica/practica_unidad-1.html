@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Práctica · Unidad 1 — Fundamentos de R</title>
+<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="../../assets/curso-page.css">
+<link rel="stylesheet" href="../../assets/webr.css">
+<link rel="stylesheet" href="../../assets/examen.css">
+</head>
+<body class="fullcontent quarto-light">
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<main class="content" id="quarto-document-content">
+<div class="page-wrap">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Práctica · Unidad 1</h1>
+<p class="subtitle lead">Fundamentos de R y flujo de trabajo</p>
+</div>
+</header>
+
+<div class="curso-logo"><img src="../../figures/icesi_logo.png" alt="Universidad Icesi"></div>
+<div class="curso-meta"><span class="curso-chip">Unidad 1 · Práctica ejecutable</span></div>
+<p class="curso-backlink"><a href="../../index.html">← Volver al inicio del curso</a></p>
+
+<div class="callout-key">
+<div class="callout-title">Cómo usar esta práctica</div>
+El código corre <strong>en el navegador</strong> (no necesitas instalar nada para probar).
+Ejecuta cada celda con <strong>▶ Ejecutar</strong> o <code>Ctrl/Cmd + Enter</code>, edita y vuelve a
+correr. Las celdas comparten la misma sesión: un objeto creado arriba existe abajo. Cuando quieras
+trabajar “en serio”, replica todo en RStudio dentro de tu proyecto del curso.
+</div>
+
+<div id="practica-root"></div>
+
+<footer class="curso-footer">
+Curso Nivelatorio de Programación en R · CIENFI — Universidad Icesi ·
+<a href="mailto:efmartinez@icesi.edu.co">efmartinez@icesi.edu.co</a>
+</footer>
+
+</div>
+</main>
+</div>
+
+<script>
+window.WEBR_CONFIG = { unidad: 1, packages: [], setup: "" };
+window.WEBR_BLOCKS = [
+  { type: "section", title: "1. R como calculadora" },
+  { type: "prose", html: "R evalúa expresiones y devuelve el resultado en la consola. Ejecuta y observa." },
+  { type: "code", code:
+`2 + 2
+10 / 3
+2^10
+
+# una tasa de crecimiento: (final - inicial) / inicial
+(1350000 - 1200000) / 1200000
+
+# comparaciones (devuelven TRUE o FALSE)
+100 > 50
+"cali" == "Cali"    # ¿por que da FALSE?` },
+
+  { type: "section", title: "2. Objetos" },
+  { type: "prose", html: "Guardamos valores en <strong>objetos</strong> con <code>&lt;-</code> (atajo <code>Alt + -</code>) y los reutilizamos." },
+  { type: "code", code:
+`# crear objetos con <-
+salario_hora <- 6200
+horas_mes    <- 192
+
+# usar objetos
+salario_mes <- salario_hora * horas_mes
+salario_mes
+
+# ahora usted: calcule el salario anual (12 meses + 1 prima)
+# salario_anual <- _______________` },
+
+  { type: "section", title: "3. Tipos de datos" },
+  { type: "prose", html: "Cada objeto tiene un <strong>tipo</strong>. <code>class()</code> es la lupa para saber cuál." },
+  { type: "code", code:
+`ingreso <- 1200000
+ciudad  <- "Cali"
+ocupado <- TRUE
+
+class(ingreso)
+class(ciudad)
+class(ocupado)
+
+# ¿que pasa si "sumamos" texto? (quite el # y ejecute; LEA el error)
+# ingreso + ciudad` },
+
+  { type: "section", title: "4. Vectores" },
+  { type: "prose", html: "Un <strong>vector</strong> agrupa varios valores del mismo tipo. La <em>indexación lógica</em> es la base del <code>filter()</code> de la Unidad 2." },
+  { type: "code", code:
+`# ingresos de 7 personas (COP)
+ingresos <- c(1200000, 950000, 3500000, 800000, 1300000, 2100000, 600000)
+
+length(ingresos)
+mean(ingresos)
+median(ingresos)
+
+ingresos[1]
+ingresos[2:4]
+
+# indexacion logica
+ingresos[ingresos > 1300000]
+sum(ingresos < 1300000)
+
+# ahora usted: ¿cual es el ingreso MAXIMO? ¿y el minimo?` },
+
+  { type: "check", pregunta: { tema: "Vectores y NA", tipo: "escribir_codigo",
+    enunciado: "Escribe la expresión que calcula el **promedio** del vector `ingresos` **ignorando los NA**.",
+    respuestas: ["mean(ingresos, na.rm = TRUE)", "mean(ingresos, na.rm = T)"],
+    retro_ok: "Correcto: `na.rm = TRUE` ignora los faltantes.",
+    retro_no: "Se espera `mean(ingresos, na.rm = TRUE)`: sin `na.rm`, un solo `NA` propaga `NA`." } },
+
+  { type: "section", title: "5. Data frames" },
+  { type: "prose", html: "El <strong>data frame</strong> es la tabla de R: filas (observaciones) y columnas (variables)." },
+  { type: "code", code:
+`personas <- data.frame(
+  id      = 1:5,
+  sexo    = c("mujer", "hombre", "mujer", "hombre", "mujer"),
+  edad    = c(28, 45, 35, 52, 23),
+  ingreso = c(1500000, 2200000, 1800000, 3500000, 900000)
+)
+
+# la radiografia de toda base
+str(personas)
+head(personas)
+dim(personas)
+
+# columnas con $
+personas$ingreso
+mean(personas$ingreso)
+
+# filas con [condicion, ]
+personas[personas$edad > 40, ]` },
+
+  { type: "check", pregunta: { tema: "Data frames", tipo: "escribir_codigo",
+    enunciado: "Del data frame `personas`, extrae la **columna** `ingreso` usando el operador `$`.",
+    respuestas: ["personas$ingreso"],
+    retro_ok: "Correcto: `df$columna` devuelve esa columna como vector.",
+    retro_no: "Se espera `personas$ingreso`." } },
+
+  { type: "section", title: "6. NA: el dato faltante" },
+  { type: "prose", html: "Un <code>NA</code> es un dato faltante. Cualquier operación con <code>NA</code> devuelve <code>NA</code> salvo que lo ignoremos con <code>na.rm = TRUE</code>." },
+  { type: "code", code:
+`ingresos_na <- c(1200000, 800000, NA, 2500000)
+
+mean(ingresos_na)                 # ¿que devuelve? ¿por que?
+mean(ingresos_na, na.rm = TRUE)   # la solucion
+
+sum(is.na(ingresos_na))           # ¿cuantos faltantes hay?` },
+
+  { type: "section", title: "7. Errores y warnings" },
+  { type: "prose", html: "Aprender a <strong>leer</strong> lo que R avisa es más útil que memorizar sintaxis. Un <em>warning</em> corre pero avisa; un <em>error</em> detiene la ejecución." },
+  { type: "code", code:
+`# WARNING: el codigo corre, pero avisa
+sqrt(-4)
+
+# ERROR: objeto que no existe (quite el # y LEA el mensaje)
+# tasa_informalidad
+
+# la ayuda es su primera fuente (antes que cualquier IA)
+# ?mean` },
+
+  { type: "section", title: "8. Paquetes" },
+  { type: "prose", html: "Los paquetes se instalan <strong>una sola vez</strong> desde la consola de RStudio (no en webR). El estándar del curso es <code>pacman::p_load()</code>, que instala y carga." },
+  { type: "static", note: "Se ejecuta en la consola de RStudio (no aquí)", code:
+`# instalar UNA vez (en la consola, no en el script):
+install.packages("pacman")
+
+# el estandar del curso: p_load carga e instala si falta
+require(pacman)
+p_load(dplyr)` },
+
+  { type: "section", title: "9. Su proyecto (en RStudio)" },
+  { type: "prose", html: "Esto se hace en RStudio, no con código: crear el proyecto y las carpetas, y usar siempre <strong>rutas relativas</strong> a la raíz del proyecto." },
+  { type: "static", note: "Se hace en RStudio (menús + estructura de carpetas)", code:
+`# 1. File > New Project > New Directory > nivelacion_r
+# 2. Cree las carpetas: datos/originales, datos/procesados, scripts, output
+# 3. Guarde este script en scripts/
+# 4. Verifique el working directory:
+getwd()
+
+# regla de oro: rutas RELATIVAS a la raiz del proyecto
+# bien:  read.csv("datos/originales/base.csv")
+# mal:   read.csv("C:/Users/minombre/Desktop/base.csv")` }
+];
+</script>
+<script src="../../assets/curso-config.js"></script>
+<script src="../../assets/examen-core.js"></script>
+<script src="../../assets/webr.js"></script>
+</body></html>
