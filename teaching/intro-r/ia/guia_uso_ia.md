@@ -133,13 +133,13 @@ actívelo: guía con preguntas en vez de entregar la respuesta.
   injustificado y confusión entre significancia y magnitud (DeLuca y Brown,
   2025). Por eso la Unidad 4 los pone a **corregir a la IA**.
 
-Referencias completas y más recursos: [investigacion_ia_recursos.md](investigacion_ia_recursos.html).
+Referencias completas y más recursos: [investigacion_ia_recursos.md](investigacion_ia_recursos.md).
 
 ## 8. Las actividades con IA del curso
 
 | Unidad | Actividad | Habilidad que entrena |
 |---|---|---|
-| 1 | [Primero tú, luego la IA](../unidad-1-fundamentos/actividad_ia_unidad-1.html) | Leer errores; usar la IA como tutor, no como oráculo |
-| 2 | [El código corre… pero está mal](../unidad-2-manejo-datos/actividad_ia_unidad-2.html) | Detectar bugs silenciosos; verificar código ajeno |
-| 3 | [Mejora esta figura](../unidad-3-visualizacion/actividad_ia_unidad-3.html) | Iterar con IA sin que cambie los datos |
-| 4 | [Crítica al econometrista artificial](../unidad-4-regresiones/actividad_ia_unidad-4.html) | Auditar interpretaciones estadísticas de la IA |
+| 1 | [Primero tú, luego la IA](../unidad-1-fundamentos/actividad_ia_unidad-1.md) | Leer errores; usar la IA como tutor, no como oráculo |
+| 2 | [El código corre… pero está mal](../unidad-2-manejo-datos/actividad_ia_unidad-2.md) | Detectar bugs silenciosos; verificar código ajeno |
+| 3 | [Mejora esta figura](../unidad-3-visualizacion/actividad_ia_unidad-3.md) | Iterar con IA sin que cambie los datos |
+| 4 | [Crítica al econometrista artificial](../unidad-4-regresiones/actividad_ia_unidad-4.md) | Auditar interpretaciones estadísticas de la IA |

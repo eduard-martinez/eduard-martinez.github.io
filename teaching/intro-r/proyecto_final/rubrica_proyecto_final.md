@@ -28,8 +28,8 @@ Se valora el **proceso completo** más que un único resultado. Nota sobre 5.0.
 ## Referencias de calificación (para el docente)
 
 Los valores esperados del análisis (tasas, coeficientes, N) están en
-`soluciones/respuestas_cuestionarios.md`
+[`soluciones/respuestas_cuestionarios.md`](../soluciones/respuestas_cuestionarios.md)
 y el flujo de referencia completo en
-`soluciones/solucion_proyecto_final.R`.
+[`soluciones/solucion_proyecto_final.R`](../soluciones/solucion_proyecto_final.R).
 Decisiones distintas a las de referencia son válidas si están justificadas y
 aplicadas consistentemente (p. ej., winsorizar outliers en lugar de dejarlos).

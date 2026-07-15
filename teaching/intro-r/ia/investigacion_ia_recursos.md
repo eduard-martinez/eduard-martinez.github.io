@@ -2,7 +2,7 @@
 
 **Documento de referencia para el docente** — Curso Nivelatorio de R (CIENFI · Universidad Icesi).
 Informe de búsqueda web profunda (julio de 2026) sobre cómo integrar IA generativa en el curso.
-De aquí salen la [Guía de uso de IA](guia_uso_ia.html) y las actividades con IA de cada unidad.
+De aquí salen la [Guía de uso de IA](guia_uso_ia.md) y las actividades con IA de cada unidad.
 
 ---
 
@@ -31,7 +31,7 @@ Syllabus: *"You are actively encouraged to use generative AI assistants… to im
 
 ### 1.4. QTM 350 (Emory, Danilo Freire)
 Clases dedicadas a "AI-Assisted Programming" dentro de un curso de cómputo reproducible.
-- https://danilofreire.github.io/datasci350/
+- https://danilofreire.github.io/qtm350/lectures/lectures.html
 - **Aplicación:** justifica dedicar tiempo de clase formal a la IA como contenido, no solo como permiso.
 
 ### 1.5. RCT "Teaching Econometrics with AI" (U. Adolfo Ibáñez, Chile)
@@ -81,7 +81,7 @@ Ensayo aleatorizado registrado (AEA RCT Registry, 2025): GPT personalizado de ec
 | **chattr** | Gadget de chat en RStudio; inserta código en el script | CRAN | https://mlverse.github.io/chattr/ |
 | **gander** | "Copilot con contexto": lee el environment (columnas, tipos) y escribe código en el cursor | CRAN | https://simonpcouch.github.io/gander/ |
 | **gptstudio** | Addins de RStudio: chat, comentar código | CRAN | https://github.com/MichelNivard/gptstudio |
-| **statlingua** | `explain(modelo)`: traduce salidas de `lm`/GLM a lenguaje natural por audiencia | CRAN | https://cran.r-project.org/package=statlingua |
+| **statlingua** | `explain(modelo)`: traduce salidas de `lm`/GLM a lenguaje natural por audiencia | CRAN | https://bgreenwell.github.io/statlingua/ |
 | **mall** | LLMs fila a fila sobre data frames (clasificar, extraer) | CRAN | https://mlverse.github.io/mall/ |
 | **GitHub Copilot en RStudio** | Autocompletado nativo; **gratis para estudiantes y docentes** (GitHub Education) | Estable | https://docs.posit.co/ide/user/ide/guide/tools/copilot.html |
 | **Posit Assistant** (Positron/RStudio) | Chat + agente con contexto de ciencia de datos; suscripción o BYO-key | Producción | https://positron.posit.co/assistant.html |

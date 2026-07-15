@@ -9,15 +9,19 @@ de primera mano que puede equivocarse con total seguridad.
 
 ## Parte A — La escalera de depuración (30 min)
 
-Los cuatro fragmentos de abajo producen **error o warning**. Para cada uno siga
-los tres escalones **en orden** (no salte al 3):
+Los cuatro fragmentos de abajo **fallan**: unos lanzan un **error o warning**
+visible; otros corren sin avisar pero devuelven un **resultado sospechoso**
+(un `NA` inesperado, un cálculo que no cuadra). Aprender a notar el segundo
+caso —el fallo silencioso— es tan importante como leer un error. Para cada uno
+siga los tres escalones **en orden** (no salte al 3):
 
-1. **Usted solo:** ejecute el fragmento, lea el mensaje completo y escriba como
-   comentario su hipótesis de qué pasó.
+1. **Usted solo:** ejecute el fragmento. Si hay mensaje (error/warning), léalo
+   completo; si no lo hay, **mire el resultado y pregúntese si es el que
+   esperaba**. Escriba como comentario su hipótesis de qué pasó.
 2. **La documentación:** consulte la ayuda (`?mean`, `?data.frame`, ...) y
    ajuste su hipótesis si hace falta.
 3. **La IA como tutor:** pregunte usando la plantilla de la
-   [Guía de uso de IA](../ia/guia_uso_ia.html) (sección 5), pidiendo
+   [Guía de uso de IA](../ia/guia_uso_ia.md) (sección 5), pidiendo
    **explicación, no solución**. Compare con su hipótesis.
 
 ```r

@@ -12,7 +12,7 @@ sustenta oralmente.
 ## Los datos
 
 Dos bases (en `datos/` del curso, descripción completa en el
-[diccionario](../datos/diccionario_datos.html)):
+[diccionario](../datos/diccionario_datos.md)):
 
 - **`innovacion_empresas.csv`** — microdatos a nivel de firma (una fila por
   empresa), *deliberadamente desordenados*: categorías inconsistentes, tipos
@@ -23,7 +23,7 @@ Dos bases (en `datos/` del curso, descripción completa en el
 
 ## Lo que deben hacer
 
-Trabajen sobre una copia de la [plantilla de proyecto](../buenas_practicas/plantilla_proyecto.html)
+Trabajen sobre una copia de la [plantilla de proyecto](../buenas_practicas/plantilla_proyecto/)
 del curso. El análisis se organiza en el pipeline de tres scripts:
 
 **`01_limpieza.R` — Del crudo al análisis (Unidad 2)**
@@ -85,4 +85,4 @@ no poder explicar el propio código, no.
 - ¿Las firmas innovadoras venden más? ¿Cuánto más, controlando por tamaño?
   ¿Por qué NO pueden decir que la innovación *causa* mayores ventas?
 
-La rúbrica de calificación está en [rubrica_proyecto_final.md](rubrica_proyecto_final.html).
+La rúbrica de calificación está en [rubrica_proyecto_final.md](rubrica_proyecto_final.md).

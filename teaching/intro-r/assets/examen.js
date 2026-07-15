@@ -2,12 +2,12 @@
    EXAMEN.JS — Motor de cuestionario evaluativo (un examen por página)
    Curso Nivelatorio de R · CIENFI · Universidad Icesi
 
-   Flujo:  bloqueada (clave) → identidad (código + correo)
-           → instrucciones → en curso → resultado.
+   Flujo:  identidad (código + correo) → instrucciones
+           → en curso → resultado.
    · Sin límite de tiempo.
    · 2 intentos por estudiante (localStorage).
    · Los resultados se envían (sin bloquear) a Google Sheets vía Apps
-     Script; en el SEGUNDO intento, el Apps Script le envía al correo
+     Script; en CADA intento, el Apps Script le envía al correo
      del estudiante sus resultados con las respuestas correctas.
    ═══════════════════════════════════════════════════════════════ */
 (function () {
@@ -16,7 +16,6 @@
 
   /* ─────────── [CONFIG-EVALUACION] ─────────── */
   const EVAL_CONFIG = {
-    claveAcceso:    "CIENFI_2026", // clave que desbloquea el cuestionario
     maxIntentos:    2,             // intentos por estudiante
     notaAprobacion: 60,            // % mínimo para aprobar
   };
@@ -29,7 +28,6 @@
 
   const LS_ATTEMPTS   = "cursoR_intentos_" + PARTE;
   const LS_SESION     = "cursoR_sesion_" + PARTE;
-  const LS_DESBLOQUEO = "cursoR_eval_desbloqueada";
   const LS_ULT_EST    = "cursoR_ult_estudiante";
 
   let resultadoActual = null;
@@ -43,7 +41,6 @@
 
   function registro(id) { return lsGet(LS_ATTEMPTS, {})[id] || { intentosUsados: 0, historial: [] }; }
   function guardarRegistro(id, reg) { const t = lsGet(LS_ATTEMPTS, {}); t[id] = reg; lsSet(LS_ATTEMPTS, t); }
-  function desbloqueada() { return lsGet(LS_DESBLOQUEO, false) === true; }
 
   /* ─────────── enrutador ─────────── */
   function render() {
@@ -51,28 +48,7 @@
     const sesion = lsGet(LS_SESION, null);
     if (sesion && !sesion.finalizada) { pantallaEnCurso(sesion); return; }
     if (resultadoActual) { pantallaResultado(resultadoActual); return; }
-    if (!desbloqueada()) { pantallaBloqueada(); return; }
     pantallaInstrucciones();
-  }
-
-  /* ─────────── reja de clave ─────────── */
-  function pantallaBloqueada() {
-    root().innerHTML =
-      '<div class="eval-gate">' +
-        '<div class="lock">🔒</div>' +
-        "<h3>Cuestionario protegido</h3>" +
-        '<p class="ex-intro">Este cuestionario es evaluativo. Ingresa la <strong>clave de acceso</strong> que te dará el profesor.</p>' +
-        '<div class="eval-clave"><input type="text" id="inputClave" placeholder="clave de acceso" autocomplete="off" aria-label="Clave de acceso">' +
-        '<button class="ex-btn ex-btn--primario" id="btnClave">Entrar</button></div>' +
-        '<div class="ex-error" id="claveError"></div>' +
-      "</div>";
-    const intentar = function () {
-      const val = ($("#inputClave").value || "").trim();
-      if (val === EVAL_CONFIG.claveAcceso) { lsSet(LS_DESBLOQUEO, true); render(); }
-      else { $("#claveError").textContent = "Clave incorrecta. Verifícala con el profesor."; }
-    };
-    $("#btnClave").addEventListener("click", intentar);
-    $("#inputClave").addEventListener("keydown", function (e) { if (e.key === "Enter") intentar(); });
   }
 
   /* ─────────── instrucciones + identidad ─────────── */
@@ -93,7 +69,7 @@
         "<li>Dispones de <strong>máximo " + EVAL_CONFIG.maxIntentos + " intento(s)</strong>. Cada envío cuenta como un intento.</li>" +
         "<li><strong>No hay límite de tiempo</strong>: tómate lo que necesites, pero responde con lo que sabes.</li>" +
         "<li>Debes <strong>escribir el código</strong> en R en las preguntas que lo pidan.</li>" +
-        "<li>En tu <strong>segundo intento</strong> recibirás por <strong>correo</strong> tus resultados con las respuestas correctas.</li>" +
+        "<li>Después de <strong>cada intento</strong> recibirás por <strong>correo</strong> tus resultados con las respuestas correctas.</li>" +
       "</ul></div>" +
       '<div class="form-identidad">' +
         '<div class="campo"><label for="estNombre">Nombre completo</label><input type="text" id="estNombre" placeholder="Tu nombre" autocomplete="name"></div>' +
@@ -300,7 +276,8 @@
       puntaje: pct, aprobado: aprobado, correctas: correctas, total: total, duracionSeg: dur,
       porTema: porTema, detalle: detalle,
       // el Apps Script envía el correo con respuestas correctas cuando enviarCorreo === true
-      enviarCorreo: sesion.intento >= EVAL_CONFIG.maxIntentos,
+      // (se envía en TODOS los intentos, no solo en el último)
+      enviarCorreo: true,
     });
 
     sesion.finalizada = true;

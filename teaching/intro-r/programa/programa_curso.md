@@ -32,7 +32,7 @@ Dos rasgos distinguen esta versión del curso:
 2. **IA con reglas:** el curso integra la IA generativa como herramienta de
    aprendizaje (depurar, explicar errores, mejorar gráficos, criticar
    interpretaciones) con validación crítica obligatoria — ver la
-   [Guía de uso de IA](../ia/guia_uso_ia.html).
+   [Guía de uso de IA](../ia/guia_uso_ia.md).
 
 ## 2. Dirigido a / objetivos de aprendizaje
 
@@ -94,7 +94,7 @@ familiaridad básica con hojas de cálculo (fila, columna, celda).
   la **práctica guiada** en RStudio; (3) *aplicar* en la **tarea** con su
   cuestionario y en la **actividad con IA**.
 - **Proyecto final en parejas** con sustentación oral (ver
-  [enunciado](../proyecto_final/enunciado_proyecto_final.html)).
+  [enunciado](../proyecto_final/enunciado_proyecto_final.md)).
 
 ## 5. Estructura del curso: cuatro unidades
 
@@ -109,10 +109,10 @@ familiaridad básica con hojas de cálculo (fila, columna, celda).
 | **Actividad IA** | Primero tú, luego la IA | El código corre… pero está mal | Mejora esta figura | Crítica al econometrista artificial |
 
 Las guías transversales acompañan todas las unidades:
-[estilo de scripts](../buenas_practicas/guia_estilo_scripts.html) ·
-[organización de proyectos](../buenas_practicas/guia_organizacion_proyecto.html) ·
-[uso de IA](../ia/guia_uso_ia.html) ·
-[plantilla de proyecto](../buenas_practicas/plantilla_proyecto.html).
+[estilo de scripts](../buenas_practicas/guia_estilo_scripts.md) ·
+[organización de proyectos](../buenas_practicas/guia_organizacion_proyecto.md) ·
+[uso de IA](../ia/guia_uso_ia.md) ·
+[plantilla de proyecto](../buenas_practicas/plantilla_proyecto/).
 
 ## 6. Calendario sugerido (julio de 2026)
 
@@ -138,8 +138,8 @@ Sesiones sincrónicas de 10:00 a 12:00. Ajustable según programación de CIENFI
 | Sustentación oral (defensa del código, **sin IA**) | 15% | N0 |
 
 Los niveles de uso de IA (N0–N4) están definidos en la
-[Guía de uso de IA](../ia/guia_uso_ia.html). La rúbrica detallada del proyecto:
-[rubrica_proyecto_final.md](../proyecto_final/rubrica_proyecto_final.html).
+[Guía de uso de IA](../ia/guia_uso_ia.md). La rúbrica detallada del proyecto:
+[rubrica_proyecto_final.md](../proyecto_final/rubrica_proyecto_final.md).
 Aprobar la sustentación (explicar el propio código) es **condición necesaria**
 para aprobar el proyecto.
 
@@ -151,7 +151,7 @@ para aprobar el proyecto.
 | `sectores_agregado.csv` | 7 sectores, referente nacional limpio | U2, proyecto |
 | `geih_nivelacion.csv` | 21.821 ocupados — extracto real de la GEIH (DANE) | U3, U4 |
 
-Descripción variable a variable: [diccionario de datos](../datos/diccionario_datos.html).
+Descripción variable a variable: [diccionario de datos](../datos/diccionario_datos.md).
 
 ## 9. Bibliografía y recursos
 

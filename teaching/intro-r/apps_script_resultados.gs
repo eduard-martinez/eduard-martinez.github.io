@@ -78,8 +78,8 @@ function doPost(e) {
       hojaDet.getRange(hojaDet.getLastRow() + 1, 1, filas.length, ENC_DETALLE.length).setValues(filas);
     }
 
-    // En el segundo intento (enviarCorreo === true), envía al estudiante sus
-    // resultados con las respuestas correctas.
+    // Cuando enviarCorreo === true, envía al estudiante sus resultados con las
+    // respuestas correctas (el front-end lo activa en cada intento).
     if (d.enviarCorreo && d.correo) { try { enviarCorreoFeedback_(d); } catch (e) {} }
 
     return json_({ ok: true });
