@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="PhD. Eduard F. Martínez-González">
 
-<title>Práctica guiada — Semana 11: Árboles de Clasificación</title>
+<title>Unidad 5 - Práctica: el torneo de clasificadores</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,1574 +21,57 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
 <script src="week-11_files/libs/clipboard/clipboard.min.js"></script>
 <script src="week-11_files/libs/quarto-html/quarto.js" type="module"></script>
 <script src="week-11_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-11_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="week-11_files/libs/quarto-html/popper.min.js"></script>
 <script src="week-11_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="week-11_files/libs/quarto-html/anchor.min.js"></script>
 <link href="week-11_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="week-11_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="week-11_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="week-11_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="week-11_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="week-11_files/libs/bootstrap/bootstrap-e6bb25874def5e3c119f13f2169c6013.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="week-11_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <style>html{ scroll-behavior: smooth; }</style>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  
-<style type="text/css">
-.monaco-editor pre {
-  background-color: unset !important;
-}
-
-.qwebr-editor-toolbar {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  box-sizing: border-box;
-}
-
-.qwebr-editor-toolbar-left-buttons, .qwebr-editor-toolbar-right-buttons {
-  display: flex;
-}
-
-.qwebr-non-interactive-loading-container.qwebr-cell-needs-evaluation, .qwebr-non-interactive-loading-container.qwebr-cell-evaluated {
-  justify-content: center;
-  display: flex;
-  background-color: rgba(250, 250, 250, 0.65);
-  border: 1px solid rgba(233, 236, 239, 0.65);
-  border-radius: 0.5rem;
-  margin-top: 15px;
-  margin-bottom: 15px;
-}
-
-.qwebr-r-project-logo {
-  color: #2767B0; /* R Project's blue color */
-}
-
-.qwebr-icon-status-spinner {
-  color: #7894c4;
-}
-
-.qwebr-icon-run-code {
-  color: #0d9c29
-}
-
-body.quarto-light .qwebr-output-code-stdout {
-  color: #111;
-}
-
-body.quarto-dark .qwebr-output-code-stdout {
-  color: #EEE;
-}
-
-.qwebr-output-code-stderr {
-  color: #db4133;
-}
-
-body.quarto-light .qwebr-editor {
-  border: 1px solid #EEEEEE;
-}
-
-body.quarto-light .qwebr-editor-toolbar {
-  background-color: #EEEEEE;
-  padding: 0.2rem 0.5rem;
-}
-
-body.quarto-dark .qwebr-editor {
-  border: 1px solid #111;
-}
-
-body.quarto-dark .qwebr-editor-toolbar {
-  background-color: #111;
-  padding: 0.2rem 0.5rem;
-}
-
-.qwebr-button {
-  display: inline-block;
-  font-weight: 400;
-  line-height: 1;
-  text-decoration: none;
-  text-align: center;
-  padding: 0.375rem 0.75rem;
-  font-size: .9rem;
-  border-radius: 0.25rem;
-  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-}
-
-body.quarto-light .qwebr-button {
-  background-color: #EEEEEE;
-  color: #000;
-  border-color: #dee2e6;
-  border: 1px solid rgba(0,0,0,0);
-}
-
-body.quarto-dark .qwebr-button {
-  background-color: #111;
-  color: #EEE;
-  border-color: #dee2e6;
-  border: 1px solid rgba(0,0,0,0);
-}
-
-body.quarto-light .qwebr-button:hover {
-  color: #000;
-  background-color: #d9dce0;
-  border-color: #c8ccd0;
-}
-
-body.quarto-dark .qwebr-button:hover {
-  color: #d9dce0;
-  background-color: #323232;
-  border-color: #d9dce0;
-}
-
-.qwebr-button:disabled,.qwebr-button.disabled,fieldset:disabled .qwebr-button {
-  pointer-events: none;
-  opacity: .65
-}
-
-.qwebr-button-reset {
-  color: #696969; /*#4682b4;*/
-}
-
-.qwebr-button-copy {
-  color: #696969;
-}
-
-/* Style the code highlight lines */
-body.quarto-light .qwebr-editor-highlight-line {
-  background-color: lightblue;
-}
-
-body.quarto-dark .qwebr-editor-highlight-line {
-  background-color: darkblue;
-}
-
-/* Style the modal pop-up */
-
-/* The Modal (background) */
-.qwebr-modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-  padding-top: 60px;
-}
-
-/* Modal Content */
-.qwebr-modal-content {
-  background-color: #fefefe;
-  margin: 5% auto; /* 15% from the top and centered */
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%; /* Could be more or less, depending on screen size */
-}
-
-.qwebr-modal-content-code {
-  max-height: 50vh;
-  min-height: 5vh;
-  overflow: scroll;
-  border: 1px solid #888;
-}
-
-/* The Close Button */
-.qwebr-modal-close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.qwebr-modal-close:hover,
-.qwebr-modal-close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.qwebr-download-btn {
-  margin-top: 10px;
-  text-decoration: none !important;
-}
-
-/* Styling to download image that is created */
-
-.qwebr-canvas-image {
-  position: relative;
-  display: inline-block;
-  margin: 10px;
-}
-
-.qwebr-canvas-image-download-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 5px 10px;
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  cursor: pointer;
-  display: none;
-}
-
-figure:hover .qwebr-canvas-image-download-btn {
-  display: block;
-}
-
-/* Custom styling for RevealJS Presentations*/
-
-/* Reset the style of the interactive area */
-.reveal div.qwebr-interactive-area {
-  display: block;
-  box-shadow: none;
-  max-width: 100%;
-  max-height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* Provide space to entries */
-.reveal div.qwebr-output-code-area pre div {
-  margin: 1px 2px 1px 10px;
-}
-
-/* Collapse the inside code tags to avoid extra space between line outputs */
-.reveal pre div code.qwebr-output-code-stdout, .reveal pre div code.qwebr-output-code-stderr {
-  padding: 0;
-  display: contents;
-}
-
-body.reveal.quarto-light pre div code.qwebr-output-code-stdout {
-  color: #111;
-}
-
-body.reveal.quarto-dark pre div code.qwebr-output-code-stdout {
-  color: #EEEEEE;
-}
-
-.reveal pre div code.qwebr-output-code-stderr {
-  color: #db4133;
-}
-
-
-/* Create a border around console and output (does not effect graphs) */
-body.reveal.quarto-light div.qwebr-console-area {
-  border: 1px solid #EEEEEE;
-  box-shadow: 2px 2px 10px #EEEEEE;
-}
-
-body.reveal.quarto-dark div.qwebr-console-area {
-  border: 1px solid #111;
-  box-shadow: 2px 2px 10px #111;
-}
-
-
-/* Cap output height and allow text to scroll */
-/* TODO: Is there a better way to fit contents/max it parallel to the monaco editor size? */
-.reveal div.qwebr-output-code-area pre {
-  max-height: 400px;
-  overflow: scroll;
-}
-
-iframe.qwebr-output-code-browse {
-  width: 100%;
-
-  /*
-    TODO: How to make the height automatic according to the widget size,
-    or respect the quarto code block options?
-  */
-  min-height: 500px;
-}
-
-</style>
-<script type="module">
-// Document level settings ----
-
-// Determine if we need to install R packages
-globalThis.qwebrInstallRPackagesList = ['dplyr', 'ggplot2', 'skimr'];
-
-// Specify possible locations to search for the repository
-globalThis.qwebrPackageRepoURLS = ['https://repo.r-wasm.org/'];
-
-// Check to see if we have an empty array, if we do set to skip the installation.
-globalThis.qwebrSetupRPackages = !(qwebrInstallRPackagesList.indexOf("") !== -1);
-globalThis.qwebrAutoloadRPackages = true;
-
-// Display a startup message?
-globalThis.qwebrShowStartupMessage = true;
-globalThis.qwebrShowHeaderMessage = false;
-
-// Describe the webR settings that should be used
-globalThis.qwebrCustomizedWebROptions = {
-  "baseURL": "https://webr.r-wasm.org/v0.5.2/",
-  "serviceWorkerUrl": "",
-  "homedir": "/home/web_user", 
-  "channelType": "ChannelType.Automatic"
-};
-
-// Store cell data
-globalThis.qwebrCellDetails = [{"code":"## Limpiar entorno / Clean environment\nrm(list = ls())\n\n## instalar\ninstall.packages(\"rpart\")  \ninstall.packages(\"rpart.plot\")  \n\n## Cargar paquetes / Load packages\nrequire(dplyr)    # manipulación de datos\nrequire(ggplot2)  # visualización\nrequire(rpart)    # árbol de decisión/regresión\nrequire(rpart.plot) # visualizar el árbol de forma clara","id":1,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-1","message":"false","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"false"}},{"code":"## Cargar datos / Load data\n#credito <- read.csv(\"https://eduard-martinez.github.io/teaching/ba/week-11/db/credito_clasificacion.csv\")\nsource(\"https://eduard-martinez.github.io/teaching/ba/week-11/db/credito_clasificacion.R\")","id":2,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-2","message":"false","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"false"}},{"code":"## inspect data\nhead(credito)","id":3,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-3","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Distribución de la variable de resultado / Target variable distribution\ntable(credito$decision)","id":4,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-4","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Proporción de cada categoría / Proportion per category\nprop.table(table(credito$decision))","id":5,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-5","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Fijar semilla para reproducibilidad / Set seed for reproducibility\nset.seed(2025)\n\n## Total de filas / Total rows\nn_total <- nrow(credito)\nn_total\n\n## Índices de entrenamiento (75% de los datos) / Training indices (75%)\nidx_train <- sample(x = 1:n_total, size = floor(0.75 * n_total))\n\n## Crear conjuntos / Create sets\ncredito_train <- credito[idx_train, ]\ncredito_test  <- credito[-idx_train, ]\n\n## Verificar tamaños / Check sizes\nnrow(credito_train)\nnrow(credito_test)","id":6,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-6","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Entrenar el árbol / Train the tree\n## method = \"class\" indica clasificación / method = \"class\" for classification\narbol <- rpart(formula = decision ~ ingreso_m + historial + deuda_actual + antiguedad_lab + edad,\n               data    = credito_train,\n               method  = \"class\",\n               control = rpart.control(maxdepth = 3))\n\n## Ver el árbol en texto / Print tree as text\narbol","id":7,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-7","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Visualización básica\nrpart.plot(arbol, type = 4, extra = 101)","id":8,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-8","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Visualización mejorada con colores y más detalle\nrpart.plot(\n  x          = arbol,\n  type       = 4,       # muestra las etiquetas en los nodos y hojas\n  extra      = 101,     # muestra n° de observaciones y porcentaje en cada nodo\n  box.palette = \"Blues\", # gradiente de color: azul claro = nota baja, azul oscuro = nota alta\n  shadow.col = \"gray80\",\n  nn         = TRUE,    # muestra número de nodo\n  fallen.leaves = TRUE, # alinea todas las hojas al fondo\n  main       = \"Árbol de Clasificación — Predicción de nota final\",\n  cex        = 0.85\n)","id":9,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-9","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Predecir en conjunto de prueba / Predict on test set\n## type = \"class\" devuelve la categoría, no probabilidades / returns category label\npredicciones <- predict(object  = arbol,\n                        newdata = credito_test,\n                        type    = \"class\")","id":10,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-10","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Cuántas predicciones de cada categoría / Count predictions per category\ntable(predicciones)","id":11,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-11","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Comparar predicción vs. valor real — primeras 10 filas\n## Compare prediction vs. real value — first 10 rows\nhead(\n  data.frame(real       = credito_test$decision,\n             prediccion = predicciones),\n  n = 10\n)","id":12,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-12","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Construir la tabla de confusión / Build confusion matrix\n## Filas = valor real, Columnas = predicción del modelo\n## Rows = real value, Cols = model prediction\ntabla_confusion <- table(Real      = credito_test$decision,\n                         Prediccion = predicciones)\n\n## Ver la tabla / Print table\ntabla_confusion","id":13,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-13","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Extraer cada celda de la tabla / Extract each cell from the table\n## Sintaxis: tabla[\"nombre_fila\", \"nombre_columna\"]\n## Syntax:   table[\"row_name\",  \"column_name\"]","id":14,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-14","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}}];
-
-</script>
-<script type="module">
-// Declare startupMessageQWebR globally
-globalThis.qwebrStartupMessage = document.createElement("p");
-
-// Verify if OffScreenCanvas is supported
-globalThis.qwebrOffScreenCanvasSupport = function() {
-  return typeof OffscreenCanvas !== 'undefined'
-}
-
-// Function to set the button text
-globalThis.qwebrSetInteractiveButtonState = function(buttonText, enableCodeButton = true) {
-  document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
-    btn.innerHTML = buttonText;
-    btn.disabled = !enableCodeButton;
-  });
-}
-
-// Function to update the status message in non-interactive cells
-globalThis.qwebrUpdateStatusMessage = function(message) {
-  document.querySelectorAll(".qwebr-status-text.qwebr-cell-needs-evaluation").forEach((elem) => {
-    elem.innerText = message;
-  });
-}
-
-// Function to update the status message
-globalThis.qwebrUpdateStatusHeader = function(message) {
-  qwebrStartupMessage.innerHTML = `
-    <i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i>
-    <span>${message}</span>`;
-}
-
-// Function to return true if element is found, false if not
-globalThis.qwebrCheckHTMLElementExists = function(selector) {
-  const element = document.querySelector(selector);
-  return !!element;
-}
-
-// Function that detects whether reveal.js slides are present
-globalThis.qwebrIsRevealJS = function() {
-  // If the '.reveal .slides' selector exists, RevealJS is likely present
-  return qwebrCheckHTMLElementExists('.reveal .slides');
-}
-
-// Initialize the Quarto sidebar element
-function qwebrSetupQuartoSidebar() {
-  var newSideBarDiv = document.createElement('div');
-  newSideBarDiv.id = 'quarto-margin-sidebar';
-  newSideBarDiv.className = 'sidebar margin-sidebar';
-  newSideBarDiv.style.top = '0px';
-  newSideBarDiv.style.maxHeight = 'calc(0px + 100vh)';
-
-  return newSideBarDiv;
-}
-
-// Position the sidebar in the document
-function qwebrPlaceQuartoSidebar() {
-  // Get the reference to the element with id 'quarto-document-content'
-  var referenceNode = document.getElementById('quarto-document-content');
-
-  // Create the new div element
-  var newSideBarDiv = qwebrSetupQuartoSidebar();
-
-  // Insert the new div before the 'quarto-document-content' element
-  referenceNode.parentNode.insertBefore(newSideBarDiv, referenceNode);
-}
-
-function qwebrPlaceMessageContents(content, html_location = "title-block-header", revealjs_location = "title-slide") {
-
-  // Get references to header elements
-  const headerHTML = document.getElementById(html_location);
-  const headerRevealJS = document.getElementById(revealjs_location);
-
-  // Determine where to insert the quartoTitleMeta element
-  if (headerHTML || headerRevealJS) {
-    // Append to the existing "title-block-header" element or "title-slide" div
-    (headerHTML || headerRevealJS).appendChild(content);
-  } else {
-    // If neither headerHTML nor headerRevealJS is found, insert after "webr-monaco-editor-init" script
-    const monacoScript = document.getElementById("qwebr-monaco-editor-init");
-    const header = document.createElement("header");
-    header.setAttribute("id", "title-block-header");
-    header.appendChild(content);
-    monacoScript.after(header);
-  }
-}
-
-
-
-function qwebrOffScreenCanvasSupportWarningMessage() {
-  
-  // Verify canvas is supported.
-  if(qwebrOffScreenCanvasSupport()) return;
-
-  // Create the main container div
-  var calloutContainer = document.createElement('div');
-  calloutContainer.classList.add('callout', 'callout-style-default', 'callout-warning', 'callout-titled');
-
-  // Create the header div
-  var headerDiv = document.createElement('div');
-  headerDiv.classList.add('callout-header', 'd-flex', 'align-content-center');
-
-  // Create the icon container div
-  var iconContainer = document.createElement('div');
-  iconContainer.classList.add('callout-icon-container');
-
-  // Create the icon element
-  var iconElement = document.createElement('i');
-  iconElement.classList.add('callout-icon');
-
-  // Append the icon element to the icon container
-  iconContainer.appendChild(iconElement);
-
-  // Create the title container div
-  var titleContainer = document.createElement('div');
-  titleContainer.classList.add('callout-title-container', 'flex-fill');
-  titleContainer.innerText = 'Warning: Web Browser Does Not Support Graphing!';
-
-  // Append the icon container and title container to the header div
-  headerDiv.appendChild(iconContainer);
-  headerDiv.appendChild(titleContainer);
-
-  // Create the body container div
-  var bodyContainer = document.createElement('div');
-  bodyContainer.classList.add('callout-body-container', 'callout-body');
-
-  // Create the paragraph element for the body content
-  var paragraphElement = document.createElement('p');
-  paragraphElement.innerHTML = 'This web browser does not have support for displaying graphs through the <code>quarto-webr</code> extension since it lacks an <code>OffScreenCanvas</code>. Please upgrade your web browser to one that supports <code>OffScreenCanvas</code>.';
-
-  // Append the paragraph element to the body container
-  bodyContainer.appendChild(paragraphElement);
-
-  // Append the header div and body container to the main container div
-  calloutContainer.appendChild(headerDiv);
-  calloutContainer.appendChild(bodyContainer);
-
-  // Append the main container div to the document depending on format
-  qwebrPlaceMessageContents(calloutContainer, "title-block-header"); 
-
-}
-
-
-// Function that attaches the document status message and diagnostics
-function displayStartupMessage(showStartupMessage, showHeaderMessage) {
-  if (!showStartupMessage) {
-    return;
-  }
-
-  // Create the outermost div element for metadata
-  const quartoTitleMeta = document.createElement("div");
-  quartoTitleMeta.classList.add("quarto-title-meta");
-
-  // Create the first inner div element
-  const firstInnerDiv = document.createElement("div");
-  firstInnerDiv.setAttribute("id", "qwebr-status-message-area");
-
-  // Create the second inner div element for "WebR Status" heading and contents
-  const secondInnerDiv = document.createElement("div");
-  secondInnerDiv.setAttribute("id", "qwebr-status-message-title");
-  secondInnerDiv.classList.add("quarto-title-meta-heading");
-  secondInnerDiv.innerText = "WebR Status";
-
-  // Create another inner div for contents
-  const secondInnerDivContents = document.createElement("div");
-  secondInnerDivContents.setAttribute("id", "qwebr-status-message-body");
-  secondInnerDivContents.classList.add("quarto-title-meta-contents");
-
-  // Describe the WebR state
-  qwebrStartupMessage.innerText = "🟡 Loading...";
-  qwebrStartupMessage.setAttribute("id", "qwebr-status-message-text");
-  // Add `aria-live` to auto-announce the startup status to screen readers
-  qwebrStartupMessage.setAttribute("aria-live", "assertive");
-
-  // Append the startup message to the contents
-  secondInnerDivContents.appendChild(qwebrStartupMessage);
-
-  // Add a status indicator for COOP and COEP Headers if needed
-  if (showHeaderMessage) {
-    const crossOriginMessage = document.createElement("p");
-    crossOriginMessage.innerText = `${crossOriginIsolated ? '🟢' : '🟡'} COOP & COEP Headers`;
-    crossOriginMessage.setAttribute("id", "qwebr-coop-coep-header");
-    secondInnerDivContents.appendChild(crossOriginMessage);
-  }
-
-  // Combine the inner divs and contents
-  firstInnerDiv.appendChild(secondInnerDiv);
-  firstInnerDiv.appendChild(secondInnerDivContents);
-  quartoTitleMeta.appendChild(firstInnerDiv);
-
-  // Place message on webpage
-  qwebrPlaceMessageContents(quartoTitleMeta); 
-}
-
-function qwebrAddCommandHistoryModal() {
-  // Create the modal div
-  var modalDiv = document.createElement('div');
-  modalDiv.id = 'qwebr-history-modal';
-  modalDiv.className = 'qwebr-modal';
-
-  // Create the modal content div
-  var modalContentDiv = document.createElement('div');
-  modalContentDiv.className = 'qwebr-modal-content';
-
-  // Create the span for closing the modal
-  var closeSpan = document.createElement('span');
-  closeSpan.id = 'qwebr-command-history-close-btn';
-  closeSpan.className = 'qwebr-modal-close';
-  closeSpan.innerHTML = '&times;';
-
-  // Create the h1 element for the modal
-  var modalH1 = document.createElement('h1');
-  modalH1.textContent = 'R History Command Contents';
-
-  // Create an anchor element for downloading the Rhistory file 
-  var downloadLink = document.createElement('a');
-  downloadLink.href = '#';
-  downloadLink.id = 'qwebr-download-history-btn';
-  downloadLink.className = 'qwebr-download-btn';
-
-  // Create an 'i' element for the icon
-  var icon = document.createElement('i');
-  icon.className = 'bi bi-file-code';
-
-  // Append the icon to the anchor element
-  downloadLink.appendChild(icon);
-
-  // Add the text 'Download R History' to the anchor element
-  downloadLink.appendChild(document.createTextNode(' Download R History File'));
-
-  // Create the pre for command history contents
-  var commandContentsPre = document.createElement('pre');
-  commandContentsPre.id = 'qwebr-command-history-contents';
-  commandContentsPre.className = 'qwebr-modal-content-code';
-
-  // Append the close span, h1, and history contents pre to the modal content div
-  modalContentDiv.appendChild(closeSpan);
-  modalContentDiv.appendChild(modalH1);
-  modalContentDiv.appendChild(downloadLink);
-  modalContentDiv.appendChild(commandContentsPre);
-
-  // Append the modal content div to the modal div
-  modalDiv.appendChild(modalContentDiv);
-
-  // Append the modal div to the body
-  document.body.appendChild(modalDiv);
-}
-
-function qwebrRegisterRevealJSCommandHistoryModal() {
-  // Select the <ul> element inside the <div> with data-panel="Custom0"
-  let ulElement = document.querySelector('div[data-panel="Custom0"] > ul.slide-menu-items');
-
-  // Find the last <li> element with class slide-tool-item
-  let lastItem = ulElement.querySelector('li.slide-tool-item:last-child');
-
-  // Calculate the next data-item value
-  let nextItemValue = 0;
-  if (lastItem) {
-      nextItemValue = parseInt(lastItem.dataset.item) + 1;
-  }
-
-  // Create a new <li> element
-  let newListItem = document.createElement('li');
-  newListItem.className = 'slide-tool-item';
-  newListItem.dataset.item = nextItemValue.toString(); // Set the next available data-item value
-
-  // Create the <a> element inside the <li>
-  let newLink = document.createElement('a');
-  newLink.href = '#';
-  newLink.id = 'qwebrRHistoryButton'; // Set the ID for the new link
-  
-  // Create the <kbd> element inside the <a>
-  let newKbd = document.createElement('kbd');
-  newKbd.textContent = ' '; // Set to empty as we are not registering a keyboard shortcut
-
-  // Create text node for the link text
-  let newText = document.createTextNode(' View R History');
-
-  // Append <kbd> and text node to <a>
-  newLink.appendChild(newKbd);
-  newLink.appendChild(newText);
-
-  // Append <a> to <li>
-  newListItem.appendChild(newLink);
-
-  // Append <li> to <ul>
-  ulElement.appendChild(newListItem);
-}
-
-// Handle setting up the R history modal
-function qwebrCodeLinks() {
-
-  if (qwebrIsRevealJS()) {
-    qwebrRegisterRevealJSCommandHistoryModal();
-    return;
-  }
-
-  // Create the container div
-  var containerDiv = document.createElement('div');
-  containerDiv.className = 'quarto-code-links';
-
-  // Create the h2 element
-  var h2 = document.createElement('h2');
-  h2.textContent = 'webR Code Links';
-
-  // Create the ul element
-  var ul = document.createElement('ul');
-
-  // Create the li element
-  var li = document.createElement('li');
-
-  // Create the a_history_btn element
-  var a_history_btn = document.createElement('a');
-  a_history_btn.href = 'javascript:void(0)';
-  a_history_btn.setAttribute('id', 'qwebrRHistoryButton');
-
-  // Create the i_history_btn element
-  var i_history_btn = document.createElement('i');
-  i_history_btn.className = 'bi bi-file-code';
-
-  // Create the text node for the link text
-  var text_history_btn = document.createTextNode('View R History');
-
-  // Append the icon element and link text to the a element
-  a_history_btn.appendChild(i_history_btn);
-  a_history_btn.appendChild(text_history_btn);
-
-  // Append the a element to the li element
-  li.appendChild(a_history_btn);
-
-  // Append the li element to the ul element
-  ul.appendChild(li);
-
-  // Append the h2 and ul elements to the container div
-  containerDiv.appendChild(h2);
-  containerDiv.appendChild(ul);
-
-  // Append the container div to the element with the ID 'quarto-margin-sidebar'
-  var sidebar = document.getElementById('quarto-margin-sidebar');
-    
-  // If the sidebar element is not found, create it
-  if(!sidebar) {
-    qwebrPlaceQuartoSidebar();
-  }
-  
-  // Re-select the sidebar element (if it was just created)
-  sidebar = document.getElementById('quarto-margin-sidebar');   
-
-
-  // If the sidebar element exists, append the container div to it
-  if(sidebar) {
-    // Append the container div to the sidebar
-    sidebar.appendChild(containerDiv);
-    // Force the sidebar to be clickable by removing the 'zindex-bottom' class
-    // added in pre-release: https://github.com/quarto-dev/quarto-cli/commit/f0c53a1ffcaa1de4eccbf07803b096898248adcc
-    sidebar.className = 'sidebar margin-sidebar';
-  } else {
-    // Get a debugger ...
-    console.warn('Element with ID "quarto-margin-sidebar" not found.');
-  }
-}
-
-// Call the function to append the code links for qwebR into the right sidebar
-qwebrCodeLinks();
-
-// Add the command history modal
-qwebrAddCommandHistoryModal();
-
-displayStartupMessage(qwebrShowStartupMessage, qwebrShowHeaderMessage);
-qwebrOffScreenCanvasSupportWarningMessage();
-</script>
-<script type="module">
-// Define a global storage and retrieval solution ----
-
-// Store commands executed in R
-globalThis.qwebrRCommandHistory = [];
-
-// Function to retrieve the command history
-globalThis.qwebrFormatRHistory = function() {
-   return qwebrRCommandHistory.join("\n\n");
-}
-
-// Retrieve HTML Elements ----
-
-// Get the command modal
-const command_history_modal = document.getElementById("qwebr-history-modal");
-
-// Get the button that opens the command modal
-const command_history_btn = document.getElementById("qwebrRHistoryButton");
-
-// Get the <span> element that closes the command modal
-const command_history_close_span = document.getElementById("qwebr-command-history-close-btn");
-
-// Get the download button for r history information
-const command_history_download_btn = document.getElementById("qwebr-download-history-btn");
-
-// Plug in command history into modal/download button ----
-
-// Function to populate the modal with command history
-function populateCommandHistoryModal() {
-    document.getElementById("qwebr-command-history-contents").innerHTML = qwebrFormatRHistory() || "No commands have been executed yet.";
-}
-
-// Function to format the current date and time to
-// a string with the format YYYY-MM-DD-HH-MM-SS
-function formatDateTime() {
-    const now = new Date();
-
-    const year = now.getFullYear();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
-}
-
-
-// Function to convert document title with datetime to a safe filename
-function safeFileName() {
-    // Get the current page title
-    let pageTitle = document.title;
-
-    // Combine the current page title with the current date and time
-    let pageNameWithDateTime = `Rhistory-${pageTitle}-${formatDateTime()}`;
-
-    // Replace unsafe characters with safe alternatives
-    let safeFilename = pageNameWithDateTime.replace(/[\\/:\*\?! "<>\|]/g, '-');
-
-    return safeFilename;
-}
-
-
-// Function to download list contents as text file
-function downloadRHistory() {
-    // Get the current page title + datetime and use it as the filename
-    const filename = `${safeFileName()}.R`;
-
-    // Get the text contents of the R History list
-    const text = qwebrFormatRHistory();
-
-    // Create a new Blob object with the text contents
-    const blob = new Blob([text], { type: 'text/plain' });
-  
-    // Create a new anchor element for the download
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-
-    // Append the anchor to the body, click it, and remove it
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}
-
-// Register event handlers ----
-
-// When the user clicks the View R History button, open the command modal
-command_history_btn.onclick = function() {
-    populateCommandHistoryModal();
-    command_history_modal.style.display = "block";
-}
-
-// When the user clicks on <span> (x), close the command modal
-command_history_close_span.onclick = function() {
-    command_history_modal.style.display = "none";
-}
-
-// When the user clicks anywhere outside of the command modal, close it
-window.onclick = function(event) {
-    if (event.target == command_history_modal) {
-        command_history_modal.style.display = "none";
-    }
-}
-
-// Add an onclick event listener to the download button so that
-// the user can download the R history as a text file
-command_history_download_btn.onclick = function() {
-    downloadRHistory();
-};
-</script>
-<script type="module">
-// Supported Evaluation Types for Context
-globalThis.EvalTypes = Object.freeze({
-  Interactive: 'interactive',
-  Setup: 'setup',
-  Output: 'output',
-});
-
-// Function that obtains the font size for a given element 
-globalThis.qwebrCurrentFontSizeOnElement = function(element, cssProperty = 'font-size') {
-
-  const currentFontSize = parseFloat(
-    window
-    .getComputedStyle(element)
-    .getPropertyValue(cssProperty)
-  );
-  
-  return currentFontSize;
-}
-
-// Function to determine font scaling
-globalThis.qwebrScaledFontSize = function(div, qwebrOptions) {
-  // Determine if we should compute font-size using RevealJS's `--r-main-font-size` 
-  // or if we can directly use the document's `font-size`.
-  const cssProperty = document.body.classList.contains('reveal') ? 
-    "--r-main-font-size" : "font-size";
-  
-  // Get the current font size on the div element
-  const elementFontSize = qwebrCurrentFontSizeOnElement(div, cssProperty);
-
-  // Determine the scaled font size value
-  const scaledFontSize = ((qwebrOptions['editor-font-scale'] ?? 1) * elementFontSize) ?? 17.5;
-
-  return scaledFontSize;
-}
-
-
-// Function that dispatches the creation request
-globalThis.qwebrCreateHTMLElement = function (
-  cellData
-) {
-
-  // Extract key components
-  const evalType = cellData.options.context;
-  const qwebrCounter = cellData.id;
-
-  // We make an assumption that insertion points are defined by the Lua filter as:
-  // qwebr-insertion-location-{qwebrCounter} 
-  const elementLocator = document.getElementById(`qwebr-insertion-location-${qwebrCounter}`);
-
-  // Figure out the routine to use to insert the element.
-  let qwebrElement;
-  switch ( evalType ) {
-    case EvalTypes.Interactive:
-      qwebrElement = qwebrCreateInteractiveElement(qwebrCounter, cellData.options);
-      break;
-    case EvalTypes.Output: 
-      qwebrElement = qwebrCreateNonInteractiveOutputElement(qwebrCounter, cellData.options);
-      break;
-    case EvalTypes.Setup: 
-      qwebrElement = qwebrCreateNonInteractiveSetupElement(qwebrCounter, cellData.options);
-      break;
-    default: 
-      qwebrElement = document.createElement('div');
-      qwebrElement.textContent = 'Error creating `quarto-webr` element';
-  }
-
-  // Insert the dynamically generated object at the document location.
-  elementLocator.appendChild(qwebrElement);
-};
-
-// Function that setups the interactive element creation
-globalThis.qwebrCreateInteractiveElement = function (qwebrCounter, qwebrOptions) {
-
-  // Create main div element
-  var mainDiv = document.createElement('div');
-  mainDiv.id = 'qwebr-interactive-area-' + qwebrCounter;
-  mainDiv.className = `qwebr-interactive-area`;
-  if (qwebrOptions.classes) {
-    mainDiv.className += " " + qwebrOptions.classes
-  }
-
-  // Add a unique cell identifier that users can customize
-  if (qwebrOptions.label) {
-    mainDiv.setAttribute('data-id', qwebrOptions.label);
-  }
-
-  // Create toolbar div
-  var toolbarDiv = document.createElement('div');
-  toolbarDiv.className = 'qwebr-editor-toolbar';
-  toolbarDiv.id = 'qwebr-editor-toolbar-' + qwebrCounter;
-
-  // Create a div to hold the left buttons
-  var leftButtonsDiv = document.createElement('div');
-  leftButtonsDiv.className = 'qwebr-editor-toolbar-left-buttons';
-
-  // Create a div to hold the right buttons
-  var rightButtonsDiv = document.createElement('div');
-  rightButtonsDiv.className = 'qwebr-editor-toolbar-right-buttons';
-
-  // Create Run Code button
-  var runCodeButton = document.createElement('button');
-  runCodeButton.className = 'btn btn-default qwebr-button qwebr-button-run';
-  runCodeButton.disabled = true;
-  runCodeButton.type = 'button';
-  runCodeButton.id = 'qwebr-button-run-' + qwebrCounter;
-  runCodeButton.textContent = '🟡 Loading webR...';
-  runCodeButton.title = `Run code (Shift + Enter)`;
-
-  // Append buttons to the leftButtonsDiv
-  leftButtonsDiv.appendChild(runCodeButton);
-
-  // Create Reset button
-  var resetButton = document.createElement('button');
-  resetButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-reset';
-  resetButton.type = 'button';
-  resetButton.id = 'qwebr-button-reset-' + qwebrCounter;
-  resetButton.title = 'Start over';
-  resetButton.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i>';
-
-  // Create Copy button
-  var copyButton = document.createElement('button');
-  copyButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-copy';
-  copyButton.type = 'button';
-  copyButton.id = 'qwebr-button-copy-' + qwebrCounter;
-  copyButton.title = 'Copy code';
-  copyButton.innerHTML = '<i class="fa-regular fa-copy"></i>';
-
-  // Append buttons to the rightButtonsDiv
-  rightButtonsDiv.appendChild(resetButton);
-  rightButtonsDiv.appendChild(copyButton);
-
-  // Create console area div
-  var consoleAreaDiv = document.createElement('div');
-  consoleAreaDiv.id = 'qwebr-console-area-' + qwebrCounter;
-  consoleAreaDiv.className = 'qwebr-console-area';
-
-  // Create editor div
-  var editorDiv = document.createElement('div');
-  editorDiv.id = 'qwebr-editor-' + qwebrCounter;
-  editorDiv.className = 'qwebr-editor';
-
-  // Create output code area div
-  var outputCodeAreaDiv = document.createElement('div');
-  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
-  outputCodeAreaDiv.className = 'qwebr-output-code-area';
-  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
-
-  // Create pre element inside output code area
-  var preElement = document.createElement('pre');
-  preElement.style.visibility = 'hidden';
-  outputCodeAreaDiv.appendChild(preElement);
-
-  // Create output graph area div
-  var outputGraphAreaDiv = document.createElement('div');
-  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
-  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
-
-  // Append buttons to the toolbar
-  toolbarDiv.appendChild(leftButtonsDiv);
-  toolbarDiv.appendChild(rightButtonsDiv);
-
-  // Append all elements to the main div
-  mainDiv.appendChild(toolbarDiv);
-  consoleAreaDiv.appendChild(editorDiv);
-  consoleAreaDiv.appendChild(outputCodeAreaDiv);
-  mainDiv.appendChild(consoleAreaDiv);
-  mainDiv.appendChild(outputGraphAreaDiv);
-
-  return mainDiv;
-}
-
-// Function that adds output structure for non-interactive output
-globalThis.qwebrCreateNonInteractiveOutputElement = function(qwebrCounter, qwebrOptions) {
-  // Create main div element
-  var mainDiv = document.createElement('div');
-  mainDiv.id = 'qwebr-noninteractive-area-' + qwebrCounter;
-  mainDiv.className = `qwebr-noninteractive-area`;
-  if (qwebrOptions.classes) {
-    mainDiv.className += " " + qwebrOptions.classes
-  }
-  
-  // Add a unique cell identifier that users can customize
-  if (qwebrOptions.label) {
-    mainDiv.setAttribute('data-id', qwebrOptions.label);
-  }
-  
-  // Create a status container div
-  var statusContainer = createLoadingContainer(qwebrCounter);
-
-  // Create output code area div
-  var outputCodeAreaDiv = document.createElement('div');
-  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
-  outputCodeAreaDiv.className = 'qwebr-output-code-area';
-  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
-
-  // Create pre element inside output code area
-  var preElement = document.createElement('pre');
-  preElement.style.visibility = 'hidden';
-  outputCodeAreaDiv.appendChild(preElement);
-
-  // Create output graph area div
-  var outputGraphAreaDiv = document.createElement('div');
-  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
-  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
-
-  // Append all elements to the main div
-  mainDiv.appendChild(statusContainer);
-  mainDiv.appendChild(outputCodeAreaDiv);
-  mainDiv.appendChild(outputGraphAreaDiv);
-
-  return mainDiv;
-};
-
-// Function that adds a stub in the page to indicate a setup cell was used.
-globalThis.qwebrCreateNonInteractiveSetupElement = function(qwebrCounter, qwebrOptions) {
-  // Create main div element
-  var mainDiv = document.createElement('div');
-  mainDiv.id = `qwebr-noninteractive-setup-area-${qwebrCounter}`;
-  mainDiv.className = `qwebr-noninteractive-setup-area`;
-  if (qwebrOptions.classes) {
-    mainDiv.className += " " + qwebrOptions.classes
-  }
-
-
-  // Add a unique cell identifier that users can customize
-  if (qwebrOptions.label) {
-    mainDiv.setAttribute('data-id', qwebrOptions.label);
-  }
-
-  // Create a status container div
-  var statusContainer = createLoadingContainer(qwebrCounter);
-
-  // Append status onto the main div
-  mainDiv.appendChild(statusContainer);
-
-  return mainDiv;
-}
-
-
-// Function to create loading container with specified ID
-globalThis.createLoadingContainer = function(qwebrCounter) {
-
-  // Create a status container
-  const container = document.createElement('div');
-  container.id = `qwebr-non-interactive-loading-container-${qwebrCounter}`;
-  container.className = 'qwebr-non-interactive-loading-container qwebr-cell-needs-evaluation';
-
-  // Create an R project logo to indicate its a code space
-  const rProjectIcon = document.createElement('i');
-  rProjectIcon.className = 'fa-brands fa-r-project fa-3x qwebr-r-project-logo';
-
-  // Setup a loading icon from font awesome
-  const spinnerIcon = document.createElement('i');
-  spinnerIcon.className = 'fa-solid fa-spinner fa-spin fa-1x qwebr-icon-status-spinner';
-
-  // Add a section for status text
-  const statusText = document.createElement('p');
-  statusText.id = `qwebr-status-text-${qwebrCounter}`;
-  statusText.className = `qwebr-status-text qwebr-cell-needs-evaluation`;
-  statusText.innerText = 'Loading webR...';
-
-  // Incorporate an inner container
-  const innerContainer = document.createElement('div');
-
-  // Append elements to the inner container
-  innerContainer.appendChild(spinnerIcon);
-  innerContainer.appendChild(statusText);
-
-  // Append elements to the main container
-  container.appendChild(rProjectIcon);
-  container.appendChild(innerContainer);
-
-  return container;
-}
-</script>
-<script type="module">
-// Function to install a single package
-async function qwebrInstallRPackage(packageName) {
-  await mainWebR.evalRVoid(`webr::install('${packageName}');`);
-}
-
-// Function to load a single package
-async function qwebrLoadRPackage(packageName) {
-  await mainWebR.evalRVoid(`require('${packageName}', quietly = TRUE)`);
-}
-
-// Generic function to process R packages
-async function qwebrProcessRPackagesWithStatus(packages, processType, displayStatusMessageUpdate = true) {
-  // Switch between contexts
-  const messagePrefix = processType === 'install' ? 'Installing' : 'Loading';
-
-  // Modify button state
-  qwebrSetInteractiveButtonState(`🟡 ${messagePrefix} package ...`, false);
-
-  // Iterate over packages
-  for (let i = 0; i < packages.length; i++) {
-    const activePackage = packages[i];
-    const formattedMessage = `${messagePrefix} package ${i + 1} out of ${packages.length}: ${activePackage}`;
-
-    // Display the update in header
-    if (displayStatusMessageUpdate) {
-      qwebrUpdateStatusHeader(formattedMessage);
-    }
-
-    // Display the update in non-active areas
-    qwebrUpdateStatusMessage(formattedMessage);
-
-    // Run package installation
-    if (processType === 'install') {
-      await qwebrInstallRPackage(activePackage);
-    } else {
-      await qwebrLoadRPackage(activePackage);
-    }
-  }
-
-  // Clean slate
-  if (processType === 'load') {
-    await mainWebR.flush();
-  }
-}
-
-// Start a timer
-const initializeWebRTimerStart = performance.now();
-
-// Encase with a dynamic import statement
-globalThis.qwebrInstance = import(qwebrCustomizedWebROptions.baseURL + "webr.mjs").then(
-  async ({ WebR, ChannelType }) => {
-    // Populate WebR options with defaults or new values based on `webr` meta
-    globalThis.mainWebR = new WebR(qwebrCustomizedWebROptions);
-
-    // Initialization WebR
-    await mainWebR.init();
-
-    // Setup a shelter
-    globalThis.mainWebRCodeShelter = await new mainWebR.Shelter();
-
-    // Setup a pager to allow processing help documentation
-    await mainWebR.evalRVoid('webr::pager_install()');
-
-    // Setup a viewer to allow processing htmlwidgets.
-    // This might not be available in old webr version
-    await mainWebR.evalRVoid('try({ webr::viewer_install() })');
-
-    // Override the existing install.packages() to use webr::install()
-    await mainWebR.evalRVoid('webr::shim_install()');
-
-    // Specify the repositories to pull from
-    // Note: webR does not use the `repos` option, but instead uses `webr_pkg_repos`
-    // inside of `install()`. However, other R functions still pull from `repos`.
-    await mainWebR.evalRVoid(`
-      options(
-        webr_pkg_repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')}),
-        repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')})
-      )
-    `);
-
-    // Check to see if any packages need to be installed
-    if (qwebrSetupRPackages) {
-      // Obtain only a unique list of packages
-      const uniqueRPackageList = Array.from(new Set(qwebrInstallRPackagesList));
-
-      // Install R packages one at a time (either silently or with a status update)
-      await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'install', qwebrShowStartupMessage);
-
-      if (qwebrAutoloadRPackages) {
-        // Load R packages one at a time (either silently or with a status update)
-        await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'load', qwebrShowStartupMessage);
-      }
-    }
-  }
-);
-
-// Stop timer
-const initializeWebRTimerEnd = performance.now();
-
-</script>
-<script type="module">
-// Function to verify a given JavaScript Object is empty
-globalThis.qwebrIsObjectEmpty = function (arr) {
-    return Object.keys(arr).length === 0;
-}
-
-// Global version of the Escape HTML function that converts HTML
-// characters to their HTML entities.
-globalThis.qwebrEscapeHTMLCharacters = function(unsafe) {
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-};
-
-// Passthrough results
-globalThis.qwebrIdentity = function(x) {
-    return x;
-};
-
-// Append a comment
-globalThis.qwebrPrefixComment = function(x, comment) {
-    return `${comment}${x}`;
-};
-
-// Function to store the code in the history
-globalThis.qwebrLogCodeToHistory = function(codeToRun, options) {
-    qwebrRCommandHistory.push(
-        `# Ran code in ${options.label} at ${new Date().toLocaleString()} ----\n${codeToRun}`
-    );
-};
-
-// Function to attach a download button onto the canvas
-// allowing the user to download the image.
-function qwebrImageCanvasDownloadButton(canvas, canvasContainer) {
-
-    // Create the download button
-    const downloadButton = document.createElement('button');
-    downloadButton.className = 'qwebr-canvas-image-download-btn';
-    downloadButton.textContent = 'Download Image';
-    canvasContainer.appendChild(downloadButton);
-
-    // Trigger a download of the image when the button is clicked
-    downloadButton.addEventListener('click', function() {
-        const image = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = image;
-        link.download = 'qwebr-canvas-image.png';
-        link.click();
-    });
-}
-
-
-// Function to parse the pager results
-globalThis.qwebrParseTypePager = async function (msg) {
-
-    // Split out the event data
-    const { path, title, deleteFile } = msg.data;
-
-    // Process the pager data by reading the information from disk
-    const paged_data = await mainWebR.FS.readFile(path).then((data) => {
-        // Obtain the file content
-        let content = new TextDecoder().decode(data);
-
-        // Remove excessive backspace characters until none remain
-        while(content.match(/.[\b]/)){
-            content = content.replace(/.[\b]/g, '');
-        }
-
-        // Returned cleaned data
-        return content;
-    });
-
-    // Unlink file if needed
-    if (deleteFile) {
-        await mainWebR.FS.unlink(path);
-    }
-
-    // Return extracted data with spaces
-    return paged_data;
-};
-
-
-// Function to parse the browse results
-globalThis.qwebrParseTypeBrowse = async function (msg) {
-
-    // msg.type === "browse"
-    const path = msg.data.url;
-
-    // Process the browse data by reading the information from disk
-    const browse_data = await mainWebR.FS.readFile(path).then((data) => {
-        // Obtain the file content
-        let content = new TextDecoder().decode(data);
-
-        return content;
-    });
-
-    // Return extracted data as-is
-    return browse_data;
-};
-
-// Function to run the code using webR and parse the output
-globalThis.qwebrComputeEngine = async function(
-    codeToRun,
-    elements,
-    options) {
-
-    // Call into the R compute engine that persists within the document scope.
-    // To be prepared for all scenarios, the following happens:
-    // 1. We setup a canvas device to write to by making a namespace call into the {webr} package
-    // 2. We use values inside of the options array to set the figure size.
-    // 3. We capture the output stream information (STDOUT and STERR)
-    // 4. We disable the current device's image creation.
-    // 5. Piece-wise parse the results into the different output areas
-
-    // Create a pager variable for help/file contents
-    let pager = [];
-
-    // Handle how output is processed
-    let showMarkup = options.results === "markup" && options.output !== "asis";
-    let processOutput;
-
-    if (showMarkup) {
-        processOutput = qwebrEscapeHTMLCharacters;
-    } else {
-        processOutput = qwebrIdentity;
-    }
-
-    // ----
-    // Convert from Inches to Pixels by using DPI (dots per inch)
-    // for bitmap devices (dpi * inches = pixels)
-    let fig_width = options["fig-width"] * options["dpi"];
-    let fig_height = options["fig-height"] * options["dpi"];
-
-    // Initialize webR
-    await mainWebR.init();
-
-    // Configure capture output
-    let captureOutputOptions = {
-        withAutoprint: true,
-        captureStreams: true,
-        captureConditions: false,
-        // env: webR.objs.emptyEnv, // maintain a global environment for webR v0.2.0
-    };
-
-    // Determine if the browser supports OffScreen
-    if (qwebrOffScreenCanvasSupport()) {
-        // Mirror default options of webr::canvas()
-        // with changes to figure height and width.
-        captureOutputOptions.captureGraphics = {
-            width: fig_width,
-            height: fig_height,
-            bg: "white", // default: transparent
-            pointsize: 12,
-            capture: true
-        };
-    }  else {
-        // Disable generating graphics
-        captureOutputOptions.captureGraphics = false;
-    }
-
-    // Store the code to run in history
-    qwebrLogCodeToHistory(codeToRun, options);
-
-    // Setup a webR canvas by making a namespace call into the {webr} package
-    // Evaluate the R code
-    // Remove the active canvas silently
-    const result = await mainWebRCodeShelter.captureR(
-        `${codeToRun}`,
-        captureOutputOptions
-    );
-
-    // -----
-
-    // Start attempting to parse the result data
-    processResultOutput:try {
-
-        // Avoid running through output processing
-        if (options.results === "hide" || options.output === "false") {
-            break processResultOutput;
-        }
-
-        // Merge output streams of STDOUT and STDErr (messages and errors are combined.)
-        // Require both `warning` and `message` to be true to display `STDErr`.
-        const out = result.output
-        .filter(
-            evt => evt.type === "stdout" ||
-            ( evt.type === "stderr" && (options.warning === "true" && options.message === "true"))
-        )
-        .map((evt, index) => {
-            const className = `qwebr-output-code-${evt.type}`;
-            const outputResult = qwebrPrefixComment(processOutput(evt.data), options.comment);
-            return `<code id="${className}-editor-${elements.id}-result-${index + 1}" class="${className}">${outputResult}</code>`;
-        })
-        .join("\n");
-
-
-        // Clean the state
-        // We're now able to process pager events.
-        // As a result, we cannot maintain a true 1-to-1 output order
-        // without individually feeding each line
-        const msgs = await mainWebR.flush();
-
-        // Use `map` to process the filtered "pager" events asynchronously
-        const pager = [];
-        const browse = [];
-
-        await Promise.all(
-            msgs.map(
-                async (msg) => {
-
-                    const msgType = msg.type || "unknown";
-
-                    switch(msgType) {
-                        case 'pager':
-                            const pager_data = await qwebrParseTypePager(msg);
-                            pager.push(pager_data);
-                            break;
-                        case 'browse':
-                            const browse_data = await qwebrParseTypeBrowse(msg);
-                            browse.push(browse_data);
-                            break;
-                    }
-                    return;
-                }
-            )
-        );
-
-        // Nullify the output area of content
-        elements.outputCodeDiv.innerHTML = "";
-        elements.outputGraphDiv.innerHTML = "";
-
-        // Design an output object for messages
-        const pre = document.createElement("pre");
-        if (/\S/.test(out)) {
-            // Display results as HTML elements to retain output styling
-            const div = document.createElement("div");
-            div.innerHTML = out;
-
-            // Calculate a scaled font-size value
-            const scaledFontSize = qwebrScaledFontSize(
-                elements.outputCodeDiv, options);
-
-            // Override output code cell size
-            pre.style.fontSize = `${scaledFontSize}px`;
-            pre.appendChild(div);
-        } else {
-            // If nothing is present, hide the element.
-            pre.style.visibility = "hidden";
-        }
-
-        elements.outputCodeDiv.appendChild(pre);
-
-        // Determine if we have graphs to display
-        if (result.images.length > 0) {
-
-            // Create figure element
-            const figureElement = document.createElement("figure");
-            figureElement.className = "qwebr-canvas-image";
-
-            // Place each rendered graphic onto a canvas element
-            result.images.forEach((img) => {
-
-                // Construct canvas for object
-                const canvas = document.createElement("canvas");
-
-                // Add an image download button
-                qwebrImageCanvasDownloadButton(canvas, figureElement);
-
-                // Set canvas size to image
-                canvas.width = img.width;
-                canvas.height = img.height;
-
-                // Apply output truncations
-                canvas.style.width = options["out-width"] ? options["out-width"] : `${fig_width}px`;
-                if (options["out-height"]) {
-                    canvas.style.height = options["out-height"];
-                }
-
-                // Apply styling
-                canvas.style.display = "block";
-                canvas.style.margin = "auto";
-
-                // Draw image onto Canvas
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0, img.width, img.height);
-
-                // Append canvas to figure output area
-                figureElement.appendChild(canvas);
-
-            });
-
-            if (options['fig-cap']) {
-                // Create figcaption element
-                const figcaptionElement = document.createElement('figcaption');
-                figcaptionElement.innerText = options['fig-cap'];
-                // Append figcaption to figure
-                figureElement.appendChild(figcaptionElement);
-            }
-
-            elements.outputGraphDiv.appendChild(figureElement);
-
-        }
-
-        // Display the pager data
-        if (pager.length > 0) {
-            // Use the `pre` element to preserve whitespace.
-            pager.forEach((paged_data, index) => {
-                const pre_pager = document.createElement("pre");
-                pre_pager.innerText = paged_data;
-                pre_pager.classList.add("qwebr-output-code-pager");
-                pre_pager.setAttribute("id", `qwebr-output-code-pager-editor-${elements.id}-result-${index + 1}`);
-                elements.outputCodeDiv.appendChild(pre_pager);
-            });
-        }
-
-        // Display the browse data
-        if (browse.length > 0) {
-            // Use the `pre` element to preserve whitespace.
-            browse.forEach((browse_data, index) => {
-                const iframe_browse = document.createElement('iframe');
-                iframe_browse.classList.add("qwebr-output-code-browse");
-                iframe_browse.setAttribute("id", `qwebr-output-code-browse-editor-${elements.id}-result-${index + 1}`);
-                iframe_browse.style.width = "100%";
-                iframe_browse.style.minHeight = "500px";
-                elements.outputCodeDiv.appendChild(iframe_browse);
-
-                iframe_browse.contentWindow.document.open();
-                iframe_browse.contentWindow.document.write(browse_data);
-                iframe_browse.contentWindow.document.close();
-            });
-        }
-    } finally {
-        // Clean up the remaining code
-        mainWebRCodeShelter.purge();
-    }
-};
-
-// Function to execute the code (accepts code as an argument)
-globalThis.qwebrExecuteCode = async function (
-    codeToRun,
-    id,
-    options = {}) {
-
-    // If options are not passed, we fall back on the bare minimum to handle the computation
-    if (qwebrIsObjectEmpty(options)) {
-        options = {
-            "context": "interactive",
-            "fig-width": 7, "fig-height": 5,
-            "out-width": "700px", "out-height": "",
-            "dpi": 72,
-            "results": "markup",
-            "warning": "true", "message": "true",
-        };
-    }
-
-    // Next, we access the compute areas values
-    const elements = {
-        runButton: document.getElementById(`qwebr-button-run-${id}`),
-        outputCodeDiv: document.getElementById(`qwebr-output-code-area-${id}`),
-        outputGraphDiv: document.getElementById(`qwebr-output-graph-area-${id}`),
-        id: id,
-    }
-
-    // Disallowing execution of other code cells
-    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
-        btn.disabled = true;
-    });
-
-    if (options.context == EvalTypes.Interactive) {
-        // Emphasize the active code cell
-        elements.runButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i> <span>Run Code</span>';
-    }
-
-    // Evaluate the code and parse the output into the document
-    await qwebrComputeEngine(codeToRun, elements, options);
-
-    // Switch to allowing execution of code
-    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
-        btn.disabled = false;
-    });
-
-    if (options.context == EvalTypes.Interactive) {
-        // Revert to the initial code cell state
-        elements.runButton.innerHTML = '<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>';
-    }
-}
-
-</script>
 
 
 <link rel="stylesheet" href="styles.css">
@@ -1602,318 +85,27 @@ globalThis.qwebrExecuteCode = async function (
     <h2 id="toc-title">Tabla de contenidos</h2>
    
   <ul>
-  <li><a href="#contexto-de-negocio" id="toc-contexto-de-negocio" class="nav-link active" data-scroll-target="#contexto-de-negocio"><span class="header-section-number">1</span> Contexto de negocio</a></li>
-  <li><a href="#paso-1-preparar-el-entorno" id="toc-paso-1-preparar-el-entorno" class="nav-link" data-scroll-target="#paso-1-preparar-el-entorno"><span class="header-section-number">2</span> Paso 1 — Preparar el entorno</a></li>
-  <li><a href="#paso-2-cargar-los-datos" id="toc-paso-2-cargar-los-datos" class="nav-link" data-scroll-target="#paso-2-cargar-los-datos"><span class="header-section-number">3</span> Paso 2 — Cargar los datos</a></li>
-  <li><a href="#paso-3-explorar-la-variable-de-resultado" id="toc-paso-3-explorar-la-variable-de-resultado" class="nav-link" data-scroll-target="#paso-3-explorar-la-variable-de-resultado"><span class="header-section-number">4</span> Paso 3 — Explorar la variable de resultado</a></li>
-  <li><a href="#paso-4-dividir-en-entrenamiento-y-prueba" id="toc-paso-4-dividir-en-entrenamiento-y-prueba" class="nav-link" data-scroll-target="#paso-4-dividir-en-entrenamiento-y-prueba"><span class="header-section-number">5</span> Paso 4 — Dividir en entrenamiento y prueba</a></li>
-  <li><a href="#paso-5-entrenar-el-árbol-de-clasificación" id="toc-paso-5-entrenar-el-árbol-de-clasificación" class="nav-link" data-scroll-target="#paso-5-entrenar-el-árbol-de-clasificación"><span class="header-section-number">6</span> Paso 5 — Entrenar el árbol de clasificación</a></li>
-  <li><a href="#paso-6-visualizar-el-árbol" id="toc-paso-6-visualizar-el-árbol" class="nav-link" data-scroll-target="#paso-6-visualizar-el-árbol"><span class="header-section-number">7</span> Paso 6 — Visualizar el árbol</a></li>
-  <li><a href="#paso-7-predecir-en-el-conjunto-de-prueba" id="toc-paso-7-predecir-en-el-conjunto-de-prueba" class="nav-link" data-scroll-target="#paso-7-predecir-en-el-conjunto-de-prueba"><span class="header-section-number">8</span> Paso 7 — Predecir en el conjunto de prueba</a></li>
-  <li><a href="#paso-8-construir-la-matriz-de-confusión" id="toc-paso-8-construir-la-matriz-de-confusión" class="nav-link" data-scroll-target="#paso-8-construir-la-matriz-de-confusión"><span class="header-section-number">9</span> Paso 8 — Construir la matriz de confusión</a></li>
-  <li><a href="#paso-9-extraer-vp-fp-vn-fn" id="toc-paso-9-extraer-vp-fp-vn-fn" class="nav-link" data-scroll-target="#paso-9-extraer-vp-fp-vn-fn"><span class="header-section-number">10</span> Paso 9 — Extraer VP, FP, VN, FN</a></li>
-  <li><a href="#paso-10-calcular-las-métricas" id="toc-paso-10-calcular-las-métricas" class="nav-link" data-scroll-target="#paso-10-calcular-las-métricas"><span class="header-section-number">11</span> Paso 10 — Calcular las métricas</a></li>
-  <li><a href="#paso-11-comparar-con-el-baseline" id="toc-paso-11-comparar-con-el-baseline" class="nav-link" data-scroll-target="#paso-11-comparar-con-el-baseline"><span class="header-section-number">12</span> Paso 11 — Comparar con el baseline</a></li>
-  <li><a href="#tu-entregable-la-matriz-completa" id="toc-tu-entregable-la-matriz-completa" class="nav-link" data-scroll-target="#tu-entregable-la-matriz-completa"><span class="header-section-number">13</span> Tu entregable: la matriz completa</a>
-  <ul class="collapse">
-  <li><a href="#checklist" id="toc-checklist" class="nav-link" data-scroll-target="#checklist"><span class="header-section-number">13.1</span> Checklist</a></li>
-  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">13.2</span> Preguntas de comprensión</a></li>
-  </ul></li>
+  <li><a href="#reglas-de-juego" id="toc-reglas-de-juego" class="nav-link active" data-scroll-target="#reglas-de-juego"><span class="header-section-number">1</span> Reglas de juego</a></li>
+  <li><a href="#el-setup-5-min" id="toc-el-setup-5-min" class="nav-link" data-scroll-target="#el-setup-5-min"><span class="header-section-number">2</span> El setup <span class="badge-time">≈ 5 min</span></a></li>
+  <li><a href="#momento-1-la-partición-y-la-vara-7-min" id="toc-momento-1-la-partición-y-la-vara-7-min" class="nav-link" data-scroll-target="#momento-1-la-partición-y-la-vara-7-min"><span class="header-section-number">3</span> Momento 1 — La partición y la vara <span class="badge-time">≈ 7 min</span></a></li>
+  <li><a href="#momento-2-tu-primer-árbol-y-cómo-leerlo-12-min" id="toc-momento-2-tu-primer-árbol-y-cómo-leerlo-12-min" class="nav-link" data-scroll-target="#momento-2-tu-primer-árbol-y-cómo-leerlo-12-min"><span class="header-section-number">4</span> Momento 2 — Tu primer árbol (y cómo leerlo) <span class="badge-time">≈ 12 min</span></a></li>
+  <li><a href="#momento-3-el-memorizador-y-la-poda-15-min" id="toc-momento-3-el-memorizador-y-la-poda-15-min" class="nav-link" data-scroll-target="#momento-3-el-memorizador-y-la-poda-15-min"><span class="header-section-number">5</span> Momento 3 — El memorizador y la poda <span class="badge-time">≈ 15 min</span></a></li>
+  <li><a href="#momento-4-quinientos-árboles-votando-10-min" id="toc-momento-4-quinientos-árboles-votando-10-min" class="nav-link" data-scroll-target="#momento-4-quinientos-árboles-votando-10-min"><span class="header-section-number">6</span> Momento 4 — Quinientos árboles votando <span class="badge-time">≈ 10 min</span></a></li>
+  <li><a href="#momento-5-la-perilla-del-umbral-8-min" id="toc-momento-5-la-perilla-del-umbral-8-min" class="nav-link" data-scroll-target="#momento-5-la-perilla-del-umbral-8-min"><span class="header-section-number">7</span> Momento 5 — La perilla del umbral <span class="badge-time">≈ 8 min</span></a></li>
+  <li><a href="#el-informe-del-torneo-5-min" id="toc-el-informe-del-torneo-5-min" class="nav-link" data-scroll-target="#el-informe-del-torneo-5-min"><span class="header-section-number">8</span> El informe del torneo <span class="badge-time">≈ 5 min</span></a></li>
+  <li><a href="#terminaste-antes-el-reto-del-bosque" id="toc-terminaste-antes-el-reto-del-bosque" class="nav-link" data-scroll-target="#terminaste-antes-el-reto-del-bosque"><span class="header-section-number">9</span> ¿Terminaste antes? El reto del bosque</a></li>
+  <li><a href="#cierre" id="toc-cierre" class="nav-link" data-scroll-target="#cierre"><span class="header-section-number">10</span> Cierre</a></li>
   </ul>
 </nav>
 </div>
 <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
 </div>
 <main class="content" id="quarto-document-content">
-<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
-<script type="module" id="qwebr-monaco-editor-init">
-
-  // Configure the Monaco Editor's loader
-  require.config({
-    paths: {
-      'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs'
-    }
-  });
-</script>
-<script type="module">
-// Function to update Monaco Editors when body class changes
-function updateMonacoEditorsOnBodyClassChange() {
-    // Select the body element
-    const body = document.querySelector('body');
-
-    // Options for the observer (which mutations to observe)
-    const observerOptions = {
-        attributes: true,  // Observe changes to attributes
-        attributeFilter: ['class'] // Only observe changes to the 'class' attribute
-    };
-
-    // Callback function to execute when mutations are observed
-    const bodyClassChangeCallback = function(mutationsList, observer) {
-        for(let mutation of mutationsList) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                // Class attribute has changed
-                // Update all Monaco Editors on the page
-                updateMonacoEditorTheme();
-            }
-        }
-    };
-
-    // Create an observer instance linked to the callback function
-    const observer = new MutationObserver(bodyClassChangeCallback);
-
-    // Start observing the target node for configured mutations
-    observer.observe(body, observerOptions);
-}
-
-// Function to update all instances of Monaco Editors on the page
-function updateMonacoEditorTheme() {
-    // Determine what VS Theme to use
-    const vsThemeToUse = document.body.classList.contains("quarto-dark") ? 'vs-dark' : 'vs' ;
-
-    // Iterate through all initialized Monaco Editors
-    qwebrEditorInstances.forEach( function(editorInstance) { 
-        editorInstance.updateOptions({ theme: vsThemeToUse }); 
-    });
-}
-
-// Call the function to start observing changes to body class
-updateMonacoEditorsOnBodyClassChange();
-</script>
-<script type="module">
-// Global array to store Monaco Editor instances
-globalThis.qwebrEditorInstances = [];
-
-function isValidCodeLineNumbers(stringCodeLineNumbers) {
-  // Regular expression to match valid input strings
-  const regex = /^(\d+(-\d+)?)(,\d+(-\d+)?)*$/;
-  return regex.test(stringCodeLineNumbers);
-}
-
-// Function that builds and registers a Monaco Editor instance    
-globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
-
-  const initialCode = cellData.code;
-  const qwebrCounter = cellData.id;
-  const qwebrOptions = cellData.options;
-
-  // Retrieve the previously created document elements
-  let runButton = document.getElementById(`qwebr-button-run-${qwebrCounter}`);
-  let resetButton = document.getElementById(`qwebr-button-reset-${qwebrCounter}`);
-  let copyButton = document.getElementById(`qwebr-button-copy-${qwebrCounter}`);
-  let editorDiv = document.getElementById(`qwebr-editor-${qwebrCounter}`);
-
-  // Load the Monaco Editor and create an instance
-  let editor;
-  require(['vs/editor/editor.main'], function () {
-    editor = monaco.editor.create(editorDiv, {
-      value: initialCode,
-      language: 'r',
-      theme: 'vs-light',
-      automaticLayout: true,           // Works wonderfully with RevealJS
-      scrollBeyondLastLine: false,
-      minimap: {
-        enabled: false
-      },
-      fontSize: qwebrScaledFontSize(editorDiv, qwebrOptions),         
-      renderLineHighlight: "none",      // Disable current line highlighting
-      hideCursorInOverviewRuler: true,  // Remove cursor indictor in right hand side scroll bar
-      readOnly: qwebrOptions['read-only'] ?? false,
-      quickSuggestions: qwebrOptions['editor-quick-suggestions'] ?? false,
-      wordWrap: (qwebrOptions['editor-word-wrap'] == 'true' ? "on" : "off")
-    });
-
-    // Store the official counter ID to be used in keyboard shortcuts
-    editor.__qwebrCounter = qwebrCounter;
-
-    // Store the official div container ID
-    editor.__qwebrEditorId = `qwebr-editor-${qwebrCounter}`;
-
-    // Store the initial code value and options
-    editor.__qwebrinitialCode = initialCode;
-    editor.__qwebrOptions = qwebrOptions;
-
-    // Set at the model level the preferred end of line (EOL) character to LF.
-    // This prevent `\r\n` from being given to the webR engine if the user is on Windows.
-    // See details in: https://github.com/coatless/quarto-webr/issues/94
-    // Associated error text: 
-    // Error: <text>:1:7 unexpected input
-
-    // Retrieve the underlying model
-    const model = editor.getModel();
-    // Set EOL for the model
-    model.setEOL(monaco.editor.EndOfLineSequence.LF);
-    
-    // Dynamically modify the height of the editor window if new lines are added.
-    let ignoreEvent = false;
-    const updateHeight = () => {
-      // Increment editor height by 2 to prevent vertical scroll bar from appearing
-      const contentHeight = editor.getContentHeight() + 2;
-
-      // Retrieve editor-max-height option
-      const maxEditorHeight = qwebrOptions['editor-max-height'];
-
-      // If editor-max-height is missing, allow infinite growth. Otherwise, threshold.
-      const editorHeight = !maxEditorHeight ?  contentHeight : Math.min(contentHeight, maxEditorHeight);
-
-      // We're avoiding a width change
-      //editorDiv.style.width = `${width}px`;
-      editorDiv.style.height = `${editorHeight}px`;
-      try {
-        ignoreEvent = true;
-
-        // The key to resizing is this call
-        editor.layout();
-      } finally {
-        ignoreEvent = false;
-      }
-    };
-
-    // Function to generate decorations to highlight lines
-    // in the editor based on input string.
-    function decoratorHighlightLines(codeLineNumbers) {
-      // Store the lines to be lighlight
-      let linesToHighlight = [];
-      
-      // Parse the codeLineNumbers string to get the line numbers to highlight
-      // First, split the string by commas
-      codeLineNumbers.split(',').forEach(part => {
-        // Check if we have a range of lines
-        if (part.includes('-')) {
-            // Handle range of lines (e.g., "6-8")
-            const [start, end] = part.split('-').map(Number);
-            for (let i = start; i <= end; i++) {
-                linesToHighlight.push(i);
-            }
-        } else {
-            // Handle single line (e.g., "7")
-            linesToHighlight.push(Number(part));
-        }
-      });
-  
-      // Create monaco decorations for the lines to highlight
-      const decorations = linesToHighlight.map(lineNumber => ({
-          range: new monaco.Range(lineNumber, 1, lineNumber, 1),
-          options: {
-              isWholeLine: true,
-              className: 'qwebr-editor-highlight-line'
-          }
-      }));
-  
-      // Return decorations to be applied to the editor
-      return decorations;
-    }
-
-    // Ensure that the editor-code-line-numbers option is set and valid
-    // then apply styling
-    if (qwebrOptions['editor-code-line-numbers']) {
-      // Remove all whitespace from the string
-      const codeLineNumbers = qwebrOptions['editor-code-line-numbers'].replace(/\s/g,'');
-      // Check if the string is valid for line numbers, e.g., "1,3-5,7"
-      if (isValidCodeLineNumbers(codeLineNumbers)) {
-        // Apply the decorations to the editor
-        editor.createDecorationsCollection(decoratorHighlightLines(codeLineNumbers));
-      } else {
-        // Warn the user that the input is invalid
-        console.warn(`Invalid "editor-code-line-numbers" value in code cell ${qwebrOptions['label']}: ${codeLineNumbers}`);
-      }
-    }
-
-    // Helper function to check if selected text is empty
-    function isEmptyCodeText(selectedCodeText) {
-      return (selectedCodeText === null || selectedCodeText === undefined || selectedCodeText === "");
-    }
-
-    // Registry of keyboard shortcuts that should be re-added to each editor window
-    // when focus changes.
-    const addWebRKeyboardShortCutCommands = () => {
-      // Add a keydown event listener for Shift+Enter to run all code in cell
-      editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
-
-        // Retrieve all text inside the editor
-        qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
-      });
-
-      // Add a keydown event listener for CMD/Ctrl+Enter to run selected code
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-
-        // Get the selected text from the editor
-        const selectedText = editor.getModel().getValueInRange(editor.getSelection());
-        // Check if no code is selected
-        if (isEmptyCodeText(selectedText)) {
-          // Obtain the current cursor position
-          let currentPosition = editor.getPosition();
-          // Retrieve the current line content
-          let currentLine = editor.getModel().getLineContent(currentPosition.lineNumber);
-
-          // Propose a new position to move the cursor to
-          let newPosition = new monaco.Position(currentPosition.lineNumber + 1, 1);
-
-          // Check if the new position is beyond the last line of the editor
-          if (newPosition.lineNumber > editor.getModel().getLineCount()) {
-            // Add a new line at the end of the editor
-            editor.executeEdits("addNewLine", [{
-            range: new monaco.Range(newPosition.lineNumber, 1, newPosition.lineNumber, 1),
-            text: "\n", 
-            forceMoveMarkers: true,
-            }]);
-          }
-          
-          // Run the entire line of code.
-          qwebrExecuteCode(currentLine, editor.__qwebrCounter, editor.__qwebrOptions);
-
-          // Move cursor to new position
-          editor.setPosition(newPosition);
-        } else {
-          // Code to run when Ctrl+Enter is pressed with selected code
-          qwebrExecuteCode(selectedText, editor.__qwebrCounter, editor.__qwebrOptions);
-        }
-      });
-    }
-
-    // Register an on focus event handler for when a code cell is selected to update
-    // what keyboard shortcut commands should work.
-    // This is a workaround to fix a regression that happened with multiple
-    // editor windows since Monaco 0.32.0 
-    // https://github.com/microsoft/monaco-editor/issues/2947
-    editor.onDidFocusEditorText(addWebRKeyboardShortCutCommands);
-
-    // Register an on change event for when new code is added to the editor window
-    editor.onDidContentSizeChange(updateHeight);
-
-    // Manually re-update height to account for the content we inserted into the call
-    updateHeight();
-
-    // Store the editor instance in the global dictionary
-    qwebrEditorInstances[editor.__qwebrCounter] = editor;
-
-  });
-
-  // Add a click event listener to the run button
-  runButton.onclick = function () {
-    qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
-  };
-
-  // Add a click event listener to the reset button
-  copyButton.onclick = function () {
-    // Retrieve current code data
-    const data = editor.getValue();
-    
-    // Write code data onto the clipboard.
-    navigator.clipboard.writeText(data || "");
-  };
-  
-  // Add a click event listener to the copy button
-  resetButton.onclick = function () {
-    editor.setValue(editor.__qwebrinitialCode);
-  };
-  
-}
-</script>
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Práctica guiada — Semana 11: Árboles de Clasificación</h1>
-<p class="subtitle lead">Introducción al Business Analytics · 06278-ECO</p>
+<h1 class="title">Unidad 5 - Práctica: el torneo de clasificadores</h1>
+<p class="subtitle lead">Aplicación guiada en clase · Semana 11 · 06278-ECO</p>
 </div>
 
 
@@ -1937,125 +129,67 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 
 
 <div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
-<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a> <span id="webr-status-anchor"></span></p>
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a></p>
 </div>
 <!--=================-->
 <!--=================-->
-<section id="contexto-de-negocio" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Contexto de negocio</h1>
-<p>Una entidad financiera quiere automatizar la evaluación de solicitudes de crédito. Tienen un historial de 300 solicitudes con características del solicitante y saben si cada una fue <strong>“Aprobada”</strong> o <strong>“Rechazada”</strong> por el comité de crédito. Quieren un modelo que, dadas las características de una solicitud nueva, prediga automáticamente la decisión correcta.</p>
-<p><strong>Nuestro trabajo:</strong> Entrenar un árbol de clasificación, obtener sus predicciones en el conjunto de prueba, y construir la matriz de confusión para evaluar qué tan bien predice el modelo.</p>
-<p><strong>Tu entregable al final de la clase:</strong> La matriz de confusión completa con los valores de TP, FP, TN, FN, las tres métricas calculadas (accuracy, precisión, recall), la comparación con el baseline, y una interpretación escrita de máximo 3 líneas.</p>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-<section id="paso-1-preparar-el-entorno" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Paso 1 — Preparar el entorno</h1>
-<div id="qwebr-insertion-location-1"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-<section id="paso-2-cargar-los-datos" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Paso 2 — Cargar los datos</h1>
-<p>Trabajamos con el dataset <code>credito_icesi</code>, que contiene solicitudes de crédito de una entidad financiera colombiana.</p>
-<div id="qwebr-insertion-location-2"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-3"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<section id="reglas-de-juego" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Reglas de juego</h1>
 <div class="callout-key">
-<p><strong>Variables del dataset:</strong></p>
+<p><strong>Hoy eres el ingeniero (el juez ya lo llevas dentro)</strong></p>
+<p>La semana pasada calificaste modelos ajenos. Hoy entrenas los tuyos: el mismo problema de crédito, pero ahora la base <strong>completa y sin predicciones</strong> — las predicciones las produces tú. Esta práctica asume la <a href="../theory/week-11.html">teoría de la semana</a> (árboles, poda, bosques, umbral) y las <a href="../../week-10/theory/week-10.html">métricas de la semana 10</a>. Nada se re-explica.</p>
+</div>
 <ul>
-<li><code>ingreso_m</code> — Ingreso mensual en millones de pesos</li>
-<li><code>historial</code> — Historial crediticio (1 = positivo, 0 = negativo)</li>
-<li><code>deuda_actual</code> — Deuda vigente en millones de pesos</li>
-<li><code>antiguedad_lab</code> — Años de antigüedad laboral</li>
-<li><code>edad</code> — Edad del solicitante en años</li>
-<li><code>decision</code> — <strong>Variable de resultado</strong>: <code>"Aprobado"</code> si el crédito fue aprobado, <code>"Rechazado"</code> si fue rechazado</li>
+<li>👥 En <strong>parejas</strong>: uno escribe, el otro lee los árboles en voz alta y audita cifras. Roten en el Momento 4.</li>
+<li>🖥️ <strong>RStudio</strong> con tu proyecto del curso. Paquetes de la semana: <code>rpart</code>, <code>rpart.plot</code>, <code>randomForest</code> (los instalaste antes de clase, ¿cierto?). Plan B: <code>install.packages(c("rpart","rpart.plot","randomForest"))</code> y a esperar el wifi.</li>
+<li>📥 El dato de hoy: <a href="credito_clasificacion.csv" download=""><strong>credito_clasificacion.csv</strong></a> — 300 solicitudes históricas de BancoAndes con su decisión final. Guárdalo en <code>data/</code>.</li>
+<li>🎯 La misión de la gerencia: <em>“la semana pasada nos convencieron de no comprar el modelo de CreditoYa. Perfecto — entonces constrúyanme uno mejor, y demuéstrenlo con las mismas métricas que usaron para tumbar el de ellos.”</em></li>
 </ul>
-</div>
-<hr>
 <!--=================-->
 <!--=================-->
 </section>
-<section id="paso-3-explorar-la-variable-de-resultado" class="level1" data-number="4">
-<h1 data-number="4"><span class="header-section-number">4</span> Paso 3 — Explorar la variable de resultado</h1>
-<p>Antes de entrenar, siempre revisamos cuántos casos hay de cada categoría. Esto nos permite calcular el <strong>baseline</strong> al final.</p>
-<div id="qwebr-insertion-location-4"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-5"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>¿Qué es el baseline?</strong></p>
-<p>El baseline es el resultado que obtendríamos con el modelo más simple posible: predecir siempre la categoría más frecuente. Si el 58% de las solicitudes son “Aprobado”, un modelo que siempre predice “Aprobado” tendría 58% de accuracy sin aprender nada.</p>
-<p>Nuestro árbol debe superar ese porcentaje. Si no lo hace, no está aprendiendo nada útil. <strong>Anota este porcentaje</strong> — lo necesitarás en el entregable final.</p>
-</div>
-<hr>
+<section id="el-setup-5-min" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> El setup <span class="badge-time">≈ 5 min</span></h1>
+<p>Script nuevo: <code>scripts/11_torneo.R</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ============================================</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Práctica semana 11 — El torneo de clasificadores</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Nombre(s): _______________</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Fecha:     _______________</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## ============================================</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Librerías / Libraries</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(dplyr, rpart, rpart.plot, randomForest)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## Cargar datos / Load data</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>credito <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/credito_clasificacion.csv"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">## El target debe ser factor para clasificar / Target as factor</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>credito<span class="sc">$</span>decision <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(credito<span class="sc">$</span>decision)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="do">## Radiografía / First look</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(credito)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(credito)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(credito<span class="sc">$</span>decision)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> <strong>300 filas y 6 columnas</strong>; <code>decision</code> es factor con <strong>160 Aprobado / 140 Rechazado</strong>. Cinco variables para predecir: ingreso, historial, deuda, antigüedad laboral y edad.</p>
 <!--=================-->
 <!--=================-->
 </section>
-<section id="paso-4-dividir-en-entrenamiento-y-prueba" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> Paso 4 — Dividir en entrenamiento y prueba</h1>
-<p>El árbol aprende con los datos de entrenamiento. Evaluamos con los datos de prueba — solicitudes que el modelo nunca vio durante el entrenamiento.</p>
-<div id="qwebr-insertion-location-6"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>¿Por qué dividir los datos?</strong></p>
-<p>El árbol memoriza patrones del conjunto de entrenamiento. Si medimos el error en esos mismos datos, el modelo parece perfecto. El conjunto de prueba simula solicitudes futuras y mide la capacidad real de predecir. Esto es el train/test split que vimos en la Semana 9.</p>
-</div>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-<section id="paso-5-entrenar-el-árbol-de-clasificación" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> Paso 5 — Entrenar el árbol de clasificación</h1>
-<div id="qwebr-insertion-location-7"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>¿Cómo leer el output de texto del árbol?</strong></p>
-<p>Cada línea es un nodo. Se lee de arriba hacia abajo:</p>
-<ul>
-<li>El primer nodo (sin sangría) es el <strong>nodo raíz</strong>: la primera pregunta que hace el modelo. Recuerda el diagrama de la teoría — en el ejemplo de los 8 solicitantes era <code>¿Ingreso ≥ 3.5M?</code>. Aquí el árbol eligió otra variable de corte basándose en los 225 datos de entrenamiento.</li>
-<li>El símbolo <code>*</code> al final de una línea indica que es una <strong>hoja</strong>: allí termina esa rama y el árbol da una predicción.</li>
-<li>La columna <code>yval</code> muestra la predicción de ese nodo (Aprobado o Rechazado).</li>
-<li>Los números entre paréntesis muestran cuántas observaciones de entrenamiento cayeron en ese nodo y cómo se distribuyen entre las categorías.</li>
-</ul>
-<p><strong>Identifica:</strong> ¿Cuál es la primera variable que usa el árbol para dividir? ¿Coincide con la intuición del analista de crédito de la teoría?</p>
-</div>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-<section id="paso-6-visualizar-el-árbol" class="level1" data-number="7">
-<h1 data-number="7"><span class="header-section-number">7</span> Paso 6 — Visualizar el árbol</h1>
-<div id="qwebr-insertion-location-8"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-9"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>¿Qué muestra el gráfico?</strong></p>
-<ul>
-<li>Cada nodo interno muestra la pregunta que divide: la variable y el umbral de corte.</li>
-<li>Cada hoja (nodo terminal) muestra la predicción: “Aprobado” o “Rechazado”.</li>
-<li><code>use.n = TRUE</code> agrega el conteo de observaciones de entrenamiento que cayeron en cada nodo.</li>
-</ul>
-<p>Compara este gráfico con los diagramas SVG de la teoría (profundidad 1 y profundidad 2). ¿El árbol que entrenaste aquí tiene más o menos niveles que el ejemplo de la teoría? ¿Cuántas hojas tiene?</p>
-</div>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-<section id="paso-7-predecir-en-el-conjunto-de-prueba" class="level1" data-number="8">
-<h1 data-number="8"><span class="header-section-number">8</span> Paso 7 — Predecir en el conjunto de prueba</h1>
-<p>El árbol ya aprendió. Ahora predice sobre las solicitudes que nunca vio durante el entrenamiento.</p>
-<div id="qwebr-insertion-location-10"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-11"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-12"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<section id="momento-1-la-partición-y-la-vara-7-min" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Momento 1 — La partición y la vara <span class="badge-time">≈ 7 min</span></h1>
+<p>Primero la disciplina de la semana 10: apartar el examen <strong>antes</strong> de entrenar nada, y medir la regla tonta.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Partición 80/20 / Train-test split</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11</span>)   <span class="co"># ¡en la línea inmediatamente anterior al sample!</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>idx_train <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(credito), <span class="at">size =</span> <span class="fu">round</span>(<span class="fl">0.8</span> <span class="sc">*</span> <span class="fu">nrow</span>(credito)))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>train <span class="ot">&lt;-</span> credito[idx_train, ]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>test  <span class="ot">&lt;-</span> credito[<span class="sc">-</span>idx_train, ]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Verificar / Check</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(train<span class="sc">$</span>decision)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(test<span class="sc">$</span>decision)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="do">## Baseline: la clase mayoritaria / Majority-class baseline</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">max</span>(<span class="fu">table</span>(test<span class="sc">$</span>decision)) <span class="sc">/</span> <span class="fu">nrow</span>(test), <span class="dv">3</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> train con <strong>129 Aprobado / 111 Rechazado</strong> (240 filas) y test con <strong>31 / 29</strong> (60 filas). Baseline: <strong>0.517</strong> — este test quedó casi parejo, así que la regla tonta apenas le gana a una moneda. Todo lo que entrenes hoy compite contra ese 51.7%.</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2066,388 +200,166 @@ Advertencia
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><strong>¿Ves filas donde <code>real</code> y <code>prediccion</code> difieren?</strong> Esos son los errores del modelo. Algunos son FP (predijo Aprobado, era Rechazado) y otros son FN (predijo Rechazado, era Aprobado). La matriz de confusión del siguiente paso los cuenta todos.</p>
+<p><strong>Si tus números no coinciden con los checkpoints</strong>, casi seguro corriste <code>sample()</code> sin ejecutar el <code>set.seed(11)</code> justo antes. Cada bloque aleatorio de hoy trae su propia semilla — ejecútala siempre junto con su bloque (o corre el script completo con <em>Source</em>).</p>
 </div>
 </div>
-<hr>
 <!--=================-->
 <!--=================-->
 </section>
-<section id="paso-8-construir-la-matriz-de-confusión" class="level1" data-number="9">
-<h1 data-number="9"><span class="header-section-number">9</span> Paso 8 — Construir la matriz de confusión</h1>
-<p>Este es el paso central de la clase. Usamos <code>table()</code> para cruzar los valores reales con las predicciones.</p>
-<div id="qwebr-insertion-location-13"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>Cómo leer esta tabla:</strong></p>
-<p>La estructura es <strong>filas = valor real</strong> y <strong>columnas = predicción del modelo</strong> — igual que los diagramas de la teoría.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Posición</th>
-<th>Nombre</th>
-<th>Significado</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Fila “Aprobado”, Col “Aprobado”</td>
-<td><strong>VP</strong></td>
-<td>Predijo Aprobado y era Aprobado — acierto</td>
-</tr>
-<tr class="even">
-<td>Fila “Aprobado”, Col “Rechazado”</td>
-<td><strong>FN</strong></td>
-<td>Predijo Rechazado pero era Aprobado — se perdió un buen cliente</td>
-</tr>
-<tr class="odd">
-<td>Fila “Rechazado”, Col “Aprobado”</td>
-<td><strong>FP</strong></td>
-<td>Predijo Aprobado pero era Rechazado — riesgo de impago</td>
-</tr>
-<tr class="even">
-<td>Fila “Rechazado”, Col “Rechazado”</td>
-<td><strong>VN</strong></td>
-<td>Predijo Rechazado y era Rechazado — acierto</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Tu tarea:</strong> Extrae los cuatro números de la tabla y anótalos. Los usarás en el paso siguiente y en el entregable.</p>
-</div>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-<section id="paso-9-extraer-vp-fp-vn-fn" class="level1" data-number="10">
-<h1 data-number="10"><span class="header-section-number">10</span> Paso 9 — Extraer VP, FP, VN, FN</h1>
-<div id="qwebr-insertion-location-14"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Advertencia
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><strong>¿Por qué <code>tabla["Aprobado", "Aprobado"]</code> y no <code>tabla[1,1]</code>?</strong></p>
-<p>Usar los nombres de las categorías es más seguro: si R ordena las filas o columnas alfabéticamente de forma distinta a lo que esperamos, <code>tabla[1,1]</code> puede no ser el TP. Los nombres siempre apuntan a la celda correcta.</p>
-</div>
-</div>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-<section id="paso-10-calcular-las-métricas" class="level1" data-number="11">
-<h1 data-number="11"><span class="header-section-number">11</span> Paso 10 — Calcular las métricas</h1>
-<div class="callout-key">
-<p><strong>¿Cómo interpretar los tres números juntos?</strong></p>
-<ul>
-<li><strong>Accuracy:</strong> de todas las solicitudes del test, ¿en qué fracción acertó el modelo? Si es 82%, acierta 8 de cada 10.</li>
-<li><strong>Precisión:</strong> de las que predijo “Aprobado”, ¿cuántas realmente lo eran? Una precisión alta protege a la entidad de aprobar malos créditos.</li>
-<li><strong>Recall:</strong> de las que realmente eran “Aprobado”, ¿cuántas detectó? Un recall alto minimiza los buenos clientes rechazados.</li>
-</ul>
-<p>Ahora piensa: ¿cuál error es más costoso para esta entidad financiera — el FP o el FN?</p>
-</div>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-<section id="paso-11-comparar-con-el-baseline" class="level1" data-number="12">
-<h1 data-number="12"><span class="header-section-number">12</span> Paso 11 — Comparar con el baseline</h1>
-<p>Antes de concluir que el modelo es bueno, lo comparamos con el modelo más simple posible: predecir siempre la categoría más frecuente del conjunto de prueba.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Advertencia
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><strong>¿El árbol mejora el baseline?</strong></p>
-<p>Compara la accuracy del árbol (Paso 10) con la del baseline (el <code>max()</code> que acabas de calcular). Si el árbol no supera ese número, no aprendió nada útil: cualquier persona que siempre diga “Aprobado” lo haría igual de bien.</p>
-<p>Si sí lo supera: ¿cuántos puntos porcentuales ganamos? ¿Vale la complejidad del modelo?</p>
-</div>
-</div>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-<section id="tu-entregable-la-matriz-completa" class="level1" data-number="13">
-<h1 data-number="13"><span class="header-section-number">13</span> Tu entregable: la matriz completa</h1>
-<p>Durante el semestre, el equipo de analítica de una entidad financiera evaluó un árbol de clasificación entrenado para predecir si una solicitud de crédito debía aprobarse o rechazarse. El modelo fue probado sobre 40 solicitudes del conjunto de prueba, de las cuales 22 eran realmente aprobadas y 18 eran realmente rechazadas. De las 22 solicitudes que realmente debían aprobarse, el modelo identificó correctamente 18 y clasificó erróneamente 4 como rechazadas. De las 18 solicitudes que realmente debían rechazarse, el modelo clasificó correctamente 14 como rechazadas, pero aprobó incorrectamente las 4 restantes.</p>
+<section id="momento-2-tu-primer-árbol-y-cómo-leerlo-12-min" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Momento 2 — Tu primer árbol (y cómo leerlo) <span class="badge-time">≈ 12 min</span></h1>
+<p>Empecemos con un árbol corto y legible: máximo dos niveles de preguntas.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Entrenar un árbol de profundidad 2 / Train a depth-2 tree</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>arbol <span class="ot">&lt;-</span> <span class="fu">rpart</span>(decision <span class="sc">~</span> ., <span class="at">data =</span> train, <span class="at">method =</span> <span class="st">"class"</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">maxdepth =</span> <span class="dv">2</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Verlo como texto y como diagrama / Print and plot</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>arbol</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rpart.plot</span>(arbol, <span class="at">type =</span> <span class="dv">4</span>, <span class="at">extra =</span> <span class="dv">104</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> la <strong>raíz</strong> pregunta por la <strong>deuda</strong> (<code>deuda_actual &lt; 13.36</code>). Con deuda alta → Rechazado directo (103 casos de train). Con deuda baja, segunda pregunta por el ingreso (<code>ingreso_m &gt;= 3.41</code>) → Aprobado; si además el ingreso es bajo → Rechazado.</p>
 <div class="callout-practice">
-<p><strong>Actividad en clase — Entrega individual</strong></p>
-<p>Con los resultados del texto anterior, completa esta tabla a mano en un documento word y cargalo en Intu en el espacio indicado por el profesor.</p>
-<hr>
-<p><strong>Matriz de confusión (conjunto de prueba):</strong></p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th></th>
-<th>Predicción: Aprobado</th>
-<th>Predicción: Rechazado</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Real: Aprobado</strong></td>
-<td>VP = _____</td>
-<td>FN = _____</td>
-</tr>
-<tr class="even">
-<td><strong>Real: Rechazado</strong></td>
-<td>FP = _____</td>
-<td>VN = _____</td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><strong>Métricas calculadas:</strong></p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Métrica</th>
-<th>Fórmula</th>
-<th>Resultado</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Accuracy</td>
-<td>(TP + TN) / (TP + FN + FP + TN)</td>
-<td>______%</td>
-</tr>
-<tr class="even">
-<td>Precisión</td>
-<td>TP / (TP + FP)</td>
-<td>______%</td>
-</tr>
-<tr class="odd">
-<td>Recall</td>
-<td>TP / (TP + FN)</td>
-<td>______%</td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><strong>Interpretación (máximo 3 líneas):</strong></p>
-<p>Responde: ¿Qué error comete más el modelo — FP o FN? ¿Qué significa ese error en términos del negocio de la entidad financiera? ¿Recomendarías usar este modelo tal como está?</p>
-<hr>
-<hr>
-<hr>
+<p><strong>Lectura en voz alta (2 min, en pareja):</strong> traduzcan el árbol a política de crédito en dos frases, sin decir “nodo” ni “split”. Algo así como: <em>“si debe más de 13 millones, no; si debe poco y gana más de 3.4, sí; …”</em>. Después comparen: ¿se parece a lo que un comité humano haría? ¿Qué variable esperaban en la raíz que NO apareció?</p>
 </div>
-<hr>
+<p>Ahora califícalo con el músculo de la semana 10 — matriz y métricas en test:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Predecir y evaluar / Predict and evaluate</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pred_arbol <span class="ot">&lt;-</span> <span class="fu">predict</span>(arbol, <span class="at">newdata =</span> test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">Real =</span> test<span class="sc">$</span>decision, <span class="at">Modelo =</span> pred_arbol)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>tp <span class="ot">&lt;-</span> <span class="fu">sum</span>(test<span class="sc">$</span>decision <span class="sc">==</span> <span class="st">"Aprobado"</span>  <span class="sc">&amp;</span> pred_arbol <span class="sc">==</span> <span class="st">"Aprobado"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>fn <span class="ot">&lt;-</span> <span class="fu">sum</span>(test<span class="sc">$</span>decision <span class="sc">==</span> <span class="st">"Aprobado"</span>  <span class="sc">&amp;</span> pred_arbol <span class="sc">==</span> <span class="st">"Rechazado"</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>fp <span class="ot">&lt;-</span> <span class="fu">sum</span>(test<span class="sc">$</span>decision <span class="sc">==</span> <span class="st">"Rechazado"</span> <span class="sc">&amp;</span> pred_arbol <span class="sc">==</span> <span class="st">"Aprobado"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>tn <span class="ot">&lt;-</span> <span class="fu">sum</span>(test<span class="sc">$</span>decision <span class="sc">==</span> <span class="st">"Rechazado"</span> <span class="sc">&amp;</span> pred_arbol <span class="sc">==</span> <span class="st">"Rechazado"</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>((tp <span class="sc">+</span> tn) <span class="sc">/</span> <span class="fu">nrow</span>(test), <span class="dv">3</span>)   <span class="co"># accuracy</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(tp <span class="sc">/</span> (tp <span class="sc">+</span> fp), <span class="dv">3</span>)           <span class="co"># precisión</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(tp <span class="sc">/</span> (tp <span class="sc">+</span> fn), <span class="dv">3</span>)           <span class="co"># recall</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> matriz <strong>TP=27, FN=4, FP=1, TN=28</strong> → accuracy <strong>0.917</strong>, precisión <strong>0.964</strong>, recall <strong>0.871</strong>. Dos preguntas y ya vas 40 puntos arriba del baseline (91.7% vs 51.7%). Y como anécdota: el “modelo misterioso” que auditaste la semana pasada rondaba el 88% — acabas de superarlo con un árbol que se explica en dos frases (otra partición, así que tómalo como guiño, no como prueba).</p>
 <!--=================-->
 <!--=================-->
-<section id="checklist" class="level2" data-number="13.1">
-<h2 data-number="13.1" class="anchored" data-anchor-id="checklist"><span class="header-section-number">13.1</span> Checklist</h2>
-<p>Al finalizar esta práctica, debes poder:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Cargar datos y explorar la distribución de la variable de resultado antes de entrenar</label></li>
-<li><label><input type="checkbox">Dividir en train/test con <code>sample()</code> y <code>set.seed()</code> para reproducibilidad</label></li>
-<li><label><input type="checkbox">Entrenar un árbol con <code>rpart(..., method = "class", control = rpart.control(maxdepth = ...))</code></label></li>
-<li><label><input type="checkbox">Leer el output de texto del árbol: identificar el nodo raíz, las hojas y las predicciones</label></li>
-<li><label><input type="checkbox">Conectar el gráfico del árbol con los diagramas SVG vistos en la teoría</label></li>
-<li><label><input type="checkbox">Obtener predicciones con <code>predict(..., type = "class")</code></label></li>
-<li><label><input type="checkbox">Construir la tabla de confusión con <code>table(Real = ..., Prediccion = ...)</code></label></li>
-<li><label><input type="checkbox">Extraer TP, FP, TN, FN usando los nombres de categoría: <code>tabla["nombre_fila", "nombre_col"]</code></label></li>
-<li><label><input type="checkbox">Calcular accuracy, precisión y recall con las fórmulas</label></li>
-<li><label><input type="checkbox">Calcular el baseline con <code>max(prop.table(...))</code> y comparar con la accuracy del árbol</label></li>
-<li><label><input type="checkbox">Interpretar el tipo de error más frecuente en términos del contexto de negocio</label></li>
-</ul>
 </section>
-<section id="preguntas-de-comprensión" class="level2" data-number="13.2">
-<h2 data-number="13.2" class="anchored" data-anchor-id="preguntas-de-comprensión"><span class="header-section-number">13.2</span> Preguntas de comprensión</h2>
-<p><strong>1.</strong> En el Paso 5 entrenaste con <code>maxdepth = 3</code>. Si cambias a <code>maxdepth = 1</code>, ¿esperas que la accuracy en test suba o baje? ¿Y si usas <code>maxdepth = 8</code>? ¿Qué concepto de la teoría explica ambos casos?</p>
-<details>
-<summary>
-Ver respuesta
-</summary>
-Con <code>maxdepth = 1</code> el árbol hace una sola pregunta — igual que el ejemplo de profundidad 1 de la teoría. Es muy simple: probablemente baja la accuracy en test (subajuste). Con <code>maxdepth = 8</code> el árbol tiene muchos niveles y puede memorizar los 225 datos de entrenamiento: accuracy alta en train, pero puede bajar en test (sobreajuste). El mejor punto suele estar en un valor intermedio donde el árbol generaliza sin memorizar.
-</details>
-<p><strong>2.</strong> Tu tabla de confusión muestra FP = 8 y FN = 3. Una compañera dice: “Prefiero el modelo con FP = 3 y FN = 8 porque aprueba menos créditos malos.” ¿Tienes razón de preocuparte? ¿Qué depende?</p>
-<details>
-<summary>
-Ver respuesta
-</summary>
-Depende del costo relativo de cada error para la entidad. FP = aprobar a alguien que no pagará → pérdida por impago (costo financiero directo). FN = rechazar a un buen cliente → pérdida de ingresos futuros (costo de oportunidad). Si el costo del impago es mayor que el del cliente perdido, el modelo con FP=3 es preferible aunque tenga más FN. Si rechazar buenos clientes tiene un costo alto (por ejemplo en un mercado competitivo), puede ser mejor tolerar más FP. No hay respuesta universal — es una decisión de negocio.
-</details>
-<p><strong>3.</strong> El árbol da 84% de accuracy en test. El baseline es 56%. Un colega dice: “Ganamos 28 puntos porcentuales, el modelo es excelente.” ¿Estás de acuerdo con esa sola afirmación? ¿Qué más revisarías?</p>
-<details>
-<summary>
-Ver respuesta
-</summary>
-La mejora sobre el baseline es importante y es una buena señal — el modelo sí aprendió algo. Pero la accuracy sola no es suficiente: hay que revisar precisión y recall para saber qué tipo de errores comete. Si el 84% de accuracy se logra aprobando casi todo (recall muy alto, precisión baja), puede estar asumiendo demasiado riesgo de impago. También conviene verificar que la diferencia entre accuracy en train y en test no sea muy grande (señal de sobreajuste) y que el árbol tenga sentido de negocio: ¿la primera variable de corte que eligió es razonable?
-</details>
-<!-- Panel Environment -->
-<div id="env-panel" class="collapsed">
-  <div id="env-header" onclick="toggleEnvPanel()">
-    <span id="env-header-left">📦 Environment</span>
-    <span id="env-header-right">
-      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">🔄</button>
-      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">▲</button>
-    </span>
-  </div>
-  <div id="env-status">Esperando webR...</div>
-  <div id="env-body">
-    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
-  </div>
+<section id="momento-3-el-memorizador-y-la-poda-15-min" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Momento 3 — El memorizador y la poda <span class="badge-time">≈ 15 min</span></h1>
+<p>¿Y si soltamos todos los frenos? Profundidad libre, hojas de un solo caso — el árbol que puede memorizar:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## El memorizador: sin frenos / No-brakes tree</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11</span>)   <span class="co"># la CV interna de rpart usa el azar</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>memorizador <span class="ot">&lt;-</span> <span class="fu">rpart</span>(decision <span class="sc">~</span> ., <span class="at">data =</span> train, <span class="at">method =</span> <span class="st">"class"</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">control =</span> <span class="fu">rpart.control</span>(<span class="at">cp =</span> <span class="fl">0.0001</span>, <span class="at">minsplit =</span> <span class="dv">2</span>, <span class="at">minbucket =</span> <span class="dv">1</span>))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="do">## ¿Cuántas hojas le salieron? / How many leaves?</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(memorizador<span class="sc">$</span>frame<span class="sc">$</span>var <span class="sc">==</span> <span class="st">"&lt;leaf&gt;"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Train vs test / The overfitting signature</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>pred_memo_tr <span class="ot">&lt;-</span> <span class="fu">predict</span>(memorizador, <span class="at">newdata =</span> train, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>pred_memo_te <span class="ot">&lt;-</span> <span class="fu">predict</span>(memorizador, <span class="at">newdata =</span> test,  <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">mean</span>(pred_memo_tr <span class="sc">==</span> train<span class="sc">$</span>decision), <span class="dv">3</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">mean</span>(pred_memo_te <span class="sc">==</span> test<span class="sc">$</span>decision), <span class="dv">3</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> <strong>12 hojas</strong>; accuracy <strong>1.000 en train</strong> y <strong>0.967 en test</strong>.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
 </div>
-
-<script type="module">
-window.toggleEnvPanel = function() {
-  const panel = document.getElementById('env-panel');
-  const btn   = document.getElementById('env-toggle-btn');
-  panel.classList.toggle('collapsed');
-  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
-};
-
-async function getEnvData() {
-  if (!globalThis.mainWebR) return [];
-  try {
-    const shelter = await new globalThis.mainWebR.Shelter();
-    const result  = await shelter.evalR(`
-      local({
-        objs <- ls(envir = .GlobalEnv)
-        if (length(objs) == 0) return("")
-        info <- vapply(objs, function(nm) {
-          obj <- get(nm, envir = .GlobalEnv)
-          cls <- paste(class(obj), collapse = ", ")
-          len <- length(obj)
-          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
-          prev <- tryCatch({
-            if (is.data.frame(obj)) {
-              paste(names(obj), collapse = ", ")
-            } else if (is.function(obj)) {
-              a <- names(formals(obj))
-              paste0("function(", paste(a, collapse = ", "), ")")
-            } else if (is.atomic(obj) && len <= 6) {
-              paste(format(obj, digits = 4), collapse = ", ")
-            } else if (is.atomic(obj) && len > 6) {
-              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
-            } else if (is.list(obj)) {
-              paste0("List of ", len)
-            } else { "" }
-          }, error = function(e) "")
-          paste(nm, cls, len, dm, prev, sep = "\\t")
-        }, character(1))
-        paste(info, collapse = "\\n")
-      })
-    `);
-    const raw = await result.toString();
-    shelter.purge();
-    if (!raw || raw === '') return [];
-    return raw.split('\n').map(line => {
-      const p = line.split('\t');
-      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
-    });
-  } catch (e) {
-    console.warn('Env panel error:', e);
-    return [];
-  }
-}
-
-function renderEnv(items) {
-  const body   = document.getElementById('env-body');
-  const status = document.getElementById('env-status');
-  if (items.length === 0) {
-    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
-    status.textContent = '0 objetos';
-    return;
-  }
-  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
-  body.innerHTML = items.map(it => {
-    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
-    if (it.dim) {
-      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
-    } else {
-      meta += 'Length: ' + it.len;
-    }
-    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
-    return '<div class="env-item">' +
-           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
-           '  <div class="env-item-meta">' + meta + '</div>' +
-           prev +
-           '</div>';
-  }).join('');
-}
-
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-async function updateEnvPanel() {
-  const items = await getEnvData();
-  renderEnv(items);
-}
-window.refreshEnv = function() {
-  const btn = document.getElementById('env-refresh-btn');
-  btn.style.animation = 'none';
-  void btn.offsetWidth;
-  updateEnvPanel();
-};
-
-function moveWebRStatus() {
-  const anchor = document.getElementById('webr-status-anchor');
-  const statusArea = document.getElementById('qwebr-status-message-area');
-  if (anchor && statusArea) {
-    const wrapper = statusArea.closest('.quarto-title-meta');
-    if (wrapper) {
-      wrapper.style.display = 'inline';
-      wrapper.style.fontSize = '13px';
-      wrapper.style.marginLeft = '30px';
-      anchor.parentNode.insertBefore(wrapper, anchor);
-    }
-  }
-}
-
-async function init() {
-  while (!globalThis.qwebrInstance) {
-    await new Promise(r => setTimeout(r, 300));
-  }
-  await globalThis.qwebrInstance;
-  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
-  moveWebRStatus();
-
-  await new Promise(resolve => {
-    const check = setInterval(() => {
-      const btns = document.querySelectorAll('.qwebr-button-run');
-      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
-        clearInterval(check);
-        resolve();
-      }
-    }, 400);
-  });
-
-  const original = globalThis.qwebrComputeEngine;
-  globalThis.qwebrComputeEngine = async function(...args) {
-    const res = await original.apply(this, args);
-    setTimeout(updateEnvPanel, 150);
-    return res;
-  };
-
-  const panel = document.getElementById('env-panel');
-  if (panel.classList.contains('collapsed')) {
-    toggleEnvPanel();
-  }
-  await updateEnvPanel();
-}
-
-init();
-</script>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Momento incómodo (y valioso):</strong> el memorizador NO se estrelló — en este test hasta le fue bien. ¿Entonces la teoría mintió? No: su 100% en train sigue siendo una cifra que jamás podrías reportar, y un solo test de 60 filas es un examen ruidoso donde 2-3 casos mueven todo. El árbitro confiable es la <strong>validación cruzada</strong> — 10 exámenes en vez de uno. Veamos qué dice.</p>
+</div>
+</div>
+<p><code>rpart</code> corrió esa CV por ti mientras entrenaba. La tabla:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## La CV incorporada: error por tamaño del árbol / Built-in CV table</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(memorizador<span class="sc">$</span>cptable, <span class="dv">4</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> la columna <strong><code>xerror</code></strong> (error de CV, relativo) baja hasta <strong>0.0901</strong> con <code>nsplit = 3</code>… y de ahí en adelante <strong>sube</strong>: 0.1261 con 7 divisiones, 0.1351 con 11. Ahí está la curva del dial de la semana 10, dibujada por la CV: las hojas extra del memorizador no compran patrón — compran ruido.</p>
+<p>Para podar, la regla profesional (<strong>regla 1-SE</strong>): como la CV también trae ruido (mira la columna <code>xstd</code>), no persigas el mínimo exacto — quédate con el <strong>árbol más pequeño que empata con el mínimo</strong> dentro de un error estándar:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Regla 1-SE: el árbol más pequeño que empata con el mejor</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="do">## 1-SE rule: smallest tree within one SE of the minimum</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>tabla  <span class="ot">&lt;-</span> memorizador<span class="sc">$</span>cptable</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>tope   <span class="ot">&lt;-</span> <span class="fu">min</span>(tabla[, <span class="st">"xerror"</span>]) <span class="sc">+</span> tabla[<span class="fu">which.min</span>(tabla[, <span class="st">"xerror"</span>]), <span class="st">"xstd"</span>]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>cp_opt <span class="ot">&lt;-</span> tabla[<span class="fu">which</span>(tabla[, <span class="st">"xerror"</span>] <span class="sc">&lt;=</span> tope)[<span class="dv">1</span>], <span class="st">"CP"</span>]</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(cp_opt, <span class="dv">3</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>arbol_podado <span class="ot">&lt;-</span> <span class="fu">prune</span>(memorizador, <span class="at">cp =</span> cp_opt)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(arbol_podado<span class="sc">$</span>frame<span class="sc">$</span>var <span class="sc">==</span> <span class="st">"&lt;leaf&gt;"</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">rpart.plot</span>(arbol_podado, <span class="at">type =</span> <span class="dv">4</span>, <span class="at">extra =</span> <span class="dv">104</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="do">## Evaluar el podado / Evaluate the pruned tree</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>pred_poda <span class="ot">&lt;-</span> <span class="fu">predict</span>(arbol_podado, <span class="at">newdata =</span> test, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">mean</span>(pred_poda <span class="sc">==</span> test<span class="sc">$</span>decision), <span class="dv">3</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> el tope queda en 0.0901 + 0.0279 = 0.118, el primer árbol que cabe es el de <code>nsplit = 2</code> → <code>cp_opt</code> = <strong>0.027</strong> → el árbol podado tiene <strong>3 hojas</strong> y saca <strong>0.917</strong> en test. ¿Te suena? Es <em>esencialmente tu árbol del Momento 2</em>: la CV acaba de confirmar, con 10 exámenes, que las preguntas deuda → ingreso eran las correctas y que las 9 hojas extra del memorizador no compraban nada. Entre modelos empatados, gana el simple (parsimonia). En el taller, con datos más ruidosos, verás al memorizador pagar caro de verdad.</p>
+<!--=================-->
+<!--=================-->
 </section>
+<section id="momento-4-quinientos-árboles-votando-10-min" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Momento 4 — Quinientos árboles votando <span class="badge-time">≈ 10 min</span></h1>
+<p>Roten roles. Ahora el candidato pesado del torneo:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Random Forest / The forest</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11</span>)   <span class="co"># el bootstrap usa el azar</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>bosque <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(decision <span class="sc">~</span> ., <span class="at">data =</span> train, <span class="at">ntree =</span> <span class="dv">500</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Evaluar en test / Evaluate on test</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>pred_rf <span class="ot">&lt;-</span> <span class="fu">predict</span>(bosque, <span class="at">newdata =</span> test)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">Real =</span> test<span class="sc">$</span>decision, <span class="at">Modelo =</span> pred_rf)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">mean</span>(pred_rf <span class="sc">==</span> test<span class="sc">$</span>decision), <span class="dv">3</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="do">## ¿Qué variables mandan? / Variable importance</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">importance</span>(bosque)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> matriz <strong>TP=29, FN=2, FP=1, TN=28</strong> → accuracy <strong>0.950</strong> (precisión 0.967, recall 0.935). Y la importancia corona a la <strong>deuda (44.0)</strong>, seguida del <strong>ingreso (35.8)</strong> y la <strong>antigüedad (25.9)</strong> — el mismo podio que insinuó la raíz de tu árbol del Momento 2, ahora votado por 500 árboles. La edad (3.4) resultó casi decorativa.</p>
+<div class="callout-practice">
+<p><strong>Discusión de 2 minutos:</strong> el bosque le ganó al árbol podado (0.950 vs 0.900) pero ya no puedes dibujarlo. Si el regulador financiero exige explicar cada rechazo, ¿cuál de los dos despliegas? ¿Hay una tercera vía? (Pista: la teoría habló de un “vocero”.)</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="momento-5-la-perilla-del-umbral-8-min" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Momento 5 — La perilla del umbral <span class="badge-time">≈ 8 min</span></h1>
+<p>La gerencia de riesgo entra a la sala: <em>“un impago nos cuesta lo que ganamos con ocho créditos buenos. No quiero el modelo que más acierte — quiero el que no apruebe morosos.”</em> Eso no pide otro modelo: pide <strong>otro umbral</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Probabilidades del bosque (proporción de votos) / Vote share</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>prob <span class="ot">&lt;-</span> <span class="fu">predict</span>(bosque, <span class="at">newdata =</span> test, <span class="at">type =</span> <span class="st">"prob"</span>)[, <span class="st">"Aprobado"</span>]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">round</span>(prob, <span class="dv">2</span>))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Umbral estricto: aprobar solo con prob &gt;= 0.8 / Strict threshold</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>pred_08 <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(prob <span class="sc">&gt;=</span> <span class="fl">0.8</span>, <span class="st">"Aprobado"</span>, <span class="st">"Rechazado"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">Real =</span> test<span class="sc">$</span>decision, <span class="at">Modelo =</span> pred_08)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> con umbral 0.8 la matriz queda <strong>TP=23, FN=8, FP=0, TN=29</strong>: precisión <strong>1.000</strong> (¡ni un moroso aprobado!) pero el recall cae a <strong>0.742</strong> — el banco rechaza a 8 buenos clientes de 31. La accuracy bajó a 0.867 y sin embargo <strong>este es el modelo que la gerente pidió</strong>. Métrica correcta &gt; métrica alta.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## a) Calcula precisión y recall con umbral 0.8 (código, no calculadora)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="do">## b) Comentario (2-3 líneas): ¿qué le dirías a la gerente que gana</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="do">##    y que pierde con el umbral 0.8 frente al 0.5? ¿Con qué dato</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="do">##    del negocio decidirías el punto exacto?</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-informe-del-torneo-5-min" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> El informe del torneo <span class="badge-time">≈ 5 min</span></h1>
+<p>Cierra con la tabla que resume el torneo (el memorizador no clasifica a la final — quedó descalificado por mentiroso):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Tabla final / Final report</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>torneo <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">modelo   =</span> <span class="fu">c</span>(<span class="st">"Baseline (mayoritaria)"</span>, <span class="st">"Árbol podado (3 hojas)"</span>, <span class="st">"Random Forest (500)"</span>),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">accuracy =</span> <span class="fu">c</span>(<span class="fl">0.517</span>, <span class="fl">0.917</span>, <span class="fl">0.950</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">nota     =</span> <span class="fu">c</span>(<span class="st">"la vara"</span>, <span class="st">"legible y estable"</span>, <span class="st">"el que mejor predice"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>torneo</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(torneo, <span class="st">"output/torneo_semana11.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="do">## Dos riesgos para el informe (comentarios, 2 líneas c/u):</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="do">## ¿qué NO garantiza este torneo? (pistas: ¿el perfil de solicitantes</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="do">## de 2026 será igual al histórico? ¿60 filas de test bastan?)</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint final 🎯:</strong> el script corre completo con <em>Source</em>, <code>output/torneo_semana11.csv</code> existe, y los comentarios de los Momentos 2, 4 y 5 están escritos. Ese es el entregable mental de la semana: <strong>baseline → candidatos → CV → test → umbral → riesgos</strong>.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="terminaste-antes-el-reto-del-bosque" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> ¿Terminaste antes? El reto del bosque</h1>
+<p>Dos experimentos rápidos con <code>randomForest</code> (documenta lo que observes como comentarios):</p>
+<ol type="1">
+<li><strong>¿Cuántos árboles bastan?</strong> Entrena con <code>ntree = 50</code> y con <code>ntree = 2000</code> (misma semilla). ¿Cuánto cambió la accuracy de test? ¿Y el tiempo de espera?</li>
+<li><strong>Amnesia regulada:</strong> el argumento <code>mtry</code> controla cuántas variables puede mirar cada corte (por defecto ≈ √5 ≈ 2). Pruébalo con <code>mtry = 5</code> (todas las variables — bosque sin amnesia). ¿Mejora o empeora? ¿Por qué la teoría predice que árboles clones votan peor?</li>
+</ol>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="cierre" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Cierre</h1>
+<p>En una clase montaste el pipeline completo de un clasificador profesional: vara, candidato legible, control de sobreajuste con CV, un bosque que vota y una perilla de umbral negociada con el negocio. El <a href="../task/week-11.html"><strong>Taller 11</strong></a> te espera con otra empresa y otra pregunta — y una trampa que ya deberías oler: allá la clase que importa es la <em>minoritaria</em>, así que la accuracy va a mentir con ganas. Lleva tu recall.</p>
 </section>
 
 </main>
@@ -2503,13 +415,14 @@ init();
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
@@ -2857,122 +770,6 @@ init();
   });
   </script>
 </div> <!-- /content -->
-<script type="module">
-// Handle cell initialization initialization
-qwebrCellDetails.map(
-  (entry) => {
-    // Handle the creation of the element
-    qwebrCreateHTMLElement(entry);
-    // In the event of interactive, initialize the monaco editor
-    if (entry.options.context == EvalTypes.Interactive) {
-      qwebrCreateMonacoEditorInstance(entry);
-    }
-  }
-);
-
-// Identify non-interactive cells (in order)
-const filteredEntries = qwebrCellDetails.filter(entry => {
-  const contextOption = entry.options && entry.options.context;
-  return ['output', 'setup'].includes(contextOption) || (contextOption == "interactive" && entry.options && entry.options.autorun === 'true');
-});
-
-// Condition non-interactive cells to only be run after webR finishes its initialization.
-qwebrInstance.then(
-  async () => {
-    const nHiddenCells = filteredEntries.length;
-    var currentHiddenCell = 0;
-
-
-    // Modify button state
-    qwebrSetInteractiveButtonState(`🟡 Running hidden code cells ...`, false);
-
-    // Begin processing non-interactive sections
-    // Due to the iteration policy, we must use a for() loop.
-    // Otherwise, we would need to switch to using reduce with an empty
-    // starting promise
-    for (const entry of filteredEntries) {
-
-      // Determine cell being examined
-      currentHiddenCell = currentHiddenCell + 1;
-      const formattedMessage = `Evaluating hidden cell ${currentHiddenCell} out of ${nHiddenCells}`;
-
-      // Update the document status header
-      if (qwebrShowStartupMessage) {
-        qwebrUpdateStatusHeader(formattedMessage);
-      }
-
-      // Display the update in non-active areas
-      qwebrUpdateStatusMessage(formattedMessage);
-
-      // Extract details on the active cell
-      const evalType = entry.options.context;
-      const cellCode = entry.code;
-      const qwebrCounter = entry.id;
-
-      if (['output', 'setup'].includes(evalType)) {
-        // Disable further global status updates
-        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
-        activeContainer.classList.remove('qwebr-cell-needs-evaluation');
-        activeContainer.classList.add('qwebr-cell-evaluated');
-
-        // Update status on the code cell
-        const activeStatus = document.getElementById(`qwebr-status-text-${qwebrCounter}`);
-        activeStatus.innerText = " Evaluating hidden code cell...";
-        activeStatus.classList.remove('qwebr-cell-needs-evaluation');
-        activeStatus.classList.add('qwebr-cell-evaluated');
-      }
-
-      switch (evalType) {
-        case 'interactive':
-          // TODO: Make this more standardized.
-          // At the moment, we're overriding the interactive status update by pretending its
-          // output-like. 
-          const tempOptions = entry.options;
-          tempOptions["context"] = "output"
-          // Run the code in a non-interactive state that is geared to displaying output
-          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, tempOptions);
-          break;
-        case 'output':
-          // Run the code in a non-interactive state that is geared to displaying output
-          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, entry.options);
-          break;
-        case 'setup':
-          const activeDiv = document.getElementById(`qwebr-noninteractive-setup-area-${qwebrCounter}`);
-
-          // Store code in history
-          qwebrLogCodeToHistory(cellCode, entry.options);
-
-          // Run the code in a non-interactive state with all output thrown away
-          await mainWebR.evalRVoid(`${cellCode}`);
-          break;
-        default: 
-          break; 
-      }
-
-      if (['output', 'setup'].includes(evalType)) {
-        // Disable further global status updates
-        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
-        // Disable visibility
-        activeContainer.style.visibility = 'hidden';
-        activeContainer.style.display = 'none';
-      }
-    }
-  }
-).then(
-  () => {
-    // Release document status as ready
-
-    if (qwebrShowStartupMessage) {
-      qwebrStartupMessage.innerText = "🟢 Ready!"
-    }
-  
-    qwebrSetInteractiveButtonState(
-      `<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>`, 
-      true
-    );  
-  }
-);
-</script>
 
 
 

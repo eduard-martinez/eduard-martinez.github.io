@@ -1,5 +1,5 @@
 ---
-title: "Unidad 3 - Transformación de Datos con dplyr"
+title: "Unidad 1 - Manipulación y visualización de datos"
 subtitle: "Introducción al Business Analytics · Semana 4 · 06278-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
@@ -15,96 +15,10 @@ lang: es
 <span id="webr-status-anchor"></span>
 </div>
 
-<!--=================-->
-<!--=================-->
-# Objetivo de la semana
-
-Esta semana aprenderemos a **transformar datos crudos en información lista para tomar decisiones**. El foco NO está en "dominar dplyr", sino en responder preguntas de negocio mediante filtros, cálculos, agrupaciones y resúmenes.
-
-::: {.callout-key}
-**¿Por qué necesitamos transformar datos?**
-
-Los datos raramente vienen en el formato que necesitamos para responder preguntas. Casi siempre debemos:
-
-- **Filtrar:** "Solo quiero ver las ventas de 2023"
-- **Calcular:** "¿Cuál es el margen unitario de cada producto?"
-- **Agrupar:** "¿Cuánto vendió cada región?"
-- **Resumir:** "¿Cuál es el promedio de ventas por vendedor?"
-
-`dplyr` es una "gramática" que nos permite hacer estas transformaciones con verbos claros. Esta semana aprenderemos cada verbo por separado. Al final de la clase los combinaremos.
-:::
-
-## Lo que aprenderemos esta semana
-
-**1. Transformaciones básicas — un verbo a la vez**
-
-- Seleccionar columnas con `select()`
-- Filtrar filas con `filter()`
-- Crear variables calculadas con `mutate()`
-- Obtener resúmenes globales con `summarise()`
-
-**2. Descriptivas por grupo**
-
-- Agrupar datos con `group_by()`
-- Calcular KPIs por segmento con `group_by() + summarise()`
-
-::: {.callout-key}
-**Conexión con el flujo analítico**
-
-Ya entendemos qué es el proceso analítico (Semana 02) y cómo funciona R como entorno de trabajo (Semana 03). Ahora aprendemos a **preparar tablas** que respondan preguntas específicas antes de visualizarlas (Semana 05).
-
-Esta semana trabajamos con datos "ideales" (sin valores faltantes ni errores). La limpieza la veremos en la Semana 06.
-:::
-
-<!--=================-->
-<!--=================-->
-# Introducción a dplyr
-
-## ¿Qué es dplyr?
-
-`dplyr` es un paquete de R diseñado para manipular data frames de manera intuitiva. Es parte del [tidyverse]{.term}: un ecosistema de paquetes con una filosofía común de código claro y legible.
-
-**La idea central: verbos para acciones**
-
-En R base podemos filtrar filas así:
-
-```r
-ventas[ventas$region == "Norte", ]
-```
-
-Con `dplyr`, la misma operación se escribe así:
-
-```r
-filter(ventas, region == "Norte")
-```
-
-`dplyr` reemplaza la notación de corchetes por **verbos** que describen exactamente qué queremos hacer. Cada verbo hace una sola cosa, y tiene un nombre que lo dice claramente.
-
-## Instalación y carga
-
-La función `install.packages()` descarga el paquete en tu computador — solo se hace **una vez**, igual que instalas una aplicación. `library()` lo activa para la sesión actual — esto sí hay que hacerlo **cada vez** que abres RStudio, igual que abres la app cada vez que la necesitas.
-
-**Regla práctica:** `install.packages()` se corre una sola vez directo en la Consola. Nunca debe quedar activo en el script. Si quieres conservarla como referencia, déjala comentada: así evitas reinstalaciones innecesarias y, si compartes el script, otras personas no reinstalarán paquetes que ya tienen.
-
-```{webr-r}
-## Instalar dplyr (solo una vez, fuera del script)
-# install.packages("dplyr")
-
-## Cargar al inicio de cada sesión
-library(dplyr)
-```
-
-## Dataset de ejemplo: ventas de una tienda
-
-Usaremos este data frame durante toda la clase. Tiene **9 transacciones** y **6 columnas**: trimestre, producto, categoría, precio unitario, cantidad vendida y región del vendedor.
-
-En el entorno de **WebR** (este documento), el dataset ya viene precargado: no necesitas leerlo desde ningún archivo. Basta con ejecutar el segundo chunk para inspeccionarlo.
-
-Si trabajas desde **RStudio**, descomenta la línea `read.csv(...)` para cargar el dataset directamente desde internet.
-
 ```{webr-r}
 #| context: setup
 
+## Base pequeña: para aprender los verbos de dplyr (9 transacciones)
 ventas <- data.frame(
   trimestre = c("Q1","Q1","Q1","Q2","Q2","Q2","Q3","Q3","Q3"),
   producto  = c("Laptop","Mouse","Licencia","Laptop","Soporte","Mouse","Licencia","Laptop","Soporte"),
@@ -113,839 +27,857 @@ ventas <- data.frame(
   cantidad  = c(2, 10, 5, 3, 8, 15, 6, 1, 4),
   region    = c("Norte","Sur","Norte","Centro","Sur","Norte","Centro","Sur","Norte")
 )
+
+## Base ampliada: para los gráficos (36 transacciones)
+ventas_full <- data.frame(
+  trimestre = rep(c("Q1","Q2","Q3"), each = 12),
+  producto  = rep(c("Laptop","Mouse","Licencia","Soporte"), 9),
+  categoria = rep(c("Hardware","Hardware","Software","Software"), 9),
+  precio    = c(1200,25,150,80, 1150,30,160,75, 1250,20,140,85,
+                1200,25,150,80, 1180,28,155,78, 1220,22,145,82,
+                1200,25,150,80, 1190,26,158,77, 1210,24,148,83),
+  cantidad  = c(2,10,5,8, 1,15,6,7, 3,12,4,9,
+                3,8,5,10, 2,14,7,6, 1,11,5,8,
+                2,9,6,7, 3,13,4,9, 1,10,5,8),
+  region    = rep(c("Norte","Sur","Centro"), each = 12)
+)
+ventas_full <- mutate(ventas_full, ingreso = precio * cantidad)
+
+## Tablas intermedias pre-creadas para que toda celda corra por sí sola
+## (las celdas visibles del documento enseñan cómo se construyen)
+ing_region <- ventas_full %>%
+  group_by(region) %>%
+  summarise(ingreso_total = sum(ingreso), .groups = "drop")
+
+kpis_region <- ventas_full %>%
+  group_by(region) %>%
+  summarise(ingreso_total   = sum(ingreso),
+            ticket_promedio = round(mean(ingreso)),
+            n_transacciones = n(),
+            .groups = "drop") %>%
+  arrange(desc(ingreso_total))
 ```
+
+<!--=================-->
+<!--=================-->
+# Cómo estudiar esta semana
+
+La semana pasada aprendiste el idioma; esta semana lo pones a producir. El plan es un viaje completo: tomar una tabla de transacciones, **transformarla** hasta convertirla en una tabla de indicadores de negocio (KPIs), y luego **comunicarla** con gráficos que se entienden en tres segundos. Las dos herramientas son las más usadas de todo el ecosistema R: `dplyr` para manipular, `ggplot2` para visualizar.
+
+::: {.callout-key}
+**Tu ruta de esta semana (antes de llegar a clase)**
+
+1. 🎬 **Ve el video de la semana**: el verbo a verbo de `dplyr` y la construcción de gráficos por capas. <!-- TODO: pegar aquí el enlace del video en Intu -->
+2. 📖 **Lee este documento** ejecutando cada celda: es la versión escrita del video y, como la semana pasada, **el código corre en tu navegador** (panel 📦 Environment incluido, abajo a la derecha).
+3. ✅ **Presenta el quiz** de teoría en Intu.
+4. 💻 Ven a clase con RStudio funcionando y el proyecto `intro_ba` de la semana pasada a la mano.
+:::
+
+::: {.callout-workflow}
+**El dataset de la semana**
+
+Trabajaremos con las ventas de una comercializadora de tecnología. En esta página los datos **ya están precargados** en dos versiones: `ventas` (9 transacciones, para aprender los verbos viendo todo) y `ventas_full` (36 transacciones, para que los gráficos tengan sustancia).
+
+Si replicas desde **RStudio**, cárgalos desde internet:
+
+```r
+require(pacman)
+p_load(dplyr, ggplot2)
+
+## La base pequeña (idéntica a la de esta página)
+ventas <- read.csv("https://eduard-martinez.github.io/databases/ba/ventas.csv")
+
+## Para la mitad de gráficos: usa la base del año completo como ventas_full
+## (tiene más columnas y otros números — los patrones son los mismos)
+ventas_full <- read.csv("https://eduard-martinez.github.io/databases/ba/ventas_2025.csv")
+ventas_full <- mutate(ventas_full, ingreso = precio * cantidad)
+```
+:::
+
+<!--=================-->
+<!--=================-->
+# Glosario de la semana
+
+```{=html}
+<div class="glossary-grid">
+  <div class="gloss-card"><div class="gloss-term">🔧 Verbo (dplyr)</div><div class="gloss-def">Función que hace <b>una</b> transformación con nombre claro: <code>filter()</code> filtra filas, <code>select()</code> escoge columnas, <code>mutate()</code> crea variables, <code>summarise()</code> resume.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🔗 Pipe %&gt;%</div><div class="gloss-def">El conector "y luego": <code>datos %&gt;% filter(...) %&gt;% summarise(...)</code> encadena pasos sin crear objetos intermedios. Se lee de izquierda a derecha, como una receta.</div></div>
+  <div class="gloss-card"><div class="gloss-term">📈 KPI</div><div class="gloss-def"><i>Key Performance Indicator</i>: la cifra que resume el desempeño de algo — ingreso total, ticket promedio, número de transacciones. Es el producto típico de <code>summarise()</code>.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🎯 Ticket promedio</div><div class="gloss-def">El valor promedio de una transacción (ingreso total ÷ número de transacciones). KPI clásico del comercio: dice si vendes mucho de a poquito o poco de a mucho.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🧩 Granularidad</div><div class="gloss-def">El nivel de detalle de un resumen: ¿una fila por todo el negocio, una por región, o una por región × trimestre? La define <code>group_by()</code>.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🗺️ Mapeo estético (aes)</div><div class="gloss-def">La conexión entre variables y atributos visuales: qué columna va al eje X, cuál al Y, cuál controla el color. Se declara dentro de <code>aes()</code>.</div></div>
+  <div class="gloss-card"><div class="gloss-term">📐 Geometría (geom)</div><div class="gloss-def">La forma visual de los datos: barras (<code>geom_col</code>), puntos (<code>geom_point</code>), líneas (<code>geom_line</code>), histogramas (<code>geom_histogram</code>). Se elige según la pregunta.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🥞 Capa</div><div class="gloss-def">Cada pieza que se suma a un gráfico con el operador <code>+</code>: la geometría, las etiquetas, el tema. Un gráfico de ggplot2 es una pila de capas.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🎨 Tema (theme)</div><div class="gloss-def">El estilo visual del gráfico (fondo, grillas, tipografía): <code>theme_minimal()</code> para presentaciones, <code>theme_bw()</code> para reportes. No cambia los datos, solo el vestido.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🪟 Faceta</div><div class="gloss-def">Panelitos que repiten el mismo gráfico para cada grupo (<code>facet_wrap(~ region)</code>). La alternativa elegante a amontonar todo en un solo gráfico.</div></div>
+</div>
+```
+
+<!--=================-->
+<!--=================-->
+# El destino: una tabla de KPIs y sus gráficos
+
+Antes de la herramienta, el propósito. Imagina que la gerente te pregunta: *"¿cómo nos fue este año por región?"*. La respuesta profesional no es reenviarle las 36 transacciones — es entregarle algo así:
+
+| region | ingreso_total | ticket_promedio | n_transacciones |
+|--------|--------------:|----------------:|----------------:|
+| Norte  | ... | ... | ... |
+| Sur    | ... | ... | ... |
+| Centro | ... | ... | ... |
+
+...y un gráfico donde la comparación se vea sola. **Ese es el producto de esta semana**: la tabla analítica de KPIs y 2-3 gráficos que la comunican. `dplyr` construye la tabla; `ggplot2`, los gráficos. Empecemos por conocer los datos:
 
 ```{webr-r}
-## Descomenta esta línea si trabajas desde RStudio
-# ventas <- read.csv("https://eduard-martinez.github.io/databases/ba/ventas.csv")
-
-## Inspeccionar la base de datos
+## La base pequeña con la que aprenderemos los verbos
 ventas
+
+## Radiografía (el reflejo de la semana 3)
+str(ventas)
 ```
 
-<!--=================-->
-<!--=================-->
-# Transformaciones básicas
+Cada fila es una **transacción**: qué producto se vendió, a qué precio unitario, cuántas unidades, en qué región y trimestre. Datos **limpios** — sin faltantes ni errores. (El mundo real es más sucio; de eso nos ocuparemos en la semana 6.)
 
-La lógica de trabajo es siempre la misma:
+<!--=================-->
+<!--=================-->
+# La gramática dplyr: un verbo a la vez
+
+En la semana 3 filtraste con corchetes: `ventas[ventas$region == "Norte", ]`. Funciona, pero no *se lee*. `dplyr` propone algo mejor: **verbos** que dicen exactamente qué hacen. La lógica de trabajo es siempre la misma:
 
 ```
 resultado <- verbo(datos, argumentos)
 ```
 
-Aplicamos un verbo al dataset y guardamos el resultado en un objeto nuevo. El dataset original **no se modifica**.
+Se aplica el verbo, se guarda el resultado en un objeto nuevo, y el dataset original **queda intacto**.
 
----
-
-## select(): Seleccionar columnas
-
-La función `select()` devuelve solo las columnas que le pedimos.
+## `select()`: escoger columnas
 
 ```{webr-r}
-## Seleccionar 3 columnas del dataset ventas
+## Solo tres columnas
 ventas_red <- select(ventas, producto, precio, cantidad)
 ventas_red
 ```
 
-::: {.callout-key}
-**¿Qué pasó aquí?**
-
-- `ventas` sigue intacto en el Environment (con 6 columnas)
-- `ventas_red` es un objeto nuevo con solo 3 columnas
-- `select()` no modifica el original, crea una copia reducida
-
-Puedes verificarlo ejecutando `ncol(ventas)` y `ncol(ventas_red)` por separado.
-:::
-
-También puedes excluir columnas con el operador `-`. Útil cuando es más fácil decir qué NO quieres:
+`ventas` sigue completo en el Environment; `ventas_red` es una copia reducida. También puedes decir qué **no** quieres:
 
 ```{webr-r}
 ## Todas las columnas EXCEPTO trimestre
-ventas_notrim <- select(ventas, -trimestre)
-ventas_notrim
+select(ventas, -trimestre)
 ```
 
-Si en algún momento trabajas con datasets de muchas columnas, `select()` tiene funciones auxiliares como `starts_with()` y `ends_with()` que permiten seleccionar columnas por patrones en sus nombres.
+## `rename()`: renombrar columnas
 
-
-## rename(): Renombrar columnas
-
-La función `rename()` cambia el nombre de una o más columnas sin modificar su contenido. La sintaxis es `nuevo_nombre = nombre_viejo`:
+Sintaxis `nuevo_nombre = nombre_viejo`. Útil cuando los nombres originales son crípticos (`x1`, `Var2`) o traen espacios:
 
 ```{webr-r}
-## Renombrar la columna "producto" a "item"
-ventas_ren <- rename(ventas, item = producto)
-ventas_ren
+rename(ventas, item = producto)
 ```
 
-::: {.callout-practice}
-**¿Cuándo renombrar?** Cuando los nombres originales no son descriptivos (`x1`, `var2`), contienen espacios o caracteres especiales, o quieres estandarizar nomenclatura antes de combinar datasets.
+## `filter()`: quedarse con las filas que importan
 
-**Buena práctica:** minúsculas y guion bajo — `precio_unitario`, no `Precio Unitario`.
-:::
-
----
-
-## filter(): Filtrar filas
-
-La función `filter()` devuelve solo las filas que cumplen una condición. Las demás se descartan.
-
-### Filtros simples
+El verbo que más usarás en tu vida. Devuelve las filas que cumplen una condición:
 
 ```{webr-r}
-## Filas donde region es exactamente "Norte"
-ventas_norte <- filter(ventas, region == "Norte")
-ventas_norte
+## Transacciones de la región Norte
+filter(ventas, region == "Norte")
 ```
 
 ```{webr-r}
-## Filas donde el precio supera 100
-ventas_alta <- filter(ventas, precio > 100)
-ventas_alta
+## Transacciones de más de 100 pesos de precio unitario
+filter(ventas, precio > 100)
 ```
 
-### Operadores de comparación
-
-La condición dentro de `filter()` siempre usa un operador de comparación. Estos son los más comunes:
+Los operadores de comparación son los de la semana 3:
 
 | Operador | Significado | Ejemplo |
 |----------|-------------|---------|
-| `==` | Igual a | `region == "Norte"` |
-| `!=` | Diferente de | `region != "Sur"` |
-| `>` | Mayor que | `precio > 100` |
-| `<` | Menor que | `precio < 500` |
-| `>=` | Mayor o igual | `cantidad >= 5` |
-| `<=` | Menor o igual | `precio <= 300` |
-| `%in%` | Pertenece al conjunto | `region %in% c("Norte","Sur")` |
+| `==` | igual a | `region == "Norte"` |
+| `!=` | diferente de | `region != "Sur"` |
+| `>` , `>=` | mayor (o igual) que | `precio >= 150` |
+| `<` , `<=` | menor (o igual) que | `cantidad < 5` |
+| `%in%` | pertenece al conjunto | `region %in% c("Norte", "Sur")` |
 
-::: {.callout-practice}
-**Error común: confundir `=` con `==`**
+Y las condiciones se combinan con `&` (ambas) y `|` (al menos una):
 
-```r
-filter(ventas, region = "Norte")   # Error — asigna en lugar de comparar
-filter(ventas, region == "Norte")  # Correcto — compara
+```{webr-r}
+## Norte Y precio alto (deben cumplirse las dos)
+filter(ventas, region == "Norte" & precio > 100)
 ```
 
-Dentro de `filter()`, siempre dos signos igual para comparar.
+```{webr-r}
+## Centro O Sur (basta una)
+filter(ventas, region == "Centro" | region == "Sur")
+```
+
+::: {.callout-warning}
+**El error #1 de la semana:** `filter(ventas, region = "Norte")` — con un solo `=` — falla. Dentro de `filter()` siempre se **compara** con `==`. R incluso te lo sugiere en el mensaje de error; léelo.
 :::
 
-### Filtros con múltiples condiciones
+## `arrange()`: ordenar para leer mejor
 
-Cuando la pregunta exige que se cumplan **dos condiciones al mismo tiempo**, usamos `&`:
-
-```{webr-r}
-# Ventas de región Norte con precio mayor a 100
-norte <- filter(ventas, region=="Norte" & precio>100)
-norte
-```
-
-Cuando basta con que se cumpla **al menos una**, usamos `|`:
+El orden importa tanto como el contenido: un ranking se lee de arriba hacia abajo.
 
 ```{webr-r}
-# Ventas de región Centro o región Sur
-centro <- filter(ventas, region=="Centro" | region=="Sur")
-centro
-```
-
----
-
-### Mini-ejercicio
-
-Escribe el código para responder cada pregunta. Si obtienes el resultado esperado, vas bien.
-
-```{webr-r}
-# P1. ¿Cuáles ventas son de Hardware?
-#     Resultado esperado: 5 filas
-
-
-# P2. ¿Cuáles ventas tienen cantidad mayor o igual a 5?
-#     Resultado esperado: 6 filas
-
-
-# P3. ¿Cuáles ventas son de Software con cantidad mayor a 5?
-#     Resultado esperado: 2 filas
-
-
-# P4. ¿Cuáles ventas NO son de la región Norte?
-#     Resultado esperado: 5 filas
-
-
-```
-
----
-
-## arrange(): Ordenar filas
-
-Filtrar y calcular nos da los datos correctos, pero no siempre en el orden más útil para leerlos o comunicarlos. `arrange()` reorganiza las filas de un data frame según los valores de una o más columnas. Es especialmente útil como paso final antes de mostrar una tabla: un ranking de productos por ingreso, los clientes con mayor deuda primero, o las transacciones más recientes arriba son todos casos donde el orden importa tanto como el contenido.
-
-```{webr-r}
-# Ordenar por precio de menor a mayor (ascendente por defecto)
-ventas_por_precio <- arrange(ventas, precio)
-ventas_por_precio
+## De menor a mayor precio (así viene por defecto)
+arrange(ventas, precio)
 ```
 
 ```{webr-r}
-# Ordenar de mayor a menor con desc()
-ventas_precio_desc <- arrange(ventas, desc(precio))
-ventas_precio_desc
+## De mayor a menor, con desc()
+arrange(ventas, desc(precio))
 ```
 
 ```{webr-r}
-# Ordenar por región (ascendente) y dentro de cada región por precio (descendente)
-ventas_ordenado <- arrange(ventas, region, desc(precio))
-ventas_ordenado
+## Por región (A→Z) y, dentro de cada región, por precio descendente
+arrange(ventas, region, desc(precio))
 ```
 
-**Cómo leer el último ejemplo:** "Ordena primero por región (A→Z). Dentro de cada región, ordena por precio de mayor a menor."
+## `mutate()`: crear variables nuevas
 
----
+`mutate()` añade columnas calculadas — la materia prima de casi cualquier análisis. Nuestra tabla tiene precio y cantidad, pero la pregunta de negocio es sobre **ingreso**:
 
-## mutate(): Crear nuevas variables
-
-La función `mutate()` añade columnas calculadas al dataset. Las columnas originales se conservan.
-
-### Cálculos simples
 ```{webr-r}
-# Calcular ingreso por transacción
+## Ingreso de cada transacción
 ventas_ing <- mutate(ventas, ingreso = precio * cantidad)
 ventas_ing
 ```
+
+Puedes crear varias a la vez, y clasificar con `ifelse(condición, si_cumple, si_no)`:
+
 ```{webr-r}
-# Crear varias columnas a la vez
-ventas_cal <- mutate(ventas,
-                     ingreso = precio * cantidad,
-                     ing_miles = (precio * cantidad) /1000)
-ventas_cal
+## Dos columnas nuevas de un solo golpe
+mutate(ventas,
+       ingreso   = precio * cantidad,
+       tipo_venta = ifelse(precio * cantidad > 500, "Alta", "Baja"))
 ```
 
 ::: {.callout-key}
-**mutate() mantiene el número de filas**
-
-`mutate()` siempre devuelve un data frame con **el mismo número de filas** que el original. Solo añade (o reemplaza) columnas. Cada fila recibe su propio valor calculado.
-
-Más adelante veremos `summarise()`, que hace lo opuesto: **colapsa** todas las filas en un resumen.
+**`mutate()` conserva las filas.** Devuelve la misma cantidad de filas del original, con columnas de más. Guárdalo en la memoria porque su contraste con `summarise()` — que **colapsa** filas — es la pregunta favorita de los quices (y de los parciales).
 :::
 
-### Clasificar con ifelse()
+## Mini-ejercicio: cuatro preguntas, cuatro filtros
+
+Escribe el código de cada una y verifica contra el resultado esperado:
+
 ```{webr-r}
-# Etiquetar productos como "Alto" o "Bajo" precio
-ventas_d <- mutate(ventas, 
-                   rango = ifelse(precio > 100, "A", "B"))
-ventas_d
+# P1. ¿Cuáles ventas son de Hardware?            (esperado: 5 filas)
+
+
+# P2. ¿Cuáles tienen cantidad mayor o igual a 5?  (esperado: 5 filas)
+
+
+# P3. ¿Cuáles son de Software con cantidad > 5?   (esperado: 2 filas)
+
+
+# P4. Crea tipo_venta ("Alta" si ingreso > 500, "Baja" si no)
+#     ¿Cuántas salen "Alta"? (esperado: 6)
+
 ```
 
-**Cómo leer esto:** "Para cada fila, si el precio es mayor a 100 escribe `"A"`, si no escribe `"B"`."
+::: {.callout-remember}
+**Lo esencial de los verbos**
 
-Cuando necesitas **tres o más categorías**, `ifelse()` anidado se vuelve difícil de leer. Para esos casos existe `case_when()` — explóralo en la [documentación de dplyr](https://dplyr.tidyverse.org/reference/case_when.html) cuando lo necesites.
-
----
-
-### Mini-ejercicio
-
-Con el dataset `ventas`, crea una nueva columna `tipo_venta` que clasifique cada transacción así:
-
-- `"Alta"` si el ingreso (`precio * cantidad`) supera 500
-- `"Baja"` en cualquier otro caso
-
-Guarda el resultado en `ventas_tipo` e imprímelo.
-```{webr-r}
-# Tu código aquí
-ventas_tipo <- mutate(ventas,
-                      tipo_venta = ___(___ , ___, ___))
-ventas_tipo
-```
-
-::: {.callout-practice}
-**Pista**
-
-Necesitas calcular el ingreso *dentro* de la condición: `precio * cantidad > 500`.
-No es necesario crear la columna `ingreso` primero — `mutate()` puede evaluarla directamente.
+- `select()` columnas · `filter()` filas · `rename()` nombres · `arrange()` orden · `mutate()` variables nuevas.
+- Siempre: `resultado <- verbo(datos, ...)` — el original no se toca.
+- Comparar es `==`; asignar argumentos es `=`.
 :::
 
 <!--=================-->
 <!--=================-->
-# Resúmenes globales
+# Resúmenes: de la tabla al número
 
-## summarise(): Colapsar datos en un resumen
+## `summarise()`: colapsar en un indicador
 
-La lógica de trabajo sigue siendo la misma:
-
-```
-resultado <- verbo(datos, argumentos)
-```
-
-`summarise()` es diferente a todos los verbos que hemos visto hasta ahora. `select()`, `mutate()` y `arrange()` devuelven un data frame con el mismo número de filas que el original. `summarise()` hace algo distinto: **colapsa todas las filas en una sola**, calculando una estadística que representa al grupo completo. Pensemos en ello así: si `mutate()` añade una columna nueva a cada fila, `summarise()` toma todas las filas y las "aplasta" en un único número.
-
-### Un solo estadístico
-
-La forma más simple: pedirle a `summarise()` un único valor.
+Todos los verbos anteriores devuelven tablas del mismo largo (o más cortas). `summarise()` hace algo distinto: **aplasta todas las filas en un resumen**. Es la fábrica de KPIs.
 
 ```{webr-r}
 ## ¿Cuál es el precio promedio de todas las transacciones?
-resumen_p <- summarise(ventas, precio_p = mean(precio))
-
-# ver resultado
-resumen_p
+summarise(ventas, precio_promedio = mean(precio))
 ```
 
-**Qué pasó:** el data frame `ventas` tenía 9 filas. `summarise()` las leyó todas, calculó el promedio de la columna `precio`, y devolvió **una sola fila** con ese resultado. El nombre `precio_p` es el que nosotros elegimos para la columna de salida.
-
-### Varios estadísticos a la vez
-
-Podemos pedir múltiples resúmenes en una sola llamada. Cada uno se convierte en una columna del resultado:
+Nueve filas entraron; salió **una**, con el nombre de columna que tú elegiste. Y puede calcular varios indicadores de una vez:
 
 ```{webr-r}
-## Resumen global de precios con varios estadísticos
-resumen_glo <- summarise(ventas,
-                         precio_promedio = mean(precio),
-                         precio_minimo   = min(precio),
-                         precio_maximo   = max(precio),
-                         n_transacciones = n())
-
-## ver resultado
-resumen_glo
-```
-
-**Qué pasó:** el mismo proceso de antes, pero ahora `summarise()` calculó cuatro estadísticos simultáneamente. El resultado sigue siendo **una sola fila**, pero ahora tiene cuatro columnas —una por cada estadístico que pedimos. La función especial `n()` no recibe ninguna columna como argumento: simplemente cuenta cuántas filas había en el dataset antes de colapsar.
-
-::: {.callout-key}
-**Funciones de resumen más comunes**
-
-**Tendencia central:** `mean()` (promedio), `median()` (mediana)
-
-**Dispersión:** `sd()` (desviación estándar), `IQR()` (rango intercuartílico)
-
-**Extremos:** `min()`, `max()`
-
-**Conteos:** `n()` (número de filas), `n_distinct()` (valores únicos), `sum()`
-:::
-
-### Mini-ejercicio
-
-Usando `filter()`, `mutate()` y `summarise()`, calcula el ingreso total y el ticket promedio de las transacciones de la categoría **Software**. Guarda el resultado en `resumen_soft` e imprímelo.
-
-```{webr-r}
-# Paso 1: filtrar solo Software
-ventas_soft <- filter(___, ___ == ___)
-
-# Paso 2: calcular ingreso por fila
-ventas_soft_ing <- mutate(___, ingreso = ___ * ___)
-
-# Paso 3: resumir
-resumen_soft <- summarise(___,
-                          ingreso_total   = ___,
-                          ticket_promedio = ___,
-                          n_ventas        = ___
-)
-resumen_soft
-```
-
-::: {.callout-practice}
-**Pista**
-
-`ingreso` no existe en el dataset original — hay que crearla con `mutate()` antes de poder usarla en `summarise()`. Si ves un error que dice `object 'ingreso' not found`, significa que saltaste el Paso 2.
-
-**Resultado esperado:** una sola fila con `ingreso_total = 1710`, `ticket_promedio = 427.5` y `n_ventas = 4`.
-:::
-
-
-<!--=================-->
-# Descriptivas por grupo
-
-## ¿Qué significa agrupar?
-
-`summarise()` sin agrupación produce una sola fila para todo el dataset. Pero casi siempre queremos comparar segmentos:
-
-- Ventas **por región**
-- Ticket promedio **por vendedor**
-- Ingreso **por categoría**
-
-Para eso usamos `group_by()` antes de `summarise()`.
-
-::: {.callout-key}
-**Concepto de granularidad**
-
-| Operación | Resultado |
-|-----------|-----------|
-| `summarise()` sin grupo | 1 fila — resumen de todo |
-| `group_by(region)` + `summarise()` | 1 fila por cada región |
-| `group_by(region, categoria)` + `summarise()` | 1 fila por cada combinación región × categoría |
-
-La granularidad define **a qué nivel** hacemos el análisis.
-:::
-
-## group_by() + summarise(): el dúo central
-
-`group_by()` marca el dataset como agrupado. `summarise()` calcula los resúmenes dentro de cada grupo:
-
-```{webr-r}
-# Paso 1: calcular ingreso por transacción
 ventas_ing <- mutate(ventas, ingreso = precio * cantidad)
 
-# Paso 2: agrupar por región
-ventas_ing_g <- group_by(ventas_ing, region)
-
-# Paso 3: resumir por grupo
-kpis_region <- summarise(ventas_ing_g,
-                         ingreso_total   = sum(ingreso),
-                         n_transacciones = n()
-                         )
-kpis_region
+summarise(ventas_ing,
+          ingreso_total   = sum(ingreso),
+          ticket_promedio = mean(ingreso),
+          n_transacciones = n())
 ```
 
-**Cómo leer el resultado:** Cada fila es una región. Podemos ver de un vistazo cuánto generó cada una y cuántas transacciones tuvo.
+La función `n()` es especial: no recibe columna — simplemente cuenta las filas del grupo.
 
 ::: {.callout-key}
-**¿Qué hace group_by() exactamente?**
+**Tu caja de funciones de resumen**
 
-`group_by()` no cambia el data frame visualmente. Lo que hace es marcar el objeto como "agrupado". Puedes verificarlo ejecutando el objeto después de agrupar: verás `# Groups: region [3]` encima de la tabla.
-
-Cuando el siguiente paso es `summarise()`, R calcula las estadísticas **por separado para cada grupo**.
+**Centro:** `mean()` (promedio), `median()` (mediana) · **Dispersión:** `sd()` (desviación estándar), `min()`, `max()` · **Conteo:** `n()` (filas), `n_distinct()` (valores únicos), `sum()` (total).
 :::
 
-## Múltiples KPIs por grupo
+## `group_by()` + `summarise()`: el dúo central del curso
 
-Hasta ahora calculamos uno o dos estadísticos por grupo. En la práctica, casi siempre necesitamos varios KPIs a la vez para tener una visión completa del desempeño de cada segmento.
+Un resumen global responde "¿cómo nos fue?". Pero la gerente preguntó "¿cómo nos fue **por región**?" — y comparar segmentos es el 80% de la analítica descriptiva. `group_by()` marca la tabla como agrupada; el siguiente `summarise()` calcula **dentro de cada grupo**:
 
 ```{webr-r}
-## Paso 1: crear ingreso
+## Paso 1: la variable de negocio
 ventas_ing <- mutate(ventas, ingreso = precio * cantidad)
 
 ## Paso 2: agrupar por región
 ventas_agr <- group_by(ventas_ing, region)
 
-## Paso 3: calcular múltiples KPIs
+## Paso 3: resumir por grupo → LA TABLA DE KPIs
 kpis_region <- summarise(ventas_agr,
                          ingreso_total   = sum(ingreso),
                          ticket_promedio = mean(ingreso),
                          n_transacciones = n(),
                          .groups = "drop")
-
-## ver resultado
 kpis_region
 ```
 
-**Qué pasó:** cada región tiene ahora tres métricas. Podemos compararlas de un vistazo: cuál generó más ingresos, cuál tiene el ticket promedio más alto, cuál es más activa. El argumento `.groups = "drop"` desagrupa el resultado automáticamente — sin esto, el objeto quedaría marcado como agrupado y podría generar resultados inesperados en pasos posteriores.
+Cada fila es una región. De un vistazo: quién genera más, quién tiene el ticket más alto, quién mueve más transacciones. El argumento `.groups = "drop"` desagrupa el resultado al final — inclúyelo siempre para evitar sorpresas en pasos posteriores.
 
-::: {.callout-connect}
-**De tabla a decisión**
+::: {.callout-key}
+**Granularidad: ¿cuántas filas va a tener mi resumen?**
 
-Esta tabla es el punto de partida para decisiones concretas:
+| Operación | Resultado |
+|-----------|-----------|
+| `summarise()` sin agrupar | 1 fila — el negocio completo |
+| `group_by(region)` + `summarise()` | 1 fila **por región** |
+| `group_by(region, categoria)` + `summarise()` | 1 fila por **combinación** región × categoría |
 
-- Invertir más presupuesto de marketing en la región de mayor ingreso
-- Capacitar vendedores en regiones con ticket promedio bajo
-- Redistribuir esfuerzos según volumen de transacciones
-
-La analítica descriptiva diagnostica; la decisión la toma el negocio.
+Antes de ejecutar un resumen, predice cuántas filas saldrán. Si el resultado te sorprende, la granularidad no era la que creías.
 :::
 
----
-
-## Agrupar por múltiples variables
-
-A veces necesitamos mayor granularidad. Además de comparar regiones, queremos ver qué pasa **dentro de cada región** según otra dimensión: categoría de producto, trimestre, canal de venta, etc.
-
-Cuando agrupamos por dos variables, obtenemos una fila por cada **combinación** única de esas variables.
-
 ```{webr-r}
-## Calcular ingreso
+## Agrupar por DOS variables: ¿qué categoría domina en cada región?
 ventas_ing <- mutate(ventas, ingreso = precio * cantidad)
-
-## Agrupar por región Y categoría
 ventas_agr <- group_by(ventas_ing, region, categoria)
 
-## Resumir
-kpis_rc <- summarise(ventas_agr,
-                     ingreso_total = sum(ingreso),
-                     n_trans = n(),
-                     .groups = "drop")
-
-## ver resultado
-kpis_rc
+summarise(ventas_agr, ingreso_total = sum(ingreso), .groups = "drop")
 ```
 
-**Qué pasó:** ahora cada fila representa una combinación región × categoría. Por ejemplo, podemos ver cuánto generó Hardware en la región Norte, cuánto Software en el Sur, etc. Esto nos ayuda a identificar qué categoría domina en cada zona geográfica.
+::: {.callout-connect}
+**De la tabla a la decisión.** Esta tablita ya sostiene decisiones reales: ¿dónde invertir el presupuesto de mercadeo? ¿En qué región empujar el Software? La analítica descriptiva diagnostica; la decisión la toma el negocio — con tu tabla sobre la mesa.
+:::
 
-**Pregunta de análisis:** ¿En qué regiones deberíamos promocionar más Software? Busca las regiones donde Software tiene bajo `ingreso_total` o bajo `n_trans`.
-
----
-
-## count(): atajo para contar frecuencias
-
-Cuando solo necesitamos saber **cuántas filas hay por grupo**, escribir `group_by() + summarise(n = n())` es innecesariamente largo. `count()` hace exactamente eso en una sola función.
+## Los atajos: `count()`, `distinct()`, `n_distinct()`
 
 ```{webr-r}
-## ¿Cuántas transacciones por región?
-conteo_region <- count(ventas, region)
-conteo_region
-```
+## ¿Cuántas transacciones por región? (atajo de group_by + summarise(n()))
+count(ventas, region)
 
-**Equivalente largo:**
-```r
-ventas_agr <- group_by(ventas, region)
-conteo <- summarise(ventas_agr, n = n(), .groups = "drop")
-```
-
-Si además queremos ordenar de mayor a menor, usamos `sort = TRUE`:
-
-```{webr-r}
-## ¿Qué producto se vendió más veces?
+## ¿Qué producto aparece más veces? (ordenado)
 count(ventas, producto, sort = TRUE)
 ```
 
-**Cuándo usar `count()`:** cuando solo te interesa la frecuencia. Si necesitas calcular otras métricas (promedios, totales, etc.), usa `group_by() + summarise()`.
-
----
-
-## distinct() y n_distinct(): explorar categorías
-
-A veces no queremos resumir datos, solo queremos saber **qué valores únicos** tiene una variable.
-
-### distinct(): mostrar valores únicos
-
 ```{webr-r}
-## ¿Qué regiones tenemos en el dataset?
+## ¿Qué valores únicos hay? (para explorar antes de filtrar)
 distinct(ventas, region)
-```
 
-```{webr-r}
-## ¿Qué combinaciones de región y categoría existen?
-distinct(ventas, region, categoria)
-```
-
-**Para qué sirve:** exploración rápida del dataset. Antes de filtrar o agrupar, es útil ver qué valores existen.
-
-### n_distinct(): contar valores únicos
-
-Cuando lo que necesitamos es el **número** de valores únicos (no verlos), usamos `n_distinct()` dentro de `summarise()`:
-
-```{webr-r}
-## ¿Cuántos productos diferentes se vendieron por región?
+## ¿CUÁNTOS productos distintos vende cada región?
 ventas_agr <- group_by(ventas, region)
-
-diversidad <- summarise(ventas_agr,
-                        n_productos = n_distinct(producto),
-                        .groups = "drop")
-diversidad
+summarise(ventas_agr, n_productos = n_distinct(producto), .groups = "drop")
 ```
 
-**Qué pasó:** cada región tiene su conteo de productos únicos. Esto nos dice qué tan diversificado está el catálogo en cada zona.
+Regla mental: `distinct()` para **ver** los valores únicos, `n_distinct()` para **contarlos**, `count()` para frecuencias.
+
+## Mini-ejercicio: tu primera tabla de KPIs
+
+```{webr-r}
+# Con la base `ventas`:
+# P1. ¿Cuál es el ingreso total por TRIMESTRE, ordenado de mayor a menor?
+#     (pistas: mutate → group_by → summarise → arrange)
+
+
+# P2. ¿Cuál es el ticket promedio de Hardware vs. Software?
+
+
+# P3. ¿Cuántos productos distintos se vendieron en Q2? (esperado: 3)
+
+```
+
+<!--=================-->
+<!--=================-->
+# El pipe `%>%`: "y luego"
+
+Habrás notado el patrón: cada análisis crea objetos intermedios (`ventas_ing`, `ventas_agr`...) que solo existen para pasarle la posta al siguiente verbo. El operador **pipe** (`%>%`, viene con `dplyr`) elimina ese desfile: toma el resultado de la izquierda y lo mete como primer argumento de la función de la derecha. Se lee "**y luego**":
+
+```{webr-r}
+## El MISMO análisis de KPIs por región, en un solo flujo legible
+kpis_region <- ventas %>%
+  mutate(ingreso = precio * cantidad) %>%      # y luego crea ingreso...
+  group_by(region) %>%                         # y luego agrupa...
+  summarise(ingreso_total   = sum(ingreso),    # y luego resume
+            ticket_promedio = mean(ingreso),
+            n_transacciones = n(),
+            .groups = "drop") %>%
+  arrange(desc(ingreso_total))                 # y luego ordena
+
+kpis_region
+```
+
+Cuatro pasos, cero objetos intermedios, y el código se lee como una receta. Así escribiremos los análisis de aquí en adelante — y así los escribe la industria (y la IA, cuando le pidas código R).
 
 ::: {.callout-practice}
-**distinct() vs. n_distinct()**
-
-- `distinct(ventas, region)` → tabla con los valores únicos de región
-- `n_distinct(region)` dentro de `summarise()` → un número (cuántos valores únicos)
-
-Usa `distinct()` para **ver**, `n_distinct()` para **contar**.
+**Dos aclaraciones prácticas.** (1) Verás también `|>`, el pipe "nativo" de R moderno: para este curso son equivalentes; usa el que prefieras y sé consistente. (2) El pipe no reemplaza el pensamiento por pasos: si un flujo se enreda, vuelve a los objetos intermedios, verifica cada uno, y re-encadena. Atajo de teclado: `Ctrl/Cmd + Shift + M`.
 :::
 
----
+<!--=================-->
+<!--=================-->
+# La gramática de gráficos
 
-## Mini-ejercicio final
+Tabla lista. Ahora hay que **comunicarla** — y aquí entra `ggplot2`, con una idea que lo cambia todo: un gráfico no se "elige de un menú" (al estilo Excel), se **construye por capas**, como una frase se construye con sujeto, verbo y complemento.
 
-Usando lo aprendido, responde:
+## Los tres componentes mínimos
 
-**P1.** ¿Cuántos productos distintos se vendieron en Q2?
+Todo gráfico necesita: **datos** (la tabla), **mapeo estético** (`aes()`: qué variable va a qué eje/color) y **geometría** (`geom_*()`: la forma visual). Las capas se conectan con `+`. Míralo crecer en tres pasos — para eso usaremos la base ampliada `ventas_full` (36 transacciones, ya con la columna `ingreso`):
 
-**P2.** ¿Cuál es el ingreso total por trimestre? Ordena de mayor a menor.
-
-**P3.** ¿Cuál es el ticket promedio (`ingreso / n_trans`) de Hardware vs. Software?
+**Paso 0 — preparar la tabla (esto ya lo sabes hacer):**
 
 ```{webr-r}
-## P1
+ing_region <- ventas_full %>%
+  group_by(region) %>%
+  summarise(ingreso_total = sum(ingreso), .groups = "drop")
 
-
-## P2
-
-
-## P3
-
-
+ing_region
 ```
+
+**Paso 1 — los datos: el lienzo en blanco.** R reserva el espacio, pero no sabe qué mostrar:
+
+```{webr-r}
+ggplot(data = ing_region)
+```
+
+**Paso 2 — el mapeo: aparecen los ejes.** Ya sabe *qué* mostrar, no *cómo*:
+
+```{webr-r}
+ggplot(data = ing_region, mapping = aes(x = region, y = ingreso_total))
+```
+
+**Paso 3 — la geometría: aparece el gráfico.**
+
+```{webr-r}
+ggplot(data = ing_region, mapping = aes(x = region, y = ingreso_total)) +
+  geom_col()
+```
+
+| Pieza | Pregunta que responde |
+|---|---|
+| `ggplot(data = ...)` | ¿Qué tabla grafico? |
+| `aes(x = ..., y = ...)` | ¿Qué variable va en cada eje? |
+| `geom_col()` | ¿Con qué forma la represento? |
 
 ::: {.callout-practice}
-**Pistas**
-
-- P1: `filter()` + `n_distinct()` dentro de `summarise()`
-- P2: `mutate()` → `group_by(trimestre)` → `summarise()` → `arrange()`
-- P3: `mutate()` → `group_by(categoria)` → `summarise()` con promedio de ingreso
+**Ejercicio mental (hazlo antes de ejecutar):** si en el código anterior cambias `geom_col()` por `geom_point()`, ¿qué esperas ver? Pruébalo en la celda. La lección: la estructura **no cambia** — solo la pieza de geometría. Aprendiste una gramática, no un gráfico.
 :::
 
----
-
-<!--=================-->
-<!--=================-->
-# Working directory y organización
-
-## ¿Qué es el working directory?
-
-El **working directory** (directorio de trabajo) es la carpeta en la que R está "parado" en este momento. Cuando le pides leer o guardar un archivo sin especificar la ruta completa, R busca en esta carpeta.
-
-```{webr-r}
-## Ver cuál es el directorio actual
-getwd()
-```
-
-**¿Por qué importa?** Si intentas leer `"ventas.csv"` y R no encuentra el archivo, probablemente es porque el archivo está en otra carpeta y R está buscando en el working directory equivocado.
-
----
-
-## RStudio Projects: la mejor práctica
-
-En lugar de cambiar el working directory manualmente con `setwd()` (lo cual rompe la reproducibilidad), usa **RStudio Projects**.
+## Dentro vs. fuera de `aes()`: la confusión clásica
 
 ::: {.callout-key}
-**Ventajas de RStudio Projects**
-
-✓ R automáticamente establece el working directory en la carpeta del proyecto  
-✓ Cualquiera puede abrir el proyecto y todo funciona sin modificar rutas  
-✓ Cada análisis vive en su propia carpeta organizada  
-✓ R recuerda el historial y los objetos de la última sesión
-
-**Cómo crear uno:**
-
-1. File → New Project...
-2. New Directory → New Project
-3. Dale un nombre descriptivo (ej: `analisis_ventas_2025`)
-4. R crea una carpeta con un archivo `.Rproj`
-
-**Cómo usarlo:** abre siempre el proyecto haciendo doble clic en el archivo `.Rproj`, **no** abriendo RStudio directamente.
+**La regla:** si el atributo visual depende de una **variable** de la tabla, va **dentro** de `aes()` (es información). Si es un valor **fijo** para todo el gráfico, va **fuera** (es decoración).
 :::
 
----
-
-## Estructura de carpetas recomendada
-
-```
-analisis_ventas_2025/
-├── analisis_ventas_2025.Rproj   # archivo del proyecto
-├── data/                        # datos crudos (NUNCA modificar)
-│   └── ventas.csv
-├── scripts/                     # código R
-│   ├── 01_limpieza.R
-│   └── 02_analisis.R
-└── outputs/                     # resultados generados
-    ├── kpis_region.csv
-    └── grafico_ventas.png
+```{webr-r}
+## FUERA de aes(): todas las barras azules (decoración)
+ggplot(ing_region, aes(x = region, y = ingreso_total)) +
+  geom_col(fill = "steelblue")
 ```
 
-**Regla de oro:** el contenido de `data/` es intocable. Si necesitas modificar datos, hazlo en el script y guarda el resultado en `outputs/`.
-
----
-
-## Guardar una tabla como CSV
-
-Una vez que tenemos nuestra tabla final de KPIs, podemos exportarla para compartirla o usarla en otras herramientas (Excel, Power BI, etc.):
-
-```r
-## Guardar tabla de KPIs en la carpeta outputs
-write.csv(kpis_region, "outputs/kpis_region.csv", row.names = FALSE)
+```{webr-r}
+## DENTRO de aes(): el color INFORMA la región (información)
+ggplot(ing_region, aes(x = region, y = ingreso_total, fill = region)) +
+  geom_col()
 ```
 
-**Nota:** `row.names = FALSE` evita que R agregue una columna extra con números de fila.
+```{webr-r}
+## El error clásico: "steelblue" DENTRO de aes()
+## R cree que es una VARIABLE llamada "steelblue"... ejecuta y mira qué sale
+ggplot(ing_region, aes(x = region, y = ingreso_total, fill = "steelblue")) +
+  geom_col()
+```
 
----
+Regla práctica: si vas a escribir un valor entre comillas o un número literal (`"steelblue"`, `size = 3`), casi seguro va **fuera** de `aes()`.
 
 <!--=================-->
 <!--=================-->
-# Errores comunes y cómo evitarlos
+# La geometría según la pregunta
 
-Estos son los 5 errores más frecuentes al aprender `dplyr`. Si los reconoces y evitas, ahorrarás mucho tiempo de debugging.
+No hay gráfico "bonito" sin pregunta clara. Cada tipo de pregunta de negocio tiene su geometría natural.
 
----
+## Comparar categorías → `geom_col()`
 
-## 1. No guardar el resultado
-
-```r
-## INCORRECTO: se muestra en la consola pero no se guarda
-filter(ventas, region == "Norte")
-
-## CORRECTO: asignar a un objeto
-ventas_norte <- filter(ventas, region == "Norte")
-```
-
-**Por qué pasa:** olvidamos que R no modifica objetos automáticamente. Cada transformación debe guardarse explícitamente con `<-`.
-
----
-
-## 2. Confundir `=` con `==`
-
-```r
-## INCORRECTO
-filter(ventas, region = "Norte")   # Error: unexpected '='
-
-## CORRECTO
-filter(ventas, region == "Norte")
-```
-
-**Por qué pasa:** en matemáticas usamos `=` para igualdades. En R, `=` asigna valores (como `<-`) y `==` compara. Dentro de `filter()`, siempre `==`.
-
----
-
-## 3. Usar una variable que no existe todavía
-
-```r
-## INCORRECTO: ingreso no existe en ventas
-resumen_mal <- summarise(ventas, total = sum(ingreso))
-# Error: object 'ingreso' not found
-
-## CORRECTO: crear la variable primero
-ventas_ing <- mutate(ventas, ingreso = precio * cantidad)
-resumen_ok <- summarise(ventas_ing, total = sum(ingreso))
-```
-
-**Por qué pasa:** `mutate()` crea columnas nuevas. Si queremos usarlas en pasos posteriores, primero hay que crearlas y guardar el resultado.
-
----
-
-## 4. Olvidar que group_by() no hace nada solo
+*"¿Qué región vendió más?"* — barras. Dos mejoras que las vuelven profesionales: **ordenarlas** con `reorder()` y girarlas si los nombres son largos.
 
 ```{webr-r}
-## group_by() SOLO marca el dataset como agrupado
-ventas_agrupado <- group_by(ventas, region)
-ventas_agrupado  
-## ↑ Sigue teniendo 9 filas, solo está "marcado" como agrupado
+## Barras ordenadas de mayor a menor ingreso
+ggplot(ing_region, aes(x = reorder(region, -ingreso_total), y = ingreso_total)) +
+  geom_col(fill = "steelblue")
 ```
-
-**Para qué sirve:** `group_by()` no colapsa datos ni calcula nada. Solo prepara el terreno. El cálculo lo hace `summarise()`:
 
 ```{webr-r}
-## Ahora sí colapsa
-ventas_agr <- group_by(ventas, region)
-resumen <- summarise(ventas_agr, n = n(), .groups = "drop")
-resumen
+## Horizontales: intercambia x e y (útil con nombres largos)
+ggplot(ing_region, aes(x = ingreso_total, y = reorder(region, ingreso_total))) +
+  geom_col(fill = "steelblue")
 ```
 
----
+## Ver una distribución → `geom_histogram()`
 
-## 5. Confundir mutate() con summarise()
+*"¿Cómo se distribuyen los precios de lo que vendemos?"* — el histograma parte el rango en cajones (*bins*) y cuenta cuántas transacciones caen en cada uno. Solo necesita `x`:
 
-Este es el error conceptual más común. Ambas funciones crean columnas, pero funcionan de forma radicalmente distinta.
-
-::: {.callout-key}
-**Regla mnemotécnica**
-
-- `mutate()` → **M**antiene el número de filas. Añade una columna calculada para **cada fila**.
-- `summarise()` → **S**intetiza. Colapsa todas las filas en **un resumen**.
-
-**¿Cuándo usar cuál?**
-
-- Quieres calcular algo **para cada transacción** (margen, descuento, categoría)? → `mutate()`
-- Quieres un **total, promedio o conteo global**? → `summarise()`
-
-**Ejemplo:**
-
-```r
-## mutate: 9 filas → 9 filas (con nueva columna)
-ventas_ing <- mutate(ventas, ingreso = precio * cantidad)
-
-## summarise: 9 filas → 1 fila (resumen global)
-resumen <- summarise(ventas_ing, total = sum(ingreso))
+```{webr-r}
+ggplot(ventas_full, aes(x = precio)) +
+  geom_histogram(bins = 10, fill = "lightblue", color = "black")
 ```
+
+Se leen dos montañas: muchos productos baratos (Mouse, Soporte) y un grupo de caros (Laptop). Esa forma "bimodal" ya es un hallazgo: vendemos en **dos ligas de precio**. Cambia `bins` a 5 y a 20 en la celda — mira cómo el nivel de detalle cambia la historia.
+
+## Mostrar una relación → `geom_point()`
+
+*"¿Los productos caros generan más ingreso por transacción?"* — cada punto es una transacción:
+
+```{webr-r}
+ggplot(ventas_full, aes(x = precio, y = ingreso)) +
+  geom_point(size = 3)
+```
+
+Y el tercer canal de información — el **color** — mete otra variable al gráfico:
+
+```{webr-r}
+ggplot(ventas_full, aes(x = precio, y = ingreso, color = categoria)) +
+  geom_point(size = 3)
+```
+
+Ahora se ve la estructura del negocio: Hardware (caro, ingresos altos por transacción) vs. Software (barato, volumen).
+
+## Seguir una tendencia → `geom_line()`
+
+*"¿El ingreso viene creciendo?"* — primero la tabla (¡siempre primero la tabla!), luego la línea:
+
+```{webr-r}
+ing_trim <- ventas_full %>%
+  group_by(trimestre) %>%
+  summarise(ingreso_total = sum(ingreso), .groups = "drop")
+
+ggplot(ing_trim, aes(x = trimestre, y = ingreso_total)) +
+  geom_line(group = 1) +
+  geom_point(size = 3)
+```
+
+El detalle técnico: como el eje X es categórico (Q1, Q2, Q3), `group = 1` le dice a R "conecta todos los puntos en una sola línea". Y fíjate: dos geometrías **apiladas** (`geom_line` + `geom_point`) — capas, literalmente.
+
+```{webr-r}
+## Una línea POR REGIÓN: color y group apuntan a la variable
+ing_trim_reg <- ventas_full %>%
+  group_by(trimestre, region) %>%
+  summarise(ingreso_total = sum(ingreso), .groups = "drop")
+
+ggplot(ing_trim_reg, aes(x = trimestre, y = ingreso_total,
+                         color = region, group = region)) +
+  geom_line() +
+  geom_point(size = 2)
+```
+
+## El mapa completo
+
+| La pregunta empieza por... | Geometría |
+|---|---|
+| "¿Cuál categoría es mayor/menor...?" | `geom_col()` |
+| "¿Cómo se distribuye...?" | `geom_histogram()` |
+| "¿Existe relación entre X e Y...?" | `geom_point()` |
+| "¿Cómo ha cambiado en el tiempo...?" | `geom_line()` |
+
+## Ponte a prueba: ¿qué gráfico uso?
+
+```{=html}
+<div class="widget-card" id="wg-geom">
+  <div class="widget-head">🎯 Elige la geometría · 5 preguntas de negocio</div>
+  <div class="widget-body">
+    <div id="geom-items"></div>
+    <div class="quiz-score" id="geom-score"></div>
+    <div class="widget-note">Truco: subraya el verbo de la pregunta — <b>comparar</b>, <b>distribuir</b>, <b>relacionar</b>, <b>evolucionar</b> — y la geometría se elige sola.</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var ITEMS = [
+    {
+      q: "El gerente comercial: \"¿Cuál de nuestras 3 regiones generó más ingreso este año?\"",
+      ans: "col",
+      fb: "Comparar pocas categorías → barras (geom_col), idealmente ordenadas con reorder() para que el ranking se lea solo."
+    },
+    {
+      q: "La analista de precios: \"¿Nuestros precios están concentrados o tenemos dos ligas de productos?\"",
+      ans: "hist",
+      fb: "Pregunta por la forma de la distribución de UNA variable numérica → histograma (geom_histogram). La palabra clave era \"concentrados\"."
+    },
+    {
+      q: "El director financiero: \"¿El ticket promedio viene subiendo o bajando trimestre a trimestre?\"",
+      ans: "line",
+      fb: "Evolución en el tiempo → línea (geom_line). El eje X es el tiempo (trimestre); antes de graficar toca construir la tabla con group_by + summarise."
+    },
+    {
+      q: "La jefa de producto: \"¿Los productos con más unidades vendidas son también los de mayor ingreso?\"",
+      ans: "point",
+      fb: "Relación entre DOS variables numéricas (unidades vs. ingreso) → dispersión (geom_point). Cada punto sería un producto."
+    },
+    {
+      q: "Mercadeo: \"Muéstrame el top 5 de productos por unidades vendidas.\"",
+      ans: "col",
+      fb: "¡Un ranking es una comparación de categorías! → barras ordenadas (geom_col + reorder). Ni línea ni puntos: no hay tiempo ni relación aquí, solo un podio."
+    }
+  ];
+  var LABELS = { col: "📊 Barras", hist: "🏔️ Histograma", point: "✨ Dispersión", line: "📈 Línea" };
+  var box = document.getElementById("geom-items");
+  var scoreEl = document.getElementById("geom-score");
+  var answered = 0, correct = 0;
+
+  ITEMS.forEach(function (it, i) {
+    var q = document.createElement("div");
+    q.className = "quiz-q";
+    var opts = ["col", "hist", "point", "line"].map(function (k) {
+      return '<button type="button" class="btn-widget quiz-opt" data-k="' + k + '">' + LABELS[k] + "</button>";
+    }).join("");
+    q.innerHTML =
+      '<div class="quiz-q-title">' + (i + 1) + " · " + it.q + "</div>" +
+      '<div class="quiz-opts">' + opts + "</div>" +
+      '<div class="quiz-fb"></div>';
+    box.appendChild(q);
+
+    var btns = q.querySelectorAll(".quiz-opt");
+    var fb = q.querySelector(".quiz-fb");
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (q.dataset.done) return;
+        q.dataset.done = "1";
+        answered++;
+        var ok = b.dataset.k === it.ans;
+        if (ok) { correct++; b.classList.add("correct"); }
+        else {
+          b.classList.add("wrong");
+          btns.forEach(function (x) { if (x.dataset.k === it.ans) x.classList.add("correct"); });
+        }
+        btns.forEach(function (x) { x.disabled = true; });
+        fb.className = "quiz-fb show " + (ok ? "ok" : "bad");
+        fb.innerHTML = (ok ? "✔ Correcto. " : "✘ No exactamente. ") + it.fb;
+        scoreEl.textContent = "Aciertos: " + correct + " de " + answered + (answered === ITEMS.length ? " · ¡Listo para la práctica!" : "");
+      });
+    });
+  });
+})();
+</script>
+```
+
+<!--=================-->
+<!--=================-->
+# Pulir para comunicar
+
+Un gráfico sin títulos es un dato sin mensaje. Las últimas capas convierten "un gráfico que corre" en "un gráfico que convence".
+
+## Etiquetas con `labs()`
+
+```{webr-r}
+ggplot(ing_region, aes(x = reorder(region, -ingreso_total), y = ingreso_total)) +
+  geom_col(fill = "steelblue") +
+  labs(title    = "Sur lidera el ingreso del año, en una carrera apretada",
+       subtitle = "Ventas acumuladas Q1-Q3",
+       x        = "Región",
+       y        = "Ingreso total (USD)",
+       caption  = "Fuente: sistema interno de ventas")
+```
+
+La regla de oro del título: escribe el **mensaje**, no la descripción. "Norte lidera el ingreso" informa; "Gráfico de ingresos por región" decora.
+
+## Temas: el vestido del gráfico
+
+```{webr-r}
+ggplot(ing_region, aes(x = region, y = ingreso_total)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Ingreso por región") +
+  theme_minimal()
+```
+
+**Guía rápida:** `theme_minimal()` para presentaciones (limpio, moderno) · `theme_bw()` para reportes técnicos · `theme_classic()` para publicaciones sobrias. El fondo gris por defecto (`theme_gray`) — evítalo en entregas profesionales.
+
+## Colores con propósito
+
+Ya sabes fijar un color (fuera de `aes()`) o mapearlo a una variable (dentro). El paso final es **elegir** los colores con `scale_fill_manual()`:
+
+```{webr-r}
+ggplot(ing_region, aes(x = region, y = ingreso_total, fill = region)) +
+  geom_col() +
+  scale_fill_manual(values = c("Norte" = "#2E86AB",
+                               "Sur" = "#A23B72",
+                               "Centro" = "#F18F01")) +
+  theme_minimal() +
+  theme(legend.position = "none")   # la leyenda sobra: el eje X ya dice la región
+```
+
+::: {.callout-warning}
+**Tres errores que delatan al aficionado**
+
+1. **Eje Y que no empieza en cero (en barras).** La barra "el doble de alta" debe representar el doble de valor. Para líneas de tendencia, la regla se relaja.
+2. **Veinte categorías en un gráfico de barras.** Ilegible. Filtra el top 10, agrupa el resto en "Otros", o usa tabla.
+3. **Colores sin significado.** Cinco barras de cinco colores "porque se ve alegre" = ruido. El color o informa una variable, o es uno solo.
 :::
 
----
+<!--=================-->
+<!--=================-->
+# Facetas: el mismo gráfico para cada grupo *(opcional)*
+
+Cuando superponer grupos satura el gráfico, `facet_wrap()` crea un **panel por grupo**, con las mismas escalas (comparación justa):
+
+```{webr-r}
+ggplot(ventas_full, aes(x = precio)) +
+  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+  facet_wrap(~ region)
+```
+
+Existe también `facet_grid(filas ~ columnas)` para cruzar dos variables. Considéralo tu carta elegante para el proyecto final: "la evolución de ventas... en un panel por región" suena a analista senior.
 
 <!--=================-->
 <!--=================-->
-# Checklist de salida
+# El producto de la semana, de principio a fin
 
-Al terminar esta semana, debes poder:
+Todo junto: de las 36 transacciones crudas a un entregable de gerencia — **una tabla de KPIs y dos gráficos** — en ~20 líneas legibles:
 
-- [ ] Explicar con tus palabras qué hace cada verbo de `dplyr`
-- [ ] Leer un bloque de código con objetos intermedios y describir el flujo paso a paso
-- [ ] Filtrar datos usando condiciones simples (`==`, `>`) y combinadas (`&`, `|`)
-- [ ] Crear variables calculadas con `mutate()` y clasificarlas con `ifelse()`
-- [ ] Generar tablas de KPIs con `group_by() + summarise()`
-- [ ] Interpretar una tabla resumida y conectarla con una decisión de negocio
-- [ ] Reconocer y corregir los 5 errores comunes de esta semana
-- [ ] Organizar un proyecto de análisis con RStudio Projects
+```{webr-r}
+## 1. LA TABLA: KPIs por región (dplyr, con pipe)
+kpis_region <- ventas_full %>%
+  group_by(region) %>%
+  summarise(ingreso_total   = sum(ingreso),
+            ticket_promedio = round(mean(ingreso)),
+            n_transacciones = n(),
+            .groups = "drop") %>%
+  arrange(desc(ingreso_total))
 
----
+kpis_region
+```
+
+```{webr-r}
+## 2. GRÁFICO A: la comparación (¿quién lidera?)
+ggplot(kpis_region, aes(x = reorder(region, -ingreso_total), y = ingreso_total)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Sur lidera el ingreso del año, en una carrera apretada",
+       subtitle = "Acumulado Q1-Q3 · 36 transacciones",
+       x = NULL, y = "Ingreso total (USD)",
+       caption = "Fuente: sistema interno de ventas") +
+  theme_minimal()
+```
+
+```{webr-r}
+## 3. GRÁFICO B: la tendencia (¿vamos creciendo?)
+ventas_full %>%
+  group_by(trimestre) %>%
+  summarise(ingreso_total = sum(ingreso), .groups = "drop") %>%
+  ggplot(aes(x = trimestre, y = ingreso_total)) +
+  geom_line(group = 1, color = "steelblue", linewidth = 1) +
+  geom_point(size = 3, color = "steelblue") +
+  labs(title = "El ingreso es estable, con una leve caída en Q3",
+       x = NULL, y = "Ingreso total (USD)") +
+  theme_minimal()
+```
+
+¿Notaste el truco del Gráfico B? La tabla **entra directo al `ggplot()` por el pipe** — dplyr y ggplot2 encajan como piezas de Lego (solo cambia el conector: `%>%` entre verbos, `+` entre capas).
+
+::: {.callout-workflow}
+**Checklist antes de compartir cualquier gráfico**
+
+- [ ] ¿El título dice el **mensaje** (no "gráfico de...")?
+- [ ] ¿Los ejes tienen nombre y **unidades**?
+- [ ] ¿La fuente de los datos está en el caption?
+- [ ] ¿Los colores informan algo (o son uno solo)?
+- [ ] ¿Alguien sin contexto lo entiende en 30 segundos?
+:::
+
+<!--=================-->
+<!--=================-->
+# Los 5 errores de la semana
+
+**1. No guardar el resultado.** `filter(ventas, region == "Norte")` muestra y olvida. Si lo necesitas después: `ventas_norte <- filter(...)`.
+
+**2. Comparar con `=`.** Dentro de `filter()`, siempre `==`. El error `unexpected '='` es este.
+
+**3. Usar una columna que aún no existe.** `summarise(ventas, total = sum(ingreso))` falla si nadie creó `ingreso`. Primero `mutate()`, luego el resumen (`object 'ingreso' not found` es la pista).
+
+**4. Creer que `group_by()` hace algo visible.** Solo *marca* los grupos — la tabla sigue igual. El cálculo lo ejecuta el `summarise()` que viene después.
+
+**5. Confundir `mutate()` con `summarise()`.** Mnemotecnia: **M**utate **M**antiene las filas (columna nueva para cada una); **S**ummarise **S**intetiza (colapsa todo en un resumen). ¿"Para cada transacción..."? → mutate. ¿"El total/promedio de..."? → summarise.
+
+<!--=================-->
+<!--=================-->
+# Lo esencial de la semana
+
+Al terminar la teoría (video + este documento), debes poder:
+
+- [ ] Explicar con tus palabras qué hace cada verbo: `select`, `rename`, `filter`, `arrange`, `mutate`, `summarise`
+- [ ] Filtrar con condiciones simples y combinadas (`&`, `|`, `%in%`)
+- [ ] Construir una tabla de KPIs con `group_by() + summarise()` (y predecir su granularidad)
+- [ ] Usar `count()`, `distinct()` y `n_distinct()` para explorar categorías
+- [ ] Leer y escribir un flujo con pipe (`%>%`) de 3-4 pasos
+- [ ] Explicar las tres capas mínimas de un gráfico: datos → `aes()` → `geom_*()`
+- [ ] Decidir qué va dentro y qué va fuera de `aes()`
+- [ ] Elegir la geometría según la pregunta (comparar/distribuir/relacionar/evolucionar)
+- [ ] Pulir un gráfico con `labs()` + un tema, y detectar los 3 errores de comunicación
+- [ ] Reconocer los 5 errores comunes de dplyr y corregirlos
+
+En la [aplicación guiada en clase](../practice/week-04.html) construiremos el producto completo con datos reales del año, y en el [taller evaluable](../task/week-04.html) harás la analítica de un negocio tú solo.
 
 <!--=================-->
 <!--=================-->
 # Preguntas de comprensión
 
-## 1. Interpretación de output
+**1. Sin ejecutarlo: ¿en qué se diferencian estos dos análisis?**
 
-Ejecuta el código y responde:
+```r
+# Bloque A
+ventas %>% filter(precio > 100) %>% count(region)
 
-```{webr-r}
-ventas_agr <- group_by(ventas, categoria)
-
-resultado <- summarise(ventas_agr,
-                       n = n(),
-                       precio_medio = mean(precio),
-                       .groups = "drop")
-
-resultado
+# Bloque B
+ventas %>% count(region) %>% filter(n > 2)
 ```
 
-**Pregunta:** ¿Qué representa cada fila? ¿Cuántas filas esperabas y por qué?
+<details class="answer"><summary>Ver respuesta</summary>
+El **orden de los verbos cambia la pregunta**. A filtra primero las transacciones caras y luego cuenta por región: "¿cuántas ventas *caras* tiene cada región?". B cuenta *todas* las transacciones por región y luego filtra el resumen: "¿qué regiones tienen más de 2 transacciones?". Mismas funciones, preguntas distintas, resultados distintos.
+</details>
 
----
+**2. `mutate(ventas, ingreso = precio * cantidad)` devuelve 9 filas. `summarise(ventas, total = sum(precio))` devuelve 1. ¿Por qué, y cuál usarías para calcular el margen de *cada* transacción?**
 
-## 2. Orden de operaciones
+<details class="answer"><summary>Ver respuesta</summary>
+`mutate()` calcula un valor **para cada fila** y conserva la tabla (9 → 9 con columna nueva); `summarise()` **colapsa** las filas en un indicador (9 → 1). Para el margen de *cada* transacción — un valor por fila — se usa `mutate()`. Para el margen *total del negocio*, `summarise()`.
+</details>
 
-¿Cuál es la diferencia entre estos dos bloques?
+**3. ¿Cuál de las dos opciones pinta los puntos rojos, y qué hace la otra?**
 
-```{webr-r}
-## Bloque A
-ventas_filtrado <- filter(ventas, precio > 100)
-ventas_agr_A <- group_by(ventas_filtrado, region)
-resumen_A <- summarise(ventas_agr_A, n = n(), .groups = "drop")
-resumen_A
+```r
+# Opción A
+ggplot(ventas, aes(x = precio, y = cantidad, color = "red")) + geom_point()
+
+# Opción B
+ggplot(ventas, aes(x = precio, y = cantidad)) + geom_point(color = "red")
 ```
 
-```{webr-r}
-## Bloque B
-ventas_agr_B <- group_by(ventas, region)
-resumen_B <- summarise(ventas_agr_B, n = n(), .groups = "drop")
-resumen_filtrado_B <- filter(resumen_B, n > 2)
-resumen_filtrado_B
-```
+<details class="answer"><summary>Ver respuesta</summary>
+La **B**: el color fijo va **fuera** de `aes()`. En la A, `"red"` dentro de `aes()` se interpreta como una pseudo-variable constante: R asigna un color de su paleta por defecto (¡suele salir rosado/salmón!) y agrega una leyenda inútil que dice "red". Es el error clásico de mapeo estético.
+</details>
 
-**Respuesta esperada:**
+**4. Tu tabla tiene 40 productos y te piden "un gráfico con las ventas de todos". ¿Qué propones?**
 
-- Bloque A: filtra transacciones con precio > 100 **primero**, luego cuenta por región.
-- Bloque B: cuenta todas las transacciones por región **primero**, luego filtra regiones con más de 2 transacciones.
-
-Son preguntas distintas con resultados distintos.
-
----
-
-## 3. Aplicación práctica
-
-Tienes un dataset de clientes con columnas `cliente_id`, `compras_totales`, `region`.
-
-**¿Cómo identificarías los 5 mejores clientes de cada región por monto de compras?**
-
-```{webr-r}
-## Escribe tu solución aquí:
-## Pista: necesitas group_by(), arrange() y un método para quedarte con los primeros 5
-
-
-```
-
----
+<details class="answer"><summary>Ver respuesta</summary>
+Cuarenta barras son ilegibles. Opciones profesionales: (1) top 10 ordenado con `reorder()` + barras horizontales, mencionando qué % del total representa; (2) agrupar el resto en "Otros"; (3) si de verdad necesitan los 40 valores, una **tabla** ordenada comunica mejor que un gráfico. Parte del oficio es saber cuándo *no* graficar.
+</details>
 
 <!--=================-->
 <!--=================-->
-# Próxima semana: Visualización con ggplot2
+# Material adicional
 
-En la Semana 05 aprenderemos a visualizar las tablas de KPIs que construimos esta semana usando `ggplot2`:
-
-- Gráficos de barras para comparar regiones y productos
-- Gráficos de líneas para evolución por trimestre
-- Gráficos de dispersión para relaciones entre variables
-
-La tabla `kpis_region` que construimos hoy será la entrada directa para los primeros gráficos de la próxima semana. Todo lo que aprendiste esta semana sobre transformar datos es la base para comunicar resultados visualmente.
-
+- **[from-data-to-viz.com](https://www.data-to-viz.com)** — el árbol de decisión de gráficos: le dices qué variables tienes y te sugiere la geometría, **con código R incluido**. Guárdalo: lo usarás todo el semestre.
+- **[Cheatsheet de ggplot2](https://rstudio.github.io/cheatsheets/data-visualization.pdf)** — todas las geometrías y opciones en dos páginas.
+- **[Cheatsheet de dplyr](https://rstudio.github.io/cheatsheets/data-transformation.pdf)** — el mapa de los verbos.
+- **[R Graph Gallery](https://r-graph-gallery.com)** — cientos de gráficos con código listo para adaptar.
+- **[Fundamentals of Data Visualization](https://clauswilke.com/dataviz/)** (Claus Wilke) — los principios detrás de un buen gráfico, gratis online.
 
 ```{=html}
-<!-- Panel Environment -->
+<!-- Panel Environment (CSS en styles.css) -->
 <div id="env-panel" class="collapsed">
   <div id="env-header" onclick="toggleEnvPanel()">
     <span id="env-header-left">&#x1F4E6; Environment</span>
@@ -961,13 +893,15 @@ La tabla `kpis_region` que construimos hoy será la entrada directa para los pri
 </div>
 
 <script type="module">
+/* ── Toggle colapsar / expandir ── */
 window.toggleEnvPanel = function() {
   const panel = document.getElementById('env-panel');
   const btn   = document.getElementById('env-toggle-btn');
   panel.classList.toggle('collapsed');
-  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
+  btn.innerHTML = panel.classList.contains('collapsed') ? '▲' : '▼';
 };
 
+/* ── Consultar el environment de R ── */
 async function getEnvData() {
   if (!globalThis.mainWebR) return [];
   try {
@@ -1013,6 +947,7 @@ async function getEnvData() {
   }
 }
 
+/* ── Renderizar la lista de objetos ── */
 function renderEnv(items) {
   const body   = document.getElementById('env-body');
   const status = document.getElementById('env-status');
@@ -1025,7 +960,7 @@ function renderEnv(items) {
   body.innerHTML = items.map(it => {
     let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
     if (it.dim) {
-      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
+      meta += it.dim.replace('x', ' obs. × ') + ' vars.';
     } else {
       meta += 'Length: ' + it.len;
     }
@@ -1044,6 +979,7 @@ function escHtml(s) {
   return d.innerHTML;
 }
 
+/* ── Actualizar panel ── */
 async function updateEnvPanel() {
   const items = await getEnvData();
   renderEnv(items);
@@ -1055,6 +991,7 @@ window.refreshEnv = function() {
   updateEnvPanel();
 };
 
+/* ── Mover webR Status despues de los links de contacto ── */
 function moveWebRStatus() {
   const anchor = document.getElementById('webr-status-anchor');
   const statusArea = document.getElementById('qwebr-status-message-area');
@@ -1069,7 +1006,9 @@ function moveWebRStatus() {
   }
 }
 
+/* ── Esperar webR y conectar hooks ── */
 async function init() {
+  /* Esperar a que mainWebR exista */
   while (!globalThis.qwebrInstance) {
     await new Promise(r => setTimeout(r, 300));
   }
@@ -1077,6 +1016,7 @@ async function init() {
   document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
   moveWebRStatus();
 
+  /* Esperar a que los botones Run esten habilitados (todas las celdas ocultas ejecutadas) */
   await new Promise(resolve => {
     const check = setInterval(() => {
       const btns = document.querySelectorAll('.qwebr-button-run');
@@ -1087,6 +1027,7 @@ async function init() {
     }, 400);
   });
 
+  /* Monkey-patch qwebrComputeEngine para detectar ejecucion */
   const original = globalThis.qwebrComputeEngine;
   globalThis.qwebrComputeEngine = async function(...args) {
     const res = await original.apply(this, args);
@@ -1094,6 +1035,7 @@ async function init() {
     return res;
   };
 
+  /* Expandir panel y hacer primer scan */
   const panel = document.getElementById('env-panel');
   if (panel.classList.contains('collapsed')) {
     toggleEnvPanel();

@@ -1,0 +1,196 @@
+---
+title: "Unidad 5 - Taller 12: el avaluador instantáneo"
+subtitle: "Taller práctico evaluable · Semana 12 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Instrucciones generales
+
+::: {.callout-key}
+**Cómo funciona este taller**
+
+- Es **individual** y **evaluable**, y se desarrolla en el tiempo restante de la clase (⏱️ diseñado para **≈ 55 minutos**).
+- Se resuelve **sin la guía del profesor**: todo está en este documento, en la [práctica](../practice/week-12.html) y en la [teoría](../theory/week-12.html). Es el mismo torneo de la práctica, con otro mercado y una lectura extra: la fórmula.
+- **El entregable es tu script**: `apellido_nombre_taller12.R`, con los análisis como comentarios (`##`).
+- ⚠️ **Regla de oro doble:** (1) el script corre **completo con *Source*, sin errores**; (2) **toda cifra citada sale de código presente en el script**.
+- 🌱 **Semillas:** `set.seed(12)` en la línea inmediatamente anterior a cada paso aleatorio (partición, `cv.glmnet`, árbol, bosque).
+- 📤 Entrega: sube el `.R` a Intu antes de terminar la clase. <!-- TODO: pegar aquí el enlace de entrega -->
+:::
+
+**El dato** (a `data/` de tu proyecto): <a href="apartamentos_cali.csv" download>**apartamentos_cali.csv**</a> — 320 apartamentos vendidos por InmoValle en Cali, con sus características y el **precio de venta en millones**.
+
+**Distribuye tu tiempo:** Punto 0 ≈ 5 min · Punto 1 ≈ 7 min · Punto 2 ≈ 15 min · Punto 3 ≈ 15 min · Punto 4 ≈ 13 min.
+
+<!--=================-->
+<!--=================-->
+# El encargo de InmoValle
+
+> 🏢 **InmoValle** quiere poner en su página web un **avaluador instantáneo**: el visitante digita las características de su apartamento y recibe un precio estimado al segundo. El gerente comercial fue claro: *"Necesito dos cosas. Primero, que el avalúo le atine — hoy mis asesores tasan 'a ojo' y el que diga siempre el precio promedio no me sirve de nada. Segundo, quiero **entender la fórmula**: si un cliente pregunta por qué su apartamento vale eso, no le puedo responder 'porque lo dijo el computador'."*
+
+Ese briefing pide dos cosas que ya sabes conseguir por separado — **precisión** y **legibilidad** — y tu trabajo es decir, con cifras, si un solo modelo puede entregar ambas.
+
+<!--=================-->
+<!--=================-->
+# Punto 0 — Proyecto y radiografía (0.5 puntos)
+
+Crea `apellido_nombre_taller12.R` con encabezado, carga por **ruta relativa** y haz la radiografía.
+
+```r
+## ============================================
+## Taller 12 — InmoValle: el avaluador instantáneo
+## Nombre: ______________  Código: ___________
+## Fecha: ______________
+## Qué hace: entrena y compara modelos de regresión
+## para tasar apartamentos y recomienda cuál publicar
+## ============================================
+
+## Librerías / Libraries
+pacman::p_load(dplyr, ggplot2, rpart, rpart.plot, randomForest, glmnet)
+
+## Cargar datos / Load data
+
+## Radiografía: dim, str, summary del target
+```
+
+```r
+## Punto 0c — responde como comentario:
+## ¿Cuál es el target y de qué tipo es? ¿Este problema es de
+## clasificación o de regresión? ¿En qué UNIDADES vas a reportar
+## el error (y por qué eso le facilita la vida al gerente)?
+```
+
+<!--=================-->
+<!--=================-->
+# Punto 1 — La partición y la vara (0.75 puntos)
+
+a. Parte 80/20 con `set.seed(12)`.
+b. Calcula el **baseline**: predecirle a todo apartamento el **precio promedio de train**. Reporta su MAE y su RMSE en test.
+c. Comentario (2 líneas): traduce el MAE del baseline a lenguaje de gerente — *"tasar todo apartamento en $___ millones se equivoca, en promedio, por $___ millones"*. ¿Por qué el gerente dijo que ese avaluador "no le sirve de nada"?
+
+```r
+## Punto 1a — partición
+
+## Punto 1b — baseline: MAE y RMSE en test
+
+## Punto 1c — comentario
+```
+
+<!--=================-->
+<!--=================-->
+# Punto 2 — El Lasso y la fórmula (1.25 puntos)
+
+a. Prepara las matrices con `model.matrix()` (como en la práctica) y entrena el **Lasso** con `cv.glmnet` (su `set.seed(12)` antes). Reporta `lambda.1se`.
+b. Imprime los **coeficientes** en `lambda.1se` y léelos como comentario: ¿cuánto suma cada m²? ¿cuánto cada nivel de estrato? ¿qué variable resta?
+c. **La expulsada:** una variable quedó con coeficiente **exactamente 0.000**. Nómbrala y explica en una frase qué significa que el Lasso la haya sacado (y por qué eso es información útil para el formulario web de InmoValle).
+d. Evalúa el Lasso en test: MAE y RMSE.
+
+```r
+## Punto 2a — matrices + cv.glmnet + lambda.1se
+
+## Punto 2b — coeficientes + lectura
+
+## Punto 2c — la variable expulsada:
+
+## Punto 2d — MAE y RMSE del Lasso
+```
+
+<!--=================-->
+<!--=================-->
+# Punto 3 — Los árboles y la tabla del torneo (1.25 puntos)
+
+a. Entrena el **árbol de regresión** (`method = "anova"`, `set.seed(12)` antes) y pódalo con la **regla 1-SE**. Reporta el `cp` elegido, las hojas y su MAE/RMSE en test.
+b. Entrena el **Random Forest** (500 árboles, `set.seed(12)` antes) y reporta su MAE/RMSE en test y la importancia de variables.
+c. Construye la **tabla del torneo** (baseline, Lasso, árbol podado, bosque × MAE, RMSE) con `data.frame` y expórtala a `output/torneo_taller12.csv`.
+d. Comentario (2-3 líneas): ¿quién ganó el torneo? ¿Coincide con el ganador de la semana 11 o con el de la práctica de hoy? ¿Qué te dice eso sobre la "forma" del proceso que fija los precios?
+
+```r
+## Punto 3a — árbol + poda 1-SE + métricas
+
+## Punto 3b — bosque + métricas + importancia
+
+## Punto 3c — tabla del torneo + export
+
+## Punto 3d — comentario: el podio y su moraleja
+```
+
+<!--=================-->
+<!--=================-->
+# Punto 4 — El memorando del avaluador (1.25 puntos)
+
+Cierra el script con el memorando al gerente, como comentario y en **lenguaje de negocio**:
+
+```r
+## ============================================
+## MEMORANDO PARA EL GERENTE COMERCIAL
+## ============================================
+## a) La recomendación (3-4 líneas): ¿qué modelo publica InmoValle en
+##    su web y por qué? Cita al menos TRES cifras tuyas (la vara, el
+##    error del elegido, y algo de la fórmula). Si tu elegido permite
+##    "publicar la fórmula", escríbela en una frase tipo tarifario:
+##    "cada m² suma ~$___; cada nivel de estrato ~$___; …".
+##
+## b) La letra menuda (3-4 líneas): compara el MAE y el RMSE de tu
+##    modelo elegido. ¿La brecha sugiere embarradas ocasionales?
+##    Apóyate en el gráfico predicho-vs-real (constrúyelo como en la
+##    práctica y expórtalo a output/) — ¿hay un segmento de
+##    apartamentos donde el avaluador falla más? ¿Qué le recomiendas
+##    al gerente hacer con ese segmento?
+##
+## c) La advertencia (2 líneas): el coeficiente de baños dice que un
+##    baño extra "suma" varios millones. ¿Por qué el gerente NO debe
+##    prometerle a un cliente que remodelar el baño le sube el precio
+##    en esa cifra? (pista: asociación vs. causalidad)
+```
+
+<!--=================-->
+<!--=================-->
+# Rúbrica de evaluación
+
+| Punto | Qué se evalúa | Puntos |
+|---|---|---:|
+| **0. Proyecto y radiografía** | Script con encabezado; carga por ruta relativa; radiografía; el 0c identifica regresión y sus unidades | 0.5 |
+| **1. Partición y vara** | Partición con semilla (a: 0.25); baseline con MAE/RMSE en test (b: 0.3); traducción a gerente (c: 0.2) | 0.75 |
+| **2. Lasso y fórmula** | cv.glmnet con semilla y `lambda.1se` (a: 0.3); coeficientes leídos en unidades de negocio (b: 0.35); la expulsada nombrada y explicada (c: 0.3); métricas en test (d: 0.3) | 1.25 |
+| **3. Árboles y torneo** | Árbol con poda 1-SE (a: 0.35); bosque + importancia (b: 0.35); tabla exportada (c: 0.3); el podio y su moraleja (d: 0.25) | 1.25 |
+| **4. Memorando** | Recomendación con ≥3 cifras y fórmula-tarifario (a: 0.5); diagnóstico MAE–RMSE + gráfico + segmento débil (b: 0.5); advertencia asociación/causalidad (c: 0.25) | 1.25 |
+| **Total** | | **5.0** |
+
+: La presentación (script ordenado, comentarios en su sección, que corra con *Source*) se descuenta hasta -0.3 si dificulta la revisión. {.striped tbl-colwidths="[24,64,12]"}
+
+::: {.callout-warning}
+**Recordatorios que la rúbrica aplica sin piedad**
+
+1. Script que **no corre completo** → se pierde el punto de la sección donde se rompe.
+2. Cifra citada **sin código que la produzca** → no cuenta.
+3. Coeficientes reportados sin unidades ("area = 2.7") → medio punto del 2b: el gerente piensa en millones de pesos, no en números sueltos.
+4. Los comentarios de análisis (1c, 2c, 3d y el memorando) **los redactas tú**.
+:::
+
+<!--=================-->
+<!--=================-->
+# Declaración de uso de IA
+
+Cierra tu script con este bloque diligenciado:
+
+```r
+## ============================================
+## DECLARACIÓN DE USO DE IA
+## Herramienta y modelo usados: _______________ (o "No usé IA")
+## Para qué la usé: ____________________________________________
+## Qué verifiqué por mi cuenta: ________________________________
+## ============================================
+```
+
+*Nota: la IA puede ayudarte con la sintaxis de `model.matrix` o `cv.glmnet` sin problema. Pero la fórmula del tarifario, el podio del torneo y la advertencia sobre causalidad son tu juicio — que es lo que InmoValle (y esta rúbrica) están pagando.*

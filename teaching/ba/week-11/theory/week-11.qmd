@@ -1,5 +1,5 @@
 ---
-title: "Unidad 8 - Árboles de Clasificación"
+title: "Unidad 5 - Clasificación: árboles y bosques"
 subtitle: "Introducción al Business Analytics · Semana 11 · 06278-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
@@ -12,101 +12,134 @@ lang: es
 <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
 <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
 <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
-<span id="webr-status-anchor"></span>
 </div>
 
 <!--=================-->
 <!--=================-->
-# Objetivo de la semana
-
-El foco está en **clasificación supervisada**: dado un conjunto de datos con una etiqueta conocida (aprobado/rechazado, churn/activo, precio alto/bajo), aprender a construir e interpretar un árbol de clasificación y evaluar qué tan bien predice casos nuevos. El énfasis está en **leer lo que el modelo dice y conectarlo con una decisión de negocio**, no en el código.
-
-## Lo que cubriremos
-
-- Intuición del árbol de decisión: preguntas que dividen datos  
-- Cómo el árbol aprende: impureza, divisiones y hojas  
-- Cómo leer un árbol de clasificación: nodos, ramas y predicciones  
-- La matriz de confusión: TP, FP, TN, FN  
-- Métricas: accuracy, precisión y recall  
-- Cuándo importa más cada métrica  
+# Cómo estudiar esta semana
 
 ::: {.callout-key}
-**Conexión con semanas anteriores**
+**Este documento es la versión escrita del video de la semana**
 
-| Semana 09 | Semana 10 | Semana 11 |
-|---|---|---|
-| Pipeline ML, train/test, métricas | Clustering (no supervisado) | Árbol de clasificación (supervisado) |
-| "¿Tenemos etiqueta de resultado?" | Sin etiqueta → grupos | Con etiqueta → predicción de categoría |
-| Concepto de accuracy | Sin métrica de acierto/fallo | Accuracy, precisión, recall en la práctica |
-| Leakage, overfitting | Elbow, silhouette | Overfitting según profundidad del árbol |
+1. 🎬 **Mira el video de la clase** — el enlace está en Intu. <!-- TODO: pegar aquí el enlace del video -->
+2. 📖 **Lee este documento** — el mismo recorrido con un playground interactivo para entrenar árboles tú mismo y una perilla de umbral para sentir el trade-off precisión/recall.
+3. ✅ **Presenta el quiz en Intu** antes de la clase.
 
-Esta semana tocamos el primer algoritmo **supervisado** del curso: el modelo aprende de ejemplos pasados con etiqueta para predecir casos nuevos. A diferencia del clustering, aquí sí sabemos si el modelo se equivocó.
+Las métricas (matriz de confusión, accuracy, precisión, recall) **ya las construiste en la [semana 10](../../week-10/theory/week-10.html)** — aquí no se re-explican: se usan sin anestesia. Si algo se te borró, ve al glosario de esa semana antes de seguir.
 :::
 
----
+::: {.callout-warning}
+**Antes de venir a clase: 3 paquetes (2 minutos, con internet)**
+
+En la práctica entrenarás modelos de verdad. Instala los paquetes **antes** de llegar — en clase, con el wifi del salón colapsado, es un mal momento:
+
+```r
+install.packages(c("rpart", "rpart.plot", "randomForest"))
+```
+
+Verifica que quedaron: `library(randomForest)` no debe arrojar error.
+:::
+
+**El plan:** la semana pasada fuiste el juez; esta semana eres el ingeniero. Primero abrimos el capó del modelo más legible del Machine Learning — el **árbol de clasificación** — y vemos cómo aprende sus preguntas. Luego lo entrenas tú en un playground. Después conectamos el pipeline completo de la semana 10 (baseline → validación cruzada → test). Y cerramos con dos ideas que separan al aficionado del profesional: los **bosques aleatorios** (cientos de árboles votando) y el **umbral de decisión** — la perilla con la que el negocio, no el algoritmo, decide qué error prefiere cometer.
 
 <!--=================-->
 <!--=================-->
-# La intuición: el árbol como serie de preguntas
+# Glosario de la semana
 
-Antes de cualquier fórmula, piensa en cómo toma decisiones un buen analista de crédito. Cuando alguien pide un préstamo, el analista no aplica una fórmula matemática ciega: hace preguntas en secuencia.
+::: {.glossary-grid}
+::: {.gloss-card}
+**Nodo raíz y hojas** 🌱
+La raíz es la primera pregunta del árbol; las hojas son el final del recorrido: la **predicción** (la clase mayoritaria de los casos de entrenamiento que cayeron ahí).
+:::
+::: {.gloss-card}
+**Profundidad** 📏
+Cuántos niveles de preguntas encadena el árbol. Es su dial de complejidad — el mismo dial de la semana 10: poca = subajuste, mucha = memorizador.
+:::
+::: {.gloss-card}
+**Impureza (Gini)** 🥣
+Qué tan *mezcladas* quedan las clases en un grupo. El árbol prueba todos los cortes posibles y elige el que deja los grupos más puros. Impureza 0 = grupo de una sola clase.
+:::
+::: {.gloss-card}
+**Poda y `cp`** ✂️
+Recortar ramas que no mejoran el error de validación. En `rpart`, el parámetro de complejidad `cp` controla cuánto debe aportar una división para sobrevivir.
+:::
+::: {.gloss-card}
+**Hiperparámetro** 🎛️
+Las perillas que TÚ fijas antes de entrenar (profundidad, `cp`, mínimo por hoja…). No las aprende el modelo — se eligen con validación cruzada.
+:::
+::: {.gloss-card}
+**CART** 🌳
+*Classification and Regression Trees* — el algoritmo de árboles que usa `rpart`. La misma máquina sirve para clasificar (esta semana) y para predecir números (la próxima).
+:::
+::: {.gloss-card}
+**Bootstrap y bagging** 🎒
+Bootstrap: remuestrear los datos con reemplazo para crear versiones alternativas del dataset. Bagging: entrenar un modelo en cada versión y **promediar/votar** sus predicciones.
+:::
+::: {.gloss-card}
+**Random Forest** 🌲🌲
+Cientos de árboles, cada uno entrenado con un bootstrap distinto **y** un subconjunto aleatorio de variables en cada corte. Decide por votación. Menos interpretable, mejor generalización.
+:::
+::: {.gloss-card}
+**Importancia de variables** 🏆
+El ranking que entrega el bosque: cuánto contribuyó cada variable a separar las clases. El consuelo de interpretabilidad cuando ya no puedes dibujar el modelo.
+:::
+::: {.gloss-card}
+**Umbral de decisión** 🚪
+El modelo no dice "Aprobado": dice *"probabilidad 0.73 de Aprobado"*. El umbral convierte probabilidad en decisión — y moverlo intercambia precisión por recall.
+:::
+:::
 
-> *"¿Tiene ingresos mensuales superiores a 3 millones?"*  
-> → No: rechazar (alto riesgo).  
-> → Sí: siguiente pregunta.  
->  
-> *"¿Su historial crediticio es positivo?"*  
-> → No: condicional, pedir garantías.  
-> → Sí: **aprobar**.  
+<!--=================-->
+<!--=================-->
+# El modelo misterioso, al descubierto
 
-Eso es exactamente un **árbol de clasificación**: una serie de preguntas binarias encadenadas que terminan en la predicción de una categoría.
+En la práctica de la semana 10 auditaste un "modelo misterioso" que decidía créditos: le calculaste la matriz de confusión, lo comparaste contra el baseline y firmaste su veredicto — sin saber qué había adentro. Hora de confesarlo: **era un árbol de clasificación**. Hoy construyes uno igual (de hecho, uno mejor).
+
+¿Y por qué empezar el zoológico de modelos por los árboles? Porque piensan como un analista. Cuando un analista de crédito evalúa una solicitud, no aplica una fórmula ciega — hace **preguntas en secuencia**:
+
+> *"¿Tiene ingresos superiores a 3 millones?"*
+> → No: rechazar (alto riesgo).
+> → Sí: siguiente pregunta.
+>
+> *"¿Su historial crediticio es positivo?"*
+> → No: pedir garantías.
+> → Sí: **aprobar**.
+
+Eso es un árbol de clasificación: **preguntas binarias encadenadas que terminan en la predicción de una categoría**. La diferencia con el analista es que el árbol no hereda sus preguntas de un manual — las *aprende* de los datos, midiendo qué corte separa mejor las clases. Y a diferencia de casi cualquier otro modelo, el resultado se puede **dibujar y leer completo**: por eso los bancos y los reguladores los aman.
+
+::: {.callout-connect}
+**Dónde estás parado en el pipeline**
+
+Semana 10, pasos 5-6: evaluar y reportar (ya lo dominas). Esta semana, paso 4: **entrenar y ajustar** — con la validación cruzada eligiendo los hiperparámetros, como se prometió. El baseline sigue siendo la vara y el test se sigue visitando una sola vez. Nada de lo de la semana pasada se descarta: se ensambla.
+:::
+
+<!--=================-->
+<!--=================-->
+# El árbol: una máquina de preguntas
 
 ## Vocabulario mínimo
 
 ::: {.callout-key}
-**Nodo raíz** — La primera pregunta. El modelo elige la variable que mejor separa las clases posibles.
+**Nodo raíz** — La primera pregunta. El árbol la elige midiendo qué variable y qué corte separan mejor las clases.
 
-**Nodo interno** — Preguntas intermedias. Cada una divide más el subgrupo que llegó a ese punto.
+**Nodo interno** — Preguntas intermedias: cada una refina el subgrupo que llegó hasta ahí.
 
-**Hoja** — El final del árbol: la predicción. Es la categoría más frecuente entre las observaciones de entrenamiento que cayeron en ese nodo.
+**Hoja** — El final: la predicción. Es la clase más frecuente entre los casos de entrenamiento que cayeron en ese nodo.
 
-**Profundidad** — Cuántos niveles de preguntas tiene el árbol. Profundidad 1 = una pregunta. Más profundidad = más complejo = más riesgo de sobreajuste.
+**Profundidad** — Cuántos niveles de preguntas. Profundidad 1 = una sola pregunta. Es el dial de complejidad del árbol.
 :::
 
-::: {.callout-warning}
-**Sobreajuste vs. subajuste**
+## Cómo aprende: el corte más puro
 
-Un árbol muy profundo memoriza los datos de entrenamiento: accuracy alta en train, baja en test. Un árbol muy superficial es demasiado simple: accuracy baja en ambos. La **profundidad máxima** es el parámetro de control más importante.
-:::
+Para elegir cada pregunta, el árbol ensaya **todos los cortes posibles** en todas las variables y mide la **impureza** que deja cada uno: qué tan mezcladas quedan las clases a cada lado. Un corte que separa perfectamente aprobados de rechazados deja impureza 0 (corte de oro); un corte que deja mitad y mitad a cada lado no sirvió de nada. El árbol se queda con el mejor corte, divide, y repite el proceso dentro de cada rama hasta toparse con un freno: profundidad máxima, muy pocos casos, o grupos ya puros.
 
----
+Si quieres ver la intuición del algoritmo narrada paso a paso, este video del canal **Codificando Bits** (material complementario, 15 min) lo hace muy bien:
 
-<!--=================-->
-<!--=================-->
-# Árbol de clasificación: predecir una categoría
-
-El siguiente video muestra la intuición general de un árbol de clasificación. 
-
-<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
 {{< video https://www.youtube.com/watch?v=kqaLlte6P6o >}}
-
-Ahora vamos a verlo en acción con un ejemplo concreto: 8 solicitudes de crédito donde solo conocemos el ingreso mensual y el historial crediticio de cada solicitante.
-El objetivo es entender tres cosas que verás en los diagramas que siguen: primero, cómo el árbol elige su primera pregunta; segundo, qué significa la predicción que aparece en cada hoja; y tercero, qué ocurre cuando le permitimos al árbol hacer una segunda pregunta — y por qué eso no siempre es mejor.
-
-## Cómo aprende el árbol
-
-Para elegir en qué variable y en qué valor cortar, el árbol mide la **impureza** de cada posible división: qué tan mezcladas quedan las clases en cada grupo después del corte. El corte que produce los grupos más "puros" (menos mezclados) es el que elige.
-
-Imagina 10 solicitantes de crédito y el objetivo de predecir "Aprobado" / "Rechazado":
-
-- Si el corte en *ingresos > 3M* separa perfectamente aprobados de rechazados → impureza = 0, corte perfecto.
-- Si el corte en *número de hijos* mezcla aprobados y rechazados por igual → impureza alta, corte inútil.
-
-El árbol repite este proceso en cada nodo hasta llegar a la profundidad máxima o hasta que los grupos sean suficientemente puros.
 
 ## Un árbol con profundidad 1
 
-El siguiente ejemplo usa **8 solicitudes de crédito** con dos variables: ingreso mensual (millones) e historial crediticio (1 = positivo, 0 = negativo).
+Míralo con números pequeños: **8 solicitudes de crédito**, dos variables (ingreso mensual en millones e historial crediticio: 1 = positivo, 0 = negativo).
 
 | Solicitante | Ingreso (M) | Historial | Decisión real |
 |---|---|---|---|
@@ -119,10 +152,7 @@ El siguiente ejemplo usa **8 solicitudes de crédito** con dos variables: ingres
 | G | 4.5 | 0 | Aprobado |
 | H | 5.0 | 1 | Aprobado |
 
-El árbol analiza todos los posibles cortes y encuentra que **Ingreso ≥ 3.5M** es el que mejor separa las clases:
-
-- Rama izquierda (Ingreso < 3.5M): A, B, C, D → todos rechazados → **hoja: Rechazado**
-- Rama derecha (Ingreso ≥ 3.5M): E, F, G, H → todos aprobados → **hoja: Aprobado**
+El árbol ensaya todos los cortes y encuentra que **Ingreso ≥ 3.5M** es el que mejor separa:
 
 ```{=html}
 <div style="margin:1.5rem 0">
@@ -166,24 +196,14 @@ El árbol analiza todos los posibles cortes y encuentra que **Ingreso ≥ 3.5M**
 ```
 
 ::: {.callout-key}
-**¿Cómo predice el árbol un caso nuevo?**
+**¿Cómo predice un caso nuevo?**
 
-Llega una solicitud con ingreso de 2.8M:
-
-- ¿Ingreso ≥ 3.5M? → **No** → rama izquierda → predicción: **Rechazado**
-
-Llega otra con ingreso de 4.2M:
-
-- ¿Ingreso ≥ 3.5M? → **Sí** → rama derecha → predicción: **Aprobado**
-
-La predicción es determinista: para el mismo dato, siempre da la misma respuesta.
+Llega una solicitud con ingreso de 2.8M: ¿Ingreso ≥ 3.5M? → **No** → hoja izquierda → **Rechazado**. Llega otra con 4.2M: → **Sí** → hoja derecha → **Aprobado**. Determinista: mismo dato, misma respuesta, y puedes explicar *por qué* — intenta eso con una red neuronal.
 :::
 
-## ¿Qué pasa si el árbol es más profundo?
+## ¿Y con una pregunta más?
 
-Con profundidad 1, el árbol rechaza al solicitante C (ingreso 2.5M, historial positivo) porque cayó en el grupo izquierdo junto con A, B y D. ¿Pero C merece el mismo trato que alguien con historial negativo?
-
-Con profundidad 2, el árbol puede hacer una **segunda pregunta** dentro del grupo izquierdo:
+Con profundidad 1, el solicitante C (ingreso 2.5M pero **historial positivo**) quedó rechazado por caer en el grupo de ingresos bajos. Con profundidad 2, el árbol puede hacer una segunda pregunta dentro de esa rama:
 
 ```{=html}
 <div style="margin:1.5rem 0">
@@ -247,22 +267,20 @@ Con profundidad 2, el árbol puede hacer una **segunda pregunta** dentro del gru
 </div>
 ```
 
-Con profundidad 2, el árbol detecta que C (ingreso bajo pero historial positivo) merece aprobación. La segunda pregunta refina la predicción, pero también hace el modelo más complejo — y si los datos de entrenamiento son pocos, puede memorizarlos en vez de aprender un patrón real.
-
----
+La segunda pregunta rescata a C. Pero ojo con la moraleja completa: cada nivel extra hace el modelo más fino **y** más capaz de memorizar ruido. La hoja de C tiene **n = 1** — ¿aprendió un patrón o se aprendió a C? Con 8 datos no se puede saber; con 240 sí, y para eso está la validación cruzada de abajo.
 
 <!--=================-->
 <!--=================-->
-# Explóralo tú mismo: árbol de clasificación interactivo
+# Explóralo tú mismo: entrena tu primer árbol
 
-Experimenta con los parámetros del árbol. El playground tiene dos pestañas: el **Mapa de decisión** (cómo divide el espacio de datos en regiones de colores) y la **Estructura del árbol** (las preguntas que hace, visualizadas como nodos).
+Experimenta con los hiperparámetros. El playground tiene dos pestañas: el **Mapa de decisión** (cómo el árbol parte el espacio en regiones de color) y la **Estructura del árbol** (las preguntas, dibujadas). Los dos datasets te van a sonar: aprobación de crédito (la práctica de esta semana) y churn de clientes (el taller).
 
 **¿Qué explorar?**
 
-1. Con **"Aprobación de crédito"** y profundidad 1: ¿cuál es la única pregunta del árbol? Cambia al tab **Árbol** para verla.
-2. Sube la profundidad a 4 o 5: ¿la accuracy en train sube? ¿Y en test? ¿Hay sobreajuste?
-3. Baja el mínimo de muestras por hoja a 1: ¿el árbol se vuelve más o menos complejo?
-4. Compara ambas pestañas: cada línea divisoria del Mapa corresponde a un nodo en el Árbol.
+1. Con **profundidad 1**: ¿cuál es la única pregunta? Cambia a la pestaña **Árbol** para leerla.
+2. Sube la profundidad a 6 y baja el mínimo por hoja a 1: ¿qué pasa con la accuracy de train? ¿Y la de test? Estás viendo el dial de la semana 10, ahora con un modelo real.
+3. Cada línea del Mapa es un nodo del Árbol: verifica la correspondencia.
+4. Pulsa **Reiniciar datos** varias veces con los mismos parámetros: ¿el árbol cambia mucho? Esa *inestabilidad* es la debilidad que los bosques van a curar.
 
 ```{=html}
 <div style="margin:1.5rem 0;">
@@ -595,153 +613,246 @@ setTimeout(()=>{resize();loadDS();},150);
 </div>
 ```
 
----
-
 <!--=================-->
 <!--=================-->
-# La matriz de confusión: leer un modelo de clasificación
+# El pipeline del clasificador: baseline → CV → test
 
-En el video anterior viste cómo un árbol de clasificación llega a una predicción: recorre sus preguntas y termina en una hoja que dice "Aprobado" o "Rechazado". Pero predecir no es suficiente — necesitamos saber qué tan bien predice, y para eso necesitamos comparar lo que el modelo dijo con lo que realmente ocurrió.
+Ya sabes entrenar un árbol. Ahora insértalo en la disciplina de la semana 10 — este es exactamente el guion de la práctica:
 
-Esa comparación se organiza en una tabla de cuatro celdas llamada matriz de confusión. En este video vas a ver cómo se construye celda por celda, siguiendo dos reglas simples: la primera letra (Verdadero o Falso) depende de si el modelo acertó; la segunda (Positivo o Negativo) depende únicamente de lo que el modelo predijo. Al final del video el profesor te propone un ejercicio de conteo — páusalo y resuélvelo antes de seguir, porque en clase trabajarás con exactamente esta misma lógica aplicada a datos reales.
-
-<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
-{{< video https://youtu.be/TWDdeKs3org >}}
-
-Cuando el árbol predice sobre el conjunto de prueba, comparamos lo que predijo con lo que realmente ocurrió. Ese resumen es la **matriz de confusión**.
-
-## La tabla 2×2
-
-|  | **Predicho: Aprobado** | **Predicho: Rechazado** |
-|---|---|---|
-| **Real: Aprobado** | Verdadero Positivo (TP) | Falso Negativo (FN) |
-| **Real: Rechazado** | Falso Positivo (FP) | Verdadero Negativo (TN) |
-
-::: {.callout-key}
-**Los cuatro resultados posibles:**
-
-**TP (Verdadero Positivo):** Dijo "Aprobado" y era aprobado. Acierto donde importaba.
-
-**TN (Verdadero Negativo):** Dijo "Rechazado" y era rechazado. Acierto también.
-
-**FP (Falso Positivo):** Dijo "Aprobado" pero era rechazado → riesgo de impago para la entidad.
-
-**FN (Falso Negativo):** Dijo "Rechazado" pero era aprobado → se perdió un buen cliente.
-
-**Regla de memoria:** el primer adjetivo (Verdadero/Falso) dice si acertó. El segundo sustantivo (Positivo/Negativo) dice lo que predijo el modelo.
-:::
-
-## Las métricas que salen de la matriz
-
-::: {.callout-key}
-**Accuracy:**  
-$$\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}$$  
-Fracción de casos correctamente clasificados.  
-*Limitación: engañosa si las clases están desbalanceadas.*
-
-**Precisión:**  
-$$\text{Precisión} = \frac{TP}{TP + FP}$$  
-De los que el modelo dijo "Aprobado", ¿cuántos realmente lo eran?
-
-**Recall:**  
-$$\text{Recall} = \frac{TP}{TP + FN}$$  
-De los que realmente eran aprobados, ¿cuántos detectó el modelo?
-:::
-
-| Situación | Error más costoso | Priorizar |
-|---|---|---|
-| Fraude bancario | FN: dejar pasar un fraude | Recall alto |
-| Diagnóstico médico | FN: no detectar un caso real | Recall alto |
-| Crédito (impago caro) | FP: aprobar a quien no pagará | Precisión alta |
-| Retención de clientes | FN: no detectar al que se va | Recall alto |
+```{=html}
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>Parte train/test y calcula el baseline.</b> La clase mayoritaria marca la vara. Si el 52% de los créditos históricos se aprobó, "aprobar a todo el mundo" acierta 52% — todo modelo se mide contra eso.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>Entrena candidatos con distinta complejidad.</b> Árboles cortos, árboles profundos, con y sin frenos. Todos aprenden solo de train.</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>Elige el tamaño con validación cruzada — no con train ni con test.</b> Aquí hay un regalo: <code>rpart</code> corre la CV de 10 pliegues automáticamente mientras entrena, y su tabla reporta el error de CV (<code>xerror</code>) para cada tamaño del árbol. Como la CV también trae ruido, la regla profesional no es "el mínimo exacto" sino el <b>árbol más pequeño que empata con el mínimo</b> dentro de un margen de un error estándar (la <em>regla 1-SE</em>). Con ese <code>cp</code> podas usando <code>prune()</code>.</div></div>
+  <div class="pipe-step"><div class="pipe-num">4</div><div><b>Evalúa el elegido en test, una sola vez</b> — matriz de confusión, accuracy, precisión, recall. Y compara contra el baseline del paso 1.</div></div>
+</div>
+```
 
 ::: {.callout-warning}
-No existe la métrica perfecta. Mejorar el recall suele bajar la precisión y viceversa. La decisión de qué optimizar es de negocio, no del algoritmo.
-:::
+**El memorizador no siempre se estrella en el test — y aun así está mal**
 
----
+En la práctica entrenarás un árbol sin frenos que saca **100% en train**. A veces, con datos muy limpios, ese árbol hasta sobrevive dignamente en el test — ¿entonces cuál es el problema? Tres: (1) su 100% de train es una **mentira** que no puedes reportar; (2) con 12 hojas es ilegible y quebradizo — otro muestreo de datos y sale un árbol distinto; (3) la validación cruzada, que promedia 10 exámenes en vez de uno, casi siempre muestra que las ramas extra **no compran nada** (el `xerror` deja de bajar… y luego sube). Regla profesional: entre dos árboles con el mismo error de CV, gana el más pequeño. Se llama principio de parsimonia y te va a salvar en el proyecto final.
+:::
 
 <!--=================-->
 <!--=================-->
-# Del resultado al negocio: un ejemplo completo
+# Del árbol al bosque
 
-Una entidad financiera evalúa el árbol sobre 50 solicitudes del conjunto de prueba:
+El árbol tiene dos virtudes (legible, rápido) y una debilidad seria: es **inestable**. Cambia 20 filas del entrenamiento y puede cambiar la pregunta de la raíz — y con ella, todo el árbol. Un modelo que se transforma con cada brisa de datos no inspira confianza.
 
-|  | Predicho: Aprobado | Predicho: Rechazado |
-|---|---|---|
-| Real: Aprobado | **22** (TP) | **4** (FN) |
-| Real: Rechazado | **5** (FP) | **19** (TN) |
+La cura es contraintuitiva: **no entrenes un árbol; entrena quinientos.**
 
-- Accuracy = (22 + 19) / 50 = **82%**  
-- Precisión = 22 / 27 = **81.5%** — cuando dice "Aprobado", acierta el 81.5% de las veces  
-- Recall = 22 / 26 = **84.6%** — detecta el 84.6% de los buenos clientes  
+::: {.callout-key}
+**La receta del Random Forest, en tres ingredientes**
 
-¿Es suficiente? Depende del costo del error. Si el costo de un impago (FP) supera al costo de perder un buen cliente (FN), el modelo debería ajustarse para aumentar precisión — aceptando más FN a cambio. **Esa es una decisión de negocio, no del algoritmo.**
-
-::: {.callout-connect}
-**Conexión con semana 9**
-
-¿Por qué evaluamos en el conjunto de **prueba** y no en el de entrenamiento?
-
-El árbol ya "vio" los datos de entrenamiento. Medir allí da accuracy inflada. El conjunto de prueba simula solicitudes futuras — eso mide la capacidad real de predecir. Un árbol con 99% en train y 62% en test está memorizando, no aprendiendo (sobreajuste).
+1. **Bootstrap** 🎒 — Crea 500 versiones alternativas del dataset remuestreando filas con reemplazo (cada versión duplica unas filas y omite otras).
+2. **Un árbol por versión, con amnesia parcial** 🌳 — Entrena un árbol profundo en cada una, pero con una regla extraña: en **cada corte**, el árbol solo puede mirar un **subconjunto aleatorio de variables**. Así los 500 árboles no terminan siendo clones que preguntan todos lo mismo (sin esto, todos abrirían con la variable más fuerte y se equivocarían en lo mismo).
+3. **Votación** 🗳️ — Para predecir un caso nuevo, los 500 árboles votan y gana la mayoría. También obtienes la *proporción* de votos — la probabilidad que usaremos en el umbral.
 :::
 
----
+¿Por qué funciona? Cada árbol individual es mediocre y sobreajustado a su versión de los datos — pero sus errores son **distintos**, y al votar, los errores individuales se cancelan mientras el patrón común se refuerza. Es la sabiduría de las multitudes aplicada a modelos: quinientos peritos imperfectos que se equivocan en cosas diferentes le ganan a un perito perfecto en sus propios recuerdos.
 
-## Material adicional (opcional)
+El precio: ya no puedes dibujar el modelo. Quinientos árboles votando no caben en una diapositiva, y el regulador bancario que amaba tu árbol ahora frunce el ceño. Los consuelos:
 
-- **An Introduction to Statistical Learning (ISLR)** — Capítulo 8: árboles, bagging, random forests — [statlearning.com](https://www.statlearning.com)
-- **Google ML Crash Course** — clasificación con ejemplos interactivos — [developers.google.com/machine-learning/crash-course](https://developers.google.com/machine-learning/crash-course)
+- **Importancia de variables**: el bosque reporta cuánto contribuyó cada variable a separar las clases — un ranking que sí cabe en la diapositiva y suele ser la parte más citada del informe.
+- **El árbol podado como vocero**: en la práctica profesional es común usar el bosque para decidir y un árbol simple para *explicar* la lógica general.
 
----
-
-## Checklist de preclase
-
-Al llegar a clase debes poder explicar:
-
-- [ ] ¿Qué es un nodo raíz, un nodo interno y una hoja?
-- [ ] ¿Qué predice el árbol en cada hoja?
-- [ ] ¿Cómo elige el árbol la primera variable de corte?
-- [ ] ¿Qué son TP, FP, TN, FN y cómo se ubican en la tabla 2×2?
-- [ ] ¿Cómo se calcula la accuracy? ¿Por qué puede ser engañosa?
-- [ ] ¿Cuándo es más importante el recall que la precisión?
-- [ ] ¿Por qué se evalúa en el conjunto de prueba y no en el de entrenamiento?
-- [ ] ¿Qué significa que un árbol esté sobreajustado?
-
-## Preguntas de comprensión
-
-**1.** Un árbol entrega estos resultados sobre 50 solicitudes del conjunto de prueba:
-
-|  | Predicho: Aprobado | Predicho: Rechazado |
+| | Árbol (CART) | Random Forest |
 |---|---|---|
-| Real: Aprobado | 20 | 5 |
-| Real: Rechazado | 3 | 22 |
+| Interpretabilidad | 🟢 Se dibuja y se lee completo | 🟠 Solo importancia de variables |
+| Desempeño típico | 🟠 Bueno | 🟢 Mejor (casi siempre) |
+| Estabilidad | 🟠 Cambia con los datos | 🟢 La votación lo estabiliza |
+| Costo de cómputo | 🟢 Instantáneo | 🟠 500 árboles (aún rápido en estas bases) |
+| Cuándo elegirlo | Explicar la decisión es obligatorio | Predecir bien es lo que manda |
 
-Calcula la accuracy, la precisión y el recall. ¿Qué error es más frecuente: FP o FN?
+: {.striped tbl-colwidths="[24,38,38]"}
 
-<details>
-<summary>Ver respuesta</summary>
+<!--=================-->
+<!--=================-->
+# El umbral: la perilla que controla el negocio
 
-TP=20, FN=5, FP=3, TN=22  
-- Accuracy = (20+22)/50 = **84%**  
-- Precisión = 20/23 = **87%**  
-- Recall = 20/25 = **80%**  
+Queda la idea más importante de la semana para tu vida profesional. El bosque no dice "Aprobado" — dice *"el 73% de mis árboles votó Aprobado"*. Esa **probabilidad** se convierte en decisión solo cuando alguien fija un **umbral**: ¿aprobamos desde 0.5? ¿Solo desde 0.8?
 
-El error más frecuente es FN (5) > FP (3): el modelo rechaza más clientes buenos de lo que aprueba malos.
+Y ese *alguien* no debería ser el algoritmo. Mueve la perilla y mira lo que le pasa a la matriz:
+
+```{=html}
+<div class="widget-card" id="wg-umbral">
+  <div class="widget-head">🚪 La perilla del umbral — 20 solicitudes, positivo: Aprobado</div>
+  <div class="widget-body">
+    <div class="ofit-controls">
+      <span style="font-size:0.9em; color:#475569;">Aprobar si la probabilidad ≥</span>
+      <input type="range" id="thr-slider" min="0.05" max="0.95" value="0.5" step="0.05" aria-label="Umbral de decisión">
+      <span class="ofit-cx" id="thr-val">0.50</span>
+    </div>
+    <svg class="ofit-svg" id="thr-svg" viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Solicitudes ordenadas por probabilidad y línea de umbral"></svg>
+    <div class="ofit-boxes">
+      <div class="ofit-box"><div class="ofit-val" id="thr-mat">–</div><div class="ofit-lab">TP · FP · FN · TN</div></div>
+      <div class="ofit-box ofit-train"><div class="ofit-val" id="thr-prec">–</div><div class="ofit-lab">Precisión</div></div>
+      <div class="ofit-box ofit-test"><div class="ofit-val" id="thr-rec">–</div><div class="ofit-lab">Recall</div></div>
+    </div>
+    <div class="widget-note" id="thr-nota"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // [probabilidad del modelo, clase real: 1 = Aprobado, 0 = Rechazado]
+  var CASOS = [
+    [0.95, 1], [0.90, 1], [0.85, 1], [0.80, 1], [0.75, 1],
+    [0.70, 1], [0.60, 1], [0.55, 1], [0.45, 1], [0.35, 1],
+    [0.65, 0], [0.55, 0], [0.50, 0], [0.40, 0], [0.30, 0],
+    [0.25, 0], [0.20, 0], [0.15, 0], [0.10, 0], [0.05, 0]
+  ];
+  var svg = document.getElementById("thr-svg");
+  if (!svg) return;
+  var W = 560, L = 92, R = 20;
+  function x(p) { return L + p * (W - L - R); }
+  function base() {
+    var s = "";
+    s += '<line x1="' + L + '" y1="120" x2="' + (W - R) + '" y2="120" stroke="#94a3b8" stroke-width="1.5"/>';
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (t) {
+      s += '<line x1="' + x(t) + '" y1="120" x2="' + x(t) + '" y2="125" stroke="#94a3b8"/>';
+      s += '<text x="' + x(t) + '" y="140" font-size="11" fill="#64748b" text-anchor="middle">' + t.toFixed(2) + '</text>';
+    });
+    s += '<text x="' + (L - 6) + '" y="48" font-size="11" fill="#16a34a" text-anchor="end">Real:</text>';
+    s += '<text x="' + (L - 6) + '" y="62" font-size="11" fill="#16a34a" text-anchor="end">Aprobado</text>';
+    s += '<text x="' + (L - 6) + '" y="88" font-size="11" fill="#dc2626" text-anchor="end">Real:</text>';
+    s += '<text x="' + (L - 6) + '" y="102" font-size="11" fill="#dc2626" text-anchor="end">Rechazado</text>';
+    CASOS.forEach(function (c, i) {
+      var cy = c[1] === 1 ? 55 : 95;
+      s += '<circle id="thr-dot-' + i + '" cx="' + x(c[0]) + '" cy="' + cy + '" r="7" fill="' + (c[1] === 1 ? "#22c55e" : "#ef4444") + '" stroke="#fff" stroke-width="1.5"/>';
+    });
+    s += '<line id="thr-line" x1="0" y1="18" x2="0" y2="120" stroke="#1e3a5f" stroke-width="2" stroke-dasharray="5 3"/>';
+    s += '<text id="thr-line-lab" x="0" y="12" font-size="11" font-weight="bold" fill="#1e3a5f" text-anchor="middle">umbral</text>';
+    svg.innerHTML = s;
+  }
+  base();
+  var sl = document.getElementById("thr-slider");
+  function pinta() {
+    var u = parseFloat(sl.value);
+    document.getElementById("thr-val").textContent = u.toFixed(2);
+    var ln = document.getElementById("thr-line");
+    ln.setAttribute("x1", x(u)); ln.setAttribute("x2", x(u));
+    document.getElementById("thr-line-lab").setAttribute("x", x(u));
+    var tp = 0, fp = 0, fn = 0, tn = 0;
+    CASOS.forEach(function (c, i) {
+      var aprueba = c[0] >= u - 1e-9;
+      if (aprueba && c[1] === 1) tp++;
+      else if (aprueba && c[1] === 0) fp++;
+      else if (!aprueba && c[1] === 1) fn++;
+      else tn++;
+      document.getElementById("thr-dot-" + i).setAttribute("opacity", aprueba ? "1" : "0.3");
+    });
+    document.getElementById("thr-mat").textContent = tp + " · " + fp + " · " + fn + " · " + tn;
+    var prec = tp + fp > 0 ? (100 * tp / (tp + fp)) : NaN;
+    var rec = 100 * tp / (tp + fn);
+    document.getElementById("thr-prec").textContent = isNaN(prec) ? "—" : prec.toFixed(0) + "%";
+    document.getElementById("thr-rec").textContent = rec.toFixed(0) + "%";
+    var nota;
+    if (u <= 0.35) {
+      nota = "<b>Manga ancha:</b> aprueba " + (tp + fp) + " de 20 — casi no pierde buenos clientes (recall " + rec.toFixed(0) + "%), pero de los aprobados, " + fp + " no pagarán. Si el impago es caro, esto sale carísimo.";
+    } else if (u < 0.65) {
+      nota = "<b>Zona de equilibrio:</b> " + fp + " morosos aprobados y " + fn + " buenos clientes rechazados. ¿Es el balance correcto? Depende de cuál error cuesta más — pregunta de negocio, no de R.";
+    } else {
+      nota = "<b>Modo estricto:</b> solo aprueba con alta probabilidad — precisión " + (isNaN(prec) ? "—" : prec.toFixed(0) + "%") + (fp === 0 ? " (¡cero morosos aprobados!)" : "") + ", pero rechaza " + fn + " buenos clientes (recall " + rec.toFixed(0) + "%). Riesgo bajo, negocio perdido.";
+    }
+    document.getElementById("thr-nota").innerHTML = nota + " Los puntos atenuados quedaron <em>rechazados</em> por el umbral.";
+  }
+  sl.addEventListener("input", pinta);
+  pinta();
+})();
+</script>
+```
+
+La lección en una frase: **precisión y recall no se maximizan a la vez — se intercambian moviendo el umbral, y la tasa de cambio la decide el costo de cada error.** La tabla de la semana 10, ahora con perilla:
+
+| Situación | El error caro | El umbral se mueve hacia… |
+|---|---|---|
+| Crédito (impago caro) | FP: aprobar a quien no paga | Arriba (estricto): más precisión |
+| Retención de clientes | FN: no ver al que se fuga | Abajo (manga ancha): más recall |
+| Detección de fraude | FN: dejar pasar un fraude | Abajo: más recall |
+
+: {.striped tbl-colwidths="[36,36,28]"}
+
+::: {.callout-remember}
+**¿Y el ROC-AUC que sale en los blogs?** (opcional)
+
+Si mueves el umbral de 0 a 1 y anotas el desempeño en cada punto, dibujas una curva (ROC). El área bajo esa curva (AUC) resume qué tan bien el modelo **ordena** los casos, independiente del umbral: AUC = 1 es orden perfecto, 0.5 es barajar. Útil para comparar modelos antes de discutir umbrales — pero el umbral final sigue siendo una decisión de negocio. En este curso te basta con saber leerlo.
+:::
+
+<!--=================-->
+<!--=================-->
+# ¿Y esto cómo se ve en tu semestre?
+
+- **La práctica de esta semana**: el torneo completo sobre la base de crédito — baseline → árbol legible → el memorizador y su poda con CV → Random Forest → y la perilla del umbral con las probabilidades del bosque. Cada paso con sus métricas de la semana 10.
+- **El taller**: ConectaTel, un proveedor de internet, te entrega su base de clientes para predecir **fugas**. Clases desbalanceadas, un baseline traicionero y una métrica que no es la accuracy — todo lo de estas dos semanas, sin guía.
+- **La próxima semana**: la misma maquinaria (CART, bosque, CV) aplicada a predecir **números** — más un competidor nuevo de la familia lineal, el Lasso.
+- **Tu proyecto final**: si tu pregunta es de clasificación, este es tu arsenal: baseline + árbol podado + bosque, comparados con la métrica que tu costo de error manda, y un umbral justificado en la sustentación.
+
+<!--=================-->
+<!--=================-->
+# Para pensar 🤔
+
+1. Tu bosque de 500 árboles saca precisión 0.97. El gerente pregunta: *"¿y por qué el modelo rechazó al cliente 2041?"* — ¿qué le puedes responder, y qué NO le puedes responder? ¿Cómo lo resolverías con lo aprendido hoy?
+2. En el playground, el mínimo de muestras por hoja en 1 permite hojas de un solo caso — como la hoja de C en el ejemplo de 8 solicitantes. ¿Por qué una hoja con n = 1 es sospechosa por diseño?
+3. Una aseguradora usa umbral 0.5 para marcar reclamos como fraude y los manda a revisión humana (que cuesta poco). ¿Deberían subir o bajar el umbral? ¿Qué cambia si en vez de revisión humana la marca rechaza el reclamo automáticamente?
+
+<!--=================-->
+<!--=================-->
+# Checklist de salida
+
+Al terminar el video y esta lectura debes poder explicar:
+
+- [ ] ¿Cómo elige el árbol su primera pregunta? ¿Qué es la impureza?
+- [ ] ¿Qué predice una hoja y por qué una hoja con n = 1 es señal de alarma?
+- [ ] ¿Qué hiperparámetros frenan al árbol y qué pasa si los quitas todos?
+- [ ] ¿Cómo se usa la validación cruzada de `rpart` (xerror) para podar?
+- [ ] ¿Cuáles son los tres ingredientes del Random Forest y por qué la votación mejora la generalización?
+- [ ] ¿Qué pierdes al pasar del árbol al bosque y qué te consuela (importancia de variables)?
+- [ ] ¿Qué intercambia el umbral de decisión? ¿Quién debe fijarlo?
+- [ ] ¿Hacia dónde mueves el umbral si el error caro es el FN? ¿Y si es el FP?
+
+<!--=================-->
+<!--=================-->
+# Preguntas de comprensión
+
+**1.** Lee este árbol entrenado para predecir fuga de clientes: raíz: `reclamos_6m ≥ 2` → Sí: hoja **"Se fuga"** (n = 40); No: segunda pregunta `antiguedad < 12` → Sí: hoja **"Se fuga"** (n = 25); No: hoja **"Se queda"** (n = 175). Un cliente lleva 8 meses, tiene 1 reclamo. ¿Qué predice el árbol y por qué? ¿Qué perfil de negocio describen las dos hojas de fuga?
+
+<details class="answer"><summary>Ver respuesta</summary>
+
+Recorrido: ¿reclamos ≥ 2? No (tiene 1) → ¿antigüedad < 12? Sí (lleva 8) → hoja **"Se fuga"**. El árbol describe dos perfiles de riesgo que cualquier gerente reconoce: los **inconformes** (2+ reclamos recientes, se van sin importar lo demás) y los **recién llegados** (menos de un año, sin ancla todavía). Esa traducción directa de nodos a segmentos de negocio es la gran virtud del árbol.
+
 </details>
 
-**2.** Un compañero entrena un árbol con profundidad 7 y obtiene 98% en train y 63% en test. Dice: "Es excelente, casi no se equivoca." ¿Qué le responderías?
+**2.** Entrenas dos árboles sobre los mismos datos. El A tiene 3 hojas, error de CV (xerror) 0.10 y accuracy en train de 96%. El B tiene 14 hojas, xerror 0.13 y accuracy en train de 100%. Tu compañero prefiere el B "porque no se equivoca nunca". Convéncelo en tres frases.
 
-<details>
-<summary>Ver respuesta</summary>
+<details class="answer"><summary>Ver respuesta</summary>
 
-El modelo está sobreajustado. La brecha enorme entre train (98%) y test (63%) indica que memorizó los datos de entrenamiento en vez de aprender un patrón generalizable. Lo que importa es el desempeño en test. La solución probable es reducir la profundidad máxima o aumentar el mínimo de muestras por hoja.
+(1) El 100% en train no es evidencia: siempre se puede lograr memorizando — es el dial de la semana 10 girado a tope. (2) La medida honesta es la validación cruzada, y ahí B es *peor* (0.13 > 0.10): sus 11 hojas extra compraron ruido, no patrón. (3) Aun si empataran en CV, ganaría A por parsimonia: más simple, más legible, más estable ante datos nuevos.
+
 </details>
 
-**3.** La entidad decide que el costo de aprobar a alguien que no pagará (FP) es 4 veces mayor que el costo de rechazar a un buen cliente (FN). ¿Qué métrica debe optimizar el modelo? ¿Qué le pasa a la otra métrica?
+**3.** Tu Random Forest de fuga de clientes da, para un cliente, probabilidad 0.42 de irse. Con umbral 0.5 no se le hace nada; el equipo de retención propone bajar el umbral a 0.3. ¿Qué ganan, qué pagan, y qué dato del negocio necesitas para decidir si conviene?
 
-<details>
-<summary>Ver respuesta</summary>
+<details class="answer"><summary>Ver respuesta</summary>
 
-Debe optimizar **precisión**: el FP es el error más costoso. Para subirla, el árbol clasifica como "Aprobado" solo cuando está muy seguro — lo que probablemente sube los FN (rechaza más buenos clientes) bajando el recall. Es un trade-off inevitable: no se pueden maximizar ambas métricas a la vez. La decisión de dónde fijar ese trade-off es de la entidad.
+Ganan **recall**: capturan clientes como este (0.42 ≥ 0.3), que hoy se van sin que nadie los llame. Pagan **precisión**: más falsas alarmas — llamadas y descuentos a clientes que no pensaban irse. El dato que decide: el **costo relativo** de cada error. Si retener cuesta una llamada ($) y perder un cliente cuesta meses de facturación ($$$), el umbral bajo se paga solo; si la retención regala descuentos caros, no tanto. El umbral es una decisión financiera con disfraz estadístico.
+
 </details>
+
+**4.** ¿Por qué el Random Forest exige que cada corte de cada árbol mire solo un subconjunto aleatorio de variables? ¿Qué pasaría si se quita esa regla y cada árbol puede usar siempre todas?
+
+<details class="answer"><summary>Ver respuesta</summary>
+
+Sin esa regla, los 500 árboles serían casi **clones**: todos abrirían con la variable más predictiva (en la base de crédito, la deuda) y harían cortes muy parecidos — y 500 modelos que se equivocan *en lo mismo* votan tan mal como uno solo. La aleatoriedad de variables **des-correlaciona** los árboles: los obliga a explorar caminos distintos, de modo que sus errores sean diferentes y se cancelen al votar. La diversidad, no el número, es lo que hace sabia a la multitud.
+
+</details>
+
+<!--=================-->
+<!--=================-->
+# Material adicional
+
+- 📘 **ISLR** — capítulo 8: árboles, bagging y random forests: [statlearning.com](https://www.statlearning.com){target="_blank"}
+- 🎥 **StatQuest — Random Forests** (en inglés, con humor): [youtube.com/@statquest](https://www.youtube.com/@statquest){target="_blank"}
+- 🖼️ **MLU-Explain — Decision Trees y Random Forest** (visuales interactivos): [mlu-explain.github.io](https://mlu-explain.github.io){target="_blank"}
+- 🎬 **Codificando Bits** — el video de intuición embebido arriba y su serie de ML en español: [youtube.com/@codificandobits](https://www.youtube.com/@codificandobits){target="_blank"}

@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Unidad 3 - Agentes de código: Claude Code, Cursor y VS Code</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="week-08_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-08_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-08_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-08_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="week-08_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-08_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-08_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-08_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-08_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-08_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-08_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-08_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#cómo-estudiar-esta-semana" id="toc-cómo-estudiar-esta-semana" class="nav-link active" data-scroll-target="#cómo-estudiar-esta-semana"><span class="header-section-number">1</span> Cómo estudiar esta semana</a></li>
+  <li><a href="#glosario-de-la-semana" id="toc-glosario-de-la-semana" class="nav-link" data-scroll-target="#glosario-de-la-semana"><span class="header-section-number">2</span> Glosario de la semana</a></li>
+  <li><a href="#la-radiografía-borrosa" id="toc-la-radiografía-borrosa" class="nav-link" data-scroll-target="#la-radiografía-borrosa"><span class="header-section-number">3</span> La radiografía borrosa</a></li>
+  <li><a href="#el-método-viejo-un-mecánico-por-teléfono" id="toc-el-método-viejo-un-mecánico-por-teléfono" class="nav-link" data-scroll-target="#el-método-viejo-un-mecánico-por-teléfono"><span class="header-section-number">4</span> El método viejo: un mecánico por teléfono</a></li>
+  <li><a href="#el-cambio-de-paradigma-una-ia-que-ejecuta" id="toc-el-cambio-de-paradigma-una-ia-que-ejecuta" class="nav-link" data-scroll-target="#el-cambio-de-paradigma-una-ia-que-ejecuta"><span class="header-section-number">5</span> El cambio de paradigma: una IA que ejecuta</a>
+  <ul class="collapse">
+  <li><a href="#el-bucle-agéntico" id="toc-el-bucle-agéntico" class="nav-link" data-scroll-target="#el-bucle-agéntico"><span class="header-section-number">5.1</span> El bucle agéntico</a></li>
+  <li><a href="#y-esto-es-solo-claude-code" id="toc-y-esto-es-solo-claude-code" class="nav-link" data-scroll-target="#y-esto-es-solo-claude-code"><span class="header-section-number">5.2</span> ¿Y esto es solo Claude Code?</a></li>
+  </ul></li>
+  <li><a href="#las-reglas-del-juego-el-manifiesto" id="toc-las-reglas-del-juego-el-manifiesto" class="nav-link" data-scroll-target="#las-reglas-del-juego-el-manifiesto"><span class="header-section-number">6</span> Las reglas del juego: el manifiesto</a>
+  <ul class="collapse">
+  <li><a href="#el-manifiesto-la-constitución-del-proyecto" id="toc-el-manifiesto-la-constitución-del-proyecto" class="nav-link" data-scroll-target="#el-manifiesto-la-constitución-del-proyecto"><span class="header-section-number">6.1</span> El manifiesto: la constitución del proyecto</a></li>
+  <li><a href="#auditar-antes-de-aceptar" id="toc-auditar-antes-de-aceptar" class="nav-link" data-scroll-target="#auditar-antes-de-aceptar"><span class="header-section-number">6.2</span> Auditar antes de aceptar</a></li>
+  <li><a href="#la-memoria-del-agente" id="toc-la-memoria-del-agente" class="nav-link" data-scroll-target="#la-memoria-del-agente"><span class="header-section-number">6.3</span> La memoria del agente</a></li>
+  </ul></li>
+  <li><a href="#privacidad-analizar-sin-mirar" id="toc-privacidad-analizar-sin-mirar" class="nav-link" data-scroll-target="#privacidad-analizar-sin-mirar"><span class="header-section-number">7</span> Privacidad: analizar sin mirar</a></li>
+  <li><a href="#potencia-con-presupuesto" id="toc-potencia-con-presupuesto" class="nav-link" data-scroll-target="#potencia-con-presupuesto"><span class="header-section-number">8</span> Potencia con presupuesto</a></li>
+  <li><a href="#la-regla-de-oro-el-agente-no-es-calculadora" id="toc-la-regla-de-oro-el-agente-no-es-calculadora" class="nav-link" data-scroll-target="#la-regla-de-oro-el-agente-no-es-calculadora"><span class="header-section-number">9</span> La regla de oro: el agente no es calculadora</a></li>
+  <li><a href="#y-esto-cómo-se-ve-en-tu-semestre" id="toc-y-esto-cómo-se-ve-en-tu-semestre" class="nav-link" data-scroll-target="#y-esto-cómo-se-ve-en-tu-semestre"><span class="header-section-number">10</span> ¿Y esto cómo se ve en tu semestre?</a></li>
+  <li><a href="#para-pensar" id="toc-para-pensar" class="nav-link" data-scroll-target="#para-pensar"><span class="header-section-number">11</span> Para pensar 🤔</a></li>
+  <li><a href="#checklist-de-salida" id="toc-checklist-de-salida" class="nav-link" data-scroll-target="#checklist-de-salida"><span class="header-section-number">12</span> Checklist de salida</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">13</span> Preguntas de comprensión</a></li>
+  <li><a href="#material-adicional" id="toc-material-adicional" class="nav-link" data-scroll-target="#material-adicional"><span class="header-section-number">14</span> Material adicional</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 3 - Agentes de código: Claude Code, Cursor y VS Code</h1>
+<p class="subtitle lead">Introducción al Business Analytics · Semana 8 · 06278-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="cómo-estudiar-esta-semana" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Cómo estudiar esta semana</h1>
+<div class="callout-key">
+<p><strong>Este documento es la versión escrita del podcast de la semana</strong></p>
+<ol type="1">
+<li>🎧 <strong>Escucha el episodio</strong> — el enlace está en Intu. <!-- TODO: pegar aquí el enlace del podcast --></li>
+<li>📖 <strong>Lee este documento</strong> — sigue el mismo recorrido, pero con los conceptos organizados, tres herramientas interactivas y un glosario para consultar.</li>
+<li>✅ <strong>Presenta el quiz en Intu</strong> antes de la clase.</li>
+</ol>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Antes de venir a clase: prepara tu computador (15 minutos, en serio)</strong></p>
+<p>La aplicación de esta semana es 100% práctica y necesita que llegues con:</p>
+<ol type="1">
+<li><strong>VS Code instalado</strong> → <a href="https://code.visualstudio.com" target="_blank">code.visualstudio.com</a>. Es gratis y funciona en Windows, macOS y Linux.</li>
+<li><strong>Una cuenta de GitHub</strong> → <a href="https://github.com/signup" target="_blank">github.com/signup</a> (con tu correo Icesi). Y actívale el paquete de estudiante en <a href="https://github.com/education/students" target="_blank">github.com/education</a>: incluye <strong>GitHub Copilot Pro gratis</strong> mientras seas estudiante — el agente que usaremos en clase.</li>
+<li><strong>R funcionando</strong> — lo tienes desde la semana 3. Verifica escribiendo <code>Rscript --version</code> en una terminal.</li>
+</ol>
+<p>Si algo no te funciona, llega 10 minutos antes: los monitores te ayudan a destrabarlo. Sin estos tres ingredientes, en la práctica solo podrás mirar.</p>
+</div>
+</div>
+<p><strong>El plan del episodio:</strong> primero veremos por qué el método que muchos ya usan — copiar y pegar código entre el navegador y RStudio — es lento y ciego. Después conoceremos el cambio de paradigma: <strong>agentes</strong> que trabajan <em>dentro</em> de tu computador, ejecutan código de verdad y no se detienen hasta que corre. Y como darle manos a una IA suena tan potente como riesgoso, la segunda mitad es sobre <strong>control</strong>: reglas, auditoría, privacidad, presupuesto y la regla de oro que separa el uso aficionado del profesional.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="glosario-de-la-semana" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Glosario de la semana</h1>
+<p>Los términos que vas a escuchar en el episodio (y a usar en la práctica). Vuelve aquí cada vez que uno se te escape.</p>
+<div class="glossary-grid">
+<div class="gloss-card">
+<p><strong>Agente</strong> 🤖 Una IA que no solo <em>escribe</em> — <strong>actúa</strong>: lee tus archivos, ejecuta código, observa el resultado y corrige. La diferencia con un chat es la diferencia entre pedir instrucciones por teléfono y tener un asistente sentado frente al teclado.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Terminal (CLI)</strong> ⌨️ La ventana de texto donde se escriben comandos directamente al sistema (CLI = <em>Command Line Interface</em>, interfaz de línea de comandos). Claude Code vive ahí; <code>Rscript script.R</code> corre un script de R ahí.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Contexto del proyecto</strong> 📁 Todo lo que el agente puede ver: la estructura de carpetas, el README, los datos, los scripts, los errores de la terminal. Es lo que un chat del navegador <strong>no</strong> tiene.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Bucle agéntico</strong> 🔁 El ciclo que define a un agente: <strong>planear → ejecutar → observar → corregir</strong>, repetido hasta que el código corre limpio. Nadie copia ni pega nada en el medio.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Manifiesto (CLAUDE.md)</strong> 📜 Un archivo de texto en la raíz del proyecto con las reglas que el agente debe acatar en cada sesión: la “constitución” del proyecto. En Claude Code se llama <code>CLAUDE.md</code>; en Copilot, <code>copilot-instructions.md</code>.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Memoria del agente</strong> 🗒️ Bitácora que el agente mantiene solo: apunta las soluciones a problemas técnicos de <em>tu</em> máquina (rutas, versiones, mañas) y las reutiliza en sesiones futuras sin volver a preguntar.</p>
+</div>
+<div class="gloss-card">
+<p><strong>MCP</strong> 🔌 <em>Model Context Protocol</em> — un estándar para conectar el agente con otras fuentes: una base de datos local, la web, una API. La clave: los datos <strong>no viajan</strong>; viajan las consultas y vuelven los resultados agregados.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Subagentes</strong> 🐝 Copias del agente que trabajan en paralelo, cada una en su propia copia aislada del proyecto, coordinadas por un “director de orquesta”. Así se corren mil simulaciones sin que nadie pise a nadie.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Skill</strong> 🧰 ¿Recuerdas la semana 2? Instrucciones reutilizables y empaquetadas para una tarea recurrente. Los agentes las cargan automáticamente cuando la tarea lo amerita.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Alucinación matemática</strong> 🎲 Pedirle a un LLM que <em>calcule</em> y recibir un número plausible… e inventado. La cura: el agente escribe el código, <strong>R hace el cálculo</strong>, y el agente solo reporta lo que salió.</p>
+</div>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="la-radiografía-borrosa" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> La radiografía borrosa</h1>
+<p>El episodio arranca con una comparación médica. Cuando alguien se rompe un brazo, la radiografía muestra una línea blanca y nítida: el médico señala la pantalla y el problema es <strong>evidente, binario, definitivo</strong>. El hueso está roto o no lo está. Reconfortante, ¿no? A los seres humanos nos encantan los problemas visibles y categorizables.</p>
+<p>Ahora entra al mundo del análisis de datos — el tuyo desde la semana 3 — y esa claridad desaparece. La máquina de rayos X solo arroja <strong>imágenes borrosas</strong>: bases masivas, relaciones entre cientos de variables, resultados que cambian según cómo trates un valor faltante. Y hay algo peor:</p>
+<div class="callout-key">
+<p><strong>Un solo error en una línea de código puede cambiar la conclusión completa</strong></p>
+<p>No es una exageración. Si tu script de limpieza elimina los valores atípicos con un criterio distinto, el promedio cambia. Si el promedio cambia, la recomendación al gerente cambia. El análisis de datos serio exige un rigor que <strong>no perdona ni el más mínimo error en una línea de código</strong> — y a la vez, escribir código sin errores es dificilísimo.</p>
+<p>Esa tensión — rigor absoluto vs.&nbsp;errores inevitables — es el pantano del que esta semana intentamos salir.</p>
+</div>
+<p>La pregunta del episodio es exactamente esa: ¿cómo usar la IA no como un generador de texto que <em>opina</em> sobre tu código, sino como un <strong>operador activo</strong> que trabaja dentro de tu proyecto, prueba lo que escribe y responde por el resultado?</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-método-viejo-un-mecánico-por-teléfono" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> El método viejo: un mecánico por teléfono</h1>
+<p>Piensa en cómo has usado la IA para programar hasta ahora (semanas 2 a 6). Seguramente así: una pestaña del navegador con el chat abierto <strong>al lado</strong> de RStudio. Y un ciclo que conoces de memoria:</p>
+<ol type="1">
+<li>Tu script arroja un error larguísimo, todo teñido de rojo.</li>
+<li>Lo <strong>copias</strong> y lo <strong>pegas</strong> en el chat.</li>
+<li>Esperas una respuesta… que a menudo no entiende tu contexto.</li>
+<li><strong>Copias</strong> el código sugerido, lo <strong>pegas</strong> de vuelta en tu script.</li>
+<li>Ejecutas y <strong>cruzas los dedos</strong>. 🤞</li>
+<li>Falla otra vez (con otro error). Vuelve al paso 1.</li>
+</ol>
+<p>Cada vuelta pierde tiempo y — peor — pierde <em>tu concentración</em>. Pero el problema de fondo no es la fricción. Es que el modelo del navegador está <strong>ciego</strong>:</p>
+<div class="widget-card" id="wg-ciego">
+  <div class="widget-head">🔍 ¿Qué puede ver cada uno?</div>
+  <div class="widget-body">
+    <div class="attn-btns">
+      <button type="button" class="btn-widget attn-choice active" data-modo="chat">💬 Chat en el navegador</button>
+      <button type="button" class="btn-widget attn-choice" data-modo="agente">🤖 Agente en tu proyecto</button>
+    </div>
+    <ul class="vs-list" id="vs-list" style="margin-top:0.9em;"></ul>
+    <div class="widget-note" id="vs-note"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var CAPS = [
+    "Ve la estructura de carpetas y los archivos de tu proyecto",
+    "Sabe qué librerías y versiones tienes instaladas",
+    "Lee tus datos reales (no las 10 filas que le pegaste)",
+    "Ejecuta el código y observa el resultado verdadero",
+    "Lee el error completo en la terminal, sin que se lo copies",
+    "Corrige y vuelve a probar hasta que el script corre"
+  ];
+  var MODOS = {
+    chat: {
+      ok: [false, false, false, false, false, false],
+      note: "El chat <b>solo conoce lo que le pegas en la ventana</b>. Te da instrucciones al aire y no puede comprobar si funcionan — como un mecánico intentando reparar una moto <b>por teléfono</b>, sin poder ver el vehículo."
+    },
+    agente: {
+      ok: [true, true, true, true, true, true],
+      note: "El agente trabaja <b>dentro de tu computador</b>, con todo el contexto del proyecto — como un asistente experimentado <b>sentado frente a tu teclado</b>: escribe, ejecuta, mira el resultado y corrige."
+    }
+  };
+  var list = document.getElementById("vs-list");
+  var note = document.getElementById("vs-note");
+  var btns = document.querySelectorAll("#wg-ciego .attn-choice");
+  function render(modo) {
+    var m = MODOS[modo];
+    list.innerHTML = CAPS.map(function (c, i) {
+      var si = m.ok[i];
+      return '<li class="' + (si ? "vs-si" : "vs-no") + '"><span class="vs-ico">' +
+             (si ? "✔" : "✘") + '</span><span>' + c + '</span></li>';
+    }).join("");
+    note.innerHTML = m.note;
+  }
+  btns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      btns.forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      render(b.dataset.modo);
+    });
+  });
+  render("chat");
+})();
+</script>
+<p>Ya sabes por qué pasa esto (semana 2): el modelo <strong>solo puede trabajar con lo que entra en su ventana de contexto</strong>. Si lo único que entra es el pedazo de error que pegaste, lo único que sale es una sugerencia genérica. No es que el chat sea tonto — es que está incomunicado.</p>
+<div class="callout-remember">
+<p><strong>Recuerda del podcast de la semana 2</strong></p>
+<p>El modelo fija el significado por el <strong>contexto</strong> que lo acompaña. El copy-paste no es solo incómodo: es darle al modelo un contexto amputado.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-cambio-de-paradigma-una-ia-que-ejecuta" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> El cambio de paradigma: una IA que ejecuta</h1>
+<p>Aquí es donde el episodio presenta a <strong>Claude Code</strong>: una herramienta de Anthropic que se instala <strong>en tu computador</strong> (macOS, Linux, o Windows mediante WSL — el <em>subsistema de Windows para Linux</em>, que permite correr un entorno de comandos tipo Linux sin complicaciones) y opera desde la <span class="term">terminal</span>. No es una ventana de chat aislada: es un <strong>agente autónomo</strong> con acceso a tu proyecto.</p>
+<p>¿Y qué significa “agente”, en concreto? Un ejemplo del episodio, traducido a tu mundo:</p>
+<blockquote class="blockquote">
+<p>Corres un script y salta un error: una columna que creías numérica llegó como texto. En lugar de detenerte tú a copiar el error → el agente <strong>lo lee directamente de la terminal</strong>, abre el archivo de datos, identifica el problema (comas decimales, celdas con “ND”), <strong>ajusta el script</strong> y <strong>lo vuelve a ejecutar</strong> para verificar que la solución funcione. Tú solo miras — y apruebas.</p>
+</blockquote>
+<section id="el-bucle-agéntico" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="el-bucle-agéntico"><span class="header-section-number">5.1</span> El bucle agéntico</h2>
+<p>El mecanismo que hace esto posible es el núcleo de toda la semana. El agente no genera código “en el vacío”: evalúa los resultados <strong>reales</strong> de la ejecución, siguiendo un ciclo de cuatro fases que se repite hasta que el código corre limpiamente.</p>
+<p>Míralo en cámara lenta — este es el ciclo completo con el mismo tipo de datos que usarás en clase:</p>
+<div class="widget-card" id="wg-loop">
+  <div class="widget-head">🔁 El bucle agéntico, paso a paso</div>
+  <div class="widget-body">
+    <div class="loop-phases" id="loop-phases">
+      <span class="loop-chip" data-f="0">1 · Planear</span>
+      <span class="loop-chip" data-f="1">2 · Ejecutar</span>
+      <span class="loop-chip" data-f="2">3 · Observar</span>
+      <span class="loop-chip" data-f="3">4 · Corregir</span>
+      <span class="loop-chip" data-f="4">✔ Listo</span>
+    </div>
+    <div class="sim-term" id="sim-term"></div>
+    <div class="sim-caption" id="sim-caption">Pulsa <b>Siguiente paso</b> para ver cómo trabaja el agente con un encargo real.</div>
+    <div class="attn-btns" style="margin-top:0.8em;">
+      <button type="button" class="btn-widget" id="loop-next">▶ Siguiente paso</button>
+      <button type="button" class="btn-widget" id="loop-reset">↺ Reiniciar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var STEPS = [
+    { f: -1, add: '<span class="t-cmd">Tú › </span>Calcula el ingreso promedio por ciudad de data/ventas_tiendas.csv\n      y guarda la tabla en output/. El contexto está en el README.\n',
+      cap: "Un encargo en español, con la fórmula C-T-F-R de la semana 2. Fíjate: no le pegaste ni una fila de datos." },
+    { f: 0, add: '<span class="t-ai">Agente › </span>Voy a revisar el proyecto antes de escribir código.\n<span class="t-note">  ✓ Leyó README.md — entendió la misión y el diccionario de datos\n  ✓ Examinó data/ventas_tiendas.csv — 310 filas, 8 columnas</span>\n',
+      cap: "PLANEAR (1/2): el agente junta contexto por su cuenta — la misión del README, la estructura real de los datos. Nadie le pegó nada." },
+    { f: 0, add: '<span class="t-ai">Agente › </span>Ojo: la columna precio llegó como TEXTO (hay valores con coma\n         decimal). Plan: convertir a número → calcular ingreso →\n         agrupar por ciudad → exportar CSV.\n',
+      cap: "PLANEAR (2/2): anuncia el plan y ya detectó un problema de calidad… porque miró los datos de verdad." },
+    { f: 1, add: '\n<span class="t-cmd">$ Rscript scripts/ingreso_ciudad.R</span>\n',
+      cap: "EJECUTAR: escribió el script y lo corre en la terminal — con TU R y TUS librerías instaladas." },
+    { f: 2, add: '<span class="t-err">Error in precio * unidades : argumento no numérico para\noperador binario\nEjecución interrumpida</span>\n',
+      cap: "OBSERVAR: ¡falló! En el método viejo, aquí TÚ copiabas este error al chat. El agente lo lee solo, directo de la terminal." },
+    { f: 3, add: '<span class="t-ai">Agente › </span>El error confirma el diagnóstico: también la columna unidades\n         tiene valores no numéricos ("ND", vacíos). Corrijo: convierto\n         con as.numeric() y reporto cuántas filas quedan como NA.\n<span class="t-note">  ✎ Editó scripts/ingreso_ciudad.R (líneas 8-14)</span>\n',
+      cap: "CORREGIR: usa el error como información — no como derrota. Ajusta el código y documenta la decisión." },
+    { f: 1, add: '\n<span class="t-cmd">$ Rscript scripts/ingreso_ciudad.R</span>\n',
+      cap: "EJECUTAR (segunda vuelta): el bucle se repite. Planear → ejecutar → observar → corregir, las veces que haga falta." },
+    { f: 2, add: '<span class="t-ok">  ciudad     ingreso_promedio    n\n  Cali                26.045  125\n  Bogotá              24.077  103\n  Medellín            18.060   62\n✓ output/ingreso_ciudad.csv escrito</span>\n',
+      cap: "OBSERVAR: ahora sí. El resultado existe porque el código CORRIÓ — no porque el modelo lo predijo." },
+    { f: 4, add: '<span class="t-ai">Agente › </span>Listo. La tabla quedó en output/. Ojo: excluí 13 unidades\n         ilegibles y 4 precios absurdos (typo ×100), pero la base aún\n         tiene 11 filas duplicadas — ¿hago una limpieza formal\n         documentada antes del informe?\n',
+      cap: "LISTO — y algo más: reporta QUÉ excluyó, QUÉ encontró y propone el siguiente paso. Cifras con trazabilidad, no cifras de fe." }
+  ];
+  var term = document.getElementById("sim-term");
+  var cap = document.getElementById("sim-caption");
+  var chips = document.querySelectorAll("#loop-phases .loop-chip");
+  var i = 0;
+  function paint() {
+    var html = "";
+    for (var k = 0; k < i; k++) html += STEPS[k].add;
+    term.innerHTML = html || '<span class="t-note">— terminal vacía —</span>';
+    if (i > 0) {
+      cap.innerHTML = STEPS[i - 1].cap;
+      var f = STEPS[i - 1].f;
+      chips.forEach(function (c) {
+        var cf = parseInt(c.dataset.f, 10);
+        c.classList.remove("active", "done");
+        if (cf === f) c.classList.add("active");
+      });
+      if (f === 4) chips.forEach(function (c) { if (parseInt(c.dataset.f, 10) < 4) c.classList.add("done"); });
+    } else {
+      cap.innerHTML = 'Pulsa <b>Siguiente paso</b> para ver cómo trabaja el agente con un encargo real.';
+      chips.forEach(function (c) { c.classList.remove("active", "done"); });
+    }
+    term.scrollTop = term.scrollHeight;
+    document.getElementById("loop-next").disabled = (i >= STEPS.length);
+  }
+  document.getElementById("loop-next").addEventListener("click", function () {
+    if (i < STEPS.length) { i++; paint(); }
+  });
+  document.getElementById("loop-reset").addEventListener("click", function () { i = 0; paint(); });
+  paint();
+})();
+</script>
+<div class="callout-key">
+<p><strong>Lo esencial de este bloque</strong></p>
+<ul>
+<li>Un <strong>agente</strong> = LLM + acceso al proyecto + capacidad de ejecutar + el bucle <strong>planear → ejecutar → observar → corregir</strong>.</li>
+<li>La diferencia con el chat <strong>no es inteligencia, es contexto y manos</strong>: mismo cerebro, pero ahora ve tus archivos y puede probar lo que propone.</li>
+<li>El resultado final existe porque el código <strong>corrió de verdad</strong> en tu máquina. Nada de cruzar los dedos.</li>
+</ul>
+</div>
+</section>
+<section id="y-esto-es-solo-claude-code" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="y-esto-es-solo-claude-code"><span class="header-section-number">5.2</span> ¿Y esto es solo Claude Code?</h2>
+<p>No.&nbsp;El episodio se centra en Claude Code porque su documentación es la fuente, pero la <strong>filosofía agéntica</strong> ya vive en varias herramientas — y en la práctica de esta semana la vas a experimentar con la que tengas a mano:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 40%">
+<col style="width: 38%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Herramienta</th>
+<th>Qué es</th>
+<th>Cómo se ve</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Claude Code</strong></td>
+<td>El agente de Anthropic. Vive en la terminal; también dentro de VS Code.</td>
+<td>Le hablas en la terminal; él edita, ejecuta y te muestra diffs.</td>
+</tr>
+<tr class="even">
+<td><strong>VS Code + Copilot</strong></td>
+<td>El editor gratuito de Microsoft con el asistente de GitHub. Su <em>modo agente</em> hace el mismo bucle.</td>
+<td>Panel de chat dentro del editor; propone cambios y corre comandos en la terminal integrada. <strong>Gratis para estudiantes</strong> — el que usaremos en clase.</td>
+</tr>
+<tr class="odd">
+<td><strong>Cursor</strong></td>
+<td>Un editor construido alrededor de la idea de agente.</td>
+<td>Similar a VS Code (es un derivado), con el agente como protagonista.</td>
+</tr>
+</tbody>
+</table>
+<p>La herramienta importa menos que la filosofía: <strong>una IA que no solo escribe, sino que ejecuta y prueba, con todo el contexto del proyecto</strong>. Eso es lo que cambia las reglas del juego. Y un dato que lo aterriza: las páginas de este curso — la teoría que estás leyendo, los talleres, los widgets — fueron construidas trabajando así, con un agente.</p>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="las-reglas-del-juego-el-manifiesto" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Las reglas del juego: el manifiesto</h1>
+<p>Frente a este nivel de autonomía, la duda correcta — la que plantea el episodio — es:</p>
+<blockquote class="blockquote">
+<p>Si le doy a un programa el control sobre mis archivos, con permiso para reescribir código… ¿qué impide que, en su afán ciego por hacer que el script “deje de arrojar errores”, termine <strong>alterando la metodología</strong> sin que yo me dé cuenta?</p>
+</blockquote>
+<p>Es el talón de Aquiles de la automatización. En análisis de datos, cambiar cómo se tratan los valores atípicos puede cambiar la conclusión del estudio. Si el agente elige una semilla aleatoria distinta cada vez, o decide por su cuenta eliminar los datos faltantes en lugar de reportarlos, el resultado deja de ser <strong>reproducible</strong> — y la reproducibilidad, como insiste el episodio, <strong>no es negociable</strong>. Sin salvaguardias, lo que produce es basura estadística con buena presentación.</p>
+<section id="el-manifiesto-la-constitución-del-proyecto" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="el-manifiesto-la-constitución-del-proyecto"><span class="header-section-number">6.1</span> El manifiesto: la constitución del proyecto</h2>
+<p>La primera salvaguardia es un archivo de texto — en Claude Code se llama <code>CLAUDE.md</code> — que se coloca en la carpeta raíz del proyecto. El agente tiene la <strong>obligación de leerlo y acatarlo cada vez que inicia una sesión</strong>. Es la constitución del proyecto: tus reglas metodológicas, escritas una sola vez, aplicadas siempre.</p>
+<p>Dos propiedades lo hacen funcionar:</p>
+<p><strong>1. Es corto.</strong> La guía recomienda mantenerlo por debajo de ~200 líneas. ¿Te suena la razón? Es pura semana 2: todo lo que pongas ahí consume <strong>tokens</strong> — las unidades de atención del modelo. Un manifiesto de 500 páginas satura la ventana de contexto y el modelo “se marea”: empieza a sufrir una especie de amnesia de corto plazo y diluye su capacidad de seguir instrucciones. Menos es más.</p>
+<p><strong>2. Es verificable.</strong> Nada de órdenes vagas. Cada directiva debe ser tan concreta que puedas comprobar si el agente la cumplió o no. Practica la diferencia:</p>
+<div class="widget-card" id="wg-directivas">
+  <div class="widget-head">📜 ¿Directiva verificable o vaga?</div>
+  <div class="widget-body">
+    <p class="widget-note" style="margin-top:0;">Seis reglas candidatas para un manifiesto. Clasifícalas: ¿se puede <b>comprobar</b> si el agente la cumplió?</p>
+    <div id="quiz-zone"></div>
+    <div class="quiz8-score" id="quiz-score"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var ITEMS = [
+    { t: '"Limpia los datos con cuidado y rigor empírico."', v: false,
+      e: "¿Qué es «rigor»? ¿Cómo compruebas «cuidado»? El agente decidirá por ti — que es justo lo que quieres evitar." },
+    { t: '"Usa siempre set.seed(2026) antes de cualquier operación aleatoria."', v: true,
+      e: "Verificable en un segundo: o el script tiene la semilla o no la tiene. Reproducibilidad garantizada." },
+    { t: '"Escribe código de buena calidad."', v: false,
+      e: "«Buena calidad» significa algo distinto para cada persona (y para cada modelo). No hay forma de auditarla." },
+    { t: '"Toda tabla se exporta a output/ con write.csv(..., row.names = FALSE)."', v: true,
+      e: "Concreta: dice dónde, con qué función y con qué argumento. Puedes revisar la carpeta y el código." },
+    { t: '"Ten en cuenta el contexto colombiano."', v: false,
+      e: "¿Cuál contexto? ¿Pesos, DANE, geografía? Si importa, di exactamente qué: «los ingresos están en COP; no los conviertas»." },
+    { t: '"Nunca modifiques data/ventas_tiendas.csv: toda limpieza produce un archivo nuevo."', v: true,
+      e: "Prohibición absoluta y comprobable: basta mirar la fecha de modificación del archivo original." }
+  ];
+  var zone = document.getElementById("quiz-zone");
+  var score = document.getElementById("quiz-score");
+  var done = 0, good = 0;
+  ITEMS.forEach(function (it, idx) {
+    var div = document.createElement("div");
+    div.className = "quiz-item";
+    div.innerHTML = '<div class="quiz-text">' + it.t + '</div>' +
+      '<div class="quiz-btns">' +
+      '<button type="button" class="btn-widget" data-v="true">✅ Verificable</button>' +
+      '<button type="button" class="btn-widget" data-v="false">🌫️ Vaga</button>' +
+      '</div><div class="quiz-reveal"></div>';
+    var btns = div.querySelectorAll("button");
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (div.classList.contains("q-ok") || div.classList.contains("q-bad")) return;
+        var ans = (b.dataset.v === "true");
+        var ok = (ans === it.v);
+        div.classList.add(ok ? "q-ok" : "q-bad");
+        div.querySelector(".quiz-reveal").innerHTML =
+          (ok ? "<b>Correcto.</b> " : "<b>No.</b> Esta es " + (it.v ? "<b>verificable</b>. " : "<b>vaga</b>. ")) + it.e;
+        done++; if (ok) good++;
+        score.textContent = done === ITEMS.length
+          ? ("Resultado: " + good + " de " + ITEMS.length + (good === ITEMS.length ? " — tienes alma de metodólogo/a. 🏛️" : " — revisa las explicaciones de las que fallaste."))
+          : (done + " de " + ITEMS.length + " clasificadas");
+      });
+    });
+    zone.appendChild(div);
+  });
+})();
+</script>
+<p>Un manifiesto real para un proyecto de este curso se ve así (lo escribirás en clase):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a># Reglas del proyecto — Tiendas Andinas</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>- Usa siempre set.seed(2026) en cualquier paso aleatorio.</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>- Nunca modifiques los archivos de data/: toda limpieza produce un archivo nuevo.</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>- Todo gráfico se exporta con ggsave() a output/, en PNG, con theme_minimal().</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>- Los valores de unidades que no sean enteros positivos se convierten en NA</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  y se reportan en el log — no se eliminan en silencio.</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>- Si no estás seguro de una decisión de limpieza, pregunta antes de aplicarla.</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>- Responde y comenta el código en español.</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>¿Notas la última regla de la lista? Es la <strong>restricción comodín</strong> de la semana 2, adaptada al mundo agéntico.</p>
+</section>
+<section id="auditar-antes-de-aceptar" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="auditar-antes-de-aceptar"><span class="header-section-number">6.2</span> Auditar antes de aceptar</h2>
+<p>Segunda salvaguardia: <strong>la confianza ciega no es una metodología científica</strong>. Antes de que el agente aplique un cambio permanente a tus archivos, las herramientas muestran la modificación línea por línea — en verde lo que se añade, en rojo lo que se elimina (los programadores lo llaman un <em>diff</em>) — y <strong>nada se escribe en el disco sin tu aprobación explícita</strong>. Tu trabajo en clase incluirá exactamente eso: leer el diff, entenderlo y solo entonces aprobar.</p>
+</section>
+<section id="la-memoria-del-agente" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="la-memoria-del-agente"><span class="header-section-number">6.3</span> La memoria del agente</h2>
+<p>¿Y si las reglas rígidas le quitan flexibilidad? El episodio responde con un segundo componente: además del manifiesto (la ley inmutable), el agente mantiene por su cuenta una <strong>bitácora de aprendizaje</strong> — su memoria. Si un día descubre que en tu computador la ruta de R requiere un comando especial, lo anota; en la siguiente sesión aplica ese conocimiento sin volver a preguntarte. Ley científica inquebrantable + agilidad técnica local.</p>
+<div class="callout-key">
+<p><strong>Lo esencial de este bloque</strong></p>
+<ul>
+<li>El riesgo real de la autonomía no es que el agente “se rebele”: es que <strong>optimice lo que no debía</strong> (que el código corra) sacrificando lo que sí importa (que el método sea correcto).</li>
+<li>La defensa: un <strong>manifiesto corto y verificable</strong> que el agente lee en cada sesión, <strong>auditoría de cambios</strong> antes de aceptar, y una <strong>memoria</strong> para lo técnico-local.</li>
+<li>Regla mental: dile al agente <em>qué</em> debe cumplirse (verificable); no le pidas <em>virtudes</em> (vago).</li>
+</ul>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="privacidad-analizar-sin-mirar" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Privacidad: analizar sin mirar</h1>
+<p>Hay un obstáculo gigante que el episodio ataca de frente: <strong>los datos sensibles</strong>. Las investigaciones serias trabajan con registros individuales — encuestas de hogares, historias clínicas, registros fiscales — que por ley y por ética <strong>tienen prohibido salir del entorno local</strong>. ¿Cómo usar IA moderna sobre datos que no pueden viajar a la nube?</p>
+<p>La respuesta tiene tres capas, y la mejor forma de entenderla es la analogía estrella del episodio:</p>
+<div class="callout-workflow">
+<p><strong>El chef Michelin en la cocina de alta seguridad</strong> 👨‍🍳</p>
+<p>Contratas a un chef estrella Michelin para organizar la cocina de un restaurante de alta seguridad. Le das el <strong>menú</strong>, el <strong>inventario</strong> y las <strong>reglas de higiene</strong> (el manifiesto)… pero le prohíbes estrictamente <strong>abrir el refrigerador</strong> donde están los ingredientes secretos. El chef diseña toda la receta a ciegas — y con precisión matemática — porque no necesita <em>ver</em> los ingredientes: le basta conocer su <strong>estructura</strong>.</p>
+</div>
+<p>Las tres capas, en concreto:</p>
+<p><strong>1. Bloquear archivos.</strong> Al agente se le puede prohibir el acceso a archivos específicos — por ejemplo, todo lo que termine en <code>.csv</code>, <code>.rds</code> o <code>.dta</code> (los formatos de bases de datos). Funciona como una lista de exclusión: el agente ve que el archivo <em>existe</em>, pero no puede abrirlo.</p>
+<p><strong>2. Análisis basado en metadatos.</strong> ¿Y entonces cómo trabaja? Con el <strong>diccionario de datos</strong>: los nombres de las columnas, sus tipos, sus rangos — la “información nutricional” sin el ingrediente. Con solo eso, el agente puede diseñar el análisis completo, escribir los scripts y los controles de calidad <strong>sin haber posado jamás los ojos sobre un solo registro individual</strong>. (¿Recuerdas el diccionario de datos de la semana 6? Ahora sabes para qué más sirve.)</p>
+<p><strong>3. MCP: la base de datos calcula, el agente recibe agregados.</strong> Para bases grandes, el protocolo <span class="term">MCP</span> conecta el agente directamente con una base de datos <strong>local</strong>. En lugar de exportarle un archivo con un millón de filas privadas, el agente escribe una consulta, la base de datos — que nunca se mueve de su entorno seguro — hace el cálculo, y devuelve <strong>solo la tabla agregada</strong>: promedios, conteos, totales. La información individual jamás transita hacia la nube. El mismo canal sirve al revés: el agente puede descargar por su cuenta datos públicos (Banco Mundial, FMI) para complementar el análisis.</p>
+<div class="callout-connect">
+<p><strong>¿Y en tu proyecto final?</strong></p>
+<p>Tu base del proyecto no es un secreto de Estado, pero el principio te aplica desde ya: <strong>el agente no necesita ver todos los datos para ayudarte bien</strong> — necesita el diccionario, la estructura y reglas claras. Y si algún día trabajas con datos reales de una empresa (semestre de práctica, primer empleo), esta arquitectura es la diferencia entre poder usar IA y tenerla prohibida.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="potencia-con-presupuesto" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Potencia con presupuesto</h1>
+<p>La segunda mitad del episodio baja al terreno operativo: esto consume recursos — cómputo y plata — y usarlo bien es una decisión económica. Te va a sonar todo, porque los conceptos son de la semana 2, ahora en acción:</p>
+<p><strong>Elegir el músculo según la tarea.</strong> La jerarquía de modelos que ya conoces (el episodio la recorre: <strong>Opus</strong>, el más potente, para el razonamiento profundo; <strong>Sonnet</strong>, rápido, ideal para tareas como limpiar variables; <strong>Haiku</strong>, el liviano). Y el control de esfuerzo — <code>effort</code>, de <code>low</code> a <code>max</code> — para modular cuánta “profundidad cognitiva” exiges por tarea: normalizar nombres de columnas no necesita un genio (<code>low</code>); desenredar un diseño metodológico complejo sí (<code>xhigh</code> o <code>max</code>).</p>
+<p><strong>El caché: no releer lo ya leído.</strong> Imagina obligar al modelo a procesar un diccionario de datos de miles de líneas <strong>cada dos minutos</strong>. El <em>prompt caching</em> mantiene esa información “caliente” en memoria, y las lecturas desde caché cuestan una fracción del precio normal — el episodio habla de un ahorro de alrededor del <strong>90%</strong> en esos costos. Sin esa persistencia, usar agentes a escala sería impagable para cualquier presupuesto universitario.</p>
+<p><strong>Subagentes: la orquesta.</strong> Para trabajos masivos — el ejemplo del episodio son las simulaciones de Montecarlo, ejecutar un modelo <strong>miles de veces</strong> con ruido aleatorio para verificar que las conclusiones se sostienen — el agente asume el rol de <strong>director de orquesta</strong>: escribe un guion maestro y despliega docenas de <span class="term">subagentes</span> que corren las pruebas en paralelo. ¿Y no se pisan entre ellos, si cincuenta procesos intentan reescribir el mismo archivo? No: cada subagente trabaja en un <strong>clon invisible del directorio</strong> (una rama paralela, aislada), y solo cuando su tarea corre perfecta y cumple el manifiesto, empaqueta sus cambios y pide integrarlos. Nunca colisionan.</p>
+<p><strong>El riesgo: el bucle infinito.</strong> La contracara, y el episodio no la esconde: ¿qué pasa si sueltas cientos de agentes y se topan con un error insalvable en los datos base? Podrían quedar atrapados intentando, fallando y relanzando procesos — <strong>consumiendo el presupuesto del departamento en quince minutos</strong>. Por eso los protocolos defensivos no son opcionales:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 28%">
+<col style="width: 72%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Freno</th>
+<th>Qué hace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Límites de gasto</strong></td>
+<td>Topes máximos configurados en la consola administrativa: alertas tempranas y freno duro.</td>
+</tr>
+<tr class="even">
+<td><strong>Restringir herramientas</strong></td>
+<td>Definir qué comandos puede ejecutar un subagente — no se le otorga libertad total.</td>
+</tr>
+<tr class="odd">
+<td><strong>Auditar y podar el contexto</strong></td>
+<td>Revisar qué archivos están saturando la memoria del modelo y compactar el historial para frenar en seco cualquier bucle repetitivo.</td>
+</tr>
+</tbody>
+</table>
+<div class="callout-remember">
+<p><strong>Recuerda del podcast de la semana 2</strong></p>
+<p>Output cuesta ~5× el input, y el modelo grande cuesta ~5× el mediano. Un agente autónomo multiplica <em>volumen</em> de ambos — por eso aquí los límites de gasto pasan de “buena práctica” a “obligatorios”.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="la-regla-de-oro-el-agente-no-es-calculadora" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> La regla de oro: el agente no es calculadora</h1>
+<p>Y llegamos a la trampa más letal del paradigma — la que separa, en palabras del episodio, <em>el uso aficionado de la verdadera ciencia empírica rigurosa</em>.</p>
+<p>Por muy avanzados que sean, estos modelos siguen siendo lo que aprendiste en la semana 2: <strong>motores predictivos de lenguaje</strong>. Estiman la palabra siguiente. <strong>No hacen matemáticas dentro de su red neuronal.</strong></p>
+<p>Si le pides en el chat <em>“estima el estadístico F”</em> o <em>“¿cuál es el promedio de esta columna?”</em>, el sistema va a generar un número que parece increíblemente plausible… <strong>y es inventado</strong>. Una falsedad matemática envuelta en lenguaje académico impecable — la prima peligrosa de la bibliografía fantasma que cazaste en el taller 2. Se llama <strong>alucinación numérica</strong>, y destroza la integridad de cualquier análisis.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>El protocolo estricto (apréndetelo como un mantra)</strong></p>
+<p>Un LLM <strong>jamás</strong> se usa como calculadora. La regla operativa es:</p>
+<ol type="1">
+<li>El agente <strong>escribe</strong> la matemática en un script local (R, en nuestro caso).</li>
+<li>El <strong>intérprete de R</strong> — con sus librerías estadísticas rigurosamente validadas — ejecuta el cálculo duro en tu máquina.</li>
+<li>El agente se limita a <strong>leer el resultado exportado</strong> y reportar las cifras exactas.</li>
+</ol>
+<p>El agente es <strong>un puente hacia R, no una calculadora mágica</strong>. Si un número no salió de un script que corrió, ese número no existe.</p>
+</div>
+</div>
+<p>Fíjate en algo hermoso: el bucle agéntico <em>encarna</em> esta regla. En el simulador de arriba, el ingreso promedio por ciudad no lo “supo” el modelo — salió de <code>Rscript</code> ejecutando código sobre los datos reales. Por diseño, un agente bien usado es la <strong>cura estructural</strong> de la alucinación numérica. Y aun así, el último control de calidad sigue siendo tuyo: en la práctica verificarás una cifra del agente recalculándola tú mismo. Confianza sí — ciega no.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="y-esto-cómo-se-ve-en-tu-semestre" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> ¿Y esto cómo se ve en tu semestre?</h1>
+<div class="callout-connect">
+<p><strong>El objetivo de la semana, en una frase</strong></p>
+<p>Aprender a hacer <strong>con un agente</strong> lo que ya hiciste <strong>a mano</strong> en las semanas 3 a 6 — explorar, limpiar, resumir y graficar datos — sin soltar el timón metodológico.</p>
+</div>
+<ul>
+<li><strong>En la práctica de esta semana</strong>: abrirás un proyecto real (una cadena de minimercados con una base sucia) en VS Code, harás la “prueba del mecánico” para sentir la diferencia chat vs.&nbsp;agente en carne propia, escribirás tu primer manifiesto y dirigirás el bucle completo: diagnóstico → limpieza documentada → KPIs y gráficos. Todo con verificación.</li>
+<li><strong>En el taller evaluable</strong>: dirigirás tú solo un ciclo agéntico de principio a fin, con evidencias de cada fase.</li>
+<li><strong>Para tu proyecto final</strong>: este flujo es exactamente cómo vas a acelerar la Entrega 2 (el análisis exploratorio) — con la política de IA del curso intacta: la IA acelera, <strong>tú entiendes, validas y respondes</strong> por cada paso.</li>
+</ul>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="para-pensar" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Para pensar 🤔</h1>
+<p>El episodio cierra con una pregunta provocadora, y te la dejamos tal cual:</p>
+<blockquote class="blockquote">
+<p>Si la inteligencia artificial asume por completo la carga de programar código impecable — depurar errores, gestionar datos, aplicar mecánicamente los controles de robustez — … ¿el conocimiento técnico de programación perderá su valor diferenciador? ¿El éxito dependerá, única y exclusivamente, de la lógica y de la <strong>validez de las preguntas</strong> que seamos capaces de formular?</p>
+</blockquote>
+<p>No hay respuesta oficial. Pero nota dónde te deja parado este curso: las semanas 3 a 6 te enseñaron a programar <em>para que puedas juzgar</em> lo que el agente programa. Y las semanas 2 y 8 te enseñaron a preguntar. Tú decides cuál de las dos habilidades se aprecia más — o si la ventaja está, precisamente, en tener ambas.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="checklist-de-salida" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Checklist de salida</h1>
+<p>Antes del quiz (y de la clase), deberías poder:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Explicar con tus palabras por qué el chat del navegador está “ciego” (las tres cosas que no puede hacer).</label></li>
+<li><label><input type="checkbox">Recitar el bucle agéntico: <strong>planear → ejecutar → observar → corregir</strong> — y decir qué lo detiene.</label></li>
+<li><label><input type="checkbox">Distinguir una directiva <strong>verificable</strong> de una <strong>vaga</strong>, y escribir dos verificables para un proyecto tuyo.</label></li>
+<li><label><input type="checkbox">Explicar el manifiesto (<code>CLAUDE.md</code>): qué es, dónde vive, por qué debe ser corto (tokens = atención).</label></li>
+<li><label><input type="checkbox">Contar la analogía del chef Michelin y decir qué son los <strong>metadatos</strong> de una base.</label></li>
+<li><label><input type="checkbox">Explicar por qué un agente desbocado es un riesgo económico y nombrar dos frenos.</label></li>
+<li><label><input type="checkbox">Enunciar la regla de oro: quién calcula (R), quién reporta (el agente), quién responde (tú).</label></li>
+</ul>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="preguntas-de-comprensión" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> Preguntas de comprensión</h1>
+<p>Ponte a prueba antes del quiz. Piensa tu respuesta <strong>antes</strong> de abrir la nuestra.</p>
+<p><strong>1. Tu compañero pega en ChatGPT el error de su script y recibe una solución que no funciona en su computador. Usando el vocabulario de esta semana, ¿cuál es el diagnóstico?</strong></p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+El chat está <strong>ciego</strong>: no ve la estructura del proyecto, no sabe qué versiones de librerías tiene instaladas tu compañero y no puede <strong>ejecutar</strong> su propuesta para verificarla. Solo conoce el fragmento pegado — contexto amputado → sugerencia genérica. Es el mecánico por teléfono: da instrucciones al aire sin ver la moto. Un agente, en cambio, leería el error de la terminal, examinaría los archivos reales e iteraría hasta que el script corra.
+</details>
+<p><strong>2. En el manifiesto de tu proyecto escribes: “analiza los outliers con criterio profesional”. ¿Cuál es el problema y cómo la reescribirías?</strong></p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+Es una directiva <strong>vaga</strong>: “criterio profesional” no se puede verificar, así que el agente decidirá por su cuenta — exactamente lo que el manifiesto debía impedir. Reescritura verificable, por ejemplo: <em>“Marca como outlier todo precio mayor a 100.000 COP; no elimines esas filas: repórtalas en output/log_limpieza.md con su conteo”</em>. Ahora cualquiera puede auditar si se cumplió.
+</details>
+<p><strong>3. Una empresa te prohíbe subir su base de clientes a cualquier servicio en la nube. ¿Puedes aun así usar un agente para ese análisis? Explica las capas que lo hacen posible.</strong></p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+Sí. (1) <strong>Bloqueo de archivos</strong>: el agente tiene prohibido abrir los archivos de datos. (2) <strong>Metadatos</strong>: trabaja con el diccionario — columnas, tipos, rangos — y con eso diseña scripts y controles sin ver un solo registro (el chef Michelin sin abrir el refrigerador). (3) <strong>MCP</strong>: el agente manda consultas a la base <strong>local</strong>; la base calcula y devuelve solo agregados. Los microdatos nunca salen del entorno seguro; el código corre localmente.
+</details>
+<p><strong>4. Le preguntas al agente “¿cuál es la desviación estándar del ingreso?” y te responde “≈ 48.230 COP” sin haber ejecutado nada. ¿Qué haces y por qué?</strong></p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+Desconfiar: ese número es una <strong>alucinación numérica</strong> en potencia — el modelo predice texto plausible, no calcula. El protocolo: pedirle que <strong>escriba un script</strong> que calcule la desviación (<code>sd(ingreso)</code>), que lo <strong>ejecute</strong> con R, y que reporte la cifra que salió del intérprete. Y el control final es tuyo: recalcularla tú mismo al menos una vez. El agente es un puente hacia R, no una calculadora.
+</details>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="material-adicional" class="level1" data-number="14">
+<h1 data-number="14"><span class="header-section-number">14</span> Material adicional</h1>
+<p>Para profundizar (opcional, pero esta semana vale especialmente la pena):</p>
+<ul>
+<li><strong>Documentación oficial de Claude Code</strong> — la fuente del episodio: <a href="https://code.claude.com/docs" target="_blank">code.claude.com/docs</a></li>
+<li><strong>GitHub Copilot: modo agente en VS Code</strong> — la herramienta de la práctica: <a href="https://code.visualstudio.com/docs/copilot/overview" target="_blank">code.visualstudio.com/docs</a></li>
+<li><strong>GitHub Education (Copilot Pro gratis para estudiantes)</strong>: <a href="https://github.com/education/students" target="_blank">github.com/education</a></li>
+<li><strong>Cursor</strong>: <a href="https://cursor.com" target="_blank">cursor.com</a></li>
+<li><strong>Anthropic — “Building effective agents”</strong>: el ensayo técnico sobre cómo se diseñan estos sistemas: <a href="https://www.anthropic.com/research/building-effective-agents" target="_blank">anthropic.com/research</a></li>
+</ul>
+<p>La semana que viene no hay teoría nueva: la semana 9 es la <strong>presentación del avance de tu proyecto (EDA)</strong> — y todo lo de hoy es, casualmente, la forma más rápida de prepararla bien. 😉</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-08_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

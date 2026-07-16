@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="PhD. Eduard F. Martínez-González">
 
-<title>Unidad 4 - Fuentes, Calidad de Datos y EDA</title>
+<title>Unidad 2 - Fuentes, calidad de datos y EDA</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -62,1568 +62,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="week-06_files/libs/clipboard/clipboard.min.js"></script>
 <script src="week-06_files/libs/quarto-html/quarto.js" type="module"></script>
 <script src="week-06_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-06_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="week-06_files/libs/quarto-html/popper.min.js"></script>
 <script src="week-06_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="week-06_files/libs/quarto-html/anchor.min.js"></script>
 <link href="week-06_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="week-06_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="week-06_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="week-06_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="week-06_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="week-06_files/libs/bootstrap/bootstrap-e6bb25874def5e3c119f13f2169c6013.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="week-06_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <style>html{ scroll-behavior: smooth; }</style>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  
-<style type="text/css">
-.monaco-editor pre {
-  background-color: unset !important;
-}
-
-.qwebr-editor-toolbar {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  box-sizing: border-box;
-}
-
-.qwebr-editor-toolbar-left-buttons, .qwebr-editor-toolbar-right-buttons {
-  display: flex;
-}
-
-.qwebr-non-interactive-loading-container.qwebr-cell-needs-evaluation, .qwebr-non-interactive-loading-container.qwebr-cell-evaluated {
-  justify-content: center;
-  display: flex;
-  background-color: rgba(250, 250, 250, 0.65);
-  border: 1px solid rgba(233, 236, 239, 0.65);
-  border-radius: 0.5rem;
-  margin-top: 15px;
-  margin-bottom: 15px;
-}
-
-.qwebr-r-project-logo {
-  color: #2767B0; /* R Project's blue color */
-}
-
-.qwebr-icon-status-spinner {
-  color: #7894c4;
-}
-
-.qwebr-icon-run-code {
-  color: #0d9c29
-}
-
-body.quarto-light .qwebr-output-code-stdout {
-  color: #111;
-}
-
-body.quarto-dark .qwebr-output-code-stdout {
-  color: #EEE;
-}
-
-.qwebr-output-code-stderr {
-  color: #db4133;
-}
-
-body.quarto-light .qwebr-editor {
-  border: 1px solid #EEEEEE;
-}
-
-body.quarto-light .qwebr-editor-toolbar {
-  background-color: #EEEEEE;
-  padding: 0.2rem 0.5rem;
-}
-
-body.quarto-dark .qwebr-editor {
-  border: 1px solid #111;
-}
-
-body.quarto-dark .qwebr-editor-toolbar {
-  background-color: #111;
-  padding: 0.2rem 0.5rem;
-}
-
-.qwebr-button {
-  display: inline-block;
-  font-weight: 400;
-  line-height: 1;
-  text-decoration: none;
-  text-align: center;
-  padding: 0.375rem 0.75rem;
-  font-size: .9rem;
-  border-radius: 0.25rem;
-  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-}
-
-body.quarto-light .qwebr-button {
-  background-color: #EEEEEE;
-  color: #000;
-  border-color: #dee2e6;
-  border: 1px solid rgba(0,0,0,0);
-}
-
-body.quarto-dark .qwebr-button {
-  background-color: #111;
-  color: #EEE;
-  border-color: #dee2e6;
-  border: 1px solid rgba(0,0,0,0);
-}
-
-body.quarto-light .qwebr-button:hover {
-  color: #000;
-  background-color: #d9dce0;
-  border-color: #c8ccd0;
-}
-
-body.quarto-dark .qwebr-button:hover {
-  color: #d9dce0;
-  background-color: #323232;
-  border-color: #d9dce0;
-}
-
-.qwebr-button:disabled,.qwebr-button.disabled,fieldset:disabled .qwebr-button {
-  pointer-events: none;
-  opacity: .65
-}
-
-.qwebr-button-reset {
-  color: #696969; /*#4682b4;*/
-}
-
-.qwebr-button-copy {
-  color: #696969;
-}
-
-/* Style the code highlight lines */
-body.quarto-light .qwebr-editor-highlight-line {
-  background-color: lightblue;
-}
-
-body.quarto-dark .qwebr-editor-highlight-line {
-  background-color: darkblue;
-}
-
-/* Style the modal pop-up */
-
-/* The Modal (background) */
-.qwebr-modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-  padding-top: 60px;
-}
-
-/* Modal Content */
-.qwebr-modal-content {
-  background-color: #fefefe;
-  margin: 5% auto; /* 15% from the top and centered */
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%; /* Could be more or less, depending on screen size */
-}
-
-.qwebr-modal-content-code {
-  max-height: 50vh;
-  min-height: 5vh;
-  overflow: scroll;
-  border: 1px solid #888;
-}
-
-/* The Close Button */
-.qwebr-modal-close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.qwebr-modal-close:hover,
-.qwebr-modal-close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.qwebr-download-btn {
-  margin-top: 10px;
-  text-decoration: none !important;
-}
-
-/* Styling to download image that is created */
-
-.qwebr-canvas-image {
-  position: relative;
-  display: inline-block;
-  margin: 10px;
-}
-
-.qwebr-canvas-image-download-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 5px 10px;
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  cursor: pointer;
-  display: none;
-}
-
-figure:hover .qwebr-canvas-image-download-btn {
-  display: block;
-}
-
-/* Custom styling for RevealJS Presentations*/
-
-/* Reset the style of the interactive area */
-.reveal div.qwebr-interactive-area {
-  display: block;
-  box-shadow: none;
-  max-width: 100%;
-  max-height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* Provide space to entries */
-.reveal div.qwebr-output-code-area pre div {
-  margin: 1px 2px 1px 10px;
-}
-
-/* Collapse the inside code tags to avoid extra space between line outputs */
-.reveal pre div code.qwebr-output-code-stdout, .reveal pre div code.qwebr-output-code-stderr {
-  padding: 0;
-  display: contents;
-}
-
-body.reveal.quarto-light pre div code.qwebr-output-code-stdout {
-  color: #111;
-}
-
-body.reveal.quarto-dark pre div code.qwebr-output-code-stdout {
-  color: #EEEEEE;
-}
-
-.reveal pre div code.qwebr-output-code-stderr {
-  color: #db4133;
-}
-
-
-/* Create a border around console and output (does not effect graphs) */
-body.reveal.quarto-light div.qwebr-console-area {
-  border: 1px solid #EEEEEE;
-  box-shadow: 2px 2px 10px #EEEEEE;
-}
-
-body.reveal.quarto-dark div.qwebr-console-area {
-  border: 1px solid #111;
-  box-shadow: 2px 2px 10px #111;
-}
-
-
-/* Cap output height and allow text to scroll */
-/* TODO: Is there a better way to fit contents/max it parallel to the monaco editor size? */
-.reveal div.qwebr-output-code-area pre {
-  max-height: 400px;
-  overflow: scroll;
-}
-
-iframe.qwebr-output-code-browse {
-  width: 100%;
-
-  /*
-    TODO: How to make the height automatic according to the widget size,
-    or respect the quarto code block options?
-  */
-  min-height: 500px;
-}
-
-</style>
-<script type="module">
-// Document level settings ----
-
-// Determine if we need to install R packages
-globalThis.qwebrInstallRPackagesList = ['dplyr', 'ggplot2', 'skimr'];
-
-// Specify possible locations to search for the repository
-globalThis.qwebrPackageRepoURLS = ['https://repo.r-wasm.org/'];
-
-// Check to see if we have an empty array, if we do set to skip the installation.
-globalThis.qwebrSetupRPackages = !(qwebrInstallRPackagesList.indexOf("") !== -1);
-globalThis.qwebrAutoloadRPackages = true;
-
-// Display a startup message?
-globalThis.qwebrShowStartupMessage = true;
-globalThis.qwebrShowHeaderMessage = false;
-
-// Describe the webR settings that should be used
-globalThis.qwebrCustomizedWebROptions = {
-  "baseURL": "https://webr.r-wasm.org/v0.5.2/",
-  "serviceWorkerUrl": "",
-  "homedir": "/home/web_user", 
-  "channelType": "ChannelType.Automatic"
-};
-
-// Store cell data
-globalThis.qwebrCellDetails = [{"code":"## Instalar (solo una vez, fuera del script)\n# install.packages(\"dplyr\")\n# install.packages(\"ggplot2\")\n# install.packages(\"skimr\")\n\n## Cargar al inicio de cada sesión\nlibrary(dplyr)\nlibrary(ggplot2)\nlibrary(skimr)","id":1,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-1","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ── Dataset sucio (ventas_raw) ──────────────────────────────────────────────\n## Este es el dataset \"tal como llega\": con errores de captura, inconsistencias\n## y valores problemáticos. Lo usaremos para practicar diagnóstico y limpieza.\n\nventas_raw <- data.frame(\n  trimestre    = c(\"Q1\",\"Q1\",\"Q1\",\"Q1\",\n                   \"Q1\",\"Q1\",\"Q1\",\"Q1\",\n                   \"Q1\",\"Q1\",\"Q1\",\"Q1\",\n                   \"q2\",\"q2\",\"q2\",\"q2\",   # PROBLEMA: \"q2\" en minúscula\n                   \"q2\",\"q2\",\"q2\",\"q2\",\n                   \"Q2\",\"Q2\",\"Q2\",\"Q2\",\n                   \"Q3\",\"Q3\",\"Q3\",\"Q3\",\n                   \"Q3\",\"Q3\",\"Q3\",\"Q3\",\n                   \"Q3\",\"Q3\",\"Q3\",\"Q3\"),\n  producto     = c(\"Laptop\",\"Mouse\",\"Licencia\",\"Soporte\",\n                   \"Laptop\",\"Mouse\",\"Licencia\",\"Soporte\",\n                   \"Laptop\",\"Mouse\",\"Licencia\",\"Soporte\",\n                   \"laptop\",\"Mouse\",\"Licencia\",\"Soporte\",   # PROBLEMA: \"laptop\" minúscula\n                   \"Laptop\",\"Mouse\",\"LICENCIA\",\"Soporte\",   # PROBLEMA: \"LICENCIA\" mayúscula\n                   \"Laptop\",\"Mouse\",\"Licencia\",\"Soporte\",\n                   \"Laptop\",\"Mouse\",\"Licencia\",\"Soporte\",\n                   \"LAPTOP\",\"Mouse\",\"Licencia\",\"Soporte\",   # PROBLEMA: \"LAPTOP\" mayúscula\n                   \"Laptop\",\"Mouse\",\"Licencia\",\"Soporte\"),\n  categoria    = rep(c(\"Hardware\",\"Hardware\",\"Software\",\"Software\"), 9),\n  precio       = c(\"1200\",\"25\",\"150\",\"80\",\n                   \"1150\",\"30\",\"160\",\"75\",\n                   \"1250\",\"20\",\"140\",\"85\",\n                   \"$1200\",\"25\",\"150\",\"80\",   # PROBLEMA: signo \"$\" en el valor\n                   \"1180\",\"28\",\"155\",\"78\",\n                   \"1220\",\"22\",\"145\",\"82\",\n                   \"1200\",\"25\",\"150\",\"80\",\n                   \"1190\",\"12000\",\"148\",\"83\", # PROBLEMA: outlier 12000 (Mouse)\n                   \"1210\",\"24\",\"148\",\"83\"),\n  cantidad     = c(2,10,5,8,\n                   1,15,6,7,\n                   3,12,4,9,\n                   3,8,5,10,\n                   2,14,7,6,\n                   1,11,5,8,\n                   2,9,6,7,\n                   3,13,-5,9,    # PROBLEMA: cantidad negativa (-5)\n                   1,10,5,8),\n  region       = c(rep(\"Norte\",4),\n                   rep(\"Sur\",4),\n                   rep(\"Centro\",4),\n                   rep(\"norte\",4),   # PROBLEMA: \"norte\" en minúscula\n                   rep(\"SUR\",4),     # PROBLEMA: \"SUR\" en mayúscula\n                   rep(\"Centro\",4),\n                   rep(\"Norte\",4),\n                   rep(\"Sur\",4),\n                   rep(\"Centro\",4)),\n  observaciones = c(NA,NA,NA,NA,\n                    NA,NA,NA,NA,\n                    NA,\"revisar\",NA,NA,\n                    NA,NA,NA,NA,\n                    NA,NA,\"ok\",NA,\n                    NA,NA,NA,NA,\n                    NA,NA,NA,NA,\n                    NA,NA,\"duplicado\",NA,\n                    NA,NA,NA,NA),\n  stringsAsFactors = FALSE\n)\n\n## Agregar NAs adicionales en precio y cantidad\nventas_raw$precio[c(5, 19)]   <- NA   # dos precios faltantes\nventas_raw$cantidad[c(9, 24)] <- NA   # dos cantidades faltantes\n\n## Agregar 3 filas duplicadas (simulando registros dobles del sistema)\nventas_raw <- rbind(ventas_raw, ventas_raw[c(1, 2, 15), ])","id":2,"options":{"autorun":"true","classes":"","comment":"","context":"setup","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-2","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Descomenta si trabajas desde RStudio\n# ventas <- read.csv(\"https://eduard-martinez.github.io/databases/ba/ventas_raw.csv\")\n\n## Ver las primeras filas del dataset\nhead(ventas_raw, 5)","id":3,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-3","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Resumen completo del dataset\nskim(ventas_raw)","id":4,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-4","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Cuáles son los valores únicos de 'region'?\nunique(ventas_raw$region)","id":5,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-5","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Cuántas veces aparece cada valor?\ntable(ventas_raw$region)","id":6,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-6","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Revisar también trimestre y producto\nunique(ventas_raw$trimestre)\nunique(ventas_raw$producto)","id":7,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-7","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Cuántas filas son duplicadas exactas?\nsum(duplicated(ventas_raw))","id":8,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-8","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Cuáles son esas filas\nventas_raw <- mutate(ventas_raw , duplicado = duplicated(ventas_raw))\nventas_raw","id":9,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-9","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Qué tipo de dato tiene 'precio'?\nclass(ventas_raw$precio)","id":10,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-10","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Ver los valores únicos: ¿hay algo raro?\nunique(ventas_raw$precio)","id":11,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-11","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Hay cantidades negativas? Verificar el mínimo\nsummary(ventas_raw$cantidad)","id":12,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-12","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## convertir en numerica precio\nventas_raw <- mutate(ventas_raw , precio_num=as.numeric(precio))\n\n## Plot la distribución de precio para detectar outliers\nggplot(ventas_raw , aes(x =precio_num)) +\ngeom_histogram(bins = 20) ","id":13,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-13","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## distinct() elimina filas duplicadas exactas\nventas_clean <- distinct(ventas_raw)\n\n## ¿Cuántas filas se eliminaron?\nnrow(ventas_raw) - nrow(ventas_clean)","id":14,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-14","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Estandarizar region, trimestre y producto\nventas_clean <- mutate(ventas_clean,\n                       trimestre = toupper(trimestre),\n                       region    = toupper(region),\n                       producto  = toupper(producto))\n\n## Verificar: ¿cuántos valores únicos hay ahora?\ntable(ventas_clean$region)\ntable(ventas_clean$trimestre)","id":15,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-15","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Eliminar el signo \"$\" y convertir a número\nventas_clean <- mutate(ventas_clean,\n                       precio = as.numeric(gsub(\"\\\\$\", \"\", precio)))\n\n## Verificar: precio ahora debe ser <dbl> o <num>\nsummary(ventas_clean$precio)","id":16,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-16","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Eliminar filas con cantidad negativa\nventas_clean <- filter(ventas_clean, cantidad >= 0)\n\n## Verificar: el mínimo ahora debe ser cero o positivo\nsummary(ventas_clean$cantidad)","id":17,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-17","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Ver la fila con precio mayor a 5000 antes de decidir\nventas_clean[!is.na(ventas_clean$precio) & ventas_clean$precio > 5000, ]","id":18,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-18","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## El valor 12000 en un Mouse es un error de captura\nventas_clean <- mutate(ventas_clean,\n                       precio = ifelse(producto == \"Mouse\" & precio > 5000 , \n                                       120 , \n                                       precio)\n                       )\n\n## Verificar que no queden outliers extremos\nsummary(ventas_clean$precio)","id":19,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-19","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Eliminar columna 'observaciones' y calcular ingreso\nventas_clean <- select(ventas_clean, -observaciones)\nventas_clean <- mutate(ventas_clean, ingreso = precio * cantidad)\n\n## Vista final del dataset limpio\nhead(ventas_clean)","id":20,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-20","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Resumen del dataset limpio\nskim(ventas_clean)","id":21,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-21","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Distribución de precio — comparar con el histograma del dataset crudo\nggplot(ventas_clean, aes(x = precio)) +\ngeom_histogram(bins = 15, fill = \"steelblue\") +\ntheme_minimal()","id":22,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-22","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Paso 1: calcular ingreso total por región\ning_region <- group_by(ventas_clean, region)\ning_region <- summarise(ing_region,\n                        ingreso_total = sum(ingreso, na.rm = TRUE),\n                        n_transacciones = n(),\n                        .groups = \"drop\")","id":23,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-23","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Ver la tabla completa\ning_region","id":24,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-24","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Paso 2: graficar\nggplot(ing_region, aes(x = reorder(region, ingreso_total), y = ingreso_total)) +\ngeom_col(fill = \"steelblue\") +\ncoord_flip() ","id":25,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-25","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## Paso 1: calcular ingreso por trimestre\ning_trim <- group_by(ventas_clean, trimestre)\ning_trim <- summarise(ing_trim,\n                      ingreso_total = sum(ingreso, na.rm = TRUE),\n                      .groups = \"drop\")\n\n## Paso 2: graficar\nggplot(ing_trim, aes(x = trimestre, y = ingreso_total)) +\ngeom_col(fill = \"steelblue\") +\ntheme_minimal()","id":26,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-26","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## ¿Relación entre precio y cantidad? Colorear por categoría\nggplot(ventas_clean, aes(x = precio, y = cantidad, color = categoria)) +\ngeom_point(size = 3, alpha = 0.7, na.rm = TRUE) +\ntheme_minimal()","id":27,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-27","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}}];
-
-</script>
-<script type="module">
-// Declare startupMessageQWebR globally
-globalThis.qwebrStartupMessage = document.createElement("p");
-
-// Verify if OffScreenCanvas is supported
-globalThis.qwebrOffScreenCanvasSupport = function() {
-  return typeof OffscreenCanvas !== 'undefined'
-}
-
-// Function to set the button text
-globalThis.qwebrSetInteractiveButtonState = function(buttonText, enableCodeButton = true) {
-  document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
-    btn.innerHTML = buttonText;
-    btn.disabled = !enableCodeButton;
-  });
-}
-
-// Function to update the status message in non-interactive cells
-globalThis.qwebrUpdateStatusMessage = function(message) {
-  document.querySelectorAll(".qwebr-status-text.qwebr-cell-needs-evaluation").forEach((elem) => {
-    elem.innerText = message;
-  });
-}
-
-// Function to update the status message
-globalThis.qwebrUpdateStatusHeader = function(message) {
-  qwebrStartupMessage.innerHTML = `
-    <i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i>
-    <span>${message}</span>`;
-}
-
-// Function to return true if element is found, false if not
-globalThis.qwebrCheckHTMLElementExists = function(selector) {
-  const element = document.querySelector(selector);
-  return !!element;
-}
-
-// Function that detects whether reveal.js slides are present
-globalThis.qwebrIsRevealJS = function() {
-  // If the '.reveal .slides' selector exists, RevealJS is likely present
-  return qwebrCheckHTMLElementExists('.reveal .slides');
-}
-
-// Initialize the Quarto sidebar element
-function qwebrSetupQuartoSidebar() {
-  var newSideBarDiv = document.createElement('div');
-  newSideBarDiv.id = 'quarto-margin-sidebar';
-  newSideBarDiv.className = 'sidebar margin-sidebar';
-  newSideBarDiv.style.top = '0px';
-  newSideBarDiv.style.maxHeight = 'calc(0px + 100vh)';
-
-  return newSideBarDiv;
-}
-
-// Position the sidebar in the document
-function qwebrPlaceQuartoSidebar() {
-  // Get the reference to the element with id 'quarto-document-content'
-  var referenceNode = document.getElementById('quarto-document-content');
-
-  // Create the new div element
-  var newSideBarDiv = qwebrSetupQuartoSidebar();
-
-  // Insert the new div before the 'quarto-document-content' element
-  referenceNode.parentNode.insertBefore(newSideBarDiv, referenceNode);
-}
-
-function qwebrPlaceMessageContents(content, html_location = "title-block-header", revealjs_location = "title-slide") {
-
-  // Get references to header elements
-  const headerHTML = document.getElementById(html_location);
-  const headerRevealJS = document.getElementById(revealjs_location);
-
-  // Determine where to insert the quartoTitleMeta element
-  if (headerHTML || headerRevealJS) {
-    // Append to the existing "title-block-header" element or "title-slide" div
-    (headerHTML || headerRevealJS).appendChild(content);
-  } else {
-    // If neither headerHTML nor headerRevealJS is found, insert after "webr-monaco-editor-init" script
-    const monacoScript = document.getElementById("qwebr-monaco-editor-init");
-    const header = document.createElement("header");
-    header.setAttribute("id", "title-block-header");
-    header.appendChild(content);
-    monacoScript.after(header);
-  }
-}
-
-
-
-function qwebrOffScreenCanvasSupportWarningMessage() {
-  
-  // Verify canvas is supported.
-  if(qwebrOffScreenCanvasSupport()) return;
-
-  // Create the main container div
-  var calloutContainer = document.createElement('div');
-  calloutContainer.classList.add('callout', 'callout-style-default', 'callout-warning', 'callout-titled');
-
-  // Create the header div
-  var headerDiv = document.createElement('div');
-  headerDiv.classList.add('callout-header', 'd-flex', 'align-content-center');
-
-  // Create the icon container div
-  var iconContainer = document.createElement('div');
-  iconContainer.classList.add('callout-icon-container');
-
-  // Create the icon element
-  var iconElement = document.createElement('i');
-  iconElement.classList.add('callout-icon');
-
-  // Append the icon element to the icon container
-  iconContainer.appendChild(iconElement);
-
-  // Create the title container div
-  var titleContainer = document.createElement('div');
-  titleContainer.classList.add('callout-title-container', 'flex-fill');
-  titleContainer.innerText = 'Warning: Web Browser Does Not Support Graphing!';
-
-  // Append the icon container and title container to the header div
-  headerDiv.appendChild(iconContainer);
-  headerDiv.appendChild(titleContainer);
-
-  // Create the body container div
-  var bodyContainer = document.createElement('div');
-  bodyContainer.classList.add('callout-body-container', 'callout-body');
-
-  // Create the paragraph element for the body content
-  var paragraphElement = document.createElement('p');
-  paragraphElement.innerHTML = 'This web browser does not have support for displaying graphs through the <code>quarto-webr</code> extension since it lacks an <code>OffScreenCanvas</code>. Please upgrade your web browser to one that supports <code>OffScreenCanvas</code>.';
-
-  // Append the paragraph element to the body container
-  bodyContainer.appendChild(paragraphElement);
-
-  // Append the header div and body container to the main container div
-  calloutContainer.appendChild(headerDiv);
-  calloutContainer.appendChild(bodyContainer);
-
-  // Append the main container div to the document depending on format
-  qwebrPlaceMessageContents(calloutContainer, "title-block-header"); 
-
-}
-
-
-// Function that attaches the document status message and diagnostics
-function displayStartupMessage(showStartupMessage, showHeaderMessage) {
-  if (!showStartupMessage) {
-    return;
-  }
-
-  // Create the outermost div element for metadata
-  const quartoTitleMeta = document.createElement("div");
-  quartoTitleMeta.classList.add("quarto-title-meta");
-
-  // Create the first inner div element
-  const firstInnerDiv = document.createElement("div");
-  firstInnerDiv.setAttribute("id", "qwebr-status-message-area");
-
-  // Create the second inner div element for "WebR Status" heading and contents
-  const secondInnerDiv = document.createElement("div");
-  secondInnerDiv.setAttribute("id", "qwebr-status-message-title");
-  secondInnerDiv.classList.add("quarto-title-meta-heading");
-  secondInnerDiv.innerText = "WebR Status";
-
-  // Create another inner div for contents
-  const secondInnerDivContents = document.createElement("div");
-  secondInnerDivContents.setAttribute("id", "qwebr-status-message-body");
-  secondInnerDivContents.classList.add("quarto-title-meta-contents");
-
-  // Describe the WebR state
-  qwebrStartupMessage.innerText = "🟡 Loading...";
-  qwebrStartupMessage.setAttribute("id", "qwebr-status-message-text");
-  // Add `aria-live` to auto-announce the startup status to screen readers
-  qwebrStartupMessage.setAttribute("aria-live", "assertive");
-
-  // Append the startup message to the contents
-  secondInnerDivContents.appendChild(qwebrStartupMessage);
-
-  // Add a status indicator for COOP and COEP Headers if needed
-  if (showHeaderMessage) {
-    const crossOriginMessage = document.createElement("p");
-    crossOriginMessage.innerText = `${crossOriginIsolated ? '🟢' : '🟡'} COOP & COEP Headers`;
-    crossOriginMessage.setAttribute("id", "qwebr-coop-coep-header");
-    secondInnerDivContents.appendChild(crossOriginMessage);
-  }
-
-  // Combine the inner divs and contents
-  firstInnerDiv.appendChild(secondInnerDiv);
-  firstInnerDiv.appendChild(secondInnerDivContents);
-  quartoTitleMeta.appendChild(firstInnerDiv);
-
-  // Place message on webpage
-  qwebrPlaceMessageContents(quartoTitleMeta); 
-}
-
-function qwebrAddCommandHistoryModal() {
-  // Create the modal div
-  var modalDiv = document.createElement('div');
-  modalDiv.id = 'qwebr-history-modal';
-  modalDiv.className = 'qwebr-modal';
-
-  // Create the modal content div
-  var modalContentDiv = document.createElement('div');
-  modalContentDiv.className = 'qwebr-modal-content';
-
-  // Create the span for closing the modal
-  var closeSpan = document.createElement('span');
-  closeSpan.id = 'qwebr-command-history-close-btn';
-  closeSpan.className = 'qwebr-modal-close';
-  closeSpan.innerHTML = '&times;';
-
-  // Create the h1 element for the modal
-  var modalH1 = document.createElement('h1');
-  modalH1.textContent = 'R History Command Contents';
-
-  // Create an anchor element for downloading the Rhistory file 
-  var downloadLink = document.createElement('a');
-  downloadLink.href = '#';
-  downloadLink.id = 'qwebr-download-history-btn';
-  downloadLink.className = 'qwebr-download-btn';
-
-  // Create an 'i' element for the icon
-  var icon = document.createElement('i');
-  icon.className = 'bi bi-file-code';
-
-  // Append the icon to the anchor element
-  downloadLink.appendChild(icon);
-
-  // Add the text 'Download R History' to the anchor element
-  downloadLink.appendChild(document.createTextNode(' Download R History File'));
-
-  // Create the pre for command history contents
-  var commandContentsPre = document.createElement('pre');
-  commandContentsPre.id = 'qwebr-command-history-contents';
-  commandContentsPre.className = 'qwebr-modal-content-code';
-
-  // Append the close span, h1, and history contents pre to the modal content div
-  modalContentDiv.appendChild(closeSpan);
-  modalContentDiv.appendChild(modalH1);
-  modalContentDiv.appendChild(downloadLink);
-  modalContentDiv.appendChild(commandContentsPre);
-
-  // Append the modal content div to the modal div
-  modalDiv.appendChild(modalContentDiv);
-
-  // Append the modal div to the body
-  document.body.appendChild(modalDiv);
-}
-
-function qwebrRegisterRevealJSCommandHistoryModal() {
-  // Select the <ul> element inside the <div> with data-panel="Custom0"
-  let ulElement = document.querySelector('div[data-panel="Custom0"] > ul.slide-menu-items');
-
-  // Find the last <li> element with class slide-tool-item
-  let lastItem = ulElement.querySelector('li.slide-tool-item:last-child');
-
-  // Calculate the next data-item value
-  let nextItemValue = 0;
-  if (lastItem) {
-      nextItemValue = parseInt(lastItem.dataset.item) + 1;
-  }
-
-  // Create a new <li> element
-  let newListItem = document.createElement('li');
-  newListItem.className = 'slide-tool-item';
-  newListItem.dataset.item = nextItemValue.toString(); // Set the next available data-item value
-
-  // Create the <a> element inside the <li>
-  let newLink = document.createElement('a');
-  newLink.href = '#';
-  newLink.id = 'qwebrRHistoryButton'; // Set the ID for the new link
-  
-  // Create the <kbd> element inside the <a>
-  let newKbd = document.createElement('kbd');
-  newKbd.textContent = ' '; // Set to empty as we are not registering a keyboard shortcut
-
-  // Create text node for the link text
-  let newText = document.createTextNode(' View R History');
-
-  // Append <kbd> and text node to <a>
-  newLink.appendChild(newKbd);
-  newLink.appendChild(newText);
-
-  // Append <a> to <li>
-  newListItem.appendChild(newLink);
-
-  // Append <li> to <ul>
-  ulElement.appendChild(newListItem);
-}
-
-// Handle setting up the R history modal
-function qwebrCodeLinks() {
-
-  if (qwebrIsRevealJS()) {
-    qwebrRegisterRevealJSCommandHistoryModal();
-    return;
-  }
-
-  // Create the container div
-  var containerDiv = document.createElement('div');
-  containerDiv.className = 'quarto-code-links';
-
-  // Create the h2 element
-  var h2 = document.createElement('h2');
-  h2.textContent = 'webR Code Links';
-
-  // Create the ul element
-  var ul = document.createElement('ul');
-
-  // Create the li element
-  var li = document.createElement('li');
-
-  // Create the a_history_btn element
-  var a_history_btn = document.createElement('a');
-  a_history_btn.href = 'javascript:void(0)';
-  a_history_btn.setAttribute('id', 'qwebrRHistoryButton');
-
-  // Create the i_history_btn element
-  var i_history_btn = document.createElement('i');
-  i_history_btn.className = 'bi bi-file-code';
-
-  // Create the text node for the link text
-  var text_history_btn = document.createTextNode('View R History');
-
-  // Append the icon element and link text to the a element
-  a_history_btn.appendChild(i_history_btn);
-  a_history_btn.appendChild(text_history_btn);
-
-  // Append the a element to the li element
-  li.appendChild(a_history_btn);
-
-  // Append the li element to the ul element
-  ul.appendChild(li);
-
-  // Append the h2 and ul elements to the container div
-  containerDiv.appendChild(h2);
-  containerDiv.appendChild(ul);
-
-  // Append the container div to the element with the ID 'quarto-margin-sidebar'
-  var sidebar = document.getElementById('quarto-margin-sidebar');
-    
-  // If the sidebar element is not found, create it
-  if(!sidebar) {
-    qwebrPlaceQuartoSidebar();
-  }
-  
-  // Re-select the sidebar element (if it was just created)
-  sidebar = document.getElementById('quarto-margin-sidebar');   
-
-
-  // If the sidebar element exists, append the container div to it
-  if(sidebar) {
-    // Append the container div to the sidebar
-    sidebar.appendChild(containerDiv);
-    // Force the sidebar to be clickable by removing the 'zindex-bottom' class
-    // added in pre-release: https://github.com/quarto-dev/quarto-cli/commit/f0c53a1ffcaa1de4eccbf07803b096898248adcc
-    sidebar.className = 'sidebar margin-sidebar';
-  } else {
-    // Get a debugger ...
-    console.warn('Element with ID "quarto-margin-sidebar" not found.');
-  }
-}
-
-// Call the function to append the code links for qwebR into the right sidebar
-qwebrCodeLinks();
-
-// Add the command history modal
-qwebrAddCommandHistoryModal();
-
-displayStartupMessage(qwebrShowStartupMessage, qwebrShowHeaderMessage);
-qwebrOffScreenCanvasSupportWarningMessage();
-</script>
-<script type="module">
-// Define a global storage and retrieval solution ----
-
-// Store commands executed in R
-globalThis.qwebrRCommandHistory = [];
-
-// Function to retrieve the command history
-globalThis.qwebrFormatRHistory = function() {
-   return qwebrRCommandHistory.join("\n\n");
-}
-
-// Retrieve HTML Elements ----
-
-// Get the command modal
-const command_history_modal = document.getElementById("qwebr-history-modal");
-
-// Get the button that opens the command modal
-const command_history_btn = document.getElementById("qwebrRHistoryButton");
-
-// Get the <span> element that closes the command modal
-const command_history_close_span = document.getElementById("qwebr-command-history-close-btn");
-
-// Get the download button for r history information
-const command_history_download_btn = document.getElementById("qwebr-download-history-btn");
-
-// Plug in command history into modal/download button ----
-
-// Function to populate the modal with command history
-function populateCommandHistoryModal() {
-    document.getElementById("qwebr-command-history-contents").innerHTML = qwebrFormatRHistory() || "No commands have been executed yet.";
-}
-
-// Function to format the current date and time to
-// a string with the format YYYY-MM-DD-HH-MM-SS
-function formatDateTime() {
-    const now = new Date();
-
-    const year = now.getFullYear();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
-}
-
-
-// Function to convert document title with datetime to a safe filename
-function safeFileName() {
-    // Get the current page title
-    let pageTitle = document.title;
-
-    // Combine the current page title with the current date and time
-    let pageNameWithDateTime = `Rhistory-${pageTitle}-${formatDateTime()}`;
-
-    // Replace unsafe characters with safe alternatives
-    let safeFilename = pageNameWithDateTime.replace(/[\\/:\*\?! "<>\|]/g, '-');
-
-    return safeFilename;
-}
-
-
-// Function to download list contents as text file
-function downloadRHistory() {
-    // Get the current page title + datetime and use it as the filename
-    const filename = `${safeFileName()}.R`;
-
-    // Get the text contents of the R History list
-    const text = qwebrFormatRHistory();
-
-    // Create a new Blob object with the text contents
-    const blob = new Blob([text], { type: 'text/plain' });
-  
-    // Create a new anchor element for the download
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-
-    // Append the anchor to the body, click it, and remove it
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}
-
-// Register event handlers ----
-
-// When the user clicks the View R History button, open the command modal
-command_history_btn.onclick = function() {
-    populateCommandHistoryModal();
-    command_history_modal.style.display = "block";
-}
-
-// When the user clicks on <span> (x), close the command modal
-command_history_close_span.onclick = function() {
-    command_history_modal.style.display = "none";
-}
-
-// When the user clicks anywhere outside of the command modal, close it
-window.onclick = function(event) {
-    if (event.target == command_history_modal) {
-        command_history_modal.style.display = "none";
-    }
-}
-
-// Add an onclick event listener to the download button so that
-// the user can download the R history as a text file
-command_history_download_btn.onclick = function() {
-    downloadRHistory();
-};
-</script>
-<script type="module">
-// Supported Evaluation Types for Context
-globalThis.EvalTypes = Object.freeze({
-  Interactive: 'interactive',
-  Setup: 'setup',
-  Output: 'output',
-});
-
-// Function that obtains the font size for a given element 
-globalThis.qwebrCurrentFontSizeOnElement = function(element, cssProperty = 'font-size') {
-
-  const currentFontSize = parseFloat(
-    window
-    .getComputedStyle(element)
-    .getPropertyValue(cssProperty)
-  );
-  
-  return currentFontSize;
-}
-
-// Function to determine font scaling
-globalThis.qwebrScaledFontSize = function(div, qwebrOptions) {
-  // Determine if we should compute font-size using RevealJS's `--r-main-font-size` 
-  // or if we can directly use the document's `font-size`.
-  const cssProperty = document.body.classList.contains('reveal') ? 
-    "--r-main-font-size" : "font-size";
-  
-  // Get the current font size on the div element
-  const elementFontSize = qwebrCurrentFontSizeOnElement(div, cssProperty);
-
-  // Determine the scaled font size value
-  const scaledFontSize = ((qwebrOptions['editor-font-scale'] ?? 1) * elementFontSize) ?? 17.5;
-
-  return scaledFontSize;
-}
-
-
-// Function that dispatches the creation request
-globalThis.qwebrCreateHTMLElement = function (
-  cellData
-) {
-
-  // Extract key components
-  const evalType = cellData.options.context;
-  const qwebrCounter = cellData.id;
-
-  // We make an assumption that insertion points are defined by the Lua filter as:
-  // qwebr-insertion-location-{qwebrCounter} 
-  const elementLocator = document.getElementById(`qwebr-insertion-location-${qwebrCounter}`);
-
-  // Figure out the routine to use to insert the element.
-  let qwebrElement;
-  switch ( evalType ) {
-    case EvalTypes.Interactive:
-      qwebrElement = qwebrCreateInteractiveElement(qwebrCounter, cellData.options);
-      break;
-    case EvalTypes.Output: 
-      qwebrElement = qwebrCreateNonInteractiveOutputElement(qwebrCounter, cellData.options);
-      break;
-    case EvalTypes.Setup: 
-      qwebrElement = qwebrCreateNonInteractiveSetupElement(qwebrCounter, cellData.options);
-      break;
-    default: 
-      qwebrElement = document.createElement('div');
-      qwebrElement.textContent = 'Error creating `quarto-webr` element';
-  }
-
-  // Insert the dynamically generated object at the document location.
-  elementLocator.appendChild(qwebrElement);
-};
-
-// Function that setups the interactive element creation
-globalThis.qwebrCreateInteractiveElement = function (qwebrCounter, qwebrOptions) {
-
-  // Create main div element
-  var mainDiv = document.createElement('div');
-  mainDiv.id = 'qwebr-interactive-area-' + qwebrCounter;
-  mainDiv.className = `qwebr-interactive-area`;
-  if (qwebrOptions.classes) {
-    mainDiv.className += " " + qwebrOptions.classes
-  }
-
-  // Add a unique cell identifier that users can customize
-  if (qwebrOptions.label) {
-    mainDiv.setAttribute('data-id', qwebrOptions.label);
-  }
-
-  // Create toolbar div
-  var toolbarDiv = document.createElement('div');
-  toolbarDiv.className = 'qwebr-editor-toolbar';
-  toolbarDiv.id = 'qwebr-editor-toolbar-' + qwebrCounter;
-
-  // Create a div to hold the left buttons
-  var leftButtonsDiv = document.createElement('div');
-  leftButtonsDiv.className = 'qwebr-editor-toolbar-left-buttons';
-
-  // Create a div to hold the right buttons
-  var rightButtonsDiv = document.createElement('div');
-  rightButtonsDiv.className = 'qwebr-editor-toolbar-right-buttons';
-
-  // Create Run Code button
-  var runCodeButton = document.createElement('button');
-  runCodeButton.className = 'btn btn-default qwebr-button qwebr-button-run';
-  runCodeButton.disabled = true;
-  runCodeButton.type = 'button';
-  runCodeButton.id = 'qwebr-button-run-' + qwebrCounter;
-  runCodeButton.textContent = '🟡 Loading webR...';
-  runCodeButton.title = `Run code (Shift + Enter)`;
-
-  // Append buttons to the leftButtonsDiv
-  leftButtonsDiv.appendChild(runCodeButton);
-
-  // Create Reset button
-  var resetButton = document.createElement('button');
-  resetButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-reset';
-  resetButton.type = 'button';
-  resetButton.id = 'qwebr-button-reset-' + qwebrCounter;
-  resetButton.title = 'Start over';
-  resetButton.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i>';
-
-  // Create Copy button
-  var copyButton = document.createElement('button');
-  copyButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-copy';
-  copyButton.type = 'button';
-  copyButton.id = 'qwebr-button-copy-' + qwebrCounter;
-  copyButton.title = 'Copy code';
-  copyButton.innerHTML = '<i class="fa-regular fa-copy"></i>';
-
-  // Append buttons to the rightButtonsDiv
-  rightButtonsDiv.appendChild(resetButton);
-  rightButtonsDiv.appendChild(copyButton);
-
-  // Create console area div
-  var consoleAreaDiv = document.createElement('div');
-  consoleAreaDiv.id = 'qwebr-console-area-' + qwebrCounter;
-  consoleAreaDiv.className = 'qwebr-console-area';
-
-  // Create editor div
-  var editorDiv = document.createElement('div');
-  editorDiv.id = 'qwebr-editor-' + qwebrCounter;
-  editorDiv.className = 'qwebr-editor';
-
-  // Create output code area div
-  var outputCodeAreaDiv = document.createElement('div');
-  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
-  outputCodeAreaDiv.className = 'qwebr-output-code-area';
-  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
-
-  // Create pre element inside output code area
-  var preElement = document.createElement('pre');
-  preElement.style.visibility = 'hidden';
-  outputCodeAreaDiv.appendChild(preElement);
-
-  // Create output graph area div
-  var outputGraphAreaDiv = document.createElement('div');
-  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
-  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
-
-  // Append buttons to the toolbar
-  toolbarDiv.appendChild(leftButtonsDiv);
-  toolbarDiv.appendChild(rightButtonsDiv);
-
-  // Append all elements to the main div
-  mainDiv.appendChild(toolbarDiv);
-  consoleAreaDiv.appendChild(editorDiv);
-  consoleAreaDiv.appendChild(outputCodeAreaDiv);
-  mainDiv.appendChild(consoleAreaDiv);
-  mainDiv.appendChild(outputGraphAreaDiv);
-
-  return mainDiv;
-}
-
-// Function that adds output structure for non-interactive output
-globalThis.qwebrCreateNonInteractiveOutputElement = function(qwebrCounter, qwebrOptions) {
-  // Create main div element
-  var mainDiv = document.createElement('div');
-  mainDiv.id = 'qwebr-noninteractive-area-' + qwebrCounter;
-  mainDiv.className = `qwebr-noninteractive-area`;
-  if (qwebrOptions.classes) {
-    mainDiv.className += " " + qwebrOptions.classes
-  }
-  
-  // Add a unique cell identifier that users can customize
-  if (qwebrOptions.label) {
-    mainDiv.setAttribute('data-id', qwebrOptions.label);
-  }
-  
-  // Create a status container div
-  var statusContainer = createLoadingContainer(qwebrCounter);
-
-  // Create output code area div
-  var outputCodeAreaDiv = document.createElement('div');
-  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
-  outputCodeAreaDiv.className = 'qwebr-output-code-area';
-  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
-
-  // Create pre element inside output code area
-  var preElement = document.createElement('pre');
-  preElement.style.visibility = 'hidden';
-  outputCodeAreaDiv.appendChild(preElement);
-
-  // Create output graph area div
-  var outputGraphAreaDiv = document.createElement('div');
-  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
-  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
-
-  // Append all elements to the main div
-  mainDiv.appendChild(statusContainer);
-  mainDiv.appendChild(outputCodeAreaDiv);
-  mainDiv.appendChild(outputGraphAreaDiv);
-
-  return mainDiv;
-};
-
-// Function that adds a stub in the page to indicate a setup cell was used.
-globalThis.qwebrCreateNonInteractiveSetupElement = function(qwebrCounter, qwebrOptions) {
-  // Create main div element
-  var mainDiv = document.createElement('div');
-  mainDiv.id = `qwebr-noninteractive-setup-area-${qwebrCounter}`;
-  mainDiv.className = `qwebr-noninteractive-setup-area`;
-  if (qwebrOptions.classes) {
-    mainDiv.className += " " + qwebrOptions.classes
-  }
-
-
-  // Add a unique cell identifier that users can customize
-  if (qwebrOptions.label) {
-    mainDiv.setAttribute('data-id', qwebrOptions.label);
-  }
-
-  // Create a status container div
-  var statusContainer = createLoadingContainer(qwebrCounter);
-
-  // Append status onto the main div
-  mainDiv.appendChild(statusContainer);
-
-  return mainDiv;
-}
-
-
-// Function to create loading container with specified ID
-globalThis.createLoadingContainer = function(qwebrCounter) {
-
-  // Create a status container
-  const container = document.createElement('div');
-  container.id = `qwebr-non-interactive-loading-container-${qwebrCounter}`;
-  container.className = 'qwebr-non-interactive-loading-container qwebr-cell-needs-evaluation';
-
-  // Create an R project logo to indicate its a code space
-  const rProjectIcon = document.createElement('i');
-  rProjectIcon.className = 'fa-brands fa-r-project fa-3x qwebr-r-project-logo';
-
-  // Setup a loading icon from font awesome
-  const spinnerIcon = document.createElement('i');
-  spinnerIcon.className = 'fa-solid fa-spinner fa-spin fa-1x qwebr-icon-status-spinner';
-
-  // Add a section for status text
-  const statusText = document.createElement('p');
-  statusText.id = `qwebr-status-text-${qwebrCounter}`;
-  statusText.className = `qwebr-status-text qwebr-cell-needs-evaluation`;
-  statusText.innerText = 'Loading webR...';
-
-  // Incorporate an inner container
-  const innerContainer = document.createElement('div');
-
-  // Append elements to the inner container
-  innerContainer.appendChild(spinnerIcon);
-  innerContainer.appendChild(statusText);
-
-  // Append elements to the main container
-  container.appendChild(rProjectIcon);
-  container.appendChild(innerContainer);
-
-  return container;
-}
-</script>
-<script type="module">
-// Function to install a single package
-async function qwebrInstallRPackage(packageName) {
-  await mainWebR.evalRVoid(`webr::install('${packageName}');`);
-}
-
-// Function to load a single package
-async function qwebrLoadRPackage(packageName) {
-  await mainWebR.evalRVoid(`require('${packageName}', quietly = TRUE)`);
-}
-
-// Generic function to process R packages
-async function qwebrProcessRPackagesWithStatus(packages, processType, displayStatusMessageUpdate = true) {
-  // Switch between contexts
-  const messagePrefix = processType === 'install' ? 'Installing' : 'Loading';
-
-  // Modify button state
-  qwebrSetInteractiveButtonState(`🟡 ${messagePrefix} package ...`, false);
-
-  // Iterate over packages
-  for (let i = 0; i < packages.length; i++) {
-    const activePackage = packages[i];
-    const formattedMessage = `${messagePrefix} package ${i + 1} out of ${packages.length}: ${activePackage}`;
-
-    // Display the update in header
-    if (displayStatusMessageUpdate) {
-      qwebrUpdateStatusHeader(formattedMessage);
-    }
-
-    // Display the update in non-active areas
-    qwebrUpdateStatusMessage(formattedMessage);
-
-    // Run package installation
-    if (processType === 'install') {
-      await qwebrInstallRPackage(activePackage);
-    } else {
-      await qwebrLoadRPackage(activePackage);
-    }
-  }
-
-  // Clean slate
-  if (processType === 'load') {
-    await mainWebR.flush();
-  }
-}
-
-// Start a timer
-const initializeWebRTimerStart = performance.now();
-
-// Encase with a dynamic import statement
-globalThis.qwebrInstance = import(qwebrCustomizedWebROptions.baseURL + "webr.mjs").then(
-  async ({ WebR, ChannelType }) => {
-    // Populate WebR options with defaults or new values based on `webr` meta
-    globalThis.mainWebR = new WebR(qwebrCustomizedWebROptions);
-
-    // Initialization WebR
-    await mainWebR.init();
-
-    // Setup a shelter
-    globalThis.mainWebRCodeShelter = await new mainWebR.Shelter();
-
-    // Setup a pager to allow processing help documentation
-    await mainWebR.evalRVoid('webr::pager_install()');
-
-    // Setup a viewer to allow processing htmlwidgets.
-    // This might not be available in old webr version
-    await mainWebR.evalRVoid('try({ webr::viewer_install() })');
-
-    // Override the existing install.packages() to use webr::install()
-    await mainWebR.evalRVoid('webr::shim_install()');
-
-    // Specify the repositories to pull from
-    // Note: webR does not use the `repos` option, but instead uses `webr_pkg_repos`
-    // inside of `install()`. However, other R functions still pull from `repos`.
-    await mainWebR.evalRVoid(`
-      options(
-        webr_pkg_repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')}),
-        repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')})
-      )
-    `);
-
-    // Check to see if any packages need to be installed
-    if (qwebrSetupRPackages) {
-      // Obtain only a unique list of packages
-      const uniqueRPackageList = Array.from(new Set(qwebrInstallRPackagesList));
-
-      // Install R packages one at a time (either silently or with a status update)
-      await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'install', qwebrShowStartupMessage);
-
-      if (qwebrAutoloadRPackages) {
-        // Load R packages one at a time (either silently or with a status update)
-        await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'load', qwebrShowStartupMessage);
-      }
-    }
-  }
-);
-
-// Stop timer
-const initializeWebRTimerEnd = performance.now();
-
-</script>
-<script type="module">
-// Function to verify a given JavaScript Object is empty
-globalThis.qwebrIsObjectEmpty = function (arr) {
-    return Object.keys(arr).length === 0;
-}
-
-// Global version of the Escape HTML function that converts HTML
-// characters to their HTML entities.
-globalThis.qwebrEscapeHTMLCharacters = function(unsafe) {
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-};
-
-// Passthrough results
-globalThis.qwebrIdentity = function(x) {
-    return x;
-};
-
-// Append a comment
-globalThis.qwebrPrefixComment = function(x, comment) {
-    return `${comment}${x}`;
-};
-
-// Function to store the code in the history
-globalThis.qwebrLogCodeToHistory = function(codeToRun, options) {
-    qwebrRCommandHistory.push(
-        `# Ran code in ${options.label} at ${new Date().toLocaleString()} ----\n${codeToRun}`
-    );
-};
-
-// Function to attach a download button onto the canvas
-// allowing the user to download the image.
-function qwebrImageCanvasDownloadButton(canvas, canvasContainer) {
-
-    // Create the download button
-    const downloadButton = document.createElement('button');
-    downloadButton.className = 'qwebr-canvas-image-download-btn';
-    downloadButton.textContent = 'Download Image';
-    canvasContainer.appendChild(downloadButton);
-
-    // Trigger a download of the image when the button is clicked
-    downloadButton.addEventListener('click', function() {
-        const image = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = image;
-        link.download = 'qwebr-canvas-image.png';
-        link.click();
-    });
-}
-
-
-// Function to parse the pager results
-globalThis.qwebrParseTypePager = async function (msg) {
-
-    // Split out the event data
-    const { path, title, deleteFile } = msg.data;
-
-    // Process the pager data by reading the information from disk
-    const paged_data = await mainWebR.FS.readFile(path).then((data) => {
-        // Obtain the file content
-        let content = new TextDecoder().decode(data);
-
-        // Remove excessive backspace characters until none remain
-        while(content.match(/.[\b]/)){
-            content = content.replace(/.[\b]/g, '');
-        }
-
-        // Returned cleaned data
-        return content;
-    });
-
-    // Unlink file if needed
-    if (deleteFile) {
-        await mainWebR.FS.unlink(path);
-    }
-
-    // Return extracted data with spaces
-    return paged_data;
-};
-
-
-// Function to parse the browse results
-globalThis.qwebrParseTypeBrowse = async function (msg) {
-
-    // msg.type === "browse"
-    const path = msg.data.url;
-
-    // Process the browse data by reading the information from disk
-    const browse_data = await mainWebR.FS.readFile(path).then((data) => {
-        // Obtain the file content
-        let content = new TextDecoder().decode(data);
-
-        return content;
-    });
-
-    // Return extracted data as-is
-    return browse_data;
-};
-
-// Function to run the code using webR and parse the output
-globalThis.qwebrComputeEngine = async function(
-    codeToRun,
-    elements,
-    options) {
-
-    // Call into the R compute engine that persists within the document scope.
-    // To be prepared for all scenarios, the following happens:
-    // 1. We setup a canvas device to write to by making a namespace call into the {webr} package
-    // 2. We use values inside of the options array to set the figure size.
-    // 3. We capture the output stream information (STDOUT and STERR)
-    // 4. We disable the current device's image creation.
-    // 5. Piece-wise parse the results into the different output areas
-
-    // Create a pager variable for help/file contents
-    let pager = [];
-
-    // Handle how output is processed
-    let showMarkup = options.results === "markup" && options.output !== "asis";
-    let processOutput;
-
-    if (showMarkup) {
-        processOutput = qwebrEscapeHTMLCharacters;
-    } else {
-        processOutput = qwebrIdentity;
-    }
-
-    // ----
-    // Convert from Inches to Pixels by using DPI (dots per inch)
-    // for bitmap devices (dpi * inches = pixels)
-    let fig_width = options["fig-width"] * options["dpi"];
-    let fig_height = options["fig-height"] * options["dpi"];
-
-    // Initialize webR
-    await mainWebR.init();
-
-    // Configure capture output
-    let captureOutputOptions = {
-        withAutoprint: true,
-        captureStreams: true,
-        captureConditions: false,
-        // env: webR.objs.emptyEnv, // maintain a global environment for webR v0.2.0
-    };
-
-    // Determine if the browser supports OffScreen
-    if (qwebrOffScreenCanvasSupport()) {
-        // Mirror default options of webr::canvas()
-        // with changes to figure height and width.
-        captureOutputOptions.captureGraphics = {
-            width: fig_width,
-            height: fig_height,
-            bg: "white", // default: transparent
-            pointsize: 12,
-            capture: true
-        };
-    }  else {
-        // Disable generating graphics
-        captureOutputOptions.captureGraphics = false;
-    }
-
-    // Store the code to run in history
-    qwebrLogCodeToHistory(codeToRun, options);
-
-    // Setup a webR canvas by making a namespace call into the {webr} package
-    // Evaluate the R code
-    // Remove the active canvas silently
-    const result = await mainWebRCodeShelter.captureR(
-        `${codeToRun}`,
-        captureOutputOptions
-    );
-
-    // -----
-
-    // Start attempting to parse the result data
-    processResultOutput:try {
-
-        // Avoid running through output processing
-        if (options.results === "hide" || options.output === "false") {
-            break processResultOutput;
-        }
-
-        // Merge output streams of STDOUT and STDErr (messages and errors are combined.)
-        // Require both `warning` and `message` to be true to display `STDErr`.
-        const out = result.output
-        .filter(
-            evt => evt.type === "stdout" ||
-            ( evt.type === "stderr" && (options.warning === "true" && options.message === "true"))
-        )
-        .map((evt, index) => {
-            const className = `qwebr-output-code-${evt.type}`;
-            const outputResult = qwebrPrefixComment(processOutput(evt.data), options.comment);
-            return `<code id="${className}-editor-${elements.id}-result-${index + 1}" class="${className}">${outputResult}</code>`;
-        })
-        .join("\n");
-
-
-        // Clean the state
-        // We're now able to process pager events.
-        // As a result, we cannot maintain a true 1-to-1 output order
-        // without individually feeding each line
-        const msgs = await mainWebR.flush();
-
-        // Use `map` to process the filtered "pager" events asynchronously
-        const pager = [];
-        const browse = [];
-
-        await Promise.all(
-            msgs.map(
-                async (msg) => {
-
-                    const msgType = msg.type || "unknown";
-
-                    switch(msgType) {
-                        case 'pager':
-                            const pager_data = await qwebrParseTypePager(msg);
-                            pager.push(pager_data);
-                            break;
-                        case 'browse':
-                            const browse_data = await qwebrParseTypeBrowse(msg);
-                            browse.push(browse_data);
-                            break;
-                    }
-                    return;
-                }
-            )
-        );
-
-        // Nullify the output area of content
-        elements.outputCodeDiv.innerHTML = "";
-        elements.outputGraphDiv.innerHTML = "";
-
-        // Design an output object for messages
-        const pre = document.createElement("pre");
-        if (/\S/.test(out)) {
-            // Display results as HTML elements to retain output styling
-            const div = document.createElement("div");
-            div.innerHTML = out;
-
-            // Calculate a scaled font-size value
-            const scaledFontSize = qwebrScaledFontSize(
-                elements.outputCodeDiv, options);
-
-            // Override output code cell size
-            pre.style.fontSize = `${scaledFontSize}px`;
-            pre.appendChild(div);
-        } else {
-            // If nothing is present, hide the element.
-            pre.style.visibility = "hidden";
-        }
-
-        elements.outputCodeDiv.appendChild(pre);
-
-        // Determine if we have graphs to display
-        if (result.images.length > 0) {
-
-            // Create figure element
-            const figureElement = document.createElement("figure");
-            figureElement.className = "qwebr-canvas-image";
-
-            // Place each rendered graphic onto a canvas element
-            result.images.forEach((img) => {
-
-                // Construct canvas for object
-                const canvas = document.createElement("canvas");
-
-                // Add an image download button
-                qwebrImageCanvasDownloadButton(canvas, figureElement);
-
-                // Set canvas size to image
-                canvas.width = img.width;
-                canvas.height = img.height;
-
-                // Apply output truncations
-                canvas.style.width = options["out-width"] ? options["out-width"] : `${fig_width}px`;
-                if (options["out-height"]) {
-                    canvas.style.height = options["out-height"];
-                }
-
-                // Apply styling
-                canvas.style.display = "block";
-                canvas.style.margin = "auto";
-
-                // Draw image onto Canvas
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0, img.width, img.height);
-
-                // Append canvas to figure output area
-                figureElement.appendChild(canvas);
-
-            });
-
-            if (options['fig-cap']) {
-                // Create figcaption element
-                const figcaptionElement = document.createElement('figcaption');
-                figcaptionElement.innerText = options['fig-cap'];
-                // Append figcaption to figure
-                figureElement.appendChild(figcaptionElement);
-            }
-
-            elements.outputGraphDiv.appendChild(figureElement);
-
-        }
-
-        // Display the pager data
-        if (pager.length > 0) {
-            // Use the `pre` element to preserve whitespace.
-            pager.forEach((paged_data, index) => {
-                const pre_pager = document.createElement("pre");
-                pre_pager.innerText = paged_data;
-                pre_pager.classList.add("qwebr-output-code-pager");
-                pre_pager.setAttribute("id", `qwebr-output-code-pager-editor-${elements.id}-result-${index + 1}`);
-                elements.outputCodeDiv.appendChild(pre_pager);
-            });
-        }
-
-        // Display the browse data
-        if (browse.length > 0) {
-            // Use the `pre` element to preserve whitespace.
-            browse.forEach((browse_data, index) => {
-                const iframe_browse = document.createElement('iframe');
-                iframe_browse.classList.add("qwebr-output-code-browse");
-                iframe_browse.setAttribute("id", `qwebr-output-code-browse-editor-${elements.id}-result-${index + 1}`);
-                iframe_browse.style.width = "100%";
-                iframe_browse.style.minHeight = "500px";
-                elements.outputCodeDiv.appendChild(iframe_browse);
-
-                iframe_browse.contentWindow.document.open();
-                iframe_browse.contentWindow.document.write(browse_data);
-                iframe_browse.contentWindow.document.close();
-            });
-        }
-    } finally {
-        // Clean up the remaining code
-        mainWebRCodeShelter.purge();
-    }
-};
-
-// Function to execute the code (accepts code as an argument)
-globalThis.qwebrExecuteCode = async function (
-    codeToRun,
-    id,
-    options = {}) {
-
-    // If options are not passed, we fall back on the bare minimum to handle the computation
-    if (qwebrIsObjectEmpty(options)) {
-        options = {
-            "context": "interactive",
-            "fig-width": 7, "fig-height": 5,
-            "out-width": "700px", "out-height": "",
-            "dpi": 72,
-            "results": "markup",
-            "warning": "true", "message": "true",
-        };
-    }
-
-    // Next, we access the compute areas values
-    const elements = {
-        runButton: document.getElementById(`qwebr-button-run-${id}`),
-        outputCodeDiv: document.getElementById(`qwebr-output-code-area-${id}`),
-        outputGraphDiv: document.getElementById(`qwebr-output-graph-area-${id}`),
-        id: id,
-    }
-
-    // Disallowing execution of other code cells
-    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
-        btn.disabled = true;
-    });
-
-    if (options.context == EvalTypes.Interactive) {
-        // Emphasize the active code cell
-        elements.runButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i> <span>Run Code</span>';
-    }
-
-    // Evaluate the code and parse the output into the document
-    await qwebrComputeEngine(codeToRun, elements, options);
-
-    // Switch to allowing execution of code
-    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
-        btn.disabled = false;
-    });
-
-    if (options.context == EvalTypes.Interactive) {
-        // Revert to the initial code cell state
-        elements.runButton.innerHTML = '<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>';
-    }
-}
-
-</script>
 
 
 <link rel="stylesheet" href="styles.css">
@@ -1637,43 +85,37 @@ globalThis.qwebrExecuteCode = async function (
     <h2 id="toc-title">Tabla de contenidos</h2>
    
   <ul>
-  <li><a href="#objetivo-de-la-semana" id="toc-objetivo-de-la-semana" class="nav-link active" data-scroll-target="#objetivo-de-la-semana"><span class="header-section-number">1</span> Objetivo de la semana</a>
+  <li><a href="#cómo-estudiar-esta-semana" id="toc-cómo-estudiar-esta-semana" class="nav-link active" data-scroll-target="#cómo-estudiar-esta-semana"><span class="header-section-number">1</span> Cómo estudiar esta semana</a>
   <ul class="collapse">
   <li><a href="#lo-que-aprenderemos-esta-semana" id="toc-lo-que-aprenderemos-esta-semana" class="nav-link" data-scroll-target="#lo-que-aprenderemos-esta-semana"><span class="header-section-number">1.1</span> Lo que aprenderemos esta semana</a></li>
   </ul></li>
-  <li><a href="#fuentes-de-datos" id="toc-fuentes-de-datos" class="nav-link" data-scroll-target="#fuentes-de-datos"><span class="header-section-number">2</span> Fuentes de datos</a></li>
-  <li><a href="#instalación-y-carga-de-paquetes" id="toc-instalación-y-carga-de-paquetes" class="nav-link" data-scroll-target="#instalación-y-carga-de-paquetes"><span class="header-section-number">3</span> Instalación y carga de paquetes</a></li>
-  <li><a href="#el-dataset-de-esta-semana-ventas_raw" id="toc-el-dataset-de-esta-semana-ventas_raw" class="nav-link" data-scroll-target="#el-dataset-de-esta-semana-ventas_raw"><span class="header-section-number">4</span> El dataset de esta semana: <code>ventas_raw</code></a></li>
-  <li><a href="#paso-1-diagnóstico-qué-tan-sucios-están-los-datos" id="toc-paso-1-diagnóstico-qué-tan-sucios-están-los-datos" class="nav-link" data-scroll-target="#paso-1-diagnóstico-qué-tan-sucios-están-los-datos"><span class="header-section-number">5</span> Paso 1 — Diagnóstico: ¿qué tan sucios están los datos?</a>
+  <li><a href="#glosario-de-la-semana" id="toc-glosario-de-la-semana" class="nav-link" data-scroll-target="#glosario-de-la-semana"><span class="header-section-number">2</span> Glosario de la semana</a></li>
+  <li><a href="#los-exámenes-que-llegaron-del-laboratorio" id="toc-los-exámenes-que-llegaron-del-laboratorio" class="nav-link" data-scroll-target="#los-exámenes-que-llegaron-del-laboratorio"><span class="header-section-number">3</span> Los exámenes que llegaron del laboratorio</a></li>
+  <li><a href="#fuentes-de-datos-el-origen-te-dice-qué-buscar" id="toc-fuentes-de-datos-el-origen-te-dice-qué-buscar" class="nav-link" data-scroll-target="#fuentes-de-datos-el-origen-te-dice-qué-buscar"><span class="header-section-number">4</span> Fuentes de datos: el origen te dice qué buscar</a>
   <ul class="collapse">
-  <li><a href="#visión-general-skim" id="toc-visión-general-skim" class="nav-link" data-scroll-target="#visión-general-skim"><span class="header-section-number">5.1</span> Visión general: <code>skim()</code></a></li>
-  <li><a href="#inconsistencias-en-categorías-unique-y-table" id="toc-inconsistencias-en-categorías-unique-y-table" class="nav-link" data-scroll-target="#inconsistencias-en-categorías-unique-y-table"><span class="header-section-number">5.2</span> Inconsistencias en categorías: <code>unique()</code> y <code>table()</code></a></li>
-  <li><a href="#filas-duplicadas-duplicated" id="toc-filas-duplicadas-duplicated" class="nav-link" data-scroll-target="#filas-duplicadas-duplicated"><span class="header-section-number">5.3</span> Filas duplicadas: <code>duplicated()</code></a></li>
-  <li><a href="#tipo-de-dato-incorrecto-el-problema-de-precio" id="toc-tipo-de-dato-incorrecto-el-problema-de-precio" class="nav-link" data-scroll-target="#tipo-de-dato-incorrecto-el-problema-de-precio"><span class="header-section-number">5.4</span> Tipo de dato incorrecto: el problema de <code>precio</code></a></li>
-  <li><a href="#valores-imposibles-y-outliers" id="toc-valores-imposibles-y-outliers" class="nav-link" data-scroll-target="#valores-imposibles-y-outliers"><span class="header-section-number">5.5</span> Valores imposibles y outliers</a></li>
+  <li><a href="#primaria-vs.-secundaria" id="toc-primaria-vs.-secundaria" class="nav-link" data-scroll-target="#primaria-vs.-secundaria"><span class="header-section-number">4.1</span> Primaria vs.&nbsp;secundaria</a></li>
   </ul></li>
-  <li><a href="#paso-2-limpieza-corregir-cada-problema" id="toc-paso-2-limpieza-corregir-cada-problema" class="nav-link" data-scroll-target="#paso-2-limpieza-corregir-cada-problema"><span class="header-section-number">6</span> Paso 2 — Limpieza: corregir cada problema</a>
+  <li><a href="#las-cuatro-dimensiones-de-la-calidad" id="toc-las-cuatro-dimensiones-de-la-calidad" class="nav-link" data-scroll-target="#las-cuatro-dimensiones-de-la-calidad"><span class="header-section-number">5</span> Las cuatro dimensiones de la calidad</a></li>
+  <li><a href="#problema-1-valores-faltantes" id="toc-problema-1-valores-faltantes" class="nav-link" data-scroll-target="#problema-1-valores-faltantes"><span class="header-section-number">6</span> Problema 1: valores faltantes</a>
   <ul class="collapse">
-  <li><a href="#eliminar-filas-duplicadas" id="toc-eliminar-filas-duplicadas" class="nav-link" data-scroll-target="#eliminar-filas-duplicadas"><span class="header-section-number">6.1</span> Eliminar filas duplicadas</a></li>
-  <li><a href="#estandarizar-categorías" id="toc-estandarizar-categorías" class="nav-link" data-scroll-target="#estandarizar-categorías"><span class="header-section-number">6.2</span> Estandarizar categorías</a></li>
-  <li><a href="#corregir-el-tipo-de-dato-de-precio" id="toc-corregir-el-tipo-de-dato-de-precio" class="nav-link" data-scroll-target="#corregir-el-tipo-de-dato-de-precio"><span class="header-section-number">6.3</span> Corregir el tipo de dato de <code>precio</code></a></li>
-  <li><a href="#eliminar-valores-imposibles" id="toc-eliminar-valores-imposibles" class="nav-link" data-scroll-target="#eliminar-valores-imposibles"><span class="header-section-number">6.4</span> Eliminar valores imposibles</a></li>
-  <li><a href="#corregir-el-outlier-de-precio" id="toc-corregir-el-outlier-de-precio" class="nav-link" data-scroll-target="#corregir-el-outlier-de-precio"><span class="header-section-number">6.5</span> Corregir el outlier de precio</a></li>
-  <li><a href="#eliminar-la-columna-basura-y-calcular-ingreso" id="toc-eliminar-la-columna-basura-y-calcular-ingreso" class="nav-link" data-scroll-target="#eliminar-la-columna-basura-y-calcular-ingreso"><span class="header-section-number">6.6</span> Eliminar la columna basura y calcular <code>ingreso</code></a></li>
+  <li><a href="#diagnosticar-antes-de-decidir" id="toc-diagnosticar-antes-de-decidir" class="nav-link" data-scroll-target="#diagnosticar-antes-de-decidir"><span class="header-section-number">6.1</span> Diagnosticar antes de decidir</a></li>
+  <li><a href="#las-tres-estrategias" id="toc-las-tres-estrategias" class="nav-link" data-scroll-target="#las-tres-estrategias"><span class="header-section-number">6.2</span> Las tres estrategias</a></li>
   </ul></li>
-  <li><a href="#paso-3-eda-explorar-el-dataset-limpio" id="toc-paso-3-eda-explorar-el-dataset-limpio" class="nav-link" data-scroll-target="#paso-3-eda-explorar-el-dataset-limpio"><span class="header-section-number">7</span> Paso 3 — EDA: explorar el dataset limpio</a>
+  <li><a href="#problema-2-outliers" id="toc-problema-2-outliers" class="nav-link" data-scroll-target="#problema-2-outliers"><span class="header-section-number">7</span> Problema 2: outliers</a>
   <ul class="collapse">
-  <li><a href="#resumen-estadístico-del-dataset-limpio" id="toc-resumen-estadístico-del-dataset-limpio" class="nav-link" data-scroll-target="#resumen-estadístico-del-dataset-limpio"><span class="header-section-number">7.1</span> Resumen estadístico del dataset limpio</a></li>
-  <li><a href="#distribuciones-de-variables-numéricas" id="toc-distribuciones-de-variables-numéricas" class="nav-link" data-scroll-target="#distribuciones-de-variables-numéricas"><span class="header-section-number">7.2</span> Distribuciones de variables numéricas</a></li>
-  <li><a href="#comparar-grupos-ingreso-por-región" id="toc-comparar-grupos-ingreso-por-región" class="nav-link" data-scroll-target="#comparar-grupos-ingreso-por-región"><span class="header-section-number">7.3</span> Comparar grupos: ingreso por región</a></li>
-  <li><a href="#evolución-temporal-qué-está-cambiando" id="toc-evolución-temporal-qué-está-cambiando" class="nav-link" data-scroll-target="#evolución-temporal-qué-está-cambiando"><span class="header-section-number">7.4</span> Evolución temporal: ¿qué está cambiando?</a></li>
-  <li><a href="#relación-entre-variables-scatter-plot-exploratorio" id="toc-relación-entre-variables-scatter-plot-exploratorio" class="nav-link" data-scroll-target="#relación-entre-variables-scatter-plot-exploratorio"><span class="header-section-number">7.5</span> Relación entre variables: scatter plot exploratorio</a></li>
+  <li><a href="#detectarlos" id="toc-detectarlos" class="nav-link" data-scroll-target="#detectarlos"><span class="header-section-number">7.1</span> Detectarlos</a></li>
+  <li><a href="#tratarlos-la-pregunta-que-importa" id="toc-tratarlos-la-pregunta-que-importa" class="nav-link" data-scroll-target="#tratarlos-la-pregunta-que-importa"><span class="header-section-number">7.2</span> Tratarlos: la pregunta que importa</a></li>
   </ul></li>
-  <li><a href="#resumen-del-flujo-completo" id="toc-resumen-del-flujo-completo" class="nav-link" data-scroll-target="#resumen-del-flujo-completo"><span class="header-section-number">8</span> Resumen del flujo completo</a></li>
-  <li><a href="#checklist-qué-debes-poder-explicar" id="toc-checklist-qué-debes-poder-explicar" class="nav-link" data-scroll-target="#checklist-qué-debes-poder-explicar"><span class="header-section-number">9</span> Checklist — ¿Qué debes poder explicar?</a></li>
-  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">10</span> Preguntas de comprensión</a>
+  <li><a href="#problema-3-el-error-más-silencioso" id="toc-problema-3-el-error-más-silencioso" class="nav-link" data-scroll-target="#problema-3-el-error-más-silencioso"><span class="header-section-number">8</span> Problema 3: el error más silencioso</a></li>
+  <li><a href="#qué-es-la-eda-y-qué-no-es" id="toc-qué-es-la-eda-y-qué-no-es" class="nav-link" data-scroll-target="#qué-es-la-eda-y-qué-no-es"><span class="header-section-number">9</span> Qué es la EDA (y qué no es)</a>
   <ul class="collapse">
-  <li><a href="#material-adicional-opcional" id="toc-material-adicional-opcional" class="nav-link" data-scroll-target="#material-adicional-opcional"><span class="header-section-number">10.1</span> Material adicional (opcional)</a></li>
+  <li><a href="#un-ejemplo-de-por-qué-esto-importa" id="toc-un-ejemplo-de-por-qué-esto-importa" class="nav-link" data-scroll-target="#un-ejemplo-de-por-qué-esto-importa"><span class="header-section-number">9.1</span> Un ejemplo de por qué esto importa</a></li>
+  </ul></li>
+  <li><a href="#el-producto-de-la-semana-raw-clean-analysis-ready" id="toc-el-producto-de-la-semana-raw-clean-analysis-ready" class="nav-link" data-scroll-target="#el-producto-de-la-semana-raw-clean-analysis-ready"><span class="header-section-number">10</span> El producto de la semana: raw → clean → analysis-ready</a></li>
+  <li><a href="#checklist-de-salida" id="toc-checklist-de-salida" class="nav-link" data-scroll-target="#checklist-de-salida"><span class="header-section-number">11</span> Checklist de salida</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">12</span> Preguntas de comprensión</a>
+  <ul class="collapse">
+  <li><a href="#material-adicional-opcional" id="toc-material-adicional-opcional" class="nav-link" data-scroll-target="#material-adicional-opcional"><span class="header-section-number">12.1</span> Material adicional (opcional)</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -1681,294 +123,10 @@ globalThis.qwebrExecuteCode = async function (
 <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
 </div>
 <main class="content" id="quarto-document-content">
-<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
-<script type="module" id="qwebr-monaco-editor-init">
-
-  // Configure the Monaco Editor's loader
-  require.config({
-    paths: {
-      'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs'
-    }
-  });
-</script>
-<script type="module">
-// Function to update Monaco Editors when body class changes
-function updateMonacoEditorsOnBodyClassChange() {
-    // Select the body element
-    const body = document.querySelector('body');
-
-    // Options for the observer (which mutations to observe)
-    const observerOptions = {
-        attributes: true,  // Observe changes to attributes
-        attributeFilter: ['class'] // Only observe changes to the 'class' attribute
-    };
-
-    // Callback function to execute when mutations are observed
-    const bodyClassChangeCallback = function(mutationsList, observer) {
-        for(let mutation of mutationsList) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                // Class attribute has changed
-                // Update all Monaco Editors on the page
-                updateMonacoEditorTheme();
-            }
-        }
-    };
-
-    // Create an observer instance linked to the callback function
-    const observer = new MutationObserver(bodyClassChangeCallback);
-
-    // Start observing the target node for configured mutations
-    observer.observe(body, observerOptions);
-}
-
-// Function to update all instances of Monaco Editors on the page
-function updateMonacoEditorTheme() {
-    // Determine what VS Theme to use
-    const vsThemeToUse = document.body.classList.contains("quarto-dark") ? 'vs-dark' : 'vs' ;
-
-    // Iterate through all initialized Monaco Editors
-    qwebrEditorInstances.forEach( function(editorInstance) { 
-        editorInstance.updateOptions({ theme: vsThemeToUse }); 
-    });
-}
-
-// Call the function to start observing changes to body class
-updateMonacoEditorsOnBodyClassChange();
-</script>
-<script type="module">
-// Global array to store Monaco Editor instances
-globalThis.qwebrEditorInstances = [];
-
-function isValidCodeLineNumbers(stringCodeLineNumbers) {
-  // Regular expression to match valid input strings
-  const regex = /^(\d+(-\d+)?)(,\d+(-\d+)?)*$/;
-  return regex.test(stringCodeLineNumbers);
-}
-
-// Function that builds and registers a Monaco Editor instance    
-globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
-
-  const initialCode = cellData.code;
-  const qwebrCounter = cellData.id;
-  const qwebrOptions = cellData.options;
-
-  // Retrieve the previously created document elements
-  let runButton = document.getElementById(`qwebr-button-run-${qwebrCounter}`);
-  let resetButton = document.getElementById(`qwebr-button-reset-${qwebrCounter}`);
-  let copyButton = document.getElementById(`qwebr-button-copy-${qwebrCounter}`);
-  let editorDiv = document.getElementById(`qwebr-editor-${qwebrCounter}`);
-
-  // Load the Monaco Editor and create an instance
-  let editor;
-  require(['vs/editor/editor.main'], function () {
-    editor = monaco.editor.create(editorDiv, {
-      value: initialCode,
-      language: 'r',
-      theme: 'vs-light',
-      automaticLayout: true,           // Works wonderfully with RevealJS
-      scrollBeyondLastLine: false,
-      minimap: {
-        enabled: false
-      },
-      fontSize: qwebrScaledFontSize(editorDiv, qwebrOptions),         
-      renderLineHighlight: "none",      // Disable current line highlighting
-      hideCursorInOverviewRuler: true,  // Remove cursor indictor in right hand side scroll bar
-      readOnly: qwebrOptions['read-only'] ?? false,
-      quickSuggestions: qwebrOptions['editor-quick-suggestions'] ?? false,
-      wordWrap: (qwebrOptions['editor-word-wrap'] == 'true' ? "on" : "off")
-    });
-
-    // Store the official counter ID to be used in keyboard shortcuts
-    editor.__qwebrCounter = qwebrCounter;
-
-    // Store the official div container ID
-    editor.__qwebrEditorId = `qwebr-editor-${qwebrCounter}`;
-
-    // Store the initial code value and options
-    editor.__qwebrinitialCode = initialCode;
-    editor.__qwebrOptions = qwebrOptions;
-
-    // Set at the model level the preferred end of line (EOL) character to LF.
-    // This prevent `\r\n` from being given to the webR engine if the user is on Windows.
-    // See details in: https://github.com/coatless/quarto-webr/issues/94
-    // Associated error text: 
-    // Error: <text>:1:7 unexpected input
-
-    // Retrieve the underlying model
-    const model = editor.getModel();
-    // Set EOL for the model
-    model.setEOL(monaco.editor.EndOfLineSequence.LF);
-    
-    // Dynamically modify the height of the editor window if new lines are added.
-    let ignoreEvent = false;
-    const updateHeight = () => {
-      // Increment editor height by 2 to prevent vertical scroll bar from appearing
-      const contentHeight = editor.getContentHeight() + 2;
-
-      // Retrieve editor-max-height option
-      const maxEditorHeight = qwebrOptions['editor-max-height'];
-
-      // If editor-max-height is missing, allow infinite growth. Otherwise, threshold.
-      const editorHeight = !maxEditorHeight ?  contentHeight : Math.min(contentHeight, maxEditorHeight);
-
-      // We're avoiding a width change
-      //editorDiv.style.width = `${width}px`;
-      editorDiv.style.height = `${editorHeight}px`;
-      try {
-        ignoreEvent = true;
-
-        // The key to resizing is this call
-        editor.layout();
-      } finally {
-        ignoreEvent = false;
-      }
-    };
-
-    // Function to generate decorations to highlight lines
-    // in the editor based on input string.
-    function decoratorHighlightLines(codeLineNumbers) {
-      // Store the lines to be lighlight
-      let linesToHighlight = [];
-      
-      // Parse the codeLineNumbers string to get the line numbers to highlight
-      // First, split the string by commas
-      codeLineNumbers.split(',').forEach(part => {
-        // Check if we have a range of lines
-        if (part.includes('-')) {
-            // Handle range of lines (e.g., "6-8")
-            const [start, end] = part.split('-').map(Number);
-            for (let i = start; i <= end; i++) {
-                linesToHighlight.push(i);
-            }
-        } else {
-            // Handle single line (e.g., "7")
-            linesToHighlight.push(Number(part));
-        }
-      });
-  
-      // Create monaco decorations for the lines to highlight
-      const decorations = linesToHighlight.map(lineNumber => ({
-          range: new monaco.Range(lineNumber, 1, lineNumber, 1),
-          options: {
-              isWholeLine: true,
-              className: 'qwebr-editor-highlight-line'
-          }
-      }));
-  
-      // Return decorations to be applied to the editor
-      return decorations;
-    }
-
-    // Ensure that the editor-code-line-numbers option is set and valid
-    // then apply styling
-    if (qwebrOptions['editor-code-line-numbers']) {
-      // Remove all whitespace from the string
-      const codeLineNumbers = qwebrOptions['editor-code-line-numbers'].replace(/\s/g,'');
-      // Check if the string is valid for line numbers, e.g., "1,3-5,7"
-      if (isValidCodeLineNumbers(codeLineNumbers)) {
-        // Apply the decorations to the editor
-        editor.createDecorationsCollection(decoratorHighlightLines(codeLineNumbers));
-      } else {
-        // Warn the user that the input is invalid
-        console.warn(`Invalid "editor-code-line-numbers" value in code cell ${qwebrOptions['label']}: ${codeLineNumbers}`);
-      }
-    }
-
-    // Helper function to check if selected text is empty
-    function isEmptyCodeText(selectedCodeText) {
-      return (selectedCodeText === null || selectedCodeText === undefined || selectedCodeText === "");
-    }
-
-    // Registry of keyboard shortcuts that should be re-added to each editor window
-    // when focus changes.
-    const addWebRKeyboardShortCutCommands = () => {
-      // Add a keydown event listener for Shift+Enter to run all code in cell
-      editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
-
-        // Retrieve all text inside the editor
-        qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
-      });
-
-      // Add a keydown event listener for CMD/Ctrl+Enter to run selected code
-      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-
-        // Get the selected text from the editor
-        const selectedText = editor.getModel().getValueInRange(editor.getSelection());
-        // Check if no code is selected
-        if (isEmptyCodeText(selectedText)) {
-          // Obtain the current cursor position
-          let currentPosition = editor.getPosition();
-          // Retrieve the current line content
-          let currentLine = editor.getModel().getLineContent(currentPosition.lineNumber);
-
-          // Propose a new position to move the cursor to
-          let newPosition = new monaco.Position(currentPosition.lineNumber + 1, 1);
-
-          // Check if the new position is beyond the last line of the editor
-          if (newPosition.lineNumber > editor.getModel().getLineCount()) {
-            // Add a new line at the end of the editor
-            editor.executeEdits("addNewLine", [{
-            range: new monaco.Range(newPosition.lineNumber, 1, newPosition.lineNumber, 1),
-            text: "\n", 
-            forceMoveMarkers: true,
-            }]);
-          }
-          
-          // Run the entire line of code.
-          qwebrExecuteCode(currentLine, editor.__qwebrCounter, editor.__qwebrOptions);
-
-          // Move cursor to new position
-          editor.setPosition(newPosition);
-        } else {
-          // Code to run when Ctrl+Enter is pressed with selected code
-          qwebrExecuteCode(selectedText, editor.__qwebrCounter, editor.__qwebrOptions);
-        }
-      });
-    }
-
-    // Register an on focus event handler for when a code cell is selected to update
-    // what keyboard shortcut commands should work.
-    // This is a workaround to fix a regression that happened with multiple
-    // editor windows since Monaco 0.32.0 
-    // https://github.com/microsoft/monaco-editor/issues/2947
-    editor.onDidFocusEditorText(addWebRKeyboardShortCutCommands);
-
-    // Register an on change event for when new code is added to the editor window
-    editor.onDidContentSizeChange(updateHeight);
-
-    // Manually re-update height to account for the content we inserted into the call
-    updateHeight();
-
-    // Store the editor instance in the global dictionary
-    qwebrEditorInstances[editor.__qwebrCounter] = editor;
-
-  });
-
-  // Add a click event listener to the run button
-  runButton.onclick = function () {
-    qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
-  };
-
-  // Add a click event listener to the reset button
-  copyButton.onclick = function () {
-    // Retrieve current code data
-    const data = editor.getValue();
-    
-    // Write code data onto the clipboard.
-    navigator.clipboard.writeText(data || "");
-  };
-  
-  // Add a click event listener to the copy button
-  resetButton.onclick = function () {
-    editor.setValue(editor.__qwebrinitialCode);
-  };
-  
-}
-</script>
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Unidad 4 - Fuentes, Calidad de Datos y EDA</h1>
+<h1 class="title">Unidad 2 - Fuentes, calidad de datos y EDA</h1>
 <p class="subtitle lead">Introducción al Business Analytics · Semana 6 · 06278-ECO</p>
 </div>
 
@@ -1993,74 +151,121 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 
 
 <div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
-<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a> <span id="webr-status-anchor"></span></p>
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a></p>
 </div>
 <!--=================-->
 <!--=================-->
-<section id="objetivo-de-la-semana" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Objetivo de la semana</h1>
-<p>Esta semana NO hablaremos de modelos ni de gráficos sofisticados. El foco está en algo más fundamental: <strong>saber qué tan confiables son tus datos antes de usarlos</strong>.</p>
+<section id="cómo-estudiar-esta-semana" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Cómo estudiar esta semana</h1>
+<p>Esta semana la fundamentación teórica llega en formato <strong>podcast</strong>: <em>Fuentes, calidad de datos y EDA</em>.</p>
 <div class="callout-key">
-<p><strong>La pregunta central de esta semana</strong></p>
-<p>Antes de analizar, siempre debes poder responder:</p>
+<p><strong>Este documento es la versión escrita del podcast</strong></p>
+<p>Puedes <strong>escuchar</strong> el episodio, <strong>leer</strong> este documento, o hacer ambas cosas: cubren el mismo contenido. Este documento no es una transcripción literal; es una versión organizada para facilitar el estudio, con glosario y resúmenes por bloque.</p>
 <ul>
-<li>¿De dónde vienen estos datos y cómo fueron recolectados?</li>
-<li>¿Hay valores faltantes, duplicados o imposibles?</li>
-<li>¿Las categorías están escritas de forma consistente?</li>
-<li>¿Hay valores atípicos que distorsionarán cualquier cálculo?</li>
+<li>🎧 <strong>Podcast:</strong> disponible en Intu. <!-- TODO: pegar aquí el enlace del podcast --></li>
+<li>📝 <strong>Quiz de teoría:</strong> en Intu, antes de la sesión de clase.</li>
+<li>🧑‍💻 <strong>En clase:</strong> aquí no hay laboratorio de R. <strong>El código va todo en la sesión presencial</strong>, sobre un dataset intencionalmente sucio. Lo de hoy es el criterio; lo de la clase, las manos.</li>
 </ul>
-<p>Un modelo entrenado con datos sucios produce resultados sucios. La limpieza no es opcional — es el paso que protege todas las decisiones que vienen después.</p>
 </div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Antes de venir a clase: 1 paquete (30 segundos, con internet)</strong></p>
+<p>En la sesión usarás <code>skimr</code> para la radiografía de la base. Instálalo <strong>antes</strong> de llegar — en clase, con el wifi del salón colapsado, es un mal momento:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"skimr"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Verifica que quedó: <code>library(skimr)</code> no debe arrojar error.</p>
+</div>
+</div>
+<p>⚠️ <strong>Por qué esta semana se estudia distinto:</strong> en la semana 4 aprendiste los verbos de <code>dplyr</code> con datos de juguete — impecables, sin un solo <code>NA</code>. Ese mundo no existe. Esta semana conocemos los datos como llegan de verdad: con errores de captura, categorías escritas de cinco formas distintas y valores imposibles. El podcast te da el <strong>criterio</strong> para diagnosticarlos; la clase te da la <strong>práctica</strong> para arreglarlos.</p>
 <section id="lo-que-aprenderemos-esta-semana" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="lo-que-aprenderemos-esta-semana"><span class="header-section-number">1.1</span> Lo que aprenderemos esta semana</h2>
-<p><strong>1. Entender el origen y tipo de los datos</strong></p>
+<p><strong>1. De dónde vienen los datos</strong></p>
 <ul>
-<li>Fuentes primarias vs.&nbsp;secundarias</li>
-<li>Datos estructurados vs.&nbsp;no estructurados</li>
-<li>Por qué el origen importa para la interpretación</li>
+<li>Fuentes primarias y secundarias, y qué suciedad es típica de cada una.</li>
+<li>Por qué conocer el origen te dice <strong>qué errores buscar</strong>.</li>
 </ul>
-<p><strong>2. Diagnosticar problemas de calidad</strong></p>
+<p><strong>2. Las cuatro dimensiones de la calidad</strong></p>
 <ul>
-<li>Visión general con <code>skim()</code>: faltantes, tipos, distribuciones</li>
-<li>Revisión de categorías con <code>unique()</code> y <code>table()</code></li>
-<li>Duplicados con <code>duplicated()</code></li>
+<li>Completitud, consistencia, validez y unicidad: el checklist que se aplica a cualquier base, siempre.</li>
 </ul>
-<p><strong>3. Limpiar con dplyr</strong></p>
+<p><strong>3. Los tres problemas clásicos</strong></p>
 <ul>
-<li>Estandarizar categorías, corregir tipos, filtrar imposibles</li>
-<li>Del dataset “sucio” al dataset “listo para analizar”</li>
+<li>Valores faltantes: diagnosticar y decidir (eliminar, imputar, marcar).</li>
+<li>Outliers: la regla del IQR y la pregunta que importa (¿error o caso real?).</li>
+<li>Categorías inconsistentes: el error más silencioso y más caro.</li>
 </ul>
-<p><strong>4. EDA: explorar antes de modelar</strong></p>
+<p><strong>4. Qué es y para qué sirve la EDA</strong></p>
 <ul>
-<li>Resumen descriptivo con <code>skim()</code></li>
-<li>Visualizaciones exploratorias con <code>ggplot2</code></li>
-<li>El propósito del EDA no es “hacer gráficos bonitos” — es <strong>encontrar señales y anomalías</strong> antes de comprometer decisiones</li>
+<li>El flujo <em>raw → clean → analysis-ready</em> y el acta de decisiones.</li>
 </ul>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-</section>
-<section id="fuentes-de-datos" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Fuentes de datos</h1>
-<p>Antes de limpiar, necesitamos entender de dónde vienen los datos. El origen determina qué errores son probables.</p>
-<div class="callout-key">
-<p><strong>Fuente primaria vs.&nbsp;secundaria</strong></p>
-<ul>
-<li><strong>Primaria:</strong> los datos los recolectaste tú (o tu organización) directamente para este análisis. Ejemplos: encuesta de satisfacción, registro de ventas propio, experimento A/B.
-<ul>
-<li><em>Ventaja:</em> sabes exactamente qué pregunta se hizo y cómo.</li>
-<li><em>Riesgo típico:</em> errores de captura, formularios mal diseñados.</li>
-</ul></li>
-<li><strong>Secundaria:</strong> alguien más los recolectó para otro propósito. Ejemplos: datos del DANE, Nielsen, Kaggle, API de redes sociales.
-<ul>
-<li><em>Ventaja:</em> mayor volumen, menor costo.</li>
-<li><em>Riesgo típico:</em> no conoces el proceso de recolección; las definiciones pueden no coincidir con las tuyas.</li>
-</ul></li>
-</ul>
+<div class="callout-connect">
+<p><strong>¿Y esto qué tiene que ver con lo que ya sabemos?</strong></p>
+<p>La semana pasada dibujamos el mapa de siete etapas. Esta semana bajamos a las <strong>etapas 3 y 4</strong> — limpieza y EDA — que juntas se llevan el <strong>80% del tiempo</strong> de cualquier proyecto real. Y todo lo de la semana 4 (<code>filter</code>, <code>mutate</code>, <code>group_by</code>, <code>ggplot</code>) deja de ser un ejercicio de sintaxis: <strong>son las herramientas con las que se limpia</strong>. Además, la EDA es literalmente la <strong>Entrega 2</strong> de tu proyecto (semana 9).</p>
 </div>
-<p>En este curso trabajamos principalmente con <strong>datos estructurados</strong>: tablas con filas (observaciones) y columnas (variables).</p>
-<table class="caption-top table">
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="glosario-de-la-semana" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Glosario de la semana</h1>
+<div class="glossary-grid">
+  <div class="gloss-card"><span class="gloss-term">Fuente primaria</span><span class="gloss-def">Datos que recolectaste tú o tu organización para este análisis. Sabes exactamente cómo se preguntaron; el riesgo está en la captura.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Fuente secundaria</span><span class="gloss-def">Datos que alguien más recolectó para otro propósito (DANE, Kaggle, una API). Más volumen y menos costo, pero no controlas las definiciones.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Dato estructurado</span><span class="gloss-def">Una tabla con filas (observaciones) y columnas (variables). Es con lo que trabajamos en este curso: CSV, Excel, SQL.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Diccionario de variables</span><span class="gloss-def">El documento que dice qué significa cada columna, en qué unidad está y qué valores admite. Si no existe, tu primer trabajo es construirlo.</span></div>
+  <div class="gloss-card"><span class="gloss-term">NA</span><span class="gloss-def">El valor faltante en R. No es un cero ni un texto vacío: es "aquí no hay dato", y se contagia a cualquier cálculo que lo toque.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Imputar</span><span class="gloss-def">Reemplazar un valor faltante por una estimación (la media, la mediana, un valor por defecto). Es una decisión, no un trámite: siempre se documenta.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Outlier</span><span class="gloss-def">Una observación que se sale del patrón. Puede ser un error de captura o el caso más interesante de la base — distinguirlo es tu trabajo.</span></div>
+  <div class="gloss-card"><span class="gloss-term">IQR</span><span class="gloss-def">(<i>Rango intercuartílico</i>) La distancia entre el percentil 25 y el 75: donde vive la mitad central de los datos. Es la base de la regla para detectar outliers.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Cardinalidad</span><span class="gloss-def">Cuántos valores distintos tiene una columna. Si "región" tiene cardinalidad 5 y sabes que hay 3 regiones, acabas de encontrar un problema.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Analysis-ready</span><span class="gloss-def">El dataset ya diagnosticado, limpio y documentado, listo para analizar. Es el producto de esta semana y el punto de partida de todas las siguientes.</span></div>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="los-exámenes-que-llegaron-del-laboratorio" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Los exámenes que llegaron del laboratorio</h1>
+<p>La semana pasada usamos la metáfora del médico: pregunta, exámenes, diagnóstico, tratamiento. Retomémosla justo donde la dejamos.</p>
+<p>Llegaron los exámenes del laboratorio. Un médico prudente <strong>no diagnostica de inmediato</strong>. Primero los mira con desconfianza profesional y se hace cuatro preguntas en dos segundos:</p>
+<ul>
+<li>¿Está <strong>completo</strong>? (falta la mitad de la hoja)</li>
+<li>¿Es <strong>consistente</strong>? (la fecha de la muestra es posterior a la del resultado)</li>
+<li>¿Es <strong>válido</strong>? (una hemoglobina de 900 no es una enfermedad rarísima: es un error de digitación)</li>
+<li>¿Es <strong>único</strong>? (te repitieron el mismo examen y quedó cargado dos veces)</li>
+</ul>
+<p>Solo si los exámenes pasan ese filtro, el médico diagnostica. <strong>Si diagnostica sobre un examen equivocado, todo lo que venga después estará equivocado — y con total confianza.</strong></p>
+<div class="callout-key">
+<p><strong>La idea más importante de toda la semana</strong></p>
+<p>Un modelo entrenado con datos sucios produce resultados sucios, <strong>pero no produce ningún error</strong>. R no te va a avisar. El cálculo va a salir, el gráfico se va a ver bonito y el número va a tener dos decimales. La suciedad de los datos no se manifiesta como una falla: se manifiesta como una <strong>respuesta confiada y falsa</strong>. Por eso el diagnóstico no es opcional.</p>
+</div>
+<p>Esas cuatro preguntas del médico tienen nombre técnico, y son el checklist de esta semana.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="fuentes-de-datos-el-origen-te-dice-qué-buscar" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Fuentes de datos: el origen te dice qué buscar</h1>
+<p>Antes de limpiar, hay que saber de dónde vienen los datos. <strong>El origen determina qué errores son probables.</strong></p>
+<section id="primaria-vs.-secundaria" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="primaria-vs.-secundaria"><span class="header-section-number">4.1</span> Primaria vs.&nbsp;secundaria</h2>
+<p><strong>Fuente primaria</strong> — los recolectaste tú o tu organización, para este análisis. Una encuesta de satisfacción, el registro de ventas propio, un experimento A/B.</p>
+<ul>
+<li><em>Ventaja:</em> sabes exactamente qué se preguntó y cómo.</li>
+<li><em>Riesgo típico:</em> <strong>errores de captura</strong> y formularios mal diseñados. Si un campo se llenaba a mano, ahí va a haber suciedad.</li>
+</ul>
+<p><strong>Fuente secundaria</strong> — alguien más los recolectó, para otro propósito. Datos del DANE, de Nielsen, de Kaggle, de la API de una red social.</p>
+<ul>
+<li><em>Ventaja:</em> mucho más volumen, mucho menor costo.</li>
+<li><em>Riesgo típico:</em> <strong>no conoces el proceso de recolección</strong>, y las definiciones pueden no coincidir con las tuyas. Su “cliente activo” puede no ser tu “cliente activo”.</li>
+</ul>
+<table class="table-striped caption-top table">
+<caption>En este curso trabajamos con datos <strong>estructurados</strong>.</caption>
 <colgroup>
 <col style="width: 33%">
 <col style="width: 33%">
@@ -2081,7 +286,7 @@ globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
 </tr>
 <tr class="even">
 <td><strong>Semi-estructurado</strong></td>
-<td>Tiene estructura pero flexible</td>
+<td>Tiene estructura, pero flexible</td>
 <td>JSON, XML</td>
 </tr>
 <tr class="odd">
@@ -2101,131 +306,57 @@ Advertencia
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><strong>Por qué el origen importa para interpretar</strong></p>
-<p>Si tus datos de ventas vienen del sistema ERP pero tienen una columna “región” que el equipo llenaba manualmente en Excel… es probable que encuentres “Norte”, “norte”, “NORTE” y “Nortte” representando la misma región. No es un error del sistema — es un error humano de captura. Saber el origen te permite anticipar qué tipo de suciedad buscar.</p>
+<p><strong>El origen te dice qué suciedad esperar</strong></p>
+<p>Si tus datos de ventas salen del ERP pero la columna <code>región</code> la llenaba el equipo <strong>a mano en un Excel</strong>, ya sabes que vas a encontrar <code>"Norte"</code>, <code>"norte"</code>, <code>"NORTE"</code> y <code>"Nortte"</code> conviviendo. No es una falla del sistema: es una consecuencia previsible de cómo se capturó el dato.</p>
+<p>Este es el reflejo que hay que desarrollar: <strong>antes de abrir la base, pregunta cómo se llenó.</strong> Te ahorra media hora de sorpresas.</p>
 </div>
 </div>
-<hr>
 <!--=================-->
 <!--=================-->
 </section>
-<section id="instalación-y-carga-de-paquetes" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Instalación y carga de paquetes</h1>
-<p>Esta semana usaremos tres paquetes:</p>
+</section>
+<section id="las-cuatro-dimensiones-de-la-calidad" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Las cuatro dimensiones de la calidad</h1>
+<p>Las cuatro preguntas del médico, con su nombre real. Este es el checklist que le vas a aplicar a <strong>toda</strong> base de datos que recibas en tu vida profesional.</p>
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>Completitud</b> — ¿están todos los datos que deberían estar? Es el terreno de los <b>valores faltantes</b> (NA) y de las columnas que llegaron vacías.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>Consistencia</b> — ¿el mismo hecho se representa siempre igual? Es el terreno de las <b>categorías inconsistentes</b> ("Norte" vs. "norte") y de los formatos que no cuadran entre tablas.</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>Validez</b> — ¿los valores son posibles? Es el terreno de los <b>valores imposibles</b> (una cantidad de −5, una fecha en el futuro, una edad de 200 años) y de los <b>tipos incorrectos</b> (un precio guardado como texto).</div></div>
+  <div class="pipe-step"><div class="pipe-num">4</div><div><b>Unicidad</b> — ¿cada observación aparece una sola vez? Es el terreno de los <b>duplicados</b>, que inflan silenciosamente todos los totales.</div></div>
+</div>
+<div class="callout-key">
+<p><strong>La revisión estructural: los primeros 30 segundos</strong></p>
+<p>Antes incluso de las cuatro dimensiones, hay una revisión más básica que se hace de entrada:</p>
 <ul>
-<li><code>dplyr</code> — para manipular y limpiar datos (ya lo conocemos de Semana 04).</li>
-<li><code>ggplot2</code> — para hacer gráficos exploratorios (ya lo conocemos de Semana 05).</li>
-<li><code>skimr</code> — <strong>nuevo</strong>: genera un resumen rápido y completo de cada variable del dataset.</li>
+<li><strong>Dimensiones:</strong> ¿cuántas filas y columnas tiene? ¿Es lo que esperabas?</li>
+<li><strong>Qué es una fila:</strong> ¿una transacción? ¿un cliente? ¿un cliente-mes? Si no puedes responder esto, no puedes analizar nada.</li>
+<li><strong>Nombres y tipos:</strong> ¿las columnas se llaman como deberían? ¿los números son números?</li>
+<li><strong>Diccionario:</strong> ¿existe? Si no, constrúyelo tú — aunque sea de diez líneas.</li>
+<li><strong>Cardinalidad:</strong> ¿cuántos valores distintos tiene cada columna de texto? Aquí saltan las inconsistencias.</li>
 </ul>
-<div id="qwebr-insertion-location-1"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>Recordatorio</strong></p>
-<p><code>install.packages()</code> se corre una sola vez en la Consola (nunca en el script). <code>library()</code> se corre cada vez que abres RStudio. Si trabajas en este documento WebR, los paquetes ya están disponibles.</p>
 </div>
-<hr>
+<div class="callout-remember">
+<p><strong>Resumen del bloque</strong></p>
+<p>Cuatro dimensiones: <strong>completitud</strong> (¿falta?), <strong>consistencia</strong> (¿se escribe siempre igual?), <strong>validez</strong> (¿es posible?) y <strong>unicidad</strong> (¿está repetido?). Y una regla de oro que las precede: saber <strong>qué representa una fila</strong>. Todo el diagnóstico de la clase del jueves es este checklist, ejecutado con código.</p>
+</div>
 <!--=================-->
 <!--=================-->
 </section>
-<section id="el-dataset-de-esta-semana-ventas_raw" class="level1" data-number="4">
-<h1 data-number="4"><span class="header-section-number">4</span> El dataset de esta semana: <code>ventas_raw</code></h1>
-<p>Usaremos una versión <strong>realista y sucia</strong> del mismo dataset de ventas de las semanas anteriores. Como si lo hubiéramos recibido “tal cual” del sistema antes de cualquier limpieza.</p>
-<div class="callout-key">
-<p><strong>¿Qué tiene de diferente este dataset?</strong></p>
-<p>Es el mismo origen (ventas de tecnología, 3 trimestres, 3 regiones), pero con problemas típicos de datos reales:</p>
-<ol type="1">
-<li><strong>Categorías inconsistentes:</strong> “Norte”, “norte”, “NORTE” en la misma columna</li>
-<li><strong>Tipo de dato incorrecto:</strong> <code>precio</code> llega como texto (<code>character</code>) con signos de dólar (“$1200”)</li>
-<li><strong>Valores faltantes:</strong> <code>NA</code> en precio y cantidad</li>
-<li><strong>Valor imposible:</strong> una transacción con <code>cantidad = -5</code></li>
-<li><strong>Outlier de captura:</strong> un Mouse con precio = 12.000 (probablemente debería ser 120)</li>
-<li><strong>Filas duplicadas:</strong> 3 transacciones aparecen dos veces</li>
-<li><strong>Columna basura:</strong> <code>observaciones</code>, casi siempre vacía</li>
-</ol>
-<p>Nuestro trabajo esta semana es <strong>detectar, documentar y corregir</strong> cada uno de estos problemas.</p>
-</div>
-<div id="qwebr-insertion-location-2"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-3"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<hr>
-<!--=================-->
-<!--=================-->
+<section id="problema-1-valores-faltantes" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Problema 1: valores faltantes</h1>
+<section id="diagnosticar-antes-de-decidir" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="diagnosticar-antes-de-decidir"><span class="header-section-number">6.1</span> Diagnosticar antes de decidir</h2>
+<p>Lo primero <strong>no</strong> es rellenar: es <strong>contar</strong>. Para cada variable necesitas saber cuántos faltantes hay y qué <strong>proporción</strong> representan. No es lo mismo un 0,5% que un 40%.</p>
+<p>En R, una radiografía completa se pide con una sola función:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(ventas_raw)   <span class="co"># del paquete skimr</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Esa salida te da, por columna: el tipo de dato, <code>n_missing</code> (cuántos faltan), <code>n_unique</code> (cardinalidad) y, para las numéricas, mínimo, máximo, media y desviación. <strong>Se lee de arriba abajo, columna por columna, y cualquier cosa que no tenga sentido es un hallazgo.</strong> En clase la vamos a leer juntos.</p>
 </section>
-<section id="paso-1-diagnóstico-qué-tan-sucios-están-los-datos" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> Paso 1 — Diagnóstico: ¿qué tan sucios están los datos?</h1>
-<p>Antes de corregir, necesitamos un <strong>diagnóstico completo</strong>. La secuencia es:</p>
-<ol type="1">
-<li>Primero, una visión general de todo el dataset con <code>skim()</code></li>
-<li>Luego, si algo llama la atención, profundizamos con herramientas específicas</li>
-</ol>
-<section id="visión-general-skim" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="visión-general-skim"><span class="header-section-number">5.1</span> Visión general: <code>skim()</code></h2>
-<p><code>skim()</code> es nuestra primera herramienta de diagnóstico. En una sola llamada nos dice: cuántas filas tiene el dataset, el tipo de cada variable, cuántos valores faltantes hay, y un resumen estadístico por columna.</p>
-<div id="qwebr-insertion-location-4"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>Cómo leer la salida de <code>skim()</code></strong></p>
-<p>La salida se divide en dos bloques según el tipo de variable:</p>
-<p><strong>Variables de texto (<code>character</code>):</strong></p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Columna</th>
-<th>Lo que nos dice</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>n_missing</code></td>
-<td>Cuántos valores faltantes tiene esa columna</td>
-</tr>
-<tr class="even">
-<td><code>n_unique</code></td>
-<td>Cuántos valores distintos hay</td>
-</tr>
-</tbody>
-</table>
-<p>Mira la columna <code>region</code>: si <code>n_unique</code> dice 5 en vez de 3, hay inconsistencias de mayúsculas/minúsculas.<br>
-Mira <code>precio</code>: si aparece como <code>character</code> en vez de <code>numeric</code>, hay un problema de tipo de dato.</p>
-<p><strong>Variables numéricas (<code>numeric</code>):</strong></p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Columna</th>
-<th>Lo que nos dice</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>n_missing</code></td>
-<td>Cuántos valores faltantes tiene esa columna</td>
-</tr>
-<tr class="even">
-<td><code>mean</code>, <code>sd</code></td>
-<td>Promedio y desviación estándar</td>
-</tr>
-<tr class="odd">
-<td><code>p0</code>, <code>p100</code></td>
-<td>Mínimo y máximo — aquí aparecen los valores imposibles y outliers</td>
-</tr>
-</tbody>
-</table>
-<p>Mira <code>cantidad</code>: si <code>p0</code> (el mínimo) es negativo, hay una cantidad imposible.</p>
-<p><strong>Regla práctica:</strong> lee <code>skim()</code> de arriba a abajo, columna por columna. Cualquier cosa que no tenga sentido es un problema que documentar.</p>
-</div>
-</section>
-<section id="inconsistencias-en-categorías-unique-y-table" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="inconsistencias-en-categorías-unique-y-table"><span class="header-section-number">5.2</span> Inconsistencias en categorías: <code>unique()</code> y <code>table()</code></h2>
-<p><code>skim()</code> nos dijo cuántos valores únicos hay en cada columna de texto. Ahora vamos a <strong>ver</strong> cuáles son esos valores:</p>
-<div id="qwebr-insertion-location-5"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-6"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<section id="las-tres-estrategias" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="las-tres-estrategias"><span class="header-section-number">6.2</span> Las tres estrategias</h2>
+<p>Una vez sabes cuánto falta, hay tres caminos — y elegir es tu trabajo, no el de R:</p>
+<p><strong>1. Eliminar.</strong> Razonable cuando faltan pocos y no hay patrón en quién falta. Si el 0,5% de las filas no tiene precio, eliminarlas casi no cambia nada.</p>
+<p><strong>2. Imputar.</strong> Reemplazar por una estimación: la <strong>mediana</strong> (más robusta que la media cuando hay outliers), la media, o un valor por defecto del negocio. Útil cuando no puedes darte el lujo de perder la fila.</p>
+<p><strong>3. Marcar.</strong> Crear una columna indicadora (<code>precio_faltaba = TRUE/FALSE</code>) y conservar el registro. Suena raro, pero a veces <strong>el hecho de que falte es información</strong>: si a los clientes que se fueron nunca les registraron el motivo, ese vacío no es aleatorio — te está diciendo algo.</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2236,145 +367,60 @@ Advertencia
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><strong>Error clásico: “Norte” ≠ “norte” ≠ “NORTE”</strong></p>
-<p>Para R, estas son <strong>tres categorías diferentes</strong>. Si calculas el ingreso por región con <code>group_by(region)</code>, obtendrás 5 grupos en vez de 3. Los totales nunca cuadrarán y el gerente tomará decisiones con datos incorrectos — sin que R emita ningún error.</p>
-<p>Este es uno de los errores más frecuentes y silenciosos en análisis de datos.</p>
+<p><strong>El faltante que no es aleatorio</strong></p>
+<p>La pregunta que separa un analista de un ejecutor: <strong>¿por qué falta?</strong> Si los ingresos faltan justo en los clientes de mayor patrimonio (porque se negaron a declararlos), imputarlos con la mediana <strong>sesga toda tu base hacia abajo</strong> y ninguna estadística te va a avisar. Antes de imputar, pregúntate si los datos faltan al azar o si hay un mecanismo detrás.</p>
 </div>
 </div>
-<div id="qwebr-insertion-location-7"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</section>
-<section id="filas-duplicadas-duplicated" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="filas-duplicadas-duplicated"><span class="header-section-number">5.3</span> Filas duplicadas: <code>duplicated()</code></h2>
-<div id="qwebr-insertion-location-8"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-9"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
 <div class="callout-key">
-<p><strong>Qué hace <code>duplicated()</code></strong></p>
-<p><code>duplicated(df)</code> compara cada fila con todas las anteriores y devuelve <code>TRUE</code> si ya apareció antes.</p>
-<ul>
-<li><code>sum(duplicated(df))</code> → cuántas filas son copias exactas</li>
-<li><code>df[duplicated(df), ]</code> → ver esas filas</li>
-</ul>
-<p><strong>¿Por qué aparecen duplicados?</strong> En la práctica ocurren por exportaciones dobles del sistema, joins mal hechos, o actualizaciones que acumulan en vez de reemplazar. Siempre pregunta la causa antes de eliminar.</p>
+<p><strong>El principio que no se negocia</strong></p>
+<blockquote class="blockquote">
+<p>Toda decisión sobre faltantes debe quedar <strong>documentada</strong>.</p>
+</blockquote>
+<p>No importa cuál de las tres elijas: importa que quede escrito qué hiciste y por qué. Eliminaste 12 filas — ¿cuáles y con qué criterio? Imputaste con la mediana — ¿por qué la mediana y no la media? Un análisis que no puede responder eso no es reproducible, y por lo tanto no es un activo de nadie.</p>
 </div>
-</section>
-<section id="tipo-de-dato-incorrecto-el-problema-de-precio" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="tipo-de-dato-incorrecto-el-problema-de-precio"><span class="header-section-number">5.4</span> Tipo de dato incorrecto: el problema de <code>precio</code></h2>
-<p><code>skim()</code> ya nos alertó que <code>precio</code> es de tipo <code>character</code>. Veamos exactamente por qué:</p>
-<div id="qwebr-insertion-location-10"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-11"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>¿Por qué es un problema que <code>precio</code> sea <code>character</code>?</strong></p>
-<p>Cuando una columna numérica llega como texto, R no puede hacer aritmética con ella:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Esto da error</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(ventas_raw<span class="sc">$</span>precio, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Error: invalid 'type' (character) of argument</span></span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Para convertirla necesitamos: 1. Eliminar el signo <code>$</code> con <code>gsub()</code> 2. Convertir el texto limpio a número con <code>as.numeric()</code></p>
-<p>Lo haremos en la sección de limpieza.</p>
-</div>
-</section>
-<section id="valores-imposibles-y-outliers" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="valores-imposibles-y-outliers"><span class="header-section-number">5.5</span> Valores imposibles y outliers</h2>
-<p>Con <code>skim()</code> ya vimos el mínimo de <code>cantidad</code>. Confirmemos el problema y exploremos el precio visualmente:</p>
-<div id="qwebr-insertion-location-12"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-13"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>El histograma como detector de outliers</strong></p>
-<p>Cuando el eje X se extiende muy a la derecha con una barra solitaria, es señal de outlier. La gran mayoría de precios están entre 20 y 1.250, pero hay un punto en ~12.000.</p>
-<p>Ese valor corresponde a un Mouse con precio = 12.000. Un mouse no cuesta $12.000 — es casi con certeza un error de captura. Antes de corregirlo, siempre documenta la decisión.</p>
-</div>
-<hr>
 <!--=================-->
 <!--=================-->
 </section>
 </section>
-<section id="paso-2-limpieza-corregir-cada-problema" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> Paso 2 — Limpieza: corregir cada problema</h1>
-<p>Ya sabemos qué tiene mal el dataset. Ahora lo corregimos. La lógica es simple: partimos de <code>ventas_raw</code> (la base original, que no tocamos) y construimos <code>ventas_clean</code>, que iremos actualizando en cada paso hasta tener un dataset confiable.</p>
-<p>El orden importa: primero eliminamos filas problemáticas (duplicados, imposibles), luego corregimos columnas (texto, tipos, outliers), y al final ajustamos la estructura (columnas innecesarias, variables nuevas).</p>
-<section id="eliminar-filas-duplicadas" class="level2" data-number="6.1">
-<h2 data-number="6.1" class="anchored" data-anchor-id="eliminar-filas-duplicadas"><span class="header-section-number">6.1</span> Eliminar filas duplicadas</h2>
-<p>El primer paso es eliminar los registros que aparecen más de una vez. Si los dejamos, cualquier suma o promedio quedará inflado, porque R contará la misma transacción dos veces.</p>
-<div id="qwebr-insertion-location-14"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p>La diferencia entre ambas dimensiones confirma cuántos duplicados se removieron. Si el resultado es 3, el proceso funcionó como esperábamos.</p>
-<div class="callout-key">
-<p><strong>Qué hace <code>distinct()</code></strong></p>
-<p><code>distinct(df)</code> compara todas las columnas de cada fila. Si dos filas son idénticas en todo, elimina la segunda y conserva la primera.</p>
-<p>La línea <code>nrow(ventas_raw) - nrow(ventas_clean)</code> nos dice cuántas filas duplicadas se removieron — es una forma rápida de confirmar que la operación hizo lo que esperábamos.</p>
-<p>Si quisieras eliminar duplicados solo en algunas columnas (por ejemplo, mismo <code>producto</code> + <code>trimestre</code> + <code>region</code>), puedes especificarlas:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">distinct</span>(df, producto, trimestre, region, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)</span></code><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<hr>
+<section id="problema-2-outliers" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Problema 2: outliers</h1>
+<section id="detectarlos" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="detectarlos"><span class="header-section-number">7.1</span> Detectarlos</h2>
+<p>Un outlier es una observación que se sale del patrón. Hay tres formas de encontrarlos, de la más simple a la más visual:</p>
+<p><strong>1. Reglas de rango.</strong> Las que salen del negocio: una cantidad no puede ser negativa, una edad no puede ser 200, un porcentaje no puede pasar de 100. Estas son las más fáciles y las más ignoradas.</p>
+<p><strong>2. La regla del IQR.</strong> El <strong>rango intercuartílico</strong> (IQR) es la distancia entre el percentil 75 y el percentil 25 — es decir, el ancho de la franja donde vive <strong>la mitad central</strong> de tus datos. La regla estándar marca como outlier todo lo que caiga fuera de:</p>
+<blockquote class="blockquote">
+<p><code>[ Q1 − 1,5 × IQR , Q3 + 1,5 × IQR ]</code></p>
+</blockquote>
+<p>La intuición: si un valor está a más de una vez y media el ancho de la caja por fuera de la caja, es sospechoso. Es exactamente lo que dibuja un <strong>boxplot</strong>: la caja es el IQR, los bigotes llegan hasta ese límite, y los puntos sueltos más allá son los candidatos.</p>
+<p><strong>3. Mirarlos.</strong> Un <strong>histograma</strong> con el eje X estirándose solo hasta una barrita solitaria a la derecha es un outlier gritando. Un <strong>boxplot</strong> te los señala uno por uno.</p>
 </section>
-<section id="estandarizar-categorías" class="level2" data-number="6.2">
-<h2 data-number="6.2" class="anchored" data-anchor-id="estandarizar-categorías"><span class="header-section-number">6.2</span> Estandarizar categorías</h2>
-<p>El diagnóstico mostró que <code>region</code>, <code>trimestre</code> y <code>producto</code> tienen variantes por mayúsculas y minúsculas. Si no las corregimos, <code>group_by()</code> producirá más grupos de los reales y los totales no cuadrarán.</p>
-<p>La solución es llevar todo al mismo formato. Aquí usamos <code>toupper()</code> para convertir todo a mayúsculas, lo que elimina cualquier inconsistencia de capitalización.</p>
-<div id="qwebr-insertion-location-15"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p>Después de <code>toupper()</code>, <code>table()</code> debe mostrar exactamente 3 regiones y 3 trimestres, cada uno con el conteo correcto.</p>
+<section id="tratarlos-la-pregunta-que-importa" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="tratarlos-la-pregunta-que-importa"><span class="header-section-number">7.2</span> Tratarlos: la pregunta que importa</h2>
+<p>Detectarlo es lo fácil. La decisión es esta:</p>
 <div class="callout-key">
-<p><strong>Tres funciones para estandarizar texto</strong></p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Función</th>
-<th>Resultado</th>
-<th>Cuándo usarla</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>toupper(x)</code></td>
-<td><code>"NORTE"</code></td>
-<td>Códigos, IDs, siglas — la usamos aquí</td>
-</tr>
-<tr class="even">
-<td><code>tolower(x)</code></td>
-<td><code>"norte"</code></td>
-<td>Paso intermedio antes de capitalizar</td>
-</tr>
-<tr class="odd">
-<td><code>tools::toTitleCase(x)</code></td>
-<td><code>"Norte"</code></td>
-<td>Nombres propios, categorías</td>
-</tr>
-</tbody>
-</table>
-<p>La elección depende del estilo que quieras en la base final. Para códigos como Q1, Q2, Q3 y nombres de región, las mayúsculas son la opción más limpia.</p>
-</div>
-<hr>
-</section>
-<section id="corregir-el-tipo-de-dato-de-precio" class="level2" data-number="6.3">
-<h2 data-number="6.3" class="anchored" data-anchor-id="corregir-el-tipo-de-dato-de-precio"><span class="header-section-number">6.3</span> Corregir el tipo de dato de <code>precio</code></h2>
-<p><code>precio</code> llega como texto (<code>character</code>) y tiene un signo <code>$</code> en algunos valores. Eso impide hacer cualquier cálculo aritmético. Necesitamos primero eliminar el símbolo <code>$</code> y luego convertir el texto a número.</p>
-<div id="qwebr-insertion-location-16"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p>Si <code>class()</code> devuelve <code>"numeric"</code>, la conversión fue exitosa. Cualquier valor que no se pueda convertir (por ejemplo, si tuviera letras) quedaría como <code>NA</code> — lo cual también sería una señal importante.</p>
-<div class="callout-key">
-<p><strong>Qué hace <code>gsub("\\$", "", precio)</code></strong></p>
-<p><code>gsub(patron, reemplazo, texto)</code> busca el patrón en el texto y lo reemplaza.</p>
+<p><strong>¿Es un error o es un caso real?</strong></p>
 <ul>
-<li><code>"\\$"</code> → el patrón es el símbolo <code>$</code> (se escribe <code>\\$</code> porque <code>$</code> tiene significado especial en expresiones regulares)</li>
-<li><code>""</code> → reemplaza por nada, es decir, elimina el símbolo</li>
-<li>Resultado: <code>"$1200"</code> → <code>"1200"</code> → <code>as.numeric()</code> → <code>1200</code></li>
+<li><strong>Un mouse con precio de $12.000</strong> entre mouses de $25 → es un <strong>error de captura</strong> (probablemente eran $120). Se corrige.</li>
+<li><strong>Una venta de $80 millones</strong> entre ventas de $2 millones → puede ser <strong>el cliente corporativo más importante del año</strong>. Si lo eliminas por “limpiar”, borraste el dato más valioso de la base.</li>
 </ul>
+<p>El mismo procedimiento estadístico los marca a los dos. <strong>Solo el conocimiento del negocio los distingue.</strong> Un outlier no es un error hasta que demuestres que lo es.</p>
 </div>
-<hr>
+<p>Con eso decidido, las opciones son: <strong>corregir</strong> (si sabes el valor verdadero), <strong>eliminar</strong> (si es un error irrecuperable), <strong>recortar o <em>capping</em></strong> (llevarlo al límite razonable en vez de borrarlo), o <strong>dejarlo y reportarlo</strong> (si es real). Y otra vez: se documenta.</p>
+<div class="callout-remember">
+<p><strong>Resumen del bloque</strong></p>
+<p>Faltantes → <strong>cuenta primero</strong>, luego elige entre eliminar / imputar / marcar, y pregúntate <strong>por qué faltan</strong>. Outliers → detecta con reglas de rango, con el <strong>IQR</strong> (<code>Q1 − 1,5·IQR</code> a <code>Q3 + 1,5·IQR</code>, que es lo que dibuja el boxplot) y con gráficos; después decide si es <strong>error o caso real</strong>. Las dos decisiones se documentan, siempre.</p>
+</div>
+<!--=================-->
+<!--=================-->
 </section>
-<section id="eliminar-valores-imposibles" class="level2" data-number="6.4">
-<h2 data-number="6.4" class="anchored" data-anchor-id="eliminar-valores-imposibles"><span class="header-section-number">6.4</span> Eliminar valores imposibles</h2>
-<p>Una cantidad negativa es un valor que no tiene sentido en este contexto de negocio: no se puede vender −5 unidades. Lo más seguro es eliminar esa fila, dejando una nota de la decisión.</p>
-<div id="qwebr-insertion-location-17"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p>El resultado de <code>min()</code> confirma que ya no hay cantidades negativas en el dataset.</p>
+</section>
+<section id="problema-3-el-error-más-silencioso" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Problema 3: el error más silencioso</h1>
+<p>Guardamos el peor para el final, porque no parece grave y es el que más plata cuesta.</p>
+<p>Para R, estas son <strong>tres regiones distintas</strong>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="st">"Norte"</span>    <span class="st">"norte"</span>    <span class="st">"NORTE"</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Ahora recuerda el <code>group_by(region)</code> de la semana 4. Si calculas el ingreso por región sobre una base así, R te devuelve <strong>cinco grupos donde hay tres</strong>. Los totales no cuadran. Y lo peor:</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2385,143 +431,66 @@ Advertencia
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><strong>¿Eliminar o imputar?</strong></p>
-<p>Cuando encuentras un valor imposible, tienes tres opciones:</p>
+<p><strong>R no te va a avisar</strong></p>
+<p>No hay error. No hay warning. La tabla sale, se ve perfecta, tiene sus totales alineados y sus dos decimales. Se la pasas al gerente, él asigna el presupuesto regional con esa tabla, y el presupuesto queda mal repartido — <strong>porque “Norte” y “norte” se llevaron cada uno su pedazo.</strong></p>
+<p>Este es el error más frecuente y más silencioso del análisis de datos. Y se arregla con <strong>una línea</strong> de código, si te acuerdas de buscarlo.</p>
+</div>
+</div>
+<p>El diagnóstico es sencillo (<code>n_unique</code> en la radiografía, o mirar los valores directamente), y la corrección también: llevar todo al mismo formato — mayúsculas, minúsculas, lo que definas — de modo que los cinco grupos vuelvan a ser tres. En clase lo hacemos.</p>
+<p>El primo hermano de este problema es el <strong>tipo de dato incorrecto</strong>: un <code>precio</code> que llega como texto porque alguien dejó el signo <code>$</code> adentro (<code>"$1200"</code>). R no puede sumar texto, así que cualquier cálculo se cae o, peor, devuelve <code>NA</code> sin explicar por qué.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="qué-es-la-eda-y-qué-no-es" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Qué es la EDA (y qué no es)</h1>
+<p>Con los datos ya limpios empieza el <strong>Análisis Exploratorio de Datos</strong>.</p>
+<div class="callout-key">
+<p><strong>La EDA no es “hacer gráficos bonitos”</strong></p>
+<p>El objetivo de la EDA <strong>no</strong> es responder la pregunta de negocio final. Es <strong>entender la estructura, las distribuciones y las relaciones</strong> antes de comprometerte con un análisis o un modelo. Es el médico leyendo los exámenes ya validados, antes de diagnosticar.</p>
+</div>
+<p>La EDA busca cuatro cosas:</p>
 <ol type="1">
-<li><strong>Eliminar la fila:</strong> si no tienes información para corregirla.</li>
-<li><strong>Convertir a NA:</strong> si quieres conservar el resto de la fila para otros análisis.</li>
-<li><strong>Corregir el valor:</strong> si tienes evidencia suficiente (una devolución documentada, por ejemplo, puede tener cantidad negativa de forma legítima).</li>
+<li><strong>Distribuciones:</strong> ¿cómo se comporta cada variable por su cuenta? ¿Simétrica, sesgada, con dos picos?</li>
+<li><strong>Resúmenes por grupo:</strong> ¿hay diferencias reales entre regiones, categorías, trimestres?</li>
+<li><strong>Relaciones:</strong> ¿precio y cantidad tienen algo que ver entre sí?</li>
+<li><strong>Anomalías residuales:</strong> ¿quedó algo raro que el diagnóstico no cazó?</li>
 </ol>
-<p>La opción correcta depende del <strong>contexto de negocio</strong>, no de una regla estadística. Lo más importante es <strong>documentar la decisión</strong>.</p>
-</div>
-</div>
-<hr>
-</section>
-<section id="corregir-el-outlier-de-precio" class="level2" data-number="6.5">
-<h2 data-number="6.5" class="anchored" data-anchor-id="corregir-el-outlier-de-precio"><span class="header-section-number">6.5</span> Corregir el outlier de precio</h2>
-<p>El histograma del diagnóstico mostró un precio de ~12.000 para un Mouse. Ese valor es claramente un error de captura: un mouse no cuesta $12.000. Antes de corregir, conviene ver la fila completa para confirmar el error.</p>
-<div id="qwebr-insertion-location-18"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p>La fila confirma que es un Mouse. Decisión documentada: reemplazar 12.000 por 120, que es el precio típico de Mouse en el dataset.</p>
-<div id="qwebr-insertion-location-19"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<p>El máximo de <code>precio</code> ahora debe ser consistente con el rango de Laptops (~1.200).</p>
+<p>Y combina <strong>tablas</strong> (<code>dplyr</code>) con <strong>gráficos</strong> (<code>ggplot2</code>). Ninguno de los dos alcanza solo.</p>
+<section id="un-ejemplo-de-por-qué-esto-importa" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="un-ejemplo-de-por-qué-esto-importa"><span class="header-section-number">9.1</span> Un ejemplo de por qué esto importa</h2>
+<p>Supón que el histograma del precio muestra <strong>dos jorobas</strong>: un montón de productos alrededor de $80 y otro alrededor de $1.200. Eso es una distribución <strong>bimodal</strong>, y no es una curiosidad estadística: es un <strong>hallazgo de negocio</strong>. Significa que tienes dos segmentos de producto radicalmente distintos conviviendo en la misma tabla.</p>
+<p>Consecuencia inmediata: si el gerente te pide “el precio promedio”, ese número <strong>no representa a nadie</strong>. Cae en el valle entre las dos jorobas, donde no hay productos. La respuesta correcta no es el promedio: es <em>“hay que separar los segmentos, y aquí está el promedio de cada uno”</em>.</p>
 <div class="callout-key">
-<p><strong><code>ifelse()</code> para correcciones puntuales</strong></p>
-<p><code>ifelse(condicion, valor_si_TRUE, valor_si_FALSE)</code> aplica una lógica fila por fila:</p>
-<ul>
-<li>Si la condición se cumple → usa el valor nuevo</li>
-<li>Si no → conserva el valor original</li>
-</ul>
-<p>Siempre usa una condición <strong>específica</strong> (producto + umbral de precio) para no corregir por error otras filas.</p>
+<p><strong>Lo que la EDA produce</strong></p>
+<blockquote class="blockquote">
+<p>La EDA no produce respuestas. Produce <strong>hipótesis</strong> y <strong>decisiones de limpieza</strong>.</p>
+</blockquote>
+<p>Sales de la EDA con tres o cuatro hallazgos, un puñado de preguntas nuevas y la certeza de que los datos aguantan lo que viene. Ese es exactamente el entregable de la <strong>Entrega 2</strong> de tu proyecto (semana 9).</p>
 </div>
-<hr>
-</section>
-<section id="eliminar-la-columna-basura-y-calcular-ingreso" class="level2" data-number="6.6">
-<h2 data-number="6.6" class="anchored" data-anchor-id="eliminar-la-columna-basura-y-calcular-ingreso"><span class="header-section-number">6.6</span> Eliminar la columna basura y calcular <code>ingreso</code></h2>
-<p>La columna <code>observaciones</code> tiene casi todo en <code>NA</code> y no aporta información analítica. La eliminamos para no cargar el dataset con ruido. Aprovechamos este último paso para calcular <code>ingreso = precio × cantidad</code>, que usaremos en el EDA.</p>
-<div id="qwebr-insertion-location-20"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>El “acta de limpieza”</strong></p>
-<p>En un análisis profesional, cada decisión de limpieza debe quedar documentada. Al final del proceso deberías poder responder:</p>
-<ul>
-<li>¿Cuántas filas eliminé y por qué?</li>
-<li>¿Qué valores imputé o corregí y con qué criterio?</li>
-<li>¿Qué columnas eliminé y por qué no aportaban?</li>
-</ul>
-<p>Esto permite que otro analista (o tú mismo en tres meses) pueda reproducir exactamente el mismo dataset limpio.</p>
-</div>
-<hr>
 <!--=================-->
 <!--=================-->
 </section>
 </section>
-<section id="paso-3-eda-explorar-el-dataset-limpio" class="level1" data-number="7">
-<h1 data-number="7"><span class="header-section-number">7</span> Paso 3 — EDA: explorar el dataset limpio</h1>
-<p>Con los datos ya limpios, comenzamos el <strong>Análisis Exploratorio de Datos (EDA)</strong>. El objetivo del EDA no es responder la pregunta de negocio final — es <strong>entender la estructura, distribución y relaciones</strong> antes de comprometerse con un análisis o modelo.</p>
-<div class="callout-key">
-<p><strong>¿Qué busca el EDA?</strong></p>
+<section id="el-producto-de-la-semana-raw-clean-analysis-ready" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> El producto de la semana: raw → clean → analysis-ready</h1>
+<p>Todo lo anterior se organiza en un flujo con tres estados, y <strong>los tres se conservan</strong>:</p>
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>raw</b> — el dataset tal como llegó. <b>No se toca nunca.</b> Es tu punto de retorno: si te equivocas limpiando, siempre puedes volver.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>clean</b> — el dataset con los problemas corregidos, construido <b>por código</b> a partir de raw. Cada corrección es una línea que otra persona puede leer.</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>analysis-ready</b> — el clean más las variables derivadas que tu análisis necesita (<code>ingreso = precio × cantidad</code>, por ejemplo). Es lo que alimenta todo lo que viene.</div></div>
+</div>
+<div class="callout-workflow">
+<p><strong>El acta de limpieza</strong></p>
+<p>Al terminar, debes poder responder estas tres preguntas sin dudar:</p>
 <ol type="1">
-<li><strong>Distribuciones:</strong> ¿cómo se comportan las variables individualmente? ¿Simétricas, sesgadas, con múltiples picos?</li>
-<li><strong>Resúmenes por grupo:</strong> ¿hay diferencias relevantes entre regiones, categorías, trimestres?</li>
-<li><strong>Relaciones entre variables:</strong> ¿precio y cantidad tienen alguna relación?</li>
-<li><strong>Valores anómalos residuales:</strong> ¿quedó algo raro que no detectamos antes?</li>
+<li>¿Cuántas filas eliminé y <strong>por qué</strong>?</li>
+<li>¿Qué valores imputé o corregí y <strong>con qué criterio</strong>?</li>
+<li>¿Qué columnas eliminé y <strong>por qué no aportaban</strong>?</li>
 </ol>
-<p>El EDA combina <strong>tablas</strong> (dplyr) y <strong>gráficos</strong> (ggplot2). Ninguno es suficiente solo.</p>
+<p>La prueba de fuego: que <strong>otra persona</strong> —o tú mismo dentro de tres meses— pueda correr tu script sobre el <code>raw</code> y obtener <strong>exactamente</strong> el mismo <code>analysis-ready</code>. Si eso no ocurre, tu análisis no es reproducible, y un análisis no reproducible no le sirve a ninguna organización.</p>
 </div>
-<section id="resumen-estadístico-del-dataset-limpio" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="resumen-estadístico-del-dataset-limpio"><span class="header-section-number">7.1</span> Resumen estadístico del dataset limpio</h2>
-<p>Ahora que los datos están limpios, <code>skim()</code> nos da un panorama confiable:</p>
-<div id="qwebr-insertion-location-21"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-practice">
-<p><strong>Compara con el <code>skim()</code> del dataset crudo</strong></p>
-<p>Vuelve a la sección 1.1 y compara las dos salidas. Deberías notar:</p>
-<ul>
-<li><code>precio</code> ahora aparece como <code>numeric</code>, no como <code>character</code></li>
-<li><code>n_missing</code> en precio y cantidad es el mismo (los NAs que venían del origen, no los que generamos)</li>
-<li><code>n_unique</code> en <code>region</code> y <code>trimestre</code> ahora coincide con lo esperado (3 regiones, 3 trimestres)</li>
-<li>El máximo de <code>cantidad</code> ya no es negativo</li>
-</ul>
-<p>Esta comparación es parte del EDA: confirmar que el dataset limpio tiene la forma que esperábamos.</p>
-</div>
-</section>
-<section id="distribuciones-de-variables-numéricas" class="level2" data-number="7.2">
-<h2 data-number="7.2" class="anchored" data-anchor-id="distribuciones-de-variables-numéricas"><span class="header-section-number">7.2</span> Distribuciones de variables numéricas</h2>
-<div id="qwebr-insertion-location-22"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-key">
-<p><strong>Distribución bimodal: una señal importante</strong></p>
-<p>Si el histograma muestra dos “jorobas” claramente separadas, es porque tenemos dos segmentos de productos muy distintos: productos baratos (Mouse, Licencia, Soporte) y productos caros (Laptop).</p>
-<p>Esto ya es un hallazgo de negocio: no se puede calcular un “precio promedio representativo” sin separar los segmentos.</p>
-</div>
-</section>
-<section id="comparar-grupos-ingreso-por-región" class="level2" data-number="7.3">
-<h2 data-number="7.3" class="anchored" data-anchor-id="comparar-grupos-ingreso-por-región"><span class="header-section-number">7.3</span> Comparar grupos: ingreso por región</h2>
-<div id="qwebr-insertion-location-23"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-24"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div id="qwebr-insertion-location-25"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-practice">
-<p><strong>¿Qué nos dice esta tabla?</strong></p>
-<ul>
-<li>El ingreso total es la métrica de negocio más importante.</li>
-<li><code>n_transacciones</code> confirma cuántos registros sobrevivieron la limpieza.</li>
-<li>Si una región tiene muchas transacciones pero bajo ingreso total, puede indicar que vende productos de bajo precio — no necesariamente que tenga bajo desempeño.</li>
-</ul>
-</div>
-</section>
-<section id="evolución-temporal-qué-está-cambiando" class="level2" data-number="7.4">
-<h2 data-number="7.4" class="anchored" data-anchor-id="evolución-temporal-qué-está-cambiando"><span class="header-section-number">7.4</span> Evolución temporal: ¿qué está cambiando?</h2>
-<div id="qwebr-insertion-location-26"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-</section>
-<section id="relación-entre-variables-scatter-plot-exploratorio" class="level2" data-number="7.5">
-<h2 data-number="7.5" class="anchored" data-anchor-id="relación-entre-variables-scatter-plot-exploratorio"><span class="header-section-number">7.5</span> Relación entre variables: scatter plot exploratorio</h2>
-<div id="qwebr-insertion-location-27"></div>
-<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
-<div class="callout-practice">
-<p><strong>Interpretación del scatter plot</strong></p>
-<p>Observa el gráfico y responde:</p>
-<ol type="1">
-<li>¿Los productos de Hardware tienden a tener precios más altos o más bajos que Software?</li>
-<li>¿Hay una relación clara entre precio y cantidad? ¿Positiva, negativa o ninguna?</li>
-<li>¿Ves algún punto que se aleje del patrón general?</li>
-</ol>
-<p>El scatter plot no te da la respuesta — te da la <strong>pregunta correcta</strong> para profundizar.</p>
-</div>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-</section>
-<section id="resumen-del-flujo-completo" class="level1" data-number="8">
-<h1 data-number="8"><span class="header-section-number">8</span> Resumen del flujo completo</h1>
 <div class="callout-connect">
-<p><strong>Conexión con el resto del curso</strong></p>
+<p><strong>Hacia dónde va esto</strong></p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -2529,260 +498,99 @@ Advertencia
 </colgroup>
 <thead>
 <tr class="header">
-<th>Lo que hicimos hoy</th>
-<th>Cómo lo usaremos después</th>
+<th>Lo de esta semana</th>
+<th>Dónde lo vas a necesitar</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Dataset limpio (<code>ventas_clean</code>)</td>
-<td>Base para todos los modelos de Semanas 09-12</td>
+<td>Dataset limpio</td>
+<td>La base de todos los modelos, de la semana 10 a la 13</td>
 </tr>
 <tr class="even">
 <td>EDA de distribuciones</td>
-<td>En ML: verificar que los datos de train y test tengan distribuciones similares</td>
+<td>En ML: verificar que train y test se parezcan</td>
 </tr>
 <tr class="odd">
 <td>Detección de outliers</td>
-<td>En regresión (Semana 12): los outliers inflan el RMSE y sesgan los coeficientes</td>
+<td>En regresión (semana 12): un outlier infla el RMSE y tuerce los coeficientes</td>
 </tr>
 <tr class="even">
 <td>Categorías estandarizadas</td>
-<td>En clasificación (Semana 11): las etiquetas deben ser consistentes o el modelo las trata como clases distintas</td>
+<td>En clasificación (semana 11): si las etiquetas no son consistentes, el modelo inventa clases</td>
 </tr>
 <tr class="odd">
-<td>Documentar decisiones de limpieza</td>
+<td>Documentar decisiones</td>
 <td>Exigencia del proyecto final: toda transformación debe estar justificada</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Semana 07 (Parcial):</strong> El parcial incluye preguntas sobre diagnóstico de calidad de datos e interpretación de EDA. Revisa las secciones de <code>skim()</code>, <code>unique()</code>, <code>table()</code> y los histogramas.</p>
+<p><strong>Y en la semana 7 hay parcial:</strong> el diagnóstico de calidad y la interpretación de la EDA entran. Este documento es material de estudio.</p>
 </div>
-<hr>
 <!--=================-->
 <!--=================-->
 </section>
-<section id="checklist-qué-debes-poder-explicar" class="level1" data-number="9">
-<h1 data-number="9"><span class="header-section-number">9</span> Checklist — ¿Qué debes poder explicar?</h1>
-<div class="callout-key">
-<p><strong>Antes de pasar a la siguiente semana, verifica que puedes:</strong></p>
-<p><strong>Sobre fuentes y calidad:</strong></p>
+<section id="checklist-de-salida" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Checklist de salida</h1>
+<p>Al terminar el podcast (o este documento), debes ser capaz de:</p>
 <ul class="task-list">
-<li><label><input type="checkbox">Distinguir fuente primaria de secundaria y qué riesgos implica cada una</label></li>
-<li><label><input type="checkbox">Nombrar al menos 4 tipos de problemas de calidad de datos con un ejemplo de cada uno</label></li>
-<li><label><input type="checkbox">Explicar por qué “Norte” ≠ “norte” en R y qué consecuencia tiene en un <code>group_by()</code></label></li>
+<li><label><input type="checkbox">Distinguir fuente primaria de secundaria y decir qué riesgo típico trae cada una.</label></li>
+<li><label><input type="checkbox">Explicar por qué conocer el origen del dato te dice qué suciedad buscar.</label></li>
+<li><label><input type="checkbox">Nombrar las cuatro dimensiones de la calidad y dar un ejemplo de cada una.</label></li>
+<li><label><input type="checkbox">Explicar por qué la suciedad de los datos no produce errores, sino respuestas confiadas y falsas.</label></li>
+<li><label><input type="checkbox">Decir qué representa una fila de una base y por qué esa pregunta va primero.</label></li>
+<li><label><input type="checkbox">Enumerar las tres estrategias frente a valores faltantes y cuándo conviene cada una.</label></li>
+<li><label><input type="checkbox">Explicar por qué “¿por qué falta?” importa más que “¿con qué lo relleno?”.</label></li>
+<li><label><input type="checkbox">Definir el IQR y enunciar la regla de detección de outliers (<code>Q1 − 1,5·IQR</code> a <code>Q3 + 1,5·IQR</code>).</label></li>
+<li><label><input type="checkbox">Explicar por qué un outlier no es necesariamente un error, con un ejemplo de cada caso.</label></li>
+<li><label><input type="checkbox">Explicar qué le pasa a un <code>group_by()</code> cuando hay “Norte” y “norte”, y por qué R no avisa.</label></li>
+<li><label><input type="checkbox">Explicar qué busca la EDA y por qué no es “hacer gráficos bonitos”.</label></li>
+<li><label><input type="checkbox">Describir el flujo <em>raw → clean → analysis-ready</em> y qué es el acta de limpieza.</label></li>
 </ul>
-<p><strong>Sobre diagnóstico en R:</strong></p>
-<ul class="task-list">
-<li><label><input type="checkbox">Interpretar la salida de <code>skim()</code> para identificar tipos, faltantes y outliers</label></li>
-<li><label><input type="checkbox">Usar <code>unique()</code> y <code>table()</code> para detectar inconsistencias en categorías</label></li>
-<li><label><input type="checkbox">Interpretar un histograma y señalar dónde podría haber un outlier</label></li>
-</ul>
-<p><strong>Sobre limpieza:</strong></p>
-<ul class="task-list">
-<li><label><input type="checkbox">Explicar qué hace <code>distinct()</code> y cuándo usarlo</label></li>
-<li><label><input type="checkbox">Usar <code>toupper()</code> / <code>tolower()</code> / <code>toTitleCase()</code> para estandarizar texto</label></li>
-<li><label><input type="checkbox">Convertir una columna de texto con “$” a número usando <code>gsub()</code> + <code>as.numeric()</code></label></li>
-<li><label><input type="checkbox">Usar <code>ifelse()</code> para corregir un valor puntual</label></li>
-<li><label><input type="checkbox">Justificar verbalmente cada decisión de limpieza (eliminar vs imputar vs corregir)</label></li>
-</ul>
-<p><strong>Sobre EDA:</strong></p>
-<ul class="task-list">
-<li><label><input type="checkbox">Usar <code>skim()</code> para obtener un resumen completo del dataset limpio</label></li>
-<li><label><input type="checkbox">Calcular y graficar el ingreso por grupo con <code>group_by()</code> + <code>summarise()</code></label></li>
-<li><label><input type="checkbox">Elegir el gráfico adecuado según la pregunta (distribución, comparación, relación, tendencia)</label></li>
-<li><label><input type="checkbox">Explicar qué es el EDA y por qué se hace antes de modelar</label></li>
-</ul>
-</div>
-<hr>
+<!--=================-->
+<!--=================-->
 </section>
-<section id="preguntas-de-comprensión" class="level1" data-number="10">
-<h1 data-number="10"><span class="header-section-number">10</span> Preguntas de comprensión</h1>
+<section id="preguntas-de-comprensión" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Preguntas de comprensión</h1>
+<p>Del estilo de las que encontrarás en el quiz. Intenta responderlas <strong>antes</strong> de abrir la respuesta.</p>
 <div class="callout-practice">
-<p><strong>Pregunta 1 — Diagnóstico</strong></p>
-<p>Recibes un dataset de 500 transacciones. Al correr <code>skim()</code> ves que la columna <code>precio</code> tiene tipo <code>character</code> y <code>n_unique = 47</code>. Luego corres <code>unique(df$precio)</code> y ves valores como <code>"25.000"</code>, <code>"1.200.000"</code> y <code>"$ 450"</code>.</p>
-<p>¿Cuáles son los dos problemas de calidad que debes resolver antes de calcular el ingreso promedio? ¿Qué función de R usarías para cada uno?</p>
+<p><strong>1. El presupuesto mal repartido</strong></p>
+<p>Un analista calcula el ingreso por región sobre la base sin limpiar y obtiene <strong>5 grupos</strong> donde la empresa tiene 3 regiones. Explica (a) por qué R genera 5 grupos y (b) qué le pasa al gerente que usa esa tabla para asignar el presupuesto regional.</p>
+<details class="answer"><summary>Ver respuesta</summary>
+<p><b>(a)</b> Porque para R <code>"Norte"</code>, <code>"norte"</code> y <code>"NORTE"</code> son <b>tres cadenas de texto distintas</b>, y <code>group_by()</code> agrupa por valor exacto. Es un problema de <b>consistencia</b>. <b>(b)</b> El ingreso real del Norte queda <b>partido en dos filas</b>, así que el Norte parece la mitad de rentable de lo que es y recibe menos presupuesto del que merece. Lo grave: <b>R no emitió ningún error</b> — la tabla se ve perfecta. La decisión se toma con datos falsos y nadie se entera.</p>
+</details>
 </div>
 <div class="callout-practice">
-<p><strong>Pregunta 2 — Consecuencia de no limpiar</strong></p>
-<p>Un analista recibe el dataset <code>ventas_raw</code> y calcula el ingreso total por región sin limpiar primero. Obtiene 5 grupos en vez de 3. Explica en dos oraciones:</p>
-<ol type="a">
-<li>Por qué R genera 5 grupos</li>
-<li>Cómo afecta esto a la toma de decisiones si el gerente usa esa tabla para asignar presupuesto regional</li>
-</ol>
+<p><strong>2. Dos precios sospechosos</strong></p>
+<p>En una base de una tienda de tecnología encuentras: (a) un <strong>mouse con precio de $12.000</strong> cuando todos los demás cuestan entre $20 y $30, y (b) una <strong>venta de $80 millones</strong> cuando la venta típica es de $2 millones. ¿Los tratas igual? ¿Qué haces con cada uno?</p>
+<details class="answer"><summary>Ver respuesta</summary>
+<p><b>No.</b> El (a) es casi con certeza un <b>error de captura</b> (probablemente $120, con un cero de más): se corrige y se documenta. El (b) puede ser perfectamente <b>real</b>: el cliente corporativo más grande del año. Si lo eliminas "para limpiar", borraste el dato más valioso de la base. La regla: <b>el mismo procedimiento estadístico marca a los dos, pero solo el conocimiento del negocio los distingue</b>. Un outlier no es un error hasta que demuestres que lo es — así que ve a mirar la fila completa antes de decidir.</p>
+</details>
 </div>
 <div class="callout-practice">
-<p><strong>Pregunta 3 — EDA como decisión</strong></p>
-<p>Después de limpiar los datos, corres <code>skim(ventas_clean)</code> y luego un histograma del precio. Observas una distribución bimodal (dos picos: uno en ~80 y otro en ~1.200).</p>
-<p>¿Qué significa esa distribución bimodal en términos de negocio? ¿Cambiaría tu análisis si el gerente te pide “el precio promedio de ventas”? ¿Por qué?</p>
+<p><strong>3. La imputación que sesga</strong></p>
+<p>Tienes una base de clientes donde falta el <code>ingreso_mensual</code> en el 15% de los casos. Un compañero propone: “fácil, lo relleno con la mediana y seguimos”. ¿Qué le preguntarías antes de dejarlo?</p>
+<details class="answer"><summary>Ver respuesta</summary>
+<p><b>"¿Por qué faltan?"</b> Si faltan al azar, imputar con la mediana es defendible. Pero si faltan porque <b>los clientes de mayor patrimonio se negaron a declararlo</b>, el faltante <b>no es aleatorio</b>: al imputarlos a todos con la mediana estás empujando artificialmente hacia abajo justo la cola alta de la distribución, y sesgas toda la base sin que ninguna estadística te avise. En ese caso conviene <b>marcar</b> (crear un indicador de faltante) en vez de rellenar. Y decidas lo que decidas: se documenta.</p>
+</details>
+</div>
+<div class="callout-practice">
+<p><strong>4. El promedio que no representa a nadie</strong></p>
+<p>Después de limpiar, el histograma del precio muestra dos picos bien separados: uno en ~$80 y otro en ~$1.200. El gerente te pide “el precio promedio de ventas”. ¿Se lo das?</p>
+<details class="answer"><summary>Ver respuesta</summary>
+<p>No, o al menos no solo. Esa es una distribución <b>bimodal</b>: hay <b>dos segmentos de producto distintos</b> (accesorios baratos y equipos caros) conviviendo en la tabla. El promedio va a caer en el <b>valle entre los dos picos</b>, un rango de precios donde no existe casi ningún producto: es un número técnicamente correcto que <b>no describe a nadie</b>. La respuesta correcta es separar los segmentos y reportar el promedio de cada uno — y esa recomendación <b>salió de la EDA</b>, no del modelo. Esto es exactamente a qué nos referimos con que la EDA produce hipótesis y decisiones.</p>
+</details>
 </div>
 <hr>
-<section id="material-adicional-opcional" class="level2" data-number="10.1">
-<h2 data-number="10.1" class="anchored" data-anchor-id="material-adicional-opcional"><span class="header-section-number">10.1</span> Material adicional (opcional)</h2>
-<p>Si quieres profundizar en los temas de esta semana:</p>
+<section id="material-adicional-opcional" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="material-adicional-opcional"><span class="header-section-number">12.1</span> Material adicional (opcional)</h2>
+<p>Si quieres profundizar por tu cuenta:</p>
 <ul>
-<li><strong>R for Data Science — Cap. 18 (Missing values):</strong> cobertura detallada de estrategias para NAs → <a href="https://r4ds.hadley.nz/missing-values">https://r4ds.hadley.nz/missing-values</a></li>
-<li><strong>Tidy Data (Hadley Wickham):</strong> artículo original que define qué significa un dataset “ordenado” → <a href="https://vita.had.co.nz/papers/tidy-data.pdf">https://vita.had.co.nz/papers/tidy-data.pdf</a></li>
-<li><strong>dplyr cheat sheet:</strong> referencia rápida de todas las funciones de manipulación → <a href="https://rstudio.github.io/cheatsheets/data-transformation.pdf">https://rstudio.github.io/cheatsheets/data-transformation.pdf</a></li>
+<li><strong>R for Data Science — Cap. 18 (Missing values):</strong> el tratamiento detallado de los <code>NA</code> → <a href="https://r4ds.hadley.nz/missing-values">r4ds.hadley.nz/missing-values</a></li>
+<li><strong>Tidy Data (Hadley Wickham):</strong> el artículo que define qué significa un dataset “ordenado” → <a href="https://vita.had.co.nz/papers/tidy-data.pdf">vita.had.co.nz/papers/tidy-data.pdf</a></li>
+<li><strong>dplyr cheat sheet:</strong> la referencia rápida de todos los verbos → <a href="https://rstudio.github.io/cheatsheets/data-transformation.pdf">rstudio.github.io/cheatsheets/data-transformation.pdf</a></li>
 </ul>
-<!-- Panel Environment -->
-<div id="env-panel" class="collapsed">
-  <div id="env-header" onclick="toggleEnvPanel()">
-    <span id="env-header-left">📦 Environment</span>
-    <span id="env-header-right">
-      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">🔄</button>
-      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">▲</button>
-    </span>
-  </div>
-  <div id="env-status">Esperando webR...</div>
-  <div id="env-body">
-    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
-  </div>
-</div>
-
-<script type="module">
-window.toggleEnvPanel = function() {
-  const panel = document.getElementById('env-panel');
-  const btn   = document.getElementById('env-toggle-btn');
-  panel.classList.toggle('collapsed');
-  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
-};
-
-async function getEnvData() {
-  if (!globalThis.mainWebR) return [];
-  try {
-    const shelter = await new globalThis.mainWebR.Shelter();
-    const result  = await shelter.evalR(`
-      local({
-        objs <- ls(envir = .GlobalEnv)
-        if (length(objs) == 0) return("")
-        info <- vapply(objs, function(nm) {
-          obj <- get(nm, envir = .GlobalEnv)
-          cls <- paste(class(obj), collapse = ", ")
-          len <- length(obj)
-          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
-          prev <- tryCatch({
-            if (is.data.frame(obj)) {
-              paste(names(obj), collapse = ", ")
-            } else if (is.function(obj)) {
-              a <- names(formals(obj))
-              paste0("function(", paste(a, collapse = ", "), ")")
-            } else if (is.atomic(obj) && len <= 6) {
-              paste(format(obj, digits = 4), collapse = ", ")
-            } else if (is.atomic(obj) && len > 6) {
-              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
-            } else if (is.list(obj)) {
-              paste0("List of ", len)
-            } else { "" }
-          }, error = function(e) "")
-          paste(nm, cls, len, dm, prev, sep = "\\t")
-        }, character(1))
-        paste(info, collapse = "\\n")
-      })
-    `);
-    const raw = await result.toString();
-    shelter.purge();
-    if (!raw || raw === '') return [];
-    return raw.split('\n').map(line => {
-      const p = line.split('\t');
-      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
-    });
-  } catch (e) {
-    console.warn('Env panel error:', e);
-    return [];
-  }
-}
-
-function renderEnv(items) {
-  const body   = document.getElementById('env-body');
-  const status = document.getElementById('env-status');
-  if (items.length === 0) {
-    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
-    status.textContent = '0 objetos';
-    return;
-  }
-  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
-  body.innerHTML = items.map(it => {
-    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
-    if (it.dim) {
-      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
-    } else {
-      meta += 'Length: ' + it.len;
-    }
-    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
-    return '<div class="env-item">' +
-           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
-           '  <div class="env-item-meta">' + meta + '</div>' +
-           prev +
-           '</div>';
-  }).join('');
-}
-
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-async function updateEnvPanel() {
-  const items = await getEnvData();
-  renderEnv(items);
-}
-window.refreshEnv = function() {
-  const btn = document.getElementById('env-refresh-btn');
-  btn.style.animation = 'none';
-  void btn.offsetWidth;
-  updateEnvPanel();
-};
-
-function moveWebRStatus() {
-  const anchor = document.getElementById('webr-status-anchor');
-  const statusArea = document.getElementById('qwebr-status-message-area');
-  if (anchor && statusArea) {
-    const wrapper = statusArea.closest('.quarto-title-meta');
-    if (wrapper) {
-      wrapper.style.display = 'inline';
-      wrapper.style.fontSize = '13px';
-      wrapper.style.marginLeft = '30px';
-      anchor.parentNode.insertBefore(wrapper, anchor);
-    }
-  }
-}
-
-async function init() {
-  while (!globalThis.qwebrInstance) {
-    await new Promise(r => setTimeout(r, 300));
-  }
-  await globalThis.qwebrInstance;
-  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
-  moveWebRStatus();
-
-  await new Promise(resolve => {
-    const check = setInterval(() => {
-      const btns = document.querySelectorAll('.qwebr-button-run');
-      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
-        clearInterval(check);
-        resolve();
-      }
-    }, 400);
-  });
-
-  const original = globalThis.qwebrComputeEngine;
-  globalThis.qwebrComputeEngine = async function(...args) {
-    const res = await original.apply(this, args);
-    setTimeout(updateEnvPanel, 150);
-    return res;
-  };
-
-  const panel = document.getElementById('env-panel');
-  if (panel.classList.contains('collapsed') ) {
-    toggleEnvPanel();
-  }
-  await updateEnvPanel();
-}
-
-init();
-</script>
+<p>Para esta semana, el podcast (o este documento) es suficiente. <strong>Nos vemos en clase: traemos una base bien sucia y la dejamos presentable.</strong> 🧹</p>
 </section>
 </section>
 
@@ -2839,13 +647,14 @@ init();
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
@@ -3193,122 +1002,6 @@ init();
   });
   </script>
 </div> <!-- /content -->
-<script type="module">
-// Handle cell initialization initialization
-qwebrCellDetails.map(
-  (entry) => {
-    // Handle the creation of the element
-    qwebrCreateHTMLElement(entry);
-    // In the event of interactive, initialize the monaco editor
-    if (entry.options.context == EvalTypes.Interactive) {
-      qwebrCreateMonacoEditorInstance(entry);
-    }
-  }
-);
-
-// Identify non-interactive cells (in order)
-const filteredEntries = qwebrCellDetails.filter(entry => {
-  const contextOption = entry.options && entry.options.context;
-  return ['output', 'setup'].includes(contextOption) || (contextOption == "interactive" && entry.options && entry.options.autorun === 'true');
-});
-
-// Condition non-interactive cells to only be run after webR finishes its initialization.
-qwebrInstance.then(
-  async () => {
-    const nHiddenCells = filteredEntries.length;
-    var currentHiddenCell = 0;
-
-
-    // Modify button state
-    qwebrSetInteractiveButtonState(`🟡 Running hidden code cells ...`, false);
-
-    // Begin processing non-interactive sections
-    // Due to the iteration policy, we must use a for() loop.
-    // Otherwise, we would need to switch to using reduce with an empty
-    // starting promise
-    for (const entry of filteredEntries) {
-
-      // Determine cell being examined
-      currentHiddenCell = currentHiddenCell + 1;
-      const formattedMessage = `Evaluating hidden cell ${currentHiddenCell} out of ${nHiddenCells}`;
-
-      // Update the document status header
-      if (qwebrShowStartupMessage) {
-        qwebrUpdateStatusHeader(formattedMessage);
-      }
-
-      // Display the update in non-active areas
-      qwebrUpdateStatusMessage(formattedMessage);
-
-      // Extract details on the active cell
-      const evalType = entry.options.context;
-      const cellCode = entry.code;
-      const qwebrCounter = entry.id;
-
-      if (['output', 'setup'].includes(evalType)) {
-        // Disable further global status updates
-        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
-        activeContainer.classList.remove('qwebr-cell-needs-evaluation');
-        activeContainer.classList.add('qwebr-cell-evaluated');
-
-        // Update status on the code cell
-        const activeStatus = document.getElementById(`qwebr-status-text-${qwebrCounter}`);
-        activeStatus.innerText = " Evaluating hidden code cell...";
-        activeStatus.classList.remove('qwebr-cell-needs-evaluation');
-        activeStatus.classList.add('qwebr-cell-evaluated');
-      }
-
-      switch (evalType) {
-        case 'interactive':
-          // TODO: Make this more standardized.
-          // At the moment, we're overriding the interactive status update by pretending its
-          // output-like. 
-          const tempOptions = entry.options;
-          tempOptions["context"] = "output"
-          // Run the code in a non-interactive state that is geared to displaying output
-          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, tempOptions);
-          break;
-        case 'output':
-          // Run the code in a non-interactive state that is geared to displaying output
-          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, entry.options);
-          break;
-        case 'setup':
-          const activeDiv = document.getElementById(`qwebr-noninteractive-setup-area-${qwebrCounter}`);
-
-          // Store code in history
-          qwebrLogCodeToHistory(cellCode, entry.options);
-
-          // Run the code in a non-interactive state with all output thrown away
-          await mainWebR.evalRVoid(`${cellCode}`);
-          break;
-        default: 
-          break; 
-      }
-
-      if (['output', 'setup'].includes(evalType)) {
-        // Disable further global status updates
-        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
-        // Disable visibility
-        activeContainer.style.visibility = 'hidden';
-        activeContainer.style.display = 'none';
-      }
-    }
-  }
-).then(
-  () => {
-    // Release document status as ready
-
-    if (qwebrShowStartupMessage) {
-      qwebrStartupMessage.innerText = "🟢 Ready!"
-    }
-  
-    qwebrSetInteractiveButtonState(
-      `<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>`, 
-      true
-    );  
-  }
-);
-</script>
 
 
 

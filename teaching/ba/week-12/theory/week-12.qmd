@@ -1,5 +1,5 @@
 ---
-title: "Unidad 9 - Árboles de Regresión"
+title: "Unidad 5 - Regresión: árboles, bosques y la ruta Lasso"
 subtitle: "Introducción al Business Analytics · Semana 12 · 06278-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
@@ -12,89 +12,153 @@ lang: es
 <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
 <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
 <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
-<span id="webr-status-anchor"></span>
 </div>
 
 <!--=================-->
 <!--=================-->
-# Objetivo de la semana
-
-El foco está en **regresión supervisada**: cuando la variable de resultado no es una categoría sino un **número continuo**, el árbol de decisión se adapta para predecirlo. Esta semana aprenderemos a construir e interpretar un árbol de regresión y a medir su desempeño con métricas que cuantifican el error en las mismas unidades del resultado.
-
-## Lo que cubriremos
-
-- De clasificación a regresión: qué cambia y qué se mantiene igual
-- Cómo predice el árbol de regresión: el promedio de la hoja
-- Métricas de error: MAE y RMSE — qué miden y cuándo usar cada una
-- El baseline de regresión: comparar contra predecir siempre el promedio
-- Sobreajuste en regresión: misma trampa, diferente métrica
+# Cómo estudiar esta semana
 
 ::: {.callout-key}
-**Conexión con semanas anteriores**
+**Este documento es la versión escrita del video de la semana**
 
-| Semana 11 | Semana 12 |
-|---|---|
-| Árbol de **clasificación** | Árbol de **regresión** |
-| Variable resultado: categoría (Aprobado/Rechazado) | Variable resultado: número continuo (nota 0–5.0) |
-| Hoja predice: categoría más frecuente | Hoja predice: promedio de los casos |
-| Métricas: accuracy, precisión, recall | Métricas: MAE, RMSE |
-| Baseline: clase mayoritaria | Baseline: predecir siempre el promedio global |
+1. 🎬 **Mira el video de la clase** — el enlace está en Intu. <!-- TODO: pegar aquí el enlace del video -->
+2. 📖 **Lee este documento** — con un playground para entrenar árboles de regresión y un dial interactivo para sentir cómo el Lasso "apaga" variables.
+3. ✅ **Presenta el quiz en Intu** antes de la clase.
 
-La lógica del árbol es idéntica: preguntas binarias, nodos, hojas, profundidad máxima. Lo que cambia es **qué hay en la hoja** y **cómo medimos el error**.
+Las métricas de esta semana — **MAE y RMSE** — las construiste en el video 2 de la [semana 10](../../week-10/theory/week-10.html), y la maquinaria de árboles (cptable, poda 1-SE, bosques) es la de la [semana 11](../../week-11/theory/week-11.html). Hoy todo eso se recicla — lo nuevo es el problema (predecir números) y un competidor de la familia lineal: el **Lasso**.
 :::
 
----
+::: {.callout-warning}
+**Antes de venir a clase: un paquete nuevo (1 minuto)**
+
+A los paquetes de la semana pasada se suma el de la regresión regularizada:
+
+```r
+install.packages("glmnet")
+```
+
+Verifica con `library(glmnet)`. Los demás (`rpart`, `rpart.plot`, `randomForest`) ya los tienes.
+:::
+
+**El plan:** la semana pasada predijiste categorías; esta semana predices **números** — notas, precios, cantidades. Primero el cambio mínimo: el árbol de la semana 11 con una sola pieza distinta (la hoja ya no vota: **promedia**). Luego el competidor nuevo: la **ruta lineal**, donde el modelo es una ecuación con coeficientes y el **Lasso** le pone un freno (λ) que encoge coeficientes y **expulsa variables** — un modelo que se poda solo y te entrega una fórmula publicable. Cerramos con el bosque en versión regresión y el torneo que enfrentará a todos en clase — con un final distinto al de la semana pasada.
 
 <!--=================-->
 <!--=================-->
-# De clasificación a regresión: ¿qué cambia?
+# Glosario de la semana
+
+::: {.glossary-grid}
+::: {.gloss-card}
+**Árbol de regresión** 🌳
+La misma máquina de preguntas de la semana 11, pero la hoja ya no predice una categoría: predice el **promedio** del target de los casos de entrenamiento que cayeron ahí.
+:::
+::: {.gloss-card}
+**Homogeneidad (varianza)** 🥣
+El criterio de corte: en clasificación era pureza de clases; ahora es **poca varianza** — que los casos de cada grupo tengan valores parecidos del target.
+:::
+::: {.gloss-card}
+**Modelo lineal** 📈
+Predecir con una ecuación: target ≈ intercepto + coeficiente₁·variable₁ + coeficiente₂·variable₂ + … La forma más antigua (y comunicable) de predicción.
+:::
+::: {.gloss-card}
+**Coeficiente** ⚖️
+Cuánto cambia la predicción cuando la variable sube una unidad, con las demás quietas. "Cada m² suma 2.7 millones" es un coeficiente hablando.
+:::
+::: {.gloss-card}
+**Regularización** 🧲
+Penalizar los coeficientes grandes al entrenar. El modelo solo "compra" un coeficiente si el ajuste lo justifica — un impuesto a la complejidad que combate el sobreajuste.
+:::
+::: {.gloss-card}
+**Lasso** 🪢
+La regularización con superpoder: no solo encoge coeficientes — puede dejarlos **exactamente en cero**. Las variables con coeficiente cero salen del modelo: selección automática.
+:::
+::: {.gloss-card}
+**Lambda (λ)** 🎚️
+La fuerza del freno del Lasso. λ = 0: modelo lineal sin freno. λ enorme: todos los coeficientes en cero (el modelo predice el promedio). Se elige con validación cruzada.
+:::
+::: {.gloss-card}
+**`lambda.1se`** ✂️
+La regla 1-SE de la semana 11, versión Lasso: el λ **más simple** cuyo error de CV empata (dentro de un error estándar) con el mínimo. `cv.glmnet` te lo entrega listo.
+:::
+::: {.gloss-card}
+**Bosque de regresión** 🌲
+Los 500 árboles de la semana 11, pero en vez de votar, **promedian** sus predicciones numéricas. Mismo bootstrap, misma amnesia de variables, misma pérdida de legibilidad.
+:::
+::: {.gloss-card}
+**Residual** 🔍
+Lo que el modelo no explicó: real − predicho, caso por caso. Mirar *dónde* se concentran los residuales grandes dice más que cualquier métrica promedio.
+:::
+:::
+
+<!--=================-->
+<!--=================-->
+# La revancha de PronosticaU
+
+¿Recuerdas el encargo 2 de la semana 10? Una universidad quería pronosticar la **nota final** de sus estudiantes para disparar alertas tempranas, y el proveedor **PronosticaU** ofrecía su modelo estrella… que tú mismo auditaste y hundiste: perdía contra la regla tonta de predecir el promedio (MAE 0.55 contra 0.40 del baseline). La universidad canceló el contrato.
+
+Ahora te llegó el correo: *"Ya que tumbaron al proveedor — constrúyanlo ustedes. Necesitamos un pronosticador que **sí** le gane al promedio, y necesitamos entender qué mira para confiar en él."*
+
+Esta semana tienes tres formas de construirlo, y las tres compiten en clase:
+
+1. **El árbol de regresión** — la máquina de la semana 11 con una pieza cambiada.
+2. **El Lasso** — la ruta lineal con freno: una ecuación que se poda sola.
+3. **El bosque de regresión** — los 500 árboles, ahora promediando.
+
+::: {.callout-connect}
+**El mapa completo del aprendizaje supervisado**
+
+Con esta semana cierras las dos casillas grandes de la semana 5: target categórico → clasificación (semana 11); target numérico → **regresión** (hoy). Métricas de la semana 10 en ambas. La semana 13 abre la caja distinta: cuando NO hay target (segmentación).
+:::
+
+<!--=================-->
+<!--=================-->
+# De categorías a números: ¿qué cambia?
+
+Casi nada — y esa es la buena noticia. La disciplina completa sobrevive intacta: partir train/test, baseline, validación cruzada, test una sola vez. Lo que rota es el contenido de tres casillas:
+
+| | Semana 11 (clasificación) | Semana 12 (regresión) |
+|---|---|---|
+| El target | Categoría (`Si`/`No`) | Número continuo (3.4, 250M) |
+| La hoja del árbol predice | La clase más frecuente | El **promedio** del grupo |
+| "Buen corte" significa | Grupos puros (una sola clase) | Grupos de **poca varianza** (valores parecidos) |
+| Métricas | Matriz, accuracy, precisión, recall | **MAE y RMSE** (semana 10, video 2) |
+| Baseline | Clase mayoritaria | **Predecir el promedio** de train |
+
+: {.striped tbl-colwidths="[30,35,35]"}
+
+::: {.callout-warning}
+**¿Regresión o clasificación? Lo decide la pregunta, no el algoritmo**
+
+*"¿Qué nota sacará?"* → número → regresión. *"¿Está en riesgo de perder?"* → categoría → clasificación. La misma base de datos sirve para ambas; lo que cambia es qué le prometiste al negocio. Ya viviste esta disyuntiva en la práctica de la semana 10 — y va a reaparecer en tu proyecto final.
+:::
+
+Si quieres la intuición del árbol de regresión narrada antes de leerla, este video del canal **Codificando Bits** (material complementario) recorre el algoritmo CART en versión regresión:
 
 {{< video https://www.youtube.com/watch?v=2Miw4bjzSF0 >}}
 
-La semana pasada el árbol respondía preguntas del tipo "¿a cuál categoría pertenece este caso?". Esta semana responde preguntas del tipo "¿cuánto vale esta variable para este caso?".
-
-El cambio parece pequeño pero tiene consecuencias importantes en cómo leemos los resultados y cómo los convertimos en decisiones.
-
-| Pregunta de negocio | Tipo de árbol | Variable resultado |
-|---|---|---|
-| ¿Este cliente pagará el crédito? | Clasificación | Sí / No |
-| ¿Este estudiante aprobará la materia? | Clasificación | Aprobó / Reprobó |
-| ¿Cuánto valdrá esta propiedad? | **Regresión** | Precio en millones |
-| ¿Qué nota final sacará este estudiante? | **Regresión** | Nota de 0.0 a 5.0 |
-
-::: {.callout-warning}
-**¿Cuándo usar regresión y cuándo clasificación?**
-
-La respuesta no está en el algoritmo sino en la **pregunta de negocio**. Si la respuesta es una categoría discreta ("sí/no", "alto/bajo", "A/B/C"), usa clasificación. Si la respuesta es un número continuo con matices ("3.2", "127,000", "0.87"), usa regresión. No tiene sentido convertir una nota de 3.8 en "Aprobado" si lo que necesitamos es saber exactamente cuánto sacó el estudiante para calcular promedios o detectar quiénes están en riesgo.
-:::
-
----
-
 <!--=================-->
 <!--=================-->
-# El árbol de regresión: cómo predice un número
+# El árbol de regresión: la hoja es un promedio
 
-## La intuición: grupos homogéneos y promedios
+## La pieza que cambia
 
-El árbol de regresión funciona igual que el de clasificación en su estructura: divide los datos con preguntas binarias buscando grupos internamente homogéneos. La diferencia está en **qué mide la homogeneidad** y **qué devuelve en la hoja**.
+La estructura es idéntica a la semana pasada: preguntas binarias, nodos, ramas, frenos (`maxdepth`, `cp`, mínimo por hoja). Los dos cambios:
 
-En clasificación, homogeneidad significaba que todos los casos de un grupo tuvieran la misma categoría. En regresión, homogeneidad significa que todos los casos de un grupo tengan **notas similares** — poca varianza dentro del grupo.
-
-Lo que devuelve la hoja no es una categoría: es el **promedio de las notas** de los estudiantes de entrenamiento que cayeron en ese grupo.
+1. **El criterio de corte**: el árbol ya no busca grupos *puros* — busca grupos **homogéneos en el número**: que las notas (o precios) de cada lado del corte se parezcan entre sí (poca varianza interna).
+2. **La predicción de la hoja**: el **promedio** del target de los casos de entrenamiento que cayeron ahí.
 
 ::: {.callout-key}
-**Predicción en hoja de regresión:**
+**La predicción de una hoja de regresión**
 
-$$\hat{y} = \frac{1}{n} \sum_{i \in \text{hoja}} y_i$$
+$$\hat{y}_{\text{hoja}} = \frac{1}{n} \sum_{i \in \text{hoja}} y_i$$
 
-En palabras: el árbol predice el **promedio** de los valores de resultado de los casos de entrenamiento que pertenecen a esa hoja.
+Si una hoja agrupa estudiantes con notas 3.2, 3.5, 3.8 y 4.0, cualquier estudiante nuevo que caiga ahí recibe la predicción **(3.2 + 3.5 + 3.8 + 4.0) / 4 = 3.625**. El árbol no inventa números: devuelve el promedio de los casos de entrenamiento que más se parecen al nuevo.
 
-Si una hoja contiene estudiantes con notas 3.2, 3.5, 3.8 y 4.0, la predicción para cualquier estudiante nuevo que caiga allí es **(3.2 + 3.5 + 3.8 + 4.0) / 4 = 3.625**.
+Consecuencia curiosa: un árbol de k hojas solo puede predecir **k valores distintos**. Su predicción es una escalera, no una rampa — por eso a los árboles les cuesta extrapolar suavemente.
 :::
 
-## Un árbol con profundidad 1: ejemplo de notas
+## Un árbol con profundidad 1
 
-Usemos **8 estudiantes** con dos variables: nota del parcial 1 (sobre 5.0) y porcentaje de asistencia (%). La variable de resultado es la nota final.
+**8 estudiantes**, dos variables (nota del parcial 1 y asistencia), target = nota final:
 
 | Estudiante | Parcial 1 | Asistencia (%) | Nota final |
 |---|---|---|---|
@@ -107,10 +171,7 @@ Usemos **8 estudiantes** con dos variables: nota del parcial 1 (sobre 5.0) y por
 | G | 4.2 | 85 | 4.1 |
 | H | 4.5 | 90 | 4.4 |
 
-El árbol prueba todos los posibles cortes y encuentra que **Parcial 1 ≥ 3.3** produce los dos grupos con menor varianza interna:
-
-- Rama izquierda (Parcial 1 < 3.3): A, B, C, D → notas entre 2.3 y 3.1 → **promedio = 2.725**
-- Rama derecha (Parcial 1 ≥ 3.3): E, F, G, H → notas entre 3.6 y 4.4 → **promedio = 4.0**
+El corte que produce los grupos más homogéneos es **Parcial 1 ≥ 3.3**:
 
 ```{=html}
 <div style="margin:1.5rem 0">
@@ -153,23 +214,7 @@ El árbol prueba todos los posibles cortes y encuentra que **Parcial 1 ≥ 3.3**
 </div>
 ```
 
-::: {.callout-key}
-**¿Cómo predice el árbol a un estudiante nuevo?**
-
-Llega un estudiante con Parcial 1 = 2.9:
-
-- ¿Parcial 1 ≥ 3.3? → **No** → rama izquierda → predicción: **2.73**
-
-Llega otro con Parcial 1 = 4.0:
-
-- ¿Parcial 1 ≥ 3.3? → **Sí** → rama derecha → predicción: **4.00**
-
-El árbol no inventa el número — devuelve el promedio de los estudiantes de entrenamiento que son más similares al caso nuevo según las preguntas que hace.
-:::
-
-## ¿Qué pasa con más profundidad?
-
-Con profundidad 2, el árbol puede hacer una segunda pregunta dentro de cada grupo para afinar la predicción:
+## ¿Y con una pregunta más?
 
 ```{=html}
 <div style="margin:1.5rem 0">
@@ -229,82 +274,20 @@ Con profundidad 2, el árbol puede hacer una segunda pregunta dentro de cada gru
 </div>
 ```
 
-Con profundidad 2, el árbol distingue dentro del grupo de notas bajas: los estudiantes con asistencia menor al 63% predicen **2.45**, los que asisten más predicen **3.00**. Las predicciones son más precisas — pero el modelo también se vuelve más complejo y puede sobreajustarse si los datos son pocos.
-
----
+La segunda pregunta afina la escalera: tres peldaños en vez de dos. Y aplica todo lo de la semana 11: cada nivel extra refina **y** arriesga memorizar — por eso el ritual es el mismo: dejar crecer, mirar la `cptable`, podar con la **regla 1-SE**. No aprendas nada nuevo aquí: reutiliza.
 
 <!--=================-->
 <!--=================-->
-# Métricas de regresión: ¿qué tan lejos estuvo el modelo?
+# Explóralo tú mismo: el árbol que predice números
 
-En clasificación medíamos si acertó o falló (correcto/incorrecto). En regresión no hay acierto perfecto: el modelo predijo 3.6 y la nota real fue 3.8. El error es 0.2 — ¿eso es mucho o poco? Las métricas de regresión cuantifican ese error de forma sistemática.
-
-Antes de ver las métricas, mira este video donde se explica cómo se calculan con un ejemplo paso a paso.
-
-<!-- TODO: agregar video métricas MAE y RMSE -->
-{{< video https://youtu.be/bSHrtLHCPvc >}}
-
-## MAE — Error Absoluto Medio
-
-El MAE promedia los errores absolutos de todas las predicciones:
-
-$$\text{MAE} = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|$$
-
-::: {.callout-key}
-**Cómo leerlo:** "En promedio, el modelo se equivoca por X unidades."
-
-Si el MAE es 0.3 en una escala de 0 a 5.0, el modelo se equivoca en promedio por 0.3 puntos. Eso equivale a decir que una nota real de 3.5 la predice entre 3.2 y 3.8.
-
-**Ventaja:** está en las mismas unidades que la variable de resultado. Fácil de comunicar.
-
-**Limitación:** trata igual un error de 0.1 y uno de 0.9 — no penaliza especialmente los errores grandes.
-:::
-
-## RMSE — Raíz del Error Cuadrático Medio
-
-El RMSE eleva los errores al cuadrado antes de promediarlos y luego saca la raíz:
-
-$$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}$$
-
-::: {.callout-key}
-**Cómo leerlo:** similar al MAE, pero penaliza más los errores grandes.
-
-Si el modelo predice 4.5 cuando la nota real es 2.0, ese error de 2.5 puntos pesa mucho más en el RMSE que en el MAE. Por eso el RMSE siempre es ≥ MAE.
-
-**Cuándo usarlo:** cuando los errores grandes son especialmente costosos. Por ejemplo, si el error en identificar a un estudiante en riesgo de reprobar tiene consecuencias graves, el RMSE captura mejor ese riesgo.
-:::
-
-## MAE vs. RMSE: ¿cuál usar?
-
-| Situación | Preferir |
-|---|---|
-| Los errores grandes son igual de malos que los pequeños | MAE |
-| Los errores grandes son especialmente costosos | RMSE |
-| Comunicar resultados a audiencias no técnicas | MAE (más intuitivo) |
-| Detectar modelos con predicciones muy erradas en algunos casos | RMSE |
-
-::: {.callout-warning}
-**Siempre compara contra el baseline.**
-
-El baseline de regresión es el modelo más simple posible: **predecir siempre el promedio global** de la variable de resultado. Si el promedio de notas finales es 3.2, el baseline predice 3.2 para todos.
-
-Calcula el MAE y RMSE de ese baseline. Si tu árbol no los mejora, no aprendió nada útil — cualquier persona que siempre dijera "3.2" lo haría igual de bien.
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Explóralo tú mismo: árbol de regresión interactivo
-
-Experimenta con los parámetros. El playground tiene dos pestañas: el **Mapa de predicción** (cómo varía la predicción en el espacio de datos) y la **Estructura del árbol** (los nodos y valores que predice en cada hoja).
+El playground de la semana 11, versión regresión. Dos pestañas: el **Mapa de predicción** (el espacio partido en regiones, ahora coloreadas por el *valor* que predicen) y la **Estructura del árbol** (los promedios en cada hoja).
 
 **¿Qué explorar?**
 
-1. Con profundidad 1: ¿cuántas hojas hay? ¿Cuántos valores distintos puede predecir el árbol?
-2. Sube la profundidad a 5 o 6: ¿el MAE en train sigue bajando? ¿Y en test? ¿Cuándo empieza el sobreajuste?
-3. Compara MAE y RMSE: ¿en qué dataset divergen más? ¿Por qué?
-4. Cambia al tab **Árbol**: ¿puedes leer el valor predicho en cada hoja?
+1. Con profundidad 1: ¿cuántos valores distintos puede predecir el árbol? Mira la escalera en el Mapa.
+2. Sube la profundidad a 5 o 6: ¿el MAE de train sigue bajando? ¿Y el de test? El dial de la semana 10, tercera aparición.
+3. Compara MAE y RMSE en el panel: ¿cuándo se separan? ¿Qué te dice esa brecha (pista: video 2 de la semana 10)?
+4. En la pestaña **Árbol**: ¿puedes leer el promedio que predice cada hoja?
 
 ```{=html}
 <div style="margin:1.5rem 0;">
@@ -635,99 +618,241 @@ setTimeout(()=>{resize();loadDS();},150);
 </div>
 ```
 
----
-
 <!--=================-->
 <!--=================-->
-# Del resultado al negocio: interpretar las métricas
+# La ruta lineal: el Lasso
 
-Un árbol de regresión entrenado sobre 300 estudiantes da estos resultados en el conjunto de prueba (75 estudiantes):
+El árbol responde con reglas y escalones. Hay otra tradición — más vieja que el Machine Learning — que responde con una **ecuación**:
 
-| Métrica | Baseline (siempre predice promedio) | Árbol de regresión |
-|---|---|---|
-| MAE | 0.48 pts | 0.21 pts |
-| RMSE | 0.61 pts | 0.28 pts |
+$$\text{nota final} \approx b_0 + b_1 \cdot \text{parcial}_1 + b_2 \cdot \text{parcial}_2 + b_3 \cdot \text{tareas} + \dots$$
 
-El árbol reduce el error a menos de la mitad respecto al baseline. En términos prácticos: en promedio se equivoca por 0.21 puntos en una escala de 5.0. Eso significa que una nota real de 3.5 la predice entre 3.3 y 3.7 — útil para identificar estudiantes en riesgo antes de que sea demasiado tarde.
+Cada coeficiente $b$ dice cuánto suma (o resta) una unidad de esa variable, con las demás quietas. Es el modelo más **comunicable** que existe: *"cada punto del parcial 2 aporta 0.27 a la nota final"* cabe en una frase de gerencia. La regresión lineal clásica elige los $b$ que minimizan el error cuadrático en train — hasta ahí, nada nuevo bajo el sol.
+
+El problema aparece con el sospechoso de siempre: **el sobreajuste**. Con muchas variables (y peor si algunas son ruido o se duplican entre sí), la recta tiene libertad de sobra para acomodarse al ruido de train: coeficientes enormes, signos absurdos, métricas infladas. El modelo lineal también necesita un freno.
 
 ::: {.callout-key}
-**¿Cuándo es "suficientemente bueno" un MAE?**
+**El freno Lasso: un impuesto a los coeficientes**
 
-Depende del uso. Si el modelo se usa para identificar estudiantes con nota predicha menor a 3.0 y ofrecerles tutorías, un MAE de 0.21 es más que suficiente — el modelo no necesita ser perfecto para ser útil. Si se usa para calcular el promedio exacto de la carrera, el requerimiento de precisión es mayor.
+El Lasso re-escribe el objetivo del entrenamiento: minimiza el error **más una multa proporcional al tamaño total de los coeficientes**, con una perilla λ que fija la tarifa:
 
-La pregunta no es "¿el MAE es bajo?" sino "**¿el error del modelo es tolerable para la decisión que quiero tomar?**"
+$$\min_b \; \underbrace{\text{error de ajuste}}_{\text{lo de siempre}} \; + \; \lambda \sum_j |b_j|$$
+
+Consecuencias:
+
+- Cada variable debe **pagarse su puesto**: solo conserva coeficiente si reduce el error más de lo que cuesta su multa.
+- Con λ suficiente, los coeficientes de las variables flojas caen **exactamente a cero** — quedan **fuera del modelo**. El Lasso se poda solo, como el árbol con `prune()`.
+- λ es el dial de complejidad (¡otra vez!): λ = 0 es la recta sin freno (riesgo de memorizar); λ gigante deja el modelo vacío prediciendo el promedio (subajuste).
 :::
 
-::: {.callout-connect}
-**Conexión con semana 9 y semana 11**
+¿Y quién elige λ? La respuesta ya la sabes de memoria: **la validación cruzada**. La función `cv.glmnet()` prueba una malla de valores de λ con CV de 10 pliegues y te reporta dos candidatos: `lambda.min` (el del error mínimo) y `lambda.1se` — el más simple que empata con el mínimo. Sí: **la regla 1-SE de la semana 11**, con otro nombre de variable. En este curso usamos `lambda.1se`.
 
-El sobreajuste ocurre igual en regresión que en clasificación: el MAE en train baja indefinidamente con más profundidad, pero el MAE en test empieza a subir en algún punto. La señal de sobreajuste es la **brecha creciente entre train y test**, no el valor absoluto de cada uno.
+Siente el dial — mueve λ y mira qué les pasa a los coeficientes del pronosticador de notas:
 
-Revisa en el playground: ¿en qué profundidad empieza a crecer el MAE en test mientras el de train sigue bajando?
+```{=html}
+<div class="widget-card" id="wg-lasso">
+  <style>
+    #wg-lasso .lasso-fila { display: flex; align-items: center; gap: 0.6em; margin-bottom: 0.45em; }
+    #wg-lasso .lasso-nom { flex: 0 0 6.5em; font-size: 0.85em; color: #334155; text-align: right; }
+    #wg-lasso .lasso-pista { flex: 1 1 auto; background: #f1f5f9; border-radius: 6px; height: 1.35em; position: relative; overflow: hidden; }
+    #wg-lasso .lasso-barra { position: absolute; left: 0; top: 0; bottom: 0; background: #2563eb; border-radius: 6px; transition: width 0.15s; }
+    #wg-lasso .lasso-cero .lasso-barra { background: #cbd5e1; }
+    #wg-lasso .lasso-val { flex: 0 0 4.5em; font-size: 0.85em; font-weight: 700; color: #1e3a5f; }
+    #wg-lasso .lasso-cero .lasso-val { color: #94a3b8; }
+    #wg-lasso .lasso-fuera { flex: 0 0 auto; font-size: 0.7em; font-weight: 700; color: #b91c1c; background: #fee2e2; border-radius: 999px; padding: 0.1em 0.55em; visibility: hidden; }
+    #wg-lasso .lasso-cero .lasso-fuera { visibility: visible; }
+  </style>
+  <div class="widget-head">🎚️ El dial λ — ¿qué variables sobreviven al freno?</div>
+  <div class="widget-body">
+    <div class="ofit-controls">
+      <span style="font-size:0.9em; color:#475569;">Freno λ</span>
+      <input type="range" id="lasso-slider" min="0" max="8" value="2" step="1" aria-label="Nivel del freno lambda">
+      <span class="ofit-cx" id="lasso-nivel">λ₂</span>
+    </div>
+    <div id="lasso-barras"></div>
+    <div class="ofit-boxes">
+      <div class="ofit-box"><div class="ofit-val" id="lasso-nvar">–</div><div class="ofit-lab">Variables en el modelo</div></div>
+      <div class="ofit-box ofit-test"><div class="ofit-val" id="lasso-cv">–</div><div class="ofit-lab">Error de CV (MAE)</div></div>
+    </div>
+    <div style="text-align:center; margin:0.4em 0;"><span class="ofit-verdict" id="lasso-verdict"></span></div>
+    <div class="widget-note" id="lasso-nota"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var VARS = ["parcial_2", "parcial_1", "tareas", "quices", "asistencia"];
+  // coeficientes (ilustrativos) para cada nivel de lambda, 0..8
+  var PATHS = [
+    [0.31, 0.30, 0.29, 0.27, 0.24, 0.20, 0.15, 0.08, 0.00],
+    [0.26, 0.25, 0.23, 0.20, 0.16, 0.11, 0.05, 0.00, 0.00],
+    [0.19, 0.18, 0.16, 0.14, 0.09, 0.04, 0.00, 0.00, 0.00],
+    [0.13, 0.11, 0.08, 0.05, 0.01, 0.00, 0.00, 0.00, 0.00],
+    [0.05, 0.03, 0.01, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00]
+  ];
+  var CVERR = [0.245, 0.235, 0.226, 0.222, 0.229, 0.246, 0.274, 0.318, 0.344];
+  var cont = document.getElementById("lasso-barras");
+  if (!cont) return;
+  var html = "";
+  VARS.forEach(function (v, i) {
+    html += '<div class="lasso-fila" id="lasso-f' + i + '">' +
+      '<span class="lasso-nom">' + v + '</span>' +
+      '<span class="lasso-pista"><span class="lasso-barra" id="lasso-b' + i + '"></span></span>' +
+      '<span class="lasso-val" id="lasso-v' + i + '">–</span>' +
+      '<span class="lasso-fuera">FUERA</span></div>';
+  });
+  cont.innerHTML = html;
+  var sl = document.getElementById("lasso-slider");
+  function pinta() {
+    var k = parseInt(sl.value, 10);
+    document.getElementById("lasso-nivel").textContent = "λ" + "₀₁₂₃₄₅₆₇₈"[k];
+    var nvar = 0;
+    PATHS.forEach(function (p, i) {
+      var c = p[k];
+      document.getElementById("lasso-b" + i).style.width = (c / 0.32 * 100) + "%";
+      document.getElementById("lasso-v" + i).textContent = c.toFixed(2);
+      document.getElementById("lasso-f" + i).classList.toggle("lasso-cero", c === 0);
+      if (c > 0) nvar++;
+    });
+    document.getElementById("lasso-nvar").textContent = nvar + " de 5";
+    document.getElementById("lasso-cv").textContent = CVERR[k].toFixed(3);
+    var v = document.getElementById("lasso-verdict"), n = document.getElementById("lasso-nota");
+    v.className = "ofit-verdict";
+    if (k <= 1) {
+      v.classList.add("v-sub"); v.textContent = "FRENO SUELTO";
+      n.innerHTML = "Con λ pequeño casi no hay multa: todas las variables adentro con coeficientes grandes. En datos con más ruido que estos, aquí vive el <b>sobreajuste lineal</b>.";
+    } else if (k <= 4) {
+      v.classList.add("v-dulce"); v.textContent = k === 3 ? "MÍNIMO DE CV 🎯" : "ZONA SANA";
+      n.innerHTML = (k === 3 ? "Aquí el error de CV toca su mínimo. " : (k === 4 ? "Un paso más de freno y el error casi no sube — este sería el <b>λ de la regla 1-SE</b>: el modelo más simple que empata con el mejor. " : "")) + "Nota el orden de expulsión: el freno saca primero a las variables que menos aportan (asistencia, luego quices).";
+    } else {
+      v.classList.add("v-sobre"); v.textContent = "FRENO EXCESIVO";
+      n.innerHTML = "La multa es tan cara que el modelo se queda sin variables: con todas en cero solo puede predecir el promedio — <b>el baseline con pasos extra</b>. Subajuste puro.";
+    }
+  }
+  sl.addEventListener("input", pinta);
+  pinta();
+})();
+</script>
+```
+
+*Coeficientes y errores ilustrativos — la forma del recorrido es la típica; los valores exactos los calcularás en clase con `cv.glmnet`.* Fíjate en la moraleja del dial: el Lasso convierte la selección de variables — que en la era manual era un debate de comité — en una consecuencia matemática del freno. Y el orden de expulsión es información de negocio pura: te dice qué mira (y qué ignora) el fenómeno.
+
+<!--=================-->
+<!--=================-->
+# El bosque, versión regresión
+
+El Random Forest de la semana 11 se recicla con un solo cambio: los 500 árboles ya no votan una clase — cada uno predice su número y el bosque entrega el **promedio**. Todo lo demás es idéntico: bootstrap, amnesia de variables en cada corte, importancia de variables como consuelo de interpretabilidad, y la misma advertencia — es una caja difícil de explicar.
+
+(De paso, un nombre que oirás en la industria: **XGBoost**, otro ensamble de árboles que en vez de promediarlos en paralelo los entrena *en cadena*, cada árbol corrigiendo los errores del anterior. Es el campeón habitual de las competencias de predicción; su lógica fina queda fuera de este curso, pero al leerlo en una oferta de trabajo ya sabes de qué familia viene.)
+
+Tu menú de regresión queda así:
+
+| | Lasso | Árbol podado | Bosque |
+|---|---|---|---|
+| Entrega | Una **ecuación** con coeficientes | **Reglas** legibles (escalera) | Solo la predicción + importancia |
+| Interpretabilidad | 🟢 La fórmula se publica | 🟢 Se dibuja | 🟠 Caja semi-negra |
+| Captura no linealidades | 🟠 No (es una recta) | 🟢 Sí (a escalones) | 🟢 Sí (suavizadas) |
+| Selección de variables | 🟢 Automática (ceros) | 🟢 Implícita (qué corta) | 🟠 Ranking, no selección |
+| Típicamente gana cuando… | El patrón es lineal | Hay reglas de quiebre claras | Patrones complejos y mucha interacción |
+
+: {.striped tbl-colwidths="[22,26,26,26]"}
+
+::: {.callout-remember}
+**¿Y quién gana el torneo?** La semana pasada ganó el bosque y quizás concluiste "el bosque siempre gana". Esta semana te espera una sorpresa que vale más que cualquier regla de pulgar: **el ganador depende de la forma del patrón**. Cuando el proceso que genera los datos es (casi) lineal, la recta con freno le gana a quinientos árboles — y además se deja leer. Por eso el profesional no se casa con un modelo: monta el torneo y deja que el test hable.
 :::
 
----
+<!--=================-->
+<!--=================-->
+# El torneo y el diagnóstico
 
-## Material adicional (opcional)
+El guion de la clase — cuarta vez que lo ves, primera vez con tres familias de modelos:
 
-- **An Introduction to Statistical Learning (ISLR)** — Capítulo 8: árboles de regresión y clasificación — [statlearning.com](https://www.statlearning.com)
-- **Towards Data Science: "MAE vs RMSE — when to use which?"** — artículo con ejemplos aplicados
+```{=html}
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>Parte train/test y calcula el baseline:</b> predecir siempre el promedio de train. Su MAE y RMSE son la vara.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>Entrena los tres candidatos</b> — Lasso (con <code>cv.glmnet</code> eligiendo λ), árbol (podado con 1-SE) y bosque. Cada uno usa su propia CV interna; el test sigue intacto.</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>Evalúa todos en test, una sola vez:</b> MAE y RMSE por modelo, en una tabla comparativa contra el baseline.</div></div>
+  <div class="pipe-step"><div class="pipe-num">4</div><div><b>Diagnostica al ganador antes de firmarlo:</b> el gráfico predicho-vs-real y la brecha MAE–RMSE. La métrica promedio aprueba el modelo; el diagnóstico te dice <em>dónde</em> falla.</div></div>
+</div>
+```
 
----
+Dos herramientas de diagnóstico que usarás en clase:
 
-## Checklist de preclase
+- **El gráfico predicho vs. real**: un punto por caso del test; la diagonal es la perfección. Nubes pegadas a la diagonal = modelo sano; abanicos que se abren en un extremo = el modelo falla justo ahí (¿notas altas subestimadas? ¿apartamentos de lujo mal tasados?).
+- **La brecha MAE–RMSE**: la aprendiste en la semana 10 y aquí paga arriendo — si el RMSE queda muy por encima del MAE, el modelo comete **embarradas ocasionales**. Encuentra en qué casos (mira los residuales más grandes) y decide si ese segmento necesita tratamiento aparte.
 
-Al llegar a clase debes poder explicar:
+<!--=================-->
+<!--=================-->
+# ¿Y esto cómo se ve en tu semestre?
 
-- [ ] ¿Qué diferencia hay entre un árbol de clasificación y uno de regresión?
-- [ ] ¿Qué valor devuelve el árbol de regresión en cada hoja?
-- [ ] ¿Cómo se calcula el MAE? ¿Y el RMSE? ¿Qué mide cada uno?
-- [ ] ¿Por qué el RMSE es siempre ≥ al MAE?
-- [ ] ¿Qué es el baseline de regresión? ¿Cómo se construye?
-- [ ] ¿Qué significa que un árbol de regresión esté sobreajustado? ¿Cómo lo detectas?
-- [ ] ¿Cuándo preferirías MAE sobre RMSE para reportar el error?
+- **La práctica**: la revancha completa — el pronosticador de notas de la universidad, con el torneo baseline → Lasso → árbol → bosque, la lectura de los coeficientes y el gráfico predicho-vs-real. Spoiler responsable: el podio de esta semana no es el de la semana pasada.
+- **El taller**: la inmobiliaria InmoValle quiere un **avaluador instantáneo** de apartamentos para su página web. Torneo completo, lectura de la ecuación del Lasso (¿cuánto vale un m²? ¿qué variable sale expulsada?) y un memorando con la letra menuda.
+- **La semana 13**: se acaba el target — segmentación con k-means, el mundo no supervisado.
+- **Tu proyecto final**: si tu pregunta es de regresión (predicción), este es el arsenal completo, con una regla de oro para la sustentación: MAE/RMSE **en test**, contra el baseline del promedio, y el jurado siempre pregunta por la brecha MAE–RMSE.
 
-## Preguntas de comprensión
+<!--=================-->
+<!--=================-->
+# Para pensar 🤔
 
-**1.** Un árbol de regresión predice la nota final de 6 estudiantes del conjunto de prueba. Los resultados son:
+1. El coeficiente del Lasso dice: "cada baño adicional suma ~12 millones al precio". Un cliente concluye: *"entonces si construyo un baño, mi apartamento vale 12 millones más"*. ¿Por qué esa lectura es un salto al vacío? (Pista: el modelo describe el mercado, no interviene en él.)
+2. Un árbol de regresión con 6 hojas solo puede predecir 6 precios distintos. ¿Por qué eso casi no le pesa en el MAE global, pero puede ser un problema serio si la inmobiliaria lo usa para tasar apartamentos muy por fuera del rango histórico?
+3. Tu Lasso expulsó la variable `habitaciones` (coeficiente 0) pero el bosque le da importancia media. ¿Contradicción? (Pista: ¿qué otra variable del dataset ya "cuenta" las habitaciones?)
 
-| Estudiante | Nota real | Nota predicha |
-|---|---|---|
-| 1 | 2.8 | 3.1 |
-| 2 | 3.5 | 3.3 |
-| 3 | 4.0 | 3.9 |
-| 4 | 1.5 | 2.2 |
-| 5 | 4.8 | 4.6 |
-| 6 | 3.2 | 3.0 |
+<!--=================-->
+<!--=================-->
+# Checklist de salida
 
-Calcula el MAE y el RMSE. ¿Cuál estudiante contribuye más al RMSE y por qué?
+Al terminar el video y esta lectura debes poder explicar:
 
-<details>
-<summary>Ver respuesta</summary>
+- [ ] ¿Qué predice la hoja de un árbol de regresión y qué busca cada corte?
+- [ ] ¿Por qué la predicción del árbol es una "escalera" y qué limitación implica?
+- [ ] ¿Qué re-usas tal cual de la semana 11 para podar? (cptable, xerror, regla 1-SE)
+- [ ] ¿Qué multa agrega el Lasso al entrenamiento y qué efecto tiene sobre los coeficientes?
+- [ ] ¿Por qué el Lasso hace selección automática de variables y por qué eso es oro para el negocio?
+- [ ] ¿Qué es `lambda.1se` y con qué regla de la semana 11 rima?
+- [ ] ¿Qué cambia en el Random Forest al pasar de clasificación a regresión?
+- [ ] ¿Qué diagnósticos corres antes de firmar al ganador del torneo?
 
-Errores absolutos: |2.8-3.1|=0.3, |3.5-3.3|=0.2, |4.0-3.9|=0.1, |1.5-2.2|=0.7, |4.8-4.6|=0.2, |3.2-3.0|=0.2
+<!--=================-->
+<!--=================-->
+# Preguntas de comprensión
 
-**MAE** = (0.3+0.2+0.1+0.7+0.2+0.2)/6 = 1.7/6 = **0.283**
+**1.** Una hoja de un árbol de regresión contiene 5 apartamentos de entrenamiento con precios 210, 230, 250, 260 y 300 millones. (a) ¿Qué precio predice esa hoja para un apartamento nuevo que caiga ahí? (b) Si el apartamento nuevo realmente vale 410 millones, ¿cuál es su residual y qué pudo salir mal?
 
-Errores cuadráticos: 0.09, 0.04, 0.01, 0.49, 0.04, 0.04 → suma = 0.71
+<details class="answer"><summary>Ver respuesta</summary>
 
-**RMSE** = √(0.71/6) = √0.118 = **0.344**
+(a) El promedio: (210+230+250+260+300)/5 = **250 millones**. (b) Residual = real − predicho = 410 − 250 = **+160 millones**: el modelo subestimó gravemente. Causa probable: el apartamento nuevo es de un segmento que casi no existe en esa hoja (o en el entrenamiento) — p. ej., un piso de lujo. Los árboles no extrapolan: nunca predicen por fuera del rango de promedios de sus hojas, así que los casos extremos siempre quedan recortados hacia el centro.
 
-El estudiante 4 (error de 0.7) contribuye más al RMSE: su error cuadrático (0.49) representa el 69% de la suma total de errores cuadráticos. En el MAE su contribución es el 41%. El RMSE penaliza más ese error grande.
 </details>
 
-**2.** Un árbol con profundidad 6 da MAE = 0.08 en train y MAE = 0.39 en test. El baseline tiene MAE = 0.45 en test. ¿Es un buen modelo? ¿Qué harías?
+**2.** Corres `cv.glmnet` y te reporta `lambda.min = 0.01` (error CV 0.220) y `lambda.1se = 0.04` (error CV 0.228, y con dos variables menos). ¿Cuál eliges para el modelo del proyecto y cómo defiendes la elección ante el jurado?
 
-<details>
-<summary>Ver respuesta</summary>
+<details class="answer"><summary>Ver respuesta</summary>
 
-El modelo mejora el baseline (0.39 < 0.45), así que sí aprendió algo útil. Pero la brecha enorme entre train (0.08) y test (0.39) indica sobreajuste: el árbol memorizó los datos de entrenamiento en vez de aprender un patrón generalizable. Lo que haría es reducir la profundidad máxima o aumentar el mínimo de muestras por hoja hasta que train y test converjan a un valor parecido — aunque eso implique aceptar un MAE en train un poco más alto.
+`lambda.1se`. La diferencia de error (0.228 vs 0.220) está dentro del ruido de la propia CV — estadísticamente es un empate — y el modelo de `lambda.1se` es más simple: dos variables menos que mantener, explicar y recolectar. Es la misma lógica de la poda 1-SE de los árboles: **entre modelos empatados, el más simple generaliza mejor y se defiende mejor**. Ante el jurado: "elegí el modelo más parsimonioso cuyo desempeño de validación empata con el mínimo".
+
 </details>
 
-**3.** Una facultad quiere usar el modelo para identificar estudiantes en riesgo de reprobar (nota < 3.0) antes del parcial final. ¿Qué métrica priorizarías para evaluar el modelo — MAE o RMSE? ¿Por qué?
+**3.** El torneo de una cadena de tiendas para pronosticar ventas semanales termina así (MAE en test): baseline 48, Lasso 31, árbol 29, bosque 22. Pero el gerente comercial necesita explicar a cada tienda *por qué* su pronóstico es el que es. ¿Qué recomiendas: el bosque, el árbol, u otra cosa?
 
-<details>
-<summary>Ver respuesta</summary>
+<details class="answer"><summary>Ver respuesta</summary>
 
-Dependería de si los errores grandes importan más que los pequeños. En este caso, predecir 2.1 cuando la nota real es 2.8 (error = 0.7) es mucho más costoso que predecir 3.3 cuando la real es 3.5 (error = 0.2): en el primer caso el estudiante queda por debajo del umbral de riesgo sin detectarse. Ese tipo de error grave es exactamente lo que el RMSE penaliza más. Sin embargo, si lo que importa es identificar correctamente quién está cerca del 3.0, también sería útil analizar cuántos estudiantes en riesgo real el modelo no detecta — lo que se acerca al concepto de recall que vimos en la semana 11, aplicado a regresión.
+Depende del uso, y se puede partir en dos: para **planear inventario** (donde solo importa acertar), el bosque — 6 puntos menos de MAE que el árbol son plata. Para **conversar con las tiendas**, el árbol de 29 (o el Lasso) como "vocero": sus reglas explican la lógica general del pronóstico. Es la solución vocero de la semana 11: decidir con el modelo potente, comunicar con el legible — documentando que son dos piezas con roles distintos. Recomendar un único modelo "para todo" era la trampa de la pregunta.
+
 </details>
+
+**4.** En el dataset de apartamentos, `area_m2` y `habitaciones` están fuertemente correlacionadas (los apartamentos grandes tienen más cuartos). El Lasso dejó `habitaciones` casi en cero. ¿Significa que las habitaciones "no importan" para el precio? ¿Qué frase honesta pondrías en el informe?
+
+<details class="answer"><summary>Ver respuesta</summary>
+
+No. Significa que, **con el área ya en el modelo**, las habitaciones no agregan información *adicional*: el área ya las "cuenta". Si quitaras el área, las habitaciones heredarían un coeficiente grande. Frase honesta: *"el número de habitaciones no aporta poder predictivo adicional una vez conocida el área"* — muy distinto de "las habitaciones no importan". Los coeficientes del Lasso se leen siempre condicionados a las demás variables del modelo (y describen asociación, no causalidad).
+
+</details>
+
+<!--=================-->
+<!--=================-->
+# Material adicional
+
+- 📘 **ISLR** — capítulo 6 (regularización y Lasso) y capítulo 8 (árboles y bosques): [statlearning.com](https://www.statlearning.com){target="_blank"}
+- 🎥 **StatQuest — Regularization Part 2: Lasso** (en inglés): [youtube.com/@statquest](https://www.youtube.com/@statquest){target="_blank"}
+- 🖼️ **MLU-Explain — Linear Regression y Random Forest** (visuales interactivos): [mlu-explain.github.io](https://mlu-explain.github.io){target="_blank"}
+- 🎬 **Codificando Bits** — el video de árboles CART embebido arriba y su serie en español: [youtube.com/@codificandobits](https://www.youtube.com/@codificandobits){target="_blank"}

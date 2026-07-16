@@ -1,0 +1,132 @@
+---
+title: "Unidad 1 - Taller 4: la analítica de una cafetería"
+subtitle: "Taller práctico evaluable · Semana 4 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Instrucciones generales
+
+**El caso:** una cadena de cafeterías con **8 sucursales** en Cali, Bogotá y Medellín te contrata para su primer análisis de datos. Te entregan el registro de **120 transacciones** del primer trimestre y tres preguntas: ¿cómo va el negocio?, ¿qué sucursales jalonan y cuáles preocupan?, ¿qué harías tú? Todo lo que practicaste hoy — verbos, KPIs, gráficos — aplicado a otro negocio.
+
+::: {.callout-key}
+**Cómo funciona este taller**
+
+- Es **individual** y **evaluable**, y se desarrolla en el tiempo restante de la clase (⏱️ diseñado para **≈ 55 minutos**).
+- Se resuelve **sin la guía del profesor**: todo lo necesario está en este documento, en la [práctica](../practice/week-04.html) y en la [teoría](../theory/week-04.html). El profesor solo atiende dudas logísticas.
+- Herramienta: **RStudio**, dentro de tu proyecto `intro_ba`.
+:::
+
+**Los datos:** descarga 📄 [**cafeteria.csv**](cafeteria.csv) y guárdalo en la carpeta `data/` de tu proyecto. Contiene 120 filas con 7 columnas: `sucursal`, `ciudad`, `producto`, `tipo` (Bebida/Alimento), `precio`, `unidades` y `mes` (Ene, Feb, Mar).
+
+**El entregable** son **tres archivos** (si Intu solo acepta uno, comprímelos en un `.zip`):
+
+- 📄 `apellido_nombre_taller4.R` — el script con todos los puntos, comentado.
+- 🖼️ Los **dos gráficos** del Punto 4, exportados con `ggsave()` como `.png`.
+- 📤 Entrega: en el espacio habilitado en Intu antes de terminar la clase. <!-- TODO: pegar aquí el enlace de entrega -->
+
+::: {.callout-warning}
+**Reglas de juego (la rúbrica las aplica)**
+
+1. **El script debe correr completo** de arriba a abajo (con `cafeteria.csv` en `data/`). Se revisa con *Source*: si se detiene en un error, se califica hasta esa línea. Prueba de fuego antes de entregar: `rm(list = ls())` → *Source*.
+2. **Ruta relativa obligatoria**: los datos se leen con `read.csv("data/cafeteria.csv")`. Una ruta absoluta (`C:/Users/...`) descuenta en presentación — va contra todo lo de la semana 3.
+3. **Las interpretaciones son tuyas**, en comentarios de 1-2 líneas. Se evalúa que **leas** el resultado, no que lo parafrasees ("la tabla muestra ingresos" no dice nada; "Medellín tiene el ticket más alto pese a vender menos" sí).
+4. **Uso de IA:** permitido solo para explicar errores o conceptos después de intentarlo tú; prohibido pedir la solución de un punto. Declaración obligatoria al final del script.
+:::
+
+**Distribuye tu tiempo:** Punto 1 ≈ 8 min · Punto 2 ≈ 10 min · Punto 3 ≈ 15 min · Punto 4 ≈ 17 min · Punto 5 ≈ 5 min.
+
+<!--=================-->
+<!--=================-->
+# Punto 1 — Setup y carga (0.5 puntos)
+
+a. Crea el script `apellido_nombre_taller4.R` en `scripts/`, con el **encabezado** estándar (nombre, código, fecha, qué hace) y el bloque de librerías (`require(pacman)` + `p_load(dplyr, ggplot2)`).
+b. Lee los datos con **ruta relativa** y guárdalos en el objeto `cafe`.
+c. Aplica la radiografía (`str()`, `head()`) y responde en un comentario: ¿cuántas observaciones y variables hay, y qué representa **una fila** de esta base?
+
+<!--=================-->
+<!--=================-->
+# Punto 2 — Transformaciones (1.0 punto)
+
+Cada literal es una línea (o pipe corto) + lo que se pida en comentario:
+
+a. Filtra las transacciones de **Cali** y guárdalas en `ventas_cali`. En un comentario: ¿cuántas filas quedaron?
+b. Filtra las **Bebidas con precio mayor a 5.000** (dos condiciones). ¿Cuántas son?
+c. Crea la columna `ingreso` (= `precio * unidades`), **sobrescribiendo** `cafe` — la usarás en todo lo que sigue.
+d. Muestra las **5 transacciones de mayor ingreso** (ordena y usa `head()`). En un comentario: ¿qué producto domina ese top 5?
+
+<!--=================-->
+<!--=================-->
+# Punto 3 — La tabla de KPIs (1.5 puntos)
+
+a. **El pulso global:** con `summarise()`, calcula en una sola tabla `ingreso_total`, `ticket_promedio` y `n_transacciones` del trimestre.
+b. **El desagregado:** construye `kpis_ciudad` — las mismas tres métricas **por ciudad**, ordenadas por ingreso de mayor a menor (recuerda `.groups = "drop"`).
+c. En un comentario de 1-2 líneas tuyas: ¿la ciudad que más ingreso genera es también la del **ticket promedio** más alto? ¿Qué te dice eso del tipo de negocio en cada ciudad?
+d. ¿Qué **producto** aparece en más transacciones? (una línea, con el atajo visto en clase).
+e. Exporta `kpis_ciudad` a `output/kpis_ciudad.csv` con `write.csv()` (sin nombres de fila).
+
+<!--=================-->
+<!--=================-->
+# Punto 4 — Los gráficos del dueño (1.5 puntos)
+
+Dos gráficos, con **geometrías distintas**, ambos con: título que diga el **mensaje** (no "gráfico de..."), ejes etiquetados con unidades, un tema profesional, y exportados con `ggsave()` a `output/`. Debajo de cada uno, tu **interpretación en 1-2 líneas** como comentario.
+
+a. **Obligatorio — el ranking:** ingreso total por **sucursal**, en barras **horizontales y ordenadas** (son 8 nombres largos: ya sabes por qué horizontales). Pista: primero la tabla (`group_by + summarise`), luego `reorder()`.
+b. **A tu elección**, según la pregunta que prefieras responder:
+   - *¿El negocio viene creciendo?* → línea del ingreso total por `mes` (Ene, Feb, Mar).
+   - *¿Bebidas y alimentos se comportan distinto?* → dispersión de `precio` vs. `unidades` coloreada por `tipo`.
+
+::: {.callout-workflow}
+**Pista de calidad:** en el gráfico (a), fíjate en los dos extremos — la sucursal líder y la más floja — porque los necesitarás en el Punto 5. Y recuerda el checklist del gráfico listo para compartir: mensaje en el título, unidades en los ejes, fuente en el caption.
+:::
+
+<!--=================-->
+<!--=================-->
+# Punto 5 — La decisión (0.5 puntos)
+
+Cierra tu script con un comentario de **2-3 líneas escritas por ti**: si fueras el dueño de la cadena, ¿qué **única acción concreta** tomarías el próximo mes, y qué número tuyo la respalda? (Ejemplos del *tipo* de acción — no los copies: cerrar o relanzar una sucursal, cambiar el menú de una ciudad, replicar una fórmula que funciona, preparar inventario para una tendencia.)
+
+> La vara de calidad: una acción **específica** (+ dónde, + basada en qué cifra). "Vender más" no es una decisión; "duplicar la pauta en X porque Y" sí.
+
+<!--=================-->
+<!--=================-->
+# Rúbrica de evaluación
+
+| Punto | Qué se evalúa | Puntos |
+|---|---|---:|
+| **1. Setup y carga** | Encabezado + librerías (0.2); ruta relativa correcta (0.2); lectura de la radiografía en comentario (0.1) | 0.5 |
+| **2. Transformaciones** | Filtro simple con conteo (0.25); filtro doble (0.25); `ingreso` creado y persistido (0.25); top 5 ordenado + lectura (0.25) | 1.0 |
+| **3. KPIs** | Resumen global (0.3); `kpis_ciudad` completo y ordenado (0.5); interpretación propia ingreso vs. ticket (0.3); producto más frecuente (0.2); export a `output/` (0.2) | 1.5 |
+| **4. Gráficos** | Ranking por sucursal: horizontal, ordenado, pulido (0.6); segundo gráfico con otra geometría, pulido (0.5); `ggsave()` de ambos (0.2); interpretaciones propias (0.2) | 1.5 |
+| **5. Decisión** | Acción específica + cifra propia que la respalda | 0.5 |
+| **Total** | | **5.0** |
+
+: El script que no corre completo se evalúa hasta la línea del primer error. La presentación (encabezado, puntos numerados, rutas relativas, comentarios legibles) se descuenta hasta -0.3 si dificulta la revisión. {.striped tbl-colwidths="[24,64,12]"}
+
+<!--=================-->
+<!--=================-->
+# Declaración de uso de IA
+
+Cierra tu script con este bloque diligenciado (obligatorio, aunque sea para decir que no la usaste):
+
+```r
+## ============================================
+## DECLARACIÓN DE USO DE IA
+## Herramienta y modelo usados: _______________ (o "No usé IA")
+## La usé para: _______________________________
+## Verifiqué por mi cuenta: ____________________
+## ============================================
+```
+
+*La política de siempre: la IA para **entender** (errores, conceptos, un detalle de sintaxis como el del separador de miles), no para resolver los puntos. En la semana 8 le daremos la vuelta — la IA escribirá análisis completos y tu trabajo será auditarlos. Para auditar, primero hay que saber hacer.*

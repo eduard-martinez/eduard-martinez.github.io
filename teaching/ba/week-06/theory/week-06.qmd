@@ -1,5 +1,5 @@
 ---
-title: "Unidad 4 - Fuentes, Calidad de Datos y EDA"
+title: "Unidad 2 - Fuentes, calidad de datos y EDA"
 subtitle: "Introducción al Business Analytics · Semana 6 · 06278-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
@@ -12,949 +12,435 @@ lang: es
 <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
 <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
 <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
-<span id="webr-status-anchor"></span>
 </div>
 
 <!--=================-->
 <!--=================-->
-# Objetivo de la semana
+# Cómo estudiar esta semana
 
-Esta semana NO hablaremos de modelos ni de gráficos sofisticados. El foco está en algo más fundamental: **saber qué tan confiables son tus datos antes de usarlos**.
+Esta semana la fundamentación teórica llega en formato **podcast**: *Fuentes, calidad de datos y EDA*.
 
 ::: {.callout-key}
-**La pregunta central de esta semana**
+**Este documento es la versión escrita del podcast**
 
-Antes de analizar, siempre debes poder responder:
+Puedes **escuchar** el episodio, **leer** este documento, o hacer ambas cosas: cubren el mismo contenido. Este documento no es una transcripción literal; es una versión organizada para facilitar el estudio, con glosario y resúmenes por bloque.
 
-- ¿De dónde vienen estos datos y cómo fueron recolectados?
-- ¿Hay valores faltantes, duplicados o imposibles?
-- ¿Las categorías están escritas de forma consistente?
-- ¿Hay valores atípicos que distorsionarán cualquier cálculo?
-
-Un modelo entrenado con datos sucios produce resultados sucios. La limpieza no es opcional — es el paso que protege todas las decisiones que vienen después.
+- 🎧 **Podcast:** disponible en Intu. <!-- TODO: pegar aquí el enlace del podcast -->
+- 📝 **Quiz de teoría:** en Intu, antes de la sesión de clase.
+- 🧑‍💻 **En clase:** aquí no hay laboratorio de R. **El código va todo en la sesión presencial**, sobre un dataset intencionalmente sucio. Lo de hoy es el criterio; lo de la clase, las manos.
 :::
+
+::: {.callout-warning}
+**Antes de venir a clase: 1 paquete (30 segundos, con internet)**
+
+En la sesión usarás `skimr` para la radiografía de la base. Instálalo **antes** de llegar — en clase, con el wifi del salón colapsado, es un mal momento:
+
+```r
+install.packages("skimr")
+```
+
+Verifica que quedó: `library(skimr)` no debe arrojar error.
+:::
+
+⚠️ **Por qué esta semana se estudia distinto:** en la semana 4 aprendiste los verbos de `dplyr` con datos de juguete — impecables, sin un solo `NA`. Ese mundo no existe. Esta semana conocemos los datos como llegan de verdad: con errores de captura, categorías escritas de cinco formas distintas y valores imposibles. El podcast te da el **criterio** para diagnosticarlos; la clase te da la **práctica** para arreglarlos.
 
 ## Lo que aprenderemos esta semana
 
-**1. Entender el origen y tipo de los datos**
+**1. De dónde vienen los datos**
 
-- Fuentes primarias vs. secundarias
-- Datos estructurados vs. no estructurados
-- Por qué el origen importa para la interpretación
+- Fuentes primarias y secundarias, y qué suciedad es típica de cada una.
+- Por qué conocer el origen te dice **qué errores buscar**.
 
-**2. Diagnosticar problemas de calidad**
+**2. Las cuatro dimensiones de la calidad**
 
-- Visión general con `skim()`: faltantes, tipos, distribuciones
-- Revisión de categorías con `unique()` y `table()`
-- Duplicados con `duplicated()`
+- Completitud, consistencia, validez y unicidad: el checklist que se aplica a cualquier base, siempre.
 
-**3. Limpiar con dplyr**
+**3. Los tres problemas clásicos**
 
-- Estandarizar categorías, corregir tipos, filtrar imposibles
-- Del dataset "sucio" al dataset "listo para analizar"
+- Valores faltantes: diagnosticar y decidir (eliminar, imputar, marcar).
+- Outliers: la regla del IQR y la pregunta que importa (¿error o caso real?).
+- Categorías inconsistentes: el error más silencioso y más caro.
 
-**4. EDA: explorar antes de modelar**
+**4. Qué es y para qué sirve la EDA**
 
-- Resumen descriptivo con `skim()`
-- Visualizaciones exploratorias con `ggplot2`
-- El propósito del EDA no es "hacer gráficos bonitos" — es **encontrar señales y anomalías** antes de comprometer decisiones
+- El flujo *raw → clean → analysis-ready* y el acta de decisiones.
 
----
+::: {.callout-connect}
+**¿Y esto qué tiene que ver con lo que ya sabemos?**
 
-<!--=================-->
-<!--=================-->
-# Fuentes de datos
-
-Antes de limpiar, necesitamos entender de dónde vienen los datos. El origen determina qué errores son probables.
-
-::: {.callout-key}
-**Fuente primaria vs. secundaria**
-
-- **Primaria:** los datos los recolectaste tú (o tu organización) directamente para este análisis. Ejemplos: encuesta de satisfacción, registro de ventas propio, experimento A/B.
-  - *Ventaja:* sabes exactamente qué pregunta se hizo y cómo.
-  - *Riesgo típico:* errores de captura, formularios mal diseñados.
-
-- **Secundaria:** alguien más los recolectó para otro propósito. Ejemplos: datos del DANE, Nielsen, Kaggle, API de redes sociales.
-  - *Ventaja:* mayor volumen, menor costo.
-  - *Riesgo típico:* no conoces el proceso de recolección; las definiciones pueden no coincidir con las tuyas.
+La semana pasada dibujamos el mapa de siete etapas. Esta semana bajamos a las **etapas 3 y 4** — limpieza y EDA — que juntas se llevan el **80% del tiempo** de cualquier proyecto real. Y todo lo de la semana 4 (`filter`, `mutate`, `group_by`, `ggplot`) deja de ser un ejercicio de sintaxis: **son las herramientas con las que se limpia**. Además, la EDA es literalmente la **Entrega 2** de tu proyecto (semana 9).
 :::
 
-En este curso trabajamos principalmente con **datos estructurados**: tablas con filas (observaciones) y columnas (variables).
+<!--=================-->
+<!--=================-->
+# Glosario de la semana
+
+```{=html}
+<div class="glossary-grid">
+  <div class="gloss-card"><span class="gloss-term">Fuente primaria</span><span class="gloss-def">Datos que recolectaste tú o tu organización para este análisis. Sabes exactamente cómo se preguntaron; el riesgo está en la captura.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Fuente secundaria</span><span class="gloss-def">Datos que alguien más recolectó para otro propósito (DANE, Kaggle, una API). Más volumen y menos costo, pero no controlas las definiciones.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Dato estructurado</span><span class="gloss-def">Una tabla con filas (observaciones) y columnas (variables). Es con lo que trabajamos en este curso: CSV, Excel, SQL.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Diccionario de variables</span><span class="gloss-def">El documento que dice qué significa cada columna, en qué unidad está y qué valores admite. Si no existe, tu primer trabajo es construirlo.</span></div>
+  <div class="gloss-card"><span class="gloss-term">NA</span><span class="gloss-def">El valor faltante en R. No es un cero ni un texto vacío: es "aquí no hay dato", y se contagia a cualquier cálculo que lo toque.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Imputar</span><span class="gloss-def">Reemplazar un valor faltante por una estimación (la media, la mediana, un valor por defecto). Es una decisión, no un trámite: siempre se documenta.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Outlier</span><span class="gloss-def">Una observación que se sale del patrón. Puede ser un error de captura o el caso más interesante de la base — distinguirlo es tu trabajo.</span></div>
+  <div class="gloss-card"><span class="gloss-term">IQR</span><span class="gloss-def">(<i>Rango intercuartílico</i>) La distancia entre el percentil 25 y el 75: donde vive la mitad central de los datos. Es la base de la regla para detectar outliers.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Cardinalidad</span><span class="gloss-def">Cuántos valores distintos tiene una columna. Si "región" tiene cardinalidad 5 y sabes que hay 3 regiones, acabas de encontrar un problema.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Analysis-ready</span><span class="gloss-def">El dataset ya diagnosticado, limpio y documentado, listo para analizar. Es el producto de esta semana y el punto de partida de todas las siguientes.</span></div>
+</div>
+```
+
+<!--=================-->
+<!--=================-->
+# Los exámenes que llegaron del laboratorio
+
+La semana pasada usamos la metáfora del médico: pregunta, exámenes, diagnóstico, tratamiento. Retomémosla justo donde la dejamos.
+
+Llegaron los exámenes del laboratorio. Un médico prudente **no diagnostica de inmediato**. Primero los mira con desconfianza profesional y se hace cuatro preguntas en dos segundos:
+
+- ¿Está **completo**? (falta la mitad de la hoja)
+- ¿Es **consistente**? (la fecha de la muestra es posterior a la del resultado)
+- ¿Es **válido**? (una hemoglobina de 900 no es una enfermedad rarísima: es un error de digitación)
+- ¿Es **único**? (te repitieron el mismo examen y quedó cargado dos veces)
+
+Solo si los exámenes pasan ese filtro, el médico diagnostica. **Si diagnostica sobre un examen equivocado, todo lo que venga después estará equivocado — y con total confianza.**
+
+::: {.callout-key}
+**La idea más importante de toda la semana**
+
+Un modelo entrenado con datos sucios produce resultados sucios, **pero no produce ningún error**. R no te va a avisar. El cálculo va a salir, el gráfico se va a ver bonito y el número va a tener dos decimales. La suciedad de los datos no se manifiesta como una falla: se manifiesta como una **respuesta confiada y falsa**. Por eso el diagnóstico no es opcional.
+:::
+
+Esas cuatro preguntas del médico tienen nombre técnico, y son el checklist de esta semana.
+
+<!--=================-->
+<!--=================-->
+# Fuentes de datos: el origen te dice qué buscar
+
+Antes de limpiar, hay que saber de dónde vienen los datos. **El origen determina qué errores son probables.**
+
+## Primaria vs. secundaria
+
+**Fuente primaria** — los recolectaste tú o tu organización, para este análisis. Una encuesta de satisfacción, el registro de ventas propio, un experimento A/B.
+
+- *Ventaja:* sabes exactamente qué se preguntó y cómo.
+- *Riesgo típico:* **errores de captura** y formularios mal diseñados. Si un campo se llenaba a mano, ahí va a haber suciedad.
+
+**Fuente secundaria** — alguien más los recolectó, para otro propósito. Datos del DANE, de Nielsen, de Kaggle, de la API de una red social.
+
+- *Ventaja:* mucho más volumen, mucho menor costo.
+- *Riesgo típico:* **no conoces el proceso de recolección**, y las definiciones pueden no coincidir con las tuyas. Su "cliente activo" puede no ser tu "cliente activo".
 
 | Tipo | Descripción | Ejemplos |
 |---|---|---|
 | **Estructurado** | Tabla con filas y columnas | Excel, CSV, base de datos SQL |
-| **Semi-estructurado** | Tiene estructura pero flexible | JSON, XML |
+| **Semi-estructurado** | Tiene estructura, pero flexible | JSON, XML |
 | **No estructurado** | Sin formato predefinido | Texto libre, imágenes, audio |
 
-::: {.callout-warning}
-**Por qué el origen importa para interpretar**
-
-Si tus datos de ventas vienen del sistema ERP pero tienen una columna "región" que el equipo llenaba manualmente en Excel... es probable que encuentres "Norte", "norte", "NORTE" y "Nortte" representando la misma región. No es un error del sistema — es un error humano de captura. Saber el origen te permite anticipar qué tipo de suciedad buscar.
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Instalación y carga de paquetes
-
-Esta semana usaremos tres paquetes:
-
-- `dplyr` — para manipular y limpiar datos (ya lo conocemos de Semana 04).
-- `ggplot2` — para hacer gráficos exploratorios (ya lo conocemos de Semana 05).
-- `skimr` — **nuevo**: genera un resumen rápido y completo de cada variable del dataset.
-
-```{webr-r}
-## Instalar (solo una vez, fuera del script)
-# install.packages("dplyr")
-# install.packages("ggplot2")
-# install.packages("skimr")
-
-## Cargar al inicio de cada sesión
-library(dplyr)
-library(ggplot2)
-library(skimr)
-```
-
-::: {.callout-key}
-**Recordatorio**
-
-`install.packages()` se corre una sola vez en la Consola (nunca en el script). `library()` se corre cada vez que abres RStudio. Si trabajas en este documento WebR, los paquetes ya están disponibles.
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# El dataset de esta semana: `ventas_raw`
-
-Usaremos una versión **realista y sucia** del mismo dataset de ventas de las semanas anteriores. Como si lo hubiéramos recibido "tal cual" del sistema antes de cualquier limpieza.
-
-::: {.callout-key}
-**¿Qué tiene de diferente este dataset?**
-
-Es el mismo origen (ventas de tecnología, 3 trimestres, 3 regiones), pero con problemas típicos de datos reales:
-
-1. **Categorías inconsistentes:** "Norte", "norte", "NORTE" en la misma columna
-2. **Tipo de dato incorrecto:** `precio` llega como texto (`character`) con signos de dólar ("$1200")
-3. **Valores faltantes:** `NA` en precio y cantidad
-4. **Valor imposible:** una transacción con `cantidad = -5`
-5. **Outlier de captura:** un Mouse con precio = 12.000 (probablemente debería ser 120)
-6. **Filas duplicadas:** 3 transacciones aparecen dos veces
-7. **Columna basura:** `observaciones`, casi siempre vacía
-
-Nuestro trabajo esta semana es **detectar, documentar y corregir** cada uno de estos problemas.
-:::
-
-```{webr-r}
-#| context: setup
-## ── Dataset sucio (ventas_raw) ──────────────────────────────────────────────
-## Este es el dataset "tal como llega": con errores de captura, inconsistencias
-## y valores problemáticos. Lo usaremos para practicar diagnóstico y limpieza.
-
-ventas_raw <- data.frame(
-  trimestre    = c("Q1","Q1","Q1","Q1",
-                   "Q1","Q1","Q1","Q1",
-                   "Q1","Q1","Q1","Q1",
-                   "q2","q2","q2","q2",   # PROBLEMA: "q2" en minúscula
-                   "q2","q2","q2","q2",
-                   "Q2","Q2","Q2","Q2",
-                   "Q3","Q3","Q3","Q3",
-                   "Q3","Q3","Q3","Q3",
-                   "Q3","Q3","Q3","Q3"),
-  producto     = c("Laptop","Mouse","Licencia","Soporte",
-                   "Laptop","Mouse","Licencia","Soporte",
-                   "Laptop","Mouse","Licencia","Soporte",
-                   "laptop","Mouse","Licencia","Soporte",   # PROBLEMA: "laptop" minúscula
-                   "Laptop","Mouse","LICENCIA","Soporte",   # PROBLEMA: "LICENCIA" mayúscula
-                   "Laptop","Mouse","Licencia","Soporte",
-                   "Laptop","Mouse","Licencia","Soporte",
-                   "LAPTOP","Mouse","Licencia","Soporte",   # PROBLEMA: "LAPTOP" mayúscula
-                   "Laptop","Mouse","Licencia","Soporte"),
-  categoria    = rep(c("Hardware","Hardware","Software","Software"), 9),
-  precio       = c("1200","25","150","80",
-                   "1150","30","160","75",
-                   "1250","20","140","85",
-                   "$1200","25","150","80",   # PROBLEMA: signo "$" en el valor
-                   "1180","28","155","78",
-                   "1220","22","145","82",
-                   "1200","25","150","80",
-                   "1190","12000","148","83", # PROBLEMA: outlier 12000 (Mouse)
-                   "1210","24","148","83"),
-  cantidad     = c(2,10,5,8,
-                   1,15,6,7,
-                   3,12,4,9,
-                   3,8,5,10,
-                   2,14,7,6,
-                   1,11,5,8,
-                   2,9,6,7,
-                   3,13,-5,9,    # PROBLEMA: cantidad negativa (-5)
-                   1,10,5,8),
-  region       = c(rep("Norte",4),
-                   rep("Sur",4),
-                   rep("Centro",4),
-                   rep("norte",4),   # PROBLEMA: "norte" en minúscula
-                   rep("SUR",4),     # PROBLEMA: "SUR" en mayúscula
-                   rep("Centro",4),
-                   rep("Norte",4),
-                   rep("Sur",4),
-                   rep("Centro",4)),
-  observaciones = c(NA,NA,NA,NA,
-                    NA,NA,NA,NA,
-                    NA,"revisar",NA,NA,
-                    NA,NA,NA,NA,
-                    NA,NA,"ok",NA,
-                    NA,NA,NA,NA,
-                    NA,NA,NA,NA,
-                    NA,NA,"duplicado",NA,
-                    NA,NA,NA,NA),
-  stringsAsFactors = FALSE
-)
-
-## Agregar NAs adicionales en precio y cantidad
-ventas_raw$precio[c(5, 19)]   <- NA   # dos precios faltantes
-ventas_raw$cantidad[c(9, 24)] <- NA   # dos cantidades faltantes
-
-## Agregar 3 filas duplicadas (simulando registros dobles del sistema)
-ventas_raw <- rbind(ventas_raw, ventas_raw[c(1, 2, 15), ])
-```
-
-```{webr-r}
-## Descomenta si trabajas desde RStudio
-# ventas <- read.csv("https://eduard-martinez.github.io/databases/ba/ventas_raw.csv")
-
-## Ver las primeras filas del dataset
-head(ventas_raw, 5)
-```
-
----
-
-<!--=================-->
-<!--=================-->
-# Paso 1 — Diagnóstico: ¿qué tan sucios están los datos?
-
-Antes de corregir, necesitamos un **diagnóstico completo**. La secuencia es:
-
-1. Primero, una visión general de todo el dataset con `skim()`
-2. Luego, si algo llama la atención, profundizamos con herramientas específicas
-
-## Visión general: `skim()`
-
-`skim()` es nuestra primera herramienta de diagnóstico. En una sola llamada nos dice: cuántas filas tiene el dataset, el tipo de cada variable, cuántos valores faltantes hay, y un resumen estadístico por columna.
-
-```{webr-r}
-## Resumen completo del dataset
-skim(ventas_raw)
-```
-
-::: {.callout-key}
-**Cómo leer la salida de `skim()`**
-
-La salida se divide en dos bloques según el tipo de variable:
-
-**Variables de texto (`character`):**
-
-| Columna | Lo que nos dice |
-|---|---|
-| `n_missing` | Cuántos valores faltantes tiene esa columna |
-| `n_unique` | Cuántos valores distintos hay |
-
-Mira la columna `region`: si `n_unique` dice 5 en vez de 3, hay inconsistencias de mayúsculas/minúsculas.  
-Mira `precio`: si aparece como `character` en vez de `numeric`, hay un problema de tipo de dato.
-
-**Variables numéricas (`numeric`):**
-
-| Columna | Lo que nos dice |
-|---|---|
-| `n_missing` | Cuántos valores faltantes tiene esa columna |
-| `mean`, `sd` | Promedio y desviación estándar |
-| `p0`, `p100` | Mínimo y máximo — aquí aparecen los valores imposibles y outliers |
-
-Mira `cantidad`: si `p0` (el mínimo) es negativo, hay una cantidad imposible.
-
-**Regla práctica:** lee `skim()` de arriba a abajo, columna por columna. Cualquier cosa que no tenga sentido es un problema que documentar.
-:::
-
-## Inconsistencias en categorías: `unique()` y `table()`
-
-`skim()` nos dijo cuántos valores únicos hay en cada columna de texto. Ahora vamos a **ver** cuáles son esos valores:
-
-```{webr-r}
-## ¿Cuáles son los valores únicos de 'region'?
-unique(ventas_raw$region)
-```
-
-```{webr-r}
-## ¿Cuántas veces aparece cada valor?
-table(ventas_raw$region)
-```
+: En este curso trabajamos con datos **estructurados**. {.striped}
 
 ::: {.callout-warning}
-**Error clásico: "Norte" ≠ "norte" ≠ "NORTE"**
+**El origen te dice qué suciedad esperar**
 
-Para R, estas son **tres categorías diferentes**. Si calculas el ingreso por región con `group_by(region)`, obtendrás 5 grupos en vez de 3. Los totales nunca cuadrarán y el gerente tomará decisiones con datos incorrectos — sin que R emita ningún error.
+Si tus datos de ventas salen del ERP pero la columna `región` la llenaba el equipo **a mano en un Excel**, ya sabes que vas a encontrar `"Norte"`, `"norte"`, `"NORTE"` y `"Nortte"` conviviendo. No es una falla del sistema: es una consecuencia previsible de cómo se capturó el dato.
 
-Este es uno de los errores más frecuentes y silenciosos en análisis de datos.
+Este es el reflejo que hay que desarrollar: **antes de abrir la base, pregunta cómo se llenó.** Te ahorra media hora de sorpresas.
 :::
 
-```{webr-r}
-## Revisar también trimestre y producto
-unique(ventas_raw$trimestre)
-unique(ventas_raw$producto)
-```
+<!--=================-->
+<!--=================-->
+# Las cuatro dimensiones de la calidad
 
-## Filas duplicadas: `duplicated()`
+Las cuatro preguntas del médico, con su nombre real. Este es el checklist que le vas a aplicar a **toda** base de datos que recibas en tu vida profesional.
 
-```{webr-r}
-## ¿Cuántas filas son duplicadas exactas?
-sum(duplicated(ventas_raw))
-```
-
-```{webr-r}
-## Cuáles son esas filas
-ventas_raw <- mutate(ventas_raw , duplicado = duplicated(ventas_raw))
-ventas_raw
+```{=html}
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>Completitud</b> — ¿están todos los datos que deberían estar? Es el terreno de los <b>valores faltantes</b> (NA) y de las columnas que llegaron vacías.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>Consistencia</b> — ¿el mismo hecho se representa siempre igual? Es el terreno de las <b>categorías inconsistentes</b> ("Norte" vs. "norte") y de los formatos que no cuadran entre tablas.</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>Validez</b> — ¿los valores son posibles? Es el terreno de los <b>valores imposibles</b> (una cantidad de −5, una fecha en el futuro, una edad de 200 años) y de los <b>tipos incorrectos</b> (un precio guardado como texto).</div></div>
+  <div class="pipe-step"><div class="pipe-num">4</div><div><b>Unicidad</b> — ¿cada observación aparece una sola vez? Es el terreno de los <b>duplicados</b>, que inflan silenciosamente todos los totales.</div></div>
+</div>
 ```
 
 ::: {.callout-key}
-**Qué hace `duplicated()`**
+**La revisión estructural: los primeros 30 segundos**
 
-`duplicated(df)` compara cada fila con todas las anteriores y devuelve `TRUE` si ya apareció antes.
+Antes incluso de las cuatro dimensiones, hay una revisión más básica que se hace de entrada:
 
-- `sum(duplicated(df))` → cuántas filas son copias exactas
-- `df[duplicated(df), ]` → ver esas filas
-
-**¿Por qué aparecen duplicados?** En la práctica ocurren por exportaciones dobles del sistema, joins mal hechos, o actualizaciones que acumulan en vez de reemplazar. Siempre pregunta la causa antes de eliminar.
+- **Dimensiones:** ¿cuántas filas y columnas tiene? ¿Es lo que esperabas?
+- **Qué es una fila:** ¿una transacción? ¿un cliente? ¿un cliente-mes? Si no puedes responder esto, no puedes analizar nada.
+- **Nombres y tipos:** ¿las columnas se llaman como deberían? ¿los números son números?
+- **Diccionario:** ¿existe? Si no, constrúyelo tú — aunque sea de diez líneas.
+- **Cardinalidad:** ¿cuántos valores distintos tiene cada columna de texto? Aquí saltan las inconsistencias.
 :::
 
-## Tipo de dato incorrecto: el problema de `precio`
+::: {.callout-remember}
+**Resumen del bloque**
 
-`skim()` ya nos alertó que `precio` es de tipo `character`. Veamos exactamente por qué:
+Cuatro dimensiones: **completitud** (¿falta?), **consistencia** (¿se escribe siempre igual?), **validez** (¿es posible?) y **unicidad** (¿está repetido?). Y una regla de oro que las precede: saber **qué representa una fila**. Todo el diagnóstico de la clase del jueves es este checklist, ejecutado con código.
+:::
 
-```{webr-r}
-## ¿Qué tipo de dato tiene 'precio'?
-class(ventas_raw$precio)
-```
+<!--=================-->
+<!--=================-->
+# Problema 1: valores faltantes
 
-```{webr-r}
-## Ver los valores únicos: ¿hay algo raro?
-unique(ventas_raw$precio)
-```
+## Diagnosticar antes de decidir
 
-::: {.callout-key}
-**¿Por qué es un problema que `precio` sea `character`?**
+Lo primero **no** es rellenar: es **contar**. Para cada variable necesitas saber cuántos faltantes hay y qué **proporción** representan. No es lo mismo un 0,5% que un 40%.
 
-Cuando una columna numérica llega como texto, R no puede hacer aritmética con ella:
+En R, una radiografía completa se pide con una sola función:
 
 ```r
-## Esto da error
-sum(ventas_raw$precio, na.rm = TRUE)
-## Error: invalid 'type' (character) of argument
+skim(ventas_raw)   # del paquete skimr
 ```
 
-Para convertirla necesitamos:
-1. Eliminar el signo `$` con `gsub()`
-2. Convertir el texto limpio a número con `as.numeric()`
+Esa salida te da, por columna: el tipo de dato, `n_missing` (cuántos faltan), `n_unique` (cardinalidad) y, para las numéricas, mínimo, máximo, media y desviación. **Se lee de arriba abajo, columna por columna, y cualquier cosa que no tenga sentido es un hallazgo.** En clase la vamos a leer juntos.
 
-Lo haremos en la sección de limpieza.
-:::
+## Las tres estrategias
 
-## Valores imposibles y outliers
+Una vez sabes cuánto falta, hay tres caminos — y elegir es tu trabajo, no el de R:
 
-Con `skim()` ya vimos el mínimo de `cantidad`. Confirmemos el problema y exploremos el precio visualmente:
+**1. Eliminar.** Razonable cuando faltan pocos y no hay patrón en quién falta. Si el 0,5% de las filas no tiene precio, eliminarlas casi no cambia nada.
 
-```{webr-r}
-## ¿Hay cantidades negativas? Verificar el mínimo
-summary(ventas_raw$cantidad)
-```
+**2. Imputar.** Reemplazar por una estimación: la **mediana** (más robusta que la media cuando hay outliers), la media, o un valor por defecto del negocio. Útil cuando no puedes darte el lujo de perder la fila.
 
-```{webr-r}
-## convertir en numerica precio
-ventas_raw <- mutate(ventas_raw , precio_num=as.numeric(precio))
-
-## Plot la distribución de precio para detectar outliers
-ggplot(ventas_raw , aes(x =precio_num)) +
-geom_histogram(bins = 20) 
-```
-
-::: {.callout-key}
-**El histograma como detector de outliers**
-
-Cuando el eje X se extiende muy a la derecha con una barra solitaria, es señal de outlier. La gran mayoría de precios están entre 20 y 1.250, pero hay un punto en ~12.000.
-
-Ese valor corresponde a un Mouse con precio = 12.000. Un mouse no cuesta $12.000 — es casi con certeza un error de captura. Antes de corregirlo, siempre documenta la decisión.
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Paso 2 — Limpieza: corregir cada problema
-
-Ya sabemos qué tiene mal el dataset. Ahora lo corregimos. La lógica es simple: partimos de `ventas_raw` (la base original, que no tocamos) y construimos `ventas_clean`, que iremos actualizando en cada paso hasta tener un dataset confiable.
-
-El orden importa: primero eliminamos filas problemáticas (duplicados, imposibles), luego corregimos columnas (texto, tipos, outliers), y al final ajustamos la estructura (columnas innecesarias, variables nuevas).
-
-## Eliminar filas duplicadas
-
-El primer paso es eliminar los registros que aparecen más de una vez. Si los dejamos, cualquier suma o promedio quedará inflado, porque R contará la misma transacción dos veces.
-
-```{webr-r}
-## distinct() elimina filas duplicadas exactas
-ventas_clean <- distinct(ventas_raw)
-
-## ¿Cuántas filas se eliminaron?
-nrow(ventas_raw) - nrow(ventas_clean)
-```
-
-La diferencia entre ambas dimensiones confirma cuántos duplicados se removieron. Si el resultado es 3, el proceso funcionó como esperábamos.
-
-::: {.callout-key}
-**Qué hace `distinct()`**
-
-`distinct(df)` compara todas las columnas de cada fila. Si dos filas son idénticas en todo, elimina la segunda y conserva la primera.
-
-La línea `nrow(ventas_raw) - nrow(ventas_clean)` nos dice cuántas filas duplicadas se removieron — es una forma rápida de confirmar que la operación hizo lo que esperábamos.
-
-Si quisieras eliminar duplicados solo en algunas columnas (por ejemplo, mismo `producto` + `trimestre` + `region`), puedes especificarlas:
-```r
-distinct(df, producto, trimestre, region, .keep_all = TRUE)
-```
-:::
-
----
-
-## Estandarizar categorías
-
-El diagnóstico mostró que `region`, `trimestre` y `producto` tienen variantes por mayúsculas y minúsculas. Si no las corregimos, `group_by()` producirá más grupos de los reales y los totales no cuadrarán.
-
-La solución es llevar todo al mismo formato. Aquí usamos `toupper()` para convertir todo a mayúsculas, lo que elimina cualquier inconsistencia de capitalización.
-
-```{webr-r}
-## Estandarizar region, trimestre y producto
-ventas_clean <- mutate(ventas_clean,
-                       trimestre = toupper(trimestre),
-                       region    = toupper(region),
-                       producto  = toupper(producto))
-
-## Verificar: ¿cuántos valores únicos hay ahora?
-table(ventas_clean$region)
-table(ventas_clean$trimestre)
-```
-
-Después de `toupper()`, `table()` debe mostrar exactamente 3 regiones y 3 trimestres, cada uno con el conteo correcto.
-
-::: {.callout-key}
-**Tres funciones para estandarizar texto**
-
-| Función | Resultado | Cuándo usarla |
-|---|---|---|
-| `toupper(x)` | `"NORTE"` | Códigos, IDs, siglas — la usamos aquí |
-| `tolower(x)` | `"norte"` | Paso intermedio antes de capitalizar |
-| `tools::toTitleCase(x)` | `"Norte"` | Nombres propios, categorías |
-
-La elección depende del estilo que quieras en la base final. Para códigos como Q1, Q2, Q3 y nombres de región, las mayúsculas son la opción más limpia.
-:::
-
----
-
-## Corregir el tipo de dato de `precio`
-
-`precio` llega como texto (`character`) y tiene un signo `$` en algunos valores. Eso impide hacer cualquier cálculo aritmético. Necesitamos primero eliminar el símbolo `$` y luego convertir el texto a número.
-
-```{webr-r}
-## Eliminar el signo "$" y convertir a número
-ventas_clean <- mutate(ventas_clean,
-                       precio = as.numeric(gsub("\\$", "", precio)))
-
-## Verificar: precio ahora debe ser <dbl> o <num>
-summary(ventas_clean$precio)
-```
-
-Si `class()` devuelve `"numeric"`, la conversión fue exitosa. Cualquier valor que no se pueda convertir (por ejemplo, si tuviera letras) quedaría como `NA` — lo cual también sería una señal importante.
-
-::: {.callout-key}
-**Qué hace `gsub("\\$", "", precio)`**
-
-`gsub(patron, reemplazo, texto)` busca el patrón en el texto y lo reemplaza.
-
-- `"\\$"` → el patrón es el símbolo `$` (se escribe `\\$` porque `$` tiene significado especial en expresiones regulares)
-- `""` → reemplaza por nada, es decir, elimina el símbolo
-- Resultado: `"$1200"` → `"1200"` → `as.numeric()` → `1200`
-:::
-
----
-
-## Eliminar valores imposibles
-
-Una cantidad negativa es un valor que no tiene sentido en este contexto de negocio: no se puede vender −5 unidades. Lo más seguro es eliminar esa fila, dejando una nota de la decisión.
-
-```{webr-r}
-## Eliminar filas con cantidad negativa
-ventas_clean <- filter(ventas_clean, cantidad >= 0)
-
-## Verificar: el mínimo ahora debe ser cero o positivo
-summary(ventas_clean$cantidad)
-```
-
-El resultado de `min()` confirma que ya no hay cantidades negativas en el dataset.
+**3. Marcar.** Crear una columna indicadora (`precio_faltaba = TRUE/FALSE`) y conservar el registro. Suena raro, pero a veces **el hecho de que falte es información**: si a los clientes que se fueron nunca les registraron el motivo, ese vacío no es aleatorio — te está diciendo algo.
 
 ::: {.callout-warning}
-**¿Eliminar o imputar?**
+**El faltante que no es aleatorio**
 
-Cuando encuentras un valor imposible, tienes tres opciones:
-
-1. **Eliminar la fila:** si no tienes información para corregirla.
-2. **Convertir a NA:** si quieres conservar el resto de la fila para otros análisis.
-3. **Corregir el valor:** si tienes evidencia suficiente (una devolución documentada, por ejemplo, puede tener cantidad negativa de forma legítima).
-
-La opción correcta depende del **contexto de negocio**, no de una regla estadística. Lo más importante es **documentar la decisión**.
+La pregunta que separa un analista de un ejecutor: **¿por qué falta?** Si los ingresos faltan justo en los clientes de mayor patrimonio (porque se negaron a declararlos), imputarlos con la mediana **sesga toda tu base hacia abajo** y ninguna estadística te va a avisar. Antes de imputar, pregúntate si los datos faltan al azar o si hay un mecanismo detrás.
 :::
-
----
-
-## Corregir el outlier de precio
-
-El histograma del diagnóstico mostró un precio de ~12.000 para un Mouse. Ese valor es claramente un error de captura: un mouse no cuesta $12.000. Antes de corregir, conviene ver la fila completa para confirmar el error.
-
-```{webr-r}
-## Ver la fila con precio mayor a 5000 antes de decidir
-ventas_clean[!is.na(ventas_clean$precio) & ventas_clean$precio > 5000, ]
-```
-
-La fila confirma que es un Mouse. Decisión documentada: reemplazar 12.000 por 120, que es el precio típico de Mouse en el dataset.
-
-```{webr-r}
-## El valor 12000 en un Mouse es un error de captura
-ventas_clean <- mutate(ventas_clean,
-                       precio = ifelse(producto == "Mouse" & precio > 5000 , 
-                                       120 , 
-                                       precio)
-                       )
-
-## Verificar que no queden outliers extremos
-summary(ventas_clean$precio)
-```
-
-El máximo de `precio` ahora debe ser consistente con el rango de Laptops (~1.200).
 
 ::: {.callout-key}
-**`ifelse()` para correcciones puntuales**
+**El principio que no se negocia**
 
-`ifelse(condicion, valor_si_TRUE, valor_si_FALSE)` aplica una lógica fila por fila:
+> Toda decisión sobre faltantes debe quedar **documentada**.
 
-- Si la condición se cumple → usa el valor nuevo
-- Si no → conserva el valor original
-
-Siempre usa una condición **específica** (producto + umbral de precio) para no corregir por error otras filas.
+No importa cuál de las tres elijas: importa que quede escrito qué hiciste y por qué. Eliminaste 12 filas — ¿cuáles y con qué criterio? Imputaste con la mediana — ¿por qué la mediana y no la media? Un análisis que no puede responder eso no es reproducible, y por lo tanto no es un activo de nadie.
 :::
-
----
-
-## Eliminar la columna basura y calcular `ingreso`
-
-La columna `observaciones` tiene casi todo en `NA` y no aporta información analítica. La eliminamos para no cargar el dataset con ruido. Aprovechamos este último paso para calcular `ingreso = precio × cantidad`, que usaremos en el EDA.
-
-```{webr-r}
-## Eliminar columna 'observaciones' y calcular ingreso
-ventas_clean <- select(ventas_clean, -observaciones)
-ventas_clean <- mutate(ventas_clean, ingreso = precio * cantidad)
-
-## Vista final del dataset limpio
-head(ventas_clean)
-```
-
-::: {.callout-key}
-**El "acta de limpieza"**
-
-En un análisis profesional, cada decisión de limpieza debe quedar documentada. Al final del proceso deberías poder responder:
-
-- ¿Cuántas filas eliminé y por qué?
-- ¿Qué valores imputé o corregí y con qué criterio?
-- ¿Qué columnas eliminé y por qué no aportaban?
-
-Esto permite que otro analista (o tú mismo en tres meses) pueda reproducir exactamente el mismo dataset limpio.
-:::
-
----
 
 <!--=================-->
 <!--=================-->
-# Paso 3 — EDA: explorar el dataset limpio
+# Problema 2: outliers
 
-Con los datos ya limpios, comenzamos el **Análisis Exploratorio de Datos (EDA)**. El objetivo del EDA no es responder la pregunta de negocio final — es **entender la estructura, distribución y relaciones** antes de comprometerse con un análisis o modelo.
+## Detectarlos
 
-::: {.callout-key}
-**¿Qué busca el EDA?**
+Un outlier es una observación que se sale del patrón. Hay tres formas de encontrarlos, de la más simple a la más visual:
 
-1. **Distribuciones:** ¿cómo se comportan las variables individualmente? ¿Simétricas, sesgadas, con múltiples picos?
-2. **Resúmenes por grupo:** ¿hay diferencias relevantes entre regiones, categorías, trimestres?
-3. **Relaciones entre variables:** ¿precio y cantidad tienen alguna relación?
-4. **Valores anómalos residuales:** ¿quedó algo raro que no detectamos antes?
+**1. Reglas de rango.** Las que salen del negocio: una cantidad no puede ser negativa, una edad no puede ser 200, un porcentaje no puede pasar de 100. Estas son las más fáciles y las más ignoradas.
 
-El EDA combina **tablas** (dplyr) y **gráficos** (ggplot2). Ninguno es suficiente solo.
-:::
+**2. La regla del IQR.** El **rango intercuartílico** (IQR) es la distancia entre el percentil 75 y el percentil 25 — es decir, el ancho de la franja donde vive **la mitad central** de tus datos. La regla estándar marca como outlier todo lo que caiga fuera de:
 
-## Resumen estadístico del dataset limpio
+> `[ Q1 − 1,5 × IQR , Q3 + 1,5 × IQR ]`
 
-Ahora que los datos están limpios, `skim()` nos da un panorama confiable:
+La intuición: si un valor está a más de una vez y media el ancho de la caja por fuera de la caja, es sospechoso. Es exactamente lo que dibuja un **boxplot**: la caja es el IQR, los bigotes llegan hasta ese límite, y los puntos sueltos más allá son los candidatos.
 
-```{webr-r}
-## Resumen del dataset limpio
-skim(ventas_clean)
-```
+**3. Mirarlos.** Un **histograma** con el eje X estirándose solo hasta una barrita solitaria a la derecha es un outlier gritando. Un **boxplot** te los señala uno por uno.
 
-::: {.callout-practice}
-**Compara con el `skim()` del dataset crudo**
+## Tratarlos: la pregunta que importa
 
-Vuelve a la sección 1.1 y compara las dos salidas. Deberías notar:
-
-- `precio` ahora aparece como `numeric`, no como `character`
-- `n_missing` en precio y cantidad es el mismo (los NAs que venían del origen, no los que generamos)
-- `n_unique` en `region` y `trimestre` ahora coincide con lo esperado (3 regiones, 3 trimestres)
-- El máximo de `cantidad` ya no es negativo
-
-Esta comparación es parte del EDA: confirmar que el dataset limpio tiene la forma que esperábamos.
-:::
-
-## Distribuciones de variables numéricas
-
-```{webr-r}
-## Distribución de precio — comparar con el histograma del dataset crudo
-ggplot(ventas_clean, aes(x = precio)) +
-geom_histogram(bins = 15, fill = "steelblue") +
-theme_minimal()
-```
+Detectarlo es lo fácil. La decisión es esta:
 
 ::: {.callout-key}
-**Distribución bimodal: una señal importante**
+**¿Es un error o es un caso real?**
 
-Si el histograma muestra dos "jorobas" claramente separadas, es porque tenemos dos segmentos de productos muy distintos: productos baratos (Mouse, Licencia, Soporte) y productos caros (Laptop).
+- **Un mouse con precio de $12.000** entre mouses de $25 → es un **error de captura** (probablemente eran $120). Se corrige.
+- **Una venta de $80 millones** entre ventas de $2 millones → puede ser **el cliente corporativo más importante del año**. Si lo eliminas por "limpiar", borraste el dato más valioso de la base.
 
-Esto ya es un hallazgo de negocio: no se puede calcular un "precio promedio representativo" sin separar los segmentos.
+El mismo procedimiento estadístico los marca a los dos. **Solo el conocimiento del negocio los distingue.** Un outlier no es un error hasta que demuestres que lo es.
 :::
 
-## Comparar grupos: ingreso por región
+Con eso decidido, las opciones son: **corregir** (si sabes el valor verdadero), **eliminar** (si es un error irrecuperable), **recortar o *capping*** (llevarlo al límite razonable en vez de borrarlo), o **dejarlo y reportarlo** (si es real). Y otra vez: se documenta.
 
-```{webr-r}
-## Paso 1: calcular ingreso total por región
-ing_region <- group_by(ventas_clean, region)
-ing_region <- summarise(ing_region,
-                        ingreso_total = sum(ingreso, na.rm = TRUE),
-                        n_transacciones = n(),
-                        .groups = "drop")
-```
+::: {.callout-remember}
+**Resumen del bloque**
 
-```{webr-r}
-## Ver la tabla completa
-ing_region
-```
-
-```{webr-r}
-## Paso 2: graficar
-ggplot(ing_region, aes(x = reorder(region, ingreso_total), y = ingreso_total)) +
-geom_col(fill = "steelblue") +
-coord_flip() 
-```
-
-::: {.callout-practice}
-**¿Qué nos dice esta tabla?**
-
-- El ingreso total es la métrica de negocio más importante.
-- `n_transacciones` confirma cuántos registros sobrevivieron la limpieza.
-- Si una región tiene muchas transacciones pero bajo ingreso total, puede indicar que vende productos de bajo precio — no necesariamente que tenga bajo desempeño.
+Faltantes → **cuenta primero**, luego elige entre eliminar / imputar / marcar, y pregúntate **por qué faltan**. Outliers → detecta con reglas de rango, con el **IQR** (`Q1 − 1,5·IQR` a `Q3 + 1,5·IQR`, que es lo que dibuja el boxplot) y con gráficos; después decide si es **error o caso real**. Las dos decisiones se documentan, siempre.
 :::
-
-## Evolución temporal: ¿qué está cambiando?
-
-```{webr-r}
-## Paso 1: calcular ingreso por trimestre
-ing_trim <- group_by(ventas_clean, trimestre)
-ing_trim <- summarise(ing_trim,
-                      ingreso_total = sum(ingreso, na.rm = TRUE),
-                      .groups = "drop")
-
-## Paso 2: graficar
-ggplot(ing_trim, aes(x = trimestre, y = ingreso_total)) +
-geom_col(fill = "steelblue") +
-theme_minimal()
-```
-
-## Relación entre variables: scatter plot exploratorio
-
-```{webr-r}
-## ¿Relación entre precio y cantidad? Colorear por categoría
-ggplot(ventas_clean, aes(x = precio, y = cantidad, color = categoria)) +
-geom_point(size = 3, alpha = 0.7, na.rm = TRUE) +
-theme_minimal()
-```
-
-::: {.callout-practice}
-**Interpretación del scatter plot**
-
-Observa el gráfico y responde:
-
-1. ¿Los productos de Hardware tienden a tener precios más altos o más bajos que Software?
-2. ¿Hay una relación clara entre precio y cantidad? ¿Positiva, negativa o ninguna?
-3. ¿Ves algún punto que se aleje del patrón general?
-
-El scatter plot no te da la respuesta — te da la **pregunta correcta** para profundizar.
-:::
-
----
 
 <!--=================-->
 <!--=================-->
-# Resumen del flujo completo
+# Problema 3: el error más silencioso
+
+Guardamos el peor para el final, porque no parece grave y es el que más plata cuesta.
+
+Para R, estas son **tres regiones distintas**:
+
+```r
+"Norte"    "norte"    "NORTE"
+```
+
+Ahora recuerda el `group_by(region)` de la semana 4. Si calculas el ingreso por región sobre una base así, R te devuelve **cinco grupos donde hay tres**. Los totales no cuadran. Y lo peor:
+
+::: {.callout-warning}
+**R no te va a avisar**
+
+No hay error. No hay warning. La tabla sale, se ve perfecta, tiene sus totales alineados y sus dos decimales. Se la pasas al gerente, él asigna el presupuesto regional con esa tabla, y el presupuesto queda mal repartido — **porque "Norte" y "norte" se llevaron cada uno su pedazo.**
+
+Este es el error más frecuente y más silencioso del análisis de datos. Y se arregla con **una línea** de código, si te acuerdas de buscarlo.
+:::
+
+El diagnóstico es sencillo (`n_unique` en la radiografía, o mirar los valores directamente), y la corrección también: llevar todo al mismo formato — mayúsculas, minúsculas, lo que definas — de modo que los cinco grupos vuelvan a ser tres. En clase lo hacemos.
+
+El primo hermano de este problema es el **tipo de dato incorrecto**: un `precio` que llega como texto porque alguien dejó el signo `$` adentro (`"$1200"`). R no puede sumar texto, así que cualquier cálculo se cae o, peor, devuelve `NA` sin explicar por qué.
+
+<!--=================-->
+<!--=================-->
+# Qué es la EDA (y qué no es)
+
+Con los datos ya limpios empieza el **Análisis Exploratorio de Datos**.
+
+::: {.callout-key}
+**La EDA no es "hacer gráficos bonitos"**
+
+El objetivo de la EDA **no** es responder la pregunta de negocio final. Es **entender la estructura, las distribuciones y las relaciones** antes de comprometerte con un análisis o un modelo. Es el médico leyendo los exámenes ya validados, antes de diagnosticar.
+:::
+
+La EDA busca cuatro cosas:
+
+1. **Distribuciones:** ¿cómo se comporta cada variable por su cuenta? ¿Simétrica, sesgada, con dos picos?
+2. **Resúmenes por grupo:** ¿hay diferencias reales entre regiones, categorías, trimestres?
+3. **Relaciones:** ¿precio y cantidad tienen algo que ver entre sí?
+4. **Anomalías residuales:** ¿quedó algo raro que el diagnóstico no cazó?
+
+Y combina **tablas** (`dplyr`) con **gráficos** (`ggplot2`). Ninguno de los dos alcanza solo.
+
+## Un ejemplo de por qué esto importa
+
+Supón que el histograma del precio muestra **dos jorobas**: un montón de productos alrededor de $80 y otro alrededor de $1.200. Eso es una distribución **bimodal**, y no es una curiosidad estadística: es un **hallazgo de negocio**. Significa que tienes dos segmentos de producto radicalmente distintos conviviendo en la misma tabla.
+
+Consecuencia inmediata: si el gerente te pide "el precio promedio", ese número **no representa a nadie**. Cae en el valle entre las dos jorobas, donde no hay productos. La respuesta correcta no es el promedio: es *"hay que separar los segmentos, y aquí está el promedio de cada uno"*.
+
+::: {.callout-key}
+**Lo que la EDA produce**
+
+> La EDA no produce respuestas. Produce **hipótesis** y **decisiones de limpieza**.
+
+Sales de la EDA con tres o cuatro hallazgos, un puñado de preguntas nuevas y la certeza de que los datos aguantan lo que viene. Ese es exactamente el entregable de la **Entrega 2** de tu proyecto (semana 9).
+:::
+
+<!--=================-->
+<!--=================-->
+# El producto de la semana: raw → clean → analysis-ready
+
+Todo lo anterior se organiza en un flujo con tres estados, y **los tres se conservan**:
+
+```{=html}
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>raw</b> — el dataset tal como llegó. <b>No se toca nunca.</b> Es tu punto de retorno: si te equivocas limpiando, siempre puedes volver.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>clean</b> — el dataset con los problemas corregidos, construido <b>por código</b> a partir de raw. Cada corrección es una línea que otra persona puede leer.</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>analysis-ready</b> — el clean más las variables derivadas que tu análisis necesita (<code>ingreso = precio × cantidad</code>, por ejemplo). Es lo que alimenta todo lo que viene.</div></div>
+</div>
+```
+
+::: {.callout-workflow}
+**El acta de limpieza**
+
+Al terminar, debes poder responder estas tres preguntas sin dudar:
+
+1. ¿Cuántas filas eliminé y **por qué**?
+2. ¿Qué valores imputé o corregí y **con qué criterio**?
+3. ¿Qué columnas eliminé y **por qué no aportaban**?
+
+La prueba de fuego: que **otra persona** —o tú mismo dentro de tres meses— pueda correr tu script sobre el `raw` y obtener **exactamente** el mismo `analysis-ready`. Si eso no ocurre, tu análisis no es reproducible, y un análisis no reproducible no le sirve a ninguna organización.
+:::
 
 ::: {.callout-connect}
-**Conexión con el resto del curso**
+**Hacia dónde va esto**
 
-| Lo que hicimos hoy | Cómo lo usaremos después |
+| Lo de esta semana | Dónde lo vas a necesitar |
 |---|---|
-| Dataset limpio (`ventas_clean`) | Base para todos los modelos de Semanas 09-12 |
-| EDA de distribuciones | En ML: verificar que los datos de train y test tengan distribuciones similares |
-| Detección de outliers | En regresión (Semana 12): los outliers inflan el RMSE y sesgan los coeficientes |
-| Categorías estandarizadas | En clasificación (Semana 11): las etiquetas deben ser consistentes o el modelo las trata como clases distintas |
-| Documentar decisiones de limpieza | Exigencia del proyecto final: toda transformación debe estar justificada |
+| Dataset limpio | La base de todos los modelos, de la semana 10 a la 13 |
+| EDA de distribuciones | En ML: verificar que train y test se parezcan |
+| Detección de outliers | En regresión (semana 12): un outlier infla el RMSE y tuerce los coeficientes |
+| Categorías estandarizadas | En clasificación (semana 11): si las etiquetas no son consistentes, el modelo inventa clases |
+| Documentar decisiones | Exigencia del proyecto final: toda transformación debe estar justificada |
 
-**Semana 07 (Parcial):** El parcial incluye preguntas sobre diagnóstico de calidad de datos e interpretación de EDA. Revisa las secciones de `skim()`, `unique()`, `table()` y los histogramas.
+**Y en la semana 7 hay parcial:** el diagnóstico de calidad y la interpretación de la EDA entran. Este documento es material de estudio.
 :::
-
----
 
 <!--=================-->
 <!--=================-->
-# Checklist — ¿Qué debes poder explicar?
+# Checklist de salida
 
-::: {.callout-key}
-**Antes de pasar a la siguiente semana, verifica que puedes:**
+Al terminar el podcast (o este documento), debes ser capaz de:
 
-**Sobre fuentes y calidad:**
+- [ ] Distinguir fuente primaria de secundaria y decir qué riesgo típico trae cada una.
+- [ ] Explicar por qué conocer el origen del dato te dice qué suciedad buscar.
+- [ ] Nombrar las cuatro dimensiones de la calidad y dar un ejemplo de cada una.
+- [ ] Explicar por qué la suciedad de los datos no produce errores, sino respuestas confiadas y falsas.
+- [ ] Decir qué representa una fila de una base y por qué esa pregunta va primero.
+- [ ] Enumerar las tres estrategias frente a valores faltantes y cuándo conviene cada una.
+- [ ] Explicar por qué "¿por qué falta?" importa más que "¿con qué lo relleno?".
+- [ ] Definir el IQR y enunciar la regla de detección de outliers (`Q1 − 1,5·IQR` a `Q3 + 1,5·IQR`).
+- [ ] Explicar por qué un outlier no es necesariamente un error, con un ejemplo de cada caso.
+- [ ] Explicar qué le pasa a un `group_by()` cuando hay "Norte" y "norte", y por qué R no avisa.
+- [ ] Explicar qué busca la EDA y por qué no es "hacer gráficos bonitos".
+- [ ] Describir el flujo *raw → clean → analysis-ready* y qué es el acta de limpieza.
 
-- [ ] Distinguir fuente primaria de secundaria y qué riesgos implica cada una
-- [ ] Nombrar al menos 4 tipos de problemas de calidad de datos con un ejemplo de cada uno
-- [ ] Explicar por qué "Norte" ≠ "norte" en R y qué consecuencia tiene en un `group_by()`
-
-**Sobre diagnóstico en R:**
-
-- [ ] Interpretar la salida de `skim()` para identificar tipos, faltantes y outliers
-- [ ] Usar `unique()` y `table()` para detectar inconsistencias en categorías
-- [ ] Interpretar un histograma y señalar dónde podría haber un outlier
-
-**Sobre limpieza:**
-
-- [ ] Explicar qué hace `distinct()` y cuándo usarlo
-- [ ] Usar `toupper()` / `tolower()` / `toTitleCase()` para estandarizar texto
-- [ ] Convertir una columna de texto con "$" a número usando `gsub()` + `as.numeric()`
-- [ ] Usar `ifelse()` para corregir un valor puntual
-- [ ] Justificar verbalmente cada decisión de limpieza (eliminar vs imputar vs corregir)
-
-**Sobre EDA:**
-
-- [ ] Usar `skim()` para obtener un resumen completo del dataset limpio
-- [ ] Calcular y graficar el ingreso por grupo con `group_by()` + `summarise()`
-- [ ] Elegir el gráfico adecuado según la pregunta (distribución, comparación, relación, tendencia)
-- [ ] Explicar qué es el EDA y por qué se hace antes de modelar
-:::
-
----
-
+<!--=================-->
+<!--=================-->
 # Preguntas de comprensión
 
+Del estilo de las que encontrarás en el quiz. Intenta responderlas **antes** de abrir la respuesta.
+
 ::: {.callout-practice}
-**Pregunta 1 — Diagnóstico**
+**1. El presupuesto mal repartido**
 
-Recibes un dataset de 500 transacciones. Al correr `skim()` ves que la columna `precio` tiene tipo `character` y `n_unique = 47`. Luego corres `unique(df$precio)` y ves valores como `"25.000"`, `"1.200.000"` y `"$ 450"`.
+Un analista calcula el ingreso por región sobre la base sin limpiar y obtiene **5 grupos** donde la empresa tiene 3 regiones. Explica (a) por qué R genera 5 grupos y (b) qué le pasa al gerente que usa esa tabla para asignar el presupuesto regional.
 
-¿Cuáles son los dos problemas de calidad que debes resolver antes de calcular el ingreso promedio? ¿Qué función de R usarías para cada uno?
+```{=html}
+<details class="answer"><summary>Ver respuesta</summary>
+<p><b>(a)</b> Porque para R <code>"Norte"</code>, <code>"norte"</code> y <code>"NORTE"</code> son <b>tres cadenas de texto distintas</b>, y <code>group_by()</code> agrupa por valor exacto. Es un problema de <b>consistencia</b>. <b>(b)</b> El ingreso real del Norte queda <b>partido en dos filas</b>, así que el Norte parece la mitad de rentable de lo que es y recibe menos presupuesto del que merece. Lo grave: <b>R no emitió ningún error</b> — la tabla se ve perfecta. La decisión se toma con datos falsos y nadie se entera.</p>
+</details>
+```
 :::
 
 ::: {.callout-practice}
-**Pregunta 2 — Consecuencia de no limpiar**
+**2. Dos precios sospechosos**
 
-Un analista recibe el dataset `ventas_raw` y calcula el ingreso total por región sin limpiar primero. Obtiene 5 grupos en vez de 3. Explica en dos oraciones:
+En una base de una tienda de tecnología encuentras: (a) un **mouse con precio de $12.000** cuando todos los demás cuestan entre $20 y $30, y (b) una **venta de $80 millones** cuando la venta típica es de $2 millones. ¿Los tratas igual? ¿Qué haces con cada uno?
 
-a) Por qué R genera 5 grupos
-b) Cómo afecta esto a la toma de decisiones si el gerente usa esa tabla para asignar presupuesto regional
+```{=html}
+<details class="answer"><summary>Ver respuesta</summary>
+<p><b>No.</b> El (a) es casi con certeza un <b>error de captura</b> (probablemente $120, con un cero de más): se corrige y se documenta. El (b) puede ser perfectamente <b>real</b>: el cliente corporativo más grande del año. Si lo eliminas "para limpiar", borraste el dato más valioso de la base. La regla: <b>el mismo procedimiento estadístico marca a los dos, pero solo el conocimiento del negocio los distingue</b>. Un outlier no es un error hasta que demuestres que lo es — así que ve a mirar la fila completa antes de decidir.</p>
+</details>
+```
 :::
 
 ::: {.callout-practice}
-**Pregunta 3 — EDA como decisión**
+**3. La imputación que sesga**
 
-Después de limpiar los datos, corres `skim(ventas_clean)` y luego un histograma del precio. Observas una distribución bimodal (dos picos: uno en ~80 y otro en ~1.200).
+Tienes una base de clientes donde falta el `ingreso_mensual` en el 15% de los casos. Un compañero propone: "fácil, lo relleno con la mediana y seguimos". ¿Qué le preguntarías antes de dejarlo?
 
-¿Qué significa esa distribución bimodal en términos de negocio? ¿Cambiaría tu análisis si el gerente te pide "el precio promedio de ventas"? ¿Por qué?
+```{=html}
+<details class="answer"><summary>Ver respuesta</summary>
+<p><b>"¿Por qué faltan?"</b> Si faltan al azar, imputar con la mediana es defendible. Pero si faltan porque <b>los clientes de mayor patrimonio se negaron a declararlo</b>, el faltante <b>no es aleatorio</b>: al imputarlos a todos con la mediana estás empujando artificialmente hacia abajo justo la cola alta de la distribución, y sesgas toda la base sin que ninguna estadística te avise. En ese caso conviene <b>marcar</b> (crear un indicador de faltante) en vez de rellenar. Y decidas lo que decidas: se documenta.</p>
+</details>
+```
+:::
+
+::: {.callout-practice}
+**4. El promedio que no representa a nadie**
+
+Después de limpiar, el histograma del precio muestra dos picos bien separados: uno en ~$80 y otro en ~$1.200. El gerente te pide "el precio promedio de ventas". ¿Se lo das?
+
+```{=html}
+<details class="answer"><summary>Ver respuesta</summary>
+<p>No, o al menos no solo. Esa es una distribución <b>bimodal</b>: hay <b>dos segmentos de producto distintos</b> (accesorios baratos y equipos caros) conviviendo en la tabla. El promedio va a caer en el <b>valle entre los dos picos</b>, un rango de precios donde no existe casi ningún producto: es un número técnicamente correcto que <b>no describe a nadie</b>. La respuesta correcta es separar los segmentos y reportar el promedio de cada uno — y esa recomendación <b>salió de la EDA</b>, no del modelo. Esto es exactamente a qué nos referimos con que la EDA produce hipótesis y decisiones.</p>
+</details>
+```
 :::
 
 ---
 
 ## Material adicional (opcional)
 
-Si quieres profundizar en los temas de esta semana:
+Si quieres profundizar por tu cuenta:
 
-- **R for Data Science — Cap. 18 (Missing values):** cobertura detallada de estrategias para NAs → [https://r4ds.hadley.nz/missing-values](https://r4ds.hadley.nz/missing-values)
-- **Tidy Data (Hadley Wickham):** artículo original que define qué significa un dataset "ordenado" → [https://vita.had.co.nz/papers/tidy-data.pdf](https://vita.had.co.nz/papers/tidy-data.pdf)
-- **dplyr cheat sheet:** referencia rápida de todas las funciones de manipulación → [https://rstudio.github.io/cheatsheets/data-transformation.pdf](https://rstudio.github.io/cheatsheets/data-transformation.pdf)
+- **R for Data Science — Cap. 18 (Missing values):** el tratamiento detallado de los `NA` → [r4ds.hadley.nz/missing-values](https://r4ds.hadley.nz/missing-values)
+- **Tidy Data (Hadley Wickham):** el artículo que define qué significa un dataset "ordenado" → [vita.had.co.nz/papers/tidy-data.pdf](https://vita.had.co.nz/papers/tidy-data.pdf)
+- **dplyr cheat sheet:** la referencia rápida de todos los verbos → [rstudio.github.io/cheatsheets/data-transformation.pdf](https://rstudio.github.io/cheatsheets/data-transformation.pdf)
 
-```{=html}
-<!-- Panel Environment -->
-<div id="env-panel" class="collapsed">
-  <div id="env-header" onclick="toggleEnvPanel()">
-    <span id="env-header-left">&#x1F4E6; Environment</span>
-    <span id="env-header-right">
-      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
-      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
-    </span>
-  </div>
-  <div id="env-status">Esperando webR...</div>
-  <div id="env-body">
-    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
-  </div>
-</div>
-
-<script type="module">
-window.toggleEnvPanel = function() {
-  const panel = document.getElementById('env-panel');
-  const btn   = document.getElementById('env-toggle-btn');
-  panel.classList.toggle('collapsed');
-  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
-};
-
-async function getEnvData() {
-  if (!globalThis.mainWebR) return [];
-  try {
-    const shelter = await new globalThis.mainWebR.Shelter();
-    const result  = await shelter.evalR(`
-      local({
-        objs <- ls(envir = .GlobalEnv)
-        if (length(objs) == 0) return("")
-        info <- vapply(objs, function(nm) {
-          obj <- get(nm, envir = .GlobalEnv)
-          cls <- paste(class(obj), collapse = ", ")
-          len <- length(obj)
-          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
-          prev <- tryCatch({
-            if (is.data.frame(obj)) {
-              paste(names(obj), collapse = ", ")
-            } else if (is.function(obj)) {
-              a <- names(formals(obj))
-              paste0("function(", paste(a, collapse = ", "), ")")
-            } else if (is.atomic(obj) && len <= 6) {
-              paste(format(obj, digits = 4), collapse = ", ")
-            } else if (is.atomic(obj) && len > 6) {
-              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
-            } else if (is.list(obj)) {
-              paste0("List of ", len)
-            } else { "" }
-          }, error = function(e) "")
-          paste(nm, cls, len, dm, prev, sep = "\\t")
-        }, character(1))
-        paste(info, collapse = "\\n")
-      })
-    `);
-    const raw = await result.toString();
-    shelter.purge();
-    if (!raw || raw === '') return [];
-    return raw.split('\n').map(line => {
-      const p = line.split('\t');
-      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
-    });
-  } catch (e) {
-    console.warn('Env panel error:', e);
-    return [];
-  }
-}
-
-function renderEnv(items) {
-  const body   = document.getElementById('env-body');
-  const status = document.getElementById('env-status');
-  if (items.length === 0) {
-    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
-    status.textContent = '0 objetos';
-    return;
-  }
-  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
-  body.innerHTML = items.map(it => {
-    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
-    if (it.dim) {
-      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
-    } else {
-      meta += 'Length: ' + it.len;
-    }
-    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
-    return '<div class="env-item">' +
-           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
-           '  <div class="env-item-meta">' + meta + '</div>' +
-           prev +
-           '</div>';
-  }).join('');
-}
-
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-async function updateEnvPanel() {
-  const items = await getEnvData();
-  renderEnv(items);
-}
-window.refreshEnv = function() {
-  const btn = document.getElementById('env-refresh-btn');
-  btn.style.animation = 'none';
-  void btn.offsetWidth;
-  updateEnvPanel();
-};
-
-function moveWebRStatus() {
-  const anchor = document.getElementById('webr-status-anchor');
-  const statusArea = document.getElementById('qwebr-status-message-area');
-  if (anchor && statusArea) {
-    const wrapper = statusArea.closest('.quarto-title-meta');
-    if (wrapper) {
-      wrapper.style.display = 'inline';
-      wrapper.style.fontSize = '13px';
-      wrapper.style.marginLeft = '30px';
-      anchor.parentNode.insertBefore(wrapper, anchor);
-    }
-  }
-}
-
-async function init() {
-  while (!globalThis.qwebrInstance) {
-    await new Promise(r => setTimeout(r, 300));
-  }
-  await globalThis.qwebrInstance;
-  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
-  moveWebRStatus();
-
-  await new Promise(resolve => {
-    const check = setInterval(() => {
-      const btns = document.querySelectorAll('.qwebr-button-run');
-      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
-        clearInterval(check);
-        resolve();
-      }
-    }, 400);
-  });
-
-  const original = globalThis.qwebrComputeEngine;
-  globalThis.qwebrComputeEngine = async function(...args) {
-    const res = await original.apply(this, args);
-    setTimeout(updateEnvPanel, 150);
-    return res;
-  };
-
-  const panel = document.getElementById('env-panel');
-  if (panel.classList.contains('collapsed') ) {
-    toggleEnvPanel();
-  }
-  await updateEnvPanel();
-}
-
-init();
-</script>
-```
+Para esta semana, el podcast (o este documento) es suficiente. **Nos vemos en clase: traemos una base bien sucia y la dejamos presentable.** 🧹

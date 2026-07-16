@@ -1,0 +1,764 @@
+---
+title: "Unidad 6 - Clustering: fundamentos y métricas"
+subtitle: "Introducción al Business Analytics · Semana 13 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Cómo estudiar esta semana
+
+::: {.callout-key}
+**Este documento es la versión escrita del video de la semana**
+
+1. 🎬 **Mira el video de la clase** — el enlace está en Intu. En clustering el componente visual es clave: verás los centroides moverse en vivo. <!-- TODO: pegar aquí el enlace del video -->
+2. 📖 **Lee este documento** — el mismo recorrido, con un **playground de k-means** para correr el algoritmo paso a paso y una **perilla de k** para entrenar el ojo con el codo y la silueta.
+3. ✅ **Presenta el quiz en Intu** antes de la clase.
+:::
+
+::: {.callout-warning}
+**Antes de venir a clase: esta semana NO hay paquetes nuevos** 🎉
+
+Todo lo que usarás ya está en tu máquina: `dplyr` y `ggplot2` te acompañan desde la semana 4, `kmeans()` viene con R, y el paquete `cluster` (para la silueta) se instala junto con R. Verifícalo en 10 segundos: `library(cluster)` no debe arrojar error. Si arroja, `install.packages("cluster")` y listo.
+:::
+
+**El plan:** llevas tres semanas entrenando modelos con hoja de respuestas — el target decía quién pagó, qué nota sacó, y las métricas medían qué tanto le atinabas. Esta semana **te quitamos la hoja de respuestas**. La empresa entrega una base de clientes y pregunta: *"¿qué tipos de clientes tengo?"* Nadie sabe la respuesta — ni la empresa, ni el modelo, ni tú. Vas a descubrir grupos con **k-means**, a decidir *cuántos* grupos hay con el **codo** y la **silueta**, y a hacer el paso que paga el sueldo del analista: **perfilar** cada grupo hasta que tenga nombre propio y una acción de negocio.
+
+<!--=================-->
+<!--=================-->
+# Glosario de la semana
+
+::: {.glossary-grid}
+::: {.gloss-card}
+**Aprendizaje no supervisado** 🧭
+Modelar **sin target**: no hay columna con "la respuesta correcta". El algoritmo busca estructura (grupos, patrones) y el humano juzga si esa estructura sirve.
+:::
+::: {.gloss-card}
+**Segmentación** 🗺️
+El uso estrella del clustering en negocios: partir clientes/productos/zonas en grupos **internamente parecidos y externamente distintos**, para tratarlos diferente.
+:::
+::: {.gloss-card}
+**Distancia** 📐
+El "qué tan diferentes son" entre dos observaciones: cada cliente es un punto en el espacio de las variables, y estar cerca = comportarse parecido.
+:::
+::: {.gloss-card}
+**Escalamiento** ⚖️
+`scale()`: llevar cada variable a media 0 y desviación 1. **Obligatorio** antes de k-means: sin esto, la variable de rango grande (pesos) aplasta a las demás en el cálculo de distancias.
+:::
+::: {.gloss-card}
+**Centroide** 🎯
+El punto promedio de un cluster — la "bodega" del grupo. k-means vive moviendo centroides y reasignando puntos hasta que nada cambia.
+:::
+::: {.gloss-card}
+**WCSS** 🧲
+*Within-cluster sum of squares*: la suma de distancias² de cada punto a su centroide. Mide **compactación** — qué tan apretados quedaron los grupos. Es lo que k-means minimiza.
+:::
+::: {.gloss-card}
+**Método del codo** 💪
+Graficar la WCSS para k = 1, 2, 3… y buscar el punto donde **agregar un cluster más deja de comprar compactación**. Orienta, no decide.
+:::
+::: {.gloss-card}
+**Silueta** 👤
+De −1 a +1 por observación: ¿estás más cerca de tu cluster que del vecino? La **silueta promedio** compara valores de k — y a diferencia del codo, sí tiene un máximo.
+:::
+::: {.gloss-card}
+**`nstart`** 🎲
+k-means arranca con centroides aleatorios y puede terminar distinto cada vez. `nstart = 25` corre 25 arranques y se queda con el mejor — tu seguro contra la mala suerte.
+:::
+::: {.gloss-card}
+**Perfilamiento** 🏷️
+Traducir cada cluster a negocio: tabla de promedios, tamaños, gráficos y un **nombre accionable**. Un cluster sin perfil es un número; con perfil es una estrategia.
+:::
+:::
+
+<!--=================-->
+<!--=================-->
+# Se acabaron las respuestas
+
+Mira el arco de las últimas tres semanas: en la 10 aprendiste a **medir** modelos, en la 11 predijiste **categorías** (¿paga o no paga?), en la 12 predijiste **números** (¿en cuánto se vende?). En todas hubo un lujo que ya ni notabas: la columna con la respuesta. Podías partir en train/test y preguntar *"¿le atiné?"* porque había un dato real contra el cual chocar cada predicción.
+
+Hoy ese lujo desaparece. El gerente no pregunta *"predícEme quién se fuga"* — pregunta *"¿qué **tipos** de socios tengo?"*. En la base no existe ninguna columna `tipo_de_socio`. No la tiene él, no la tienes tú, no la tiene nadie: **hay que descubrirla**.
+
+| | Supervisado (semanas 10-12) | No supervisado (esta semana) |
+|---|---|---|
+| ¿Hay target? | 🟢 Sí — la hoja de respuestas | 🔴 No — nadie sabe "la verdad" |
+| La pregunta | *¿Puedo predecir Y?* | *¿Qué estructura esconde X?* |
+| ¿"Acertar" se puede medir? | Sí: matriz de confusión, MAE… | No hay contra qué: no existe la respuesta correcta |
+| ¿Entonces cómo se evalúa? | Contra el test (una vez) | Compactación (WCSS), silueta… **y criterio de negocio** |
+| El veredicto final | "Le atina X%" | "¿Los grupos se pueden **nombrar y accionar**?" |
+
+: {.striped tbl-colwidths="[26,37,37]"}
+
+::: {.callout-connect}
+**Dónde estás parado en el pipeline**
+
+Los pasos de la semana 10 siguen ahí — pregunta de negocio, preparar datos, entrenar, evaluar, comunicar — pero la **evaluación cambia de naturaleza**: ya no hay test que dé un veredicto objetivo. Las métricas de esta semana (WCSS, silueta) orientan la búsqueda, y la decisión final es de criterio: un clustering es bueno si produce segmentos **útiles**. Esto no es una debilidad — es la razón por la que este trabajo no se automatiza fácil.
+:::
+
+<!--=================-->
+<!--=================-->
+# ¿Por qué segmentar?
+
+Antes del algoritmo, el problema de negocio. Tienes **10.000 clientes** y un presupuesto de marketing que no alcanza para consentirlos a todos. Tratarlos igual es ineficiente: no todos quieren lo mismo, no compran igual, no responden al mismo mensaje. La segmentación busca grupos **internamente homogéneos** (los miembros se parecen entre sí) y **externamente diferentes** (los grupos se distinguen), para diseñar una estrategia por grupo en lugar de una talla única.
+
+Un buen agrupamiento logra las dos cosas a la vez — y los extremos no sirven: si todos los clientes caen en un solo grupo, no segmentaste nada; si cada cliente es su propio grupo, tampoco. El reto es el punto intermedio **útil para decidir**.
+
+**Preguntas de segmentación típicas:**
+
+- ¿Qué perfiles de clientes tenemos según frecuencia, monto y recencia de compra?
+- ¿Qué zonas de la ciudad se comportan parecido en ventas, para asignar vendedores?
+- ¿Qué productos comparten patrón de demanda, para planear inventario juntos?
+- ¿Qué canciones "suenan" parecido, para armar listas automáticas? *(la de la práctica)*
+
+En todos los casos, **nadie dice de antemano cuántos grupos hay ni cuáles son**. Eso lo descubre el algoritmo — y lo valida el analista.
+
+<!--=================-->
+<!--=================-->
+# k-means: la máquina de las bodegas
+
+## Similitud = cercanía
+
+La idea central del clustering cabe en una frase: **observaciones que están "cerca" pertenecen al mismo grupo**. Cada cliente es un punto en un espacio donde cada eje es una variable (monto, frecuencia, recencia…), y la **distancia** entre dos puntos mide qué tan distinto es su comportamiento.
+
+::: {.callout-warning}
+**La regla de oro: escalar ANTES de agrupar**
+
+Si una variable está en pesos (rango 0–5.000.000) y otra en visitas al mes (rango 0–20), la distancia la domina la de pesos: para el algoritmo, la diferencia entre gastar \$80.000 y \$95.000 es *quince mil veces más grande* que la diferencia entre ir 1 vez y ir 20. El clustering resultante refleja **unidades**, no comportamiento.
+
+`scale()` lleva todas las variables a media 0 y desviación 1 — la misma cancha para todas. **Siempre** escala las variables numéricas antes de k-means. En la práctica y el taller de esta semana vas a ver (con números) qué pasa cuando alguien lo olvida.
+:::
+
+Si quieres una pasada visual alternativa de 5 minutos, este video del canal **AprendeInnovando** (material complementario, en español) resume el algoritmo:
+
+{{< video https://www.youtube.com/watch?v=2kfY0R34Dy0 >}}
+
+## El algoritmo en 4 pasos
+
+::: {.callout-key}
+**k-means, versión gerente de logística**
+
+Necesitas ubicar **k bodegas** para atender a tus clientes repartidos en el mapa, cada bodega lo más cerca posible de los suyos:
+
+1. **Inicio:** coloca k bodegas en posiciones aleatorias.
+2. **Asignación:** cada cliente se asigna a la bodega más cercana.
+3. **Actualización:** mueve cada bodega al centro geográfico de sus clientes.
+4. **Repetición:** repite 2 y 3 hasta que las bodegas dejen de moverse (*convergencia*).
+
+Las "bodegas" son los **centroides**; los clientes de cada bodega, los **clusters**.
+:::
+
+**Lo que k-means optimiza:** la suma de distancias² de cada punto a su centroide — la **WCSS** (*within-cluster sum of squares*). Grupos compactos = WCSS baja. Ese número te lo vas a encontrar en el playground de abajo, en el gráfico del codo y en el output de R (`tot.withinss`).
+
+## Explóralo tú mismo: k-means playground
+
+Corre el algoritmo paso a paso — el video de la clase lo muestra; aquí lo manejas tú:
+
+1. Selecciona **"Blobs separados"** y ve paso a paso: Inicializar → Asignar → Mover centroides → repetir. Observa cómo la **WCSS baja** en cada iteración hasta converger.
+2. Con el mismo dataset, **Reinicia e Inicializa varias veces** con el mismo k: los centroides arrancan en lugares distintos… ¿el resultado final es siempre igual? (Esta es la razón de `nstart = 25` en R.)
+3. Cambia a **"Anillos"** con k = 2. ¿Por qué k-means fracasa aquí? ¿Qué supuesto del algoritmo se rompe?
+4. Prueba **"Grupos desiguales"** con k = 3 y mira la **silueta**: ¿sube o baja frente a "Blobs separados"?
+
+```{=html}
+<div style="margin: 1.5rem 0;">
+<style>
+#kmpl *{box-sizing:border-box;margin:0;padding:0}
+#kmpl{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:500px;border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;font-family:inherit}
+#kmpl-panel{background:#f8f8f6;border-right:1px solid #e0e0e0;padding:16px;display:flex;flex-direction:column;gap:16px}
+#kmpl-main{position:relative;background:#fff;display:flex;flex-direction:column}
+#kmpl canvas{cursor:crosshair;display:block;flex:1;min-height:300px}
+#kmpl .ps{display:flex;flex-direction:column;gap:8px}
+#kmpl .pl{font-size:11px;color:#888;letter-spacing:.03em;text-transform:uppercase;font-weight:500}
+#kmpl .pv{font-size:18px;font-weight:500;color:#111}
+#kmpl .sr{display:flex;gap:6px}
+#kmpl .kb{flex:1;padding:6px 4px;font-size:12px;font-weight:500;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111;cursor:pointer;transition:background .15s}
+#kmpl .kb:hover{background:#f0f0f0}
+#kmpl .kb:disabled{opacity:.4;cursor:not-allowed}
+#kmpl .kb.kp{background:#dbeafe;color:#1e40af;border-color:#93c5fd}
+#kmpl .kb.kp:hover{background:#bfdbfe}
+#kmpl .kb.kd{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+#kmpl .kb.kd:hover{background:#fecaca}
+#kmpl select{width:100%;padding:6px 8px;font-size:13px;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111}
+#kmpl input[type=range]{width:100%;accent-color:#378ADD}
+#kmpl .mv{font-size:20px;font-weight:500;color:#111}
+#kmpl .ml{font-size:11px;color:#888}
+#kmpl-status{padding:8px 14px;font-size:12px;color:#666;border-top:1px solid #e0e0e0;min-height:32px;display:flex;align-items:center}
+#kmpl .lr{display:flex;flex-wrap:wrap;gap:6px}
+#kmpl .li{display:flex;align-items:center;gap:4px;font-size:11px;color:#666}
+#kmpl .ld{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+#kmpl-iter{font-size:11px;color:#888;text-align:center}
+</style>
+
+<div id="kmpl">
+  <div id="kmpl-panel">
+    <div class="ps">
+      <div class="pl">Dataset</div>
+      <select id="kmpl-ds">
+        <option value="blobs">Blobs separados</option>
+        <option value="ring">Anillos</option>
+        <option value="spread">Dispersión uniforme</option>
+        <option value="imbalanced">Grupos desiguales</option>
+        <option value="custom">Dibuja tus datos ✏</option>
+      </select>
+    </div>
+    <div class="ps">
+      <div class="pl">Número de clusters (k)</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="kmpl-k" min="2" max="8" value="3" step="1" style="flex:1">
+        <span class="pv" id="kmpl-kv">3</span>
+      </div>
+    </div>
+    <div class="ps">
+      <div class="pl">Pasos del algoritmo</div>
+      <div class="sr">
+        <button class="kb kp" id="kmpl-init">Inicializar</button>
+        <button class="kb" id="kmpl-assign" disabled>Asignar</button>
+      </div>
+      <div class="sr">
+        <button class="kb" id="kmpl-update" disabled>Mover centroides</button>
+      </div>
+      <div class="sr">
+        <button class="kb" id="kmpl-run">▶ Correr todo</button>
+      </div>
+      <div id="kmpl-iter">iteración: —</div>
+    </div>
+    <div class="ps">
+      <div class="pl">WCSS</div>
+      <div class="mv" id="kmpl-wcss">—</div>
+      <div class="ml">compactación intra-cluster</div>
+    </div>
+    <div class="ps">
+      <div class="pl">Silhouette promedio</div>
+      <div class="mv" id="kmpl-sil">—</div>
+    </div>
+    <div class="ps">
+      <div class="pl">Clusters</div>
+      <div class="lr" id="kmpl-legend"></div>
+    </div>
+    <button class="kb kd" id="kmpl-reset" style="margin-top:auto">Reiniciar</button>
+  </div>
+  <div id="kmpl-main">
+    <canvas id="kmpl-canvas"></canvas>
+    <div id="kmpl-status">Elige un dataset e inicializa los centroides</div>
+  </div>
+</div>
+
+<script>
+(function(){
+const CL=[
+  {fill:'#378ADD'},{fill:'#D85A30'},{fill:'#1D9E75'},{fill:'#BA7517'},
+  {fill:'#7F77DD'},{fill:'#D4537E'},{fill:'#639922'},{fill:'#E24B4A'},
+];
+const cv=document.getElementById('kmpl-canvas');
+const cx=cv.getContext('2d');
+const ksl=document.getElementById('kmpl-k');
+const kvl=document.getElementById('kmpl-kv');
+const dsl=document.getElementById('kmpl-ds');
+const bI=document.getElementById('kmpl-init');
+const bA=document.getElementById('kmpl-assign');
+const bU=document.getElementById('kmpl-update');
+const bR=document.getElementById('kmpl-run');
+const bX=document.getElementById('kmpl-reset');
+const wEl=document.getElementById('kmpl-wcss');
+const sEl=document.getElementById('kmpl-sil');
+const stEl=document.getElementById('kmpl-status');
+const itEl=document.getElementById('kmpl-iter');
+const lgEl=document.getElementById('kmpl-legend');
+
+let pts=[],ctr=[],asg=[],iter=0,phase='idle',W,H,timer=null;
+
+function rsz(){
+  const r=cv.parentElement.getBoundingClientRect();
+  W=r.width; H=Math.max(r.height-32,280);
+  cv.width=W; cv.height=H; drw();
+}
+function rnd(a,b){return a+(b-a)*Math.random();}
+function genBlobs(){
+  const p=[],cs=[[.25,.25],[.75,.25],[.5,.72]];
+  cs.forEach(([x,y])=>{for(let i=0;i<40;i++)p.push({x:x+rnd(-.12,.12),y:y+rnd(-.12,.12)});});
+  return p;
+}
+function genRing(){
+  const p=[];
+  for(let i=0;i<60;i++){const a=Math.random()*6.28,r=rnd(.08,.14);p.push({x:.5+r*Math.cos(a),y:.5+r*Math.sin(a)});}
+  for(let i=0;i<80;i++){const a=Math.random()*6.28,r=rnd(.3,.38);p.push({x:.5+r*Math.cos(a),y:.5+r*Math.sin(a)});}
+  return p;
+}
+function genSpread(){const p=[];for(let i=0;i<140;i++)p.push({x:rnd(.05,.95),y:rnd(.05,.95)});return p;}
+function genImb(){
+  const p=[];
+  for(let i=0;i<90;i++)p.push({x:rnd(.05,.45),y:rnd(.05,.95)});
+  for(let i=0;i<15;i++)p.push({x:rnd(.6,.75),y:rnd(.2,.4)});
+  for(let i=0;i<20;i++)p.push({x:rnd(.65,.9),y:rnd(.6,.85)});
+  return p;
+}
+function load(){
+  const v=dsl.value;
+  if(v==='custom'){pts=[];rst();stEl.textContent='Haz clic en el lienzo para agregar puntos';return;}
+  const raw=v==='blobs'?genBlobs():v==='ring'?genRing():v==='spread'?genSpread():genImb();
+  pts=raw.map(p=>({x:Math.max(.02,Math.min(.98,p.x)),y:Math.max(.02,Math.min(.98,p.y))}));
+  rst(); stEl.textContent=`${pts.length} observaciones cargadas. Inicializa los centroides para comenzar.`;
+}
+function tc(p){return {x:p.x*W,y:p.y*H};}
+function tp(x,y){return {x:x/W,y:y/H};}
+function dst(a,b){return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);}
+function rst(){
+  ctr=[];asg=[];iter=0;phase='idle';
+  bA.disabled=true;bU.disabled=true;
+  itEl.textContent='iteración: —';
+  wEl.textContent='—';sEl.textContent='—';sEl.style.color='';
+  lgd();drw();
+}
+function ini(){
+  if(pts.length<3){stEl.textContent='Agrega al menos 3 puntos';return;}
+  const k=+ksl.value;ctr=[];
+  const used=new Set();
+  while(ctr.length<k){const i=Math.floor(Math.random()*pts.length);if(!used.has(i)){used.add(i);ctr.push({...pts[i]});}}
+  asg=new Array(pts.length).fill(-1);iter=0;phase='initialized';
+  bA.disabled=false;bU.disabled=true;itEl.textContent='iteración: 0';
+  wEl.textContent='—';sEl.textContent='—';sEl.style.color='';
+  lgd();drw();stEl.textContent='Centroides inicializados. Pulsa "Asignar" para asignar cada punto al centroide más cercano.';
+}
+function asn(){
+  let chg=false;
+  pts.forEach((p,i)=>{
+    let best=-1,bd=Infinity;
+    ctr.forEach((c,ci)=>{const d=dst(p,c);if(d<bd){bd=d;best=ci;}});
+    if(asg[i]!==best)chg=true;asg[i]=best;
+  });
+  phase='assigned';bA.disabled=true;bU.disabled=false;
+  mtr();drw();
+  if(!chg){phase='converged';bU.disabled=true;stEl.textContent=`¡Convergió en ${iter} iteración(es)! Los centroides ya no se mueven.`;return true;}
+  stEl.textContent=`Iteración ${iter}: puntos asignados al centroide más cercano. Ahora mueve los centroides.`;
+  return false;
+}
+function upd(){
+  const k=ctr.length,sm=Array.from({length:k},()=>({x:0,y:0,n:0}));
+  pts.forEach((p,i)=>{const c=asg[i];if(c>=0){sm[c].x+=p.x;sm[c].y+=p.y;sm[c].n++;}});
+  ctr=sm.map((s,i)=>s.n>0?{x:s.x/s.n,y:s.y/s.n}:ctr[i]);
+  iter++;itEl.textContent=`iteración: ${iter}`;
+  phase='updated';bA.disabled=false;bU.disabled=true;
+  drw();stEl.textContent=`Centroides movidos al centro de su grupo. Iteración ${iter} completa. Vuelve a asignar.`;
+}
+function clrT(){if(timer){clearInterval(timer);timer=null;}}
+function runAll(){
+  if(phase==='idle'){stEl.textContent='Primero inicializa los centroides';return;}
+  if(phase==='converged'){stEl.textContent='Ya convergió. Reinicia para explorar de nuevo.';return;}
+  clrT();
+  timer=setInterval(()=>{
+    if(phase==='converged'){clrT();bR.textContent='▶ Correr todo';return;}
+    if(phase==='initialized'||phase==='updated'){const c=asn();if(c){clrT();bR.textContent='▶ Correr todo';return;}}
+    else if(phase==='assigned')upd();
+  },600);
+  stEl.textContent='Ejecutando automáticamente…';
+}
+function mtr(){
+  if(!asg.some(a=>a>=0))return;
+  let w=0;pts.forEach((p,i)=>{const c=asg[i];if(c>=0)w+=dst(p,ctr[c])**2;});
+  wEl.textContent=w.toFixed(1);
+  if(pts.length<10){sEl.textContent='—';return;}
+  const sl=[];
+  pts.forEach((p,i)=>{
+    const ci=asg[i];
+    const sm=pts.filter((_,j)=>asg[j]===ci&&j!==i);
+    if(!sm.length){sl.push(0);return;}
+    const a=sm.reduce((s,q)=>s+dst(p,q),0)/sm.length;
+    let b=Infinity;
+    ctr.forEach((_,cj)=>{if(cj===ci)return;const ot=pts.filter((_,j)=>asg[j]===cj);if(!ot.length)return;const av=ot.reduce((s,q)=>s+dst(p,q),0)/ot.length;if(av<b)b=av;});
+    sl.push(b===Infinity?0:(b-a)/Math.max(a,b));
+  });
+  const avg=sl.reduce((s,v)=>s+v,0)/sl.length;
+  sEl.textContent=avg.toFixed(3);
+  sEl.style.color=avg>.5?'#15803d':avg>.2?'#b45309':'#b91c1c';
+}
+function lgd(){
+  const k=+ksl.value;lgEl.innerHTML='';
+  for(let i=0;i<k;i++){
+    const d=document.createElement('div');d.className='li';
+    d.innerHTML=`<div class="ld" style="background:${CL[i].fill}"></div><span>C${i+1}</span>`;
+    lgEl.appendChild(d);
+  }
+}
+function drw(){
+  if(!W||!H)return;cx.clearRect(0,0,W,H);
+  if(ctr.length>0){
+    ctr.forEach((c,ci)=>{
+      const cp=tc(c);
+      pts.forEach((p,pi)=>{
+        if(asg[pi]!==ci)return;
+        const pp=tc(p);cx.beginPath();cx.moveTo(cp.x,cp.y);cx.lineTo(pp.x,pp.y);
+        cx.strokeStyle=CL[ci].fill+'28';cx.lineWidth=1;cx.stroke();
+      });
+    });
+    ctr.forEach((c,ci)=>{
+      const cp=tc(c);
+      const ot=ctr.filter((_,j)=>j!==ci);
+      if(ot.length){
+        const md=Math.min(...ot.map(o=>dst(tc(o),cp)));
+        cx.beginPath();cx.arc(cp.x,cp.y,Math.min(md/2,Math.min(W,H)*.38),0,6.28);
+        cx.fillStyle=CL[ci].fill+'18';cx.fill();
+      }
+    });
+  }
+  pts.forEach((p,i)=>{
+    const cp=tc(p);const ci=asg[i];
+    cx.beginPath();cx.arc(cp.x,cp.y,5,0,6.28);
+    cx.fillStyle=ci>=0?CL[ci].fill:'#aaa';cx.fill();
+    cx.strokeStyle='#fff';cx.lineWidth=1.5;cx.stroke();
+  });
+  ctr.forEach((c,ci)=>{
+    const cp=tc(c);const sz=11;
+    cx.beginPath();cx.moveTo(cp.x-sz,cp.y);cx.lineTo(cp.x+sz,cp.y);
+    cx.moveTo(cp.x,cp.y-sz);cx.lineTo(cp.x,cp.y+sz);
+    cx.strokeStyle=CL[ci].fill;cx.lineWidth=3;cx.stroke();
+    cx.beginPath();cx.arc(cp.x,cp.y,sz*.55,0,6.28);
+    cx.fillStyle='#fff';cx.fill();cx.strokeStyle=CL[ci].fill;cx.lineWidth=2.5;cx.stroke();
+    cx.fillStyle=CL[ci].fill;cx.font='500 11px inherit';cx.textAlign='center';cx.textBaseline='middle';
+    cx.fillText(ci+1,cp.x,cp.y+.5);
+  });
+}
+cv.addEventListener('click',e=>{
+  if(dsl.value!=='custom')return;
+  const r=cv.getBoundingClientRect();
+  const p=tp(e.clientX-r.left,e.clientY-r.top);
+  if(p.x<0||p.x>1||p.y<0||p.y>1)return;
+  pts.push(p);if(phase!=='idle')rst();drw();
+  stEl.textContent=`${pts.length} punto(s). Inicializa cuando estés listo.`;
+});
+ksl.addEventListener('input',()=>{kvl.textContent=ksl.value;if(phase!=='idle')rst();else lgd();});
+dsl.addEventListener('change',load);
+bI.addEventListener('click',ini);
+bA.addEventListener('click',asn);
+bU.addEventListener('click',upd);
+bR.addEventListener('click',()=>{if(timer){clrT();bR.textContent='▶ Correr todo';}else{bR.textContent='⏹ Pausar';runAll();}});
+bX.addEventListener('click',()=>{clrT();bR.textContent='▶ Correr todo';load();});
+window.addEventListener('resize',rsz);
+setTimeout(()=>{rsz();load();},120);
+})();
+</script>
+</div>
+```
+
+## Limitaciones de k-means
+
+::: {.callout-warning}
+**Limitaciones que debes tener presentes al leer resultados**
+
+1. **Hay que elegir k de antemano** — el algoritmo no decide cuántos grupos hay; tú le dices cuántos buscar (la siguiente sección es justo sobre eso).
+2. **Sensible a la inicialización** — dos corridas pueden dar grupos distintos. Solución estándar: `nstart = 25` (R corre 25 arranques y entrega el mejor) + `set.seed()` para que sea reproducible.
+3. **Asume grupos "redondos" y de tamaño similar** — formas alargadas o anillos (lo viste en el playground) lo confunden.
+4. **Sensible a outliers** — un punto extremo jala el centroide hacia sí y deforma el cluster.
+5. **Solo variables numéricas** — k-means calcula distancias; las categóricas no entran sin transformación previa. Y los **ID numéricos tampoco**: que `id_socio` sea un número no significa que la "distancia" entre el socio 1001 y el 1280 mida algo.
+:::
+
+Nada de esto invalida a k-means — es el algoritmo de segmentación más usado del mundo precisamente por simple, rápido e interpretable. Pero el analista que conoce las limitaciones lee los resultados con los ojos abiertos.
+
+<!--=================-->
+<!--=================-->
+# ¿Cuántos clusters? El codo, la silueta y el negocio
+
+La pregunta más importante de la semana — y donde más se equivocan los principiantes. No existe un k "correcto" automático: hay **dos métricas que orientan** y un **criterio de negocio que decide**.
+
+## El método del codo
+
+Corres k-means para k = 1, 2, 3, …, 8 y graficas la WCSS de cada uno. La WCSS **siempre baja** al agregar clusters (más bodegas = todo el mundo más cerca de alguna) — la pregunta no es dónde baja, sino dónde **deja de bajar con ganas**.
+
+Piénsalo con las bodegas: con 1 bodega para toda Colombia, todo queda lejos. Con 2, mejora muchísimo. Con 3, bastante. Con 20… cada bodega nueva ya casi no acerca a nadie y sí cuesta. El **codo** es el punto donde la mejora marginal deja de justificar la complejidad.
+
+## La silueta
+
+La silueta mira cada punto y pregunta: *¿estás más cerca de los de tu cluster que de los del cluster vecino?* El coeficiente va de **−1 a +1**:
+
+| Valor | Significado |
+|---|---|
+| Cerca de **+1** | Bien asignado: pegado a los suyos, lejos de los demás |
+| Cerca de **0** | En la frontera entre dos clusters |
+| **Negativo** | Probablemente en el cluster equivocado |
+
+: {.striped tbl-colwidths="[28,72]"}
+
+Para elegir k se calcula la **silueta promedio** de cada candidato — y a diferencia del codo (que se lee "a ojo"), aquí **sí hay un máximo** que señalar con el dedo.
+
+## Entrena el ojo: la perilla de k
+
+Un caso ilustrativo de segmentación de clientes, ya resuelto para k = 1…8. Mueve la perilla y aprende a leer las dos señales juntas:
+
+```{=html}
+<div class="widget-card" id="wg-codo">
+  <div class="widget-head">💪 El codo y la silueta — ¿cuántos grupos pido?</div>
+  <div class="widget-body">
+    <div class="ofit-controls">
+      <span style="font-size:0.9em; color:#475569;">Número de clusters (k):</span>
+      <input type="range" id="wcd-slider" min="1" max="8" value="1" step="1" aria-label="Número de clusters k">
+      <span class="ofit-cx" id="wcd-val">1</span>
+    </div>
+    <svg class="ofit-svg" id="wcd-svg" viewBox="0 0 560 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Curva del codo (WCSS) y barras de silueta promedio por k"></svg>
+    <div class="ofit-boxes">
+      <div class="ofit-box"><div class="ofit-val" id="wcd-wcss">–</div><div class="ofit-lab">WCSS</div></div>
+      <div class="ofit-box ofit-train"><div class="ofit-val" id="wcd-delta">–</div><div class="ofit-lab">Lo que compró este k</div></div>
+      <div class="ofit-box ofit-test"><div class="ofit-val" id="wcd-sil">–</div><div class="ofit-lab">Silueta promedio</div></div>
+    </div>
+    <div class="widget-note" id="wcd-nota"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var WCSS = [1000, 560, 310, 180, 158, 141, 128, 118];   // k = 1..8
+  var SIL  = [null, 0.46, 0.53, 0.61, 0.50, 0.43, 0.39, 0.36]; // k = 1..8
+  var NOTAS = [
+    "k = 1 es no segmentar: una sola bodega para todo el mundo. La WCSS arranca en su máximo y la silueta ni se define (no hay vecino contra quién compararse).",
+    "La caída fue enorme (−440): partir en dos SIEMPRE compra mucho. Pero el mapa quedó grueso — la silueta (0.46) todavía no hace pico. Sigue.",
+    "El tercer cluster todavía compró bastante (−250) y la silueta sigue subiendo (0.53). El codo aún no aparece.",
+    "★ Aquí se dobla el codo: este cluster compró −130, el siguiente compraría solo −22. Y la silueta hace su máximo (0.61). Candidato fuerte a k final — si los 4 grupos se pueden nombrar.",
+    "El quinto cluster compró casi nada (−22) y la silueta cayó a 0.50: complejidad gratis. Ya te pasaste.",
+    "WCSS casi plana (−17) y silueta en bajada (0.43): estás partiendo grupos reales en pedazos.",
+    "Cada cluster nuevo compra migajas (−13). Silueta 0.39: micro-grupos que nadie va a poder nombrar.",
+    "Ocho grupos, silueta 0.36 y una WCSS que ya no se mueve: más segmentos de los que el negocio puede accionar."
+  ];
+  var svg = document.getElementById("wcd-svg");
+  if (!svg) return;
+  var W = 560, H = 240, L = 62, R = 20, T = 18, B = 34;
+  var plotW = W - L - R, plotH = H - T - B;
+  function xk(k) { return L + (k - 1) / 7 * plotW; }
+  function yw(w) { return T + (1 - w / 1000) * plotH; }
+  function draw(sel) {
+    var s = "";
+    // banda del k seleccionado
+    var bw = plotW / 7;
+    s += '<rect x="' + (xk(sel) - bw / 2) + '" y="' + T + '" width="' + bw + '" height="' + plotH + '" fill="#dbeafe" opacity="0.55"/>';
+    // ejes
+    s += '<line x1="' + L + '" y1="' + (T + plotH) + '" x2="' + (W - R) + '" y2="' + (T + plotH) + '" stroke="#94a3b8" stroke-width="1.5"/>';
+    s += '<line x1="' + L + '" y1="' + T + '" x2="' + L + '" y2="' + (T + plotH) + '" stroke="#94a3b8" stroke-width="1.5"/>';
+    s += '<text x="' + (L - 8) + '" y="' + (T + 6) + '" font-size="10" fill="#64748b" text-anchor="end">WCSS</text>';
+    // barras de silueta (escala propia: 0.7 ≙ alto del plot)
+    for (var k = 2; k <= 8; k++) {
+      var bh = SIL[k - 1] / 0.7 * plotH;
+      s += '<rect x="' + (xk(k) - 11) + '" y="' + (T + plotH - bh) + '" width="22" height="' + bh + '" rx="3" fill="#86efac" opacity="' + (k === sel ? 1 : 0.55) + '"/>';
+      s += '<text x="' + xk(k) + '" y="' + (T + plotH - bh - 5) + '" font-size="9.5" fill="#15803d" text-anchor="middle"' + (k === sel ? ' font-weight="bold"' : '') + '>' + SIL[k - 1].toFixed(2) + '</text>';
+    }
+    // curva WCSS
+    var path = "";
+    for (var k2 = 1; k2 <= 8; k2++) path += (k2 === 1 ? "M" : "L") + xk(k2) + " " + yw(WCSS[k2 - 1]) + " ";
+    s += '<path d="' + path + '" fill="none" stroke="#1e3a5f" stroke-width="2.5"/>';
+    for (var k3 = 1; k3 <= 8; k3++) {
+      s += '<circle cx="' + xk(k3) + '" cy="' + yw(WCSS[k3 - 1]) + '" r="' + (k3 === sel ? 7 : 5) + '" fill="' + (k3 === sel ? "#f97316" : "#378ADD") + '" stroke="#fff" stroke-width="1.5"/>';
+      s += '<text x="' + xk(k3) + '" y="' + (H - 12) + '" font-size="11" fill="' + (k3 === sel ? "#1e3a5f" : "#64748b") + '"' + (k3 === sel ? ' font-weight="bold"' : '') + ' text-anchor="middle">' + k3 + '</text>';
+    }
+    s += '<text x="' + (L + plotW / 2) + '" y="' + (H - 1) + '" font-size="10" fill="#94a3b8" text-anchor="middle">número de clusters (k) · línea azul: WCSS · barras verdes: silueta promedio</text>';
+    svg.innerHTML = s;
+  }
+  function update() {
+    var k = +document.getElementById("wcd-slider").value;
+    document.getElementById("wcd-val").textContent = k;
+    document.getElementById("wcd-wcss").textContent = WCSS[k - 1];
+    document.getElementById("wcd-delta").textContent = k === 1 ? "–" : "−" + (WCSS[k - 2] - WCSS[k - 1]);
+    document.getElementById("wcd-sil").textContent = SIL[k - 1] === null ? "–" : SIL[k - 1].toFixed(2);
+    document.getElementById("wcd-nota").textContent = NOTAS[k - 1];
+    draw(k);
+  }
+  document.getElementById("wcd-slider").addEventListener("input", update);
+  update();
+})();
+</script>
+```
+
+::: {.callout-warning}
+**Ojo: el codo no siempre es nítido.** A veces la curva baja suave, sin quiebre obvio — el codo "duda" entre dos valores. Ahí es cuando la silueta rompe el empate… y cuando ni ella es clara, decide el criterio de la siguiente sección. Los tres hablan; **tú firmas.**
+:::
+
+## El criterio final: ¿los grupos sirven?
+
+El codo y la silueta te dejan en un **rango razonable** de k. La decisión final es de negocio — hazle estas cuatro preguntas a cada agrupamiento candidato:
+
+1. **¿Puedo nombrar cada cluster?** Si no puedes ponerle nombre descriptivo ("frecuentes de bajo monto", "esporádicos de alto ticket"), probablemente no es un buen agrupamiento.
+2. **¿Puedo accionar sobre cada cluster?** ¿Cada segmento recibiría una estrategia distinta? Si dos recibirían la misma acción, quizá deberían ser uno.
+3. **¿Los tamaños son razonables?** Un cluster de 3 clientes entre 10.000 suele ser ruido… aunque a veces un grupo pequeño es un **nicho valioso** — el perfil decide, no el tamaño solo.
+4. **¿Es estable?** Si otra corrida (u otro mes de datos) cambia los grupos drásticamente, no confíes en la segmentación.
+
+**Regla práctica:** si el codo sugiere 4 y la silueta 3, **perfila ambos** y quédate con el que produzca segmentos más claros y accionables.
+
+<!--=================-->
+<!--=================-->
+# Perfilamiento: de números a decisiones
+
+k-means devuelve etiquetas (`1, 2, 3…`) y aquí es donde muchos análisis mueren: *"encontré 4 clusters"* — ¿y qué? El trabajo valioso **apenas empieza**: hay que **perfilar** cada segmento hasta poder describirlo, nombrarlo y accionarlo.
+
+El perfilamiento estándar tiene tres piezas:
+
+1. **Tabla de promedios por cluster** — para cada variable, el valor típico de cada segmento (+ el **tamaño** de cada grupo).
+2. **Visualizaciones comparativas** — un scatter coloreado por cluster y boxplots por variable: muestran separación *y* dispersión.
+3. **Nombres de negocio** — la traducción final.
+
+::: {.callout-key}
+**Ejemplo: tabla de perfilamiento (clientes, 3 variables RFM)**
+
+| Cluster | Nombre sugerido | Monto prom. | Frecuencia | Recencia (días) | Tamaño |
+|---|---|---|---|---|---|
+| 1 | Frecuentes de bajo monto | $45.000 | 8.2 | 5 | 4.200 |
+| 2 | Esporádicos de alto ticket | $320.000 | 1.1 | 45 | 1.800 |
+| 3 | Inactivos | $28.000 | 0.3 | 120 | 4.000 |
+
+: {.striped}
+
+**Lectura:** el cluster 1 compra seguido pero poquito → programa de lealtad con *upgrades*. El 2 compra poco pero gasta mucho → relación personalizada. El 3 lleva 4 meses sin aparecer → campaña de reactivación… o aceptarlos como perdidos y no gastar en ellos.
+:::
+
+**Nombrar es parte del análisis.** Buenos nombres son cortos, descriptivos y orientados a la acción: *"VIP dormidos"*, *"cazadores de ofertas"*, *"nuevos exploradores"*. Malos nombres no dicen nada: *"Grupo A"*, *"cluster grande"*, *"los del medio"*. Si después de mirar la tabla no le encuentras nombre a un grupo, sospecha del agrupamiento (o del k).
+
+::: {.callout-warning}
+**El centroide es un promedio, no un cliente**
+
+Ningún miembro del cluster es idéntico al centroide — y los promedios engañan. Revisa siempre la **dispersión** dentro de cada cluster (boxplots) para saber qué tan homogéneo es de verdad el segmento. Y recuerda: las asignaciones no son certezas — un cliente puede estar en la frontera entre dos grupos (silueta ≈ 0).
+:::
+
+<!--=================-->
+<!--=================-->
+# Las alternativas (alto nivel)
+
+k-means es el punto de partida, no la única opción. Dos alternativas que debes conocer de vista:
+
+::: {.callout-key}
+**Clustering jerárquico** 🌿
+
+- No pide k de antemano: construye la jerarquía completa de fusiones y la "cortas" al nivel que quieras.
+- Produce un **dendrograma** — el árbol que muestra cómo se van uniendo los grupos.
+- Útil para explorar granularidad: ¿2 macro-segmentos o 6 micro-segmentos? El mismo dendrograma responde ambas.
+- Desventaja: lento en bases grandes.
+:::
+
+::: {.callout-key}
+**DBSCAN** 🕵️ *(opcional)*
+
+- Encuentra clusters de **forma irregular** (no solo "redondos").
+- Detecta **outliers automáticamente**: puntos que no pertenecen a ningún grupo.
+- No pide k, pero pide otros dos parámetros (radio de vecindad y mínimo de puntos).
+- Útil con grupos de formas raras o mucho ruido.
+:::
+
+| Método | ¿Elegir k antes? | Forma de clusters | Outliers | Escalabilidad |
+|---|---|---|---|---|
+| k-means | Sí | Esféricos | Los absorbe (sensible) | 🟢 Muy buena |
+| Jerárquico | No (cortas después) | Flexible | Moderado | 🟠 Limitada |
+| DBSCAN | No | Arbitraria | 🟢 Los separa solos | Buena |
+
+: {.striped tbl-colwidths="[20,20,22,22,16]"}
+
+Para este curso, **k-means es el algoritmo central**; estas alternativas son contexto para que puedas mencionarlas cuando el problema lo amerite.
+
+<!--=================-->
+<!--=================-->
+# El pipeline completo de un proyecto de segmentación
+
+Este es el guion — el mismo de la práctica, el taller y (si tu pregunta es de segmentación) tu proyecto final:
+
+```{=html}
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>Define la pregunta de negocio.</b> ¿Qué segmentas y para qué? (clientes para campañas, zonas para vendedores, productos para inventario). La pregunta decide las variables.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>Selecciona y prepara variables.</b> Solo numéricas y relevantes para la pregunta — fuera IDs, fuera categóricas sin transformar. Y <b>escala</b> con <code>scale()</code>.</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>Corre k-means para varios k</b> (típicamente 1 a 8), con <code>set.seed()</code> y <code>nstart = 25</code>.</div></div>
+  <div class="pipe-step"><div class="pipe-num">4</div><div><b>Evalúa con codo y silueta.</b> El codo acota el rango; la silueta señala su máximo. Quédate con 1-2 candidatos.</div></div>
+  <div class="pipe-step"><div class="pipe-num">5</div><div><b>Elige el k final con criterio de negocio.</b> Perfila los candidatos: gana el que produzca grupos nombrables y accionables.</div></div>
+  <div class="pipe-step"><div class="pipe-num">6</div><div><b>Perfila en serio.</b> Tabla de promedios + tamaños + gráficos comparativos. Nombra cada segmento.</div></div>
+  <div class="pipe-step"><div class="pipe-num">7</div><div><b>Comunica y recomienda.</b> Una acción concreta por segmento — eso es lo que el gerente compra.</div></div>
+</div>
+```
+
+::: {.callout-connect}
+**Conexión con el proyecto final**
+
+Si la pregunta de negocio de tu grupo es de **segmentación**, esta semana es literalmente tu proyecto: este pipeline de 7 pasos es la estructura de tu entrega final. Y la calidad se medirá donde siempre: en la **interpretabilidad y accionabilidad** de los segmentos, no en la sofisticación del algoritmo.
+:::
+
+<!--=================-->
+<!--=================-->
+# Errores frecuentes
+
+::: {.callout-warning}
+**Los seis pecados del clustering**
+
+1. **No escalar** — el error #1. El clustering termina reflejando unidades, no comportamiento.
+2. **Meter variables irrelevantes** — IDs numéricos, códigos postales "numéricos"… distorsionan la distancia. Selecciona con la pregunta de negocio en la mano.
+3. **Elegir k solo con el codo** — el codo orienta; valida con silueta y, sobre todo, con interpretabilidad.
+4. **Reportar clusters sin perfilar** — "hay 4 grupos" no le sirve a nadie; los nombres y las acciones son el entregable.
+5. **Tratar las asignaciones como certezas** — hay puntos en la frontera; la segmentación es una simplificación útil, no una verdad.
+6. **Leer el centroide como "el cliente típico"** — es un promedio; mira la dispersión antes de describir el segmento.
+:::
+
+<!--=================-->
+<!--=================-->
+# ¿Y en tu semestre?
+
+- **En la práctica de esta semana** serás el analista de una plataforma de streaming: segmentarás **canciones por su sonido** (no por el género declarado — spoiler: no coinciden del todo) para armar listas de reproducción con nombre y personalidad. Todo el pipeline: escalar, codo, silueta, perfilar, nombrar.
+- **En el taller** te toca el rol completo de consultor: un gimnasio te entrega su base de socios **y una segmentación mal hecha que tendrás que auditar** antes de construir la buena. No digo más.
+- **Y ojo al calendario:** la próxima semana es el **parcial 2** — esta teoría (más las semanas 10-12) es el material. El pipeline, las métricas y el porqué de cada paso; no la memoria de ningún número.
+
+<!--=================-->
+<!--=================-->
+# Para pensar 🧠
+
+1. Tu banco te tiene, con certeza, dentro de un cluster. ¿Qué variables crees que usaron? ¿Qué nombre le pondrías al segmento donde caes… y qué campaña te están mandando por estar ahí?
+2. Spotify Wrapped te dice cada diciembre "tu año en música". ¿Dónde ves las huellas de un clustering ahí? ¿Qué decisión de negocio toma Spotify con esos grupos?
+3. Si corres k-means dos veces y obtienes grupos distintos, ¿cuál de los dos es "el verdadero"? (Pista: la pregunta está mal planteada — ¿por qué?)
+
+<!--=================-->
+<!--=================-->
+# Checklist de la semana
+
+Antes de la clase, deberías poder marcar todas:
+
+- [ ] Explico la diferencia entre supervisado y no supervisado (y por qué aquí no hay "accuracy")
+- [ ] Narro los 4 pasos de k-means con la analogía de las bodegas
+- [ ] Explico por qué escalar es obligatorio y qué hace `scale()`
+- [ ] Sé qué mide la WCSS y cómo se lee el gráfico del codo
+- [ ] Sé qué mide la silueta y por qué complementa al codo
+- [ ] Puedo perfilar un cluster: tabla de promedios, tamaño, gráfico y nombre accionable
+- [ ] Sé qué es `nstart` y por qué va con `set.seed()`
+- [ ] Reconozco cuándo k-means no es la herramienta (formas raras → DBSCAN; explorar granularidad → jerárquico)
+
+<!--=================-->
+<!--=================-->
+# Preguntas de comprensión
+
+**1. ¿Supervisado o no supervisado?** Un banco tiene 50.000 clientes con saldo promedio, número de productos, antigüedad y frecuencia de transacciones digitales. Quiere identificar perfiles de clientes para ofertas personalizadas, pero **no existe ninguna variable que diga a qué perfil pertenece cada uno**. ¿Qué tipo de problema es y por qué?
+
+<details class="answer"><summary>Ver respuesta</summary>
+No supervisado: no hay target que indique los grupos — el algoritmo debe descubrirlos a partir de los patrones. Señal adicional: la entrega no se evalúa con "accuracy contra la respuesta", sino con la utilidad de los perfiles descubiertos.
+</details>
+
+**2. El clustering que solo veía plata.** Un analista corre k-means con ingreso anual (rango \$10M–\$200M) y compras mensuales (rango 1–30). Los clusters separan casi perfectamente por ingreso e ignoran la frecuencia. ¿Qué pasó y cómo se corrige?
+
+<details class="answer"><summary>Ver respuesta</summary>
+No escaló. El ingreso tiene un rango miles de veces mayor, así que domina el cálculo de distancias y la frecuencia se vuelve invisible. Se corrige con `scale()` antes de `kmeans()`: ambas variables quedan en media 0 y desviación 1, y pesan igual.
+</details>
+
+**3. Codo vs. silueta.** Corres k-means para k = 1…6 y obtienes WCSS = 8500, 5200, 3800, 3100, 2900, 2800, y silueta promedio (k = 2…6) = 0.41, 0.52, 0.49, 0.38, 0.33. El gerente pregunta: "¿cuántos segmentos hago?" ¿Qué respondes y con qué argumento?
+
+<details class="answer"><summary>Ver respuesta</summary>
+El codo es ambiguo entre 3 y 4 (las caídas: −3300, −1400, −700, −200, −100 — el quiebre fuerte termina entre 3 y 4). La silueta rompe el empate: máximo en k = 3 (0.52). Respuesta profesional: "los indicadores apuntan a 3; déjame perfilar 3 y 4, y confirmo con cuál los segmentos se pueden nombrar y accionar mejor".
+</details>
+
+**4. Ponles nombre.** Tras k-means con k = 3 sobre clientes obtienes: C1: monto \$380.000, frecuencia 1.2/mes, recencia 60 días (n = 2.100); C2: \$52.000, 7.5/mes, 4 días (n = 5.400); C3: \$15.000, 0.4/mes, 180 días (n = 2.500). Nombra cada cluster y propón una acción por segmento.
+
+<details class="answer"><summary>Ver respuesta</summary>
+C1 "Alto ticket esporádico / premium dormido" → relación personalizada, acceso anticipado a lanzamientos. C2 "Leales cotidianos de bajo monto" → programa de lealtad con upgrades y venta cruzada. C3 "Inactivos / en riesgo" → campaña de reactivación con incentivo; si no responden, dejar de invertir en ellos. (Cualquier nombre específico y accionable vale; "Grupo A" no.)
+</details>
+
+<!--=================-->
+<!--=================-->
+# Material adicional (opcional)
+
+- **ISLR — An Introduction to Statistical Learning**, capítulo 12 (*Unsupervised Learning*): k-means y jerárquico con ejemplos visuales — [gratis online](https://www.statlearning.com)
+- **StatQuest: K-means clustering** (inglés, 8 min) — la mecánica del algoritmo dibujada paso a paso → [youtube.com/watch?v=4b5d3muPQmA](https://www.youtube.com/watch?v=4b5d3muPQmA)
+- **from-data-to-viz.com** — para elegir los gráficos cuando perfiles tus clusters → [data-to-viz.com](https://www.data-to-viz.com)
+
+Con el video de la clase, este documento y el quiz es suficiente para llegar a la práctica. Nos vemos en clase. 🎧

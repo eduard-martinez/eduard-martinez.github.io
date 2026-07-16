@@ -1,5 +1,5 @@
 ---
-title: "Unidad 7 - Clustering: Fundamentos y Métricas"
+title: "Unidad 4 - Fundamentos de Machine Learning"
 subtitle: "Introducción al Business Analytics · Semana 10 · 06278-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
@@ -12,829 +12,636 @@ lang: es
 <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
 <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
 <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
-<span id="webr-status-anchor"></span>
 </div>
 
 <!--=================-->
 <!--=================-->
-# Objetivo de la semana
-
-El foco está en **segmentación como herramienta de decisión**: descubrir grupos naturales en los datos sin una variable de resultado (*target*), para luego describirlos, nombrarlos y convertirlos en acciones de negocio.
-
-## Lo que cubriremos
-
-- Lógica del clustering: similitud, escala, diferencia con clasificación 
-- K-means: centroides, WCSS, limitaciones 
-- Elegir k: método del codo, silueta, interpretabilidad 
-- Perfilar segmentos: de números a nombres de negocio 
+# Cómo estudiar esta semana
 
 ::: {.callout-key}
-**Conexión con semana 9**
+**Este documento es la versión escrita del podcast de la semana — y esta vez viene con dos videos**
 
-En la semana anterior vimos que en problemas no supervisados no hay etiqueta que diga si acertamos. Esta semana lo vivimos: un cluster es útil si tiene sentido de negocio, no si "da un número alto".
-
-| Semana 09 | Semana 10 |
-|---|---|
-| Pipeline ML, train/test, métricas | Primer algoritmo: k-means |
-| Supervisado vs. no supervisado (concepto) | No supervisado en la práctica |
-| Accuracy, RMSE | Elbow, silhouette (sin "respuesta correcta") |
+1. 🎧 **Escucha el episodio** — el enlace está en Intu. <!-- TODO: pegar aquí el enlace del podcast -->
+2. 🎬 **Mira los dos videos de métricas** que están embebidos más abajo: cómo se construye la **matriz de confusión** y cómo se calculan **MAE y RMSE**. No son opcionales: son la mitad del material de esta semana y la herramienta central de la clase.
+3. 📖 **Lee este documento** — organiza los conceptos, resume los videos y trae tres herramientas interactivas para ponerte a prueba.
+4. ✅ **Presenta el quiz en Intu** antes de la clase (cubre el podcast **y** los videos).
 :::
 
-# ¿Por qué segmentar?
-
-Antes de hablar de algoritmos, pensemos en el problema de negocio. Imagina que tienes **10,000 clientes** y un presupuesto limitado de marketing. Tratar a todos igual es ineficiente: no todos quieren lo mismo, no todos compran igual, no todos responden al mismo mensaje. La segmentación busca identificar **grupos internamente homogéneos** (los miembros de un grupo se parecen entre sí) y **externamente diferentes** (los grupos se distinguen entre sí).
-
-## Criterio de un buen clustering
-
-Un buen agrupamiento logra dos cosas simultáneamente:
-
-1. **Alta similitud intra-grupo** — los clientes dentro de un mismo segmento se parecen mucho entre sí.
-2. **Alta diferencia inter-grupo** — los segmentos son claramente distintos unos de otros.
-
-Si todos los clientes terminan en un solo grupo, no segmentamos nada. Si cada cliente es un grupo aparte, tampoco sirve. El reto es encontrar el punto intermedio que sea **útil para tomar decisiones**.
-
-## Ejemplos de preguntas de segmentación en negocios:
-
-- ¿Qué perfiles de clientes tenemos según frecuencia, monto y recencia de compras?
-- ¿Qué zonas geográficas se comportan de manera similar en ventas?
-- ¿Qué productos se agrupan según su patrón de demanda estacional?
-
-En todos estos casos, **nadie nos dice de antemano cuántos grupos hay ni cuáles son**. El algoritmo los descubre.
-
----
+**El plan del episodio:** hasta la semana 6 usaste los datos para describir el pasado: KPIs, tablas, gráficos. Esta semana el curso cambia de pregunta: ya no *¿qué pasó?* sino *¿qué va a pasar?* Veremos qué significa que una máquina "aprenda", por qué la única prueba que cuenta es con datos que el modelo **nunca vio**, cómo saber si un modelo de verdad aporta (el baseline), y las trampas que hacen que un modelo se vea brillante en el computador y fracase en el mundo real: el sobreajuste y el *data leakage*. Al final, los dos videos te dan el instrumento de medición: las métricas. En clase las usarás para **juzgar modelos ya entrenados** — y en las semanas 11 y 12 construirás los tuyos.
 
 <!--=================-->
 <!--=================-->
-# La intuición detrás de k-means
+# Glosario de la semana
 
-<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
-{{< video https://www.youtube.com/watch?v=2kfY0R34Dy0 >}}
+Los términos que vas a escuchar en el episodio y en los videos. Vuelve aquí cada vez que uno se te escape.
 
-## Similitud = cercanía
+::: {.glossary-grid}
+::: {.gloss-card}
+**Machine Learning** 🧠
+Enseñarle a un programa a partir de **ejemplos** (filas de datos), no de reglas escritas a mano. El objetivo no es repetir lo que vio: es **generalizar** — acertar en casos nuevos.
+:::
+::: {.gloss-card}
+**Target (variable objetivo)** 🎯
+Lo que quieres predecir. Si es una **categoría** ("Aprobado"/"Rechazado") el problema es de *clasificación*; si es un **número** (la nota final, el precio) es de *regresión*.
+:::
+::: {.gloss-card}
+**Features (predictoras)** 🧩
+Las variables con las que el modelo intenta adivinar el target: ingreso, edad, historial… Elegirlas bien es más importante que el algoritmo de moda.
+:::
+::: {.gloss-card}
+**Train / Test** 📚
+La partición sagrada: con el ~80% el modelo **estudia** (train) y con el ~20% restante presenta **el examen** (test). El test se toca una sola vez, al final.
+:::
+::: {.gloss-card}
+**Baseline** 📏
+El modelo más tonto posible: predecir siempre la clase mayoritaria o siempre el promedio. Es la vara mínima — si tu modelo no le gana, no aporta nada.
+:::
+::: {.gloss-card}
+**Sobreajuste y subajuste** 🎭
+Sobreajuste: memorizar el ruido de train y fallar en test. Subajuste: un modelo tan simple que falla hasta en train. La firma del sobreajuste es la **brecha** entre ambos errores.
+:::
+::: {.gloss-card}
+**Validación cruzada** 🔄
+En vez de un solo examen, k exámenes rotando qué parte de los datos se reserva. Sirve para comparar modelos y elegir hiperparámetros **sin gastar** el test.
+:::
+::: {.gloss-card}
+**Data leakage** 🚰
+Información del test — o del futuro — que se "fuga" al entrenamiento. El modelo se ve genial en el examen… porque vio las respuestas. La métrica queda inflada y la decisión, contaminada.
+:::
+::: {.gloss-card}
+**Matriz de confusión** 🧮
+La tabla 2×2 que resume un clasificador: qué predijo el modelo contra qué ocurrió de verdad. De ella salen accuracy, precisión y recall. La construyes en el video 1.
+:::
+::: {.gloss-card}
+**MAE y RMSE** 📐
+Las métricas de regresión: cuánto se equivoca el modelo, en promedio, en las unidades del target. El RMSE castiga más los errores grandes. Los calculas en el video 2.
+:::
+:::
 
-La idea central del clustering es simple: **observaciones que están "cerca" entre sí pertenecen al mismo grupo**. Pero ¿qué significa "cerca"?
+<!--=================-->
+<!--=================-->
+# El estudiante que se sabía el parcial de memoria
 
-En la vida cotidiana, decimos que dos clientes son "similares" si compran parecido, gastan montos parecidos, visitan con frecuencia parecida. En términos numéricos, cada cliente es un **punto en un espacio** donde cada eje es una variable (monto, frecuencia, recencia). La distancia entre dos puntos mide qué tan diferentes son.
+El episodio arranca con dos estudiantes preparando el mismo parcial.
+
+El primero consiguió los parciales de los últimos cinco semestres **con sus soluciones** y se los aprendió de memoria, cifra por cifra. En los simulacros — que salen de esos mismos parciales viejos — saca 5.0 clavado. El segundo estudió los conceptos: resolvió ejercicios, se equivocó, entendió *por qué* se equivocaba. En los simulacros saca 4.2.
+
+¿A quién le va mejor el día del parcial, con preguntas que ninguno ha visto? Exacto. El primero colapsa: su 5.0 era una ilusión, porque **medirse en preguntas que ya conoces no mide que sepas — mide que memorizaste**. El segundo saca su 4.2 tranquilo, porque su nota de simulacro sí medía comprensión.
+
+::: {.callout-key}
+**Un modelo de Machine Learning puede ser cualquiera de los dos estudiantes**
+
+Y aquí está el problema de negocio: por fuera son **idénticos**. Ambos presentan métricas espectaculares en los datos con los que se construyeron. La diferencia solo aparece cuando llegan datos nuevos — y en una empresa, "datos nuevos" significa clientes reales, créditos reales, plata real.
+
+Todo lo de esta semana — train/test, baseline, validación cruzada, leakage — es una sola pregunta repetida con distintos instrumentos: **¿este modelo entendió o memorizó?** Tu trabajo como analista es averiguarlo *antes* de que la empresa le confíe una decisión.
+:::
+
+¿Y por qué te importa? Porque los modelos ya están decidiendo: el banco que aprueba o niega un crédito en segundos, la universidad que dispara alertas tempranas de deserción, la tienda que pronostica cuánto inventario pedir. En la semana 5 llamaste a esto **analítica predictiva**. Esta semana le abres el capó.
+
+::: {.callout-connect}
+**Conexión con la semana 5 — y con tu proyecto final**
+
+¿Recuerdas la traducción de preguntas de negocio a tareas analíticas? *¿Este cliente incumplirá?* → clasificación. *¿Cuánto venderá esta tienda?* → regresión (predicción). *¿Qué grupos de clientes tengo?* → segmentación. Las dos primeras son **aprendizaje supervisado** — hay una respuesta correcta en los datos históricos con la cual entrenar y calificar — y son el tema de las semanas 10 a 12. La segmentación no tiene "respuesta correcta" y por eso se evalúa distinto: eso es la semana 13. Tu pregunta del proyecto final cae en una de estas casillas, así que lo de hoy es, literalmente, el manual de evaluación de tu Entrega 3.
+:::
+
+<!--=================-->
+<!--=================-->
+# Aprender, para una máquina
+
+Programar, como lo has hecho hasta ahora, es escribir reglas: *si el ingreso es mayor a 4 millones y no tiene mora, apruebe*. Machine Learning invierte el flujo: no le das las reglas — le das **ejemplos resueltos** (miles de solicitudes históricas con su desenlace) y el algoritmo encuentra los patrones solo.
+
+Para eso el dataset se divide en dos papeles:
+
+- El **target** 🎯: la columna que quieres predecir. En los ejemplos de esta semana: la decisión de crédito (`Aprobado`/`Rechazado`) y la nota final de un estudiante (0 a 5).
+- Las **features** 🧩: las columnas con las que se predice. Ingreso, deuda, antigüedad laboral; parciales, tareas, asistencia.
+
+Y del tipo de target sale el tipo de problema — la misma tabla de la semana 5, ahora con apellido técnico:
+
+| La pregunta de negocio | Target | Tipo de problema | Métrica (hoy la aprendes) |
+|---|---|---|---|
+| ¿Este solicitante incumplirá el crédito? | Categoría | **Clasificación** | Matriz de confusión |
+| ¿Qué nota sacará este estudiante? | Número | **Regresión** | MAE / RMSE |
+| ¿Cuánto venderá la tienda en mayo? | Número | **Regresión** | MAE / RMSE |
+| ¿Este correo es spam? | Categoría | **Clasificación** | Matriz de confusión |
+
+: {.striped tbl-colwidths="[40,15,22,23]"}
 
 ::: {.callout-warning}
-**¿Por qué escalar importa tanto?**
+**"Aprender" no es entender — es ajustar**
 
-Si una variable está en pesos (rango: 0–5,000,000) y otra en número de visitas (rango: 1–20), la distancia la domina completamente la variable en pesos. El algoritmo "ve" las diferencias en monto como enormes y las diferencias en frecuencia como despreciables.
-
-**Escalar** (estandarizar) las variables las pone en una escala comparable. Sin este paso, el clustering refleja diferencias de unidades, no de comportamiento real.
-
-**Regla práctica:** siempre escalar las variables numéricas antes de aplicar k-means.
+El algoritmo no sabe qué es un crédito ni le importa. Solo ajusta parámetros para que sus predicciones se parezcan a los ejemplos que le diste. Por eso puede "aprender" cosas absurdas si los datos las contienen: patrones espurios, errores de digitación, ruido. Y por eso la evaluación honesta — todo lo que sigue — no es un trámite: es la única forma de saber si aprendió algo útil.
 :::
 
----
+<!--=================-->
+<!--=================-->
+# El pipeline: de la pregunta al reporte
 
-## El algoritmo k-means en 4 pasos
-
-k-means es el algoritmo de clustering más usado por su simplicidad e interpretabilidad. Funciona así:
-
-### ¿Cómo funciona k-means? (versión intuitiva)
-::: {.callout-key}
-Imagina que eres gerente de logística y necesitas colocar **k bodegas** para atender a tus clientes distribuidos en un mapa. Quieres que cada bodega quede lo más cerca posible de los clientes que atiende.
-
-1. **Inicio:** Colocas k bodegas en posiciones aleatorias del mapa.
-2. **Asignación:** Cada cliente se asigna a la bodega más cercana.
-3. **Actualización:** Mueves cada bodega al centro geográfico de sus clientes asignados.
-4. **Repetición:** Repites los pasos 2 y 3 hasta que las bodegas ya no se muevan (convergencia).
-
-Las "bodegas" son los **centroides**. Los "clientes asignados a cada bodega" son los **clusters**.
-:::
-
-**Lo que k-means optimiza:** minimizar la suma de distancias entre cada punto y el centroide de su cluster. En lenguaje técnico: minimiza la *within-cluster sum of squares* (WCSS) — la "compactación" total de los grupos.
-
----
-
-## Explóralo tú mismo: K-Means Playground
-
-Antes de seguir con las limitaciones, experimenta con el algoritmo paso a paso. Usa los controles para ver exactamente qué ocurre en cada iteración.
-
-**¿Qué explorar aquí?**
-
-1. Selecciona **"Blobs separados"** y corre el algoritmo paso a paso: Inicializar → Asignar → Mover centroides → repetir. Observa cómo cambia el WCSS en cada iteración.
-2. Prueba el mismo dataset pero reiniciando varias veces con el mismo k. ¿Los centroides arrancan siempre en el mismo lugar? ¿El resultado final cambia?
-3. Cambia a **"Anillos"** con k = 2. ¿Por qué k-means falla aquí? ¿Qué limitación del algoritmo explica esto?
-4. Prueba **"Grupos desiguales"** con k = 3. Observa la silueta: ¿sube o baja comparado con "Blobs separados"?
+Todo proyecto de ML serio recorre los mismos pasos, en el mismo orden. Este es el mapa de las próximas cuatro semanas del curso:
 
 ```{=html}
-<div style="margin: 1.5rem 0;">
-<style>
-#kmpl *{box-sizing:border-box;margin:0;padding:0}
-#kmpl{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:500px;border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;font-family:inherit}
-#kmpl-panel{background:#f8f8f6;border-right:1px solid #e0e0e0;padding:16px;display:flex;flex-direction:column;gap:16px}
-#kmpl-main{position:relative;background:#fff;display:flex;flex-direction:column}
-#kmpl canvas{cursor:crosshair;display:block;flex:1;min-height:300px}
-#kmpl .ps{display:flex;flex-direction:column;gap:8px}
-#kmpl .pl{font-size:11px;color:#888;letter-spacing:.03em;text-transform:uppercase;font-weight:500}
-#kmpl .pv{font-size:18px;font-weight:500;color:#111}
-#kmpl .sr{display:flex;gap:6px}
-#kmpl .kb{flex:1;padding:6px 4px;font-size:12px;font-weight:500;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111;cursor:pointer;transition:background .15s}
-#kmpl .kb:hover{background:#f0f0f0}
-#kmpl .kb:disabled{opacity:.4;cursor:not-allowed}
-#kmpl .kb.kp{background:#dbeafe;color:#1e40af;border-color:#93c5fd}
-#kmpl .kb.kp:hover{background:#bfdbfe}
-#kmpl .kb.kd{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
-#kmpl .kb.kd:hover{background:#fecaca}
-#kmpl select{width:100%;padding:6px 8px;font-size:13px;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111}
-#kmpl input[type=range]{width:100%;accent-color:#378ADD}
-#kmpl .mv{font-size:20px;font-weight:500;color:#111}
-#kmpl .ml{font-size:11px;color:#888}
-#kmpl-status{padding:8px 14px;font-size:12px;color:#666;border-top:1px solid #e0e0e0;min-height:32px;display:flex;align-items:center}
-#kmpl .lr{display:flex;flex-wrap:wrap;gap:6px}
-#kmpl .li{display:flex;align-items:center;gap:4px;font-size:11px;color:#666}
-#kmpl .ld{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-#kmpl-iter{font-size:11px;color:#888;text-align:center}
-</style>
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>Pregunta y target.</b> Traducir la pregunta de negocio a una variable concreta que predecir. Sin target claro no hay proyecto.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>Features.</b> Elegir y preparar las variables predictoras (aquí reaparece toda tu semana 6: limpieza y EDA).</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>Partir train/test.</b> Separar el examen <em>antes</em> de estudiar. Típicamente 80/20 y al azar — con una excepción que veremos abajo.</div></div>
+  <div class="pipe-step"><div class="pipe-num">4</div><div><b>Entrenar y ajustar.</b> El algoritmo aprende con train; la validación cruzada compara versiones e hiperparámetros. <em>(Semanas 11 y 12.)</em></div></div>
+  <div class="pipe-step"><div class="pipe-num">5</div><div><b>Evaluar en test, contra un baseline.</b> Una sola vez, con la métrica correcta, y comparando contra la regla tonta. <em>(Esta semana.)</em></div></div>
+  <div class="pipe-step"><div class="pipe-num">6</div><div><b>Reportar.</b> Métrica en test + comparación con baseline + limitaciones y riesgos. Lo que un gerente necesita para decidir.</div></div>
+</div>
+```
 
-<div id="kmpl">
-  <div id="kmpl-panel">
-    <div class="ps">
-      <div class="pl">Dataset</div>
-      <select id="kmpl-ds">
-        <option value="blobs">Blobs separados</option>
-        <option value="ring">Anillos</option>
-        <option value="spread">Dispersión uniforme</option>
-        <option value="imbalanced">Grupos desiguales</option>
-        <option value="custom">Dibuja tus datos ✏</option>
-      </select>
+Fíjate en el orden de la clase: esta semana entras al pipeline **por el final** — aprenderás a ejecutar los pasos 5 y 6 sobre modelos que ya vienen entrenados. Es deliberado: primero juez, después ingeniero. Cuando la próxima semana entrenes tu primer árbol, ya sabrás calificarlo.
+
+<!--=================-->
+<!--=================-->
+# El examen: entrenamiento vs. prueba
+
+La regla más importante de todo Machine Learning cabe en una línea:
+
+::: {.callout-key}
+**Nunca evalúes un modelo con los datos que usó para aprender.**
+
+El modelo ya *vio* esas filas. Medir ahí es tomarle el examen con las mismas preguntas del simulacro: la nota sale inflada y no mide generalización. Por eso, antes de entrenar nada, se aparta un pedazo de los datos — el **conjunto de prueba** (test) — que el modelo no toca durante el aprendizaje. Ese pedazo simula el futuro: los clientes que aún no llegan, las solicitudes del próximo trimestre.
+:::
+
+La receta estándar: mezclar las filas al azar y partir **80% train / 20% test**. Dos detalles que en la práctica separan a los profesionales:
+
+1. **El test se usa una sola vez, al final.** Si lo consultas veinte veces mientras ajustas el modelo, deja de ser un examen y se convierte en otro simulacro — ya "aprendiste" de él. Para iterar está la validación cruzada (abajo).
+2. **Con datos temporales, el azar se prohíbe.** Si quieres predecir las ventas de mayo, entrena con enero-abril y prueba con mayo. Partir al azar mezclaría pasado y futuro: el modelo "vería" datos posteriores a los que intenta predecir — una fuga de información de manual.
+
+<!--=================-->
+<!--=================-->
+# Sobreajuste y subajuste
+
+Volvamos a los dos estudiantes. En términos de modelos:
+
+- **Subajuste** (*underfitting*): el modelo es demasiado simple para el patrón real. Le va mal en train **y** en test — el estudiante que no estudió.
+- **Sobreajuste** (*overfitting*): el modelo es tan flexible que además del patrón se aprendió el **ruido** de train. Brilla en train, colapsa en test — el memorizador.
+
+Entre los dos hay un punto dulce, y encontrarlo es el oficio. Muévele a la complejidad y mira qué pasa con los dos errores:
+
+```{=html}
+<div class="widget-card" id="wg-ofit">
+  <div class="widget-head">🎛️ El dial de la complejidad</div>
+  <div class="widget-body">
+    <div class="ofit-controls">
+      <span style="font-size:0.9em; color:#475569;">Complejidad del modelo</span>
+      <input type="range" id="ofit-slider" min="1" max="9" value="1" step="1" aria-label="Complejidad del modelo">
+      <span class="ofit-cx" id="ofit-cx">1</span>
     </div>
-    <div class="ps">
-      <div class="pl">Número de clusters (k)</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <input type="range" id="kmpl-k" min="2" max="8" value="3" step="1" style="flex:1">
-        <span class="pv" id="kmpl-kv">3</span>
-      </div>
+    <svg class="ofit-svg" id="ofit-svg" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Curvas de error de entrenamiento y prueba según complejidad"></svg>
+    <div class="ofit-boxes">
+      <div class="ofit-box ofit-train"><div class="ofit-val" id="ofit-etr">–</div><div class="ofit-lab">Error en train</div></div>
+      <div class="ofit-box ofit-test"><div class="ofit-val" id="ofit-ete">–</div><div class="ofit-lab">Error en test</div></div>
+      <div class="ofit-box"><div class="ofit-val" id="ofit-gap">–</div><div class="ofit-lab">Brecha (test − train)</div></div>
     </div>
-    <div class="ps">
-      <div class="pl">Pasos del algoritmo</div>
-      <div class="sr">
-        <button class="kb kp" id="kmpl-init">Inicializar</button>
-        <button class="kb" id="kmpl-assign" disabled>Asignar</button>
-      </div>
-      <div class="sr">
-        <button class="kb" id="kmpl-update" disabled>Mover centroides</button>
-      </div>
-      <div class="sr">
-        <button class="kb" id="kmpl-run">▶ Correr todo</button>
-      </div>
-      <div id="kmpl-iter">iteración: —</div>
-    </div>
-    <div class="ps">
-      <div class="pl">WCSS</div>
-      <div class="mv" id="kmpl-wcss">—</div>
-      <div class="ml">compactación intra-cluster</div>
-    </div>
-    <div class="ps">
-      <div class="pl">Silhouette promedio</div>
-      <div class="mv" id="kmpl-sil">—</div>
-    </div>
-    <div class="ps">
-      <div class="pl">Clusters</div>
-      <div class="lr" id="kmpl-legend"></div>
-    </div>
-    <button class="kb kd" id="kmpl-reset" style="margin-top:auto">Reiniciar</button>
-  </div>
-  <div id="kmpl-main">
-    <canvas id="kmpl-canvas"></canvas>
-    <div id="kmpl-status">Elige un dataset e inicializa los centroides</div>
+    <div style="text-align:center; margin:0.4em 0;"><span class="ofit-verdict" id="ofit-verdict"></span></div>
+    <div class="widget-note" id="ofit-note"></div>
   </div>
 </div>
 
 <script>
-(function(){
-const CL=[
-  {fill:'#378ADD'},{fill:'#D85A30'},{fill:'#1D9E75'},{fill:'#BA7517'},
-  {fill:'#7F77DD'},{fill:'#D4537E'},{fill:'#639922'},{fill:'#E24B4A'},
-];
-const cv=document.getElementById('kmpl-canvas');
-const cx=cv.getContext('2d');
-const ksl=document.getElementById('kmpl-k');
-const kvl=document.getElementById('kmpl-kv');
-const dsl=document.getElementById('kmpl-ds');
-const bI=document.getElementById('kmpl-init');
-const bA=document.getElementById('kmpl-assign');
-const bU=document.getElementById('kmpl-update');
-const bR=document.getElementById('kmpl-run');
-const bX=document.getElementById('kmpl-reset');
-const wEl=document.getElementById('kmpl-wcss');
-const sEl=document.getElementById('kmpl-sil');
-const stEl=document.getElementById('kmpl-status');
-const itEl=document.getElementById('kmpl-iter');
-const lgEl=document.getElementById('kmpl-legend');
-
-let pts=[],ctr=[],asg=[],iter=0,phase='idle',W,H,timer=null;
-
-function rsz(){
-  const r=cv.parentElement.getBoundingClientRect();
-  W=r.width; H=Math.max(r.height-32,280);
-  cv.width=W; cv.height=H; drw();
-}
-function rnd(a,b){return a+(b-a)*Math.random();}
-function genBlobs(){
-  const p=[],cs=[[.25,.25],[.75,.25],[.5,.72]];
-  cs.forEach(([x,y])=>{for(let i=0;i<40;i++)p.push({x:x+rnd(-.12,.12),y:y+rnd(-.12,.12)});});
-  return p;
-}
-function genRing(){
-  const p=[];
-  for(let i=0;i<60;i++){const a=Math.random()*6.28,r=rnd(.08,.14);p.push({x:.5+r*Math.cos(a),y:.5+r*Math.sin(a)});}
-  for(let i=0;i<80;i++){const a=Math.random()*6.28,r=rnd(.3,.38);p.push({x:.5+r*Math.cos(a),y:.5+r*Math.sin(a)});}
-  return p;
-}
-function genSpread(){const p=[];for(let i=0;i<140;i++)p.push({x:rnd(.05,.95),y:rnd(.05,.95)});return p;}
-function genImb(){
-  const p=[];
-  for(let i=0;i<90;i++)p.push({x:rnd(.05,.45),y:rnd(.05,.95)});
-  for(let i=0;i<15;i++)p.push({x:rnd(.6,.75),y:rnd(.2,.4)});
-  for(let i=0;i<20;i++)p.push({x:rnd(.65,.9),y:rnd(.6,.85)});
-  return p;
-}
-function load(){
-  const v=dsl.value;
-  if(v==='custom'){pts=[];rst();stEl.textContent='Haz clic en el lienzo para agregar puntos';return;}
-  const raw=v==='blobs'?genBlobs():v==='ring'?genRing():v==='spread'?genSpread():genImb();
-  pts=raw.map(p=>({x:Math.max(.02,Math.min(.98,p.x)),y:Math.max(.02,Math.min(.98,p.y))}));
-  rst(); stEl.textContent=`${pts.length} observaciones cargadas. Inicializa los centroides para comenzar.`;
-}
-function tc(p){return {x:p.x*W,y:p.y*H};}
-function tp(x,y){return {x:x/W,y:y/H};}
-function dst(a,b){return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);}
-function rst(){
-  ctr=[];asg=[];iter=0;phase='idle';
-  bA.disabled=true;bU.disabled=true;
-  itEl.textContent='iteración: —';
-  wEl.textContent='—';sEl.textContent='—';sEl.style.color='';
-  lgd();drw();
-}
-function ini(){
-  if(pts.length<3){stEl.textContent='Agrega al menos 3 puntos';return;}
-  const k=+ksl.value;ctr=[];
-  const used=new Set();
-  while(ctr.length<k){const i=Math.floor(Math.random()*pts.length);if(!used.has(i)){used.add(i);ctr.push({...pts[i]});}}
-  asg=new Array(pts.length).fill(-1);iter=0;phase='initialized';
-  bA.disabled=false;bU.disabled=true;itEl.textContent='iteración: 0';
-  wEl.textContent='—';sEl.textContent='—';sEl.style.color='';
-  lgd();drw();stEl.textContent='Centroides inicializados. Pulsa "Asignar" para asignar cada punto al centroide más cercano.';
-}
-function asn(){
-  let chg=false;
-  pts.forEach((p,i)=>{
-    let best=-1,bd=Infinity;
-    ctr.forEach((c,ci)=>{const d=dst(p,c);if(d<bd){bd=d;best=ci;}});
-    if(asg[i]!==best)chg=true;asg[i]=best;
-  });
-  phase='assigned';bA.disabled=true;bU.disabled=false;
-  mtr();drw();
-  if(!chg){phase='converged';bU.disabled=true;stEl.textContent=`¡Convergió en ${iter} iteración(es)! Los centroides ya no se mueven.`;return true;}
-  stEl.textContent=`Iteración ${iter}: puntos asignados al centroide más cercano. Ahora mueve los centroides.`;
-  return false;
-}
-function upd(){
-  const k=ctr.length,sm=Array.from({length:k},()=>({x:0,y:0,n:0}));
-  pts.forEach((p,i)=>{const c=asg[i];if(c>=0){sm[c].x+=p.x;sm[c].y+=p.y;sm[c].n++;}});
-  ctr=sm.map((s,i)=>s.n>0?{x:s.x/s.n,y:s.y/s.n}:ctr[i]);
-  iter++;itEl.textContent=`iteración: ${iter}`;
-  phase='updated';bA.disabled=false;bU.disabled=true;
-  drw();stEl.textContent=`Centroides movidos al centro de su grupo. Iteración ${iter} completa. Vuelve a asignar.`;
-}
-function clrT(){if(timer){clearInterval(timer);timer=null;}}
-function runAll(){
-  if(phase==='idle'){stEl.textContent='Primero inicializa los centroides';return;}
-  if(phase==='converged'){stEl.textContent='Ya convergió. Reinicia para explorar de nuevo.';return;}
-  clrT();
-  timer=setInterval(()=>{
-    if(phase==='converged'){clrT();bR.textContent='▶ Correr todo';return;}
-    if(phase==='initialized'||phase==='updated'){const c=asn();if(c){clrT();bR.textContent='▶ Correr todo';return;}}
-    else if(phase==='assigned')upd();
-  },600);
-  stEl.textContent='Ejecutando automáticamente…';
-}
-function mtr(){
-  if(!asg.some(a=>a>=0))return;
-  let w=0;pts.forEach((p,i)=>{const c=asg[i];if(c>=0)w+=dst(p,ctr[c])**2;});
-  wEl.textContent=w.toFixed(1);
-  if(pts.length<10){sEl.textContent='—';return;}
-  const sl=[];
-  pts.forEach((p,i)=>{
-    const ci=asg[i];
-    const sm=pts.filter((_,j)=>asg[j]===ci&&j!==i);
-    if(!sm.length){sl.push(0);return;}
-    const a=sm.reduce((s,q)=>s+dst(p,q),0)/sm.length;
-    let b=Infinity;
-    ctr.forEach((_,cj)=>{if(cj===ci)return;const ot=pts.filter((_,j)=>asg[j]===cj);if(!ot.length)return;const av=ot.reduce((s,q)=>s+dst(p,q),0)/ot.length;if(av<b)b=av;});
-    sl.push(b===Infinity?0:(b-a)/Math.max(a,b));
-  });
-  const avg=sl.reduce((s,v)=>s+v,0)/sl.length;
-  sEl.textContent=avg.toFixed(3);
-  sEl.style.color=avg>.5?'#15803d':avg>.2?'#b45309':'#b91c1c';
-}
-function lgd(){
-  const k=+ksl.value;lgEl.innerHTML='';
-  for(let i=0;i<k;i++){
-    const d=document.createElement('div');d.className='li';
-    d.innerHTML=`<div class="ld" style="background:${CL[i].fill}"></div><span>C${i+1}</span>`;
-    lgEl.appendChild(d);
+(function () {
+  var TRAIN = [32, 22, 15, 11, 8, 6, 4, 2.5, 1.5];
+  var TEST  = [34, 25, 19, 16, 17, 20, 24, 29, 34];
+  var svg = document.getElementById("ofit-svg");
+  if (!svg) return;
+  var W = 560, H = 300, L = 46, R = 20, T = 18, B = 40;
+  function x(c) { return L + (c - 1) * (W - L - R) / 8; }
+  function y(e) { return T + (36 - e) * (H - T - B) / 36; }
+  function path(arr) {
+    var d = "";
+    for (var i = 0; i < arr.length; i++) d += (i ? " L" : "M") + x(i + 1).toFixed(1) + " " + y(arr[i]).toFixed(1);
+    return d;
   }
-}
-function drw(){
-  if(!W||!H)return;cx.clearRect(0,0,W,H);
-  if(ctr.length>0){
-    ctr.forEach((c,ci)=>{
-      const cp=tc(c);
-      pts.forEach((p,pi)=>{
-        if(asg[pi]!==ci)return;
-        const pp=tc(p);cx.beginPath();cx.moveTo(cp.x,cp.y);cx.lineTo(pp.x,pp.y);
-        cx.strokeStyle=CL[ci].fill+'28';cx.lineWidth=1;cx.stroke();
-      });
-    });
-    ctr.forEach((c,ci)=>{
-      const cp=tc(c);
-      const ot=ctr.filter((_,j)=>j!==ci);
-      if(ot.length){
-        const md=Math.min(...ot.map(o=>dst(tc(o),cp)));
-        cx.beginPath();cx.arc(cp.x,cp.y,Math.min(md/2,Math.min(W,H)*.38),0,6.28);
-        cx.fillStyle=CL[ci].fill+'18';cx.fill();
-      }
-    });
+  var base = '';
+  base += '<line x1="' + L + '" y1="' + y(0) + '" x2="' + (W - R) + '" y2="' + y(0) + '" stroke="#94a3b8" stroke-width="1.5"/>';
+  base += '<line x1="' + L + '" y1="' + T + '" x2="' + L + '" y2="' + y(0) + '" stroke="#94a3b8" stroke-width="1.5"/>';
+  base += '<text x="' + ((L + W - R) / 2) + '" y="' + (H - 8) + '" font-size="12" fill="#64748b" text-anchor="middle">Complejidad del modelo →</text>';
+  base += '<text x="14" y="' + ((T + y(0)) / 2) + '" font-size="12" fill="#64748b" text-anchor="middle" transform="rotate(-90 14 ' + ((T + y(0)) / 2) + ')">Error →</text>';
+  base += '<path d="' + path(TRAIN) + '" fill="none" stroke="#2563eb" stroke-width="2.5"/>';
+  base += '<path d="' + path(TEST) + '" fill="none" stroke="#d97706" stroke-width="2.5"/>';
+  base += '<text x="' + (W - R - 4) + '" y="' + (y(TRAIN[8]) - 7) + '" font-size="12" fill="#2563eb" text-anchor="end">train</text>';
+  base += '<text x="' + (W - R - 4) + '" y="' + (y(TEST[8]) - 7) + '" font-size="12" fill="#d97706" text-anchor="end">test</text>';
+  base += '<line id="ofit-mark" x1="0" y1="' + T + '" x2="0" y2="' + y(0) + '" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="4 3"/>';
+  base += '<circle id="ofit-ptr" r="5.5" fill="#2563eb" stroke="#fff" stroke-width="1.5"/>';
+  base += '<circle id="ofit-pte" r="5.5" fill="#d97706" stroke="#fff" stroke-width="1.5"/>';
+  svg.innerHTML = base;
+  var sl = document.getElementById("ofit-slider");
+  function pinta() {
+    var c = parseInt(sl.value, 10);
+    var etr = TRAIN[c - 1], ete = TEST[c - 1];
+    document.getElementById("ofit-cx").textContent = c;
+    document.getElementById("ofit-etr").textContent = etr.toFixed(1);
+    document.getElementById("ofit-ete").textContent = ete.toFixed(1);
+    document.getElementById("ofit-gap").textContent = (ete - etr).toFixed(1);
+    var mk = document.getElementById("ofit-mark");
+    mk.setAttribute("x1", x(c)); mk.setAttribute("x2", x(c));
+    var p1 = document.getElementById("ofit-ptr");
+    p1.setAttribute("cx", x(c)); p1.setAttribute("cy", y(etr));
+    var p2 = document.getElementById("ofit-pte");
+    p2.setAttribute("cx", x(c)); p2.setAttribute("cy", y(ete));
+    var v = document.getElementById("ofit-verdict"), n = document.getElementById("ofit-note");
+    v.className = "ofit-verdict";
+    if (c <= 2) {
+      v.classList.add("v-sub"); v.textContent = "SUBAJUSTE";
+      n.innerHTML = "El modelo es demasiado simple: le va mal <b>incluso en los datos que ya vio</b>. Todavía hay patrón por aprender — súbele a la complejidad.";
+    } else if (c <= 5) {
+      v.classList.add("v-dulce"); v.textContent = c === 4 ? "PUNTO DULCE 🎯" : "ZONA SANA";
+      n.innerHTML = (c === 4 ? "Aquí el error de <b>test</b> toca su mínimo. " : "") + "El modelo captura el patrón y la brecha train-test sigue pequeña. Nota que el mejor modelo <b>no</b> es el de menor error en train.";
+    } else {
+      v.classList.add("v-sobre"); v.textContent = "SOBREAJUSTE";
+      n.innerHTML = "El error de train sigue bajando… pero el de test <b>sube</b>: el modelo está memorizando ruido. La brecha creciente entre las dos curvas es la firma del memorizador.";
+    }
   }
-  pts.forEach((p,i)=>{
-    const cp=tc(p);const ci=asg[i];
-    cx.beginPath();cx.arc(cp.x,cp.y,5,0,6.28);
-    cx.fillStyle=ci>=0?CL[ci].fill:'#aaa';cx.fill();
-    cx.strokeStyle='#fff';cx.lineWidth=1.5;cx.stroke();
-  });
-  ctr.forEach((c,ci)=>{
-    const cp=tc(c);const sz=11;
-    cx.beginPath();cx.moveTo(cp.x-sz,cp.y);cx.lineTo(cp.x+sz,cp.y);
-    cx.moveTo(cp.x,cp.y-sz);cx.lineTo(cp.x,cp.y+sz);
-    cx.strokeStyle=CL[ci].fill;cx.lineWidth=3;cx.stroke();
-    cx.beginPath();cx.arc(cp.x,cp.y,sz*.55,0,6.28);
-    cx.fillStyle='#fff';cx.fill();cx.strokeStyle=CL[ci].fill;cx.lineWidth=2.5;cx.stroke();
-    cx.fillStyle=CL[ci].fill;cx.font='500 11px inherit';cx.textAlign='center';cx.textBaseline='middle';
-    cx.fillText(ci+1,cp.x,cp.y+.5);
-  });
-}
-cv.addEventListener('click',e=>{
-  if(dsl.value!=='custom')return;
-  const r=cv.getBoundingClientRect();
-  const p=tp(e.clientX-r.left,e.clientY-r.top);
-  if(p.x<0||p.x>1||p.y<0||p.y>1)return;
-  pts.push(p);if(phase!=='idle')rst();drw();
-  stEl.textContent=`${pts.length} punto(s). Inicializa cuando estés listo.`;
-});
-ksl.addEventListener('input',()=>{kvl.textContent=ksl.value;if(phase!=='idle')rst();else lgd();});
-dsl.addEventListener('change',load);
-bI.addEventListener('click',ini);
-bA.addEventListener('click',asn);
-bU.addEventListener('click',upd);
-bR.addEventListener('click',()=>{if(timer){clrT();bR.textContent='▶ Correr todo';}else{bR.textContent='⏹ Pausar';runAll();}});
-bX.addEventListener('click',()=>{clrT();bR.textContent='▶ Correr todo';load();});
-window.addEventListener('resize',rsz);
-setTimeout(()=>{rsz();load();},120);
+  sl.addEventListener("input", pinta);
+  pinta();
 })();
 </script>
+```
+
+*Las curvas son ilustrativas — la forma es la típica de casi cualquier problema; los números exactos cambian en cada caso.* La lección del dial: **el error de train siempre baja** al agregar complejidad, así que nunca es evidencia de calidad. La curva que decide es la de test — y por eso el examen es sagrado.
+
+<!--=================-->
+<!--=================-->
+# El baseline: la regla tonta que hay que vencer
+
+Te presentan un modelo: *"accuracy del 98%"*. ¿Aplaudes? Todavía no. Falta la pregunta clave: **¿98% comparado con qué?**
+
+::: {.callout-key}
+**El baseline es el modelo que no piensa**
+
+- En **clasificación**: predecir siempre la clase mayoritaria. Si el 55% de los créditos históricos fueron aprobados, la regla "apruebe a todo el mundo" acierta el 55% — sin mirar un solo dato del solicitante.
+- En **regresión**: predecir siempre el promedio. Si la nota media histórica es 3.3, la regla "todos sacan 3.3" ya logra un MAE sorprendentemente decente.
+
+El baseline es la vara mínima: **un modelo solo aporta lo que le gana al baseline.** Y en un negocio la vara real suele ser más alta: la regla que la empresa ya usa (el comité de crédito, el pronóstico del vendedor experimentado).
+:::
+
+El ejemplo clásico de por qué esto importa: detección de fraude. En 1.000 transacciones hay 20 fraudes (el 2%). Un "modelo" que responde *"no es fraude"* a todo alcanza **98% de accuracy** — y no detecta ni un solo fraude. Espectacular en el papel, inservible en la vida. Guarda esta alarma para el video 1: cuando las clases están desbalanceadas, la accuracy se infla sola, y hay que mirar la matriz completa.
+
+<!--=================-->
+<!--=================-->
+# Validación cruzada: no un examen, sino cinco
+
+Queda un problema práctico. El test se usa **una sola vez**, pero mientras construyes el modelo necesitas comparar decenas de versiones: ¿árbol profundo o superficial? ¿estas features o aquellas? Si comparas contra el test cada vez, lo gastas. Y si comparas con un único pedacito de train, puedes tener suerte (o mala suerte) con ese pedacito.
+
+La solución es elegante — la **validación cruzada** (*k-fold cross-validation*): divide el train en k bloques (típicamente 5), entrena k veces rotando cuál bloque hace de examen, y promedia las k notas.
+
+```{=html}
+<div class="cv-grid" aria-label="Esquema de validación cruzada con 5 bloques">
+  <div class="cv-row"><span class="cv-lab">Ronda 1</span><span class="cv-blk cv-test"></span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk"></span></div>
+  <div class="cv-row"><span class="cv-lab">Ronda 2</span><span class="cv-blk"></span><span class="cv-blk cv-test"></span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk"></span></div>
+  <div class="cv-row"><span class="cv-lab">Ronda 3</span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk cv-test"></span><span class="cv-blk"></span><span class="cv-blk"></span></div>
+  <div class="cv-row"><span class="cv-lab">Ronda 4</span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk cv-test"></span><span class="cv-blk"></span></div>
+  <div class="cv-row"><span class="cv-lab">Ronda 5</span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk cv-test"></span></div>
+  <div class="cv-leyenda"><span class="cv-chip entrena"></span>entrena &nbsp;&nbsp; <span class="cv-chip prueba"></span>examina — cada bloque del train hace de examen exactamente una vez; la nota final es el promedio de las 5 rondas.</div>
 </div>
 ```
 
----
-
-## Limitaciones de k-means
-
-Como todo algoritmo, k-means tiene supuestos y limitaciones que debemos conocer para no interpretar mal los resultados:
-
-::: {.callout-warning}
-**Limitaciones que debes tener en cuenta**
-
-1. **Hay que elegir k de antemano** — el algoritmo no decide cuántos grupos hay; nosotros le decimos cuántos buscar.
-
-2. **Sensible a la inicialización** — como los centroides arrancan en posiciones aleatorias, dos ejecuciones pueden dar resultados distintos. (Solución: correr k-means varias veces y quedarse con el mejor resultado; R lo hace por defecto con `nstart`.)
-
-3. **Asume clusters esféricos y de tamaño similar** — si los grupos reales tienen formas alargadas o tamaños muy desiguales, k-means puede agrupar mal.
-
-4. **Sensible a outliers** — un punto extremo jala el centroide hacia sí y distorsiona el cluster.
-
-5. **Solo variables numéricas** — k-means calcula distancias, que requieren números. Las variables categóricas necesitan tratamiento previo.
-:::
-
-Estas limitaciones no invalidan k-means — lo hacen el algoritmo más usado en la práctica precisamente porque es simple, rápido y fácil de interpretar. Pero debemos tenerlas presentes al leer los resultados.
-
----
+Con ese promedio eliges tu mejor versión del modelo — profundidad del árbol, conjunto de features, algoritmo — y **solo entonces**, con la decisión tomada, presentas el examen final en el test. En las semanas 11 y 12 esto dejará de ser un dibujo: la usarás para elegir los hiperparámetros de tus árboles.
 
 <!--=================-->
 <!--=================-->
-# ¿Cuántos clusters? Elegir k
+# Data leakage: el enemigo silencioso
 
-Este es el paso más importante y donde más se equivocan los principiantes. No hay una respuesta "correcta" automática; hay métodos que nos orientan y un criterio final de negocio.
+La palabra suena exótica; el error es cotidiano. **Data leakage** (fuga de datos) es cualquier camino por el que información del test — o del futuro — se cuela al entrenamiento. El resultado siempre es el mismo: métricas infladas en el laboratorio, decepción en producción. Es el error #1 de los proyectos de ML principiantes, y también de varios profesionales.
 
-## Método del codo (*elbow method*)
+Las tres fugas más comunes:
 
-La idea es sencilla: probamos k-means para k = 2, 3, 4, 5, … y graficamos cómo cambia la compactación (WCSS) a medida que aumentamos k.
+1. **Preprocesar con toda la base.** Imputar valores faltantes con el promedio global, o estandarizar variables con la media y desviación de *todos* los datos, **antes** de partir train/test. Suena inocente, pero ese promedio ya contiene información del test. La regla profesional: **todo lo que se aprende de los datos (medias, escalas, imputaciones) se aprende solo con train** y luego se aplica, congelado, al test.
+2. **Variables del futuro.** Para predecir si un crédito caerá en mora, incluir la variable "número de cuotas atrasadas al cierre" — una columna que solo existe *después* del desenlace. El modelo saca métricas de fantasía porque, literalmente, le diste la respuesta disfrazada de feature.
+3. **Gastar el test.** Probar 30 modelos y quedarse con el que dio mejor métrica *en el test*. Tras 30 consultas, el test dejó de ser un examen: elegiste al ganador *por* sus respuestas al examen, y su nota ya no predice nada.
 
-**¿Cómo se lee el gráfico del codo?**
+¿Quedó claro? Demuéstralo — seis situaciones, tú decides:
 
-- El eje X muestra el número de clusters (k).
-- El eje Y muestra la WCSS (within-cluster sum of squares) — qué tan "apretados" están los puntos dentro de cada grupo.
-- A medida que k crece, la WCSS siempre baja (más grupos = más compactos).
-- El "codo" es el punto donde **agregar un cluster más ya no mejora mucho** la compactación.
+```{=html}
+<div class="widget-card" id="wg-leak">
+  <div class="widget-head">🚰 ¿Hay leakage aquí?</div>
+  <div class="widget-body">
+    <div class="quiz-item" data-ans="si">
+      <div class="quiz-text">1. Imputas los ingresos faltantes con el promedio calculado sobre <b>toda la base</b> y después partes train/test.</div>
+      <div class="quiz-btns"><button type="button" class="btn-widget" data-v="si">🚨 Hay leakage</button><button type="button" class="btn-widget btn-widget-ghost" data-v="no">✅ No hay</button></div>
+      <div class="quiz-reveal">🚨 <b>Hay fuga.</b> Ese promedio ya "vio" las filas del test. Lo correcto: calcular el promedio solo con train y usarlo para imputar ambos conjuntos.</div>
+    </div>
+    <div class="quiz-item" data-ans="no">
+      <div class="quiz-text">2. Calculas la media del ingreso <b>solo con train</b> y usas esa misma media para imputar los faltantes de train y de test.</div>
+      <div class="quiz-btns"><button type="button" class="btn-widget" data-v="si">🚨 Hay leakage</button><button type="button" class="btn-widget btn-widget-ghost" data-v="no">✅ No hay</button></div>
+      <div class="quiz-reveal">✅ <b>Sin fuga.</b> Es exactamente el protocolo correcto: lo aprendido (la media) salió solo de train; al test únicamente se le aplica.</div>
+    </div>
+    <div class="quiz-item" data-ans="si">
+      <div class="quiz-text">3. Para predecir si un crédito caerá en mora, incluyes como feature el <b>número de cuotas atrasadas al cierre del crédito</b>.</div>
+      <div class="quiz-btns"><button type="button" class="btn-widget" data-v="si">🚨 Hay leakage</button><button type="button" class="btn-widget btn-widget-ghost" data-v="no">✅ No hay</button></div>
+      <div class="quiz-reveal">🚨 <b>Hay fuga — del futuro.</b> Esa columna solo se conoce <em>después</em> del desenlace que intentas predecir. En producción no existirá al momento de decidir. Es la respuesta disfrazada de pregunta.</div>
+    </div>
+    <div class="quiz-item" data-ans="no">
+      <div class="quiz-text">4. Antes de partir train/test, eliminas las <b>filas duplicadas exactas</b> de la base.</div>
+      <div class="quiz-btns"><button type="button" class="btn-widget" data-v="si">🚨 Hay leakage</button><button type="button" class="btn-widget btn-widget-ghost" data-v="no">✅ No hay</button></div>
+      <div class="quiz-reveal">✅ <b>Sin fuga — de hecho, lo contrario.</b> Si una fila repetida cae con una copia en train y otra en test, el modelo "verá" el examen. Deduplicar antes de partir <em>previene</em> esa fuga.</div>
+    </div>
+    <div class="quiz-item" data-ans="si">
+      <div class="quiz-text">5. Estandarizas todas las variables (restar la media, dividir por la desviación) usando <b>media y desviación de toda la base</b>, y luego partes.</div>
+      <div class="quiz-btns"><button type="button" class="btn-widget" data-v="si">🚨 Hay leakage</button><button type="button" class="btn-widget btn-widget-ghost" data-v="no">✅ No hay</button></div>
+      <div class="quiz-reveal">🚨 <b>Hay fuga.</b> Mismo pecado del caso 1 con otro disfraz: media y desviación se aprenden de los datos, así que deben salir solo de train.</div>
+    </div>
+    <div class="quiz-item" data-ans="si">
+      <div class="quiz-text">6. Entrenas 30 modelos distintos y te quedas con el que sacó la mejor métrica <b>en el test</b>.</div>
+      <div class="quiz-btns"><button type="button" class="btn-widget" data-v="si">🚨 Hay leakage</button><button type="button" class="btn-widget btn-widget-ghost" data-v="no">✅ No hay</button></div>
+      <div class="quiz-reveal">🚨 <b>Hay fuga — la más elegante.</b> Elegiste al ganador por sus respuestas al examen: el test ya participó del entrenamiento (del tuyo). Para comparar 30 modelos está la validación cruzada; el test se visita una sola vez.</div>
+    </div>
+    <div class="quiz10-score" id="leak-score"></div>
+  </div>
+</div>
 
-Piensa en una analogía: si tienes 100 paquetes y 1 bodega, todo queda lejos. Con 2 bodegas, mejora mucho. Con 3, mejora un poco más. Con 50, apenas cambia. El "codo" es donde la mejora marginal deja de justificar la complejidad.
+<script>
+(function () {
+  var card = document.getElementById("wg-leak");
+  if (!card) return;
+  var items = card.querySelectorAll(".quiz-item");
+  var done = 0, ok = 0;
+  function marcador() {
+    var s = document.getElementById("leak-score");
+    if (done === items.length) {
+      s.textContent = "Resultado: " + ok + " de " + items.length + (ok === items.length ? " — olfato de auditor. 🕵️" : " — relee las reglas de la fuga y vuelve a intentar mañana.");
+    } else if (done > 0) {
+      s.textContent = "Llevas " + done + " de " + items.length + " (aciertos: " + ok + ").";
+    }
+  }
+  items.forEach(function (it) {
+    var btns = it.querySelectorAll("button[data-v]");
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (it.classList.contains("q-ok") || it.classList.contains("q-bad")) return;
+        var acierto = b.getAttribute("data-v") === it.getAttribute("data-ans");
+        it.classList.add(acierto ? "q-ok" : "q-bad");
+        done++; if (acierto) ok++;
+        marcador();
+      });
+    });
+  });
+})();
+</script>
+```
 
-::: {.callout-warning}
-**Ojo:** el codo no siempre es claro. A veces la curva baja suavemente sin un quiebre obvio. En esos casos, el elbow method da una orientación, pero no una respuesta definitiva.
+<!--=================-->
+<!--=================-->
+# Los videos: métricas con lápiz y papel
+
+Hasta aquí, el juicio ("¿generaliza o memoriza?") ha sido cualitativo. Falta el instrumento de medición: **¿cómo se califica, exactamente, una predicción?** Eso es lo que construyen los dos videos de esta semana — uno para clasificación, otro para regresión. En el diseño original del curso venían al final de las semanas 11 y 12; los adelantamos para que llegues a los modelos ya sabiendo calificarlos. En la clase de esta semana los usarás sin descanso.
+
+## Video 1 — La matriz de confusión (clasificación)
+
+El video construye, celda por celda, la tabla que resume cualquier clasificador. Usa como ejemplo un modelo que decide créditos — no importa todavía *cómo* decide (eso llega la próxima semana); importa cómo se **califica** lo que decidió. Al final el profesor propone un ejercicio de conteo: **páusalo y resuélvelo** — en clase harás exactamente esa operación sobre datos reales.
+
+{{< video https://youtu.be/TWDdeKs3org >}}
+
+El resumen para tener a la mano. Comparas cada predicción con la realidad; hay cuatro resultados posibles (con "Aprobado" como clase **positiva**):
+
+|  | **Predicho: Aprobado** | **Predicho: Rechazado** |
+|---|---|---|
+| **Real: Aprobado** | Verdadero Positivo (TP) | Falso Negativo (FN) |
+| **Real: Rechazado** | Falso Positivo (FP) | Verdadero Negativo (TN) |
+
+: {tbl-colwidths="[34,33,33]"}
+
+::: {.callout-remember}
+**Regla de memoria:** la primera palabra (Verdadero/Falso) dice si el modelo **acertó**. La segunda (Positivo/Negativo) dice **qué predijo** el modelo. Un Falso Positivo es "predijo positivo… y falló".
 :::
 
----
+De esa tabla salen las tres métricas del curso:
 
-## Método de la silueta (*silhouette*)
+::: {.callout-key}
+**Accuracy** — ¿qué fracción del total clasificó bien?
+$$\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}$$
+*Trampa conocida: con clases desbalanceadas se infla (el "modelo" que responde siempre lo mismo ya saca la accuracy de la clase mayoritaria — el detector de fraude del 98%).*
 
-La silueta mide **qué tan bien clasificado está cada punto**: ¿está más cerca de su propio cluster que del cluster vecino más cercano?
+**Precisión** — de los que el modelo marcó como positivos, ¿cuántos lo eran?
+$$\text{Precisión} = \frac{TP}{TP + FP}$$
+*En crédito: de los que aprobó, ¿qué fracción pagó de verdad? Cada FP aquí es plata perdida.*
 
-**¿Cómo se interpreta la silueta?**
+**Recall** — de los positivos reales, ¿cuántos detectó el modelo?
+$$\text{Recall} = \frac{TP}{TP + FN}$$
+*En crédito: de los buenos clientes que llegaron, ¿qué fracción aprobó? Cada FN aquí es un buen cliente rechazado.*
+:::
 
-Para cada observación, el coeficiente de silueta va de **-1 a +1**:
+¿Cuál importa más? Depende de **cuál error cuesta más** — y esa es una decisión de negocio, no del algoritmo:
 
-| Valor | Significado |
+| Situación | El error caro | Conviene vigilar |
+|---|---|---|
+| Aprobar créditos (el impago es caro) | FP: aprobar a quien no pagará | Precisión alta |
+| Detectar fraude | FN: dejar pasar un fraude | Recall alto |
+| Diagnóstico médico | FN: no detectar un caso real | Recall alto |
+| Retener clientes | FN: no ver al que se va | Recall alto |
+
+: {.striped tbl-colwidths="[38,38,24]"}
+
+Ahora hazlo tú. Diez decisiones de un modelo de crédito — clasifica cada una en su celda:
+
+```{=html}
+<div class="widget-card" id="wg-matriz">
+  <div class="widget-head">🧮 Arma la matriz — clase positiva: Aprobado</div>
+  <div class="widget-body">
+    <div class="cmx-caso" id="cmx-caso">
+      <b id="cmx-titulo">Caso 1 de 10</b>
+      <div class="cmx-tags"><span class="cmx-tag t-modelo" id="cmx-dijo"></span><span class="cmx-tag t-real" id="cmx-fue"></span></div>
+    </div>
+    <div class="cmx-wrap">
+      <div></div>
+      <div class="cmx-head">Predicho:<br>Aprobado</div>
+      <div class="cmx-head">Predicho:<br>Rechazado</div>
+      <div class="cmx-side">Real:<br>Aprobado</div>
+      <button type="button" class="cmx-cell" data-k="TP"><div class="cmx-k">TP</div><div class="cmx-n" id="cmx-tp">0</div><div class="cmx-d">verdadero positivo</div></button>
+      <button type="button" class="cmx-cell" data-k="FN"><div class="cmx-k">FN</div><div class="cmx-n" id="cmx-fn">0</div><div class="cmx-d">falso negativo</div></button>
+      <div class="cmx-side">Real:<br>Rechazado</div>
+      <button type="button" class="cmx-cell" data-k="FP"><div class="cmx-k">FP</div><div class="cmx-n" id="cmx-fp">0</div><div class="cmx-d">falso positivo</div></button>
+      <button type="button" class="cmx-cell" data-k="TN"><div class="cmx-k">TN</div><div class="cmx-n" id="cmx-tn">0</div><div class="cmx-d">verdadero negativo</div></button>
+    </div>
+    <div class="cmx-msg" id="cmx-msg">¿En qué celda cae este caso? Haz clic en la celda.</div>
+    <div class="cmx-mets" id="cmx-mets" style="display:none;">
+      <div class="cmx-met"><div class="cmx-n">70%</div><div class="cmx-d">Accuracy = (4+3)/10</div></div>
+      <div class="cmx-met"><div class="cmx-n">66.7%</div><div class="cmx-d">Precisión = 4/(4+2)</div></div>
+      <div class="cmx-met"><div class="cmx-n">80%</div><div class="cmx-d">Recall = 4/(4+1)</div></div>
+    </div>
+    <div class="widget-note" id="cmx-nota" style="display:none;">Léelo en negocio: de <b>6 créditos que aprobó, 2 eran morosos</b> (precisión 66.7%), y <b>detectó 4 de los 5 buenos clientes</b> (recall 80%). ¿Y la accuracy del 70% es "buena"? El baseline aquí — decir siempre "Aprobado" (5 reales de 10) — acierta el 50%. El modelo aporta, pero la matriz muestra <em>dónde</em> se equivoca.</div>
+    <div style="margin-top:0.6em;"><button type="button" class="btn-widget btn-widget-ghost" id="cmx-reset">↺ Reiniciar</button></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var card = document.getElementById("wg-matriz");
+  if (!card) return;
+  // (dijo el modelo, fue en la realidad) → celda correcta
+  var CASOS = [
+    ["Aprobado", "Aprobado", "TP"], ["Aprobado", "Rechazado", "FP"],
+    ["Rechazado", "Rechazado", "TN"], ["Aprobado", "Aprobado", "TP"],
+    ["Rechazado", "Aprobado", "FN"], ["Rechazado", "Rechazado", "TN"],
+    ["Aprobado", "Aprobado", "TP"], ["Aprobado", "Rechazado", "FP"],
+    ["Rechazado", "Rechazado", "TN"], ["Aprobado", "Aprobado", "TP"]
+  ];
+  var i = 0, cnt = { TP: 0, FN: 0, FP: 0, TN: 0 };
+  var celdas = card.querySelectorAll(".cmx-cell");
+  function muestra() {
+    if (i < CASOS.length) {
+      document.getElementById("cmx-titulo").textContent = "Caso " + (i + 1) + " de " + CASOS.length;
+      document.getElementById("cmx-dijo").textContent = "🤖 El modelo dijo: " + CASOS[i][0];
+      document.getElementById("cmx-fue").textContent = "📋 La realidad fue: " + CASOS[i][1];
+    } else {
+      document.getElementById("cmx-titulo").textContent = "¡Matriz completa!";
+      document.getElementById("cmx-dijo").textContent = "🤖 TP=4 · FP=2";
+      document.getElementById("cmx-fue").textContent = "📋 FN=1 · TN=3";
+      document.getElementById("cmx-msg").textContent = "Con la matriz llena, las métricas salen solas:";
+      document.getElementById("cmx-mets").style.display = "flex";
+      document.getElementById("cmx-nota").style.display = "block";
+    }
+  }
+  function limpia(el) { setTimeout(function () { el.classList.remove("flash-ok", "flash-bad"); }, 550); }
+  celdas.forEach(function (c) {
+    c.addEventListener("click", function () {
+      if (i >= CASOS.length) return;
+      var k = c.getAttribute("data-k");
+      if (k === CASOS[i][2]) {
+        cnt[k]++; c.classList.add("flash-ok"); limpia(c);
+        document.getElementById("cmx-" + k.toLowerCase()).textContent = cnt[k];
+        document.getElementById("cmx-msg").textContent = "✔ Correcto: " + (k[0] === "T" ? "el modelo acertó" : "el modelo falló") + " y había predicho " + (k[1] === "P" ? "positivo (Aprobado)" : "negativo (Rechazado)") + " → " + k + ".";
+        i++; muestra();
+      } else {
+        c.classList.add("flash-bad"); limpia(c);
+        document.getElementById("cmx-msg").textContent = "✘ Ahí no. Primera palabra: ¿acertó o falló? Segunda: ¿qué predijo el modelo? Intenta de nuevo.";
+      }
+    });
+  });
+  document.getElementById("cmx-reset").addEventListener("click", function () {
+    i = 0; cnt = { TP: 0, FN: 0, FP: 0, TN: 0 };
+    ["tp", "fn", "fp", "tn"].forEach(function (s) { document.getElementById("cmx-" + s).textContent = "0"; });
+    document.getElementById("cmx-mets").style.display = "none";
+    document.getElementById("cmx-nota").style.display = "none";
+    document.getElementById("cmx-msg").textContent = "¿En qué celda cae este caso? Haz clic en la celda.";
+    muestra();
+  });
+  muestra();
+})();
+</script>
+```
+
+## Video 2 — MAE y RMSE (regresión)
+
+En regresión no hay "acierto": el modelo predijo 3.6 y la nota real fue 3.8. ¿Un error de 0.2 es mucho o poco? El video calcula las dos métricas estándar con un ejemplo paso a paso — míralo con calculadora a la mano y replica las cuentas.
+
+{{< video https://youtu.be/bSHrtLHCPvc >}}
+
+El resumen. Para cada fila del test, el error es $y_i - \hat{y}_i$ (real menos predicho). Las dos formas de promediarlo:
+
+::: {.callout-key}
+**MAE — Error Absoluto Medio**
+$$\text{MAE} = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|$$
+"En promedio, el modelo se equivoca por X unidades" — en las **mismas unidades del target** (puntos de nota, pesos, unidades vendidas). Fácil de comunicar a un gerente.
+
+**RMSE — Raíz del Error Cuadrático Medio**
+$$\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}$$
+Eleva cada error al cuadrado antes de promediar: los errores **grandes pesan mucho más**. Por eso siempre $\text{RMSE} \geq \text{MAE}$, y por eso es la métrica preferida cuando equivocarse feo es especialmente caro.
+:::
+
+Míralo en miniatura — cinco predicciones de nota, errores: 0.2, −0.4, 0.1, −0.1 y **1.2** (una embarrada grande):
+
+$$\text{MAE} = \frac{0.2 + 0.4 + 0.1 + 0.1 + 1.2}{5} = 0.40$$
+
+$$\text{RMSE} = \sqrt{\frac{0.04 + 0.16 + 0.01 + 0.01 + 1.44}{5}} = \sqrt{0.332} \approx 0.58$$
+
+El RMSE quedó muy por encima del MAE por culpa de un solo error grande: esa **distancia entre las dos métricas** es una pista de que el modelo tiene fallas graves ocasionales, aunque "en promedio" se vea decente.
+
+| Situación | Preferir |
 |---|---|
-| Cercano a **+1** | El punto está bien asignado — muy cerca de su cluster, lejos de los demás |
-| Cercano a **0** | El punto está en la frontera entre dos clusters |
-| **Negativo** | El punto probablemente está en el cluster equivocado |
+| Los errores grandes son igual de malos que los pequeños | MAE |
+| Los errores grandes son especialmente costosos | RMSE |
+| Comunicar a una audiencia no técnica | MAE |
+| Detectar modelos con embarradas ocasionales | Comparar ambos |
 
-Para elegir k, calculamos la **silueta promedio** para cada valor de k y elegimos el k que la maximiza. A diferencia del codo, aquí **sí hay un máximo claro** (el k con mejor silueta promedio).
-
----
-
-## El criterio final: interpretabilidad
-
-Los métodos cuantitativos (elbow, silhouette) nos dan un rango razonable de k. Pero la decisión final debe considerar:
-
-**¿Los clusters tienen sentido de negocio?**
-
-Hazte estas preguntas para cada agrupamiento candidato:
-
-1. **¿Puedo nombrar cada cluster?** — Si no puedes ponerle un nombre descriptivo ("clientes frecuentes de bajo monto", "compradores esporádicos de alto ticket"), probablemente no es un buen agrupamiento.
-
-2. **¿Puedo accionar sobre cada cluster?** — ¿Puedo diseñar una estrategia diferente para cada segmento? Si dos clusters recibirían la misma acción, probablemente deberían ser uno solo.
-
-3. **¿El tamaño de los clusters es razonable?** — Un cluster con 3 clientes de 10,000 probablemente es ruido, no un segmento accionable.
-
-4. **¿Es estable?** — Si corro el algoritmo otra vez y los grupos cambian drásticamente, la segmentación no es confiable.
-
-**Regla práctica:** si el elbow sugiere k = 4 y la silueta sugiere k = 3, prueba ambos y elige el que genere los segmentos más claros y accionables.
-
----
-
-<!--=================-->
-<!--=================-->
-# Perfilamiento: de números a decisiones
-
-Una vez asignados los clusters, el trabajo analítico **apenas comienza**. El paso más valioso es **perfilar** cada segmento: describir qué lo caracteriza y qué lo diferencia de los demás.
-
-## ¿Cómo se perfila un cluster?
-
-El perfilamiento típico incluye:
-
-1. **Tabla de promedios (o medianas) por cluster** — para cada variable, ¿cuál es el valor típico en cada segmento?
-2. **Tamaño de cada cluster** — ¿cuántas observaciones tiene? ¿Es un segmento grande o un nicho?
-3. **Visualizaciones comparativas** — boxplots o barras que muestren cómo se distribuye cada variable en cada cluster.
-
-::: {.callout-key}
-**Ejemplo de tabla de perfilamiento**
-
-Supongamos que segmentamos clientes usando tres variables: monto promedio de compra, frecuencia mensual y recencia (días desde la última compra).
-
-| Cluster | Nombre sugerido | Monto promedio | Frecuencia | Recencia (días) | Tamaño |
-|---|---|---|---|---|---|
-| 1 | Frecuentes de bajo monto | $45,000 | 8.2 | 5 | 4,200 |
-| 2 | Esporádicos de alto ticket | $320,000 | 1.1 | 45 | 1,800 |
-| 3 | Inactivos | $28,000 | 0.3 | 120 | 4,000 |
-
-**Lectura:** El cluster 1 compra seguido pero montos pequeños → candidatos a programa de lealtad con upgrades. El cluster 2 compra poco pero gasta mucho → mantener relación personalizada. El cluster 3 lleva mucho sin comprar → campaña de reactivación o aceptar como perdidos.
-:::
+: {.striped tbl-colwidths="[64,36]"}
 
 ::: {.callout-warning}
-**Los centroides son promedios, no descripciones exactas**
+**Y siempre, siempre, contra el baseline**
 
-El centroide de un cluster es el punto promedio del grupo. No todos los miembros del cluster son idénticos al centroide. Siempre revisa la **dispersión** dentro de cada cluster (usando boxplots o desviaciones estándar) para saber qué tan homogéneo es realmente el segmento.
+El baseline de regresión es predecir el **promedio** (calculado en train) para todo el mundo. Calcula el MAE y el RMSE de esa regla tonta antes de emocionarte con tu modelo: si el modelo no la mejora, no aprendió nada útil. Lo comprobarás en carne propia en el taller de esta semana.
 :::
 
----
+<!--=================-->
+<!--=================-->
+# ¿Y esto cómo se ve en tu semestre?
 
-## Nombrar los clusters
-
-Los algoritmos devuelven etiquetas numéricas ("Cluster 1", "Cluster 2"…). Tu trabajo como analista es **traducir esos números a nombres de negocio**. Esto es lo que hace que la segmentación sea comunicable y accionable.
-
-Buenos nombres son cortos, descriptivos y orientados a la acción:
-
-- "VIP dormidos" (alto gasto histórico, inactivos recientemente)
-- "Cazadores de ofertas" (compran solo en descuentos, sensibles a precio)
-- "Nuevos exploradores" (clientes recientes, pocas compras, variedad de categorías)
-
-Malos nombres son los que no dicen nada: "Grupo A", "Cluster grande", "Los del medio".
-
----
+- **En la clase de esta semana**: recibirás las predicciones de modelos ya entrenados — uno que decide créditos, otro que pronostica notas — y harás el trabajo del analista: matriz de confusión, precisión, recall, MAE, RMSE, comparación contra el baseline y veredicto de negocio. Sin entrenar nada todavía: primero juez.
+- **Semanas 11 y 12**: construirás tus propios modelos (árboles de clasificación y de regresión, y sus ensambles) y los calificarás con exactamente estas métricas. La validación cruzada dejará de ser un dibujo.
+- **Semana 13**: segmentación — el caso sin target, con sus propias métricas (codo, silueta).
+- **Tu proyecto final**: la Entrega 3 debe reportar la métrica correcta para tu tipo de pregunta, **medida en test y comparada contra un baseline**. Un jurado de esta materia siempre pregunta lo mismo: *"¿y eso comparado con qué?"* — desde hoy tienes la respuesta.
 
 <!--=================-->
 <!--=================-->
-# Alternativas a k-means (alto nivel)
+# Para pensar 🤔
 
-k-means es el punto de partida, pero no la única opción. Conviene conocer dos alternativas para saber cuándo podrían ser más apropiadas:
-
-::: {.callout-key}
-**Clustering jerárquico**
-
-- No requiere elegir k de antemano — construye una jerarquía completa de agrupamientos que se puede "cortar" a cualquier nivel.
-- Produce un **dendrograma**: un árbol que muestra cómo se fusionan (o dividen) los grupos progresivamente.
-- Útil cuando quieres explorar **la estructura a distintos niveles de granularidad** (¿2 macro-segmentos o 6 micro-segmentos?).
-- Desventaja: más lento con datasets grandes.
-:::
-
-::: {.callout-key}
-**DBSCAN (opcional)**
-
-- Encuentra clusters de **forma irregular** (no solo esféricos como k-means).
-- Identifica **outliers automáticamente** — los puntos que no pertenecen a ningún cluster.
-- No requiere especificar k, pero requiere otros parámetros (radio de vecindad y mínimo de puntos).
-- Útil cuando sospechas que los grupos tienen formas no convencionales o hay mucho ruido.
-:::
-
-| Método | Elige k antes | Forma de clusters | Manejo de outliers | Escalabilidad |
-|---|---|---|---|---|
-| k-means | Sí | Esféricos | Sensible (los absorbe) | Muy buena |
-| Jerárquico | No (corta después) | Flexible | Moderado | Limitada en big data |
-| DBSCAN | No | Arbitraria | Excelente (los separa) | Buena |
-
-Para este curso, **k-means es el algoritmo central**. Las alternativas son contexto para que sepas que existen y puedas mencionarlas si el problema lo amerita.
-
----
+1. Una farmacéutica usa un modelo para detectar reacciones adversas graves a un medicamento. ¿Qué prefiere: precisión alta o recall alto? ¿Quién paga el costo de cada tipo de error?
+2. Tu modelo de fraude saca 99.5% de accuracy y el fraude ocurre en el 0.5% de las transacciones. ¿Motivo de celebración o de sospecha? ¿Qué mirarías inmediatamente después?
+3. Un compañero te dice: *"mi modelo da error cero en los datos de entrenamiento — es perfecto"*. ¿Qué le respondes, en una frase, usando lo del dial de complejidad?
 
 <!--=================-->
 <!--=================-->
-# El flujo completo de un proyecto de segmentación
+# Checklist de salida
 
-## Pipeline de segmentación (paso a paso)
+Al terminar el podcast, los videos y esta lectura debes poder explicar:
 
-1. **Definir la pregunta de negocio** — ¿Qué queremos segmentar y para qué? (clientes para personalizar campañas, productos para optimizar inventario, zonas para asignar vendedores…)
-
-2. **Seleccionar y preparar variables** — Elegir solo las variables relevantes para la pregunta. Escalar las numéricas. Excluir IDs y variables categóricas no transformadas.
-
-3. **Estimar k-means para varios valores de k** — Típicamente k = 2, 3, 4, …, 8 o 10.
-
-4. **Evaluar con elbow y silhouette** — Identificar el rango razonable de k.
-
-5. **Elegir k final con criterio de negocio** — Perfilar los candidatos y seleccionar el que produzca segmentos nombrables y accionables.
-
-6. **Asignar etiquetas y perfilar** — Tabla de promedios por cluster, tamaños, visualizaciones.
-
-7. **Comunicar y recomendar** — Nombrar los segmentos, describir sus características y proponer acciones diferenciadas para cada uno.
-
-## Conexión con el proyecto final
-
-::: {.callout-connect}
-El Caso C del proyecto final es exactamente un problema de segmentación. Seguirás este pipeline completo: desde elegir variables y escalar, hasta nombrar los clusters y proponer estrategias diferenciadas. La calidad de tu entrega se medirá por la **interpretabilidad y accionabilidad** de los segmentos, no por la complejidad del algoritmo.
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Errores frecuentes
-
-::: {.callout-warning}
-**Errores que debes evitar**
-
-1. **No escalar las variables** — El error más común. Si no escalas, el clustering refleja diferencias de unidades, no de comportamiento.
-
-2. **Elegir k solo por el codo** — El codo es una guía, no una verdad. Siempre valida con silueta y, sobre todo, con interpretabilidad.
-
-3. **Reportar clusters sin perfilarlos** — Decir "encontré 4 clusters" sin describir qué caracteriza a cada uno es inútil para la toma de decisiones.
-
-4. **Incluir variables irrelevantes** — Si segmentas clientes para marketing, incluir el código postal como variable numérica distorsiona el resultado. Selecciona variables que tengan sentido para la pregunta.
-
-5. **Olvidar que los clusters no son verdades absolutas** — Son una simplificación útil. Un cliente asignado al cluster 2 puede estar en la frontera con el cluster 3. No trates las asignaciones como certezas.
-
-6. **Interpretar el centroide como "el cliente típico"** — El centroide es un promedio, y los promedios pueden ser engañosos. Siempre revisa la dispersión dentro de cada cluster.
-:::
-
----
+- [ ] ¿Por qué **nunca** se evalúa un modelo con los datos con que se entrenó?
+- [ ] ¿Qué es el target y qué son las features? ¿Clasificación o regresión: cómo se distingue?
+- [ ] ¿Qué es el baseline en clasificación y en regresión, y por qué es la vara mínima?
+- [ ] ¿Cómo se ve el sobreajuste en las curvas train/test? ¿Y el subajuste?
+- [ ] ¿Para qué sirve la validación cruzada y qué problema resuelve (pista: el test se usa una vez)?
+- [ ] ¿Qué es data leakage? Da dos ejemplos distintos.
+- [ ] ¿Qué son TP, FP, TN y FN, y cómo se calculan accuracy, precisión y recall?
+- [ ] ¿Qué mide el MAE, en qué unidades, y por qué el RMSE siempre es mayor o igual?
 
 <!--=================-->
 <!--=================-->
 # Preguntas de comprensión
 
-::: {.callout-practice}
-**1. Supervisado vs. no supervisado**
+**1.** Un modelo de clasificación se evalúa sobre 50 casos del test y produce: TP = 18, FN = 2, FP = 6, TN = 24. Calcula accuracy, precisión y recall. ¿Qué error comete más: FP o FN? ¿Y si cada FP cuesta el doble que cada FN, el modelo es tan bueno como parece?
 
-Un banco tiene datos de 50,000 clientes con variables como saldo promedio, número de productos contratados, antigüedad y frecuencia de transacciones digitales. El banco quiere identificar perfiles de clientes para diseñar ofertas personalizadas, pero **no tiene una variable que diga a qué segmento pertenece cada cliente**.
+<details class="answer"><summary>Ver respuesta</summary>
 
-¿Esto es un problema supervisado o no supervisado? ¿Por qué?
+Accuracy = (18+24)/50 = **84%**. Precisión = 18/(18+6) = **75%**. Recall = 18/(18+2) = **90%**.
 
-**Respuesta esperada:** No supervisado, porque no hay una variable de resultado (*target*) que indique los grupos. El algoritmo debe descubrirlos a partir de los patrones en los datos.
-:::
+Comete el triple de FP (6) que de FN (2): cuando marca "positivo" se equivoca 1 de cada 4 veces. Si el FP es el error caro, el 84% de accuracy es engañoso — el modelo concentra sus errores justo donde más cuestan, y habría que ajustarlo (o rechazarlo) aunque la accuracy "se vea bien".
 
-::: {.callout-practice}
-**2. Escalamiento**
+</details>
 
-Un analista aplica k-means a clientes usando dos variables: ingreso anual (rango: $10,000,000 – $200,000,000) y número de compras mensuales (rango: 1 – 30). Los clusters resultantes separan casi perfectamente por ingreso, ignorando la frecuencia de compra.
+**2.** Tu modelo alcanza accuracy de 99% en entrenamiento y 62% en test. (a) ¿Cómo se llama este cuadro clínico y qué lo delata? (b) Menciona dos acciones razonables para tratarlo.
 
-¿Qué salió mal y cómo se corrige?
+<details class="answer"><summary>Ver respuesta</summary>
 
-**Respuesta esperada:** No escaló las variables. El ingreso tiene un rango miles de veces mayor que el número de compras, así que domina completamente el cálculo de distancias. Se corrige estandarizando ambas variables antes de aplicar k-means.
-:::
+(a) **Sobreajuste**: la brecha gigante entre train (99%) y test (62%) delata que el modelo memorizó el ruido de entrenamiento en vez de aprender el patrón. La nota de train nunca es evidencia de calidad — siempre mejora con la complejidad.
 
-::: {.callout-practice}
-**3. Interpretación de clusters**
+(b) Entre otras: reducir la complejidad del modelo (menos profundidad, menos parámetros), conseguir más datos de entrenamiento, usar validación cruzada para elegir la versión con mejor desempeño *fuera* de train. Cualquier par de estas vale.
 
-Después de aplicar k-means con k = 3 a una base de clientes, obtienes esta tabla de perfilamiento:
+</details>
 
-| Cluster | Monto promedio | Frecuencia mensual | Recencia (días) | N clientes |
-|---|---|---|---|---|
-| 1 | $380,000 | 1.2 | 60 | 2,100 |
-| 2 | $52,000 | 7.5 | 4 | 5,400 |
-| 3 | $15,000 | 0.4 | 180 | 2,500 |
+**3.** Una cadena de tiendas evalúa dos modelos que pronostican unidades a pedir por semana. El modelo A tiene MAE = 8 y RMSE = 9; el modelo B tiene MAE = 7 y RMSE = 15. Quedarse corto o pasarse **por mucho** produce pérdidas graves (bodega llena o estantes vacíos). ¿Cuál eliges y por qué?
 
-a) Propón un nombre de negocio para cada cluster.
-b) Sugiere una acción diferente para cada segmento.
+<details class="answer"><summary>Ver respuesta</summary>
 
-**Respuestas esperadas:**
+El **modelo A**. Aunque B gana por MAE (7 < 8), su RMSE dispara la alarma: 15 muy por encima de 7 significa que B comete **errores enormes de vez en cuando** — exactamente lo que el negocio dice que no tolera. A es apenas peor "en promedio" pero mucho más estable (RMSE 9 ≈ MAE 8). Cuando los errores grandes son los caros, manda el RMSE.
 
-a) Cluster 1: "Alto ticket esporádico" o "Premium dormido". Cluster 2: "Frecuente de bajo monto" o "Leal cotidiano". Cluster 3: "Inactivo" o "En riesgo de abandono".
+</details>
 
-b) Cluster 1: comunicación personalizada, acceso anticipado a nuevos productos. Cluster 2: programa de lealtad, descuentos por volumen o upgrades. Cluster 3: campaña de reactivación con incentivo; si no responde, reclasificar como perdido.
-:::
+**4.** Un equipo predice deserción estudiantil. Imputan la asistencia faltante con el promedio de **toda la base**, parten train/test, entrenan y obtienen métricas excelentes que luego no se repiten en producción. ¿Dónde estuvo la fuga, por qué infló la métrica y cómo se corrige el procedimiento?
 
----
+<details class="answer"><summary>Ver respuesta</summary>
 
-## Material adicional (opcional)
+La imputación usó el promedio de toda la base — que incluye las filas que después serían test. Información del "examen" se coló al entrenamiento: **data leakage**. La métrica de test quedó inflada porque el test ya no era independiente; en producción, con datos de verdad nuevos, esa ventaja desaparece y el desempeño cae.
 
-Si quieres profundizar:
+Corrección: partir train/test **primero**; calcular el promedio de asistencia **solo con train**; usar ese valor congelado para imputar train y test (y el mismo principio para escalas y cualquier parámetro aprendido de los datos).
 
-- **An Introduction to Statistical Learning (ISLR)** — Capítulo 12 (Unsupervised Learning): explicación accesible de k-means y clustering jerárquico con ejemplos visuales — [disponible gratis online](https://www.statlearning.com)
-- **from-data-to-viz.com** — para elegir visualizaciones cuando perfilen clusters → [https://www.data-to-viz.com](https://www.data-to-viz.com)
-- **Artículo de Harvard Business Review sobre segmentación de clientes** — perspectiva de negocio sobre cómo usar clusters para estrategia comercial
+</details>
 
-Para esta semana, el material de preclase es suficiente. En clase practicaremos con datos reales paso a paso.
+<!--=================-->
+<!--=================-->
+# Material adicional
 
-
-```{=html}
-<!-- Panel Environment -->
-<div id="env-panel" class="collapsed">
-  <div id="env-header" onclick="toggleEnvPanel()">
-    <span id="env-header-left">&#x1F4E6; Environment</span>
-    <span id="env-header-right">
-      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
-      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
-    </span>
-  </div>
-  <div id="env-status">Esperando webR...</div>
-  <div id="env-body">
-    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
-  </div>
-</div>
-
-<script type="module">
-window.toggleEnvPanel = function() {
-  const panel = document.getElementById('env-panel');
-  const btn   = document.getElementById('env-toggle-btn');
-  panel.classList.toggle('collapsed');
-  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
-};
-
-async function getEnvData() {
-  if (!globalThis.mainWebR) return [];
-  try {
-    const shelter = await new globalThis.mainWebR.Shelter();
-    const result  = await shelter.evalR(`
-      local({
-        objs <- ls(envir = .GlobalEnv)
-        if (length(objs) == 0) return("")
-        info <- vapply(objs, function(nm) {
-          obj <- get(nm, envir = .GlobalEnv)
-          cls <- paste(class(obj), collapse = ", ")
-          len <- length(obj)
-          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
-          prev <- tryCatch({
-            if (is.data.frame(obj)) {
-              paste(names(obj), collapse = ", ")
-            } else if (is.function(obj)) {
-              a <- names(formals(obj))
-              paste0("function(", paste(a, collapse = ", "), ")")
-            } else if (is.atomic(obj) && len <= 6) {
-              paste(format(obj, digits = 4), collapse = ", ")
-            } else if (is.atomic(obj) && len > 6) {
-              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
-            } else if (is.list(obj)) {
-              paste0("List of ", len)
-            } else { "" }
-          }, error = function(e) "")
-          paste(nm, cls, len, dm, prev, sep = "\\t")
-        }, character(1))
-        paste(info, collapse = "\\n")
-      })
-    `);
-    const raw = await result.toString();
-    shelter.purge();
-    if (!raw || raw === '') return [];
-    return raw.split('\n').map(line => {
-      const p = line.split('\t');
-      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
-    });
-  } catch (e) {
-    console.warn('Env panel error:', e);
-    return [];
-  }
-}
-
-function renderEnv(items) {
-  const body   = document.getElementById('env-body');
-  const status = document.getElementById('env-status');
-  if (items.length === 0) {
-    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
-    status.textContent = '0 objetos';
-    return;
-  }
-  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
-  body.innerHTML = items.map(it => {
-    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
-    if (it.dim) {
-      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
-    } else {
-      meta += 'Length: ' + it.len;
-    }
-    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
-    return '<div class="env-item">' +
-           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
-           '  <div class="env-item-meta">' + meta + '</div>' +
-           prev +
-           '</div>';
-  }).join('');
-}
-
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-async function updateEnvPanel() {
-  const items = await getEnvData();
-  renderEnv(items);
-}
-window.refreshEnv = function() {
-  const btn = document.getElementById('env-refresh-btn');
-  btn.style.animation = 'none';
-  void btn.offsetWidth;
-  updateEnvPanel();
-};
-
-function moveWebRStatus() {
-  const anchor = document.getElementById('webr-status-anchor');
-  const statusArea = document.getElementById('qwebr-status-message-area');
-  if (anchor && statusArea) {
-    const wrapper = statusArea.closest('.quarto-title-meta');
-    if (wrapper) {
-      wrapper.style.display = 'inline';
-      wrapper.style.fontSize = '13px';
-      wrapper.style.marginLeft = '30px';
-      anchor.parentNode.insertBefore(wrapper, anchor);
-    }
-  }
-}
-
-async function init() {
-  while (!globalThis.qwebrInstance) {
-    await new Promise(r => setTimeout(r, 300));
-  }
-  await globalThis.qwebrInstance;
-  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
-  moveWebRStatus();
-
-  await new Promise(resolve => {
-    const check = setInterval(() => {
-      const btns = document.querySelectorAll('.qwebr-button-run');
-      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
-        clearInterval(check);
-        resolve();
-      }
-    }, 400);
-  });
-
-  const original = globalThis.qwebrComputeEngine;
-  globalThis.qwebrComputeEngine = async function(...args) {
-    const res = await original.apply(this, args);
-    setTimeout(updateEnvPanel, 150);
-    return res;
-  };
-
-  const panel = document.getElementById('env-panel');
-  if (panel.classList.contains('collapsed')) {
-    toggleEnvPanel();
-  }
-  await updateEnvPanel();
-}
-
-init();
-</script>
-```
+- 📘 **An Introduction to Statistical Learning (ISLR)** — capítulos 2 y 5 (evaluación y validación cruzada), el libro gratuito de referencia: [statlearning.com](https://www.statlearning.com){target="_blank"}
+- 🎓 **Google ML Crash Course** — módulos de clasificación y regresión con ejercicios interactivos: [developers.google.com](https://developers.google.com/machine-learning/crash-course){target="_blank"}
+- 🖼️ **MLU-Explain** — explicaciones visuales e interactivas de train/test, validación cruzada y precisión/recall: [mlu-explain.github.io](https://mlu-explain.github.io){target="_blank"}
+- 🎥 **StatQuest** — repaso alternativo (en inglés, con humor) de la matriz de confusión: [youtube.com/@statquest](https://www.youtube.com/@statquest){target="_blank"}

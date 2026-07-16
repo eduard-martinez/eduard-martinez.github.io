@@ -1,0 +1,170 @@
+---
+title: "Unidad 2 - Taller 6: la base que llegó del sistema"
+subtitle: "Taller práctico evaluable · Semana 6 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Instrucciones generales
+
+**El caso:** *Ferretería El Tornillo*, con **4 sedes** (Norte, Sur, Centro y Palmira), quiere su primer reporte de ventas del cuatrimestre. El área de sistemas te exporta la base **tal como sale**, sin que nadie la haya revisado. El gerente te dice:
+
+> *"Ahí está todo. Necesito saber cuál sede vende más y qué producto jalona. Es para mañana."*
+
+Tú ya sabes lo que él no sabe: que si corres ese reporte sobre la base como está, el número va a salir **perfecto y equivocado**. Antes del reporte va el diagnóstico.
+
+::: {.callout-key}
+**Cómo funciona este taller**
+
+- Es **individual** y **evaluable**, y se desarrolla en el tiempo restante de la clase (⏱️ diseñado para **≈ 50 minutos**).
+- Se resuelve **sin la guía del profesor**: todo lo necesario está en este documento, en la [práctica](../practice/week-06.html) y en la [teoría](../theory/week-06.html). El profesor solo atiende dudas logísticas.
+- Herramienta: **RStudio**, dentro de tu proyecto `intro_ba`.
+:::
+
+**Los datos:** descarga 📄 [**ferreteria_raw.csv**](ferreteria_raw.csv) y guárdalo en la carpeta `data/` de tu proyecto. Tiene 7 columnas: `sede`, `mes`, `producto`, `categoria`, `precio`, `unidades` y `observaciones`.
+
+**El entregable** son **tres archivos** (si Intu solo acepta uno, comprímelos en un `.zip`):
+
+- 📄 `apellido_nombre_taller6.R` — el script con todos los puntos, comentado, **incluida el acta de limpieza**.
+- 📊 `ferreteria_clean.csv` — tu dataset analysis-ready exportado.
+- 🖼️ El **gráfico** del Punto 4, exportado con `ggsave()` como `.png`.
+- 📤 Entrega: en el espacio habilitado en Intu antes de terminar la clase. <!-- TODO: pegar aquí el enlace de entrega -->
+
+::: {.callout-warning}
+**Reglas de juego (la rúbrica las aplica)**
+
+1. **El script debe correr completo** de arriba a abajo (con `ferreteria_raw.csv` en `data/`). Se revisa con *Source*: si se detiene en un error, se califica hasta esa línea. Prueba de fuego antes de entregar: `rm(list = ls())` → *Source*.
+2. **`ferreteria_raw` no se sobrescribe.** Todo se construye sobre `ferreteria_clean`. Sobrescribir la base original descuenta.
+3. **Cada corrección va acompañada de su verificación.** Corregir sin comprobar no cuenta como corregir: si estandarizaste, muestra el `table()` que lo demuestra.
+4. **Toda decisión se justifica** en un comentario de 1-2 líneas tuyas. Este taller evalúa **criterio**, no memoria de funciones.
+5. **Uso de IA:** permitido solo para explicar errores o conceptos después de intentarlo tú; prohibido pedir la solución de un punto. Las **decisiones de limpieza y los hallazgos son tuyos**. Declaración obligatoria al final del script.
+:::
+
+**Distribuye tu tiempo:** P1 ≈ 8 min · P2 ≈ 10 min · P3 ≈ 15 min · P4 ≈ 10 min · P5 ≈ 7 min.
+
+<!--=================-->
+<!--=================-->
+# Punto 1 — Setup y radiografía (0.75 puntos)
+
+a. Crea el script `apellido_nombre_taller6.R` en `scripts/`, con el **encabezado** estándar (nombre, código, fecha, qué hace) y el bloque de librerías (`require(pacman)` + `p_load(dplyr, ggplot2, skimr)`).
+b. Lee los datos con **ruta relativa** y guárdalos en el objeto `ferreteria_raw`.
+c. Corre `skim()` y responde en comentarios:
+   - ¿Cuántas filas y columnas tiene la base?
+   - **¿Qué representa una fila?** (la pregunta que va antes que todas)
+   - ¿Qué tipo de dato tiene `precio`? ¿Es el que debería tener?
+
+<!--=================-->
+<!--=================-->
+# Punto 2 — El diagnóstico (1.0 punto)
+
+**No corrijas nada todavía.** Este punto es solo detectar y documentar. Para cada literal, escribe el código que lo demuestra **y** el hallazgo en un comentario.
+
+a. **Consistencia:** ¿cuántos valores únicos tiene `sede`? La ferretería tiene **4** sedes. ¿Cuántos reporta R y por qué? Haz lo mismo con `producto` (hay **4** productos).
+b. **Unicidad:** ¿cuántas filas son copias exactas de otra?
+c. **Validez (rango):** ¿hay algún valor imposible en `unidades`? Muestra la **fila completa** del problema — no solo el número.
+d. **Validez (outlier):** grafica la distribución de `precio` (necesitarás convertirlo temporalmente a número) e identifica el valor sospechoso. **Muestra la fila completa** y di qué producto es.
+e. **Completitud:** ¿cuántos `NA` hay en `precio` y en `unidades`?
+
+::: {.callout-workflow}
+**Pista de método:** en (c) y (d) te pedimos la **fila completa** a propósito. Un analista no juzga un número suelto: va y mira el registro entero antes de decidir. Esa fila te va a decir cosas que el número solo no dice — y en uno de los dos casos, te va a cambiar la decisión.
+:::
+
+<!--=================-->
+<!--=================-->
+# Punto 3 — La limpieza (1.5 puntos)
+
+Construye `ferreteria_clean` **a partir de** `ferreteria_raw`, en el orden correcto. Cada literal lleva su **verificación** y su **justificación** en comentario.
+
+a. **Duplicados:** elimínalos y demuestra cuántas filas se fueron (la cuenta debe coincidir con tu Punto 2b).
+b. **Categorías:** estandariza `sede` y `producto`. Verifica con `table()` que ahora sí queden **4 y 4**.
+c. **Tipo de dato:** convierte `precio` a número. ⚠️ Verifica con `summary()` que **no aparecieron `NA` nuevos** — compara contra tu conteo del Punto 2e. Si aparecieron, los creaste tú.
+d. **El outlier:** corrígelo. Usa una condición **específica** (producto + umbral), no solo el umbral. Justifica en un comentario **por qué** concluiste que era un error de captura y no un precio real.
+e. **El valor imposible — decisión de criterio:** en el Punto 2c encontraste unidades negativas. **Mira la columna `observaciones` de esa fila antes de decidir.** Elige **una** de las tres opciones de la teoría (eliminar / convertir a `NA` / conservar y corregir) y **defiéndela en 2 líneas**. No hay una única respuesta correcta: hay respuestas justificadas y respuestas automáticas.
+f. **Estructura final:** elimina la columna sin valor analítico (justifica cuál y por qué) y crea `ingreso = precio * unidades`.
+
+::: {.callout-warning}
+**El literal (e) es el que separa las notas**
+
+Ahí no se evalúa qué decidiste, sino **si leíste antes de decidir**. La respuesta refleja lo que dice la teoría: *"una devolución documentada puede tener cantidad negativa de forma legítima"*. Si eliminaste esa fila sin mirar el contexto que trae al lado, borraste un dato real. Si la conservaste, tienes que explicar qué le hace eso a tu cálculo de `ingreso`.
+:::
+
+<!--=================-->
+<!--=================-->
+# Punto 4 — La EDA (1.0 punto)
+
+a. **La verificación:** corre `skim(ferreteria_clean)` y escribe en un comentario **tres cosas** que cambiaron frente al `skim()` del Punto 1.
+b. **La tabla que pidió el gerente:** construye `kpis_sede` con el `ingreso_total`, las `unidades_totales` y el `n_transacciones` **por sede**, ordenada de mayor a menor ingreso (recuerda `.groups = "drop"`).
+c. **El gráfico:** el ingreso total por sede, en barras **horizontales y ordenadas**, con título que diga el **mensaje** (no "gráfico de ingresos"), ejes etiquetados y un tema profesional. Expórtalo con `ggsave()`.
+d. **La lectura (2 líneas tuyas):** ¿la sede que más ingreso genera es también la que más **unidades** mueve? ¿Qué te dice eso del tipo de negocio de cada sede?
+
+::: {.callout-workflow}
+**Pista de calidad:** compara el ingreso por sede que te da tu base limpia con el que habrías obtenido corriendo el mismo `group_by()` sobre `ferreteria_raw`. La diferencia entre esas dos tablas **es el trabajo de hoy**, y es exactamente el reporte errado que el gerente iba a recibir.
+:::
+
+<!--=================-->
+<!--=================-->
+# Punto 5 — El acta y los hallazgos (0.75 puntos)
+
+a. **El acta de limpieza (0.5).** Cierra tu script con el bloque de decisiones. Cada línea dice **qué** hiciste y **por qué**:
+
+```r
+## ============================================
+## ACTA DE LIMPIEZA
+## - Duplicados: eliminadas ___ filas exactas. Causa probable: ______
+## - Categorías: sede y producto estandarizados con ______; de ___ a 4 sedes.
+## - precio: ______________________________________
+## - Valor imposible: ______________________________
+##   Decisión: ______________ porque ______________
+## - Outlier: ____________________________________
+## - Columna eliminada: ______ porque ______________
+## ============================================
+```
+
+b. **Los hallazgos (0.25).** En comentarios, escribe:
+   - **2 hallazgos** — lo que ya *sabes* de este negocio, con el número que lo respalda.
+   - **1 pregunta abierta** — algo que la EDA te *destapó* y que todavía no puedes responder con esta base.
+
+> La vara de calidad de la pregunta abierta: debe ser una pregunta que **te haga pedir más datos**, no una que se responda con dos líneas más de código.
+
+<!--=================-->
+<!--=================-->
+# Rúbrica de evaluación
+
+| Punto | Qué se evalúa | Puntos |
+|---|---|---:|
+| **1. Setup y radiografía** | Encabezado + librerías + ruta relativa (0.3); qué representa una fila (0.2); tipo de `precio` detectado (0.25) | 0.75 |
+| **2. Diagnóstico** | Consistencia en `sede` y `producto` con su código (0.3); duplicados (0.15); valor imposible **con la fila completa** (0.2); outlier detectado con gráfico **y fila completa** (0.2); conteo de NA (0.15) | 1.0 |
+| **3. Limpieza** | Duplicados + verificación (0.2); estandarización + `table()` que lo prueba (0.3); `precio` a numérico **sin NA nuevos** (0.25); outlier con condición específica y justificación (0.25); **decisión defendida** sobre el valor imposible (0.3); estructura final + `ingreso` (0.2) | 1.5 |
+| **4. EDA** | Tres cambios verificados vs. el skim inicial (0.2); `kpis_sede` completo y ordenado (0.3); gráfico horizontal, ordenado y pulido + `ggsave()` (0.3); lectura propia ingreso vs. unidades (0.2) | 1.0 |
+| **5. Acta y hallazgos** | Acta completa con el **porqué** de cada decisión (0.5); 2 hallazgos con número + 1 pregunta abierta genuina (0.25) | 0.75 |
+| **Total** | | **5.0** |
+
+: El script que no corre completo se evalúa hasta la línea del primer error. Sobrescribir `ferreteria_raw` descuenta -0.3. Corregir sin verificar no cuenta como corregir. En el Punto 3e se evalúa la **justificación**, no cuál de las tres opciones elegiste. {.striped tbl-colwidths="[20,68,12]"}
+
+<!--=================-->
+<!--=================-->
+# Declaración de uso de IA
+
+Cierra tu script con este bloque diligenciado (obligatorio, aunque sea para decir que no la usaste):
+
+```r
+## ============================================
+## DECLARACIÓN DE USO DE IA
+## Herramienta y modelo usados: _______________ (o "No usé IA")
+## La usé para: _______________________________
+## Verifiqué por mi cuenta: ____________________
+## ============================================
+```
+
+*La política de siempre: la IA para **entender** (un error de `gsub()`, qué hace `distinct()`), no para resolver los puntos. Y una advertencia específica de esta semana: si le pides a un modelo "límpiame esta base", te va a devolver un script que corre y que **elimina la fila de la devolución sin preguntar**. Va a verse impecable. Va a estar mal. En la semana 8 vas a aprender a dirigir y auditar exactamente ese tipo de código — y esta semana es la razón por la que vas a poder hacerlo.*

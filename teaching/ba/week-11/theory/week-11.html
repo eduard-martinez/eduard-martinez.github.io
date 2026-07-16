@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="PhD. Eduard F. Martínez-González">
 
-<title>Unidad 8 - Árboles de Clasificación</title>
+<title>Unidad 5 - Clasificación: árboles y bosques</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,20 +21,56 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
 <script src="week-11_files/libs/clipboard/clipboard.min.js"></script>
 <script src="week-11_files/libs/quarto-html/quarto.js" type="module"></script>
 <script src="week-11_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-11_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="week-11_files/libs/quarto-html/popper.min.js"></script>
 <script src="week-11_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="week-11_files/libs/quarto-html/anchor.min.js"></script>
 <link href="week-11_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="week-11_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="week-11_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="week-11_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="week-11_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="week-11_files/libs/bootstrap/bootstrap-e6bb25874def5e3c119f13f2169c6013.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="week-11_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <style>html{ scroll-behavior: smooth; }</style>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
@@ -51,7 +87,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -78,32 +114,25 @@ window.Quarto = {
     <h2 id="toc-title">Tabla de contenidos</h2>
    
   <ul>
-  <li><a href="#objetivo-de-la-semana" id="toc-objetivo-de-la-semana" class="nav-link active" data-scroll-target="#objetivo-de-la-semana"><span class="header-section-number">1</span> Objetivo de la semana</a>
+  <li><a href="#cómo-estudiar-esta-semana" id="toc-cómo-estudiar-esta-semana" class="nav-link active" data-scroll-target="#cómo-estudiar-esta-semana"><span class="header-section-number">1</span> Cómo estudiar esta semana</a></li>
+  <li><a href="#glosario-de-la-semana" id="toc-glosario-de-la-semana" class="nav-link" data-scroll-target="#glosario-de-la-semana"><span class="header-section-number">2</span> Glosario de la semana</a></li>
+  <li><a href="#el-modelo-misterioso-al-descubierto" id="toc-el-modelo-misterioso-al-descubierto" class="nav-link" data-scroll-target="#el-modelo-misterioso-al-descubierto"><span class="header-section-number">3</span> El modelo misterioso, al descubierto</a></li>
+  <li><a href="#el-árbol-una-máquina-de-preguntas" id="toc-el-árbol-una-máquina-de-preguntas" class="nav-link" data-scroll-target="#el-árbol-una-máquina-de-preguntas"><span class="header-section-number">4</span> El árbol: una máquina de preguntas</a>
   <ul class="collapse">
-  <li><a href="#lo-que-cubriremos" id="toc-lo-que-cubriremos" class="nav-link" data-scroll-target="#lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</a></li>
+  <li><a href="#vocabulario-mínimo" id="toc-vocabulario-mínimo" class="nav-link" data-scroll-target="#vocabulario-mínimo"><span class="header-section-number">4.1</span> Vocabulario mínimo</a></li>
+  <li><a href="#cómo-aprende-el-corte-más-puro" id="toc-cómo-aprende-el-corte-más-puro" class="nav-link" data-scroll-target="#cómo-aprende-el-corte-más-puro"><span class="header-section-number">4.2</span> Cómo aprende: el corte más puro</a></li>
+  <li><a href="#un-árbol-con-profundidad-1" id="toc-un-árbol-con-profundidad-1" class="nav-link" data-scroll-target="#un-árbol-con-profundidad-1"><span class="header-section-number">4.3</span> Un árbol con profundidad 1</a></li>
+  <li><a href="#y-con-una-pregunta-más" id="toc-y-con-una-pregunta-más" class="nav-link" data-scroll-target="#y-con-una-pregunta-más"><span class="header-section-number">4.4</span> ¿Y con una pregunta más?</a></li>
   </ul></li>
-  <li><a href="#la-intuición-el-árbol-como-serie-de-preguntas" id="toc-la-intuición-el-árbol-como-serie-de-preguntas" class="nav-link" data-scroll-target="#la-intuición-el-árbol-como-serie-de-preguntas"><span class="header-section-number">2</span> La intuición: el árbol como serie de preguntas</a>
-  <ul class="collapse">
-  <li><a href="#vocabulario-mínimo" id="toc-vocabulario-mínimo" class="nav-link" data-scroll-target="#vocabulario-mínimo"><span class="header-section-number">2.1</span> Vocabulario mínimo</a></li>
-  </ul></li>
-  <li><a href="#árbol-de-clasificación-predecir-una-categoría" id="toc-árbol-de-clasificación-predecir-una-categoría" class="nav-link" data-scroll-target="#árbol-de-clasificación-predecir-una-categoría"><span class="header-section-number">3</span> Árbol de clasificación: predecir una categoría</a>
-  <ul class="collapse">
-  <li><a href="#cómo-aprende-el-árbol" id="toc-cómo-aprende-el-árbol" class="nav-link" data-scroll-target="#cómo-aprende-el-árbol"><span class="header-section-number">3.1</span> Cómo aprende el árbol</a></li>
-  <li><a href="#un-árbol-con-profundidad-1" id="toc-un-árbol-con-profundidad-1" class="nav-link" data-scroll-target="#un-árbol-con-profundidad-1"><span class="header-section-number">3.2</span> Un árbol con profundidad 1</a></li>
-  <li><a href="#qué-pasa-si-el-árbol-es-más-profundo" id="toc-qué-pasa-si-el-árbol-es-más-profundo" class="nav-link" data-scroll-target="#qué-pasa-si-el-árbol-es-más-profundo"><span class="header-section-number">3.3</span> ¿Qué pasa si el árbol es más profundo?</a></li>
-  </ul></li>
-  <li><a href="#explóralo-tú-mismo-árbol-de-clasificación-interactivo" id="toc-explóralo-tú-mismo-árbol-de-clasificación-interactivo" class="nav-link" data-scroll-target="#explóralo-tú-mismo-árbol-de-clasificación-interactivo"><span class="header-section-number">4</span> Explóralo tú mismo: árbol de clasificación interactivo</a></li>
-  <li><a href="#la-matriz-de-confusión-leer-un-modelo-de-clasificación" id="toc-la-matriz-de-confusión-leer-un-modelo-de-clasificación" class="nav-link" data-scroll-target="#la-matriz-de-confusión-leer-un-modelo-de-clasificación"><span class="header-section-number">5</span> La matriz de confusión: leer un modelo de clasificación</a>
-  <ul class="collapse">
-  <li><a href="#la-tabla-22" id="toc-la-tabla-22" class="nav-link" data-scroll-target="#la-tabla-22"><span class="header-section-number">5.1</span> La tabla 2×2</a></li>
-  <li><a href="#las-métricas-que-salen-de-la-matriz" id="toc-las-métricas-que-salen-de-la-matriz" class="nav-link" data-scroll-target="#las-métricas-que-salen-de-la-matriz"><span class="header-section-number">5.2</span> Las métricas que salen de la matriz</a></li>
-  </ul></li>
-  <li><a href="#del-resultado-al-negocio-un-ejemplo-completo" id="toc-del-resultado-al-negocio-un-ejemplo-completo" class="nav-link" data-scroll-target="#del-resultado-al-negocio-un-ejemplo-completo"><span class="header-section-number">6</span> Del resultado al negocio: un ejemplo completo</a>
-  <ul class="collapse">
-  <li><a href="#material-adicional-opcional" id="toc-material-adicional-opcional" class="nav-link" data-scroll-target="#material-adicional-opcional"><span class="header-section-number">6.1</span> Material adicional (opcional)</a></li>
-  <li><a href="#checklist-de-preclase" id="toc-checklist-de-preclase" class="nav-link" data-scroll-target="#checklist-de-preclase"><span class="header-section-number">6.2</span> Checklist de preclase</a></li>
-  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">6.3</span> Preguntas de comprensión</a></li>
-  </ul></li>
+  <li><a href="#explóralo-tú-mismo-entrena-tu-primer-árbol" id="toc-explóralo-tú-mismo-entrena-tu-primer-árbol" class="nav-link" data-scroll-target="#explóralo-tú-mismo-entrena-tu-primer-árbol"><span class="header-section-number">5</span> Explóralo tú mismo: entrena tu primer árbol</a></li>
+  <li><a href="#el-pipeline-del-clasificador-baseline-cv-test" id="toc-el-pipeline-del-clasificador-baseline-cv-test" class="nav-link" data-scroll-target="#el-pipeline-del-clasificador-baseline-cv-test"><span class="header-section-number">6</span> El pipeline del clasificador: baseline → CV → test</a></li>
+  <li><a href="#del-árbol-al-bosque" id="toc-del-árbol-al-bosque" class="nav-link" data-scroll-target="#del-árbol-al-bosque"><span class="header-section-number">7</span> Del árbol al bosque</a></li>
+  <li><a href="#el-umbral-la-perilla-que-controla-el-negocio" id="toc-el-umbral-la-perilla-que-controla-el-negocio" class="nav-link" data-scroll-target="#el-umbral-la-perilla-que-controla-el-negocio"><span class="header-section-number">8</span> El umbral: la perilla que controla el negocio</a></li>
+  <li><a href="#y-esto-cómo-se-ve-en-tu-semestre" id="toc-y-esto-cómo-se-ve-en-tu-semestre" class="nav-link" data-scroll-target="#y-esto-cómo-se-ve-en-tu-semestre"><span class="header-section-number">9</span> ¿Y esto cómo se ve en tu semestre?</a></li>
+  <li><a href="#para-pensar" id="toc-para-pensar" class="nav-link" data-scroll-target="#para-pensar"><span class="header-section-number">10</span> Para pensar 🤔</a></li>
+  <li><a href="#checklist-de-salida" id="toc-checklist-de-salida" class="nav-link" data-scroll-target="#checklist-de-salida"><span class="header-section-number">11</span> Checklist de salida</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">12</span> Preguntas de comprensión</a></li>
+  <li><a href="#material-adicional" id="toc-material-adicional" class="nav-link" data-scroll-target="#material-adicional"><span class="header-section-number">13</span> Material adicional</a></li>
   </ul>
 </nav>
 </div>
@@ -113,7 +142,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Unidad 8 - Árboles de Clasificación</h1>
+<h1 class="title">Unidad 5 - Clasificación: árboles y bosques</h1>
 <p class="subtitle lead">Introducción al Business Analytics · Semana 11 · 06278-ECO</p>
 </div>
 
@@ -138,92 +167,20 @@ window.Quarto = {
 
 
 <div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
-<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a> <span id="webr-status-anchor"></span></p>
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a></p>
 </div>
 <!--=================-->
 <!--=================-->
-<section id="objetivo-de-la-semana" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Objetivo de la semana</h1>
-<p>El foco está en <strong>clasificación supervisada</strong>: dado un conjunto de datos con una etiqueta conocida (aprobado/rechazado, churn/activo, precio alto/bajo), aprender a construir e interpretar un árbol de clasificación y evaluar qué tan bien predice casos nuevos. El énfasis está en <strong>leer lo que el modelo dice y conectarlo con una decisión de negocio</strong>, no en el código.</p>
-<section id="lo-que-cubriremos" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="lo-que-cubriremos"><span class="header-section-number">1.1</span> Lo que cubriremos</h2>
-<ul>
-<li>Intuición del árbol de decisión: preguntas que dividen datos<br>
-</li>
-<li>Cómo el árbol aprende: impureza, divisiones y hojas<br>
-</li>
-<li>Cómo leer un árbol de clasificación: nodos, ramas y predicciones<br>
-</li>
-<li>La matriz de confusión: TP, FP, TN, FN<br>
-</li>
-<li>Métricas: accuracy, precisión y recall<br>
-</li>
-<li>Cuándo importa más cada métrica</li>
-</ul>
+<section id="cómo-estudiar-esta-semana" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Cómo estudiar esta semana</h1>
 <div class="callout-key">
-<p><strong>Conexión con semanas anteriores</strong></p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Semana 09</th>
-<th>Semana 10</th>
-<th>Semana 11</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Pipeline ML, train/test, métricas</td>
-<td>Clustering (no supervisado)</td>
-<td>Árbol de clasificación (supervisado)</td>
-</tr>
-<tr class="even">
-<td>“¿Tenemos etiqueta de resultado?”</td>
-<td>Sin etiqueta → grupos</td>
-<td>Con etiqueta → predicción de categoría</td>
-</tr>
-<tr class="odd">
-<td>Concepto de accuracy</td>
-<td>Sin métrica de acierto/fallo</td>
-<td>Accuracy, precisión, recall en la práctica</td>
-</tr>
-<tr class="even">
-<td>Leakage, overfitting</td>
-<td>Elbow, silhouette</td>
-<td>Overfitting según profundidad del árbol</td>
-</tr>
-</tbody>
-</table>
-<p>Esta semana tocamos el primer algoritmo <strong>supervisado</strong> del curso: el modelo aprende de ejemplos pasados con etiqueta para predecir casos nuevos. A diferencia del clustering, aquí sí sabemos si el modelo se equivocó.</p>
-</div>
-<hr>
-<!--=================-->
-<!--=================-->
-</section>
-</section>
-<section id="la-intuición-el-árbol-como-serie-de-preguntas" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> La intuición: el árbol como serie de preguntas</h1>
-<p>Antes de cualquier fórmula, piensa en cómo toma decisiones un buen analista de crédito. Cuando alguien pide un préstamo, el analista no aplica una fórmula matemática ciega: hace preguntas en secuencia.</p>
-<blockquote class="blockquote">
-<p><em>“¿Tiene ingresos mensuales superiores a 3 millones?”</em><br>
-→ No: rechazar (alto riesgo).<br>
-→ Sí: siguiente pregunta.</p>
-<p><em>“¿Su historial crediticio es positivo?”</em><br>
-→ No: condicional, pedir garantías.<br>
-→ Sí: <strong>aprobar</strong>.</p>
-</blockquote>
-<p>Eso es exactamente un <strong>árbol de clasificación</strong>: una serie de preguntas binarias encadenadas que terminan en la predicción de una categoría.</p>
-<section id="vocabulario-mínimo" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="vocabulario-mínimo"><span class="header-section-number">2.1</span> Vocabulario mínimo</h2>
-<div class="callout-key">
-<p><strong>Nodo raíz</strong> — La primera pregunta. El modelo elige la variable que mejor separa las clases posibles.</p>
-<p><strong>Nodo interno</strong> — Preguntas intermedias. Cada una divide más el subgrupo que llegó a ese punto.</p>
-<p><strong>Hoja</strong> — El final del árbol: la predicción. Es la categoría más frecuente entre las observaciones de entrenamiento que cayeron en ese nodo.</p>
-<p><strong>Profundidad</strong> — Cuántos niveles de preguntas tiene el árbol. Profundidad 1 = una pregunta. Más profundidad = más complejo = más riesgo de sobreajuste.</p>
+<p><strong>Este documento es la versión escrita del video de la semana</strong></p>
+<ol type="1">
+<li>🎬 <strong>Mira el video de la clase</strong> — el enlace está en Intu. <!-- TODO: pegar aquí el enlace del video --></li>
+<li>📖 <strong>Lee este documento</strong> — el mismo recorrido con un playground interactivo para entrenar árboles tú mismo y una perilla de umbral para sentir el trade-off precisión/recall.</li>
+<li>✅ <strong>Presenta el quiz en Intu</strong> antes de la clase.</li>
+</ol>
+<p>Las métricas (matriz de confusión, accuracy, precisión, recall) <strong>ya las construiste en la <a href="../../week-10/theory/week-10.html">semana 10</a></strong> — aquí no se re-explican: se usan sin anestesia. Si algo se te borró, ve al glosario de esa semana antes de seguir.</p>
 </div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -235,34 +192,89 @@ Advertencia
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><strong>Sobreajuste vs.&nbsp;subajuste</strong></p>
-<p>Un árbol muy profundo memoriza los datos de entrenamiento: accuracy alta en train, baja en test. Un árbol muy superficial es demasiado simple: accuracy baja en ambos. La <strong>profundidad máxima</strong> es el parámetro de control más importante.</p>
+<p><strong>Antes de venir a clase: 3 paquetes (2 minutos, con internet)</strong></p>
+<p>En la práctica entrenarás modelos de verdad. Instala los paquetes <strong>antes</strong> de llegar — en clase, con el wifi del salón colapsado, es un mal momento:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"rpart"</span>, <span class="st">"rpart.plot"</span>, <span class="st">"randomForest"</span>))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Verifica que quedaron: <code>library(randomForest)</code> no debe arrojar error.</p>
 </div>
 </div>
-<hr>
+<p><strong>El plan:</strong> la semana pasada fuiste el juez; esta semana eres el ingeniero. Primero abrimos el capó del modelo más legible del Machine Learning — el <strong>árbol de clasificación</strong> — y vemos cómo aprende sus preguntas. Luego lo entrenas tú en un playground. Después conectamos el pipeline completo de la semana 10 (baseline → validación cruzada → test). Y cerramos con dos ideas que separan al aficionado del profesional: los <strong>bosques aleatorios</strong> (cientos de árboles votando) y el <strong>umbral de decisión</strong> — la perilla con la que el negocio, no el algoritmo, decide qué error prefiere cometer.</p>
 <!--=================-->
 <!--=================-->
 </section>
+<section id="glosario-de-la-semana" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Glosario de la semana</h1>
+<div class="glossary-grid">
+<div class="gloss-card">
+<p><strong>Nodo raíz y hojas</strong> 🌱 La raíz es la primera pregunta del árbol; las hojas son el final del recorrido: la <strong>predicción</strong> (la clase mayoritaria de los casos de entrenamiento que cayeron ahí).</p>
+</div>
+<div class="gloss-card">
+<p><strong>Profundidad</strong> 📏 Cuántos niveles de preguntas encadena el árbol. Es su dial de complejidad — el mismo dial de la semana 10: poca = subajuste, mucha = memorizador.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Impureza (Gini)</strong> 🥣 Qué tan <em>mezcladas</em> quedan las clases en un grupo. El árbol prueba todos los cortes posibles y elige el que deja los grupos más puros. Impureza 0 = grupo de una sola clase.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Poda y <code>cp</code></strong> ✂️ Recortar ramas que no mejoran el error de validación. En <code>rpart</code>, el parámetro de complejidad <code>cp</code> controla cuánto debe aportar una división para sobrevivir.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Hiperparámetro</strong> 🎛️ Las perillas que TÚ fijas antes de entrenar (profundidad, <code>cp</code>, mínimo por hoja…). No las aprende el modelo — se eligen con validación cruzada.</p>
+</div>
+<div class="gloss-card">
+<p><strong>CART</strong> 🌳 <em>Classification and Regression Trees</em> — el algoritmo de árboles que usa <code>rpart</code>. La misma máquina sirve para clasificar (esta semana) y para predecir números (la próxima).</p>
+</div>
+<div class="gloss-card">
+<p><strong>Bootstrap y bagging</strong> 🎒 Bootstrap: remuestrear los datos con reemplazo para crear versiones alternativas del dataset. Bagging: entrenar un modelo en cada versión y <strong>promediar/votar</strong> sus predicciones.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Random Forest</strong> 🌲🌲 Cientos de árboles, cada uno entrenado con un bootstrap distinto <strong>y</strong> un subconjunto aleatorio de variables en cada corte. Decide por votación. Menos interpretable, mejor generalización.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Importancia de variables</strong> 🏆 El ranking que entrega el bosque: cuánto contribuyó cada variable a separar las clases. El consuelo de interpretabilidad cuando ya no puedes dibujar el modelo.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Umbral de decisión</strong> 🚪 El modelo no dice “Aprobado”: dice <em>“probabilidad 0.73 de Aprobado”</em>. El umbral convierte probabilidad en decisión — y moverlo intercambia precisión por recall.</p>
+</div>
+</div>
+<!--=================-->
+<!--=================-->
 </section>
-<section id="árbol-de-clasificación-predecir-una-categoría" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Árbol de clasificación: predecir una categoría</h1>
-<p>El siguiente video muestra la intuición general de un árbol de clasificación.</p>
-<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
+<section id="el-modelo-misterioso-al-descubierto" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> El modelo misterioso, al descubierto</h1>
+<p>En la práctica de la semana 10 auditaste un “modelo misterioso” que decidía créditos: le calculaste la matriz de confusión, lo comparaste contra el baseline y firmaste su veredicto — sin saber qué había adentro. Hora de confesarlo: <strong>era un árbol de clasificación</strong>. Hoy construyes uno igual (de hecho, uno mejor).</p>
+<p>¿Y por qué empezar el zoológico de modelos por los árboles? Porque piensan como un analista. Cuando un analista de crédito evalúa una solicitud, no aplica una fórmula ciega — hace <strong>preguntas en secuencia</strong>:</p>
+<blockquote class="blockquote">
+<p><em>“¿Tiene ingresos superiores a 3 millones?”</em> → No: rechazar (alto riesgo). → Sí: siguiente pregunta.</p>
+<p><em>“¿Su historial crediticio es positivo?”</em> → No: pedir garantías. → Sí: <strong>aprobar</strong>.</p>
+</blockquote>
+<p>Eso es un árbol de clasificación: <strong>preguntas binarias encadenadas que terminan en la predicción de una categoría</strong>. La diferencia con el analista es que el árbol no hereda sus preguntas de un manual — las <em>aprende</em> de los datos, midiendo qué corte separa mejor las clases. Y a diferencia de casi cualquier otro modelo, el resultado se puede <strong>dibujar y leer completo</strong>: por eso los bancos y los reguladores los aman.</p>
+<div class="callout-connect">
+<p><strong>Dónde estás parado en el pipeline</strong></p>
+<p>Semana 10, pasos 5-6: evaluar y reportar (ya lo dominas). Esta semana, paso 4: <strong>entrenar y ajustar</strong> — con la validación cruzada eligiendo los hiperparámetros, como se prometió. El baseline sigue siendo la vara y el test se sigue visitando una sola vez. Nada de lo de la semana pasada se descarta: se ensambla.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-árbol-una-máquina-de-preguntas" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> El árbol: una máquina de preguntas</h1>
+<section id="vocabulario-mínimo" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="vocabulario-mínimo"><span class="header-section-number">4.1</span> Vocabulario mínimo</h2>
+<div class="callout-key">
+<p><strong>Nodo raíz</strong> — La primera pregunta. El árbol la elige midiendo qué variable y qué corte separan mejor las clases.</p>
+<p><strong>Nodo interno</strong> — Preguntas intermedias: cada una refina el subgrupo que llegó hasta ahí.</p>
+<p><strong>Hoja</strong> — El final: la predicción. Es la clase más frecuente entre los casos de entrenamiento que cayeron en ese nodo.</p>
+<p><strong>Profundidad</strong> — Cuántos niveles de preguntas. Profundidad 1 = una sola pregunta. Es el dial de complejidad del árbol.</p>
+</div>
+</section>
+<section id="cómo-aprende-el-corte-más-puro" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="cómo-aprende-el-corte-más-puro"><span class="header-section-number">4.2</span> Cómo aprende: el corte más puro</h2>
+<p>Para elegir cada pregunta, el árbol ensaya <strong>todos los cortes posibles</strong> en todas las variables y mide la <strong>impureza</strong> que deja cada uno: qué tan mezcladas quedan las clases a cada lado. Un corte que separa perfectamente aprobados de rechazados deja impureza 0 (corte de oro); un corte que deja mitad y mitad a cada lado no sirvió de nada. El árbol se queda con el mejor corte, divide, y repite el proceso dentro de cada rama hasta toparse con un freno: profundidad máxima, muy pocos casos, o grupos ya puros.</p>
+<p>Si quieres ver la intuición del algoritmo narrada paso a paso, este video del canal <strong>Codificando Bits</strong> (material complementario, 15 min) lo hace muy bien:</p>
 <div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/kqaLlte6P6o" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
-<p>Ahora vamos a verlo en acción con un ejemplo concreto: 8 solicitudes de crédito donde solo conocemos el ingreso mensual y el historial crediticio de cada solicitante. El objetivo es entender tres cosas que verás en los diagramas que siguen: primero, cómo el árbol elige su primera pregunta; segundo, qué significa la predicción que aparece en cada hoja; y tercero, qué ocurre cuando le permitimos al árbol hacer una segunda pregunta — y por qué eso no siempre es mejor.</p>
-<section id="cómo-aprende-el-árbol" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="cómo-aprende-el-árbol"><span class="header-section-number">3.1</span> Cómo aprende el árbol</h2>
-<p>Para elegir en qué variable y en qué valor cortar, el árbol mide la <strong>impureza</strong> de cada posible división: qué tan mezcladas quedan las clases en cada grupo después del corte. El corte que produce los grupos más “puros” (menos mezclados) es el que elige.</p>
-<p>Imagina 10 solicitantes de crédito y el objetivo de predecir “Aprobado” / “Rechazado”:</p>
-<ul>
-<li>Si el corte en <em>ingresos &gt; 3M</em> separa perfectamente aprobados de rechazados → impureza = 0, corte perfecto.</li>
-<li>Si el corte en <em>número de hijos</em> mezcla aprobados y rechazados por igual → impureza alta, corte inútil.</li>
-</ul>
-<p>El árbol repite este proceso en cada nodo hasta llegar a la profundidad máxima o hasta que los grupos sean suficientemente puros.</p>
 </section>
-<section id="un-árbol-con-profundidad-1" class="level2" data-number="3.2">
-<h2 data-number="3.2" class="anchored" data-anchor-id="un-árbol-con-profundidad-1"><span class="header-section-number">3.2</span> Un árbol con profundidad 1</h2>
-<p>El siguiente ejemplo usa <strong>8 solicitudes de crédito</strong> con dos variables: ingreso mensual (millones) e historial crediticio (1 = positivo, 0 = negativo).</p>
+<section id="un-árbol-con-profundidad-1" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="un-árbol-con-profundidad-1"><span class="header-section-number">4.3</span> Un árbol con profundidad 1</h2>
+<p>Míralo con números pequeños: <strong>8 solicitudes de crédito</strong>, dos variables (ingreso mensual en millones e historial crediticio: 1 = positivo, 0 = negativo).</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -323,11 +335,7 @@ Advertencia
 </tr>
 </tbody>
 </table>
-<p>El árbol analiza todos los posibles cortes y encuentra que <strong>Ingreso ≥ 3.5M</strong> es el que mejor separa las clases:</p>
-<ul>
-<li>Rama izquierda (Ingreso &lt; 3.5M): A, B, C, D → todos rechazados → <strong>hoja: Rechazado</strong></li>
-<li>Rama derecha (Ingreso ≥ 3.5M): E, F, G, H → todos aprobados → <strong>hoja: Aprobado</strong></li>
-</ul>
+<p>El árbol ensaya todos los cortes y encuentra que <strong>Ingreso ≥ 3.5M</strong> es el que mejor separa:</p>
 <div style="margin:1.5rem 0">
 <svg width="100%" viewbox="0 0 680 310" role="img">
 <title>Árbol de clasificación profundidad 1 — aprobación de crédito</title>
@@ -367,22 +375,13 @@ Advertencia
 </svg>
 </div>
 <div class="callout-key">
-<p><strong>¿Cómo predice el árbol un caso nuevo?</strong></p>
-<p>Llega una solicitud con ingreso de 2.8M:</p>
-<ul>
-<li>¿Ingreso ≥ 3.5M? → <strong>No</strong> → rama izquierda → predicción: <strong>Rechazado</strong></li>
-</ul>
-<p>Llega otra con ingreso de 4.2M:</p>
-<ul>
-<li>¿Ingreso ≥ 3.5M? → <strong>Sí</strong> → rama derecha → predicción: <strong>Aprobado</strong></li>
-</ul>
-<p>La predicción es determinista: para el mismo dato, siempre da la misma respuesta.</p>
+<p><strong>¿Cómo predice un caso nuevo?</strong></p>
+<p>Llega una solicitud con ingreso de 2.8M: ¿Ingreso ≥ 3.5M? → <strong>No</strong> → hoja izquierda → <strong>Rechazado</strong>. Llega otra con 4.2M: → <strong>Sí</strong> → hoja derecha → <strong>Aprobado</strong>. Determinista: mismo dato, misma respuesta, y puedes explicar <em>por qué</em> — intenta eso con una red neuronal.</p>
 </div>
 </section>
-<section id="qué-pasa-si-el-árbol-es-más-profundo" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="qué-pasa-si-el-árbol-es-más-profundo"><span class="header-section-number">3.3</span> ¿Qué pasa si el árbol es más profundo?</h2>
-<p>Con profundidad 1, el árbol rechaza al solicitante C (ingreso 2.5M, historial positivo) porque cayó en el grupo izquierdo junto con A, B y D. ¿Pero C merece el mismo trato que alguien con historial negativo?</p>
-<p>Con profundidad 2, el árbol puede hacer una <strong>segunda pregunta</strong> dentro del grupo izquierdo:</p>
+<section id="y-con-una-pregunta-más" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="y-con-una-pregunta-más"><span class="header-section-number">4.4</span> ¿Y con una pregunta más?</h2>
+<p>Con profundidad 1, el solicitante C (ingreso 2.5M pero <strong>historial positivo</strong>) quedó rechazado por caer en el grupo de ingresos bajos. Con profundidad 2, el árbol puede hacer una segunda pregunta dentro de esa rama:</p>
 <div style="margin:1.5rem 0">
 <svg width="100%" viewbox="0 0 680 435" role="img">
 <title>Árbol de clasificación profundidad 2 — aprobación de crédito</title>
@@ -442,21 +441,20 @@ Advertencia
 <text x="340" y="422" text-anchor="middle" font-family="inherit" font-size="11" fill="#999">Profundidad = 2 · La rama derecha ya era pura; solo la izquierda necesitó refinarse</text>
 </svg>
 </div>
-<p>Con profundidad 2, el árbol detecta que C (ingreso bajo pero historial positivo) merece aprobación. La segunda pregunta refina la predicción, pero también hace el modelo más complejo — y si los datos de entrenamiento son pocos, puede memorizarlos en vez de aprender un patrón real.</p>
-<hr>
+<p>La segunda pregunta rescata a C. Pero ojo con la moraleja completa: cada nivel extra hace el modelo más fino <strong>y</strong> más capaz de memorizar ruido. La hoja de C tiene <strong>n = 1</strong> — ¿aprendió un patrón o se aprendió a C? Con 8 datos no se puede saber; con 240 sí, y para eso está la validación cruzada de abajo.</p>
 <!--=================-->
 <!--=================-->
 </section>
 </section>
-<section id="explóralo-tú-mismo-árbol-de-clasificación-interactivo" class="level1" data-number="4">
-<h1 data-number="4"><span class="header-section-number">4</span> Explóralo tú mismo: árbol de clasificación interactivo</h1>
-<p>Experimenta con los parámetros del árbol. El playground tiene dos pestañas: el <strong>Mapa de decisión</strong> (cómo divide el espacio de datos en regiones de colores) y la <strong>Estructura del árbol</strong> (las preguntas que hace, visualizadas como nodos).</p>
+<section id="explóralo-tú-mismo-entrena-tu-primer-árbol" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Explóralo tú mismo: entrena tu primer árbol</h1>
+<p>Experimenta con los hiperparámetros. El playground tiene dos pestañas: el <strong>Mapa de decisión</strong> (cómo el árbol parte el espacio en regiones de color) y la <strong>Estructura del árbol</strong> (las preguntas, dibujadas). Los dos datasets te van a sonar: aprobación de crédito (la práctica de esta semana) y churn de clientes (el taller).</p>
 <p><strong>¿Qué explorar?</strong></p>
 <ol type="1">
-<li>Con <strong>“Aprobación de crédito”</strong> y profundidad 1: ¿cuál es la única pregunta del árbol? Cambia al tab <strong>Árbol</strong> para verla.</li>
-<li>Sube la profundidad a 4 o 5: ¿la accuracy en train sube? ¿Y en test? ¿Hay sobreajuste?</li>
-<li>Baja el mínimo de muestras por hoja a 1: ¿el árbol se vuelve más o menos complejo?</li>
-<li>Compara ambas pestañas: cada línea divisoria del Mapa corresponde a un nodo en el Árbol.</li>
+<li>Con <strong>profundidad 1</strong>: ¿cuál es la única pregunta? Cambia a la pestaña <strong>Árbol</strong> para leerla.</li>
+<li>Sube la profundidad a 6 y baja el mínimo por hoja a 1: ¿qué pasa con la accuracy de train? ¿Y la de test? Estás viendo el dial de la semana 10, ahora con un modelo real.</li>
+<li>Cada línea del Mapa es un nodo del Árbol: verifica la correspondencia.</li>
+<li>Pulsa <strong>Reiniciar datos</strong> varias veces con los mismos parámetros: ¿el árbol cambia mucho? Esa <em>inestabilidad</em> es la debilidad que los bosques van a curar.</li>
 </ol>
 <div style="margin:1.5rem 0;">
 <style>
@@ -786,99 +784,18 @@ setTimeout(()=>{resize();loadDS();},150);
 })();
 </script>
 </div>
-<hr>
 <!--=================-->
 <!--=================-->
 </section>
-<section id="la-matriz-de-confusión-leer-un-modelo-de-clasificación" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> La matriz de confusión: leer un modelo de clasificación</h1>
-<p>En el video anterior viste cómo un árbol de clasificación llega a una predicción: recorre sus preguntas y termina en una hoja que dice “Aprobado” o “Rechazado”. Pero predecir no es suficiente — necesitamos saber qué tan bien predice, y para eso necesitamos comparar lo que el modelo dijo con lo que realmente ocurrió.</p>
-<p>Esa comparación se organiza en una tabla de cuatro celdas llamada matriz de confusión. En este video vas a ver cómo se construye celda por celda, siguiendo dos reglas simples: la primera letra (Verdadero o Falso) depende de si el modelo acertó; la segunda (Positivo o Negativo) depende únicamente de lo que el modelo predijo. Al final del video el profesor te propone un ejercicio de conteo — páusalo y resuélvelo antes de seguir, porque en clase trabajarás con exactamente esta misma lógica aplicada a datos reales.</p>
-<!-- TODO: reemplazar VIDEO_ID con el enlace real -->
-<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/TWDdeKs3org" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
-<p>Cuando el árbol predice sobre el conjunto de prueba, comparamos lo que predijo con lo que realmente ocurrió. Ese resumen es la <strong>matriz de confusión</strong>.</p>
-<section id="la-tabla-22" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="la-tabla-22"><span class="header-section-number">5.1</span> La tabla 2×2</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Predicho: Aprobado</strong></th>
-<th><strong>Predicho: Rechazado</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Real: Aprobado</strong></td>
-<td>Verdadero Positivo (TP)</td>
-<td>Falso Negativo (FN)</td>
-</tr>
-<tr class="even">
-<td><strong>Real: Rechazado</strong></td>
-<td>Falso Positivo (FP)</td>
-<td>Verdadero Negativo (TN)</td>
-</tr>
-</tbody>
-</table>
-<div class="callout-key">
-<p><strong>Los cuatro resultados posibles:</strong></p>
-<p><strong>TP (Verdadero Positivo):</strong> Dijo “Aprobado” y era aprobado. Acierto donde importaba.</p>
-<p><strong>TN (Verdadero Negativo):</strong> Dijo “Rechazado” y era rechazado. Acierto también.</p>
-<p><strong>FP (Falso Positivo):</strong> Dijo “Aprobado” pero era rechazado → riesgo de impago para la entidad.</p>
-<p><strong>FN (Falso Negativo):</strong> Dijo “Rechazado” pero era aprobado → se perdió un buen cliente.</p>
-<p><strong>Regla de memoria:</strong> el primer adjetivo (Verdadero/Falso) dice si acertó. El segundo sustantivo (Positivo/Negativo) dice lo que predijo el modelo.</p>
+<section id="el-pipeline-del-clasificador-baseline-cv-test" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> El pipeline del clasificador: baseline → CV → test</h1>
+<p>Ya sabes entrenar un árbol. Ahora insértalo en la disciplina de la semana 10 — este es exactamente el guion de la práctica:</p>
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>Parte train/test y calcula el baseline.</b> La clase mayoritaria marca la vara. Si el 52% de los créditos históricos se aprobó, "aprobar a todo el mundo" acierta 52% — todo modelo se mide contra eso.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>Entrena candidatos con distinta complejidad.</b> Árboles cortos, árboles profundos, con y sin frenos. Todos aprenden solo de train.</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>Elige el tamaño con validación cruzada — no con train ni con test.</b> Aquí hay un regalo: <code>rpart</code> corre la CV de 10 pliegues automáticamente mientras entrena, y su tabla reporta el error de CV (<code>xerror</code>) para cada tamaño del árbol. Como la CV también trae ruido, la regla profesional no es "el mínimo exacto" sino el <b>árbol más pequeño que empata con el mínimo</b> dentro de un margen de un error estándar (la <em>regla 1-SE</em>). Con ese <code>cp</code> podas usando <code>prune()</code>.</div></div>
+  <div class="pipe-step"><div class="pipe-num">4</div><div><b>Evalúa el elegido en test, una sola vez</b> — matriz de confusión, accuracy, precisión, recall. Y compara contra el baseline del paso 1.</div></div>
 </div>
-</section>
-<section id="las-métricas-que-salen-de-la-matriz" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="las-métricas-que-salen-de-la-matriz"><span class="header-section-number">5.2</span> Las métricas que salen de la matriz</h2>
-<div class="callout-key">
-<p><strong>Accuracy:</strong><br>
-<span class="math display">\[\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}\]</span><br>
-Fracción de casos correctamente clasificados.<br>
-<em>Limitación: engañosa si las clases están desbalanceadas.</em></p>
-<p><strong>Precisión:</strong><br>
-<span class="math display">\[\text{Precisión} = \frac{TP}{TP + FP}\]</span><br>
-De los que el modelo dijo “Aprobado”, ¿cuántos realmente lo eran?</p>
-<p><strong>Recall:</strong><br>
-<span class="math display">\[\text{Recall} = \frac{TP}{TP + FN}\]</span><br>
-De los que realmente eran aprobados, ¿cuántos detectó el modelo?</p>
-</div>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Situación</th>
-<th>Error más costoso</th>
-<th>Priorizar</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Fraude bancario</td>
-<td>FN: dejar pasar un fraude</td>
-<td>Recall alto</td>
-</tr>
-<tr class="even">
-<td>Diagnóstico médico</td>
-<td>FN: no detectar un caso real</td>
-<td>Recall alto</td>
-</tr>
-<tr class="odd">
-<td>Crédito (impago caro)</td>
-<td>FP: aprobar a quien no pagará</td>
-<td>Precisión alta</td>
-</tr>
-<tr class="even">
-<td>Retención de clientes</td>
-<td>FN: no detectar al que se va</td>
-<td>Recall alto</td>
-</tr>
-</tbody>
-</table>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -889,124 +806,284 @@ Advertencia
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>No existe la métrica perfecta. Mejorar el recall suele bajar la precisión y viceversa. La decisión de qué optimizar es de negocio, no del algoritmo.</p>
+<p><strong>El memorizador no siempre se estrella en el test — y aun así está mal</strong></p>
+<p>En la práctica entrenarás un árbol sin frenos que saca <strong>100% en train</strong>. A veces, con datos muy limpios, ese árbol hasta sobrevive dignamente en el test — ¿entonces cuál es el problema? Tres: (1) su 100% de train es una <strong>mentira</strong> que no puedes reportar; (2) con 12 hojas es ilegible y quebradizo — otro muestreo de datos y sale un árbol distinto; (3) la validación cruzada, que promedia 10 exámenes en vez de uno, casi siempre muestra que las ramas extra <strong>no compran nada</strong> (el <code>xerror</code> deja de bajar… y luego sube). Regla profesional: entre dos árboles con el mismo error de CV, gana el más pequeño. Se llama principio de parsimonia y te va a salvar en el proyecto final.</p>
 </div>
 </div>
-<hr>
 <!--=================-->
 <!--=================-->
 </section>
-</section>
-<section id="del-resultado-al-negocio-un-ejemplo-completo" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> Del resultado al negocio: un ejemplo completo</h1>
-<p>Una entidad financiera evalúa el árbol sobre 50 solicitudes del conjunto de prueba:</p>
-<table class="caption-top table">
+<section id="del-árbol-al-bosque" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Del árbol al bosque</h1>
+<p>El árbol tiene dos virtudes (legible, rápido) y una debilidad seria: es <strong>inestable</strong>. Cambia 20 filas del entrenamiento y puede cambiar la pregunta de la raíz — y con ella, todo el árbol. Un modelo que se transforma con cada brisa de datos no inspira confianza.</p>
+<p>La cura es contraintuitiva: <strong>no entrenes un árbol; entrena quinientos.</strong></p>
+<div class="callout-key">
+<p><strong>La receta del Random Forest, en tres ingredientes</strong></p>
+<ol type="1">
+<li><strong>Bootstrap</strong> 🎒 — Crea 500 versiones alternativas del dataset remuestreando filas con reemplazo (cada versión duplica unas filas y omite otras).</li>
+<li><strong>Un árbol por versión, con amnesia parcial</strong> 🌳 — Entrena un árbol profundo en cada una, pero con una regla extraña: en <strong>cada corte</strong>, el árbol solo puede mirar un <strong>subconjunto aleatorio de variables</strong>. Así los 500 árboles no terminan siendo clones que preguntan todos lo mismo (sin esto, todos abrirían con la variable más fuerte y se equivocarían en lo mismo).</li>
+<li><strong>Votación</strong> 🗳️ — Para predecir un caso nuevo, los 500 árboles votan y gana la mayoría. También obtienes la <em>proporción</em> de votos — la probabilidad que usaremos en el umbral.</li>
+</ol>
+</div>
+<p>¿Por qué funciona? Cada árbol individual es mediocre y sobreajustado a su versión de los datos — pero sus errores son <strong>distintos</strong>, y al votar, los errores individuales se cancelan mientras el patrón común se refuerza. Es la sabiduría de las multitudes aplicada a modelos: quinientos peritos imperfectos que se equivocan en cosas diferentes le ganan a un perito perfecto en sus propios recuerdos.</p>
+<p>El precio: ya no puedes dibujar el modelo. Quinientos árboles votando no caben en una diapositiva, y el regulador bancario que amaba tu árbol ahora frunce el ceño. Los consuelos:</p>
+<ul>
+<li><strong>Importancia de variables</strong>: el bosque reporta cuánto contribuyó cada variable a separar las clases — un ranking que sí cabe en la diapositiva y suele ser la parte más citada del informe.</li>
+<li><strong>El árbol podado como vocero</strong>: en la práctica profesional es común usar el bosque para decidir y un árbol simple para <em>explicar</em> la lógica general.</li>
+</ul>
+<table class="table-striped caption-top table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 38%">
+<col style="width: 38%">
+</colgroup>
 <thead>
 <tr class="header">
 <th></th>
-<th>Predicho: Aprobado</th>
-<th>Predicho: Rechazado</th>
+<th>Árbol (CART)</th>
+<th>Random Forest</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Real: Aprobado</td>
-<td><strong>22</strong> (TP)</td>
-<td><strong>4</strong> (FN)</td>
+<td>Interpretabilidad</td>
+<td>🟢 Se dibuja y se lee completo</td>
+<td>🟠 Solo importancia de variables</td>
 </tr>
 <tr class="even">
-<td>Real: Rechazado</td>
-<td><strong>5</strong> (FP)</td>
-<td><strong>19</strong> (TN)</td>
+<td>Desempeño típico</td>
+<td>🟠 Bueno</td>
+<td>🟢 Mejor (casi siempre)</td>
+</tr>
+<tr class="odd">
+<td>Estabilidad</td>
+<td>🟠 Cambia con los datos</td>
+<td>🟢 La votación lo estabiliza</td>
+</tr>
+<tr class="even">
+<td>Costo de cómputo</td>
+<td>🟢 Instantáneo</td>
+<td>🟠 500 árboles (aún rápido en estas bases)</td>
+</tr>
+<tr class="odd">
+<td>Cuándo elegirlo</td>
+<td>Explicar la decisión es obligatorio</td>
+<td>Predecir bien es lo que manda</td>
 </tr>
 </tbody>
 </table>
-<ul>
-<li>Accuracy = (22 + 19) / 50 = <strong>82%</strong><br>
-</li>
-<li>Precisión = 22 / 27 = <strong>81.5%</strong> — cuando dice “Aprobado”, acierta el 81.5% de las veces<br>
-</li>
-<li>Recall = 22 / 26 = <strong>84.6%</strong> — detecta el 84.6% de los buenos clientes</li>
-</ul>
-<p>¿Es suficiente? Depende del costo del error. Si el costo de un impago (FP) supera al costo de perder un buen cliente (FN), el modelo debería ajustarse para aumentar precisión — aceptando más FN a cambio. <strong>Esa es una decisión de negocio, no del algoritmo.</strong></p>
-<div class="callout-connect">
-<p><strong>Conexión con semana 9</strong></p>
-<p>¿Por qué evaluamos en el conjunto de <strong>prueba</strong> y no en el de entrenamiento?</p>
-<p>El árbol ya “vio” los datos de entrenamiento. Medir allí da accuracy inflada. El conjunto de prueba simula solicitudes futuras — eso mide la capacidad real de predecir. Un árbol con 99% en train y 62% en test está memorizando, no aprendiendo (sobreajuste).</p>
-</div>
-<hr>
-<section id="material-adicional-opcional" class="level2" data-number="6.1">
-<h2 data-number="6.1" class="anchored" data-anchor-id="material-adicional-opcional"><span class="header-section-number">6.1</span> Material adicional (opcional)</h2>
-<ul>
-<li><strong>An Introduction to Statistical Learning (ISLR)</strong> — Capítulo 8: árboles, bagging, random forests — <a href="https://www.statlearning.com">statlearning.com</a></li>
-<li><strong>Google ML Crash Course</strong> — clasificación con ejemplos interactivos — <a href="https://developers.google.com/machine-learning/crash-course">developers.google.com/machine-learning/crash-course</a></li>
-</ul>
-<hr>
+<!--=================-->
+<!--=================-->
 </section>
-<section id="checklist-de-preclase" class="level2" data-number="6.2">
-<h2 data-number="6.2" class="anchored" data-anchor-id="checklist-de-preclase"><span class="header-section-number">6.2</span> Checklist de preclase</h2>
-<p>Al llegar a clase debes poder explicar:</p>
+<section id="el-umbral-la-perilla-que-controla-el-negocio" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> El umbral: la perilla que controla el negocio</h1>
+<p>Queda la idea más importante de la semana para tu vida profesional. El bosque no dice “Aprobado” — dice <em>“el 73% de mis árboles votó Aprobado”</em>. Esa <strong>probabilidad</strong> se convierte en decisión solo cuando alguien fija un <strong>umbral</strong>: ¿aprobamos desde 0.5? ¿Solo desde 0.8?</p>
+<p>Y ese <em>alguien</em> no debería ser el algoritmo. Mueve la perilla y mira lo que le pasa a la matriz:</p>
+<div class="widget-card" id="wg-umbral">
+  <div class="widget-head">🚪 La perilla del umbral — 20 solicitudes, positivo: Aprobado</div>
+  <div class="widget-body">
+    <div class="ofit-controls">
+      <span style="font-size:0.9em; color:#475569;">Aprobar si la probabilidad ≥</span>
+      <input type="range" id="thr-slider" min="0.05" max="0.95" value="0.5" step="0.05" aria-label="Umbral de decisión">
+      <span class="ofit-cx" id="thr-val">0.50</span>
+    </div>
+    <svg class="ofit-svg" id="thr-svg" viewbox="0 0 560 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Solicitudes ordenadas por probabilidad y línea de umbral"></svg>
+    <div class="ofit-boxes">
+      <div class="ofit-box"><div class="ofit-val" id="thr-mat">–</div><div class="ofit-lab">TP · FP · FN · TN</div></div>
+      <div class="ofit-box ofit-train"><div class="ofit-val" id="thr-prec">–</div><div class="ofit-lab">Precisión</div></div>
+      <div class="ofit-box ofit-test"><div class="ofit-val" id="thr-rec">–</div><div class="ofit-lab">Recall</div></div>
+    </div>
+    <div class="widget-note" id="thr-nota"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // [probabilidad del modelo, clase real: 1 = Aprobado, 0 = Rechazado]
+  var CASOS = [
+    [0.95, 1], [0.90, 1], [0.85, 1], [0.80, 1], [0.75, 1],
+    [0.70, 1], [0.60, 1], [0.55, 1], [0.45, 1], [0.35, 1],
+    [0.65, 0], [0.55, 0], [0.50, 0], [0.40, 0], [0.30, 0],
+    [0.25, 0], [0.20, 0], [0.15, 0], [0.10, 0], [0.05, 0]
+  ];
+  var svg = document.getElementById("thr-svg");
+  if (!svg) return;
+  var W = 560, L = 92, R = 20;
+  function x(p) { return L + p * (W - L - R); }
+  function base() {
+    var s = "";
+    s += '<line x1="' + L + '" y1="120" x2="' + (W - R) + '" y2="120" stroke="#94a3b8" stroke-width="1.5"/>';
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (t) {
+      s += '<line x1="' + x(t) + '" y1="120" x2="' + x(t) + '" y2="125" stroke="#94a3b8"/>';
+      s += '<text x="' + x(t) + '" y="140" font-size="11" fill="#64748b" text-anchor="middle">' + t.toFixed(2) + '</text>';
+    });
+    s += '<text x="' + (L - 6) + '" y="48" font-size="11" fill="#16a34a" text-anchor="end">Real:</text>';
+    s += '<text x="' + (L - 6) + '" y="62" font-size="11" fill="#16a34a" text-anchor="end">Aprobado</text>';
+    s += '<text x="' + (L - 6) + '" y="88" font-size="11" fill="#dc2626" text-anchor="end">Real:</text>';
+    s += '<text x="' + (L - 6) + '" y="102" font-size="11" fill="#dc2626" text-anchor="end">Rechazado</text>';
+    CASOS.forEach(function (c, i) {
+      var cy = c[1] === 1 ? 55 : 95;
+      s += '<circle id="thr-dot-' + i + '" cx="' + x(c[0]) + '" cy="' + cy + '" r="7" fill="' + (c[1] === 1 ? "#22c55e" : "#ef4444") + '" stroke="#fff" stroke-width="1.5"/>';
+    });
+    s += '<line id="thr-line" x1="0" y1="18" x2="0" y2="120" stroke="#1e3a5f" stroke-width="2" stroke-dasharray="5 3"/>';
+    s += '<text id="thr-line-lab" x="0" y="12" font-size="11" font-weight="bold" fill="#1e3a5f" text-anchor="middle">umbral</text>';
+    svg.innerHTML = s;
+  }
+  base();
+  var sl = document.getElementById("thr-slider");
+  function pinta() {
+    var u = parseFloat(sl.value);
+    document.getElementById("thr-val").textContent = u.toFixed(2);
+    var ln = document.getElementById("thr-line");
+    ln.setAttribute("x1", x(u)); ln.setAttribute("x2", x(u));
+    document.getElementById("thr-line-lab").setAttribute("x", x(u));
+    var tp = 0, fp = 0, fn = 0, tn = 0;
+    CASOS.forEach(function (c, i) {
+      var aprueba = c[0] >= u - 1e-9;
+      if (aprueba && c[1] === 1) tp++;
+      else if (aprueba && c[1] === 0) fp++;
+      else if (!aprueba && c[1] === 1) fn++;
+      else tn++;
+      document.getElementById("thr-dot-" + i).setAttribute("opacity", aprueba ? "1" : "0.3");
+    });
+    document.getElementById("thr-mat").textContent = tp + " · " + fp + " · " + fn + " · " + tn;
+    var prec = tp + fp > 0 ? (100 * tp / (tp + fp)) : NaN;
+    var rec = 100 * tp / (tp + fn);
+    document.getElementById("thr-prec").textContent = isNaN(prec) ? "—" : prec.toFixed(0) + "%";
+    document.getElementById("thr-rec").textContent = rec.toFixed(0) + "%";
+    var nota;
+    if (u <= 0.35) {
+      nota = "<b>Manga ancha:</b> aprueba " + (tp + fp) + " de 20 — casi no pierde buenos clientes (recall " + rec.toFixed(0) + "%), pero de los aprobados, " + fp + " no pagarán. Si el impago es caro, esto sale carísimo.";
+    } else if (u < 0.65) {
+      nota = "<b>Zona de equilibrio:</b> " + fp + " morosos aprobados y " + fn + " buenos clientes rechazados. ¿Es el balance correcto? Depende de cuál error cuesta más — pregunta de negocio, no de R.";
+    } else {
+      nota = "<b>Modo estricto:</b> solo aprueba con alta probabilidad — precisión " + (isNaN(prec) ? "—" : prec.toFixed(0) + "%") + (fp === 0 ? " (¡cero morosos aprobados!)" : "") + ", pero rechaza " + fn + " buenos clientes (recall " + rec.toFixed(0) + "%). Riesgo bajo, negocio perdido.";
+    }
+    document.getElementById("thr-nota").innerHTML = nota + " Los puntos atenuados quedaron <em>rechazados</em> por el umbral.";
+  }
+  sl.addEventListener("input", pinta);
+  pinta();
+})();
+</script>
+<p>La lección en una frase: <strong>precisión y recall no se maximizan a la vez — se intercambian moviendo el umbral, y la tasa de cambio la decide el costo de cada error.</strong> La tabla de la semana 10, ahora con perilla:</p>
+<table class="table-striped caption-top table">
+<colgroup>
+<col style="width: 36%">
+<col style="width: 36%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Situación</th>
+<th>El error caro</th>
+<th>El umbral se mueve hacia…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Crédito (impago caro)</td>
+<td>FP: aprobar a quien no paga</td>
+<td>Arriba (estricto): más precisión</td>
+</tr>
+<tr class="even">
+<td>Retención de clientes</td>
+<td>FN: no ver al que se fuga</td>
+<td>Abajo (manga ancha): más recall</td>
+</tr>
+<tr class="odd">
+<td>Detección de fraude</td>
+<td>FN: dejar pasar un fraude</td>
+<td>Abajo: más recall</td>
+</tr>
+</tbody>
+</table>
+<div class="callout-remember">
+<p><strong>¿Y el ROC-AUC que sale en los blogs?</strong> (opcional)</p>
+<p>Si mueves el umbral de 0 a 1 y anotas el desempeño en cada punto, dibujas una curva (ROC). El área bajo esa curva (AUC) resume qué tan bien el modelo <strong>ordena</strong> los casos, independiente del umbral: AUC = 1 es orden perfecto, 0.5 es barajar. Útil para comparar modelos antes de discutir umbrales — pero el umbral final sigue siendo una decisión de negocio. En este curso te basta con saber leerlo.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="y-esto-cómo-se-ve-en-tu-semestre" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> ¿Y esto cómo se ve en tu semestre?</h1>
+<ul>
+<li><strong>La práctica de esta semana</strong>: el torneo completo sobre la base de crédito — baseline → árbol legible → el memorizador y su poda con CV → Random Forest → y la perilla del umbral con las probabilidades del bosque. Cada paso con sus métricas de la semana 10.</li>
+<li><strong>El taller</strong>: ConectaTel, un proveedor de internet, te entrega su base de clientes para predecir <strong>fugas</strong>. Clases desbalanceadas, un baseline traicionero y una métrica que no es la accuracy — todo lo de estas dos semanas, sin guía.</li>
+<li><strong>La próxima semana</strong>: la misma maquinaria (CART, bosque, CV) aplicada a predecir <strong>números</strong> — más un competidor nuevo de la familia lineal, el Lasso.</li>
+<li><strong>Tu proyecto final</strong>: si tu pregunta es de clasificación, este es tu arsenal: baseline + árbol podado + bosque, comparados con la métrica que tu costo de error manda, y un umbral justificado en la sustentación.</li>
+</ul>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="para-pensar" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Para pensar 🤔</h1>
+<ol type="1">
+<li>Tu bosque de 500 árboles saca precisión 0.97. El gerente pregunta: <em>“¿y por qué el modelo rechazó al cliente 2041?”</em> — ¿qué le puedes responder, y qué NO le puedes responder? ¿Cómo lo resolverías con lo aprendido hoy?</li>
+<li>En el playground, el mínimo de muestras por hoja en 1 permite hojas de un solo caso — como la hoja de C en el ejemplo de 8 solicitantes. ¿Por qué una hoja con n = 1 es sospechosa por diseño?</li>
+<li>Una aseguradora usa umbral 0.5 para marcar reclamos como fraude y los manda a revisión humana (que cuesta poco). ¿Deberían subir o bajar el umbral? ¿Qué cambia si en vez de revisión humana la marca rechaza el reclamo automáticamente?</li>
+</ol>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="checklist-de-salida" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Checklist de salida</h1>
+<p>Al terminar el video y esta lectura debes poder explicar:</p>
 <ul class="task-list">
-<li><label><input type="checkbox">¿Qué es un nodo raíz, un nodo interno y una hoja?</label></li>
-<li><label><input type="checkbox">¿Qué predice el árbol en cada hoja?</label></li>
-<li><label><input type="checkbox">¿Cómo elige el árbol la primera variable de corte?</label></li>
-<li><label><input type="checkbox">¿Qué son TP, FP, TN, FN y cómo se ubican en la tabla 2×2?</label></li>
-<li><label><input type="checkbox">¿Cómo se calcula la accuracy? ¿Por qué puede ser engañosa?</label></li>
-<li><label><input type="checkbox">¿Cuándo es más importante el recall que la precisión?</label></li>
-<li><label><input type="checkbox">¿Por qué se evalúa en el conjunto de prueba y no en el de entrenamiento?</label></li>
-<li><label><input type="checkbox">¿Qué significa que un árbol esté sobreajustado?</label></li>
+<li><label><input type="checkbox">¿Cómo elige el árbol su primera pregunta? ¿Qué es la impureza?</label></li>
+<li><label><input type="checkbox">¿Qué predice una hoja y por qué una hoja con n = 1 es señal de alarma?</label></li>
+<li><label><input type="checkbox">¿Qué hiperparámetros frenan al árbol y qué pasa si los quitas todos?</label></li>
+<li><label><input type="checkbox">¿Cómo se usa la validación cruzada de <code>rpart</code> (xerror) para podar?</label></li>
+<li><label><input type="checkbox">¿Cuáles son los tres ingredientes del Random Forest y por qué la votación mejora la generalización?</label></li>
+<li><label><input type="checkbox">¿Qué pierdes al pasar del árbol al bosque y qué te consuela (importancia de variables)?</label></li>
+<li><label><input type="checkbox">¿Qué intercambia el umbral de decisión? ¿Quién debe fijarlo?</label></li>
+<li><label><input type="checkbox">¿Hacia dónde mueves el umbral si el error caro es el FN? ¿Y si es el FP?</label></li>
 </ul>
+<!--=================-->
+<!--=================-->
 </section>
-<section id="preguntas-de-comprensión" class="level2" data-number="6.3">
-<h2 data-number="6.3" class="anchored" data-anchor-id="preguntas-de-comprensión"><span class="header-section-number">6.3</span> Preguntas de comprensión</h2>
-<p><strong>1.</strong> Un árbol entrega estos resultados sobre 50 solicitudes del conjunto de prueba:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th></th>
-<th>Predicho: Aprobado</th>
-<th>Predicho: Rechazado</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Real: Aprobado</td>
-<td>20</td>
-<td>5</td>
-</tr>
-<tr class="even">
-<td>Real: Rechazado</td>
-<td>3</td>
-<td>22</td>
-</tr>
-</tbody>
-</table>
-<p>Calcula la accuracy, la precisión y el recall. ¿Qué error es más frecuente: FP o FN?</p>
-<details>
+<section id="preguntas-de-comprensión" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Preguntas de comprensión</h1>
+<p><strong>1.</strong> Lee este árbol entrenado para predecir fuga de clientes: raíz: <code>reclamos_6m ≥ 2</code> → Sí: hoja <strong>“Se fuga”</strong> (n = 40); No: segunda pregunta <code>antiguedad &lt; 12</code> → Sí: hoja <strong>“Se fuga”</strong> (n = 25); No: hoja <strong>“Se queda”</strong> (n = 175). Un cliente lleva 8 meses, tiene 1 reclamo. ¿Qué predice el árbol y por qué? ¿Qué perfil de negocio describen las dos hojas de fuga?</p>
+<details class="answer">
 <summary>
 Ver respuesta
 </summary>
-<p>TP=20, FN=5, FP=3, TN=22<br>
-- Accuracy = (20+22)/50 = <strong>84%</strong><br>
-- Precisión = 20/23 = <strong>87%</strong><br>
-- Recall = 20/25 = <strong>80%</strong></p>
-El error más frecuente es FN (5) &gt; FP (3): el modelo rechaza más clientes buenos de lo que aprueba malos.
+<p>Recorrido: ¿reclamos ≥ 2? No (tiene 1) → ¿antigüedad &lt; 12? Sí (lleva 8) → hoja <strong>“Se fuga”</strong>. El árbol describe dos perfiles de riesgo que cualquier gerente reconoce: los <strong>inconformes</strong> (2+ reclamos recientes, se van sin importar lo demás) y los <strong>recién llegados</strong> (menos de un año, sin ancla todavía). Esa traducción directa de nodos a segmentos de negocio es la gran virtud del árbol.</p>
 </details>
-<p><strong>2.</strong> Un compañero entrena un árbol con profundidad 7 y obtiene 98% en train y 63% en test. Dice: “Es excelente, casi no se equivoca.” ¿Qué le responderías?</p>
-<details>
+<p><strong>2.</strong> Entrenas dos árboles sobre los mismos datos. El A tiene 3 hojas, error de CV (xerror) 0.10 y accuracy en train de 96%. El B tiene 14 hojas, xerror 0.13 y accuracy en train de 100%. Tu compañero prefiere el B “porque no se equivoca nunca”. Convéncelo en tres frases.</p>
+<details class="answer">
 <summary>
 Ver respuesta
 </summary>
-El modelo está sobreajustado. La brecha enorme entre train (98%) y test (63%) indica que memorizó los datos de entrenamiento en vez de aprender un patrón generalizable. Lo que importa es el desempeño en test. La solución probable es reducir la profundidad máxima o aumentar el mínimo de muestras por hoja.
+<ol type="1">
+<li>El 100% en train no es evidencia: siempre se puede lograr memorizando — es el dial de la semana 10 girado a tope. (2) La medida honesta es la validación cruzada, y ahí B es <em>peor</em> (0.13 &gt; 0.10): sus 11 hojas extra compraron ruido, no patrón. (3) Aun si empataran en CV, ganaría A por parsimonia: más simple, más legible, más estable ante datos nuevos.</li>
+</ol>
 </details>
-<p><strong>3.</strong> La entidad decide que el costo de aprobar a alguien que no pagará (FP) es 4 veces mayor que el costo de rechazar a un buen cliente (FN). ¿Qué métrica debe optimizar el modelo? ¿Qué le pasa a la otra métrica?</p>
-<details>
+<p><strong>3.</strong> Tu Random Forest de fuga de clientes da, para un cliente, probabilidad 0.42 de irse. Con umbral 0.5 no se le hace nada; el equipo de retención propone bajar el umbral a 0.3. ¿Qué ganan, qué pagan, y qué dato del negocio necesitas para decidir si conviene?</p>
+<details class="answer">
 <summary>
 Ver respuesta
 </summary>
-Debe optimizar <strong>precisión</strong>: el FP es el error más costoso. Para subirla, el árbol clasifica como “Aprobado” solo cuando está muy seguro — lo que probablemente sube los FN (rechaza más buenos clientes) bajando el recall. Es un trade-off inevitable: no se pueden maximizar ambas métricas a la vez. La decisión de dónde fijar ese trade-off es de la entidad.
+<p>Ganan <strong>recall</strong>: capturan clientes como este (0.42 ≥ 0.3), que hoy se van sin que nadie los llame. Pagan <strong>precisión</strong>: más falsas alarmas — llamadas y descuentos a clientes que no pensaban irse. El dato que decide: el <strong>costo relativo</strong> de cada error. Si retener cuesta una llamada (<span class="math inline">\() y perder un cliente cuesta meses de facturación (\)</span>$$), el umbral bajo se paga solo; si la retención regala descuentos caros, no tanto. El umbral es una decisión financiera con disfraz estadístico.</p>
 </details>
+<p><strong>4.</strong> ¿Por qué el Random Forest exige que cada corte de cada árbol mire solo un subconjunto aleatorio de variables? ¿Qué pasaría si se quita esa regla y cada árbol puede usar siempre todas?</p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+<p>Sin esa regla, los 500 árboles serían casi <strong>clones</strong>: todos abrirían con la variable más predictiva (en la base de crédito, la deuda) y harían cortes muy parecidos — y 500 modelos que se equivocan <em>en lo mismo</em> votan tan mal como uno solo. La aleatoriedad de variables <strong>des-correlaciona</strong> los árboles: los obliga a explorar caminos distintos, de modo que sus errores sean diferentes y se cancelen al votar. La diversidad, no el número, es lo que hace sabia a la multitud.</p>
+</details>
+<!--=================-->
+<!--=================-->
 </section>
+<section id="material-adicional" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> Material adicional</h1>
+<ul>
+<li>📘 <strong>ISLR</strong> — capítulo 8: árboles, bagging y random forests: <a href="https://www.statlearning.com" target="_blank">statlearning.com</a></li>
+<li>🎥 <strong>StatQuest — Random Forests</strong> (en inglés, con humor): <a href="https://www.youtube.com/@statquest" target="_blank">youtube.com/<span class="citation" data-cites="statquest">@statquest</span></a></li>
+<li>🖼️ <strong>MLU-Explain — Decision Trees y Random Forest</strong> (visuales interactivos): <a href="https://mlu-explain.github.io" target="_blank">mlu-explain.github.io</a></li>
+<li>🎬 <strong>Codificando Bits</strong> — el video de intuición embebido arriba y su serie de ML en español: <a href="https://www.youtube.com/@codificandobits" target="_blank">youtube.com/<span class="citation" data-cites="codificandobits">@codificandobits</span></a></li>
+</ul>
 </section>
 
 </main>
@@ -1062,13 +1139,14 @@ Debe optimizar <strong>precisión</strong>: el FP es el error más costoso. Para
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

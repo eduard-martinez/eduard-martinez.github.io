@@ -1,0 +1,153 @@
+---
+title: "Unidad 3 - Taller 8: dirige tu propio agente"
+subtitle: "Taller práctico evaluable · Semana 8 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Instrucciones generales
+
+::: {.callout-key}
+**Cómo funciona este taller**
+
+- Es **individual** y **evaluable**, y se desarrolla en el tiempo restante de la clase (⏱️ diseñado para **≈ 55 minutos**).
+- Se resuelve **sin la guía del profesor**: todo lo que necesitas está en este documento, en la [práctica](../practice/week-08.html) y en la [teoría](../theory/week-08.html). Durante el taller el profesor solo atiende dudas logísticas (entrega, plataforma), no de contenido.
+- Trabajas sobre el **mismo proyecto de la práctica** (`tiendas_andinas/`, con la base ya limpia). Si tu limpieza quedó a medias, tu primer paso es pedirle al agente que la complete — eso también es parte del oficio.
+- Herramienta: el **agente que usaste en la práctica** (Copilot en VS Code, Claude Code o Cursor). Anota cuál y con qué modelo — lo declararás al final.
+:::
+
+**El entregable** es **un solo documento** (Word o PDF) con cinco secciones numeradas:
+
+- 📄 Nombre del archivo: `apellido_nombre_taller8.pdf`
+- 🧾 Las evidencias son **capturas de pantalla legibles** (el panel del agente, tu terminal, los archivos generados) acompañadas de los textos que se piden en cada parte.
+- 📤 Entrega: en el espacio habilitado en Intu antes de terminar la clase. <!-- TODO: pegar aquí el enlace de entrega -->
+
+::: {.callout-warning}
+**Reglas de juego (léelas: la rúbrica las aplica)**
+
+1. **El bucle debe ser tuyo.** Las capturas deben corresponder a *tu* sesión de hoy (se nota: usuario, rutas, fechas). Compartir un proyecto ya resuelto es fraude de ambos lados.
+2. **Los análisis escritos son tuyos.** Los prompts al agente y sus respuestas van completos, pero las reflexiones de 2-6 líneas que se piden las redactas tú — sin pasarlas por el agente. Ya sabes que se nota.
+3. **Toda cifra reportada debe salir de código ejecutado** — nunca de la "memoria" del modelo ni de la tuya. La Parte 4 existe para comprobarlo.
+4. **Plan B declarado:** si tu agente no ejecuta comandos (modo "manos humanas" de la práctica), el taller vale igual — corre tú cada comando propuesto y captúralo. Decláralo en la Parte 5.
+:::
+
+**Distribuye tu tiempo:** Parte 1 ≈ 5 min · Parte 2 ≈ 20 min · Parte 3 ≈ 10 min · Parte 4 ≈ 10 min · Parte 5 ≈ 10 min.
+
+<!--=================-->
+<!--=================-->
+# El encargo de la gerente
+
+El informe de la práctica gustó. La gerente de Tiendas Andinas responde con una petición nueva — este es el trabajo que dirigirás hoy:
+
+> *"Gracias por el informe. Ahora necesito decidir **qué categoría de productos impulsar en cada ciudad** con la pauta de mayo. ¿Me pueden mostrar cómo se reparte el ingreso entre categorías en cada ciudad, y una recomendación concreta por ciudad?"*
+
+Traducido a entregables del proyecto (agrégalo como **Misión 4** — puedes pegárselo así al agente dentro de tu prompt):
+
+```default
+Misión 4: partiendo de data/ventas_limpias.csv, escribe scripts/03_categorias.R
+que (1) calcule el ingreso total por ciudad y categoría y lo exporte a
+output/ingreso_ciudad_categoria.csv, y (2) produzca UN gráfico que permita
+comparar la composición por categoría entre las tres ciudades, exportado a
+output/ en PNG. Debe cumplir las reglas del proyecto y correr completo con
+Rscript sin errores.
+```
+
+La **recomendación por ciudad** (2-3 líneas) la escribes **tú** en la Parte 5 — al agente le pides los números y el gráfico, no la opinión.
+
+<!--=================-->
+<!--=================-->
+# Parte 1 — El manifiesto (0.75 puntos)
+
+Pega el contenido **final** de tu archivo de instrucciones (`copilot-instructions.md`, `CLAUDE.md` o equivalente), que debe incluir:
+
+a. Las reglas base de la práctica, **y**
+b. **Dos reglas nuevas escritas por ti**, verificables, pertinentes para la Misión 4 (piensa: formato del gráfico comparativo, redondeo de cifras, idioma de las categorías…). Márcalas con `[MÍA]` al inicio de la línea.
+
+<!--=================-->
+<!--=================-->
+# Parte 2 — El encargo y el bucle (1.25 puntos)
+
+a. Pega el **prompt** que le enviaste al agente. Debe tener los cuatro ingredientes C-T-F-R identificables (no hace falta marcarlos — deben notarse).
+b. Documenta el bucle con **2 o 3 capturas** que muestren al agente en acción: leyendo archivos del proyecto, proponiendo/ejecutando comandos y — si ocurrió — encontrando un error y corrigiéndolo.
+c. Narra en **3-5 líneas tuyas** qué pasó en cada fase: qué *planeó*, qué *ejecutó*, qué *observó* y qué *corrigió*. Si acertó a la primera vuelta, también es un resultado válido: documenta la vuelta única y señala qué verificó el agente antes de darla por buena.
+
+<!--=================-->
+<!--=================-->
+# Parte 3 — Auditoría y reproducibilidad (1.25 puntos)
+
+a. **Auditoría (antes de aceptar):** en 2-4 líneas, ¿qué revisaste en `scripts/03_categorias.R` antes de aprobarlo? Cita **una regla concreta de tu manifiesto** y muestra cómo comprobaste que el script la cumple (o cómo le exigiste al agente corregirla — captura del reclamo incluida, si aplica).
+b. **Reproducibilidad (después de aceptar):** captura de **tu terminal** corriendo el script completo, de arriba a abajo, sin errores:
+
+```default
+Rscript scripts/03_categorias.R
+```
+
+c. Captura del contenido de `output/`: el CSV nuevo y el PNG del gráfico (pega también el gráfico en el documento).
+
+<!--=================-->
+<!--=================-->
+# Parte 4 — La verificación (1.0 punto)
+
+La regla de oro, con tus manos. Elige **una cifra** central del resultado (por ejemplo: el ingreso de la categoría líder en Cali) y:
+
+a. Pega la cifra **tal como la reportó el agente**.
+b. Recalcúlala **tú**, sin el agente — una línea en la terminal basta:
+
+```default
+Rscript -e 'd <- read.csv("data/ventas_limpias.csv"); aggregate(precio*unidades ~ ciudad + categoria, d, sum)'
+```
+
+c. Captura tu comando con su salida y escribe el **veredicto** (1-2 líneas): ¿coinciden? ¿Por qué era esperable que coincidieran (o qué explica la diferencia)?
+
+::: {.callout-key}
+**Ojo:** si las cifras NO coinciden, no es un desastre — es un hallazgo. Rastrea la causa (¿el agente usó otra base? ¿filtró filas que tú no?) y documéntala: un descuadre bien explicado vale el punto completo.
+:::
+
+<!--=================-->
+<!--=================-->
+# Parte 5 — El juicio y la recomendación (0.75 puntos)
+
+a. **La recomendación a la gerente (tuya):** con la tabla y el gráfico a la vista, escribe 2-3 líneas por ciudad: qué categoría impulsarías en cada una y por qué. Lenguaje de negocio, no de código.
+b. **El juicio sobre el agente (tuyo):** en 4-6 líneas — ¿qué hizo bien que el chat del navegador no habría podido hacer? ¿Qué tuviste que corregirle o exigirle tú? ¿Qué parte de este trabajo NO le delegarías todavía, y por qué?
+
+<!--=================-->
+<!--=================-->
+# Rúbrica de evaluación
+
+| Parte | Qué se evalúa | Puntos |
+|---|---|---:|
+| **1. Manifiesto** | Reglas base presentes; las dos reglas propias son verificables y pertinentes (no deseos vagos) | 0.75 |
+| **2. Encargo y bucle** | Prompt con C-T-F-R completo; capturas que evidencian al agente leyendo/ejecutando en TU proyecto; narración propia de las cuatro fases | 1.25 |
+| **3. Auditoría y reproducibilidad** | Revisión previa citando una regla del manifiesto y su comprobación (0.5); script corriendo completo en tu terminal (0.5); outputs presentes y gráfico pegado (0.25) | 1.25 |
+| **4. Verificación** | Cifra del agente + recálculo propio con comando visible + veredicto correcto (o descuadre bien explicado) | 1.0 |
+| **5. Juicio y recomendación** | Recomendación por ciudad basada en los datos; juicio crítico propio sobre qué delegar y qué no | 0.75 |
+| **Total** | | **5.0** |
+
+: La presentación (orden, secciones numeradas, capturas legibles) se descuenta hasta -0.3 si dificulta la revisión. {.striped tbl-colwidths="[24,64,12]"}
+
+<!--=================-->
+<!--=================-->
+# Declaración de uso de IA
+
+Cierra tu documento con este mini-formato diligenciado:
+
+```default
+Agente y modelo usados: ____________________ (p. ej., Copilot — GPT / Claude Code — Opus)
+Modo de ejecución: __________________________ (agente ejecutó / "manos humanas")
+Lo que acepté sin cambios: __________________________________________________
+Lo que corregí o exigí corregir: ____________________________________________
+Verifiqué por mi cuenta: ____________________________________________________
+```
+
+*Nota: en este taller el agente no solo está permitido — es el objeto de evaluación. Lo que se califica es cómo lo **diriges**: tus reglas, tu auditoría, tu verificación y tu juicio. Esa es la política de IA del curso funcionando en su nivel más alto.*

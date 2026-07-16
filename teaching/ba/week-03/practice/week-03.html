@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Unidad 1 - Práctica: tu primer script en R</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="week-03_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-03_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-03_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-03_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="week-03_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-03_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-03_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-03_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-03_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-03_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-03_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-03_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#reglas-de-juego" id="toc-reglas-de-juego" class="nav-link active" data-scroll-target="#reglas-de-juego"><span class="header-section-number">1</span> Reglas de juego</a></li>
+  <li><a href="#la-consola-hola-r-10-min" id="toc-la-consola-hola-r-10-min" class="nav-link" data-scroll-target="#la-consola-hola-r-10-min"><span class="header-section-number">2</span> La consola: hola, R <span class="badge-time">≈ 10 min</span></a></li>
+  <li><a href="#el-script-tu-análisis-con-memoria-10-min" id="toc-el-script-tu-análisis-con-memoria-10-min" class="nav-link" data-scroll-target="#el-script-tu-análisis-con-memoria-10-min"><span class="header-section-number">3</span> El script: tu análisis con memoria <span class="badge-time">≈ 10 min</span></a></li>
+  <li><a href="#objetos-bajo-vigilancia-12-min" id="toc-objetos-bajo-vigilancia-12-min" class="nav-link" data-scroll-target="#objetos-bajo-vigilancia-12-min"><span class="header-section-number">4</span> Objetos bajo vigilancia <span class="badge-time">≈ 12 min</span></a></li>
+  <li><a href="#tu-primer-vector-con-preguntas-de-negocio-15-min" id="toc-tu-primer-vector-con-preguntas-de-negocio-15-min" class="nav-link" data-scroll-target="#tu-primer-vector-con-preguntas-de-negocio-15-min"><span class="header-section-number">5</span> Tu primer vector con preguntas de negocio <span class="badge-time">≈ 15 min</span></a></li>
+  <li><a href="#tu-primera-tabla-15-min" id="toc-tu-primera-tabla-15-min" class="nav-link" data-scroll-target="#tu-primera-tabla-15-min"><span class="header-section-number">6</span> Tu primera tabla <span class="badge-time">≈ 15 min</span></a></li>
+  <li><a href="#rompe-cosas-a-propósito-12-min" id="toc-rompe-cosas-a-propósito-12-min" class="nav-link" data-scroll-target="#rompe-cosas-a-propósito-12-min"><span class="header-section-number">7</span> Rompe cosas a propósito <span class="badge-time">≈ 12 min</span></a></li>
+  <li><a href="#tu-primera-librería-8-min" id="toc-tu-primera-librería-8-min" class="nav-link" data-scroll-target="#tu-primera-librería-8-min"><span class="header-section-number">8</span> Tu primera librería <span class="badge-time">≈ 8 min</span></a></li>
+  <li><a href="#cierre-el-proyecto-del-semestre-10-min" id="toc-cierre-el-proyecto-del-semestre-10-min" class="nav-link" data-scroll-target="#cierre-el-proyecto-del-semestre-10-min"><span class="header-section-number">9</span> Cierre: el proyecto del semestre <span class="badge-time">≈ 10 min</span></a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 1 - Práctica: tu primer script en R</h1>
+<p class="subtitle lead">Aplicación guiada en clase · Semana 3 · 06278-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="reglas-de-juego" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Reglas de juego</h1>
+<div class="callout-key">
+<p><strong>Esta sesión asume que ya estudiaste la teoría</strong></p>
+<p>Aquí no volvemos a explicar qué es un objeto, un vector o un data frame: eso quedó en el video (y su <a href="../theory/week-03.html">versión escrita interactiva</a>) y en el quiz. Hoy esos conceptos <strong>se usan</strong> — vas a escribir, ejecutar y depurar tu primer script real. Si un término se te escapa, el <a href="../theory/week-03.html#glosario-de-la-semana">glosario</a> queda a un clic.</p>
+<p><strong>Lo que necesitas ahora mismo:</strong></p>
+<ul>
+<li>💻 <strong>RStudio instalado y funcionando</strong> (lo pedía la teoría). ¿No alcanzaste? Plan B mientras lo resuelves: <a href="https://posit.cloud">posit.cloud</a> corre RStudio en el navegador.</li>
+<li>🧑‍🤝‍🧑 Un <strong>compañero</strong>: esta práctica se trabaja <strong>en parejas</strong> — un computador escribe, el otro lee los resultados y cuestiona; cambien de rol en cada sección.</li>
+</ul>
+</div>
+<p><strong>El plan de hoy:</strong> primero le hablas a R por la consola, luego mueves esa conversación a un <strong>script</strong> (la diferencia lo es todo); creas objetos y aprendes a vigilarlos en el Environment; construyes tu primer vector y tu primera tabla con preguntas de negocio; <strong>rompes cosas a propósito</strong> para perderle el miedo a los errores; cargas tu primera librería; y cierras creando <strong>el proyecto que usarás todo el semestre</strong>.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="la-consola-hola-r-10-min" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> La consola: hola, R <span class="badge-time">≈ 10 min</span></h1>
+<p>Abre RStudio. Ubica la <strong>consola</strong> (panel izquierdo/inferior izquierdo, el del símbolo <code>&gt;</code>). Escribe estas tres órdenes, una por una, presionando Enter después de cada una:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. El precio final de un producto de $48.000 con IVA del 19%</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dv">48000</span> <span class="sc">*</span> <span class="fl">1.19</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. ¿Cuánto creció una tienda que pasó de vender 34 a 41 millones? (en %)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>(<span class="dv">41</span> <span class="sc">-</span> <span class="dv">34</span>) <span class="sc">/</span> <span class="dv">34</span> <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. ¿Ese crecimiento superó la meta del 15%?</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>(<span class="dv">41</span> <span class="sc">-</span> <span class="dv">34</span>) <span class="sc">/</span> <span class="dv">34</span> <span class="sc">*</span> <span class="dv">100</span> <span class="sc">&gt;</span> <span class="dv">15</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> debes ver <code>57120</code>, <code>20.58824</code> y <code>TRUE</code>. Fíjate en la tercera: le hiciste a R una <em>pregunta de negocio</em> y respondió con un lógico.</p>
+<p>Ahora la parte incómoda, a propósito: presiona la <strong>flecha arriba</strong> en la consola. R te muestra el último comando. Así se navega el historial… pero imagina reconstruir un análisis de 50 pasos a punta de flechita. Por eso existe el script.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-script-tu-análisis-con-memoria-10-min" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> El script: tu análisis con memoria <span class="badge-time">≈ 10 min</span></h1>
+<p>Crea tu primer script: <strong>File → New File → R Script</strong> (o <code>Ctrl/Cmd + Shift + N</code>). Se abre el panel Source, arriba de la consola. Escribe esto (¡escríbelo, no lo pegues! — hoy las manos aprenden):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ============================================</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Práctica semana 3 — Mi primer script</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Nombres: _______________ y _______________</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Fecha: _______________</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="do">## ============================================</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="do">##=== 1. R como calculadora ===##</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Precio con IVA</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="dv">48000</span> <span class="sc">*</span> <span class="fl">1.19</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Crecimiento de la tienda (%)</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>(<span class="dv">41</span> <span class="sc">-</span> <span class="dv">34</span>) <span class="sc">/</span> <span class="dv">34</span> <span class="sc">*</span> <span class="dv">100</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Ahora ejecuta línea por línea: deja el cursor sobre una línea y presiona <strong><code>Ctrl + Enter</code></strong> (Windows) o <strong><code>Cmd + Enter</code></strong> (Mac). Mira cómo cada línea “viaja” a la consola y deja su resultado.</p>
+<p>Guarda el archivo (<code>Ctrl/Cmd + S</code>) como <code>practica_semana3.R</code> — por ahora en el Escritorio; al final de la clase le daremos un mejor hogar.</p>
+<div class="callout-workflow">
+<p><strong>La regla que empieza hoy y no se negocia</strong></p>
+<p>Todo lo que valga la pena conservar <strong>se escribe en el script y se ejecuta con <code>Ctrl/Cmd + Enter</code></strong>. La consola es para probar y descartar. Un buen analista puede borrar su Environment completo, correr su script de arriba a abajo, y llegar exactamente al mismo resultado — esa es la prueba de fuego de la reproducibilidad.</p>
+<p>Nota los comentarios (<code>#</code>): R los ignora, tu compañero no. Desde hoy, cada bloque de tu script lleva un comentario que dice <strong>qué</strong> hace y, cuando no sea obvio, <strong>por qué</strong>.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="objetos-bajo-vigilancia-12-min" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Objetos bajo vigilancia <span class="badge-time">≈ 12 min</span></h1>
+<p>Agrega una sección nueva a tu script y ejecútala línea por línea. <strong>Después de cada asignación, mira el panel Environment</strong> (arriba a la derecha): vas a ver aparecer cada objeto con su valor.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">##=== 2. Objetos ===##</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># El negocio: una tienda de accesorios</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>precio_sin_iva <span class="ot">&lt;-</span> <span class="dv">48000</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>tasa_iva       <span class="ot">&lt;-</span> <span class="fl">0.19</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>unidades_mes   <span class="ot">&lt;-</span> <span class="dv">350</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Objetos construidos con otros objetos</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>precio_final <span class="ot">&lt;-</span> precio_sin_iva <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> tasa_iva)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>ingreso_mes  <span class="ot">&lt;-</span> precio_final <span class="sc">*</span> unidades_mes</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># ¿Cuánto vendimos en el mes?</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>ingreso_mes</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> el Environment debe mostrar <strong>5 objetos</strong> y <code>ingreso_mes</code> debe ser <code>19992000</code> (casi 20 millones).</p>
+<p>Ahora radiografía lo que creaste:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Las lupas de la teoría, aplicadas</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(precio_final)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(precio_final <span class="sc">&gt;</span> <span class="dv">50000</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(ingreso_mes)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Ahora ustedes 🧑‍🤝‍🧑:</strong> sin borrar nada, agreguen un objeto <code>costo_unitario</code> de <code>31000</code> y calculen <code>margen_mes</code> (ingreso del mes menos costo de las 350 unidades). ¿Da positivo el negocio? <em>(Respuesta esperada: 9.142.000 — si les dio negativo, revisen el orden de las operaciones.)</em></p>
+<div class="callout-practice">
+<p><strong>El reflejo que estás entrenando:</strong> escribir → ejecutar → <strong>mirar la consola</strong> → <strong>mirar el Environment</strong>. Cuatro pasos, siempre. Si el objeto no apareció o el número no cuadra, se corrige <em>antes</em> de seguir — los errores en cadena nacen de no revisar a tiempo.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="tu-primer-vector-con-preguntas-de-negocio-15-min" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Tu primer vector con preguntas de negocio <span class="badge-time">≈ 15 min</span></h1>
+<p>La tienda te pasa sus ventas diarias de la semana pasada. Agrégalas a tu script:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">##=== 3. Vectores ===##</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Ventas de lunes a domingo (miles de pesos)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ventas_dia <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1200</span>, <span class="dv">1500</span>, <span class="dv">1100</span>, <span class="dv">1800</span>, <span class="dv">2000</span>, <span class="dv">1300</span>, <span class="dv">1700</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Radiografía rápida</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(ventas_dia)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Y ahora respóndele al dueño, línea por línea:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># a) ¿Cuánto vendimos en la semana?</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(ventas_dia)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># b) ¿Cuál fue el promedio diario?</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(ventas_dia)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># c) ¿Cuál fue el mejor día? (posición 1 = lunes ... 7 = domingo)</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">which.max</span>(ventas_dia)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># d) ¿Qué días superaron el promedio? (indexación lógica)</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>ventas_dia[ventas_dia <span class="sc">&gt;</span> <span class="fu">mean</span>(ventas_dia)]</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># e) ¿CUÁNTOS días superaron el promedio?</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(ventas_dia <span class="sc">&gt;</span> <span class="fu">mean</span>(ventas_dia))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> total <code>10600</code>, promedio <code>1514.286</code>, mejor día el <code>5</code> (viernes), y <code>3</code> días por encima del promedio.</p>
+<p>Última vuelta: el dueño avisa que el dato del miércoles estaba mal digitado — fueron <code>1400</code>, no <code>1100</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># f) Corregir el dato del miércoles (posición 3) y recalcular el total</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ventas_dia[<span class="dv">3</span>] <span class="ot">&lt;-</span> <span class="dv">1400</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(ventas_dia)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Ahora ustedes 🧑‍🤝‍🧑:</strong> ¿el nuevo total superó la meta semanal de <code>10800</code>? Escriban <strong>una sola línea</strong> que devuelva <code>TRUE</code> o <code>FALSE</code>. Luego: ¿cuántos días quedaron ahora por encima del promedio <em>recalculado</em>?</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="tu-primera-tabla-15-min" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Tu primera tabla <span class="badge-time">≈ 15 min</span></h1>
+<p>Las ventas por día están bien, pero el negocio real tiene <strong>productos</strong>. Construye tu primera tabla de tres columnas:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">##=== 4. Data frames ===##</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>inventario <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">producto =</span> <span class="fu">c</span>(<span class="st">"Audífonos"</span>, <span class="st">"Cargador"</span>, <span class="st">"Forro"</span>, <span class="st">"Cable USB"</span>, <span class="st">"Soporte"</span>),</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">precio   =</span> <span class="fu">c</span>(<span class="dv">85000</span>, <span class="dv">32000</span>, <span class="dv">25000</span>, <span class="dv">18000</span>, <span class="dv">41000</span>),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">unidades =</span> <span class="fu">c</span>(<span class="dv">12</span>, <span class="dv">40</span>, <span class="dv">55</span>, <span class="dv">70</span>, <span class="dv">8</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># La radiografía completa, SIEMPRE, apenas nace una tabla</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(inventario)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(inventario)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(inventario)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> <code>str()</code> debe reportar <code>5 obs. of 3 variables</code>, con <code>producto</code> como <code>chr</code> y las otras dos como <code>num</code>. En el Environment, <code>inventario</code> aparece en la sección <em>Data</em> — dale clic y RStudio te la muestra como hoja de cálculo (el visor sirve para <em>mirar</em>, no para editar: los cambios se hacen con código).</p>
+<p>Ahora explótala:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># a) La columna precio es un vector: ¿precio promedio del inventario?</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(inventario<span class="sc">$</span>precio)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># b) ¿Qué productos tienen menos de 20 unidades? (filtro por condición)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>inventario[inventario<span class="sc">$</span>unidades <span class="sc">&lt;</span> <span class="dv">20</span>, ]</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># c) Nueva columna: plata invertida en cada producto</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>inventario<span class="sc">$</span>valor_stock <span class="ot">&lt;-</span> inventario<span class="sc">$</span>precio <span class="sc">*</span> inventario<span class="sc">$</span>unidades</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># d) ¿Qué producto concentra más plata en bodega?</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>inventario[<span class="fu">which.max</span>(inventario<span class="sc">$</span>valor_stock), ]</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> el filtro (b) devuelve 2 productos (Audífonos y Soporte); el producto con más valor en stock (d) es el <strong>Forro</strong> (<code>1.375.000</code> — mucha unidad barata le gana a poca unidad cara: primera lección de inventarios).</p>
+<p><strong>Ahora ustedes 🧑‍🤝‍🧑:</strong> respondan con una línea cada una — (1) ¿cuál es el valor <strong>total</strong> de la bodega?, (2) ¿cuántos productos tienen precio mayor a <code>30000</code>?, (3) muestren la tabla solo con las filas cuyo <code>valor_stock</code> supere el millón. <em>(Respuestas: 5.263.000 · 3 productos · 4 filas.)</em></p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="rompe-cosas-a-propósito-12-min" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Rompe cosas a propósito <span class="badge-time">≈ 12 min</span></h1>
+<p>Un analista que no sabe leer errores depende de la suerte. Vamos a provocarlos en ambiente controlado. Escribe y ejecuta cada caso, <strong>lee el mensaje completo en voz alta</strong> con tu pareja, y clasifícalo: ¿warning o error?</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">##=== 5. Laboratorio de errores ===##</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Caso 1: aparece un dato faltante en las ventas</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>ventas_con_na <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1200</span>, <span class="dv">1500</span>, <span class="cn">NA</span>, <span class="dv">1800</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(ventas_con_na)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>¿Qué devolvió? ¿Hubo alerta roja? <em>(No: devolvió <code>NA</code> en silencio — el caso más traicionero.)</em> Arréglalo:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(ventas_con_na, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Caso 2: pedir un objeto que no existe</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>ingreso_anual</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Caso 3: el clásico de columnas mal importadas</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="st">"48000"</span> <span class="sc">+</span> <span class="dv">1000</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Para discutir en pareja (30 segundos por caso):</strong> ¿en cuál de los tres casos R se detuvo por completo? ¿En cuál corrió pero el resultado no sirve? ¿Cuál mensaje te dice <em>exactamente</em> cómo corregir?</p>
+<div class="callout-connect">
+<p><strong>🤖 Momento IA: estrena tu skill</strong></p>
+<p>En la práctica pasada construiste el skill <strong>Explicador de código R</strong>. Úsalo de verdad: pégale a tu asistente el Caso 3 completo — código <strong>y</strong> mensaje de error — y pídele que explique la causa <em>antes</em> de dar la solución (así lo diseñaste). Luego verifica: ¿la explicación coincide con lo que dice la teoría sobre tipos de datos?</p>
+<p>Este es el flujo que usarás todo el semestre: <strong>intento → leo el error → consulto (ayuda o IA) → entiendo → corrijo.</strong> La IA acelera el paso 3; los pasos 4 y 5 son tuyos.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="tu-primera-librería-8-min" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Tu primera librería <span class="badge-time">≈ 8 min</span></h1>
+<p>La próxima semana necesitaremos <code>dplyr</code> y <code>ggplot2</code>. Dejemos todo instalado hoy, que hay tiempo y wifi.</p>
+<p><strong>Paso 1 — instalar (en la CONSOLA, no en el script):</strong> esto se hace una sola vez por computador.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"pacman"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Verás mensajes de descarga; espera a que la consola vuelva a mostrar el <code>&gt;</code>.</p>
+<p><strong>Paso 2 — cargar (en el SCRIPT):</strong> agrega el encabezado estándar del curso y ejecútalo.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="do">##=== 6. Librerías ===##</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># El encabezado que llevarán todos nuestros scripts:</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(pacman)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">p_load</span>(dplyr, ggplot2)   <span class="co"># carga; y si falta alguno, lo instala solo</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> en el panel <strong>Packages</strong> (abajo a la derecha), busca <code>dplyr</code>: debe aparecer <strong>con el check activado</strong>. Ese check es la diferencia entre instalado y cargado, en vivo.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>¿<code>install.packages</code> falló?</strong> Pasa: red del campus, permisos, antivirus. Respira y aplica el protocolo: lee el mensaje, y pídele el diagnóstico a tu asistente con el error completo. Si no sale en 3 minutos, levanta la mano — que la instalación no se coma la clase.</p>
+</div>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="cierre-el-proyecto-del-semestre-10-min" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Cierre: el proyecto del semestre <span class="badge-time">≈ 10 min</span></h1>
+<p>Mira tu Environment: está lleno de objetos que <strong>morirán</strong> al cerrar RStudio. ¿Y tu análisis? Sobrevive, porque vive en el script. Solo falta darle una casa permanente — la que dice la teoría:</p>
+<ol type="1">
+<li><strong>File → New Project → New Directory → New Project</strong>. Nombre: <code>intro_ba</code>. Ubicación: tu carpeta de la universidad (no Descargas). Clic en <em>Create Project</em> — RStudio se reinicia dentro del proyecto.</li>
+<li>En el panel <strong>Files</strong>, crea tres carpetas con el botón <em>New Folder</em>: <code>data</code>, <code>scripts</code>, <code>output</code>.</li>
+<li>Trae tu script: <strong>File → Save As…</strong> → guárdalo en <code>scripts/</code> como <code>practica_semana3.R</code> (la copia del Escritorio ya puede morir).</li>
+<li>Verifica dónde está parado R:</li>
+</ol>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getwd</span>()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Debe terminar en <code>/intro_ba</code>. Desde hoy, toda ruta que escribas será <strong>relativa</strong> a esa carpeta: <code>data/archivo.csv</code>, <code>output/grafico.png</code>. Nada de <code>C:/Users/...</code>.</p>
+<div class="callout-key">
+<p><strong>Por qué esto importa (la moraleja de toda la sesión)</strong></p>
+<ul>
+<li>El <strong>Environment</strong> es memoria de corto plazo: se borra al cerrar.</li>
+<li>El <strong>script</strong> es la memoria de largo plazo: reconstruye todo, en orden, con comentarios.</li>
+<li>El <strong>proyecto</strong> hace que ese script corra igual en tu portátil, en el del monitor o en el del profesor — porque las rutas son relativas.</li>
+</ul>
+<p>Environment + script + proyecto = análisis reproducible. Este trío es, literalmente, la “buena práctica inicial” sobre la que se montará el proyecto final del curso.</p>
+</div>
+<p><strong>Prueba de fuego antes de irte al taller 🧪:</strong> con el proyecto abierto, ejecuta <code>rm(list = ls())</code> en la consola (borra TODO el Environment)… y ahora corre tu script completo de arriba a abajo (botón <strong>Source</strong>, o <code>Ctrl/Cmd + Shift + Enter</code>). Si al final el Environment se repobló y no hubo errores: felicitaciones, tu primer script es reproducible.</p>
+<hr>
+<p><strong>Siguiente parada →</strong> el <a href="../task/week-03.html"><strong>Taller 3: R desde cero</strong></a>, que resolverás individualmente con lo que acabas de practicar. Todo lo que necesitas ya está en tu cabeza, en tu script y en la teoría.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-03_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

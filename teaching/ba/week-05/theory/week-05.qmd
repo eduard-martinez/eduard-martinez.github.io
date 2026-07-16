@@ -1,5 +1,5 @@
 ---
-title: "Unidad 3 - Visualización de Datos con ggplot2"
+title: "Unidad 2 - El proceso analítico: de la pregunta a la decisión"
 subtitle: "Introducción al Business Analytics · Semana 5 · 06278-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
@@ -12,1141 +12,572 @@ lang: es
 <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
 <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
 <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
-<span id="webr-status-anchor"></span>
 </div>
 
 <!--=================-->
 <!--=================-->
-# Objetivo de la semana
+# Cómo estudiar esta semana
 
-Esta semana NO aprenderemos "sintaxis de gráficos" por sí misma. El foco está en **comunicación**, no en memorizar comandos.
+Esta semana la fundamentación teórica llega en formato **podcast**: *El proceso analítico: de la pregunta a la decisión*.
 
 ::: {.callout-key}
-**¿Qué significa "comunicar con gráficos"?**
+**Este documento es la versión escrita del podcast**
 
-Significa convertir **tablas de KPIs** (que ya sabemos construir con dplyr) en **visualizaciones claras** que transmitan insights y apoyen decisiones de negocio.
+Puedes **escuchar** el episodio, **leer** este documento, o hacer ambas cosas: cubren el mismo contenido. Este documento no es una transcripción literal; es una versión organizada para facilitar el estudio, con glosario, resúmenes por bloque y un caso real que atraviesa todas las etapas.
 
-Un gráfico bien hecho debe contar una historia sin que el público necesite leer la tabla original.
+- 🎧 **Podcast:** disponible en Intu. <!-- TODO: pegar aquí el enlace del podcast -->
+- 📝 **Quiz de teoría:** en Intu, antes de la sesión de clase.
+- 🧑‍💻 **En clase:** recorreremos el proceso completo sobre una pregunta de negocio real y **cada grupo esbozará la suya**.
 :::
+
+⚠️ **Atención, esta semana el trabajo previo tiene cola:** al final de este documento hay una instrucción que no es opcional — **traer a clase una pregunta de negocio propia**. La sesión se construye sobre esa pregunta, y lo que salga de ahí es el insumo directo de la **Entrega 1 del proyecto final**. Llegar sin ella es llegar sin materia prima.
 
 ## Lo que aprenderemos esta semana
 
-**1. Entender la lógica de construcción de gráficos**
+**1. Qué es Business Analytics, en serio**
 
-- Gráficos como "capas" que se suman (datos → mapeo → geometría → ajustes)
-- Por qué ggplot2 es diferente a Excel (control fino vs plantillas predefinidas)
+- Las cuatro patas que sostienen la mesa: estadística, programación, ciencia de datos y enfoque de negocio.
+- Por qué la cuarta pata es la que más proyectos tumba.
 
-**2. Elegir el tipo de gráfico según la pregunta**
+**2. El proceso analítico: siete etapas y un ciclo**
 
-- Comparar categorías: barras
-- Ver distribuciones: histogramas
-- Mostrar relaciones: scatter plots
-- Seguir tendencias: líneas
+- De la pregunta a la decisión, con un caso real de principio a fin.
+- Dónde se va realmente el tiempo (spoiler: no es en el modelo).
 
-**3. Personalizar para comunicar mejor**
+**3. Tipos de tareas analíticas**
 
-- Títulos, etiquetas y leyendas claras
-- Colores con propósito
-- Temas profesionales
+- Clasificación, predicción, segmentación, anomalías y optimización.
+- La pregunta que te dice cuál usar, antes de escribir una línea de código.
+
+**4. Roles: nadie hace esto solo**
+
+- Quién lidera qué fase, y por qué el mejor modelo no salva un proyecto mal preguntado.
 
 ::: {.callout-connect}
-**Conexión con Semana 04**
+**¿Y esto qué tiene que ver con lo que ya sabemos?**
 
-En la semana anterior usamos `group_by()` + `summarise()` para calcular KPIs por grupo. Esta semana **convertiremos esas tablas en gráficos** para comunicar hallazgos.
-
-| Semana 04 | Semana 05 |
-|---|---|
-| `summarise()` → tabla con ingreso por región | `geom_col()` → barra comparativa que se lee en 3 segundos |
-| `filter()` → filas del trimestre actual | `geom_line()` → tendencia visual inmediata |
-
-El flujo siempre es el mismo: **primero preparar los datos con dplyr, luego graficar con ggplot2**.
+Todo lo anterior fueron **herramientas**: R (semana 3), `dplyr` y `ggplot2` (semana 4). Sabes transformar datos y hacer gráficos. Esta semana damos un paso atrás y preguntamos: **¿para qué?** El proceso analítico es el mapa donde esas herramientas encajan — vas a descubrir que la semana 4 completa era apenas *una* de siete etapas. Y a partir de la semana 6, cada semana del curso será una etapa de este mapa.
 :::
 
----
+<!--=================-->
+<!--=================-->
+# Glosario de la semana
 
-## Recursos de referencia
+Diez términos que aparecerán una y otra vez, en este curso y en cualquier entrevista de trabajo en analítica. Vuelve a esta tabla cada vez que un concepto se te escape: para eso está.
 
-Antes de empezar, guarda estos dos recursos. Los usaremos durante toda la semana (y el resto del curso):
+```{=html}
+<div class="glossary-grid">
+  <div class="gloss-card"><span class="gloss-term">Business Analytics</span><span class="gloss-def">El proceso de convertir datos en conocimiento accionable para mejorar una decisión. Las tres palabras que importan: <i>proceso</i>, <i>accionable</i> y <i>decisión</i>.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Pregunta de negocio</span><span class="gloss-def">La pregunta específica, accionable y medible que dispara todo el proceso. Si no cambia una decisión, no es una pregunta de negocio: es curiosidad.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Target</span><span class="gloss-def">(Variable objetivo) Lo que queremos predecir o explicar. Tener target o no tenerlo es lo que separa el aprendizaje supervisado del no supervisado.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Churn</span><span class="gloss-def">La fuga de clientes: el cliente que se va. Es el caso que seguiremos durante todo este documento, y uno de los problemas más estudiados en analítica de negocios.</span></div>
+  <div class="gloss-card"><span class="gloss-term">ETL</span><span class="gloss-def">(<i>Extract, Transform, Load</i>) El proceso de extraer datos de sus fuentes, transformarlos y dejarlos disponibles para el análisis. Es donde se va la mayor parte del tiempo del proyecto.</span></div>
+  <div class="gloss-card"><span class="gloss-term">EDA</span><span class="gloss-def">(<i>Exploratory Data Analysis</i>) El análisis exploratorio: conocer los datos antes de modelarlos. Es la semana 6 completa, y la Entrega 2 del proyecto.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Baseline</span><span class="gloss-def">El punto de comparación mínimo razonable. Sin baseline no sabes si tu modelo aporta algo o si simplemente adivinar habría funcionado igual.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Supervisado</span><span class="gloss-def">El enfoque en el que aprendemos de ejemplos históricos que ya traen la respuesta correcta (el target). Clasificación y predicción viven aquí.</span></div>
+  <div class="gloss-card"><span class="gloss-term">No supervisado</span><span class="gloss-def">El enfoque en el que no hay respuesta correcta previa: el algoritmo descubre la estructura por su cuenta. La segmentación vive aquí.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Stakeholder</span><span class="gloss-def">La persona que toma la decisión y a quien hay que convencer. Casi nunca habla de tu modelo: habla de plata, de riesgo y de tiempo.</span></div>
+</div>
+```
+
+<!--=================-->
+<!--=================-->
+# El 87% que nunca llegó
+
+Empecemos por el dato incómodo:
+
+```{=html}
+<div class="stat-row">
+  <div class="stat"><span class="stat-value">87%</span><span class="stat-label">de los proyectos de ciencia de datos nunca llegan a producción</span></div>
+</div>
+```
+
+Ochenta y siete de cada cien proyectos de datos **mueren antes de ser usados**. No porque el modelo estuviera malo. Las razones que más se repiten son cuatro, y fíjate bien en cuál de ellas es un problema técnico:
+
+::: {.vs-no}
+- <span class="vs-ico">✗</span> La pregunta estaba mal definida.
+- <span class="vs-ico">✗</span> Los datos estaban sucios o incompletos.
+- <span class="vs-ico">✗</span> El modelo no generalizaba (funcionaba en el laboratorio, no en la calle).
+- <span class="vs-ico">✗</span> No había ninguna decisión clara esperando la respuesta.
+:::
+
+Solo la tercera es un problema de modelado. Las otras tres son problemas de **proceso**: de no saber qué se pregunta, de no cuidar los datos, o de analizar algo que a nadie le iba a servir. Ese es el tema de esta semana, y es la razón por la que un curso de Business Analytics no arranca enseñando modelos.
 
 ::: {.callout-key}
-**Recurso 1 — ¿Qué gráfico usar según mis datos?**
+**La idea más importante de toda la semana**
 
-[from-data-to-viz.com](https://www.data-to-viz.com)
-
-Árbol de decisión interactivo: seleccionas cuántas variables tienes y de qué tipo (numérica, categórica) → te dice qué geometría usar **y te muestra el código en R**. Úsalo cuando no estés seguro de qué tipo de gráfico hacer.
-
-**Recurso 2 — ¿Cómo se escribe en ggplot2?**
-
-[ggplot2 cheat sheet](https://rstudio.github.io/cheatsheets/data-visualization.pdf)
-
-Resumen visual de todas las geometrías, mapeos y ajustes disponibles. Útil como referencia rápida durante la práctica.
+Un proyecto de analítica **no es exitoso porque el modelo acierte**. Es exitoso cuando **cambia una decisión y genera valor medible**. El modelo es un medio; la decisión es el fin. Todo lo demás de este documento sale de esa frase.
 :::
 
 <!--=================-->
 <!--=================-->
-# Instalación y dataset
+# Qué es Business Analytics
 
-## Instalación de ggplot2
+## Cuatro patas de la misma mesa
 
-```{webr-r}
-## Instalar ggplot2 (solo una vez, fuera del script)
-# install.packages("ggplot2")
+Business Analytics no es una técnica: es un **proceso** que transforma datos en conocimiento accionable para mejorar decisiones. Y ese proceso se sostiene sobre cuatro patas. Quítale una y la mesa se cae:
 
-## Cargar al inicio de cada sesión
-library(ggplot2)
-library(dplyr)  # también necesitaremos dplyr para preparar datos
-```
+**1. Estadística aplicada.** Encontrar patrones, medir relaciones, distinguir lo que es señal de lo que es ruido. Es lo que te permite decir "esto no es casualidad" con algún fundamento.
 
-## Dataset de ejemplo: ventas de tecnología
+**2. Programación y tecnología.** Automatizar, escalar y hacer el análisis **reproducible**. Un análisis que solo existe en tu cabeza, o en un Excel que nadie más entiende, no es un activo de la organización. (Esto es exactamente por qué en la semana 3 insistimos tanto con los scripts y las rutas relativas.)
 
-Usaremos un dataset ampliado de ventas con **36 transacciones** (el triple que en Semana 04). Esto nos permite hacer histogramas y scatter plots con suficientes datos.
+**3. Ciencia de datos.** Los modelos predictivos y prescriptivos: la maquinaria que aprende de los datos. Es la pata más famosa y, como veremos, la que menos tiempo consume.
 
-En **WebR**, el dataset ya viene precargado. Si trabajas desde **RStudio**, descomenta la línea `read.csv(...)`.
-
-```{webr-r}
-#| context: setup
-
-ventas <- data.frame(
-  trimestre = rep(c("Q1","Q2","Q3"), each = 12),
-  producto  = rep(c("Laptop","Mouse","Licencia","Soporte"), 9),
-  categoria = rep(c("Hardware","Hardware","Software","Software"), 9),
-  precio    = c(1200,25,150,80, 1150,30,160,75, 1250,20,140,85,
-                1200,25,150,80, 1180,28,155,78, 1220,22,145,82,
-                1200,25,150,80, 1190,26,158,77, 1210,24,148,83),
-  cantidad  = c(2,10,5,8, 1,15,6,7, 3,12,4,9,
-                3,8,5,10, 2,14,7,6, 1,11,5,8,
-                2,9,6,7, 3,13,4,9, 1,10,5,8),
-  region    = rep(c("Norte","Sur","Centro"), each = 12)
-)
-
-## Crear columna ingreso (la usaremos en varios gráficos)
-ventas <- mutate(ventas, ingreso = precio * cantidad)
-```
-
-```{webr-r}
-## Descomenta si trabajas desde RStudio
-# ventas <- read.csv("https://eduard-martinez.github.io/databases/ba/ventas.csv")
-# ventas <- mutate(ventas, ingreso = precio * cantidad)
-
-## Inspeccionar
-head(ventas)
-```
-
-**Qué contiene:** 36 transacciones de venta de productos de tecnología, distribuidas en 3 trimestres y 3 regiones. Cada transacción tiene precio unitario, cantidad vendida e ingreso calculado.
-
-<!--=================-->
-<!--=================-->
-# La gramática de gráficos
-
-En Excel seleccionamos datos y elegimos "gráfico de barras" del menú: rápido, pero limitado. ggplot2 usa una lógica diferente: construimos gráficos como **capas que se acumulan**, igual que construimos frases con sujeto + verbo + complemento.
-
-Esto nos da ventajas clave para análisis de negocio:
-
-- Superponer capas (puntos + línea de tendencia en un mismo gráfico)
-- Controlar colores según variables del dataset (no manualmente)
-- Crear el mismo gráfico para distintos grupos automáticamente (facetas)
-- Reproducir el gráfico exacto la próxima semana con datos actualizados
-
-## Los tres componentes mínimos
-
-Todo gráfico en ggplot2 necesita tres elementos:
+**4. Enfoque de negocio.** La analítica está **al servicio de una decisión**. Esta pata es la que decide si el proyecto vive o muere, y es justo la que suelen olvidar los equipos técnicos.
 
 ::: {.callout-key}
-**La construcción de un gráfico en ggplot2 es acumulativa**
+**La pata que más proyectos tumba**
 
-Imagina que estás decorando un cuarto:
-
-1. **Datos** → `ggplot(data = mis_datos)` → entras al cuarto vacío (el lienzo en blanco). R reserva un espacio de trabajo para esa tabla, pero aún no pinta nada.
-
-2. **Mapeos estéticos** → `mapping = aes(x = ..., y = ..., color = ...)` → decides qué va en qué pared (eje X, eje Y) y qué código de color usarás para cada tipo de mueble. Los ejes aparecen con sus etiquetas, pero el interior sigue vacío.
-
-3. **Geometría** → `geom_point()`, `geom_col()`, `geom_line()`, etc. → por fin traes los muebles (los puntos, las barras, las líneas).
-
-Estos tres elementos se conectan con el operador **`+`** (suma de capas).
+Las tres primeras patas son habilidades que se aprenden con práctica. La cuarta es un **criterio**: saber para qué sirve lo que estás haciendo. Un analista con estadística, código y modelos pero sin enfoque de negocio produce trabajo impecable que nadie usa — y ese es buena parte del 87%.
 :::
 
-Estos tres elementos se conectan con el operador **`+`** (suma de capas).
+<!--=================-->
+<!--=================-->
+# El proceso analítico: siete etapas y un ciclo
 
----
+## La consulta médica
 
-## Construcción progresiva: paso a paso
+Piensa en un buen médico. Llegas al consultorio y **no** te manda de entrada a una resonancia magnética. Primero pregunta: *¿qué le duele, desde cuándo, cómo es el dolor?* Con eso pide unos exámenes puntuales. Cuando llegan, lo primero que hace es mirar si tienen sentido (¿este resultado es tuyo?, ¿el laboratorio no se equivocó?). Los lee, forma un diagnóstico, te lo **explica en palabras que entiendes** y te receta un tratamiento. Y te cita en 30 días para ver si funcionó.
 
-Veremos cómo ggplot2 construye un gráfico en tres pasos. Primero preparamos la tabla con dplyr (lo que ya sabemos hacer):
+Un médico que hace la resonancia más sofisticada del mundo, diagnostica brillantemente y **nunca receta nada** no le sirvió de nada al paciente. Un médico que receta sin preguntar qué te duele es peligroso.
 
-```{webr-r}
-## Paso 0: preparar los datos con dplyr (igual que Semana 04)
-ing_region <- ventas %>%
-  group_by(region) %>%
-  summarise(ingreso_total = sum(ingreso), .groups = "drop")
+Eso es el proceso analítico. Siete etapas, y la última vuelve a la primera:
 
-ing_region  ## → tabla de 3 filas que vamos a graficar
-```
-
----
-
-**Paso 1 — Solo los datos: el lienzo en blanco**
-
-```{webr-r}
-## Decirle a ggplot2 "voy a graficar este objeto"
-ggplot(data = ing_region)
+```{=html}
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>Pregunta</b> — ¿qué le duele al negocio y qué decisión está esperando una respuesta?</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>Datos</b> — ¿qué exámenes necesito y de dónde los saco?</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>Limpieza</b> — ¿los resultados son confiables? (aquí se va el 80% del tiempo)</div></div>
+  <div class="pipe-step"><div class="pipe-num">4</div><div><b>EDA</b> — ¿qué me dicen los datos antes de modelar nada?</div></div>
+  <div class="pipe-step"><div class="pipe-num">5</div><div><b>Modelo</b> — el diagnóstico, y su validación fuera de muestra.</div></div>
+  <div class="pipe-step"><div class="pipe-num">6</div><div><b>Comunica</b> — explicarlo en el idioma de quien decide, no en el tuyo.</div></div>
+  <div class="pipe-step"><div class="pipe-num">7</div><div><b>Decide</b> — el tratamiento... y el control a los 30 días, que reinicia el ciclo.</div></div>
+</div>
 ```
 
 ::: {.callout-key}
-R muestra un **rectángulo gris vacío** — es el lienzo. Todavía no sabe qué variables graficar ni cómo representarlas. Este es el punto de partida.
+**No es una línea recta: es un ciclo**
+
+La decisión genera nuevos datos ("¿quién respondió a la campaña?"), y esos datos generan nuevas preguntas ("¿cómo mejoramos la oferta?"). Además se **itera hacia atrás** todo el tiempo: la EDA te hace reformular la pregunta, el modelo te manda a buscar más datos. Si tu proceso fue una línea recta perfecta, probablemente no miraste con suficiente cuidado.
 :::
 
----
+## El caso que vamos a seguir
 
-**Paso 2 — Añadir el mapeo: definir ejes**
+Para no hablar en abstracto, seguiremos **un caso real por las siete etapas**:
 
-```{webr-r}
-## Decirle qué va en X y qué va en Y
-ggplot(data = ing_region,
-       mapping = aes(x = region, y = ingreso_total))
+> Una empresa de **telecomunicaciones** pierde el **25% de sus clientes al año**. La gerencia quiere saber si se puede hacer algo antes de que se vayan.
+
+```{=html}
+<div class="stat-row">
+  <div class="stat"><span class="stat-value">$500</span><span class="stat-label">costo por cliente perdido</span></div>
+  <div class="stat"><span class="stat-value">$100</span><span class="stat-label">costo del incentivo de retención</span></div>
+  <div class="stat"><span class="stat-value">60%</span><span class="stat-label">de los churns que el incentivo evita</span></div>
+  <div class="stat"><span class="stat-value">3x</span><span class="stat-label">ROI potencial si predecimos bien</span></div>
+</div>
 ```
+
+Fíjate en algo: **antes de mirar un solo dato ya tenemos números de negocio**. Sabemos qué cuesta equivocarse. Ese es el enfoque de negocio de la cuarta pata, y es lo que va a determinar todas las decisiones técnicas que vienen.
+
+## Etapa 1: formular la pregunta
+
+Una buena pregunta de negocio cumple tres condiciones:
+
+1. **Específica:** ¿qué, quién, cuándo?
+2. **Accionable:** ¿qué decisión cambia con la respuesta?
+3. **Medible:** ¿existen datos para responderla?
+
+Míralo en el caso churn:
+
+::: {.vs-no}
+- <span class="vs-ico">✗</span> *"¿Por qué se van los clientes?"* — Interesante, pero no específica (¿cuáles?, ¿cuándo?), y no dice qué haríamos mañana con la respuesta.
+:::
+
+::: {.vs-si}
+- <span class="vs-ico">✓</span> *"¿Qué clientes abandonarán en los próximos 30 días?"* — Específica (quiénes, en qué ventana), accionable (a esos los llamamos) y medible (tenemos historial).
+:::
 
 ::: {.callout-key}
-Ahora el lienzo tiene **ejes etiquetados con los rangos de las variables**, pero sigue vacío en el interior. R ya sabe *qué* mostrar, pero aún no sabe *cómo* dibujarlo.
+**El test de la pregunta**
 
-Nota: `mapping = aes(...)` es la forma completa. En la práctica se suele escribir abreviado `aes(...)` y R lo entiende igual.
+> Si te doy la respuesta ahora mismo, **¿sabes qué vas a hacer diferente mañana?**
+
+Si la respuesta es "no", todavía no tienes una pregunta de negocio. Tienes un tema. Aplícale este test a la pregunta que vas a traer a clase — y a la de tu proyecto final.
 :::
 
----
+**Entregable de la etapa:** la pregunta escrita, la decisión que va a cambiar, y el costo de equivocarse.
 
-**Paso 3 — Añadir la geometría: elegir el tipo de gráfico**
+## Etapa 2: conseguir los datos
 
-```{webr-r}
-## Añadir barras con geom_col()
-ggplot(data = ing_region,
-       mapping = aes(x = region, y = ingreso_total)) +
-  geom_col()
+Ya sabemos qué preguntar. ¿Qué exámenes pedimos?
+
+- **Datos internos:** historial de facturación, consumo, reclamos, pagos.
+- **Datos externos:** competencia, zona geográfica, nivel socioeconómico.
+- **El target:** ¿el cliente se fue? (sí/no). Sin esta columna no hay problema supervisado que valga.
+
+Los desafíos son casi siempre los mismos tres, y ninguno es estadístico: los datos viven en **silos** distintos (el CRM por un lado, la facturación por otro, soporte por otro), en **formatos incompatibles**, y con **permisos y privacidad** de por medio.
+
+**Entregable de la etapa:** el dataset *raw* (sin procesar), un **diccionario de variables** y las fuentes documentadas.
+
+## Etapa 3: limpiar y preparar (el 80% del tiempo)
+
+Aquí viene el dato que sorprende a todo el mundo que llega a este campo:
+
+```{=html}
+<div class="stat-row">
+  <div class="stat"><span class="stat-value">80%</span><span class="stat-label">limpieza, preparación y validación</span></div>
+  <div class="stat"><span class="stat-value">20%</span><span class="stat-label">modelado</span></div>
+</div>
 ```
 
-**¿Qué hace cada parte?**
-
-| Línea | Pregunta que responde |
-|---|---|
-| `ggplot(data = ing_region, ...)` | ¿Qué tabla voy a graficar? |
-| `mapping = aes(x = region, y = ingreso_total)` | ¿Qué variable va en cada eje? |
-| `geom_col()` | ¿Cómo represento visualmente los datos? |
-
-El operador `+` actúa como "y además agrega esta capa". Podemos seguir sumando capas (títulos, colores, temas, facetas).
-
----
-
-::: {.callout-practice}
-**Ejercicio mental: leer código antes de ejecutarlo**
-
-Antes de correr este código, predice qué mostrará:
-
-```r
-ggplot(data = ing_region, aes(x = region, y = ingreso_total)) +
-  geom_point()
-```
-
-Piensa en los tres pasos:
-
-1. ¿Qué tabla usa? → `ing_region` (3 filas: Norte, Sur, Centro)
-2. ¿Qué va en los ejes? → X = región (categoría), Y = ingreso total (número)
-3. ¿Qué geometría? → `geom_point()` = puntos, no barras
-
-**Respuesta:** Mismo gráfico que las barras, pero con **puntos flotantes** en lugar de columnas. Los ejes son idénticos.
-
-Esto muestra que la **lógica de construcción es siempre la misma** — solo cambia la pieza de geometría.
-:::
-
-<!--=================-->
-<!--=================-->
-# Mapeos estéticos: dentro vs fuera de aes()
-
-Una de las confusiones más comunes en ggplot2 es entender **cuándo poner algo dentro de `aes()` y cuándo fuera**.
-
-## Regla fundamental
-
-::: {.callout-key}
-**Dentro de `aes()`:** Cuando el valor depende de una **variable** del dataset.  
-→ "Quiero que el color cambie según la categoría de cada fila"
-
-**Fuera de `aes()`:** Cuando el valor es **fijo** para todo el gráfico.  
-→ "Quiero que todas las barras sean azules"
-:::
-
-## Ejemplo con nuestros datos
-
-```{webr-r}
-## Caso 1: Color fijo (todas las barras azules)
-ggplot(ing_region, aes(x = region, y = ingreso_total)) +
-  geom_col(fill = "steelblue")
-```
-
-**Qué pasó:** `fill = "steelblue"` está **fuera de `aes()`** porque no depende de ninguna variable. Todas las barras son azules.
-
-```{webr-r}
-## Caso 2: Color según región
-ggplot(ing_region, aes(x = region, y = ingreso_total, fill = region)) +
-  geom_col()
-```
-
-**Qué pasó:** `fill = region` está **dentro de `aes()`** porque queremos que cada región tenga un color diferente. R asigna automáticamente un color distinto a cada región.
-
----
-
-::: {.callout-warning}
-**Error común**
-
-```r
-## Esto NO funciona como esperas
-ggplot(ing_region, aes(x = region, y = ingreso_total, fill = "steelblue")) +
-  geom_col()
-```
-
-Al poner `fill = "steelblue"` dentro de `aes()`, R interpreta que "steelblue" es el **nombre de una variable** (que no existe). No lo interpreta como "quiero color azul fijo".
-
-**Regla práctica:** Si escribes algo entre comillas o un número literal (`"steelblue"`, `4`), probablemente debe ir **fuera** de `aes()`.
-:::
-
-<!--=================-->
-<!--=================-->
-# Geometrías según la pregunta
-
-Cada tipo de pregunta de negocio tiene una geometría natural.
-
-## geom_col(): Comparar categorías con barras
-
-**Pregunta típica:** "¿Qué región vendió más?"
-
-Ya vimos el ejemplo básico. Ahora exploremos variantes útiles:
-
-```{webr-r}
-## Barras horizontales (útil si los nombres son largos)
-ggplot(ing_region, aes(x = ingreso_total, y = region)) +
-  geom_col(fill = "steelblue")
-```
-
-**Qué cambió:** intercambiamos `x` e `y`. Ahora las barras son horizontales.
-
-```{webr-r}
-## Barras ordenadas de mayor a menor
-ing_region_ord <- arrange(ing_region, desc(ingreso_total))
-
-ggplot(ing_region_ord, aes(x = reorder(region, ingreso_total), y = ingreso_total)) +
-  geom_col(fill = "steelblue")
-```
-
-**Qué pasó:** `reorder(region, ingreso_total)` reordena las regiones según su ingreso total. Esto hace el gráfico más fácil de leer: de un vistazo vemos cuál es la mejor región.
-
----
-
-### Mini-ejercicio
-
-Usando la tabla `ventas`, calcula el ingreso total por categoría (Hardware vs Software) y grafícalo con barras. Ordena de mayor a menor.
-
-```{webr-r}
-## Tu código aquí
-## Paso 1: calcular ingreso por categoría
-
-
-## Paso 2: ordenar
-
-
-## Paso 3: graficar
-
-
-```
-
-::: {.callout-practice}
-**Resultado esperado:** Hardware debe tener una barra más alta que Software.
-:::
-
----
-
-## geom_histogram(): Ver distribuciones
-
-**Pregunta típica:** "¿Cómo se distribuyen los precios de los productos que vendemos?"
-
-Los histogramas agrupan valores continuos en "bins" (rangos) y cuentan cuántas observaciones caen en cada rango.
-
-```{webr-r}
-## Distribución de precios
-ggplot(ventas, aes(x = precio)) +
-  geom_histogram(bins = 10, fill = "lightblue", color = "black")
-```
-
-**Qué pasó:**
-
-- Solo necesitamos una variable (`x = precio`). R cuenta automáticamente cuántas transacciones tienen cada rango de precio.
-- `bins = 10`: divide el eje X en 10 rangos
-- `fill` y `color`: color de relleno y bordes de las barras
-
-**Cómo interpretar:** vemos que la mayoría de transacciones tienen precios bajos (Mouse, accesorios), con algunos picos en precios altos (Laptops). Esto es esperado: vendemos más productos de bajo valor en cantidad que productos caros.
-
----
-
-```{webr-r}
-## Distribución de ingresos por transacción
-ggplot(ventas, aes(x = ingreso)) +
-  geom_histogram(bins = 15, fill = "coral", color = "black")
-```
-
-**Qué pasó:** ahora graficamos `ingreso` en lugar de `precio`. Vemos una distribución diferente: ingresos muy variados porque `ingreso = precio * cantidad`.
-
----
-
-### Mini-ejercicio
-
-Crea un histograma de la variable `cantidad`. ¿Qué puedes concluir sobre las cantidades que vendemos por transacción?
-
-```{webr-r}
-## Tu código aquí
-
-
-```
-
-::: {.callout-practice}
-**Pregunta de análisis:** ¿Vendemos más transacciones de pocas unidades o de muchas unidades?
-:::
-
----
-
-## geom_density(): Ver la forma de la distribución
-
-**Pregunta típica:** "¿Cómo se distribuyen los precios que manejamos? ¿Hay un precio típico o son muy dispersos?"
-
-La curva de densidad es similar al histograma pero **continua**: muestra la "forma" de la distribución sin depender del número de bins.
-
-```{webr-r}
-## Distribución de precios — curva de densidad
-ggplot(ventas, aes(x = precio)) +
-  geom_density(fill = "lightblue", alpha = 0.5)
-```
-
-**Cómo interpretar:** los picos (modas) señalan los rangos de precio más comunes. Si hay dos picos separados ("distribución bimodal"), puede indicar dos segmentos de productos muy diferentes. En nuestros datos, vemos claramente la separación entre productos baratos (Mouse, Soporte) y caros (Laptop).
-
-::: {.callout-key}
-**¿Histograma o densidad?**
-
-- `geom_histogram()`: muestra **conteos exactos** (cuántas transacciones caen en cada rango)
-- `geom_density()`: muestra la **forma general** sin depender del tamaño del bin
-
-Con pocos datos la curva puede verse irregular. Con cientos o miles de registros, la densidad suele ser más informativa que el histograma.
-:::
-
----
-
-## geom_point(): Mostrar relaciones entre variables
-
-**Pregunta típica:** "¿Los productos más caros generan más ingreso por transacción?"
-
-Los scatter plots (gráficos de dispersión) muestran la relación entre dos variables continuas.
-
-```{webr-r}
-## Relación entre precio y cantidad vendida
-ggplot(ventas, aes(x = precio, y = cantidad)) +
-  geom_point()
-```
-
-**Qué pasó:** cada punto es una transacción. El eje X muestra el precio del producto, el eje Y la cantidad vendida.
-
-**Cómo interpretar:** no vemos una relación clara (los puntos están dispersos). Esto sugiere que el precio del producto no determina directamente cuántas unidades vendemos por transacción.
-
----
-
-```{webr-r}
-## Relación entre precio e ingreso
-ggplot(ventas, aes(x = precio, y = ingreso)) +
-  geom_point(color = "steelblue", size = 3)
-```
-
-**Qué pasó:** ahora vemos una relación más clara. Los productos más caros tienden a generar más ingreso (aunque no perfectamente lineal, porque `ingreso = precio * cantidad`).
-
----
-
-**Variante útil:** agregar color según categoría para ver patrones por grupo:
-
-```{webr-r}
-## Precio vs ingreso, coloreado por categoría
-ggplot(ventas, aes(x = precio, y = ingreso, color = categoria)) +
-  geom_point(size = 3)
-```
-
-**Qué pasó:** `color = categoria` dentro de `aes()` hace que Hardware y Software tengan colores diferentes. Ahora vemos que Hardware (puntos rojos) tiene precios más altos que Software (puntos azules).
-
----
-
-### Mini-ejercicio
-
-Crea un scatter plot de `cantidad` (eje X) vs `ingreso` (eje Y). Colorea los puntos según `region`. ¿Qué región tiene transacciones de mayor ingreso?
-
-```{webr-r}
-## Tu código aquí
-
-
-```
-
----
-
-## geom_line(): Seguir tendencias temporales
-
-**Pregunta típica:** "¿Cómo ha evolucionado nuestro ingreso trimestre a trimestre?"
-
-Los gráficos de línea conectan puntos en orden, útiles para series de tiempo.
-
-Primero preparamos la tabla:
-
-```{webr-r}
-## Ingreso total por trimestre
-ing_trimestre <- ventas %>%
-  group_by(trimestre) %>%
-  summarise(ingreso_total = sum(ingreso), .groups = "drop")
-
-ing_trimestre
-```
-
-Ahora graficamos:
-
-```{webr-r}
-## Evolución del ingreso
-ggplot(ing_trimestre, aes(x = trimestre, y = ingreso_total)) +
-  geom_line(group = 1) +
-  geom_point(size = 3)
-```
-
-**Qué pasó:**
-
-- `geom_line(group = 1)`: dibuja la línea. `group = 1` le dice a R que conecte todos los puntos (sin esto, no conectaría nada).
-- `geom_point()`: añade puntos sobre la línea para marcar cada trimestre.
-
-**Cómo interpretar:** vemos una ligera tendencia al alza del Q1 al Q3 (crecimiento moderado).
-
----
-
-**Variante:** ver evolución por región:
-
-```{webr-r}
-## Ingreso por trimestre y región
-ing_trim_reg <- ventas %>%
-  group_by(trimestre, region) %>%
-  summarise(ingreso_total = sum(ingreso), .groups = "drop")
-
-ggplot(ing_trim_reg, aes(x = trimestre, y = ingreso_total, color = region, group = region)) +
-  geom_line() +
-  geom_point(size = 2)
-```
-
-**Qué pasó:** `color = region` y `group = region` hacen que cada región tenga su propia línea con su propio color. Ahora podemos comparar la evolución de las tres regiones simultáneamente.
-
----
-
-### Mini-ejercicio
-
-Calcula el número de transacciones por trimestre y grafícalo con línea. ¿En qué trimestre hubo más actividad comercial?
-
-```{webr-r}
-## Tu código aquí
-## Paso 1: calcular n() por trimestre
-
-
-## Paso 2: graficar
-
-
-```
-
----
-
-::: {.callout-practice}
-**Decisión de geometría**
-
-Para cada pregunta, identifica qué geometría usarías:
-
-1. "¿Cuáles son los 3 productos más vendidos por cantidad?"
-2. "¿Existe relación entre el precio del producto y el ingreso generado?"
-3. "¿Cómo se distribuyen las cantidades vendidas por transacción?"
-4. "¿Cómo ha cambiado el ticket promedio trimestre a trimestre?"
-5. "¿Cómo se 'forma' la distribución de precios: simétrica, sesgada, bimodal?"
-
-**Respuestas:**
-1. `geom_col()` (barras, top 3 ordenados)
-2. `geom_point()` (scatter plot)
-3. `geom_histogram()` (distribución en conteos)
-4. `geom_line()` (tendencia temporal)
-5. `geom_density()` (forma de la distribución, sin depender de bins)
-:::
-
-<!--=================-->
-<!--=================-->
-# Personalización: comunicar mejor
-
-Un gráfico sin títulos ni etiquetas claras es como un reporte sin conclusiones: técnicamente está "completo" pero no comunica nada.
-
-## Etiquetas con labs()
-
-La función `labs()` controla todos los textos del gráfico:
-
-```{webr-r}
-ggplot(ing_region, aes(x = region, y = ingreso_total)) +
-  geom_col(fill = "steelblue") +
-  labs(
-    title = "Norte lidera el ingreso total de ventas",
-    subtitle = "Acumulado Q1-Q3 2025",
-    x = "Región",
-    y = "Ingreso total (USD)",
-    caption = "Fuente: Sistema interno de ventas"
-  )
-```
-
-**Qué pasó:** añadimos título, subtítulo, etiquetas de ejes y fuente de datos. Ahora el gráfico cuenta una historia completa.
-
-**Buenas prácticas:**
-
-- **Título:** La idea principal ("Norte lidera", no "Gráfico de ventas")
-- **Subtítulo:** Contexto (período, filtros aplicados)
-- **Ejes:** Unidades claras ("USD", "número de clientes", etc.)
-- **Caption:** Fuente de datos
-
----
-
-## Temas: cambiar la apariencia general
-
-Los temas controlan colores de fondo, grillas, fuentes, etc.
-
-```{webr-r}
-## Tema minimalista (sin fondo gris)
-ggplot(ing_region, aes(x = region, y = ingreso_total)) +
-  geom_col(fill = "steelblue") +
-  labs(title = "Ingreso por región") +
-  theme_minimal()
-```
-
-```{webr-r}
-## Tema clásico (fondo blanco, bordes negros)
-ggplot(ing_region, aes(x = region, y = ingreso_total)) +
-  geom_col(fill = "steelblue") +
-  labs(title = "Ingreso por región") +
-  theme_bw()
-```
-
-::: {.callout-key}
-**Cuándo usar cada tema**
-
-- `theme_minimal()`: Presentaciones corporativas (limpio, moderno)
-- `theme_bw()`: Reportes académicos/técnicos (formal, tradicional)
-- `theme_classic()`: Publicaciones impresas (sin grillas ni distracciones)
-- `theme_gray()` (default): Generalmente **evitar** en entregas profesionales
-:::
-
----
-
-## Ajustes finos con theme()
-
-Para control total, usamos `theme()`:
-
-```{webr-r}
-ggplot(ing_region, aes(x = region, y = ingreso_total, fill = region)) +
-  geom_col() +
-  labs(title = "Ingreso por región") +
-  theme_minimal() +
-  theme(
-    legend.position = "none",  # Quitar leyenda (redundante con eje X)
-    plot.title = element_text(size = 16, face = "bold"),
-    axis.text.x = element_text(size = 12)
-  )
-```
-
-**Qué pasó:**
-
-- `legend.position = "none"`: oculta la leyenda (innecesaria porque el eje X ya dice las regiones)
-- `plot.title`: hace el título más grande y en negrita
-- `axis.text.x`: aumenta tamaño de etiquetas del eje X
-
----
-
-## Colores con propósito
-
-**Color fijo:**
-
-```{webr-r}
-ggplot(ing_region, aes(x = region, y = ingreso_total)) +
-  geom_col(fill = "coral") +
-  theme_minimal()
-```
-
-**Color según variable:**
-
-```{webr-r}
-ggplot(ing_region, aes(x = region, y = ingreso_total, fill = region)) +
-  geom_col() +
-  theme_minimal()
-```
-
-**Paleta personalizada:**
-
-```{webr-r}
-ggplot(ing_region, aes(x = region, y = ingreso_total, fill = region)) +
-  geom_col() +
-  scale_fill_manual(values = c("Norte" = "#2E86AB",
-                                "Sur" = "#A23B72",
-                                "Centro" = "#F18F01")) +
-  theme_minimal()
-```
-
-**Qué pasó:** `scale_fill_manual()` nos permite asignar colores específicos a cada región.
-
-::: {.callout-warning}
-**Cuidado con los colores**
-
-- Evita colores "gritones" (rojo/verde neón)
-- Considera daltonismo (evita rojo-verde como única distinción)
-- En duda, usa grises o azules (profesionales y neutrales)
-:::
-
----
-
-### Mini-ejercicio integrador
-
-Crea un gráfico de barras del ingreso total por categoría (Hardware vs Software) con:
-
-- Título descriptivo
-- Etiquetas de ejes con unidades
-- Tema minimalista
-- Barras de color según categoría
-
-```{webr-r}
-## Tu código aquí
-
-
-```
-
-<!--=================-->
-<!--=================-->
-# Facetas: comparar múltiples grupos
-
-A veces queremos ver **el mismo gráfico para diferentes subgrupos**.
-
-## facet_wrap(): dividir por una variable
-
-Queremos ver la distribución de precios separada por región:
-
-```{webr-r}
-ggplot(ventas, aes(x = precio)) +
-  geom_histogram(bins = 10, fill = "lightblue", color = "black") +
-  facet_wrap(~ region)
-```
-
-**Qué pasó:** `facet_wrap(~ region)` crea **un panel separado para cada región**, todos con la misma escala (facilita comparación).
-
-**Cómo interpretar:** podemos ver si alguna región vende más productos de cierto rango de precio que otras.
-
----
-
-**Variante:** permitir escalas diferentes en Y si los rangos son muy distintos:
-
-```{webr-r}
-ggplot(ventas, aes(x = precio)) +
-  geom_histogram(bins = 10, fill = "coral", color = "black") +
-  facet_wrap(~ region, scales = "free_y")
-```
-
-**Qué pasó:** `scales = "free_y"` permite que cada panel tenga su propio rango en el eje Y. Útil cuando los grupos tienen tamaños muy diferentes.
-
----
-
-## facet_grid(): dividir por dos variables
-
-```{webr-r}
-ggplot(ventas, aes(x = precio)) +
-  geom_histogram(bins = 8, fill = "steelblue", color = "black") +
-  facet_grid(categoria ~ region)
-```
-
-**Qué pasó:** `facet_grid(categoria ~ region)` crea una matriz de gráficos. Filas = categoría, Columnas = región. Cada celda muestra la distribución de precios de esa combinación.
-
----
+Cuatro de cada cinco horas del proyecto se van en dejar los datos utilizables. En el caso churn, esto significó:
+
+- Valores faltantes en `antigüedad` → imputar con la mediana.
+- Duplicados por una migración de sistema → eliminar.
+- Fechas imposibles (en el futuro) → corregir o descartar.
+- `"plan A"` vs. `"Plan_A"` vs. `"PLAN A"` → estandarizar (para el computador son tres planes distintos).
+- Crear variables derivadas: `meses_desde_reclamo`, `ratio_pago_factura`.
 
 ::: {.callout-connect}
-**¿Cuándo usar facetas?**
+**Esta etapa es la semana 6 completa**
 
-Facetas son útiles cuando:
-
-1. Quieres comparar la **misma métrica** para diferentes grupos
-2. Poner todo en un solo gráfico sería confuso (muchas barras/líneas superpuestas)
-3. Los grupos tienen patrones similares (facilita ver diferencias)
-
-**Ejemplo práctico:** "Mostrar la evolución de ventas trimestre a trimestre para cada región" → 3 paneles con líneas temporales
+Todo lo que acabas de leer en cinco viñetas es el contenido de la próxima semana: diagnóstico, valores faltantes, duplicados, outliers y el flujo *raw → clean → analysis-ready*. Si esta lista te pareció trivial, la semana 6 te va a hacer cambiar de opinión.
 :::
 
-<!--=================-->
-<!--=================-->
-# Buenas prácticas de comunicación
+**Entregable de la etapa:** dataset limpio + reporte de calidad de datos.
 
-## Principios generales
+## Etapa 4: explorar (EDA)
+
+**Objetivo:** conocer los datos **antes** de modelar. Las preguntas típicas: ¿cómo se distribuyen las variables?, ¿hay outliers?, ¿qué está correlacionado con qué?, ¿están balanceadas las clases?, ¿hay patrones por segmento?
+
+Hallazgos reales del caso churn:
+
+- El 25% de los clientes hace churn → las clases están **desbalanceadas** (dato que va a cambiar la métrica que usemos).
+- Clientes con más de 3 reclamos: **60% de churn** → los reclamos son una señal potente.
+- Los clientes de plan prepago hacen **el doble** de churn que los de pospago.
 
 ::: {.callout-key}
-**1. Un gráfico = una idea**
+**La regla de oro de la EDA**
 
-No intentes mostrar 5 cosas en un mismo gráfico. Si necesitas comunicar 5 insights, crea 5 gráficos.
+> Si no lo graficas, no lo entiendes.
 
-**2. Simplicidad > complejidad**
-
-Un gráfico de barras bien hecho comunica mejor que un gráfico 3D con efectos. Evita:
-- Gráficos de pie (especialmente con muchas categorías)
-- 3D sin propósito
-- Colores excesivos
-- Información redundante (números + barras + líneas del mismo dato)
-
-**3. Contexto siempre**
-
-- Título descriptivo (no "Gráfico 1")
-- Fuente de datos
-- Unidades de medida claras
-- Notas si hay filtros o supuestos importantes
+Y aquí es donde `dplyr` y `ggplot2` de la semana 4 dejan de ser un ejercicio de sintaxis y se vuelven la herramienta de trabajo real.
 :::
 
----
+**Entregable de la etapa:** 3-5 hallazgos clave + los gráficos que los sustentan + los riesgos detectados.
 
-## Checklist antes de compartir un gráfico
+## Etapa 5: construir y validar el modelo
 
-- [ ] ¿El título comunica el mensaje principal?
-- [ ] ¿Los ejes tienen etiquetas y unidades claras?
-- [ ] ¿La fuente de datos está citada?
-- [ ] ¿Los colores ayudan a entender (no solo decoran)?
-- [ ] ¿Puedo explicar este gráfico en 30 segundos?
-- [ ] ¿Alguien sin contexto puede entender la idea principal?
+Solo ahora — en la etapa 5 de 7 — aparece el modelo. En el caso churn es un problema de **clasificación**: ¿se va o no se va?
 
-Si la respuesta a alguna es "no", mejora el gráfico antes de compartirlo.
+La idea central (que veremos a fondo en la semana 10) es que **no se evalúa un modelo con los mismos datos con los que se entrenó**: se separa **train (70%)** para que aprenda y **test (30%)** para validarlo fuera de muestra. Es la diferencia entre un examen con las respuestas a la vista y un examen de verdad.
 
----
+La métrica elegida fue **recall** (sensibilidad), y la razón es puro negocio: queremos atrapar la mayor cantidad posible de clientes que se van, porque **un falso negativo cuesta más que un falso positivo**. Dejar ir a un cliente que sí se iba cuesta $500; llamar por si acaso a uno que no se iba cuesta $100. La asimetría del costo decide la métrica.
 
-## Errores comunes en visualización de negocio
+```{=html}
+<div class="stat-row">
+  <div class="stat"><span class="stat-value">75%</span><span class="stat-label">recall del modelo</span></div>
+  <div class="stat"><span class="stat-value">60%</span><span class="stat-label">precision</span></div>
+  <div class="stat"><span class="stat-value">50%</span><span class="stat-label">baseline</span></div>
+</div>
+```
 
-::: {.callout-warning}
-**Error 1: Eje Y que no empieza en cero (en barras)**
+Contra un baseline del 50%, el modelo aporta. **Sin ese baseline, el 75% no significaría nada.**
 
-Para barras que representan cantidades (ventas, clientes, etc.), el eje Y **debe empezar en cero**. Si no, distorsionas la comparación visual.
+**Entregable de la etapa:** modelo + métricas + validación + código reproducible.
 
-**Excepción:** Gráficos de línea para tendencias (temperatura, precio de acciones) pueden no empezar en cero si tiene sentido para el negocio.
+## Etapa 6: comunicar los resultados
+
+Tienes el modelo. No basta. Hay que **traducirlo a decisión**, y ese es un problema de idioma.
+
+::: {.vs-no}
+- <span class="vs-ico">✗</span> *"El modelo tiene 80% de accuracy."* — ¿Y eso qué significa para el negocio? El gerente no sabe qué hacer con esa frase.
 :::
 
-::: {.callout-warning}
-**Error 2: Demasiadas categorías en barras**
-
-Si tienes 20 categorías, un gráfico de barras es ilegible. Opciones:
-
-1. Filtrar top 10
-2. Agrupar categorías menores en "Otros"
-3. Cambiar a tabla (si necesitas ver todos los valores)
+::: {.vs-si}
+- <span class="vs-ico">✓</span> *"Identificamos 2.500 clientes con 75% de probabilidad de irse. Si los contactamos con una oferta de retención de $100, recuperamos el 60% y **ahorramos $750.000** frente a dejarlos ir."*
 :::
 
+La segunda frase tiene los tres elementos que necesita un stakeholder: **números, no jerga técnica**; **costo-beneficio claro**; y una **acción recomendada**.
+
 ::: {.callout-warning}
-**Error 3: Colores sin significado**
+**El error más común de los analistas jóvenes**
 
-No uses colores diferentes solo "porque se ve bonito". Los colores deben:
+Presentar la métrica en vez de la consecuencia. Nadie fuera del equipo técnico sabe si 80% de accuracy es bueno o malo — de hecho, si el 80% de tus clientes se queda, un modelo que diga "nadie se va" *también* tiene 80% de accuracy y es completamente inútil. Traduce siempre a plata, riesgo o tiempo.
+:::
 
-- Representar una variable (categoría, rango de valores)
-- O ser todos iguales (si no hay distinción)
+## Etapa 7: decidir y actuar (y volver a empezar)
 
-**Mal:** 5 barras de 5 colores diferentes sin razón  
-**Bien:** 5 barras del mismo color, o colores que representan regiones
+**La decisión:** contactar a los 2.500 clientes de alto riesgo.
+
+**El plan de acción:** segmentar por valor (los VIP primero), asignar al call center, hacer la oferta personalizada y medir el resultado a 30 días.
+
+**El monitoreo (los KPIs que ahora sabes construir):** % de contactados que aceptan, % de contactados que finalmente **no** hicieron churn, ROI de la campaña (ahorro vs. costo), y actualizar el modelo cada trimestre.
+
+Y aquí se cierra el ciclo: la campaña **genera nuevos datos** (¿quién respondió?, ¿qué oferta funcionó mejor?) que producen una **nueva pregunta** (¿cómo mejoramos la oferta?) y el proceso arranca otra vez. Es el control a los 30 días del médico.
+
+::: {.callout-remember}
+**Resumen del bloque**
+
+Siete etapas: **pregunta → datos → limpieza → EDA → modelo → comunicación → decisión**, y de vuelta a la pregunta. El modelo es **una** de ellas y consume el 20% del tiempo. Las etapas 1, 6 y 7 — preguntar, traducir y decidir — no requieren una sola línea de código, y son donde se pierde la mayoría de los proyectos.
 :::
 
 <!--=================-->
 <!--=================-->
-# Resumen ejecutivo
+# Tipos de tareas analíticas: el mapa del territorio
 
-## Flujo de trabajo para crear un gráfico
+No todo análisis es igual. **Según la pregunta, cambia la tarea** — y cambian los datos que necesitas, el modelo, la métrica y el entregable. Elegir mal la tarea al principio es un error que ninguna sofisticación posterior arregla.
 
-::: {.callout-workflow}
-**Paso 1: Preparar los datos (dplyr)**
+## Clasificación (supervisada)
 
-Usar `group_by()` + `summarise()` para obtener la tabla de KPIs que quiero graficar. Si el gráfico es sobre datos brutos (histograma, scatter), puedo saltar este paso.
+**Pregunta:** ¿a qué **categoría** pertenece? ¿Sí o no?
 
-**Paso 2: Construir el gráfico en tres capas**
+- ¿Este email es spam?
+- ¿Este cliente hará churn?
+- ¿Este crédito es de riesgo alto, medio o bajo?
 
-```
-ggplot(data = mi_tabla, mapping = aes(x = ..., y = ...))  # 1️⃣ lienzo + ejes
-  + geom_...()                                             # 2️⃣ geometría
-  + labs() + theme_...()                                   # 3️⃣ personalización
-```
+**Output:** una etiqueta o una probabilidad. **Decisión que habilita:** filtrar, priorizar, bloquear, activar. **Métricas típicas:** accuracy, precision, recall, F1.
 
-**Paso 3: Elegir la geometría según la pregunta**
+> **Caso churn:** cliente 12345 → probabilidad de fuga 85% → acción: llamar hoy.
 
-| Pregunta | Geometría |
-|---|---|
-| ¿Cuánto vendió cada región? | `geom_col()` |
-| ¿Cómo evolucionó en el tiempo? | `geom_line()` |
-| ¿Existe relación entre X e Y? | `geom_point()` |
-| ¿Cuántas obs. caen en cada rango? | `geom_histogram()` |
-| ¿Cómo es la forma de la distribución? | `geom_density()` |
+## Predicción (supervisada)
 
-**Paso 4: Personalizar para comunicar**
+**Pregunta:** ¿**cuánto**? ¿**cuándo**?
 
-- Títulos y etiquetas claras con `labs()`
-- Tema profesional (`theme_minimal()`, `theme_bw()`)
-- Colores con propósito
+- ¿Cuánto venderé el próximo mes?
+- ¿Cuál será la demanda de este producto?
+- ¿En cuántos días llegará el paquete?
 
-**Paso 5: Verificar**
+**Output:** un número continuo. **Decisión que habilita:** planear inventario, capacidad, presupuesto. **Métricas típicas:** RMSE, MAE, MAPE.
 
-¿Alguien sin contexto entiende el mensaje? Si no, iterar.
+> **Ejemplo retail:** producto XYZ → demanda estimada 1.250 unidades → acción: comprar stock.
+
+## Segmentación (no supervisada)
+
+**Pregunta:** ¿qué **grupos naturales** existen aquí?
+
+- ¿Qué perfiles de clientes tengo?
+- ¿Qué zonas geográficas se parecen entre sí?
+
+**Output:** grupos (clusters). **Decisión que habilita:** personalizar la oferta, diseñar campañas por segmento.
+
+> **Ejemplo:** 10.000 clientes → 4 segmentos (VIP, Frecuente, Ocasional, Inactivo) → acción: una campaña distinta para cada uno.
+
+::: {.callout-key}
+**La diferencia clave con clasificación**
+
+En segmentación **no hay target**: nadie etiquetó previamente quién es "VIP". El algoritmo **descubre** los grupos, y luego un humano los interpreta y les pone nombre. En clasificación, en cambio, tienes ejemplos históricos que ya traen la respuesta correcta.
 :::
 
----
+## Detección de anomalías (mixta)
 
-## Checklist de salida
+**Pregunta:** ¿qué es **raro** aquí?
 
-Al final de esta semana, debes poder:
+- ¿Esta transacción es fraudulenta?
+- ¿Este sensor está fallando?
 
-- [ ] Explicar los **tres pasos** de construcción de un gráfico: lienzo → mapeo → geometría
-- [ ] Mostrar qué produce `ggplot(data=mis_datos)` solo (el lienzo en blanco) y por qué
-- [ ] Explicar qué hace `ggplot(data = ..., mapping = aes(...))` y por qué es el "lienzo"
-- [ ] Diferenciar cuándo poner algo dentro vs fuera de `aes()`
-- [ ] Elegir la geometría adecuada (`col`, `histogram`, `density`, `point`, `line`) para una pregunta de negocio
-- [ ] Agregar títulos, etiquetas y temas a un gráfico
-- [ ] Leer un gráfico existente e identificar qué datos/mapeos tiene
-- [ ] Convertir una tabla de KPIs (de Semana 04) en gráfico profesional
-- [ ] Usar [from-data-to-viz.com](https://www.data-to-viz.com) para elegir el tipo de gráfico correcto
+**Output:** una lista de observaciones atípicas priorizadas. **Decisión que habilita:** investigar, bloquear, alertar. Es *mixta* porque a veces tienes fraudes históricos etiquetados (supervisada) y a veces solo tienes lo que se sale de lo normal (no supervisada).
 
----
+## Optimización (prescriptiva)
+
+**Pregunta:** dadas mis restricciones, ¿cuál es la **mejor decisión posible**?
+
+- ¿Cómo asigno mi presupuesto de pauta entre canales para maximizar ventas?
+- ¿Cuál es la ruta de despacho más barata que cumple todas las entregas?
+
+**Output:** una decisión recomendada, no solo una predicción. Es el nivel más ambicioso: la analítica **descriptiva** dice qué pasó, la **predictiva** qué va a pasar, y la **prescriptiva** qué deberías hacer al respecto.
+
+## La pregunta que decide la tarea
+
+| Tarea | ¿Hay target? | Output | Ejemplo |
+|---|---|---|---|
+| **Clasificación** | Sí | Categoría | Churn sí/no |
+| **Predicción** | Sí | Número | Ventas $1.250 |
+| **Segmentación** | No | Grupos | 4 perfiles de cliente |
+| **Anomalías** | Mixto | Lista de outliers | 5 transacciones sospechosas |
+| **Optimización** | — | Decisión | Cómo repartir el presupuesto |
+
+: Elegir la tarea es el primer paso técnico, y ocurre **antes** de abrir R. {.striped}
+
+::: {.callout-key}
+**La pregunta que lo resuelve casi siempre**
+
+> **¿Tengo ejemplos históricos que ya traen la respuesta correcta?**
+>
+> - **Sí** → supervisado (clasificación si la respuesta es una categoría; predicción si es un número).
+> - **No** → no supervisado (segmentación).
+:::
+
+::: {.callout-remember}
+**Resumen del bloque**
+
+Cinco tareas: **clasificación** (¿qué categoría?), **predicción** (¿cuánto?), **segmentación** (¿qué grupos?), **anomalías** (¿qué es raro?) y **optimización** (¿qué hago?). La pregunta de negocio determina la tarea; la tarea determina el modelo y la métrica. En tu proyecto final trabajarás una de las tres primeras.
+:::
+
+<!--=================-->
+<!--=================-->
+# Roles: nadie hace esto solo
+
+El proceso completo exige habilidades que rara vez viven en una sola cabeza. Por eso existen cuatro roles:
+
+**🔧 Data Engineer.** Construye los *pipelines*, integra las fuentes, limpia y garantiza la calidad. Es quien hace posible que los demás tengan datos con los que trabajar.
+
+**📊 Data Analyst.** Explora los datos, construye dashboards, interpreta y comunica hallazgos descriptivos. Es el dueño de la EDA.
+
+**🤖 Data Scientist.** Construye modelos, los valida, experimenta. Es el rol más famoso y el que menos etapas lidera.
+
+**💼 Business Analyst / Data Translator.** Traduce en las dos direcciones: convierte el problema de negocio en pregunta analítica, y los resultados técnicos en recomendaciones. Es el puente.
+
+> En equipos pequeños, **una persona cumple varios roles** — probablemente tú, en tu primer trabajo, seas los cuatro a la vez. En equipos grandes, se especializan. Pero **los cuatro trabajos se hacen siempre**, tenga la empresa cuatro personas o cuarenta.
+
+## ¿Quién hace qué?
+
+| Rol | Pregunta | Datos | Limpieza | EDA | Modelo | Decisión |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|
+| **Data Engineer** | Apoya | **Lidera** | **Lidera** | Apoya | Apoya | — |
+| **Data Analyst** | Colabora | Apoya | Apoya | **Lidera** | Apoya | Colabora |
+| **Data Scientist** | Colabora | Apoya | Apoya | Colabora | **Lidera** | Apoya |
+| **Business Analyst** | **Lidera** | Apoya | — | Colabora | Apoya | **Lidera** |
+
+: Fíjate en las dos columnas de los extremos — pregunta y decisión — y en quién las lidera. {.striped}
+
+::: {.callout-key}
+**Lee la tabla de nuevo, mirando las filas**
+
+El **Data Scientist**, el rol estrella, lidera **una sola** de las seis fases. El **Business Analyst**, que no toca un modelo, lidera las dos que deciden si el proyecto sirve o no. El valor no está solo en el modelo: sin una pregunta clara (BA) y sin datos limpios (DE), el mejor modelo del mundo (DS) no sirve para nada.
+:::
+
+## El caso churn: cómo trabajaron los cuatro
+
+1. **Business Analyst** definió la pregunta ("¿quiénes harán churn?"), el costo del error ($500 vs. $100) y el umbral de decisión (probabilidad > 70%).
+2. **Data Engineer** integró CRM + facturación + soporte, eliminó duplicados, estandarizó formatos y creó las variables derivadas.
+3. **Data Analyst** exploró los patrones (reclamos → churn), detectó el desbalanceo de clases y propuso segmentar por valor.
+4. **Data Scientist** entrenó el modelo, validó con train/test, eligió la métrica (recall), comparó contra el baseline y dejó el código documentado.
+5. **Business Analyst**, otra vez al final, comunicó la recomendación ($750.000 de ahorro potencial), diseñó el plan de acción y definió los KPIs de seguimiento.
+
+El proyecto funcionó porque cada uno aportó lo suyo — **y porque alguien se ocupó del principio y del final**, no solo de la mitad.
+
+::: {.callout-remember}
+**Resumen del bloque**
+
+Cuatro roles: **Data Engineer** (datos y limpieza), **Data Analyst** (EDA), **Data Scientist** (modelo) y **Business Analyst** (pregunta y decisión). En tu proyecto final, tu grupo va a cumplir los cuatro. Que quede claro quién hace qué **y que nadie abandone las etapas 1, 6 y 7**.
+:::
+
+<!--=================-->
+<!--=================-->
+# Para pensar: ¿qué define el éxito?
+
+Un proyecto **no** es exitoso porque el modelo tenga 95% de accuracy. Es exitoso cuando **cambia una decisión y genera valor medible**.
+
+Cuatro preguntas para llevarle a tu propio proyecto — y para hacerte en cualquier trabajo de analítica que tengas en la vida:
+
+1. ¿Qué **decisión específica** va a cambiar con mi análisis?
+2. ¿**Cuánto cuesta equivocarse**? (¿y cuesta lo mismo un falso positivo que un falso negativo?)
+3. ¿Qué **métrica se alinea** con esa decisión?
+4. ¿Cómo voy a **medir el impacto real** de lo que recomendé?
+
+Si no puedes responder la primera, las otras tres sobran. 🎤
+
+<!--=================-->
+<!--=================-->
+# Para la clase presencial: trae 1 pregunta de negocio
+
+::: {.callout-warning}
+**Esto no es opcional: es la materia prima de la sesión**
+
+Piensa en **una pregunta de negocio real** que te gustaría resolver con datos. Puede ser de cualquier industria: retail, fintech, salud, educación, entretenimiento, deporte, lo que te interese.
+
+**Criterios (los mismos tres de la etapa 1):**
+
+- ✅ **Específica** — no "mejorar las ventas".
+- ✅ **Accionable** — debe implicar una decisión clara.
+- ✅ **Medible** — con datos que podrían existir.
+
+**Ejemplo del tipo de pregunta** (no lo copies): *"¿Qué productos debería promocionar en Black Friday para maximizar el margen?"* → Decisión: cuáles promocionar y cuánto descontar.
+
+**En clase** discutiremos en grupos qué **tarea analítica** es cada pregunta, qué **fases** requiere y qué **roles** participan. Y saldrás con el borrador de la pregunta de tu proyecto: es el insumo directo de la **Entrega 1**.
+:::
+
+<!--=================-->
+<!--=================-->
+# Checklist de salida
+
+Al terminar el podcast (o este documento), debes ser capaz de:
+
+- [ ] Explicar por qué el 87% de los proyectos de datos fracasa, y por qué la mayoría de esas razones no son técnicas.
+- [ ] Nombrar las cuatro patas del Business Analytics y explicar cuál es la que más proyectos tumba.
+- [ ] Enumerar las siete etapas del proceso analítico y explicar por qué es un ciclo y no una línea.
+- [ ] Aplicar el test de la pregunta ("si te doy la respuesta, ¿sabes qué hacer mañana?") y distinguir una buena de una mala.
+- [ ] Explicar la regla 80/20 del tiempo y por qué el modelado no es donde se va el esfuerzo.
+- [ ] Justificar por qué en el caso churn la métrica elegida fue *recall* y no *accuracy*, usando el costo del error.
+- [ ] Traducir un resultado técnico a un mensaje de negocio con número, costo-beneficio y acción.
+- [ ] Distinguir las cinco tareas analíticas y decir cuál corresponde a una pregunta dada.
+- [ ] Usar la pregunta del target para decidir entre supervisado y no supervisado.
+- [ ] Describir los cuatro roles y decir quién lidera la pregunta y quién la decisión.
 
 <!--=================-->
 <!--=================-->
 # Preguntas de comprensión
 
-::: {.callout-practice}
-**1. Interpretación de código**
+Del estilo de las que encontrarás en el quiz. Intenta responderlas **antes** de abrir la respuesta.
 
-```{webr-r}
-#| eval: false
-ggplot(ventas, aes(x = trimestre, y = ingreso, fill = region)) +
-  geom_col(position = "dodge") +
-  theme_minimal()
+::: {.callout-practice}
+**1. El modelo impecable**
+
+Un equipo presenta con orgullo un modelo con 94% de accuracy para predecir qué clientes cancelarán su suscripción. El gerente pregunta: "¿y ahora qué hacemos?" y nadie sabe responder. ¿En qué etapa falló el proyecto y por qué el 94% no lo salva?
+
+```{=html}
+<details class="answer"><summary>Ver respuesta</summary>
+<p>Falló en la <b>etapa 1</b>: nunca hubo una decisión esperando la respuesta. Es una de las cuatro razones del 87%. Un modelo que no cambia ninguna decisión no genera valor, por bueno que sea — el proyecto era técnicamente correcto y estratégicamente inútil. Además, con 94% de accuracy conviene sospechar del <b>desbalanceo</b>: si solo el 6% cancela, decir "nadie cancela" da 94% y no sirve para nada.</p>
+</details>
 ```
-
-Sin ejecutarlo, describe qué mostrará este gráfico:
-- ¿Qué hay en el eje X?
-- ¿Qué hay en el eje Y?
-- ¿Qué controla el color?
-- ¿Qué hace `position = "dodge"`?
-
-**Respuestas esperadas:**
-- X: trimestres
-- Y: ingreso de cada transacción (no total)
-- Color: región
-- `position = "dodge"`: barras lado a lado en lugar de apiladas
 :::
 
 ::: {.callout-practice}
-**2. Decisión de diseño**
+**2. La métrica y el costo**
 
-Tienes una tabla con 50 productos y sus ventas. ¿Qué harías?
+En el caso churn, un falso negativo (dejar ir a alguien que sí se iba) cuesta $500 y un falso positivo (llamar a alguien que no se iba) cuesta $100. ¿Por qué se eligió *recall* y no *accuracy*? ¿Cambiaría tu elección si el incentivo costara $2.000?
 
-a) Gráfico de barras con los 50 productos  
-b) Gráfico de barras con top 10 + categoría "Otros"  
-c) Tabla ordenada  
-
-**Respuesta correcta:** b) — 50 barras son ilegibles
-:::
-
-::: {.callout-practice}
-**3. Mapeo estético**
-
-¿Cuál de estos códigos mostrará puntos rojos?
-
-```{webr-r}
-#| eval: false
-## Opción A
-ggplot(ventas, aes(x = precio, y = cantidad, color = "red")) +
-  geom_point()
-
-## Opción B
-ggplot(ventas, aes(x = precio, y = cantidad)) +
-  geom_point(color = "red")
+```{=html}
+<details class="answer"><summary>Ver respuesta</summary>
+<p>Se eligió <b>recall</b> porque mide qué proporción de los que <i>sí</i> se van logramos atrapar, y el error caro es justamente dejarlos escapar ($500 &gt; $100). Con el costo del error asimétrico, conviene equivocarse "de más" llamando gente de sobra. Si el incentivo costara $2.000, la asimetría <b>se invierte</b>: cada falso positivo costaría más que el cliente perdido, y pasaríamos a priorizar <b>precision</b>. La lección: <b>la métrica sale del negocio, no del código</b>.</p>
+</details>
 ```
-
-**Respuesta correcta:** Opción B — `color = "red"` debe ir fuera de `aes()`
 :::
 
----
+::: {.callout-practice}
+**3. La tarea correcta**
 
-::: {.callout-connect}
-**Conexión con el resto del curso**
+Clasifica cada pregunta según su tarea analítica y di si es supervisada o no: (a) "¿Cuántas unidades venderemos en diciembre?" (b) "¿Qué tipos de clientes tenemos?" (c) "¿Esta transacción con tarjeta es fraudulenta?"
 
-**Semana 06 (siguiente):** Importar datos reales (CSV, Excel) y hacer EDA (Exploratory Data Analysis) combinando dplyr + ggplot2.
+```{=html}
+<details class="answer"><summary>Ver respuesta</summary>
+<p><b>(a) Predicción, supervisada</b> — el output es un número continuo y tenemos historial de ventas con la respuesta correcta. <b>(b) Segmentación, no supervisada</b> — nadie etiquetó previamente los "tipos": el algoritmo los descubre. <b>(c) Detección de anomalías / clasificación</b> — si tenemos fraudes históricos etiquetados es clasificación supervisada; si solo tenemos "lo que se sale de lo normal", es detección de anomalías no supervisada. El atajo en los tres casos: <b>¿tengo la respuesta correcta en los datos históricos?</b></p>
+</details>
+```
+:::
 
-**Semanas 09-16:** En machine learning, visualizaremos métricas de modelos, distribuciones de variables predictoras, y resultados de experimentos. Todo con la misma lógica de ggplot2.
+::: {.callout-practice}
+**4. El reparto de culpas**
 
-**Proyecto final:** Los gráficos que crees serán parte fundamental de tu reporte/sustentación. Un análisis excelente con gráficos malos comunica poco.
+Un proyecto se cae porque, después de tres meses, se descubre que la variable clave estaba mal capturada en el CRM desde hacía dos años. El equipo culpa al Data Scientist. ¿Es justo? ¿Qué etapa y qué rol fallaron?
+
+```{=html}
+<details class="answer"><summary>Ver respuesta</summary>
+<p>No es justo. Falló la <b>etapa 3</b> (limpieza y validación), que <b>lidera el Data Engineer</b>, con apoyo del Data Analyst en la <b>etapa 4</b> (EDA), donde ese problema de calidad debió aparecer. El Data Scientist apoya ambas etapas pero no las lidera. Y hay una lección de proceso más grande: el problema se detectó a los <b>tres meses</b>, cuando la EDA existe justamente para encontrarlo en la primera semana. Es el argumento entero de la semana 6.</p>
+</details>
+```
 :::
 
 ---
 
 ## Material adicional (opcional)
 
-Si quieres profundizar:
+Si quieres profundizar por tu cuenta:
 
-- **from-data-to-viz.com** (prioridad alta): árbol de decisión para elegir el tipo de gráfico según tus datos → [https://www.data-to-viz.com](https://www.data-to-viz.com)
-- **R Graph Gallery:** galería de ejemplos con código listo para copiar → [https://r-graph-gallery.com](https://r-graph-gallery.com)
-- **ggplot2 cheat sheet:** referencia rápida de geometrías y opciones → [https://rstudio.github.io/cheatsheets/data-visualization.pdf](https://rstudio.github.io/cheatsheets/data-visualization.pdf)
-- **Fundamentals of Data Visualization (Claus Wilke):** principios de visualización independiente de la herramienta — gratis online
+- **El dato del 87%:** VentureBeat (2019), [*Why do 87% of data science projects never make it into production?*](https://venturebeat.com/ai/why-do-87-of-data-science-projects-never-make-it-into-production/)
+- **El libro de referencia del proceso analítico:** Provost, F., & Fawcett, T. (2013). *Data Science for Business: What You Need to Know about Data Mining and Data-Analytic Thinking*. O'Reilly Media. — El capítulo 2 es exactamente el tema de esta semana.
+- **La mirada estratégica:** Davenport, T. H., & Harris, J. G. (2007). *Competing on Analytics: The New Science of Winning*. Harvard Business Press.
+- **Sobre los roles:** Harris, H., Murphy, S., & Vaisman, M. (2013). *Analyzing the Analyzers: An Introspective Survey of Data Scientists and Their Work*. O'Reilly Media.
+- **El caso churn, en versión académica:** Verbeke, W., Dejaeger, K., Martens, D., Hur, J., & Baesens, B. (2012). [New insights into churn prediction in the telecommunication sector: A profit driven data mining approach](https://doi.org/10.1016/j.ejor.2011.09.031). *European Journal of Operational Research, 218*(1), 211–229.
 
-Para esta semana, el material de preclase es suficiente. En clase practicaremos con datos reales paso a paso.
-
-
-```{=html}
-<!-- Panel Environment -->
-<div id="env-panel" class="collapsed">
-  <div id="env-header" onclick="toggleEnvPanel()">
-    <span id="env-header-left">&#x1F4E6; Environment</span>
-    <span id="env-header-right">
-      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
-      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
-    </span>
-  </div>
-  <div id="env-status">Esperando webR...</div>
-  <div id="env-body">
-    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
-  </div>
-</div>
-
-<script type="module">
-window.toggleEnvPanel = function() {
-  const panel = document.getElementById('env-panel');
-  const btn   = document.getElementById('env-toggle-btn');
-  panel.classList.toggle('collapsed');
-  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
-};
-
-async function getEnvData() {
-  if (!globalThis.mainWebR) return [];
-  try {
-    const shelter = await new globalThis.mainWebR.Shelter();
-    const result  = await shelter.evalR(`
-      local({
-        objs <- ls(envir = .GlobalEnv)
-        if (length(objs) == 0) return("")
-        info <- vapply(objs, function(nm) {
-          obj <- get(nm, envir = .GlobalEnv)
-          cls <- paste(class(obj), collapse = ", ")
-          len <- length(obj)
-          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
-          prev <- tryCatch({
-            if (is.data.frame(obj)) {
-              paste(names(obj), collapse = ", ")
-            } else if (is.function(obj)) {
-              a <- names(formals(obj))
-              paste0("function(", paste(a, collapse = ", "), ")")
-            } else if (is.atomic(obj) && len <= 6) {
-              paste(format(obj, digits = 4), collapse = ", ")
-            } else if (is.atomic(obj) && len > 6) {
-              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
-            } else if (is.list(obj)) {
-              paste0("List of ", len)
-            } else { "" }
-          }, error = function(e) "")
-          paste(nm, cls, len, dm, prev, sep = "\\t")
-        }, character(1))
-        paste(info, collapse = "\\n")
-      })
-    `);
-    const raw = await result.toString();
-    shelter.purge();
-    if (!raw || raw === '') return [];
-    return raw.split('\n').map(line => {
-      const p = line.split('\t');
-      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
-    });
-  } catch (e) {
-    console.warn('Env panel error:', e);
-    return [];
-  }
-}
-
-function renderEnv(items) {
-  const body   = document.getElementById('env-body');
-  const status = document.getElementById('env-status');
-  if (items.length === 0) {
-    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
-    status.textContent = '0 objetos';
-    return;
-  }
-  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
-  body.innerHTML = items.map(it => {
-    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
-    if (it.dim) {
-      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
-    } else {
-      meta += 'Length: ' + it.len;
-    }
-    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
-    return '<div class="env-item">' +
-           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
-           '  <div class="env-item-meta">' + meta + '</div>' +
-           prev +
-           '</div>';
-  }).join('');
-}
-
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-async function updateEnvPanel() {
-  const items = await getEnvData();
-  renderEnv(items);
-}
-window.refreshEnv = function() {
-  const btn = document.getElementById('env-refresh-btn');
-  btn.style.animation = 'none';
-  void btn.offsetWidth;
-  updateEnvPanel();
-};
-
-function moveWebRStatus() {
-  const anchor = document.getElementById('webr-status-anchor');
-  const statusArea = document.getElementById('qwebr-status-message-area');
-  if (anchor && statusArea) {
-    const wrapper = statusArea.closest('.quarto-title-meta');
-    if (wrapper) {
-      wrapper.style.display = 'inline';
-      wrapper.style.fontSize = '13px';
-      wrapper.style.marginLeft = '30px';
-      anchor.parentNode.insertBefore(wrapper, anchor);
-    }
-  }
-}
-
-async function init() {
-  while (!globalThis.qwebrInstance) {
-    await new Promise(r => setTimeout(r, 300));
-  }
-  await globalThis.qwebrInstance;
-  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
-  moveWebRStatus();
-
-  await new Promise(resolve => {
-    const check = setInterval(() => {
-      const btns = document.querySelectorAll('.qwebr-button-run');
-      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
-        clearInterval(check);
-        resolve();
-      }
-    }, 400);
-  });
-
-  const original = globalThis.qwebrComputeEngine;
-  globalThis.qwebrComputeEngine = async function(...args) {
-    const res = await original.apply(this, args);
-    setTimeout(updateEnvPanel, 150);
-    return res;
-  };
-
-  const panel = document.getElementById('env-panel');
-  if (panel.classList.contains('collapsed')) {
-    toggleEnvPanel();
-  }
-  await updateEnvPanel();
-}
-
-init();
-</script>
-```
+Para esta semana, el podcast (o este documento) es suficiente. **Nos vemos en clase — y recuerda traer tu pregunta de negocio.** 🚀

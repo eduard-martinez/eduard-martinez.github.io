@@ -1,465 +1,270 @@
 ---
-title: "Práctica guiada — Semana 10: Clustering con Spotify"
-subtitle: "Introducción al Business Analytics · 06278-ECO"
+title: "Unidad 4 - Práctica: el juez de modelos"
+subtitle: "Aplicación guiada en clase · Semana 10 · 06278-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
   html: default
 lang: es
 ---
 
-<!--=================-->
-<!--=================-->
-# Aplicación guiada: segmentando canciones en Spotify
-
-**Contexto de negocio:** Una plataforma de streaming quiere crear listas de reproducción automáticas con personalidad definida: "para entrenar", "ambiente tranquilo", "energía máxima". Para eso necesita agrupar canciones según sus **características de audio** — no el género declarado (subjetivo), sino variables cuantificables. Nuestro trabajo es aplicar k-means, interpretar los segmentos y proponer nombres accionables para cada grupo.
-
----
-
-## Paso 1 — Preparar el entorno
-
-```{webr-r}
-#| warning: false
-#| message: false
-
-## Limpiar entorno / Clean environment
-rm(list = ls())
-
-## Cargar paquetes / Load packages
-require(dplyr)    # manipulación de datos / data wrangling
-require(ggplot2)  # visualización / visualization
-require(skimr)    # diagnóstico rápido / quick diagnostics
-require(purrr)    # iteración funcional / functional iteration
-```
-
----
-
-## Paso 2 — Cargar los datos
-
-```{webr-r}
-#| warning: false
-#| message: false
-
-## Cargar datos / Load data
-# TODO: reemplazar con URL definitiva
-source("https://raw.githubusercontent.com/ba-in-r/01-slides/main/week-08/data/prepare-data.R")
-
-## Verificar objetos en memoria / Check objects in memory
-ls()
-```
-
-```{webr-r}
-## Dimensiones y nombres de columnas / Dimensions and column names
-nrow(spotify)
-ncol(spotify)
-colnames(spotify)
-```
-
-```{webr-r}
-## Diagnóstico completo / Full diagnostic
-skim(spotify)
-```
-
-::: {.callout-key}
-**¿Qué buscamos en el `skim()`?**
-
-Fíjate en los rangos de las variables que usaremos: `tempo` va de ~40 a ~220 BPM, `danceability` de 0 a 1. Esa diferencia de escala es exactamente la razón por la que escalar es obligatorio antes de k-means.
-:::
-
----
-
-## Paso 3 — Seleccionar variables de clustering
-
-No todas las columnas son útiles para agrupar. Usamos solo las **características de audio cuantitativas**.
-
-```{webr-r}
-## Seleccionar variables de audio / Select audio features
-spotify_features <- select(.data = spotify,
-                            danceability,
-                            energy,
-                            acousticness,
-                            tempo)
-
-## Verificar / Verify
-head(spotify_features)
-```
-
-::: {.callout-key}
-**¿Por qué estas cuatro variables?**
-
-- `danceability` — qué tan bailable (0–1)
-- `energy` — intensidad percibida (0–1)
-- `acousticness` — probabilidad de ser acústica (0–1)
-- `tempo` — velocidad en BPM
-
-Capturan dimensiones distintas del sonido. `streams` queda fuera: mide popularidad, no estilo musical.
-:::
-
----
-
-## Paso 4 — Escalar las variables
-
-`scale()` lleva cada variable a media 0 y desviación estándar 1, eliminando el efecto de las unidades.
-
-```{webr-r}
-## Escalar / Scale
-spotify_scaled <- scale(spotify_features)
-
-## Verificar: mean ≈ 0, sd ≈ 1 / Verify: mean ≈ 0, sd ≈ 1
-skim(spotify_scaled)
-```
-
-```{webr-r}
-## Dispersión previa al clustering / Pre-clustering scatter
-spotify_scaled_df <- as.data.frame(spotify_scaled)
-
-ggplot(spotify_scaled_df, aes(x = tempo, y = danceability)) +
-  geom_point(alpha = 0.3, color = "#1F4E79") +
-  theme_minimal() +
-  labs(title = "Spotify — variables escaladas",
-       x = "Tempo", y = "Danceability")
-```
-
----
-
-## Paso 5 — Método del codo para elegir k
-
-Probamos k = 1 a 8 y graficamos cómo cae el WCSS. Buscamos el "codo": donde agregar un cluster más ya no mejora mucho.
-
-```{webr-r}
-## Fijar semilla / Set seed
-set.seed(2025)
-
-## Calcular WSS para k = 1:8 / Calculate WSS for k = 1:8
-valores_k  <- 1:8
-wss_por_k  <- map_dbl(valores_k, ~ kmeans(spotify_scaled,
-                                           centers = .x,
-                                           nstart  = 20)$tot.withinss)
-## Organizar resultados / Organize results
-elbow_df <- data.frame(k = valores_k, wss = wss_por_k)
-elbow_df
-```
-
-```{webr-r}
-## Gráfico del codo / Elbow plot
-ggplot(elbow_df, aes(x = k, y = wss)) +
-  geom_line(color = "#1F4E79") +
-  geom_point(color = "#E87722", size = 3) +
-  scale_x_continuous(breaks = 1:8) +
-  theme_minimal() +
-  labs(title = "Método del codo — Spotify",
-       x = "Número de clusters (k)",
-       y = "WSS")
-```
-
-::: {.callout-key}
-**¿Cómo leer el codo?**
-
-El "codo" es donde la curva deja de caer abruptamente. Antes de ese punto: cada cluster adicional aporta mucho. Después: mejora marginal. ¿En qué k identificas el quiebre?
-:::
-
----
-
-## Paso 6 — Ajustar k-means
-
-```{webr-r}
-## Fijar semilla / Set seed
-set.seed(2025)
-
-## Ajustar modelo / Fit model
-## Reemplaza centers con el k que identificaste en el codo
-km_spotify <- kmeans(spotify_scaled, centers = 4, nstart = 30)
-
-## Resumen / Summary
-km_spotify
-```
-
-::: {.callout-key}
-**Qué leer en el output de `kmeans()`:**
-
-- `Cluster sizes` — tamaño de cada grupo. Un cluster con 3 observaciones de 5,000 no es accionable.
-- `Cluster means` — los centroides: valor promedio de cada variable por cluster. Aquí está la clave para perfilar.
-- `Within cluster sum of squares` — compactación de cada grupo.
-:::
-
----
-
-##==: Paso 7 — Agregar clusters al dataset original
-
-```{webr-r}
-## Agregar columna de cluster / Add cluster column
-spotify_clusters <- mutate(.data = spotify,
-                            cluster = factor(km_spotify$cluster))
-
-## Distribución por cluster / Count per cluster
-table(spotify_clusters$cluster)
-```
-
----
-
-## Paso 8 — Visualizar los clusters
-
-```{webr-r}
-## Dispersión coloreada por cluster / Cluster scatterplot
-ggplot(spotify_clusters, aes(x = tempo, y = danceability, color = cluster)) +
-  geom_point(alpha = 0.4, size = 1.5) +
-  theme_minimal() +
-  labs(title = "Clusters de canciones — Spotify",
-       x = "Tempo (BPM)", y = "Danceability", color = "Cluster")
-```
-
-::: {.callout-warning}
-Este gráfico muestra solo dos de las cuatro variables usadas en el clustering. Puede haber superposición aparente entre clusters que en realidad están separados en las otras dimensiones.
-:::
-
----
-
-## Paso 9 — Perfilar los clusters
-
-El perfilamiento es el paso más importante: ¿qué caracteriza a cada grupo y en qué se diferencia de los demás?
-
-```{webr-r}
-## Tabla de perfilamiento: promedios por cluster / Profiling table
-perfil_clusters <- summarise(.data = spotify_clusters,
-                              danceability_prom = mean(danceability),
-                              energy_prom       = mean(energy),
-                              acousticness_prom = mean(acousticness),
-                              tempo_prom        = mean(tempo),
-                              streams_prom      = mean(streams),
-                              n_canciones       = n(),
-                              .by = cluster)
-perfil_clusters
-```
-
-```{webr-r}
-## Canción más escuchada por cluster / Top song per cluster
-top_por_cluster <- summarise(.data = spotify_clusters,
-                              top_cancion = track_name[which.max(streams)],
-                              top_artista = artist[which.max(streams)],
-                              max_streams = max(streams),
-                              .by = cluster)
-top_por_cluster
-```
-
-::: {.callout-key}
-**¿Cómo leer la tabla de perfilamiento?**
-
-Compara las columnas fila por fila. Busca los contrastes más nítidos: ¿qué cluster tiene la `energy_prom` más alta?, ¿cuál tiene `acousticness_prom` cerca de 1?, ¿cuál combina alto `danceability` con alto `tempo`? Los nombres de negocio emergen de esos contrastes.
-:::
-
----
-
-## Paso 10 — De números a nombres de negocio
-
-::: {.callout-practice}
-**Actividad en clase**
-
-Con los datos del Paso 9, completa esta tabla para cada cluster:
-
-| Cluster | Característica principal | Nombre de lista sugerido | Momento de uso |
-|---|---|---|---|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-
-**Criterio de calidad:** un buen nombre es específico y accionable ("Tarde acústica de trabajo", "Cardio intenso"). Un mal nombre es genérico ("Grupo A", "Música tranquila").
-:::
-
----
-
-## Checklist
-
-Al finalizar esta práctica, debes poder:
-
-- [ ] Justificar por qué se excluye `streams` de las variables de clustering
-- [ ] Explicar qué hace `scale()` y verificar que funcionó con `skim()`
-- [ ] Leer el gráfico del codo e identificar el k razonable
-- [ ] Interpretar el output de `kmeans()`: tamaños, centroides, compactación
-- [ ] Construir la tabla de perfilamiento y leer los contrastes entre clusters
-- [ ] Proponer un nombre de negocio accionable para cada cluster
-
-## Preguntas de comprensión
-
-**1.** Al ejecutar el codo obtienes: k=1→8500, k=2→5200, k=3→3800, k=4→3100, k=5→2900, k=6→2800. ¿Qué k recomendarías y por qué?
-
-<details>
-<summary>Ver respuesta</summary>
-k=3 o k=4. La caída más fuerte ocurre de k=1 a k=3 (−4700). De k=4 en adelante la mejora es marginal (~200 por paso). El codo está en k=3 o k=4; la decisión final depende de si los clusters tienen sentido de negocio.
-</details>
-
-**2.** El Cluster 2 tiene `energy_prom = 0.87`, `danceability_prom = 0.82`, `acousticness_prom = 0.04`, `tempo_prom = 148`. ¿Qué nombre propondrías y para qué momento?
-
-<details>
-<summary>Ver respuesta</summary>
-Alta energía, muy bailable, casi no acústico (electrónico), ritmo rápido (148 BPM). Nombre: "Cardio máximo", "Pre-partido" o similar. Momento: ejercicio intenso, fiesta. Debe justificarse cada dimensión del perfil.
-</details>
-
-**3.** Un compañero dice que no hay que escalar porque "así los datos reflejan la realidad". ¿Cómo le responderías?
-
-<details>
-<summary>Ver respuesta</summary>
-Sin escalar, `tempo` (rango 40–220) domina completamente a `danceability` (rango 0–1). El algoritmo agrupará por tempo e ignorará las demás variables. Escalar no distorsiona los datos: los pone en escala comparable para que todas las variables tengan igual peso en el cálculo de distancias.
-</details>
-
-
-```{=html}
-<!-- Panel Environment -->
-<div id="env-panel" class="collapsed">
-  <div id="env-header" onclick="toggleEnvPanel()">
-    <span id="env-header-left">&#x1F4E6; Environment</span>
-    <span id="env-header-right">
-      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
-      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
-    </span>
-  </div>
-  <div id="env-status">Esperando webR...</div>
-  <div id="env-body">
-    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
-  </div>
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
 </div>
 
-<script type="module">
-window.toggleEnvPanel = function() {
-  const panel = document.getElementById('env-panel');
-  const btn   = document.getElementById('env-toggle-btn');
-  panel.classList.toggle('collapsed');
-  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
-};
+<!--=================-->
+<!--=================-->
+# Reglas de juego
 
-async function getEnvData() {
-  if (!globalThis.mainWebR) return [];
-  try {
-    const shelter = await new globalThis.mainWebR.Shelter();
-    const result  = await shelter.evalR(`
-      local({
-        objs <- ls(envir = .GlobalEnv)
-        if (length(objs) == 0) return("")
-        info <- vapply(objs, function(nm) {
-          obj <- get(nm, envir = .GlobalEnv)
-          cls <- paste(class(obj), collapse = ", ")
-          len <- length(obj)
-          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
-          prev <- tryCatch({
-            if (is.data.frame(obj)) {
-              paste(names(obj), collapse = ", ")
-            } else if (is.function(obj)) {
-              a <- names(formals(obj))
-              paste0("function(", paste(a, collapse = ", "), ")")
-            } else if (is.atomic(obj) && len <= 6) {
-              paste(format(obj, digits = 4), collapse = ", ")
-            } else if (is.atomic(obj) && len > 6) {
-              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
-            } else if (is.list(obj)) {
-              paste0("List of ", len)
-            } else { "" }
-          }, error = function(e) "")
-          paste(nm, cls, len, dm, prev, sep = "\\t")
-        }, character(1))
-        paste(info, collapse = "\\n")
-      })
-    `);
-    const raw = await result.toString();
-    shelter.purge();
-    if (!raw || raw === '') return [];
-    return raw.split('\n').map(line => {
-      const p = line.split('\t');
-      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
-    });
-  } catch (e) {
-    console.warn('Env panel error:', e);
-    return [];
-  }
-}
+::: {.callout-key}
+**Hoy eres el juez, no el ingeniero**
 
-function renderEnv(items) {
-  const body   = document.getElementById('env-body');
-  const status = document.getElementById('env-status');
-  if (items.length === 0) {
-    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
-    status.textContent = '0 objetos';
-    return;
-  }
-  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
-  body.innerHTML = items.map(it => {
-    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
-    if (it.dim) {
-      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
-    } else {
-      meta += 'Length: ' + it.len;
-    }
-    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
-    return '<div class="env-item">' +
-           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
-           '  <div class="env-item-meta">' + meta + '</div>' +
-           prev +
-           '</div>';
-  }).join('');
-}
+Esta práctica asume que ya escuchaste el podcast, **viste los dos videos de métricas** y presentaste el quiz. Aquí no se re-explica nada: se usa. Si un término se te escapa, el [glosario de la teoría](../theory/week-10.html) está a un clic.
 
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
+Trabajarás como el analista al que le entregan **modelos ya entrenados** y debe responder la única pregunta que le importa al negocio: *¿le confiamos la decisión?* Nada de entrenar todavía — eso empieza la próxima semana.
+:::
 
-async function updateEnvPanel() {
-  const items = await getEnvData();
-  renderEnv(items);
-}
-window.refreshEnv = function() {
-  const btn = document.getElementById('env-refresh-btn');
-  btn.style.animation = 'none';
-  void btn.offsetWidth;
-  updateEnvPanel();
-};
+- 👥 Trabaja **en parejas**: uno escribe, el otro audita las cifras (rotan en el Encargo 2).
+- 🖥️ Herramientas: **RStudio** con tu proyecto del curso. Solo necesitas `dplyr`.
+- 📥 Los datos de hoy (guárdalos en la carpeta `data/` de tu proyecto):
+  - <a href="credito_evaluacion.csv" download>**credito_evaluacion.csv**</a> — 60 solicitudes de crédito con la decisión real y la del modelo.
+  - <a href="notas_evaluacion.csv" download>**notas_evaluacion.csv**</a> — 60 estudiantes con su nota real y la pronosticada.
+- 🤖 ¿IA? Al estilo del curso desde la semana 8: puede ayudarte a escribir código, pero **toda cifra que reportes debe salir de código que tú ejecutaste** — y los veredictos los escribes tú.
 
-function moveWebRStatus() {
-  const anchor = document.getElementById('webr-status-anchor');
-  const statusArea = document.getElementById('qwebr-status-message-area');
-  if (anchor && statusArea) {
-    const wrapper = statusArea.closest('.quarto-title-meta');
-    if (wrapper) {
-      wrapper.style.display = 'inline';
-      wrapper.style.fontSize = '13px';
-      wrapper.style.marginLeft = '30px';
-      anchor.parentNode.insertBefore(wrapper, anchor);
-    }
-  }
-}
+<!--=================-->
+<!--=================-->
+# El setup <span class="badge-time">≈ 5 min</span>
 
-async function init() {
-  while (!globalThis.qwebrInstance) {
-    await new Promise(r => setTimeout(r, 300));
-  }
-  await globalThis.qwebrInstance;
-  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
-  moveWebRStatus();
+Abre tu proyecto del curso en RStudio, crea el script `scripts/10_juez_modelos.R` y arranca con el encabezado de siempre:
 
-  await new Promise(resolve => {
-    const check = setInterval(() => {
-      const btns = document.querySelectorAll('.qwebr-button-run');
-      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
-        clearInterval(check);
-        resolve();
-      }
-    }, 400);
-  });
+```r
+## ============================================
+## Práctica semana 10 — El juez de modelos
+## Nombre(s): _______________
+## Fecha:     _______________
+## ============================================
 
-  const original = globalThis.qwebrComputeEngine;
-  globalThis.qwebrComputeEngine = async function(...args) {
-    const res = await original.apply(this, args);
-    setTimeout(updateEnvPanel, 150);
-    return res;
-  };
+## Librerías / Libraries
+library(dplyr)
 
-  const panel = document.getElementById('env-panel');
-  if (panel.classList.contains('collapsed')) {
-    toggleEnvPanel();
-  }
-  await updateEnvPanel();
-}
+## Cargar el primer encargo / Load first dataset
+credito <- read.csv("data/credito_evaluacion.csv")
 
-init();
-</script>
+## Radiografía (reflejo desde la semana 3) / First look
+dim(credito)
+head(credito)
+str(credito)
 ```
 
+**Checkpoint 🎯:** `dim()` debe decir **60 filas y 7 columnas**. Las primeras cinco columnas describen al solicitante; las dos últimas son el duelo del día: `decision_real` (lo que de verdad pasó con el crédito) y `decision_modelo` (lo que el modelo predijo).
+
+::: {.callout-warning}
+**¿Por qué solo 60 filas?**
+
+Porque esto es **el examen**. BancoAndes entrenó su modelo con 240 solicitudes históricas (el 80% de train) y apartó estas 60 (el 20% de test) que el modelo **nunca vio**. Todo lo que calcules hoy es desempeño en datos nuevos — la única nota que cuenta. Si esta frase no te suena, la teoría de esta semana te espera.
+:::
+
+<!--=================-->
+<!--=================-->
+# Encargo 1 — El modelo de crédito de BancoAndes <span class="badge-time">≈ 25 min</span>
+
+*El contexto:* BancoAndes construyó un modelo que decide solicitudes de crédito en segundos. Antes de dejarlo operar, la gerencia de riesgo te contrata para el veredicto. Te entregan las 60 solicitudes de prueba. **Positivo = Aprobado** (igual que en el video 1).
+
+## Momento 1 — La vara: el baseline
+
+Antes de mirar al modelo, calcula qué lograría la regla tonta — aprobar (o rechazar) a todo el mundo según la clase mayoritaria:
+
+```r
+## ¿Cómo se reparte la realidad? / Target distribution
+table(credito$decision_real)
+
+## El baseline: acertar siempre a la clase mayoritaria
+## Baseline: always predict the majority class
+round(max(table(credito$decision_real)) / nrow(credito), 3)
+```
+
+**Checkpoint 🎯:** **34 Aprobados y 26 Rechazados** → la regla "apruebe a todo el mundo" acierta el **0.567** (56.7%). Anótalo grande: *un modelo solo aporta lo que le gane a 56.7%.*
+
+## Momento 2 — La matriz de confusión
+
+La misma operación del video 1, ahora con una línea de R:
+
+```r
+## La matriz: realidad en filas, modelo en columnas
+## Confusion matrix: truth in rows, model in columns
+table(Real = credito$decision_real, Modelo = credito$decision_modelo)
+```
+
+**Checkpoint 🎯:** tu consola debe mostrar exactamente:
+
+```default
+           Modelo
+Real        Aprobado Rechazado
+  Aprobado        31         3
+  Rechazado        4        22
+```
+
+Tradúcela con tu pareja antes de seguir (regla de memoria del video: primera palabra = ¿acertó?, segunda = ¿qué predijo?):
+
+- **TP = 31** — aprobó a quienes había que aprobar.
+- **FN = 3** — rechazó a 3 buenos clientes (negocio perdido).
+- **FP = 4** — aprobó a 4 que no pagaron (plata perdida).
+- **TN = 22** — rechazó a quienes había que rechazar.
+
+::: {.callout-practice}
+**Control de lectura (30 segundos):** ¿cuál de las cuatro celdas le quita el sueño al gerente de *riesgo*? ¿Y cuál al gerente *comercial*? Escríbanlo como comentario en el script — lo van a necesitar en el Momento 4.
+:::
+
+## Momento 3 — Las tres métricas, con código
+
+Regla de oro del curso: las cifras salen de código ejecutado, no de la calculadora del celular ni de la "memoria" de una IA. Guarda las celdas y calcula:
+
+```r
+## Las cuatro celdas / The four cells
+tp <- sum(credito$decision_real == "Aprobado"  & credito$decision_modelo == "Aprobado")
+fn <- sum(credito$decision_real == "Aprobado"  & credito$decision_modelo == "Rechazado")
+fp <- sum(credito$decision_real == "Rechazado" & credito$decision_modelo == "Aprobado")
+tn <- sum(credito$decision_real == "Rechazado" & credito$decision_modelo == "Rechazado")
+
+## Accuracy: ¿qué fracción del total clasificó bien?
+round((tp + tn) / (tp + tn + fp + fn), 3)
+
+## Precisión: de los que aprobó, ¿cuántos eran de aprobar?
+round(tp / (tp + fp), 3)
+```
+
+Y el **recall** lo escribes tú (la fórmula está en la teoría — de los buenos clientes reales, ¿cuántos detectó?):
+
+```r
+## Recall: TU CÓDIGO AQUÍ
+```
+
+**Checkpoint 🎯:** accuracy **0.883** · precisión **0.886** · recall **0.912**. Si el recall no te dio, revisa: su denominador es la *primera fila* de la matriz (los Aprobados reales), no la primera columna.
+
+## Momento 4 — El interrogatorio
+
+Con las cifras sobre la mesa, el juicio. Respondan como comentarios en el script, en sus palabras:
+
+```r
+## a) ¿Supera al baseline? ¿Por cuánto?
+## b) De cada 35 créditos que el modelo aprueba, ¿cuántos no pagan?
+##    ¿Ese riesgo es aceptable? ¿Qué información adicional pedirías?
+## c) El equipo de BancoAndes reporta que el modelo acierta el 93.3%
+##    en las 240 solicitudes de ENTRENAMIENTO. Aquí dio 88.3%.
+##    ¿Esa brecha es un escándalo o es lo esperable? ¿Cómo se llamaría
+##    el cuadro si fuera 99% contra 62%?
+```
+
+**Checkpoint 🎯:** (a) 88.3% contra 56.7%: el modelo le saca **+31.6 puntos** a la regla tonta — aporta, y mucho. (b) Aprobó 35 (31+4); **4 no pagaron** — el 11.4% de la cartera aprobada. Si un impago cuesta más de lo que dejan 8 buenos créditos, esa cifra manda sobre la accuracy. (c) Una brecha de **5 puntos** (93.3 → 88.3) es sobreajuste leve y esperable; 99 → 62 sería el memorizador de la teoría.
+
+<!--=================-->
+<!--=================-->
+# Encargo 2 — Las alertas tempranas de la universidad <span class="badge-time">≈ 20 min</span>
+
+*El contexto:* una universidad quiere pronosticar la **nota final** (escala 0–5) de cada estudiante a mitad de semestre, para disparar alertas tempranas. Su modelo se entrenó con 240 estudiantes históricos, cuyo **promedio de nota final fue 3.34** — ese dato viene del *entrenamiento* y es tu baseline (¿ves por qué no se calcula con las filas de hoy? Pista: rima con *leakage*). Te entregan los 60 estudiantes de prueba. Roten los roles de la pareja.
+
+## Momento 1 — La vara: predecir el promedio
+
+```r
+## Cargar el segundo encargo / Load second dataset
+notas <- read.csv("data/notas_evaluacion.csv")
+head(notas)
+
+## Baseline: predecirle 3.34 a todo el mundo
+## Baseline: predict the training mean for everyone
+notas <- notas %>% mutate(pred_baseline = 3.34)
+
+## MAE y RMSE del baseline (fórmulas del video 2)
+round(mean(abs(notas$nota_real - notas$pred_baseline)), 3)
+round(sqrt(mean((notas$nota_real - notas$pred_baseline)^2)), 3)
+```
+
+**Checkpoint 🎯:** MAE **0.376** y RMSE **0.466**. Lee el MAE como en el video: la regla tonta se equivoca, en promedio, por **0.38 puntos de nota**. Esa es la vara.
+
+## Momento 2 — El modelo
+
+Ahora las mismas dos métricas para `nota_modelo`. El MAE va de muestra; el RMSE es tuyo:
+
+```r
+## MAE del modelo / Model MAE
+round(mean(abs(notas$nota_real - notas$nota_modelo)), 3)
+
+## RMSE del modelo: TU CÓDIGO AQUÍ
+```
+
+**Checkpoint 🎯:** MAE **0.31** y RMSE **0.371**. Dos lecturas antes de seguir: (1) el modelo mejora al baseline en las dos métricas; (2) su RMSE queda *cerca* de su MAE — señal de que no comete embarradas ocasionales gigantes (¿recuerdas el modelo B de las preguntas de comprensión?).
+
+## Momento 3 — El veredicto con números
+
+```r
+## ¿Cuánto mejora el modelo a la regla tonta? (en %)
+## How much does the model improve on the baseline?
+mae_b  <- mean(abs(notas$nota_real - notas$pred_baseline))
+mae_m  <- mean(abs(notas$nota_real - notas$nota_modelo))
+round(100 * (mae_b - mae_m) / mae_b, 1)
+```
+
+**Checkpoint 🎯:** el modelo reduce el error promedio en **17.3%** (y el RMSE en 20.4%, si lo calculas). ¿Es mucho o poco? Esa pregunta no la responde R:
+
+```r
+## d) La universidad quiere ALERTAR a estudiantes en riesgo de perder
+##    (nota final < 3.0). Con un error promedio de ±0.31, ¿te sirve
+##    este modelo para esa decisión? ¿O la pregunta de negocio era
+##    de otro tipo (pista: semana 5 — ¿"cuánto sacará" o "¿está en
+##    riesgo?")? Escriban su postura en 3-4 líneas.
+```
+
+::: {.callout-connect}
+**La moraleja del encargo 2**
+
+"¿Qué nota sacará?" es regresión; "¿está en riesgo de perder?" es clasificación. La universidad pidió una y tal vez necesitaba la otra — traducir bien la pregunta de negocio (semana 5) decide qué métrica es la correcta (semana 10). En tu proyecto final, esa traducción es lo primero que evalúa el jurado.
+:::
+
+<!--=================-->
+<!--=================-->
+# El informe del juez <span class="badge-time">≈ 10 min</span>
+
+Todo veredicto profesional termina en una tabla que un gerente pueda leer en 20 segundos. Constrúyela con código:
+
+```r
+## La tabla final del informe / Final summary table
+informe <- data.frame(
+  encargo  = c("Crédito (clasificación)", "Crédito (clasificación)",
+               "Notas (regresión)",        "Notas (regresión)"),
+  metrica  = c("Accuracy", "Precisión", "MAE", "RMSE"),
+  baseline = c(0.567, NA, 0.376, 0.466),
+  modelo   = c(0.883, 0.886, 0.310, 0.371)
+)
+informe
+
+## Guardar la evidencia / Save the output
+write.csv(informe, "output/informe_semana10.csv", row.names = FALSE)
+```
+
+Y ciérrenlo con los **dos riesgos** que le reportarían a la gerencia (comentarios, 2 líneas cada uno). Ideas para discutir en pareja: ¿qué pasa si el perfil de los solicitantes cambia el próximo año? ¿la métrica se midió una sola vez en el test o alguien la "consultó" muchas veces? ¿los 4 FP comparten algún patrón que el modelo no ve?
+
+**Checkpoint final 🎯:** script corre completo de arriba a abajo sin errores (pruébalo con *Source*), `output/informe_semana10.csv` existe, y las preguntas a), b), c) y d) tienen respuesta escrita. Eso es exactamente el "producto mínimo" del analista: **métrica en test + baseline + riesgos**.
+
+::: {.callout-key}
+**El giro de la próxima semana 🔮**
+
+Hoy calificaste modelos que otros entrenaron. El de crédito, por cierto, era un **árbol de clasificación** — el mismo tipo de modelo que tú vas a construir, podar y calificar la próxima semana. Ya sabes exactamente con qué vara te van a medir: la dejaste escrita en `informe_semana10.csv`.
+:::
+
+<!--=================-->
+<!--=================-->
+# ¿Terminaste antes? El reto del auditor
+
+Para las parejas veloces: la gerencia de BancoAndes sospecha que el modelo trata distinto a los solicitantes jóvenes. Divide el test en dos grupos — `edad < 35` y `edad >= 35` — y calcula la **accuracy de cada grupo**. ¿El modelo es igual de confiable en ambos? (Pista: `filter()` dos veces, o `group_by(edad < 35)`.) Dos líneas de conclusión: ¿le cambiarías algo al informe final?
+
+**Checkpoint 🎯:** ambos grupos rondan el 0.88 (0.886 los de 35 o más, 0.88 los menores). En estos datos **no hay señal de trato desigual** — y ojo: un *"auditamos y no encontramos nada"* bien documentado también es un resultado, y de los que más tranquilizan a una gerencia.
+
+<!--=================-->
+<!--=================-->
+# Cierre
+
+En una sola clase pasaste de "el modelo da 88%" a un informe con matriz de confusión, tres métricas, dos baselines vencidos (uno por knockout, otro por decisión) y riesgos documentados. Esa es la diferencia entre *reportar números* y *juzgar modelos*.
+
+El **[Taller 10](../task/week-10.html)** te espera con dos proveedores que quieren venderle sus modelos a tus clientes. Al menos uno esconde algo que la accuracy no muestra. Ya tienes el olfato — ahora sin guía.

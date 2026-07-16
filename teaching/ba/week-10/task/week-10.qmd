@@ -1,0 +1,202 @@
+---
+title: "Unidad 4 - Taller 10: los vendedores de modelos"
+subtitle: "Taller práctico evaluable · Semana 10 · 06278-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Instrucciones generales
+
+::: {.callout-key}
+**Cómo funciona este taller**
+
+- Es **individual** y **evaluable**, y se desarrolla en el tiempo restante de la clase (⏱️ diseñado para **≈ 55 minutos**).
+- Se resuelve **sin la guía del profesor**: todo lo que necesitas está en este documento, en la [práctica](../practice/week-10.html) y en la [teoría](../theory/week-10.html) (con sus dos videos). Durante el taller el profesor solo atiende dudas logísticas.
+- **El entregable es tu script**: `apellido_nombre_taller10.R`. Los análisis escritos van como comentarios (`##`) dentro del script, en la sección que corresponda.
+- ⚠️ **Regla de oro doble:** (1) el script debe correr **completo, de arriba a abajo, sin errores** (pruébalo con *Source* antes de entregar — un script que no corre pierde el punto de la sección donde se rompe); (2) **toda cifra que cites en tus comentarios debe salir de código que está en el script**. Nada de calculadora, nada de cifras "de memoria" — ni tuya ni de una IA.
+- 📤 Entrega: sube el `.R` al espacio habilitado en Intu antes de terminar la clase. <!-- TODO: pegar aquí el enlace de entrega -->
+:::
+
+**Los datos** (guárdalos en la carpeta `data/` de tu proyecto, como en la práctica):
+
+- <a href="credito_taller10.csv" download>**credito_taller10.csv**</a> — 80 solicitudes de prueba evaluadas por el modelo de CreditoYa.
+- <a href="notas_taller10.csv" download>**notas_taller10.csv**</a> — 60 estudiantes de prueba con los pronósticos de PronosticaU.
+
+**Distribuye tu tiempo:** Punto 0 ≈ 5 min · Punto 1 ≈ 15 min · Punto 2 ≈ 12 min · Punto 3 ≈ 13 min · Punto 4 ≈ 10 min.
+
+<!--=================-->
+<!--=================-->
+# El encargo: dos contratos a punto de firmarse
+
+Tu firma de consultoría tiene dos clientes con el bolígrafo en la mano, y te piden la auditoría **hoy**:
+
+> 🏦 **Cliente 1 — BancoAndes.** La fintech **CreditoYa** le ofrece su modelo de aprobación automática de créditos: *"accuracy del 85% en datos de prueba, 30 puntos por encima de aprobar a ciegas"*. Adjuntan las predicciones del modelo sobre 80 solicitudes de prueba que el modelo nunca vio (`decision_real` vs. `decision_modelo`). Para BancoAndes, **el error caro es el impago**: un crédito que no se paga cuesta, en promedio, lo que dejan de ganancia ocho créditos buenos.
+
+> 🎓 **Cliente 2 — la universidad.** La startup **PronosticaU** le ofrece su pronosticador de notas para alertas tempranas: *"nuestro modelo se equivoca en promedio por apenas medio punto, y supera cualquier regla simple"*. Adjuntan sus pronósticos sobre 60 estudiantes de prueba (`nota_real` vs. `nota_modelo`). Dato del contexto: **el promedio histórico de nota final en esa universidad es 3.2**.
+
+Tu trabajo no es entrenar nada: es **verificar las afirmaciones de los vendedores con las métricas de esta semana** y recomendar, con cifras, si cada cliente firma o no.
+
+<!--=================-->
+<!--=================-->
+# Punto 0 — Proyecto y radiografía (0.5 puntos)
+
+En tu proyecto del curso, crea el script `apellido_nombre_taller10.R` con este encabezado, carga las dos bases **por ruta relativa** y hazles la radiografía de rigor:
+
+```r
+## ============================================
+## Taller 10 — Los vendedores de modelos
+## Nombre: ______________  Código: ___________
+## Fecha: ______________
+## Qué hace: audita los modelos de CreditoYa y
+## PronosticaU con métricas en datos de prueba
+## ============================================
+
+## Librerías / Libraries
+library(dplyr)
+
+## Cargar datos / Load data
+credito <- read.csv("data/credito_taller10.csv")
+notas   <- read.csv("data/notas_taller10.csv")
+
+## Radiografía / First look
+## (dim, str y head de cada base)
+```
+
+```r
+## Punto 0c — responde como comentario:
+## ¿Cuántas filas tiene cada base? ¿Cuál columna es el target real y
+## cuál la predicción del proveedor, en cada una?
+```
+
+<!--=================-->
+<!--=================-->
+# Punto 1 — CreditoYa bajo el microscopio (1.25 puntos)
+
+La clase positiva es **Aprobado**, como toda la semana.
+
+a. **La vara.** Calcula la distribución de `decision_real` y la accuracy del baseline (la regla "predecir siempre la clase mayoritaria"). Escribe como comentario cuál es la clase mayoritaria y cuánto acierta esa regla tonta.
+b. **La matriz.** Construye la matriz de confusión con `table(Real = ..., Modelo = ...)`.
+c. **Las celdas.** Identifica como comentario los cuatro valores TP, FN, FP y TN, y qué significa **cada uno en pesos de BancoAndes** (una frase por celda: quién era el solicitante, qué hizo el modelo, qué le cuesta o le deja al banco).
+
+```r
+## Punto 1a — la vara
+
+## Punto 1b — la matriz
+
+## Punto 1c — TP = __ : ____________________
+##            FN = __ : ____________________
+##            FP = __ : ____________________
+##            TN = __ : ____________________
+```
+
+<!--=================-->
+<!--=================-->
+# Punto 2 — La letra menuda del 85% (1.25 puntos)
+
+a. **Las tres métricas.** Calcula con código accuracy, precisión y recall del modelo de CreditoYa (guarda primero `tp`, `fn`, `fp`, `tn` como en la práctica).
+b. **Verificación del vendedor.** ¿La afirmación *"accuracy del 85%, 30 puntos por encima de aprobar a ciegas"* es cierta? Responde como comentario comparando **tus** cifras con las del folleto.
+c. **La pregunta de la gerente de riesgo.** Ella no habla de métricas; pregunta: *"de cada 100 créditos que este modelo apruebe, ¿cuántos NO van a pagar?"*. Calcula esa cifra con código (pista: mira solo las solicitudes que el modelo aprobó) y respóndele en una frase.
+d. **El contraste.** En una o dos líneas: ¿cómo puede un modelo tener una accuracy tan presentable y a la vez esconder este problema? ¿Qué métrica lo delataba?
+
+```r
+## Punto 2a — accuracy, precisión y recall
+
+## Punto 2b — ¿el folleto dice la verdad?
+
+## Punto 2c — la cifra de la gerente:
+
+## Punto 2d — el contraste:
+```
+
+<!--=================-->
+<!--=================-->
+# Punto 3 — PronosticaU contra la regla tonta (1.25 puntos)
+
+a. **La vara.** El baseline es predecirle a todo estudiante el promedio histórico (**3.2**). Calcula su MAE y su RMSE sobre los 60 estudiantes de prueba.
+b. **El proveedor.** Calcula el MAE y el RMSE de `nota_modelo`.
+c. **Verificación del vendedor.** El folleto afirma dos cosas: *"se equivoca en promedio por apenas medio punto"* y *"supera cualquier regla simple"*. Contrasta cada afirmación con tus cifras, como comentario. Sé precavido con los redondeos generosos.
+d. **La distancia MAE–RMSE.** El RMSE del proveedor queda bastante por encima de su MAE. ¿Qué te dice eso sobre el *tipo* de errores que comete (pista: video 2)? ¿Por qué eso es especialmente grave para un sistema de **alertas tempranas**?
+
+```r
+## Punto 3a — baseline (3.2): MAE y RMSE
+
+## Punto 3b — proveedor: MAE y RMSE
+
+## Punto 3c — ¿el folleto dice la verdad?
+
+## Punto 3d — la distancia MAE–RMSE:
+```
+
+<!--=================-->
+<!--=================-->
+# Punto 4 — El memorando final (0.75 puntos)
+
+Cierra el script con tu recomendación a cada cliente, como comentario. **Lenguaje de negocio** — imagina que lo lee un gerente que no sabe qué es un FP:
+
+```r
+## ============================================
+## MEMORANDO FINAL
+## ============================================
+## Para BancoAndes (3-5 líneas): ¿firmar, no firmar, o firmar con
+## condiciones? Cita al menos DOS cifras tuyas y conecta con el costo
+## del error que más le duele al banco.
+##
+## Para la universidad (3-5 líneas): ¿firmar o no? Cita al menos DOS
+## cifras tuyas, incluida la comparación contra la regla tonta.
+##
+## Un riesgo de tu propia auditoría (1-2 líneas): ¿qué NO puedes saber
+## con estos datos? (ideas: ¿quién eligió estas filas de prueba?,
+## ¿cuántas veces consultó el vendedor su test?, ¿el perfil de los
+## solicitantes cambiará?)
+```
+
+<!--=================-->
+<!--=================-->
+# Rúbrica de evaluación
+
+| Punto | Qué se evalúa | Puntos |
+|---|---|---:|
+| **0. Proyecto y radiografía** | Script con encabezado; datos cargados por ruta relativa; radiografía y respuestas del 0c | 0.5 |
+| **1. Baseline y matriz** | Baseline correcto con código (a: 0.4); matriz bien construida (b: 0.4); las cuatro celdas identificadas y traducidas a negocio (c: 0.45) | 1.25 |
+| **2. Métricas y letra menuda** | Tres métricas con código (a: 0.5); verificación honesta del folleto (b: 0.25); la cifra de la gerente calculada con código (c: 0.3); contraste accuracy vs. precisión (d: 0.2) | 1.25 |
+| **3. Regresión vs. baseline** | MAE/RMSE del baseline (a: 0.4) y del proveedor (b: 0.35); las dos afirmaciones contrastadas (c: 0.3); lectura de la brecha MAE–RMSE (d: 0.2) | 1.25 |
+| **4. Memorando** | Recomendaciones con cifras propias y lenguaje de negocio; el riesgo de la auditoría | 0.75 |
+| **Total** | | **5.0** |
+
+: La presentación (script ordenado, comentarios en su sección, que corra con *Source*) se descuenta hasta -0.3 si dificulta la revisión. {.striped tbl-colwidths="[24,64,12]"}
+
+::: {.callout-warning}
+**Recordatorios que la rúbrica aplica sin piedad**
+
+1. Script que **no corre completo** → se pierde el punto de la sección donde se rompe.
+2. Cifra citada en un comentario **sin código que la produzca** en el script → no cuenta.
+3. Los comentarios de análisis (1c, 2b-d, 3c-d y el memorando) **los redactas tú**. Pedirle a una IA que "opine" por ti se nota — y es justo lo que este taller evalúa que sepas hacer sin delegar.
+:::
+
+<!--=================-->
+<!--=================-->
+# Declaración de uso de IA
+
+Cierra tu script con este bloque diligenciado:
+
+```r
+## ============================================
+## DECLARACIÓN DE USO DE IA
+## Herramienta y modelo usados: _______________ (o "No usé IA")
+## Para qué la usé: ____________________________________________
+## Qué verifiqué por mi cuenta: ________________________________
+## ============================================
+```
+
+*Nota: usar IA para ayudarte con la sintaxis de R está bien (política del curso desde la semana 2, con agentes desde la semana 8). Pero recuerda la regla que aprendiste allá: la IA no es calculadora — toda cifra sale de código ejecutado por ti, y el juicio del memorando es tuyo. Hoy, precisamente, estás calificando a dos "IA" que alguien más entrenó: sería irónico delegar la auditoría.*

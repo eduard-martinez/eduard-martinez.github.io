@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Unidad 2 - Práctica: de la pregunta a la decisión</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="week-05_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-05_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-05_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-05_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="week-05_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-05_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-05_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-05_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-05_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-05_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-05_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-05_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#reglas-de-juego" id="toc-reglas-de-juego" class="nav-link active" data-scroll-target="#reglas-de-juego"><span class="header-section-number">1</span> Reglas de juego</a></li>
+  <li><a href="#bloque-1-el-caso-churn-de-punta-a-punta-20-min" id="toc-bloque-1-el-caso-churn-de-punta-a-punta-20-min" class="nav-link" data-scroll-target="#bloque-1-el-caso-churn-de-punta-a-punta-20-min"><span class="header-section-number">2</span> Bloque 1 — El caso churn, de punta a punta <span class="badge-time">≈ 20 min</span></a>
+  <ul class="collapse">
+  <li><a href="#parada-1-la-pregunta" id="toc-parada-1-la-pregunta" class="nav-link" data-scroll-target="#parada-1-la-pregunta"><span class="header-section-number">2.1</span> Parada 1 — La pregunta</a></li>
+  <li><a href="#parada-2-los-datos" id="toc-parada-2-los-datos" class="nav-link" data-scroll-target="#parada-2-los-datos"><span class="header-section-number">2.2</span> Parada 2 — Los datos</a></li>
+  <li><a href="#parada-3-la-limpieza" id="toc-parada-3-la-limpieza" class="nav-link" data-scroll-target="#parada-3-la-limpieza"><span class="header-section-number">2.3</span> Parada 3 — La limpieza</a></li>
+  <li><a href="#parada-4-la-eda" id="toc-parada-4-la-eda" class="nav-link" data-scroll-target="#parada-4-la-eda"><span class="header-section-number">2.4</span> Parada 4 — La EDA</a></li>
+  <li><a href="#parada-5-el-modelo" id="toc-parada-5-el-modelo" class="nav-link" data-scroll-target="#parada-5-el-modelo"><span class="header-section-number">2.5</span> Parada 5 — El modelo</a></li>
+  <li><a href="#parada-6-la-comunicación" id="toc-parada-6-la-comunicación" class="nav-link" data-scroll-target="#parada-6-la-comunicación"><span class="header-section-number">2.6</span> Parada 6 — La comunicación</a></li>
+  <li><a href="#parada-7-la-decisión-y-el-ciclo" id="toc-parada-7-la-decisión-y-el-ciclo" class="nav-link" data-scroll-target="#parada-7-la-decisión-y-el-ciclo"><span class="header-section-number">2.7</span> Parada 7 — La decisión (y el ciclo)</a></li>
+  </ul></li>
+  <li><a href="#bloque-2-el-banco-de-preguntas-20-min" id="toc-bloque-2-el-banco-de-preguntas-20-min" class="nav-link" data-scroll-target="#bloque-2-el-banco-de-preguntas-20-min"><span class="header-section-number">3</span> Bloque 2 — El banco de preguntas <span class="badge-time">≈ 20 min</span></a></li>
+  <li><a href="#bloque-3-tu-pregunta-de-negocio-25-min" id="toc-bloque-3-tu-pregunta-de-negocio-25-min" class="nav-link" data-scroll-target="#bloque-3-tu-pregunta-de-negocio-25-min"><span class="header-section-number">4</span> Bloque 3 — Tu pregunta de negocio <span class="badge-time">≈ 25 min</span></a>
+  <ul class="collapse">
+  <li><a href="#paso-1-pongan-todas-sobre-la-mesa-5-min" id="toc-paso-1-pongan-todas-sobre-la-mesa-5-min" class="nav-link" data-scroll-target="#paso-1-pongan-todas-sobre-la-mesa-5-min"><span class="header-section-number">4.1</span> Paso 1 — Pongan todas sobre la mesa <span class="badge-time">≈ 5 min</span></a></li>
+  <li><a href="#paso-2-pásenlas-por-el-filtro-10-min" id="toc-paso-2-pásenlas-por-el-filtro-10-min" class="nav-link" data-scroll-target="#paso-2-pásenlas-por-el-filtro-10-min"><span class="header-section-number">4.2</span> Paso 2 — Pásenlas por el filtro <span class="badge-time">≈ 10 min</span></a></li>
+  <li><a href="#paso-3-elijan-una-y-aféitenla-10-min" id="toc-paso-3-elijan-una-y-aféitenla-10-min" class="nav-link" data-scroll-target="#paso-3-elijan-una-y-aféitenla-10-min"><span class="header-section-number">4.3</span> Paso 3 — Elijan una y aféitenla <span class="badge-time">≈ 10 min</span></a></li>
+  </ul></li>
+  <li><a href="#cierre" id="toc-cierre" class="nav-link" data-scroll-target="#cierre"><span class="header-section-number">5</span> Cierre</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 2 - Práctica: de la pregunta a la decisión</h1>
+<p class="subtitle lead">Aplicación guiada en clase · Semana 5 · 06278-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="reglas-de-juego" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Reglas de juego</h1>
+<div class="callout-key">
+<p><strong>Esta sesión asume que ya estudiaste la teoría</strong></p>
+<p>Aquí no volvemos a explicar qué son las siete etapas, ni qué distingue clasificación de segmentación: eso quedó en el podcast (y su <a href="../theory/week-05.html">versión escrita</a>) y en el quiz. Hoy ese mapa <strong>se usa</strong> sobre preguntas de negocio reales — incluida la tuya. Si algo se te escapa, el <a href="../theory/week-05.html#glosario-de-la-semana">glosario</a> queda a un clic.</p>
+<p><strong>Lo que necesitas ahora mismo:</strong></p>
+<ul>
+<li>📝 <strong>Tu pregunta de negocio</strong>, la que te pidieron traer. Si no la trajiste, el Bloque 1 te da 10 minutos para improvisarla — pero llegas en desventaja.</li>
+<li>🧑‍🤝‍🧑 Tu <strong>grupo de proyecto</strong> ya conformado (el Bloque 3 se trabaja en grupo).</li>
+<li>✍️ Papel o un documento en blanco. <strong>Hoy no se abre RStudio.</strong></li>
+</ul>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>La sesión de hoy tiene consecuencias</strong></p>
+<p>Lo que produzcas en el Bloque 3 <strong>es</strong> el borrador de la <strong>Entrega 1</strong> de tu proyecto final. No es un ejercicio de calentamiento: es la primera piedra del trabajo del semestre, y una pregunta mal formulada hoy te va a costar caro en la semana 9. Los monitores están en el salón para eso.</p>
+</div>
+</div>
+<p><strong>El plan de la sesión:</strong> primero desarmamos un proyecto real completo (Bloque 1), luego entrenamos el ojo con preguntas ajenas (Bloque 2), y al final le apuntamos a la tuya (Bloque 3).</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="bloque-1-el-caso-churn-de-punta-a-punta-20-min" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Bloque 1 — El caso churn, de punta a punta <span class="badge-time">≈ 20 min</span></h1>
+<p>Vamos a recorrer las siete etapas del caso de la teoría, pero <strong>deteniéndonos en las decisiones</strong>. En cada parada, el profesor va a preguntar antes de mostrar la respuesta: la idea es que decidas tú primero.</p>
+<blockquote class="blockquote">
+<p><strong>El caso:</strong> una empresa de telecomunicaciones pierde el 25% de sus clientes al año. Perder un cliente cuesta <strong>$500</strong>. Un incentivo de retención cuesta <strong>$100</strong> y evita el 60% de las fugas.</p>
+</blockquote>
+<section id="parada-1-la-pregunta" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="parada-1-la-pregunta"><span class="header-section-number">2.1</span> Parada 1 — La pregunta</h2>
+<p>El gerente llega y dice: <em>“Necesito saber por qué se me van los clientes.”</em></p>
+<div class="callout-practice">
+<p><strong>Discute con tu vecino (2 min):</strong> ¿es esa una pregunta de negocio? Aplícale el test: si te dieran la respuesta ahora mismo, ¿sabrías qué hacer mañana?</p>
+<details class="answer"><summary>Ver el análisis</summary>
+<p>No lo es todavía. "¿Por qué se van?" es un <b>tema</b>, no una pregunta: no dice cuáles clientes, ni en qué ventana de tiempo, ni qué decisión cambia. Reformulada: <b>"¿Qué clientes abandonarán en los próximos 30 días?"</b> — específica (quiénes y cuándo), accionable (a esos los llamamos) y medible (hay historial). Fíjate en algo importante: la pregunta reformulada <b>ya define el target</b> (se va / no se va) y con eso ya define la tarea.</p>
+</details>
+</div>
+</section>
+<section id="parada-2-los-datos" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="parada-2-los-datos"><span class="header-section-number">2.2</span> Parada 2 — Los datos</h2>
+<div class="callout-practice">
+<p><strong>Al tablero (3 min):</strong> hagan entre todos la lista de datos que necesitarían. ¿Qué es interno, qué es externo, y cuál es el target?</p>
+<details class="answer"><summary>Ver el análisis</summary>
+<p><b>Internos:</b> historial de facturación, consumo, reclamos, pagos. <b>Externos:</b> competencia en la zona, nivel socioeconómico, geografía. <b>Target:</b> ¿el cliente se fue? (sí/no) — y ojo: <b>sin esa columna no hay proyecto supervisado</b>. Los tres dolores de cabeza serán los mismos de siempre: los datos viven en <b>silos</b> distintos (CRM, facturación, soporte), en formatos incompatibles, y con permisos de privacidad de por medio. Ninguno de los tres es un problema estadístico.</p>
+</details>
+</div>
+</section>
+<section id="parada-3-la-limpieza" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="parada-3-la-limpieza"><span class="header-section-number">2.3</span> Parada 3 — La limpieza</h2>
+<p>Aquí se va el <strong>80% del tiempo del proyecto</strong>. En este caso: faltantes en <code>antigüedad</code>, duplicados por una migración de sistema, fechas en el futuro, y <code>"plan A"</code> / <code>"Plan_A"</code> / <code>"PLAN A"</code> conviviendo en la misma columna.</p>
+<div class="callout-practice">
+<p><strong>Pregunta rápida:</strong> ¿por qué “plan A”, “Plan_A” y “PLAN A” son un problema real y no una manía de perfeccionista?</p>
+<details class="answer"><summary>Ver el análisis</summary>
+<p>Porque para el computador son <b>tres planes distintos</b>. Si agrupas por plan, te salen tres grupos donde hay uno solo: los conteos quedan mal, los promedios quedan mal, y cualquier modelo que use esa variable aprende basura. Es exactamente el <code>group_by()</code> de la semana 4 dando un resultado impecablemente calculado y completamente falso. Toda la semana 6 vive aquí.</p>
+</details>
+</div>
+</section>
+<section id="parada-4-la-eda" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="parada-4-la-eda"><span class="header-section-number">2.4</span> Parada 4 — La EDA</h2>
+<p>Tres hallazgos salieron de explorar: el churn es del <strong>25%</strong> (clases desbalanceadas), los clientes con más de 3 reclamos hacen <strong>60%</strong> de churn, y los de prepago hacen <strong>el doble</strong> que los de pospago.</p>
+<div class="callout-practice">
+<p><strong>Discute (3 min):</strong> de esos tres hallazgos, uno <strong>cambia una decisión técnica</strong> que viene después. ¿Cuál y por qué?</p>
+<details class="answer"><summary>Ver el análisis</summary>
+<p>El <b>desbalanceo (25%)</b>. Si el 75% de los clientes se queda, un modelo que prediga "nadie se va" acierta el 75% de las veces — <b>accuracy 75% siendo completamente inútil</b>. Ese hallazgo es el que obliga a elegir otra métrica en la etapa 5. Los otros dos son señales valiosas para el modelo (variables predictoras potentes), pero no cambian cómo lo evaluamos. Moraleja: <b>la EDA no es decoración, condiciona el modelado</b>.</p>
+</details>
+</div>
+</section>
+<section id="parada-5-el-modelo" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="parada-5-el-modelo"><span class="header-section-number">2.5</span> Parada 5 — El modelo</h2>
+<p>Clasificación. Train 70% / Test 30%. Métrica elegida: <strong>recall</strong>. Resultado: recall 75%, precision 60%, baseline 50%.</p>
+<div class="callout-practice">
+<p><strong>La pregunta del millón (3 min):</strong> ¿de dónde salió la decisión de usar <em>recall</em>? Pista: no salió de la estadística.</p>
+<details class="answer"><summary>Ver el análisis</summary>
+<p>Salió de la <b>tabla de costos</b>, es decir, del negocio. Un falso negativo (dejar ir a quien sí se iba) cuesta <b>$500</b>; un falso positivo (llamar a quien no se iba) cuesta <b>$100</b>. Como el error caro es dejarlos escapar, queremos <b>atrapar a la mayor cantidad posible de los que se van</b>: eso es recall. Si el incentivo costara $2.000, la asimetría se invertiría y priorizaríamos precision. <b>La métrica la elige el negocio, no el código.</b></p>
+</details>
+</div>
+</section>
+<section id="parada-6-la-comunicación" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="parada-6-la-comunicación"><span class="header-section-number">2.6</span> Parada 6 — La comunicación</h2>
+<p>Dos formas de decir lo mismo. El profesor va a leer las dos:</p>
+<div class="vs-no">
+<ul>
+<li><span class="vs-ico">✗</span> <em>“El modelo tiene un recall de 75% con un AUC de 0.82 sobre el conjunto de test.”</em></li>
+</ul>
+</div>
+<div class="vs-si">
+<ul>
+<li><span class="vs-ico">✓</span> <em>“Identificamos 2.500 clientes con 75% de probabilidad de irse. Contactarlos con una oferta de $100 recupera el 60% y ahorra $750.000 frente a dejarlos ir.”</em></li>
+</ul>
+</div>
+<div class="callout-practice">
+<p><strong>Discute (2 min):</strong> ambas frases describen el mismo modelo. ¿Qué tiene la segunda que la primera no?</p>
+<details class="answer"><summary>Ver el análisis</summary>
+<p>Tres cosas: <b>un número que el gerente entiende</b> ($750.000, no 0.82), <b>el costo-beneficio explícito</b> ($100 de inversión contra $500 de pérdida) y <b>una acción recomendada</b> (contactarlos). La primera frase es verdadera y es inútil: obliga al stakeholder a hacer una traducción que no sabe hacer. Traduce siempre a <b>plata, riesgo o tiempo</b>.</p>
+</details>
+</div>
+</section>
+<section id="parada-7-la-decisión-y-el-ciclo" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="parada-7-la-decisión-y-el-ciclo"><span class="header-section-number">2.7</span> Parada 7 — La decisión (y el ciclo)</h2>
+<p>Se contactan los 2.500. Se segmenta por valor, se asigna al call center, se mide a 30 días. Los KPIs: % que acepta, % que finalmente no se fue, ROI de la campaña.</p>
+<div class="callout-key">
+<p><strong>El cierre del bloque</strong></p>
+<p>La campaña <strong>genera datos nuevos</strong> (quién respondió, qué oferta funcionó) → que generan una <strong>pregunta nueva</strong> (¿cómo mejoramos la oferta?) → y el proceso arranca otra vez. Cuenta las etapas donde hubo código: fueron <strong>tres de siete</strong>. Las otras cuatro fueron pensar, decidir y hablar.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="bloque-2-el-banco-de-preguntas-20-min" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Bloque 2 — El banco de preguntas <span class="badge-time">≈ 20 min</span></h1>
+<p>Antes de mirar la tuya, entrenemos el ojo con las de otros. Abajo hay <strong>ocho preguntas candidatas</strong> de industrias distintas. En parejas, clasifica cada una:</p>
+<ol type="1">
+<li>¿Es <strong>específica</strong>? (¿qué, quién, cuándo?)</li>
+<li>¿Es <strong>accionable</strong>? (¿qué decisión cambia?)</li>
+<li>¿Es <strong>medible</strong>? (¿existen datos plausibles?)</li>
+<li>Si sirve: ¿qué <strong>tarea analítica</strong> es?</li>
+</ol>
+<blockquote class="blockquote">
+<p><strong>Cómo trabajarlo:</strong> dale tu veredicto antes de abrir la respuesta. Al final, el profesor pasa por tres de ellas al tablero.</p>
+</blockquote>
+<div class="callout-practice">
+<p><strong>Candidata 1 — Retail:</strong> <em>“¿Cómo podemos mejorar las ventas de la tienda?”</em></p>
+<details class="answer"><summary>Ver veredicto</summary>
+<p>❌ <b>No sirve.</b> Falla en las tres. No es específica (¿qué producto, qué tienda, qué periodo?), no es accionable (¿qué haces mañana con la respuesta?) y no es medible (¿"mejorar" cuánto?). Es el arquetipo del <b>tema disfrazado de pregunta</b>. <b>Reparable así:</b> "¿Qué tres productos deberíamos ubicar en la góndola de entrada el próximo mes para maximizar el margen por metro cuadrado?"</p>
+</details>
+</div>
+<div class="callout-practice">
+<p><strong>Candidata 2 — Fintech:</strong> <em>“¿Qué solicitudes de crédito de este mes tienen alta probabilidad de caer en mora en los próximos 6 meses?”</em></p>
+<details class="answer"><summary>Ver veredicto</summary>
+<p>✅ <b>Sirve, y es de manual.</b> Específica (solicitudes de este mes, ventana de 6 meses), accionable (aprobar, negar o pedir codeudor) y medible (hay historial de créditos con su desenlace). <b>Tarea:</b> clasificación supervisada — el target es "cayó en mora sí/no". Ojo con el costo asimétrico: negarle a un buen cliente cuesta distinto que aprobarle a uno malo, y eso decidirá la métrica.</p>
+</details>
+</div>
+<div class="callout-practice">
+<p><strong>Candidata 3 — Universidad:</strong> <em>“¿Qué perfiles de estudiante existen en el programa según su patrón de uso de la biblioteca, asistencia y notas?”</em></p>
+<details class="answer"><summary>Ver veredicto</summary>
+<p>✅ <b>Sirve.</b> Específica (esas tres dimensiones, ese programa), accionable (diseñar tutorías o alertas distintas por perfil) y medible (los tres datos existen en los sistemas). <b>Tarea:</b> segmentación, <b>no supervisada</b> — nadie etiquetó previamente los perfiles; el algoritmo los descubre y luego un humano los nombra. Es el tipo de pregunta más común cuando <b>no tienes target</b> pero sí muchas variables.</p>
+</details>
+</div>
+<div class="callout-practice">
+<p><strong>Candidata 4 — Salud:</strong> <em>“¿Cuál es la mejor manera de atender a los pacientes?”</em></p>
+<details class="answer"><summary>Ver veredicto</summary>
+<p>❌ <b>No sirve.</b> "Mejor" no está definido (¿más rápido?, ¿más barato?, ¿mejor desenlace clínico?) y no hay decisión concreta detrás. <b>Reparable así:</b> "¿Cuántos pacientes llegarán a urgencias cada hora del próximo fin de semana, para asignar los turnos de enfermería?" — ahí sí: específica, accionable (el cronograma de turnos) y medible (hay historial de llegadas). Y de paso cambió de tema vago a <b>predicción</b>.</p>
+</details>
+</div>
+<div class="callout-practice">
+<p><strong>Candidata 5 — E-commerce:</strong> <em>“¿Qué transacciones de la última hora deberíamos bloquear por sospecha de fraude?”</em></p>
+<details class="answer"><summary>Ver veredicto</summary>
+<p>✅ <b>Sirve.</b> Muy específica (última hora), muy accionable (se bloquea o no) y medible. <b>Tarea:</b> detección de anomalías — o clasificación, si la empresa tiene fraudes históricos ya etiquetados. Es el ejemplo perfecto de por qué la tarea es <b>mixta</b>: depende de si alguien marcó los fraudes del pasado. Nota de negocio: bloquear una compra legítima enfurece a un cliente real, así que el costo del falso positivo aquí es alto.</p>
+</details>
+</div>
+<div class="callout-practice">
+<p><strong>Candidata 6 — Deporte:</strong> <em>“¿Ganará el equipo el próximo partido?”</em></p>
+<details class="answer"><summary>Ver veredicto</summary>
+<p>⚠️ <b>Tramposa.</b> Es específica y medible (hay historial de partidos, y el target es obvio: ganó sí/no). Pero falla en <b>accionable</b>: ¿qué decisión cambia? Si eres un aficionado, ninguna. Si eres el <b>director técnico</b>, tampoco — a él no le sirve saber si gana, le sirve saber <i>qué alineación</i> maximiza la probabilidad. La lección: una pregunta puede ser técnicamente perfecta y de negocio inútil. <b>Siempre pregunta quién decide qué con la respuesta.</b></p>
+</details>
+</div>
+<div class="callout-practice">
+<p><strong>Candidata 7 — Logística:</strong> <em>“¿Cuántos domiciliarios debo tener en turno cada hora del sábado en cada zona de la ciudad?”</em></p>
+<details class="answer"><summary>Ver veredicto</summary>
+<p>✅ <b>Sirve, y es ambiciosa.</b> Específica (hora y zona), accionable (el cronograma de turnos) y medible (historial de pedidos). <b>Tarea:</b> en el fondo son <b>dos</b> — primero <i>predicción</i> (cuántos pedidos habrá por hora y zona) y luego <i>optimización</i> (cómo reparto los domiciliarios dada esa demanda y mis restricciones de contrato). Muy buen ejemplo de que una pregunta de negocio real puede encadenar tareas.</p>
+</details>
+</div>
+<div class="callout-practice">
+<p><strong>Candidata 8 — Entretenimiento:</strong> <em>“¿Por qué a la gente le gusta nuestra serie?”</em></p>
+<details class="answer"><summary>Ver veredicto</summary>
+<p>❌ <b>No sirve</b> como está. Es una pregunta de <b>causa</b>, difusa y sin decisión asociada. Además, "gustar" no está definido. <b>Reparable así:</b> "¿Qué usuarios que terminaron la temporada 1 tienen alta probabilidad de no empezar la temporada 2, para enviarles una notificación?" — específica, accionable y medible, y se convirtió en <b>clasificación</b>. Fíjate en el patrón: casi todas las preguntas "¿por qué...?" se arreglan volviéndolas "¿qué/quiénes/cuántos...?".</p>
+</details>
+</div>
+<div class="callout-key">
+<p><strong>El patrón que debiste detectar</strong></p>
+<p>Las que fallaron (1, 4, 8) fallaron <strong>todas por lo mismo</strong>: empiezan con “cómo mejorar”, “cuál es la mejor” o “por qué”. Las que sirvieron empiezan con <strong>qué, quiénes, cuántos o cuándo</strong>. No es una regla gramatical: es que las primeras describen un deseo y las segundas describen un <strong>output concreto que alguien va a usar</strong>. Y la número 6 enseña la trampa más fina: se puede fallar en accionable habiendo aprobado lo demás.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="bloque-3-tu-pregunta-de-negocio-25-min" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Bloque 3 — Tu pregunta de negocio <span class="badge-time">≈ 25 min</span></h1>
+<p>Ahora sí. <strong>En tu grupo de proyecto</strong>, y con los monitores circulando por el salón.</p>
+<section id="paso-1-pongan-todas-sobre-la-mesa-5-min" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="paso-1-pongan-todas-sobre-la-mesa-5-min"><span class="header-section-number">4.1</span> Paso 1 — Pongan todas sobre la mesa <span class="badge-time">≈ 5 min</span></h2>
+<p>Cada integrante lee la pregunta que trajo. <strong>No las critiquen todavía</strong>: solo escúchenlas todas y escríbanlas. Si el grupo tiene cuatro personas, deben quedar cuatro preguntas en el papel.</p>
+</section>
+<section id="paso-2-pásenlas-por-el-filtro-10-min" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="paso-2-pásenlas-por-el-filtro-10-min"><span class="header-section-number">4.2</span> Paso 2 — Pásenlas por el filtro <span class="badge-time">≈ 10 min</span></h2>
+<p>Para <strong>cada</strong> pregunta, respondan las cuatro columnas. Sean duros: es más barato matar una pregunta hoy que en la semana 9.</p>
+<table class="table-striped caption-top table">
+<caption>Copien esta tabla en su documento y diligéncienla.</caption>
+<colgroup>
+<col style="width: 18%">
+<col style="width: 25%">
+<col style="width: 18%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Pregunta</th>
+<th style="text-align: center;">¿Específica?</th>
+<th>¿Accionable? <br><small>¿quién decide qué?</small></th>
+<th>¿Medible? <br><small>¿qué datos harían falta?</small></th>
+<th>Tarea</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1.</td>
+<td style="text-align: center;"></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>2.</td>
+<td style="text-align: center;"></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>3.</td>
+<td style="text-align: center;"></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>4.</td>
+<td style="text-align: center;"></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Las tres trampas que los monitores van a buscar</strong></p>
+<ol type="1">
+<li><strong>El tema disfrazado.</strong> Si la pregunta admite la respuesta “depende” o “interesante”, es un tema. Aplíquenle el test: <em>si te doy la respuesta, ¿qué haces distinto mañana?</em></li>
+<li><strong>La pregunta sin dueño.</strong> Si nadie en la organización toma una decisión con eso, no importa qué tan elegante sea el análisis (es la trampa de la candidata 6).</li>
+<li><strong>El dato que no existe.</strong> “Qué piensan los clientes que no compraron” es fascinante y no hay forma de medirlo. Si el dato no existe ni puede existir, la pregunta no es viable — por más buena que sea.</li>
+</ol>
+</div>
+</div>
+</section>
+<section id="paso-3-elijan-una-y-aféitenla-10-min" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="paso-3-elijan-una-y-aféitenla-10-min"><span class="header-section-number">4.3</span> Paso 3 — Elijan una y aféitenla <span class="badge-time">≈ 10 min</span></h2>
+<p>Escojan <strong>la mejor</strong> (o fusionen dos) y escríbanla en su versión final, completando esta plantilla. Este es el borrador de su Entrega 1:</p>
+<blockquote class="blockquote">
+<p><strong>Nuestra pregunta:</strong> ¿____________________?</p>
+<p><strong>La decisión que cambia:</strong> cuando tengamos la respuesta, ______________ (quién) va a decidir ______________.</p>
+<p><strong>El costo de equivocarse:</strong> un error de tipo ______________ nos cuesta ______________, y uno de tipo ______________ nos cuesta ______________.</p>
+<p><strong>La tarea analítica:</strong> ______________ (clasificación / predicción / segmentación), porque el output es ______________ y el target ______________ (existe / no existe).</p>
+<p><strong>Los datos que necesitaríamos:</strong> ____________________.</p>
+</blockquote>
+<div class="callout-key">
+<p><strong>El estándar de calidad de hoy</strong></p>
+<p>Salgan del salón con <strong>esa plantilla llena</strong> y con los cinco espacios respondidos sin muletillas. Si un espacio les quedó en blanco, ahí está exactamente el problema de su proyecto — y todavía están a tiempo de arreglarlo. Levanten la mano y llamen a un monitor: para eso están.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="cierre" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Cierre</h1>
+<p>Hoy no escribieron una línea de código y, sin embargo, hicieron el trabajo que decide si un proyecto de datos sirve o no. Recuerden el dato con el que abrimos: <strong>el 87% de los proyectos muere</strong>, y casi nunca por culpa del modelo.</p>
+<p><strong>Lo que sigue:</strong> en la <strong>semana 6</strong> bajamos a la etapa 3 y 4 del proceso — datos sucios, limpieza y EDA — y ahí sí vuelve R con todo. La pregunta que acaban de escribir es la que van a estar respondiendo hasta la semana 16. 🚀</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-05_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

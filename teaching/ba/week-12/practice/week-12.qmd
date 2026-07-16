@@ -1,6 +1,6 @@
 ---
-title: "Práctica guiada — Semana 12: Árboles de Regresión"
-subtitle: "Introducción al Business Analytics · 06278-ECO"
+title: "Unidad 5 - Práctica: la revancha de PronosticaU"
+subtitle: "Aplicación guiada en clase · Semana 12 · 06278-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
   html: default
@@ -12,609 +12,219 @@ lang: es
 <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
 <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
 <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
-<span id="webr-status-anchor"></span>
 </div>
 
 <!--=================-->
 <!--=================-->
-# Contexto de negocio
-
-La Dirección Académica de una universidad quiere anticipar el rendimiento de sus estudiantes antes del cierre del semestre. Tienen un historial de 300 estudiantes con sus resultados parciales y quieren construir un modelo que prediga la **nota final numérica** (escala 0–5.0) a partir de las notas de los parciales, tareas, quices y el porcentaje de asistencia.
-
-**Nuestro trabajo:** Entrenar un árbol de regresión, evaluar sus predicciones con MAE y RMSE, comparar contra el baseline y determinar si el modelo es útil para identificar estudiantes en riesgo.
-
-**Tu entregable al final de la clase:** Una tabla con el MAE y RMSE del árbol (train y test), el MAE del baseline, y una interpretación escrita de máximo 3 líneas sobre si el modelo es útil para la decisión de negocio planteada.
-
----
-
-<!--=================-->
-<!--=================-->
-# Paso 1 — Preparar el entorno
-
-```{webr-r}
-#| warning: false
-#| message: false
-
-## Limpiar entorno / Clean environment
-rm(list = ls())
-
-## instalar
-install.packages("rpart")  
-install.packages("rpart.plot")  
-
-## Cargar paquetes / Load packages
-require(dplyr)    # manipulación de datos
-require(ggplot2)  # visualización
-require(rpart)    # árbol de decisión/regresión
-require(rpart.plot) # visualizar el árbol de forma clara
-```
-
----
-
-<!--=================-->
-<!--=================-->
-# Paso 2 — Cargar los datos
-
-```{webr-r}
-#| warning: false
-#| message: false
-
-## Cargar datos / Load data
-#notas <- read.csv("https://eduard-martinez.github.io/teaching/ba/week-12/db/notas_regresion.csv")
-source("https://eduard-martinez.github.io/teaching/ba/week-12/db/notas_regresion.R")
-```
-
-```{webr-r}
-## inspect data
-head(notas)
-```
+# Reglas de juego
 
 ::: {.callout-key}
-**Variables del dataset:**
+**El encargo que te ganaste tumbando al proveedor**
 
-- `parcial_1` — Nota del primer parcial (0–5.0)
-- `parcial_2` — Nota del segundo parcial (0–5.0)
-- `tareas` — Promedio de tareas entregadas (0–5.0)
-- `quices` — Promedio de quices (0–5.0)
-- `asistencia` — Porcentaje de asistencia al semestre (0–100)
-- `nota_final` — **Variable de resultado**: nota final numérica (0–5.0)
+Semana 10: auditaste el pronosticador de notas de **PronosticaU** y demostraste que perdía contra el promedio (MAE 0.55 vs 0.40). Hoy la universidad te pasa la base histórica y el contrato: *"constrúyanlo ustedes — y esta vez, que le gane al promedio y se deje explicar."* Esta práctica asume la [teoría de la semana](../theory/week-12.html) (árbol de regresión, Lasso, bosque) y las [métricas MAE/RMSE de la semana 10](../../week-10/theory/week-10.html).
 :::
 
----
+- 👥 En **parejas**: uno escribe, el otro lee coeficientes y audita cifras. Roten en el Momento 3.
+- 🖥️ **RStudio**. Paquetes: los de la semana 11 más `glmnet` (instalado antes de clase).
+- 📥 El dato: <a href="notas_regresion.csv" download>**notas_regresion.csv**</a> — 300 estudiantes históricos con sus notas parciales, tareas, quices, asistencia y la **nota final** (el target). Guárdalo en `data/`.
+- 🏆 Regla del torneo: tres modelos compiten contra el baseline; **todos se miden en el mismo test, una sola vez**, con MAE y RMSE.
 
 <!--=================-->
 <!--=================-->
-# Paso 3 — Explorar la variable de resultado
+# El setup <span class="badge-time">≈ 5 min</span>
 
-Antes de entrenar, siempre exploramos la distribución de lo que queremos predecir. En regresión esto nos da el **baseline**: si siempre predecimos el promedio, ¿qué tan lejos estamos en promedio?
+Script nuevo: `scripts/12_revancha.R`.
 
-```{webr-r}
-## Resumen de la variable de resultado / Target variable summary
+```r
+## ============================================
+## Práctica semana 12 — La revancha de PronosticaU
+## Nombre(s): _______________
+## Fecha:     _______________
+## ============================================
+
+## Librerías / Libraries
+pacman::p_load(dplyr, ggplot2, rpart, rpart.plot, randomForest, glmnet)
+
+## Cargar datos / Load data
+notas <- read.csv("data/notas_regresion.csv")
+
+## Radiografía / First look
+dim(notas)
+str(notas)
 summary(notas$nota_final)
 ```
 
-```{webr-r}
-## Distribución visual / Visual distribution
-ggplot(notas, aes(x = nota_final)) +
-  geom_histogram(bins = 20, fill = "#378ADD", color = "white", alpha = 0.8) +
-  theme_minimal() +
-  labs(title = "Distribución de la nota final",
-       x = "Nota final (0–5.0)", y = "Frecuencia")
+**Checkpoint 🎯:** **300 filas y 6 columnas**; `nota_final` es numérica (va de ~0.9 a 5.0) — target continuo, problema de **regresión**. Nada de factores hoy.
+
+<!--=================-->
+<!--=================-->
+# Momento 1 — La partición y la vara <span class="badge-time">≈ 6 min</span>
+
+```r
+## Partición 80/20 / Train-test split
+set.seed(12)   # la semilla de la semana, en la línea anterior al sample
+idx_train <- sample(1:nrow(notas), size = round(0.8 * nrow(notas)))
+train <- notas[idx_train, ]
+test  <- notas[-idx_train, ]
+
+## Baseline: predecir el promedio de TRAIN / Mean baseline
+media_train <- round(mean(train$nota_final), 2)
+media_train
+
+## MAE y RMSE del baseline en test (fórmulas de la semana 10)
+round(mean(abs(test$nota_final - media_train)), 3)
+round(sqrt(mean((test$nota_final - media_train)^2)), 3)
 ```
 
-```{webr-r}
-## Promedio global — este es el baseline / Global mean — this is the baseline
-promedio_global <- mean(notas$nota_final)
-promedio_global
+**Checkpoint 🎯:** media de train **3.35** → baseline con MAE **0.344** y RMSE **0.429**. Esa es la vara de hoy. (PronosticaU cobraba por un MAE de 0.55 — tenlo a mano para la humillación final.)
+
+<!--=================-->
+<!--=================-->
+# Momento 2 — La ruta lineal: el Lasso <span class="badge-time">≈ 15 min</span>
+
+`glmnet` no recibe fórmulas como `rpart`: pide la **matriz de variables** y el **vector del target** por separado. `model.matrix()` hace la conversión (el `[, -1]` descarta la columna de intercepto que glmnet maneja por su cuenta):
+
+```r
+## Preparar matrices / Prepare matrices for glmnet
+x_train <- model.matrix(nota_final ~ ., data = train)[, -1]
+y_train <- train$nota_final
+x_test  <- model.matrix(nota_final ~ ., data = test)[, -1]
+
+## Lasso con CV de 10 pliegues para elegir lambda
+## Lasso with 10-fold CV to pick lambda
+set.seed(12)   # los pliegues de la CV usan el azar
+lasso_cv <- cv.glmnet(x = x_train, y = y_train, alpha = 1)
+
+## La curva de CV y los dos candidatos / CV curve
+plot(lasso_cv)
+round(lasso_cv$lambda.1se, 4)
 ```
 
-::: {.callout-key}
-**¿Qué es el baseline en regresión?**
+**Checkpoint 🎯:** `lambda.1se` = **0.0382**. En el gráfico: el error de CV en forma de U (¡el dial de la teoría, con datos reales!), la línea punteada izquierda es `lambda.min` y la derecha es `lambda.1se` — el freno más fuerte que empata con el mínimo. La regla 1-SE de la semana 11, servida por `glmnet`.
 
-El baseline predice siempre el promedio global de la variable de resultado — sin usar ninguna variable predictora. Si el promedio es 3.2, el baseline diría "3.2" para todo estudiante.
+Ahora lo mejor del Lasso — **leer el modelo**:
 
-El MAE del baseline mide cuánto nos equivocamos en promedio con esa estrategia simple. Nuestro árbol debe superar ese número para demostrar que aprendió algo útil. **Anota el promedio** — lo calcularás en el Paso 10.
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Paso 4 — Dividir en entrenamiento y prueba
-
-```{webr-r}
-## Fijar semilla para reproducibilidad / Set seed for reproducibility
-set.seed(2025)
-
-## Total de filas / Total rows
-n_total <- nrow(notas)
-n_total
-
-## Índices de entrenamiento (75%) / Training indices (75%)
-idx_train <- sample(x = 1:n_total, size = floor(0.75 * n_total))
-
-## Crear conjuntos / Create sets
-notas_train <- notas[idx_train, ]
-notas_test  <- notas[-idx_train, ]
-
-## Verificar tamaños / Check sizes
-nrow(notas_train)
-nrow(notas_test)
+```r
+## Los coeficientes que sobrevivieron / Surviving coefficients
+round(as.matrix(coef(lasso_cv, s = "lambda.1se")), 4)
 ```
 
-::: {.callout-key}
-**¿Por qué dividir en regresión también?** Exactamente por la misma razón que en clasificación (Semana 11): el árbol memoriza los datos de entrenamiento. Si medimos el MAE en esos mismos datos, el error parece artificialmente bajo. El conjunto de prueba simula estudiantes futuros que el modelo nunca vio.
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Paso 5 — Entrenar el árbol de regresión
-
-La única diferencia respecto a la semana pasada está en el argumento `method`: aquí usamos `"anova"` en lugar de `"class"`, porque la variable de resultado es numérica.
-
-```{webr-r}
-## Entrenar el árbol de regresión / Train the regression tree
-## method = "anova" indica regresión / method = "anova" for regression
-arbol <- rpart(formula = nota_final ~ parcial_1 + parcial_2 + tareas + quices + asistencia,
-               data    = notas_train,
-               method  = "anova",
-               control = rpart.control(maxdepth = 3))
-
-## Ver el árbol en texto / Print tree as text
-arbol
-```
-
-::: {.callout-key}
-**¿Cómo leer el output de un árbol de regresión?**
-
-La estructura es la misma que en clasificación, pero ahora en cada nodo aparece:
-
-- El **valor medio** (promedio de `nota_final`) de las observaciones que llegaron a ese nodo.
-- El **número de observaciones** en ese nodo.
-- La **desviación** (varianza residual) — cuánto varían las notas dentro del grupo.
-
-Las hojas marcadas con `*` muestran el valor que el árbol predice para cualquier estudiante nuevo que caiga allí: el **promedio de las notas** de los estudiantes de entrenamiento de ese grupo.
-
-**Identifica:** ¿Cuál es la primera variable que usa el árbol para dividir? ¿Tiene sentido pedagógico que sea esa variable?
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Paso 6 — Visualizar el árbol
-
-```{webr-r}
-## Visualización básica
-rpart.plot(arbol, type = 4, extra = 101)
-``` 
-
-
-```{webr-r}
-## Visualización mejorada con colores y más detalle
-rpart.plot(
-  x          = arbol,
-  type       = 4,       # muestra las etiquetas en los nodos y hojas
-  extra      = 101,     # muestra n° de observaciones y porcentaje en cada nodo
-  box.palette = "Blues", # gradiente de color: azul claro = nota baja, azul oscuro = nota alta
-  shadow.col = "gray80",
-  nn         = TRUE,    # muestra número de nodo
-  fallen.leaves = TRUE, # alinea todas las hojas al fondo
-  main       = "Árbol de regresión — Predicción de nota final",
-  cex        = 0.85
-)
-```
-
-::: {.callout-key}
-**¿Qué muestra el gráfico?**
-
-- Los nodos internos muestran la pregunta de división: variable y umbral.
-- Las hojas muestran el **valor predicho** (promedio de ese grupo) y el número de observaciones de entrenamiento que cayeron allí.
-
-Compara este árbol con los diagramas SVG de la teoría. ¿Las hojas muestran categorías o números? ¿Cuántos valores distintos puede predecir este árbol?
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Paso 7 — Predecir en el conjunto de prueba
-
-```{webr-r}
-## Predecir en conjunto de prueba / Predict on test set
-## En regresión no se necesita type = "class" — devuelve números directamente
-## In regression no type = "class" needed — returns numbers directly
-predicciones <- predict(object  = arbol,
-                        newdata = notas_test)
-```
-
-```{webr-r}
-## Comparar predicción vs. valor real — primeras 10 filas
-## Compare prediction vs. real value — first 10 rows
-head(
-  data.frame(nota_real  = notas_test$nota_final,
-             prediccion = round(predicciones, 2),
-             error      = round(notas_test$nota_final - predicciones, 2)),
-  n = 10
-)
-```
-
-::: {.callout-warning}
-**Diferencia clave con la semana pasada**
-
-En clasificación, `predict()` devolvía una categoría ("Aprobado" / "Rechazado") y el error era binario: acertó o falló. En regresión, devuelve un número y el error es continuo: puede ser 0.05 o puede ser 1.2. Por eso necesitamos métricas distintas — MAE y RMSE — que cuantifiquen esa magnitud del error.
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Paso 8 — Calcular el MAE
-
-```{webr-r}
-## Errores absolutos / Absolute errors
-errores_abs <- abs(notas_test$nota_final - predicciones)
-
-## MAE — Error Absoluto Medio / Mean Absolute Error
-MAE_test <- mean(errores_abs)
-MAE_test
-```
-
-```{webr-r}
-## MAE también en train para comparar / MAE on train set for comparison
-predicciones_train <- predict(object = arbol, newdata = notas_train)
-
-## MAE
-MAE_train <- mean(abs(notas_train$nota_final - predicciones_train))
-MAE_train
-```
-
-::: {.callout-key}
-**¿Cómo leer el MAE?**
-
-El MAE está en las mismas unidades que la nota final. Si el MAE en test es 0.28, el modelo se equivoca en promedio por 0.28 puntos. En una escala de 5.0, eso equivale a decir que una nota real de 3.5 la predice entre 3.2 y 3.8.
-
-Compara train y test: si el MAE en train es mucho menor que en test, hay sobreajuste — el árbol memorizó los datos de entrenamiento.
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Paso 9 — Calcular el RMSE
-
-```{webr-r}
-## Errores cuadráticos / Squared errors
-errores_cuad <- (notas_test$nota_final - predicciones)^2
-
-## RMSE — Raíz del Error Cuadrático Medio / Root Mean Squared Error
-RMSE_test <- sqrt(mean(errores_cuad))
-RMSE_test
-```
-
-::: {.callout-key}
-**MAE vs. RMSE: ¿qué te dice la diferencia?**
-
-Si el RMSE es mucho mayor que el MAE, significa que el modelo tiene algunos errores muy grandes que "jalan" el RMSE hacia arriba. Eso merece investigarse: ¿hay estudiantes específicos para los que el modelo falla mucho? ¿Son casos atípicos o un patrón que el árbol no capturó?
-
-Si RMSE ≈ MAE, los errores son relativamente uniformes — el modelo no tiene predicciones catastróficamente malas.
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Paso 10 — Calcular el baseline y comparar
-
-```{webr-r}
-## Baseline: predecir siempre el promedio del conjunto de entrenamiento
-## Baseline: always predict the training set mean
-promedio_train <- mean(notas_train$nota_final)
-promedio_train
-
-## MAE del baseline en el conjunto de test
-## Baseline MAE on test set
-MAE_baseline <- mean(abs(notas_test$nota_final - promedio_train))
-MAE_baseline
-```
-
-::: {.callout-warning}
-**¿El árbol mejora el baseline?**
-
-Si el MAE del árbol en test es menor que el MAE del baseline, el árbol aprendió algo útil — predice mejor que simplemente decir "todos sacan el promedio". Si no lo mejora, algo está mal: árbol demasiado superficial, variables poco informativas, o datos insuficientes.
-
-¿En cuántos puntos mejoró? ¿Vale la pena la complejidad del modelo para esa mejora?
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Paso 11 — Visualizar predicciones vs. valores reales
-
-```{webr-r}
-## Crear data frame de resultados / Create results data frame
-resultados_test <- data.frame(
-  nota_real  = notas_test$nota_final,
-  prediccion = predicciones
-)
-
-## Gráfico predicción vs. real / Prediction vs. actual plot
-ggplot(resultados_test, aes(x = nota_real, y = prediccion)) +
-  geom_point(alpha = 0.5, color = "#378ADD") +
-  geom_abline(slope = 1, intercept = 0, color = "#E87722",
-              linetype = "dashed", linewidth = 1) +
-  theme_minimal() +
-  labs(title = "Predicción vs. Nota real (conjunto de prueba)",
-       x = "Nota real", y = "Nota predicha",
-       caption = "Línea naranja: predicción perfecta (real = predicho)")
-```
-
-::: {.callout-key}
-**¿Cómo leer este gráfico?**
-
-- Si todos los puntos estuvieran sobre la línea naranja, el modelo sería perfecto.
-- Los puntos por encima de la línea son casos donde el modelo sobreestimó la nota.
-- Los puntos por debajo son casos donde el modelo subestimó.
-- Los puntos muy alejados de la línea son los errores más grandes — los que más pesan en el RMSE.
-
-Observa: ¿el modelo tiende a sobre- o sub-estimar en algún rango de notas? ¿Los errores más grandes se concentran en notas bajas o altas?
-:::
-
----
-
-<!--=================-->
-<!--=================-->
-# Tu entregable: resumen de métricas
+**Checkpoint 🎯:** la ecuación quedó: nota ≈ 0.944 + **0.271·parcial_2** + **0.181·parcial_1** + **0.142·tareas** + 0.049·quices + 0.0045·asistencia. El parcial 2 es el rey (cada punto suyo aporta 0.27 a la final), y `asistencia` quedó encogida casi a cero — el freno te está diciendo dónde está la señal. (Hoy no expulsó a nadie del todo; en el taller sí verás un coeficiente en 0.000 exacto.)
 
 ::: {.callout-practice}
-**Actividad en clase — Entrega individual**
-
-Con los resultados de los pasos anteriores, completa esta tabla:
-
----
-
-**Métricas del árbol de regresión:**
-
-| Métrica | Train | Test |
-|---|---|---|
-| MAE | ______ | ______ |
-| RMSE | ______ | ______ |
-
----
-
-**Comparación con el baseline:**
-
-| | MAE |
-|---|---|
-| Baseline (predice siempre el promedio) | ______ |
-| Árbol de regresión (test) | ______ |
-| Mejora absoluta | ______ pts |
-| Reducción porcentual del error | ______% |
-
----
-
-**¿Hay sobreajuste?**
-
-- MAE train: ______ · MAE test: ______
-- Diferencia: ______
-- ¿La diferencia es preocupante? ☐ Sí ☐ No
-
----
-
-**Interpretación (máximo 3 líneas):**
-
-¿El modelo es útil para identificar estudiantes en riesgo de reprobar (nota < 3.0)? ¿Recomendarías usarlo tal como está o ajustarías la profundidad? ¿Por qué?
-
-_______________________________________________
-_______________________________________________
-_______________________________________________
+**Traducción simultánea (2 min, en pareja):** conviertan dos coeficientes en frases que la decana entienda — *"un punto más en el parcial 2 se asocia con ___ más en la nota final"*. Ojo con el verbo: *se asocia*, no *causa*. ¿Por qué la distinción importa si la decana quiere "intervenir la asistencia"?
 :::
 
----
-
-<!--=================-->
-<!--=================-->
-## Checklist
-
-Al finalizar esta práctica, debes poder:
-
-- [ ] Cargar datos y explorar la distribución de la variable de resultado numérica
-- [ ] Dividir en train/test con `sample()` y `set.seed()` para reproducibilidad
-- [ ] Entrenar un árbol de regresión con `rpart(..., method = "anova")`
-- [ ] Explicar la diferencia entre `method = "class"` (semana 11) y `method = "anova"` (semana 12)
-- [ ] Leer el árbol: identificar el valor predicho en cada hoja (promedio del grupo)
-- [ ] Obtener predicciones numéricas con `predict()` — sin `type = "class"`
-- [ ] Calcular MAE con `mean(abs(real - predicho))`
-- [ ] Calcular RMSE con `sqrt(mean((real - predicho)^2))`
-- [ ] Calcular el MAE del baseline con `mean(abs(real - mean(train)))`
-- [ ] Comparar MAE train vs. test para detectar sobreajuste
-- [ ] Interpretar el gráfico de predicción vs. real
-- [ ] Conectar el MAE con la decisión de negocio (identificar estudiantes en riesgo)
-
-## Preguntas de comprensión
-
-**1.** En el Paso 5 entrenaste con `maxdepth = 3`. Si cambias a `maxdepth = 1`, ¿esperas que el MAE en test suba o baje? ¿Qué pasa con el RMSE? ¿Y si usas `maxdepth = 10`?
-
-<details>
-<summary>Ver respuesta</summary>
-Con `maxdepth = 1` el árbol hace una sola pregunta y predice solo dos valores distintos — muy simple. El MAE en test subirá (subajuste): el modelo no captura suficiente variación en las notas. Con `maxdepth = 10` el árbol es muy profundo y puede memorizar los 225 datos de entrenamiento: el MAE en train bajará mucho, pero el MAE en test puede subir (sobreajuste). El mejor punto suele estar en una profundidad intermedia donde train y test tienen MAEs parecidos.
-</details>
-
-**2.** El árbol da MAE = 0.24 en test y el baseline da MAE = 0.43. Un compañero dice: "El modelo redujo el error casi a la mitad, es excelente." ¿Estás de acuerdo con esa sola afirmación? ¿Qué más revisarías?
-
-<details>
-<summary>Ver respuesta</summary>
-La mejora es importante y es una señal positiva. Pero hay que revisar más cosas: primero, si el MAE en train es mucho menor que 0.24 (señal de sobreajuste). Segundo, si el RMSE es mucho mayor que el MAE — indica errores grandes en algunos casos específicos, que podrían ser exactamente los estudiantes en riesgo que más importa predecir bien. Tercero, si el gráfico de predicción vs. real muestra algún sesgo sistemático (el modelo siempre sobreestima notas bajas o subestima notas altas). Un MAE global bueno no garantiza que el modelo funcione bien en el rango crítico (notas cerca de 3.0).
-</details>
-
-**3.** La Dirección Académica quiere usar el modelo para enviar tutorías a estudiantes con nota predicha < 3.0. ¿Prefieren un modelo con MAE bajo o con RMSE bajo? ¿Hay alguna métrica de la semana 11 que también sería relevante aquí?
-
-<details>
-<summary>Ver respuesta</summary>
-Para este uso, los errores grandes son especialmente costosos: si el modelo predice 3.4 para un estudiante que en realidad sacará 2.2, ese estudiante no recibe tutorías y reprueba. Ese error grande pesa más en el RMSE — así que preferir un modelo con bajo RMSE tiene sentido. Pero también sería relevante el concepto de **recall** de la semana 11: si convirtiéramos el problema en clasificación (en riesgo / no en riesgo), el recall mediría cuántos estudiantes realmente en riesgo el modelo sí detecta. Un MAE global bajo puede coexistir con un recall bajo si el modelo falla sistemáticamente en el rango crítico de notas bajas.
-</details>
-
-
-```{=html}
-<!-- Panel Environment -->
-<div id="env-panel" class="collapsed">
-  <div id="env-header" onclick="toggleEnvPanel()">
-    <span id="env-header-left">&#x1F4E6; Environment</span>
-    <span id="env-header-right">
-      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
-      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
-    </span>
-  </div>
-  <div id="env-status">Esperando webR...</div>
-  <div id="env-body">
-    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
-  </div>
-</div>
-
-<script type="module">
-window.toggleEnvPanel = function() {
-  const panel = document.getElementById('env-panel');
-  const btn   = document.getElementById('env-toggle-btn');
-  panel.classList.toggle('collapsed');
-  btn.innerHTML = panel.classList.contains('collapsed') ? '\u25B2' : '\u25BC';
-};
-
-async function getEnvData() {
-  if (!globalThis.mainWebR) return [];
-  try {
-    const shelter = await new globalThis.mainWebR.Shelter();
-    const result  = await shelter.evalR(`
-      local({
-        objs <- ls(envir = .GlobalEnv)
-        if (length(objs) == 0) return("")
-        info <- vapply(objs, function(nm) {
-          obj <- get(nm, envir = .GlobalEnv)
-          cls <- paste(class(obj), collapse = ", ")
-          len <- length(obj)
-          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
-          prev <- tryCatch({
-            if (is.data.frame(obj)) {
-              paste(names(obj), collapse = ", ")
-            } else if (is.function(obj)) {
-              a <- names(formals(obj))
-              paste0("function(", paste(a, collapse = ", "), ")")
-            } else if (is.atomic(obj) && len <= 6) {
-              paste(format(obj, digits = 4), collapse = ", ")
-            } else if (is.atomic(obj) && len > 6) {
-              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
-            } else if (is.list(obj)) {
-              paste0("List of ", len)
-            } else { "" }
-          }, error = function(e) "")
-          paste(nm, cls, len, dm, prev, sep = "\\t")
-        }, character(1))
-        paste(info, collapse = "\\n")
-      })
-    `);
-    const raw = await result.toString();
-    shelter.purge();
-    if (!raw || raw === '') return [];
-    return raw.split('\n').map(line => {
-      const p = line.split('\t');
-      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
-    });
-  } catch (e) {
-    console.warn('Env panel error:', e);
-    return [];
-  }
-}
-
-function renderEnv(items) {
-  const body   = document.getElementById('env-body');
-  const status = document.getElementById('env-status');
-  if (items.length === 0) {
-    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
-    status.textContent = '0 objetos';
-    return;
-  }
-  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
-  body.innerHTML = items.map(it => {
-    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
-    if (it.dim) {
-      meta += it.dim.replace('x', ' obs. \u00D7 ') + ' vars.';
-    } else {
-      meta += 'Length: ' + it.len;
-    }
-    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
-    return '<div class="env-item">' +
-           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
-           '  <div class="env-item-meta">' + meta + '</div>' +
-           prev +
-           '</div>';
-  }).join('');
-}
-
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-async function updateEnvPanel() {
-  const items = await getEnvData();
-  renderEnv(items);
-}
-window.refreshEnv = function() {
-  const btn = document.getElementById('env-refresh-btn');
-  btn.style.animation = 'none';
-  void btn.offsetWidth;
-  updateEnvPanel();
-};
-
-function moveWebRStatus() {
-  const anchor = document.getElementById('webr-status-anchor');
-  const statusArea = document.getElementById('qwebr-status-message-area');
-  if (anchor && statusArea) {
-    const wrapper = statusArea.closest('.quarto-title-meta');
-    if (wrapper) {
-      wrapper.style.display = 'inline';
-      wrapper.style.fontSize = '13px';
-      wrapper.style.marginLeft = '30px';
-      anchor.parentNode.insertBefore(wrapper, anchor);
-    }
-  }
-}
-
-async function init() {
-  while (!globalThis.qwebrInstance) {
-    await new Promise(r => setTimeout(r, 300));
-  }
-  await globalThis.qwebrInstance;
-  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
-  moveWebRStatus();
-
-  await new Promise(resolve => {
-    const check = setInterval(() => {
-      const btns = document.querySelectorAll('.qwebr-button-run');
-      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
-        clearInterval(check);
-        resolve();
-      }
-    }, 400);
-  });
-
-  const original = globalThis.qwebrComputeEngine;
-  globalThis.qwebrComputeEngine = async function(...args) {
-    const res = await original.apply(this, args);
-    setTimeout(updateEnvPanel, 150);
-    return res;
-  };
-
-  const panel = document.getElementById('env-panel');
-  if (panel.classList.contains('collapsed')) {
-    toggleEnvPanel();
-  }
-  await updateEnvPanel();
-}
-
-init();
-</script>
+```r
+## Evaluar el Lasso en test / Evaluate on test
+pred_lasso <- as.numeric(predict(lasso_cv, newx = x_test, s = "lambda.1se"))
+round(mean(abs(test$nota_final - pred_lasso)), 3)
+round(sqrt(mean((test$nota_final - pred_lasso)^2)), 3)
 ```
+
+**Checkpoint 🎯:** MAE **0.218** y RMSE **0.270**. La vara (0.344) quedó atrás por 37%. Primer candidato instalado en el podio.
+
+<!--=================-->
+<!--=================-->
+# Momento 3 — El árbol, ritual exprés <span class="badge-time">≈ 10 min</span>
+
+Roten roles. El ritual completo lo dominas desde la semana 11 — hoy en versión compacta (`method = "anova"` es la única novedad: le dice a `rpart` que prediga números):
+
+```r
+## Árbol de regresión + poda 1-SE / Regression tree + 1-SE pruning
+set.seed(12)
+arbol <- rpart(nota_final ~ ., data = train, method = "anova")
+round(arbol$cptable, 4)
+
+tabla  <- arbol$cptable
+tope   <- min(tabla[, "xerror"]) + tabla[which.min(tabla[, "xerror"]), "xstd"]
+cp_opt <- tabla[which(tabla[, "xerror"] <= tope)[1], "CP"]
+round(cp_opt, 4)
+
+arbol_podado <- prune(arbol, cp = cp_opt)
+sum(arbol_podado$frame$var == "<leaf>")
+rpart.plot(arbol_podado, type = 4)
+
+## Evaluar / Evaluate
+pred_arbol <- predict(arbol_podado, newdata = test)
+round(mean(abs(test$nota_final - pred_arbol)), 3)
+round(sqrt(mean((test$nota_final - pred_arbol)^2)), 3)
+```
+
+**Checkpoint 🎯:** tope 1-SE **0.806** → `cp_opt` = **0.0315** → árbol de **5 hojas** con MAE **0.286** y RMSE **0.345**. Mira el `rpart.plot`: la raíz pregunta por el parcial 2 (el rey otra vez) y cada hoja es un *peldaño* — este árbol solo puede predecir 5 notas distintas. Le gana a la vara, pero la escalera pierde contra la rampa del Lasso.
+
+<!--=================-->
+<!--=================-->
+# Momento 4 — El bosque promedia <span class="badge-time">≈ 8 min</span>
+
+```r
+## Random Forest de regresión / Regression forest
+set.seed(12)
+bosque <- randomForest(nota_final ~ ., data = train, ntree = 500)
+pred_rf <- predict(bosque, newdata = test)
+round(mean(abs(test$nota_final - pred_rf)), 3)
+round(sqrt(mean((test$nota_final - pred_rf)^2)), 3)
+
+## ¿Qué variables mandan? / Importance
+importance(bosque)
+```
+
+**Checkpoint 🎯:** MAE **0.226** y RMSE **0.281** — pisándole los talones al Lasso. Y la importancia corona otra vez al **parcial_2 (14.4)**, con parcial_1 (9.0) de segundo: tres modelos distintos, la misma historia sobre qué mueve la nota. Cuando eso pasa, el hallazgo es robusto — frase para tu proyecto final.
+
+<!--=================-->
+<!--=================-->
+# Momento 5 — El podio y el diagnóstico <span class="badge-time">≈ 12 min</span>
+
+```r
+## La tabla del torneo / Tournament table
+torneo <- data.frame(
+  modelo = c("Baseline (promedio)", "Lasso (lambda.1se)",
+             "Árbol podado (5 hojas)", "Random Forest (500)"),
+  MAE    = c(0.344, 0.218, 0.286, 0.226),
+  RMSE   = c(0.429, 0.270, 0.345, 0.281)
+)
+torneo
+write.csv(torneo, "output/torneo_semana12.csv", row.names = FALSE)
+```
+
+🥇 **Ganó el Lasso.** ¿No que el bosque siempre gana? La semana pasada sí; esta no — el proceso que genera las notas es (casi) una suma ponderada de los parciales, y **en cancha lineal, el modelo lineal manda**. La moraleja que vale el semestre: *el ganador depende de la forma del patrón; por eso se monta el torneo.* Y de paso: PronosticaU cobraba por MAE 0.55 — tu Lasso lo hace en 0.218, con fórmula publicable.
+
+El diagnóstico antes de firmar — predicho contra real:
+
+```r
+## Gráfico predicho vs. real del ganador / Predicted vs actual
+resultado <- data.frame(real = test$nota_final, pred = pred_lasso)
+ggplot(resultado, aes(x = pred, y = real)) +
+  geom_point(alpha = 0.7, color = "#1e3a5f") +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "#d97706") +
+  labs(title = "Pronosticador de notas — Lasso en test",
+       x = "Nota predicha", y = "Nota real") +
+  theme_minimal()
+ggsave("output/diagnostico_lasso.png", width = 6, height = 4)
+```
+
+**Checkpoint 🎯:** la nube abraza la diagonal, sin abanicos en los extremos, y la brecha MAE–RMSE del Lasso es pequeña (0.218 vs 0.270): sin embarradas ocasionales. Este modelo se firma.
+
+```r
+## Cierre (comentarios, 3-4 líneas): la universidad te pregunta si
+## puede usar este modelo para ALERTAS TEMPRANAS a mitad de semestre.
+## a) ¿Qué le respondes con las cifras de hoy?
+## b) ¿Qué variable NO estaría disponible a mitad de semestre y qué
+##    harías al respecto? (mira las columnas de la base…)
+```
+
+::: {.callout-warning}
+**La pregunta b) no es retórica.** Una de las variables del modelo se conoce *tarde* para servir en una alerta temprana. Detectarlo es exactamente la disciplina anti-leakage de la semana 10: pregúntate siempre *"¿esta columna existirá en el momento de predecir?"*. Discútanlo — y anoten qué le pasaría al MAE si hay que sacarla.
+:::
+
+<!--=================-->
+<!--=================-->
+# ¿Terminaste antes? El reto de los dos lambdas
+
+`cv.glmnet` te dio dos candidatos y usamos `lambda.1se`. Repite la predicción con `s = "lambda.min"` y compara: ¿cuánto mejora el MAE? ¿Cuántos coeficientes cambian de tamaño? Documenta como comentario cuál elegirías para el informe de la universidad y por qué (pista: pregunta 2 de comprensión de la teoría).
+
+<!--=================-->
+<!--=================-->
+# Cierre
+
+Torneo completo en una clase: una vara, tres familias de modelos, un ganador que se deja leer y un diagnóstico que lo confirma. El [**Taller 12**](../task/week-12.html) te lleva al mercado inmobiliario: InmoValle quiere publicar un **avaluador instantáneo** en su web, y tu Lasso va a hacer algo que hoy no hizo — **expulsar variables** con coeficiente cero exacto. Atento a quién saca y por qué.
