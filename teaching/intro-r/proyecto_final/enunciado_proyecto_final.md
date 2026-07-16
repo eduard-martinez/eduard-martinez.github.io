@@ -23,7 +23,7 @@ Dos bases (en `datos/` del curso, descripción completa en el
 
 ## Lo que deben hacer
 
-Trabajen sobre una copia de la [plantilla de proyecto](../buenas_practicas/plantilla_proyecto/)
+Trabajen sobre una copia de la [plantilla de proyecto](../buenas_practicas/plantilla_proyecto.html)
 del curso. El análisis se organiza en el pipeline de tres scripts:
 
 **`01_limpieza.R` — Del crudo al análisis (Unidad 2)**

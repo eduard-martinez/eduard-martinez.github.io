@@ -112,7 +112,7 @@ Las guías transversales acompañan todas las unidades:
 [estilo de scripts](../buenas_practicas/guia_estilo_scripts.md) ·
 [organización de proyectos](../buenas_practicas/guia_organizacion_proyecto.md) ·
 [uso de IA](../ia/guia_uso_ia.md) ·
-[plantilla de proyecto](../buenas_practicas/plantilla_proyecto/).
+[plantilla de proyecto](../buenas_practicas/plantilla_proyecto.html).
 
 ## 6. Calendario sugerido (julio de 2026)
 

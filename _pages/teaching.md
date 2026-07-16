@@ -47,8 +47,8 @@ nav_order: 3
 
   <div class="course">
     <span class="ttl"><a href="/teaching/business-analytics/">Introduction to Business Analytics</a></span>
-    <span class="meta">Department of Economics · Undergraduate · 06278-ECO · 2026-01</span>
-    <p class="desc">Data analysis and machine learning for business decision-making: R and the tidyverse, exploratory data analysis, clustering, decision trees, and AI tools.</p>
+    <span class="meta">Department of Economics · Undergraduate · 06278-ECO · 2026</span>
+    <p class="desc">Data analysis and machine learning for business decision-making, with generative AI across the whole course: R and the tidyverse, exploratory data analysis and data quality, LLMs and AI coding agents (Claude Code, Cursor, VS Code), classification and regression with trees, random forests and the Lasso, and k-means clustering.</p>
     <p class="links"><a href="/teaching/business-analytics/">Course page &amp; materials &rarr;</a></p>
   </div>
 

@@ -104,7 +104,7 @@ un objeto fantasma que vivía en la memoria, un paquete que no estaba en
 
 ## 7. Plantilla lista para usar
 
-La carpeta [`plantilla_proyecto/`](plantilla_proyecto/) de este curso trae la
+La carpeta [`plantilla_proyecto/`](plantilla_proyecto.html) de este curso trae la
 estructura básica ya armada (carpetas + esqueletos de los tres scripts +
 README). Cópiela, renómbrela y trabaje sobre ella — así arranca el proyecto
 final.
