@@ -52,6 +52,13 @@ nav_order: 3
     <p class="links"><a href="/teaching/business-analytics/">Course page &amp; materials &rarr;</a></p>
   </div>
 
+  <div class="course">
+    <span class="ttl"><a href="/teaching/workshop-cienfi/">Workshop CIENFI — Spatial Data in R</a></span>
+    <span class="meta">CIENFI · Research workshop series · 2025 – 2026</span>
+    <p class="desc">Hands-on workshops on spatial data analysis in R for applied research: vector data with sf (geocoding, OpenStreetMap, distances, maps), rasters and night lights with terra (crop and mask, raster&ndash;vector joins with census blocks), and satellite applications &mdash; Sentinel-2 vegetation and built-up indices and the monthly VIIRS night-lights series &mdash; plus class notes and paper commentaries.</p>
+    <p class="links"><a href="/teaching/workshop-cienfi/">Course page &amp; materials &rarr;</a></p>
+  </div>
+
   <div class="uni">Universidad de los Andes · Colombia</div>
 
   <div class="course">

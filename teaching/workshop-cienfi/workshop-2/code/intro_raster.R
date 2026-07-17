@@ -1,6 +1,11 @@
+## Eduard F. Martinez-Gonzalez
+## Workshop Cienfi: Introduccion a Datos Raster en R
+## lee: data/night_light_201301.tif, data/night_light_202301.tif, data/manzanas_cali.rds
+## produce: output/cali_recorte.tif
+## nota: abra el proyecto workshop-2.Rproj para que las rutas relativas funcionen
 
 ## Instalar/llamar las librerías de la clase
-require(pacman) 
+require(pacman)
 p_load(tidyverse,
        sf,
        osmdata,
@@ -8,7 +13,7 @@ p_load(tidyverse,
        mapview)
 
 ## Leer un archivo raster
-nl_r <- rast("https://eduard-martinez.github.io/blog/intro_raster_in_r/data/night_light_202301.tif")
+nl_r <- rast("data/night_light_202301.tif")
 
 ## Información general
 nl_r          
@@ -34,13 +39,13 @@ cali_r <- crop(nl_r , cali , mask=T)
 mapview(cali_r)
 
 ## Guardar el raster recortado como archivo GeoTIFF en el disco
-writeRaster(cali_r, "cali_recorte.tif", overwrite=T)
+writeRaster(cali_r, "output/cali_recorte.tif", overwrite=T)
 
 ## Convertir el raster recortado en un data.frame, incluyendo las coordenadas (x, y)
 df <- as.data.frame(cali_r, xy = TRUE)
 
 # Leer archivo RDS que contiene los polígonos de manzanas censales de Cali
-mnz <- read_rds("https://eduard-martinez.github.io/blog/intro_raster_in_r/data/manzanas_cali.rds") %>% 
+mnz <- read_rds("data/manzanas_cali.rds") %>%
        st_as_sf()
 
 ## Visualizar las primeras filas del objeto de manzanas
@@ -75,8 +80,8 @@ theme_bw()
 lm(asinh(night_light_202301) ~ asinh(personas), data = df_nl)
 
 ## luminosidad 2023
-nl_r <- c(rast("https://eduard-martinez.github.io/blog/intro_raster_in_r/data/night_light_201301.tif"),
-          rast("https://eduard-martinez.github.io/blog/intro_raster_in_r/data/night_light_202301.tif")) %>%
+nl_r <- c(rast("data/night_light_201301.tif"),
+          rast("data/night_light_202301.tif")) %>%
         crop(cali,mask=T) %>%
         as.polygons() %>%
         st_as_sf() %>%

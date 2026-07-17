@@ -1,13 +1,15 @@
 ## Eduard F. Martinez-Gonzalez
 ## Workshop Cienfi: Introduccion a Datos Espaciales en R
+## lee: data/data_cali.rds
+## nota: abra el proyecto workshop-1.Rproj para que las rutas relativas funcionen
 
 ##==: 1. Configuracon Inicial
 
 ## clean environment
 rm(list=ls())
 
-## llamar pacman 
-install.packages(pacman)
+## llamar y/o instalar pacman
+if(!require(pacman)) install.packages("pacman")
 require(pacman)
 
 ## llamar y/o instalar librerias
@@ -36,7 +38,7 @@ casa <- geo("" , method="arcgis")
 ##==: 3. Geocodificar Varias Direcciones
 
 ## leer base de datos
-cali <- import("https://eduard-martinez.github.io/blog/intro_gis_in_r/data/data_cali.rds")
+cali <- import("data/data_cali.rds")
 cali
 
 ## geocodificar vector de direcciones
