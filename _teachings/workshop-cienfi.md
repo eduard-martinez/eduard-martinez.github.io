@@ -43,6 +43,7 @@ The scripts read from `data/` and write to `output/` using **relative paths only
 
 *Vector data with `sf`.* What spatial data is and how it is represented (geometries, CRS, datums, projections); geocoding addresses with `tidygeocoder` and turning coordinates into `sf` points; querying OpenStreetMap with `osmdata` — amenities and administrative boundaries; spatial filters and crops; geodesic distances between points; and maps with `mapview` and `ggplot2` (OSM basemap tiles, viridis scales, north arrow, and scale bar). The applications discussed include night lights as a proxy for GDP and motorcycle-restriction policies.
 
+- [Session recording (YouTube)](https://youtu.be/gm6Oz2A91EM){:target="_blank"} — full video of the session (*Datos Espaciales (Vectoriales) en R*).
 - [Lecture slides, part 1 (PDF)](/teaching/workshop-cienfi/workshop-1/lecture/parte-1.pdf) — concepts: GIS, geometries, CRS and projections, the `sf` ecosystem.
 - [Lecture slides, part 2 (HTML)](/teaching/workshop-cienfi/workshop-1/lecture/parte-2.html) — the hands-on walkthrough of the session.
 - [Script (`workshop-01.R`)](/teaching/workshop-cienfi/workshop-1/code/workshop-01.R) — live-coding script: geocoding, OSM, distances, and maps.
@@ -53,6 +54,7 @@ The scripts read from `data/` and write to `output/` using **relative paths only
 
 *Raster data with `terra`.* What a raster is (cells, resolution, bands) and how to read and inspect a GeoTIFF; night lights over Colombia cropped and masked to Cali's administrative boundary from OpenStreetMap; from raster to `data.frame` and to `sf` polygons; aligning CRSs; the spatial join between raster cells and census blocks (*manzanas*); the light–population relationship by block (including the `asinh` regression); and the 2013 vs. 2023 comparison of night lights. The lecture motivates rasters with applications on conflict (Ukraine), COVID lockdowns, land cover, and poverty measurement.
 
+- [Session recording (YouTube)](https://youtu.be/V4q1mx2-CU0){:target="_blank"} — full video of the session (*Introducción a datos Raster en R*).
 - [Lecture slides (HTML)](/teaching/workshop-cienfi/workshop-2/lecture/) — note: self-contained file of ~45 MB; it may take a moment to load.
 - [Script (`intro_raster.R`)](/teaching/workshop-cienfi/workshop-2/code/intro_raster.R) — live-coding script: read, crop, mask, join, and regress.
 - Datasets: [`night_light_201301.tif`](/teaching/workshop-cienfi/workshop-2/data/night_light_201301.tif) · [`night_light_202301.tif`](/teaching/workshop-cienfi/workshop-2/data/night_light_202301.tif) — night-lights rasters (January 2013 and January 2023) — and [`manzanas_cali.rds`](/teaching/workshop-cienfi/workshop-2/data/manzanas_cali.rds) — census blocks of Cali with population.
@@ -66,6 +68,7 @@ The scripts read from `data/` and write to `output/` using **relative paths only
 
 **Part 2 — VIIRS night lights + Google Maps points.** A monthly VIIRS stack (2012–2025) clipped to Cali's urban perimeter: the time dimension of rasters (including the 2020 lockdown dip in luminosity), 19,081 Google Maps establishments, the two directions of the raster–vector cross — from cells to points (`st_join`/`extract`) and from points to cells (`rasterize`) — and the business-density vs. luminosity relationship.
 
+- [Session recording (YouTube)](https://youtu.be/U9Ii-alb_Hs){:target="_blank"} — full video of the session (*Datos Satelitales en R (Sentinel-II)*).
 - [Script, part 1 (`parte-1.R`)](/teaching/workshop-cienfi/workshop-3/code/parte-1.R) — Sentinel-2, RGB compositions, NDVI and NDBI.
 - [Script, part 2 (`parte-2.R`)](/teaching/workshop-cienfi/workshop-3/code/parte-2.R) — VIIRS series and Google Maps points.
 - Datasets: [`sentinel_pance.tif`](/teaching/workshop-cienfi/workshop-3/data/sentinel_pance.tif) — Sentinel-2 image (Aug 18, 2024; 5 bands at 10 m) — [`nl_cali_viirs.tif`](/teaching/workshop-cienfi/workshop-3/data/nl_cali_viirs.tif) — monthly VIIRS stack 2012–2025 (162 bands) — and [`puntos_maps.rds`](/teaching/workshop-cienfi/workshop-3/data/puntos_maps.rds) — Google Maps establishments in Cali.
