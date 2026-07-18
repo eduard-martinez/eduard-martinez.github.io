@@ -29,8 +29,8 @@ nav_order: 2
 
 <div class="publications">
 
-<h2 class="bib-section">Job Market Paper</h2>
-{% bibliography --query @*[category=jmp] %}
+<h2 class="bib-section">Publications</h2>
+{% bibliography --query @*[category=pub] %}
 
 <h2 class="bib-section">Working Papers</h2>
 {% bibliography --query @*[category=wp] %}
