@@ -40,6 +40,7 @@ year: 2026
 
 <p>
 <a href="/teaching/business-analytics/" class="ws-btn"><i class="fas fa-language"></i>English version</a>
+<a href="https://open.spotify.com/show/033UvL50nPzm1gIH35udu5" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast del curso · El Dato con Contexto</a>
 </p>
 
 Los materiales del curso se publican en este sitio a medida que se libera cada semana. Los documentos están construidos con [Quarto](https://quarto.org/){:target="_blank"} y ejecutan R en el navegador vía [webR](https://docs.r-wasm.org/webr/latest/){:target="_blank"}: puedes correr cada ejemplo directamente en la página, sin instalar nada.
@@ -52,9 +53,9 @@ El curso introduce el proceso de *business analytics*: cómo convertir datos cru
 
 Cada semana de contenido publica tres materiales, en el orden en que se usan:
 
-1. <i class="fas fa-book-open"></i> **Teoría** — se estudia *antes* de clase: la versión escrita del podcast o video de la semana, con ejemplos de R ejecutables. Los episodios del podcast y el quiz semanal están en Intu (plataforma institucional).
+1. <i class="fas fa-book-open"></i> **Teoría** — se estudia *antes* de clase: la versión escrita del podcast o video de la semana, con ejemplos de R ejecutables. Los episodios del podcast se publican en Spotify — [*El Dato con Contexto*](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — y cada uno queda enlazado en su semana, más abajo. El quiz semanal es escrito, en papel, al inicio de la clase.
 2. <i class="fas fa-laptop-code"></i> **Práctica guiada** — la aplicación en clase, paso a paso.
-3. <i class="fas fa-clipboard-check"></i> **Taller** — la actividad evaluable que cada estudiante desarrolla durante la sesión.
+3. <i class="fas fa-clipboard-check"></i> **Taller** — la actividad evaluable que cada estudiante desarrolla durante la sesión y entrega a través de Samán.
 
 ## Resultados de aprendizaje
 
@@ -75,6 +76,7 @@ Al finalizar el curso, el estudiante estará en capacidad de:
 Qué es el business analytics y qué problemas resuelve; el recorrido semana a semana; la dinámica de aprendizaje (teoría antes de clase, quiz, aplicación guiada); las reglas de evaluación, el proyecto final y la política de IA — motivada por evidencia reciente sobre cómo el uso de IA afecta la formación de habilidades.
 
 <p>
+<a href="/teaching/ba/week-01/theory/week-01.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
 <a href="/teaching/ba/week-01/theory/week-01.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Diapositivas (PDF)</a>
 <a href="https://arxiv.org/abs/2601.20245" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-book-open"></i>Lectura: Shen &amp; Tamkin (2026)</a>
 </p>
@@ -84,6 +86,7 @@ Qué es un modelo de lenguaje y por qué importa en economía y negocios; alcanc
 
 <p>
 <a href="/teaching/ba/week-02/theory/week-02.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="https://open.spotify.com/episode/68vkoezzpxxmBUUsw35zAE" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
 <a href="/teaching/ba/week-02/practice/week-02.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
 <a href="/teaching/ba/week-02/task/week-02.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 </p>
@@ -114,6 +117,7 @@ El business analytics como proceso que convierte datos en conocimiento accionabl
 
 <p>
 <a href="/teaching/ba/week-05/theory/week-05.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="https://open.spotify.com/episode/75F2Igpy5LJbRKyyKzIOg8" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
 <a href="/teaching/ba/week-05/practice/week-05.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
 <a href="/teaching/ba/week-05/task/week-05.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 </p>
@@ -123,6 +127,7 @@ Fuentes y calidad de datos; el checklist de diagnóstico — tipos, rangos, falt
 
 <p>
 <a href="/teaching/ba/week-06/theory/week-06.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="https://open.spotify.com/episode/1aQ02r039bDtbEbwpumQcq" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
 <a href="/teaching/ba/week-06/practice/week-06.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
 <a href="/teaching/ba/week-06/task/week-06.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <small class="ws-data">Datos: <a href="/teaching/ba/week-06/task/ferreteria_raw.csv"><code>ferreteria_raw.csv</code></a></small>
@@ -205,8 +210,8 @@ El clustering como segmentación sin target; **k-means** (distancia, escalamient
 
 | Componente | Peso | Uso permitido de IA |
 |---|---|---|
-| Quices conceptuales semanales (cada semana de contenido, en Intu) | 25% | Sin IA |
-| Talleres en clase (uno por sesión) | 10% | Colaboración con IA — cada decisión debe poder explicarse |
+| Quices conceptuales semanales (escritos, en papel, cada semana de contenido) | 25% | Sin IA |
+| Talleres en clase (uno por sesión, se entregan por Samán) | 10% | Colaboración con IA — cada decisión debe poder explicarse |
 | Evaluación integradora 1 (semana 7) | 20% | Sin IA |
 | Evaluación integradora 2 (semana 14) | 20% | Sin IA |
 | Proyecto final (tres entregas) | 25% | Planificación / colaboración con IA, según la entrega |
@@ -230,4 +235,4 @@ Handouts de referencia de la edición anterior, disponibles como lectura complem
 
 ---
 
-*Los materiales se publican progresivamente a lo largo del semestre. Los podcasts y quices semanales están en Intu.*
+*Los materiales se publican progresivamente a lo largo del semestre. El podcast del curso — [El Dato con Contexto](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — está en Spotify; los quices son escritos, en papel, cada semana, y los talleres se entregan a través de Samán.*

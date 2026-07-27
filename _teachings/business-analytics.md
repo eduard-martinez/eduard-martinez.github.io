@@ -40,6 +40,7 @@ year: 2026
 
 <p>
 <a href="/teaching/business-analytics-es/" class="ws-btn"><i class="fas fa-language"></i>Versión en español</a>
+<a href="https://open.spotify.com/show/033UvL50nPzm1gIH35udu5" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Course podcast · El Dato con Contexto</a>
 </p>
 
 Original title (in Spanish): **Analítica para los Negocios**. All materials are in Spanish — a full [Spanish version of this page](/teaching/business-analytics-es/) is available.
@@ -54,9 +55,9 @@ The course introduces the business-analytics process: how to turn raw data into 
 
 Each content week publishes three materials, in the order students use them:
 
-1. <i class="fas fa-book-open"></i> **Theory** — studied *before* class: the written version of the week's podcast or video, with runnable R examples. The podcast episodes and the weekly quiz live on Intu (institutional platform).
+1. <i class="fas fa-book-open"></i> **Theory** — studied *before* class: the written version of the week's podcast or video, with runnable R examples. The podcast episodes are published on Spotify — [*El Dato con Contexto*](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — and each one is linked in its week below. The weekly quiz is written, on paper, at the start of class.
 2. <i class="fas fa-laptop-code"></i> **Guided practice** — the in-class application, led step by step.
-3. <i class="fas fa-clipboard-check"></i> **Workshop** — the graded activity each student completes during the session.
+3. <i class="fas fa-clipboard-check"></i> **Workshop** — the graded activity each student completes during the session and submits through Samán.
 
 ## Learning outcomes
 
@@ -77,6 +78,7 @@ By the end of the course, students will be able to:
 What business analytics is and the problems it solves; the week-by-week tour; the learning dynamic (theory before class, quiz, guided application); evaluation rules, the final project, and the AI policy — motivated by recent evidence on how AI use affects skill formation.
 
 <p>
+<a href="/teaching/ba/week-01/theory/week-01.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="/teaching/ba/week-01/theory/week-01.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Slides (PDF)</a>
 <a href="https://arxiv.org/abs/2601.20245" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-book-open"></i>Reading: Shen &amp; Tamkin (2026)</a>
 </p>
@@ -86,6 +88,7 @@ What a large language model is and why it matters for economics and business; ca
 
 <p>
 <a href="/teaching/ba/week-02/theory/week-02.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
+<a href="https://open.spotify.com/episode/68vkoezzpxxmBUUsw35zAE" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
 <a href="/teaching/ba/week-02/practice/week-02.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
 <a href="/teaching/ba/week-02/task/week-02.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
 </p>
@@ -116,6 +119,7 @@ Business analytics as a process that turns data into actionable knowledge; trans
 
 <p>
 <a href="/teaching/ba/week-05/theory/week-05.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
+<a href="https://open.spotify.com/episode/75F2Igpy5LJbRKyyKzIOg8" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
 <a href="/teaching/ba/week-05/practice/week-05.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
 <a href="/teaching/ba/week-05/task/week-05.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
 </p>
@@ -125,6 +129,7 @@ Data sources and quality; the diagnostic checklist — types, ranges, missing va
 
 <p>
 <a href="/teaching/ba/week-06/theory/week-06.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
+<a href="https://open.spotify.com/episode/1aQ02r039bDtbEbwpumQcq" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
 <a href="/teaching/ba/week-06/practice/week-06.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
 <a href="/teaching/ba/week-06/task/week-06.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
 <small class="ws-data">Data: <a href="/teaching/ba/week-06/task/ferreteria_raw.csv"><code>ferreteria_raw.csv</code></a></small>
@@ -207,8 +212,8 @@ Clustering as segmentation without a target; **k-means** (distance, scaling, cen
 
 | Component | Weight | Allowed use of AI |
 |---|---|---|
-| Weekly concept quizzes (every content week, on Intu) | 25% | No AI |
-| In-class workshops (one per session) | 10% | Collaboration with AI — every decision must be explainable |
+| Weekly concept quizzes (written on paper, every content week) | 25% | No AI |
+| In-class workshops (one per session, submitted through Samán) | 10% | Collaboration with AI — every decision must be explainable |
 | Integrative written exam 1 (week 7) | 20% | No AI |
 | Integrative written exam 2 (week 14) | 20% | No AI |
 | Final project (three deliverables) | 25% | Planning / collaboration with AI, by deliverable |
@@ -232,4 +237,4 @@ Reference handouts from the previous edition, still available as complementary r
 
 ---
 
-*Materials are released progressively as the semester advances. Podcasts and weekly quizzes live on Intu.*
+*Materials are released progressively as the semester advances. The course podcast — [El Dato con Contexto](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — is on Spotify; quizzes are written weekly on paper, and workshops are submitted through Samán.*
