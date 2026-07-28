@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Unidad 4 - Fundamentos de Machine Learning</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="week-10_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-10_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-10_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-10_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="week-10_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-10_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-10_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-10_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-10_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-10_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-10_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-10_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#cómo-estudiar-esta-semana" id="toc-cómo-estudiar-esta-semana" class="nav-link active" data-scroll-target="#cómo-estudiar-esta-semana"><span class="header-section-number">1</span> Cómo estudiar esta semana</a></li>
+  <li><a href="#glosario-de-la-semana" id="toc-glosario-de-la-semana" class="nav-link" data-scroll-target="#glosario-de-la-semana"><span class="header-section-number">2</span> Glosario de la semana</a></li>
+  <li><a href="#el-estudiante-que-se-sabía-el-parcial-de-memoria" id="toc-el-estudiante-que-se-sabía-el-parcial-de-memoria" class="nav-link" data-scroll-target="#el-estudiante-que-se-sabía-el-parcial-de-memoria"><span class="header-section-number">3</span> El estudiante que se sabía el parcial de memoria</a></li>
+  <li><a href="#aprender-para-una-máquina" id="toc-aprender-para-una-máquina" class="nav-link" data-scroll-target="#aprender-para-una-máquina"><span class="header-section-number">4</span> Aprender, para una máquina</a></li>
+  <li><a href="#el-pipeline-de-la-pregunta-al-reporte" id="toc-el-pipeline-de-la-pregunta-al-reporte" class="nav-link" data-scroll-target="#el-pipeline-de-la-pregunta-al-reporte"><span class="header-section-number">5</span> El pipeline: de la pregunta al reporte</a></li>
+  <li><a href="#el-examen-entrenamiento-vs.-prueba" id="toc-el-examen-entrenamiento-vs.-prueba" class="nav-link" data-scroll-target="#el-examen-entrenamiento-vs.-prueba"><span class="header-section-number">6</span> El examen: entrenamiento vs.&nbsp;prueba</a></li>
+  <li><a href="#sobreajuste-y-subajuste" id="toc-sobreajuste-y-subajuste" class="nav-link" data-scroll-target="#sobreajuste-y-subajuste"><span class="header-section-number">7</span> Sobreajuste y subajuste</a></li>
+  <li><a href="#el-baseline-la-regla-tonta-que-hay-que-vencer" id="toc-el-baseline-la-regla-tonta-que-hay-que-vencer" class="nav-link" data-scroll-target="#el-baseline-la-regla-tonta-que-hay-que-vencer"><span class="header-section-number">8</span> El baseline: la regla tonta que hay que vencer</a></li>
+  <li><a href="#validación-cruzada-no-un-examen-sino-cinco" id="toc-validación-cruzada-no-un-examen-sino-cinco" class="nav-link" data-scroll-target="#validación-cruzada-no-un-examen-sino-cinco"><span class="header-section-number">9</span> Validación cruzada: no un examen, sino cinco</a></li>
+  <li><a href="#data-leakage-el-enemigo-silencioso" id="toc-data-leakage-el-enemigo-silencioso" class="nav-link" data-scroll-target="#data-leakage-el-enemigo-silencioso"><span class="header-section-number">10</span> Data leakage: el enemigo silencioso</a></li>
+  <li><a href="#los-videos-métricas-con-lápiz-y-papel" id="toc-los-videos-métricas-con-lápiz-y-papel" class="nav-link" data-scroll-target="#los-videos-métricas-con-lápiz-y-papel"><span class="header-section-number">11</span> Los videos: métricas con lápiz y papel</a>
+  <ul class="collapse">
+  <li><a href="#video-1-la-matriz-de-confusión-clasificación" id="toc-video-1-la-matriz-de-confusión-clasificación" class="nav-link" data-scroll-target="#video-1-la-matriz-de-confusión-clasificación"><span class="header-section-number">11.1</span> Video 1 — La matriz de confusión (clasificación)</a></li>
+  <li><a href="#video-2-mae-y-rmse-regresión" id="toc-video-2-mae-y-rmse-regresión" class="nav-link" data-scroll-target="#video-2-mae-y-rmse-regresión"><span class="header-section-number">11.2</span> Video 2 — MAE y RMSE (regresión)</a></li>
+  </ul></li>
+  <li><a href="#y-esto-cómo-se-ve-en-tu-semestre" id="toc-y-esto-cómo-se-ve-en-tu-semestre" class="nav-link" data-scroll-target="#y-esto-cómo-se-ve-en-tu-semestre"><span class="header-section-number">12</span> ¿Y esto cómo se ve en tu semestre?</a></li>
+  <li><a href="#para-pensar" id="toc-para-pensar" class="nav-link" data-scroll-target="#para-pensar"><span class="header-section-number">13</span> Para pensar 🤔</a></li>
+  <li><a href="#checklist-de-salida" id="toc-checklist-de-salida" class="nav-link" data-scroll-target="#checklist-de-salida"><span class="header-section-number">14</span> Checklist de salida</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">15</span> Preguntas de comprensión</a></li>
+  <li><a href="#material-adicional" id="toc-material-adicional" class="nav-link" data-scroll-target="#material-adicional"><span class="header-section-number">16</span> Material adicional</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 4 - Fundamentos de Machine Learning</h1>
+<p class="subtitle lead">Analítica para los negocios · Semana 10 · 06327-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="cómo-estudiar-esta-semana" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Cómo estudiar esta semana</h1>
+<div class="callout-key">
+<p><strong>Este documento es la versión escrita del podcast de la semana — y esta vez viene con dos videos</strong></p>
+<ol type="1">
+<li>🎧 <strong>Escucha el episodio</strong> — el enlace está en Intu. <!-- TODO: pegar aquí el enlace del podcast --></li>
+<li>🎬 <strong>Mira los dos videos de métricas</strong> que están embebidos más abajo: cómo se construye la <strong>matriz de confusión</strong> y cómo se calculan <strong>MAE y RMSE</strong>. No son opcionales: son la mitad del material de esta semana y la herramienta central de la clase.</li>
+<li>📖 <strong>Lee este documento</strong> — organiza los conceptos, resume los videos y trae tres herramientas interactivas para ponerte a prueba.</li>
+<li>✅ <strong>Presenta el quiz en Intu</strong> antes de la clase (cubre el podcast <strong>y</strong> los videos).</li>
+</ol>
+</div>
+<p><strong>El plan del episodio:</strong> hasta la semana 6 usaste los datos para describir el pasado: KPIs, tablas, gráficos. Esta semana el curso cambia de pregunta: ya no <em>¿qué pasó?</em> sino <em>¿qué va a pasar?</em> Veremos qué significa que una máquina “aprenda”, por qué la única prueba que cuenta es con datos que el modelo <strong>nunca vio</strong>, cómo saber si un modelo de verdad aporta (el baseline), y las trampas que hacen que un modelo se vea brillante en el computador y fracase en el mundo real: el sobreajuste y el <em>data leakage</em>. Al final, los dos videos te dan el instrumento de medición: las métricas. En clase las usarás para <strong>juzgar modelos ya entrenados</strong> — y en las semanas 11 y 12 construirás los tuyos.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="glosario-de-la-semana" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Glosario de la semana</h1>
+<p>Los términos que vas a escuchar en el episodio y en los videos. Vuelve aquí cada vez que uno se te escape.</p>
+<div class="glossary-grid">
+<div class="gloss-card">
+<p><strong>Machine Learning</strong> 🧠 Enseñarle a un programa a partir de <strong>ejemplos</strong> (filas de datos), no de reglas escritas a mano. El objetivo no es repetir lo que vio: es <strong>generalizar</strong> — acertar en casos nuevos.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Target (variable objetivo)</strong> 🎯 Lo que quieres predecir. Si es una <strong>categoría</strong> (“Aprobado”/“Rechazado”) el problema es de <em>clasificación</em>; si es un <strong>número</strong> (la nota final, el precio) es de <em>regresión</em>.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Features (predictoras)</strong> 🧩 Las variables con las que el modelo intenta adivinar el target: ingreso, edad, historial… Elegirlas bien es más importante que el algoritmo de moda.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Train / Test</strong> 📚 La partición sagrada: con el ~80% el modelo <strong>estudia</strong> (train) y con el ~20% restante presenta <strong>el examen</strong> (test). El test se toca una sola vez, al final.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Baseline</strong> 📏 El modelo más tonto posible: predecir siempre la clase mayoritaria o siempre el promedio. Es la vara mínima — si tu modelo no le gana, no aporta nada.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Sobreajuste y subajuste</strong> 🎭 Sobreajuste: memorizar el ruido de train y fallar en test. Subajuste: un modelo tan simple que falla hasta en train. La firma del sobreajuste es la <strong>brecha</strong> entre ambos errores.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Validación cruzada</strong> 🔄 En vez de un solo examen, k exámenes rotando qué parte de los datos se reserva. Sirve para comparar modelos y elegir hiperparámetros <strong>sin gastar</strong> el test.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Data leakage</strong> 🚰 Información del test — o del futuro — que se “fuga” al entrenamiento. El modelo se ve genial en el examen… porque vio las respuestas. La métrica queda inflada y la decisión, contaminada.</p>
+</div>
+<div class="gloss-card">
+<p><strong>Matriz de confusión</strong> 🧮 La tabla 2×2 que resume un clasificador: qué predijo el modelo contra qué ocurrió de verdad. De ella salen accuracy, precisión y recall. La construyes en el video 1.</p>
+</div>
+<div class="gloss-card">
+<p><strong>MAE y RMSE</strong> 📐 Las métricas de regresión: cuánto se equivoca el modelo, en promedio, en las unidades del target. El RMSE castiga más los errores grandes. Los calculas en el video 2.</p>
+</div>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-estudiante-que-se-sabía-el-parcial-de-memoria" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> El estudiante que se sabía el parcial de memoria</h1>
+<p>El episodio arranca con dos estudiantes preparando el mismo parcial.</p>
+<p>El primero consiguió los parciales de los últimos cinco semestres <strong>con sus soluciones</strong> y se los aprendió de memoria, cifra por cifra. En los simulacros — que salen de esos mismos parciales viejos — saca 5.0 clavado. El segundo estudió los conceptos: resolvió ejercicios, se equivocó, entendió <em>por qué</em> se equivocaba. En los simulacros saca 4.2.</p>
+<p>¿A quién le va mejor el día del parcial, con preguntas que ninguno ha visto? Exacto. El primero colapsa: su 5.0 era una ilusión, porque <strong>medirse en preguntas que ya conoces no mide que sepas — mide que memorizaste</strong>. El segundo saca su 4.2 tranquilo, porque su nota de simulacro sí medía comprensión.</p>
+<div class="callout-key">
+<p><strong>Un modelo de Machine Learning puede ser cualquiera de los dos estudiantes</strong></p>
+<p>Y aquí está el problema de negocio: por fuera son <strong>idénticos</strong>. Ambos presentan métricas espectaculares en los datos con los que se construyeron. La diferencia solo aparece cuando llegan datos nuevos — y en una empresa, “datos nuevos” significa clientes reales, créditos reales, plata real.</p>
+<p>Todo lo de esta semana — train/test, baseline, validación cruzada, leakage — es una sola pregunta repetida con distintos instrumentos: <strong>¿este modelo entendió o memorizó?</strong> Tu trabajo como analista es averiguarlo <em>antes</em> de que la empresa le confíe una decisión.</p>
+</div>
+<p>¿Y por qué te importa? Porque los modelos ya están decidiendo: el banco que aprueba o niega un crédito en segundos, la universidad que dispara alertas tempranas de deserción, la tienda que pronostica cuánto inventario pedir. En la semana 5 llamaste a esto <strong>analítica predictiva</strong>. Esta semana le abres el capó.</p>
+<div class="callout-connect">
+<p><strong>Conexión con la semana 5 — y con tu proyecto final</strong></p>
+<p>¿Recuerdas la traducción de preguntas de negocio a tareas analíticas? <em>¿Este cliente incumplirá?</em> → clasificación. <em>¿Cuánto venderá esta tienda?</em> → regresión (predicción). <em>¿Qué grupos de clientes tengo?</em> → segmentación. Las dos primeras son <strong>aprendizaje supervisado</strong> — hay una respuesta correcta en los datos históricos con la cual entrenar y calificar — y son el tema de las semanas 10 a 12. La segmentación no tiene “respuesta correcta” y por eso se evalúa distinto: eso es la semana 13. Tu pregunta del proyecto final cae en una de estas casillas, así que lo de hoy es, literalmente, el manual de evaluación de tu Entrega 3.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="aprender-para-una-máquina" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Aprender, para una máquina</h1>
+<p>Programar, como lo has hecho hasta ahora, es escribir reglas: <em>si el ingreso es mayor a 4 millones y no tiene mora, apruebe</em>. Machine Learning invierte el flujo: no le das las reglas — le das <strong>ejemplos resueltos</strong> (miles de solicitudes históricas con su desenlace) y el algoritmo encuentra los patrones solo.</p>
+<p>Para eso el dataset se divide en dos papeles:</p>
+<ul>
+<li>El <strong>target</strong> 🎯: la columna que quieres predecir. En los ejemplos de esta semana: la decisión de crédito (<code>Aprobado</code>/<code>Rechazado</code>) y la nota final de un estudiante (0 a 5).</li>
+<li>Las <strong>features</strong> 🧩: las columnas con las que se predice. Ingreso, deuda, antigüedad laboral; parciales, tareas, asistencia.</li>
+</ul>
+<p>Y del tipo de target sale el tipo de problema — la misma tabla de la semana 5, ahora con apellido técnico:</p>
+<table class="table-striped caption-top table">
+<colgroup>
+<col style="width: 40%">
+<col style="width: 15%">
+<col style="width: 22%">
+<col style="width: 23%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>La pregunta de negocio</th>
+<th>Target</th>
+<th>Tipo de problema</th>
+<th>Métrica (hoy la aprendes)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>¿Este solicitante incumplirá el crédito?</td>
+<td>Categoría</td>
+<td><strong>Clasificación</strong></td>
+<td>Matriz de confusión</td>
+</tr>
+<tr class="even">
+<td>¿Qué nota sacará este estudiante?</td>
+<td>Número</td>
+<td><strong>Regresión</strong></td>
+<td>MAE / RMSE</td>
+</tr>
+<tr class="odd">
+<td>¿Cuánto venderá la tienda en mayo?</td>
+<td>Número</td>
+<td><strong>Regresión</strong></td>
+<td>MAE / RMSE</td>
+</tr>
+<tr class="even">
+<td>¿Este correo es spam?</td>
+<td>Categoría</td>
+<td><strong>Clasificación</strong></td>
+<td>Matriz de confusión</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>“Aprender” no es entender — es ajustar</strong></p>
+<p>El algoritmo no sabe qué es un crédito ni le importa. Solo ajusta parámetros para que sus predicciones se parezcan a los ejemplos que le diste. Por eso puede “aprender” cosas absurdas si los datos las contienen: patrones espurios, errores de digitación, ruido. Y por eso la evaluación honesta — todo lo que sigue — no es un trámite: es la única forma de saber si aprendió algo útil.</p>
+</div>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-pipeline-de-la-pregunta-al-reporte" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> El pipeline: de la pregunta al reporte</h1>
+<p>Todo proyecto de ML serio recorre los mismos pasos, en el mismo orden. Este es el mapa de las próximas cuatro semanas del curso:</p>
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>Pregunta y target.</b> Traducir la pregunta de negocio a una variable concreta que predecir. Sin target claro no hay proyecto.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>Features.</b> Elegir y preparar las variables predictoras (aquí reaparece toda tu semana 6: limpieza y EDA).</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>Partir train/test.</b> Separar el examen <em>antes</em> de estudiar. Típicamente 80/20 y al azar — con una excepción que veremos abajo.</div></div>
+  <div class="pipe-step"><div class="pipe-num">4</div><div><b>Entrenar y ajustar.</b> El algoritmo aprende con train; la validación cruzada compara versiones e hiperparámetros. <em>(Semanas 11 y 12.)</em></div></div>
+  <div class="pipe-step"><div class="pipe-num">5</div><div><b>Evaluar en test, contra un baseline.</b> Una sola vez, con la métrica correcta, y comparando contra la regla tonta. <em>(Esta semana.)</em></div></div>
+  <div class="pipe-step"><div class="pipe-num">6</div><div><b>Reportar.</b> Métrica en test + comparación con baseline + limitaciones y riesgos. Lo que un gerente necesita para decidir.</div></div>
+</div>
+<p>Fíjate en el orden de la clase: esta semana entras al pipeline <strong>por el final</strong> — aprenderás a ejecutar los pasos 5 y 6 sobre modelos que ya vienen entrenados. Es deliberado: primero juez, después ingeniero. Cuando la próxima semana entrenes tu primer árbol, ya sabrás calificarlo.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-examen-entrenamiento-vs.-prueba" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> El examen: entrenamiento vs.&nbsp;prueba</h1>
+<p>La regla más importante de todo Machine Learning cabe en una línea:</p>
+<div class="callout-key">
+<p><strong>Nunca evalúes un modelo con los datos que usó para aprender.</strong></p>
+<p>El modelo ya <em>vio</em> esas filas. Medir ahí es tomarle el examen con las mismas preguntas del simulacro: la nota sale inflada y no mide generalización. Por eso, antes de entrenar nada, se aparta un pedazo de los datos — el <strong>conjunto de prueba</strong> (test) — que el modelo no toca durante el aprendizaje. Ese pedazo simula el futuro: los clientes que aún no llegan, las solicitudes del próximo trimestre.</p>
+</div>
+<p>La receta estándar: mezclar las filas al azar y partir <strong>80% train / 20% test</strong>. Dos detalles que en la práctica separan a los profesionales:</p>
+<ol type="1">
+<li><strong>El test se usa una sola vez, al final.</strong> Si lo consultas veinte veces mientras ajustas el modelo, deja de ser un examen y se convierte en otro simulacro — ya “aprendiste” de él. Para iterar está la validación cruzada (abajo).</li>
+<li><strong>Con datos temporales, el azar se prohíbe.</strong> Si quieres predecir las ventas de mayo, entrena con enero-abril y prueba con mayo. Partir al azar mezclaría pasado y futuro: el modelo “vería” datos posteriores a los que intenta predecir — una fuga de información de manual.</li>
+</ol>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="sobreajuste-y-subajuste" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Sobreajuste y subajuste</h1>
+<p>Volvamos a los dos estudiantes. En términos de modelos:</p>
+<ul>
+<li><strong>Subajuste</strong> (<em>underfitting</em>): el modelo es demasiado simple para el patrón real. Le va mal en train <strong>y</strong> en test — el estudiante que no estudió.</li>
+<li><strong>Sobreajuste</strong> (<em>overfitting</em>): el modelo es tan flexible que además del patrón se aprendió el <strong>ruido</strong> de train. Brilla en train, colapsa en test — el memorizador.</li>
+</ul>
+<p>Entre los dos hay un punto dulce, y encontrarlo es el oficio. Muévele a la complejidad y mira qué pasa con los dos errores:</p>
+<div class="widget-card" id="wg-ofit">
+  <div class="widget-head">🎛️ El dial de la complejidad</div>
+  <div class="widget-body">
+    <div class="ofit-controls">
+      <span style="font-size:0.9em; color:#475569;">Complejidad del modelo</span>
+      <input type="range" id="ofit-slider" min="1" max="9" value="1" step="1" aria-label="Complejidad del modelo">
+      <span class="ofit-cx" id="ofit-cx">1</span>
+    </div>
+    <svg class="ofit-svg" id="ofit-svg" viewbox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Curvas de error de entrenamiento y prueba según complejidad"></svg>
+    <div class="ofit-boxes">
+      <div class="ofit-box ofit-train"><div class="ofit-val" id="ofit-etr">–</div><div class="ofit-lab">Error en train</div></div>
+      <div class="ofit-box ofit-test"><div class="ofit-val" id="ofit-ete">–</div><div class="ofit-lab">Error en test</div></div>
+      <div class="ofit-box"><div class="ofit-val" id="ofit-gap">–</div><div class="ofit-lab">Brecha (test − train)</div></div>
+    </div>
+    <div style="text-align:center; margin:0.4em 0;"><span class="ofit-verdict" id="ofit-verdict"></span></div>
+    <div class="widget-note" id="ofit-note"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var TRAIN = [32, 22, 15, 11, 8, 6, 4, 2.5, 1.5];
+  var TEST  = [34, 25, 19, 16, 17, 20, 24, 29, 34];
+  var svg = document.getElementById("ofit-svg");
+  if (!svg) return;
+  var W = 560, H = 300, L = 46, R = 20, T = 18, B = 40;
+  function x(c) { return L + (c - 1) * (W - L - R) / 8; }
+  function y(e) { return T + (36 - e) * (H - T - B) / 36; }
+  function path(arr) {
+    var d = "";
+    for (var i = 0; i < arr.length; i++) d += (i ? " L" : "M") + x(i + 1).toFixed(1) + " " + y(arr[i]).toFixed(1);
+    return d;
+  }
+  var base = '';
+  base += '<line x1="' + L + '" y1="' + y(0) + '" x2="' + (W - R) + '" y2="' + y(0) + '" stroke="#94a3b8" stroke-width="1.5"/>';
+  base += '<line x1="' + L + '" y1="' + T + '" x2="' + L + '" y2="' + y(0) + '" stroke="#94a3b8" stroke-width="1.5"/>';
+  base += '<text x="' + ((L + W - R) / 2) + '" y="' + (H - 8) + '" font-size="12" fill="#64748b" text-anchor="middle">Complejidad del modelo →</text>';
+  base += '<text x="14" y="' + ((T + y(0)) / 2) + '" font-size="12" fill="#64748b" text-anchor="middle" transform="rotate(-90 14 ' + ((T + y(0)) / 2) + ')">Error →</text>';
+  base += '<path d="' + path(TRAIN) + '" fill="none" stroke="#2563eb" stroke-width="2.5"/>';
+  base += '<path d="' + path(TEST) + '" fill="none" stroke="#d97706" stroke-width="2.5"/>';
+  base += '<text x="' + (W - R - 4) + '" y="' + (y(TRAIN[8]) - 7) + '" font-size="12" fill="#2563eb" text-anchor="end">train</text>';
+  base += '<text x="' + (W - R - 4) + '" y="' + (y(TEST[8]) - 7) + '" font-size="12" fill="#d97706" text-anchor="end">test</text>';
+  base += '<line id="ofit-mark" x1="0" y1="' + T + '" x2="0" y2="' + y(0) + '" stroke="#1e3a5f" stroke-width="1" stroke-dasharray="4 3"/>';
+  base += '<circle id="ofit-ptr" r="5.5" fill="#2563eb" stroke="#fff" stroke-width="1.5"/>';
+  base += '<circle id="ofit-pte" r="5.5" fill="#d97706" stroke="#fff" stroke-width="1.5"/>';
+  svg.innerHTML = base;
+  var sl = document.getElementById("ofit-slider");
+  function pinta() {
+    var c = parseInt(sl.value, 10);
+    var etr = TRAIN[c - 1], ete = TEST[c - 1];
+    document.getElementById("ofit-cx").textContent = c;
+    document.getElementById("ofit-etr").textContent = etr.toFixed(1);
+    document.getElementById("ofit-ete").textContent = ete.toFixed(1);
+    document.getElementById("ofit-gap").textContent = (ete - etr).toFixed(1);
+    var mk = document.getElementById("ofit-mark");
+    mk.setAttribute("x1", x(c)); mk.setAttribute("x2", x(c));
+    var p1 = document.getElementById("ofit-ptr");
+    p1.setAttribute("cx", x(c)); p1.setAttribute("cy", y(etr));
+    var p2 = document.getElementById("ofit-pte");
+    p2.setAttribute("cx", x(c)); p2.setAttribute("cy", y(ete));
+    var v = document.getElementById("ofit-verdict"), n = document.getElementById("ofit-note");
+    v.className = "ofit-verdict";
+    if (c <= 2) {
+      v.classList.add("v-sub"); v.textContent = "SUBAJUSTE";
+      n.innerHTML = "El modelo es demasiado simple: le va mal <b>incluso en los datos que ya vio</b>. Todavía hay patrón por aprender — súbele a la complejidad.";
+    } else if (c <= 5) {
+      v.classList.add("v-dulce"); v.textContent = c === 4 ? "PUNTO DULCE 🎯" : "ZONA SANA";
+      n.innerHTML = (c === 4 ? "Aquí el error de <b>test</b> toca su mínimo. " : "") + "El modelo captura el patrón y la brecha train-test sigue pequeña. Nota que el mejor modelo <b>no</b> es el de menor error en train.";
+    } else {
+      v.classList.add("v-sobre"); v.textContent = "SOBREAJUSTE";
+      n.innerHTML = "El error de train sigue bajando… pero el de test <b>sube</b>: el modelo está memorizando ruido. La brecha creciente entre las dos curvas es la firma del memorizador.";
+    }
+  }
+  sl.addEventListener("input", pinta);
+  pinta();
+})();
+</script>
+<p><em>Las curvas son ilustrativas — la forma es la típica de casi cualquier problema; los números exactos cambian en cada caso.</em> La lección del dial: <strong>el error de train siempre baja</strong> al agregar complejidad, así que nunca es evidencia de calidad. La curva que decide es la de test — y por eso el examen es sagrado.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-baseline-la-regla-tonta-que-hay-que-vencer" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> El baseline: la regla tonta que hay que vencer</h1>
+<p>Te presentan un modelo: <em>“accuracy del 98%”</em>. ¿Aplaudes? Todavía no. Falta la pregunta clave: <strong>¿98% comparado con qué?</strong></p>
+<div class="callout-key">
+<p><strong>El baseline es el modelo que no piensa</strong></p>
+<ul>
+<li>En <strong>clasificación</strong>: predecir siempre la clase mayoritaria. Si el 55% de los créditos históricos fueron aprobados, la regla “apruebe a todo el mundo” acierta el 55% — sin mirar un solo dato del solicitante.</li>
+<li>En <strong>regresión</strong>: predecir siempre el promedio. Si la nota media histórica es 3.3, la regla “todos sacan 3.3” ya logra un MAE sorprendentemente decente.</li>
+</ul>
+<p>El baseline es la vara mínima: <strong>un modelo solo aporta lo que le gana al baseline.</strong> Y en un negocio la vara real suele ser más alta: la regla que la empresa ya usa (el comité de crédito, el pronóstico del vendedor experimentado).</p>
+</div>
+<p>El ejemplo clásico de por qué esto importa: detección de fraude. En 1.000 transacciones hay 20 fraudes (el 2%). Un “modelo” que responde <em>“no es fraude”</em> a todo alcanza <strong>98% de accuracy</strong> — y no detecta ni un solo fraude. Espectacular en el papel, inservible en la vida. Guarda esta alarma para el video 1: cuando las clases están desbalanceadas, la accuracy se infla sola, y hay que mirar la matriz completa.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="validación-cruzada-no-un-examen-sino-cinco" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Validación cruzada: no un examen, sino cinco</h1>
+<p>Queda un problema práctico. El test se usa <strong>una sola vez</strong>, pero mientras construyes el modelo necesitas comparar decenas de versiones: ¿árbol profundo o superficial? ¿estas features o aquellas? Si comparas contra el test cada vez, lo gastas. Y si comparas con un único pedacito de train, puedes tener suerte (o mala suerte) con ese pedacito.</p>
+<p>La solución es elegante — la <strong>validación cruzada</strong> (<em>k-fold cross-validation</em>): divide el train en k bloques (típicamente 5), entrena k veces rotando cuál bloque hace de examen, y promedia las k notas.</p>
+<div class="cv-grid" aria-label="Esquema de validación cruzada con 5 bloques">
+  <div class="cv-row"><span class="cv-lab">Ronda 1</span><span class="cv-blk cv-test"></span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk"></span></div>
+  <div class="cv-row"><span class="cv-lab">Ronda 2</span><span class="cv-blk"></span><span class="cv-blk cv-test"></span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk"></span></div>
+  <div class="cv-row"><span class="cv-lab">Ronda 3</span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk cv-test"></span><span class="cv-blk"></span><span class="cv-blk"></span></div>
+  <div class="cv-row"><span class="cv-lab">Ronda 4</span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk cv-test"></span><span class="cv-blk"></span></div>
+  <div class="cv-row"><span class="cv-lab">Ronda 5</span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk"></span><span class="cv-blk cv-test"></span></div>
+  <div class="cv-leyenda"><span class="cv-chip entrena"></span>entrena &nbsp;&nbsp; <span class="cv-chip prueba"></span>examina — cada bloque del train hace de examen exactamente una vez; la nota final es el promedio de las 5 rondas.</div>
+</div>
+<p>Con ese promedio eliges tu mejor versión del modelo — profundidad del árbol, conjunto de features, algoritmo — y <strong>solo entonces</strong>, con la decisión tomada, presentas el examen final en el test. En las semanas 11 y 12 esto dejará de ser un dibujo: la usarás para elegir los hiperparámetros de tus árboles.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="data-leakage-el-enemigo-silencioso" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Data leakage: el enemigo silencioso</h1>
+<p>La palabra suena exótica; el error es cotidiano. <strong>Data leakage</strong> (fuga de datos) es cualquier camino por el que información del test — o del futuro — se cuela al entrenamiento. El resultado siempre es el mismo: métricas infladas en el laboratorio, decepción en producción. Es el error #1 de los proyectos de ML principiantes, y también de varios profesionales.</p>
+<p>Las tres fugas más comunes:</p>
+<ol type="1">
+<li><strong>Preprocesar con toda la base.</strong> Imputar valores faltantes con el promedio global, o estandarizar variables con la media y desviación de <em>todos</em> los datos, <strong>antes</strong> de partir train/test. Suena inocente, pero ese promedio ya contiene información del test. La regla profesional: <strong>todo lo que se aprende de los datos (medias, escalas, imputaciones) se aprende solo con train</strong> y luego se aplica, congelado, al test.</li>
+<li><strong>Variables del futuro.</strong> Para predecir si un crédito caerá en mora, incluir la variable “número de cuotas atrasadas al cierre” — una columna que solo existe <em>después</em> del desenlace. El modelo saca métricas de fantasía porque, literalmente, le diste la respuesta disfrazada de feature.</li>
+<li><strong>Gastar el test.</strong> Probar 30 modelos y quedarse con el que dio mejor métrica <em>en el test</em>. Tras 30 consultas, el test dejó de ser un examen: elegiste al ganador <em>por</em> sus respuestas al examen, y su nota ya no predice nada.</li>
+</ol>
+<p>¿Quedó claro? Demuéstralo — seis situaciones, tú decides:</p>
+<div class="widget-card" id="wg-leak">
+  <div class="widget-head">🚰 ¿Hay leakage aquí?</div>
+  <div class="widget-body">
+    <div class="quiz-item" data-ans="si">
+      <div class="quiz-text">1. Imputas los ingresos faltantes con el promedio calculado sobre <b>toda la base</b> y después partes train/test.</div>
+      <div class="quiz-btns"><button type="button" class="btn-widget" data-v="si">🚨 Hay leakage</button><button type="button" class="btn-widget btn-widget-ghost" data-v="no">✅ No hay</button></div>
+      <div class="quiz-reveal">🚨 <b>Hay fuga.</b> Ese promedio ya "vio" las filas del test. Lo correcto: calcular el promedio solo con train y usarlo para imputar ambos conjuntos.</div>
+    </div>
+    <div class="quiz-item" data-ans="no">
+      <div class="quiz-text">2. Calculas la media del ingreso <b>solo con train</b> y usas esa misma media para imputar los faltantes de train y de test.</div>
+      <div class="quiz-btns"><button type="button" class="btn-widget" data-v="si">🚨 Hay leakage</button><button type="button" class="btn-widget btn-widget-ghost" data-v="no">✅ No hay</button></div>
+      <div class="quiz-reveal">✅ <b>Sin fuga.</b> Es exactamente el protocolo correcto: lo aprendido (la media) salió solo de train; al test únicamente se le aplica.</div>
+    </div>
+    <div class="quiz-item" data-ans="si">
+      <div class="quiz-text">3. Para predecir si un crédito caerá en mora, incluyes como feature el <b>número de cuotas atrasadas al cierre del crédito</b>.</div>
+      <div class="quiz-btns"><button type="button" class="btn-widget" data-v="si">🚨 Hay leakage</button><button type="button" class="btn-widget btn-widget-ghost" data-v="no">✅ No hay</button></div>
+      <div class="quiz-reveal">🚨 <b>Hay fuga — del futuro.</b> Esa columna solo se conoce <em>después</em> del desenlace que intentas predecir. En producción no existirá al momento de decidir. Es la respuesta disfrazada de pregunta.</div>
+    </div>
+    <div class="quiz-item" data-ans="no">
+      <div class="quiz-text">4. Antes de partir train/test, eliminas las <b>filas duplicadas exactas</b> de la base.</div>
+      <div class="quiz-btns"><button type="button" class="btn-widget" data-v="si">🚨 Hay leakage</button><button type="button" class="btn-widget btn-widget-ghost" data-v="no">✅ No hay</button></div>
+      <div class="quiz-reveal">✅ <b>Sin fuga — de hecho, lo contrario.</b> Si una fila repetida cae con una copia en train y otra en test, el modelo "verá" el examen. Deduplicar antes de partir <em>previene</em> esa fuga.</div>
+    </div>
+    <div class="quiz-item" data-ans="si">
+      <div class="quiz-text">5. Estandarizas todas las variables (restar la media, dividir por la desviación) usando <b>media y desviación de toda la base</b>, y luego partes.</div>
+      <div class="quiz-btns"><button type="button" class="btn-widget" data-v="si">🚨 Hay leakage</button><button type="button" class="btn-widget btn-widget-ghost" data-v="no">✅ No hay</button></div>
+      <div class="quiz-reveal">🚨 <b>Hay fuga.</b> Mismo pecado del caso 1 con otro disfraz: media y desviación se aprenden de los datos, así que deben salir solo de train.</div>
+    </div>
+    <div class="quiz-item" data-ans="si">
+      <div class="quiz-text">6. Entrenas 30 modelos distintos y te quedas con el que sacó la mejor métrica <b>en el test</b>.</div>
+      <div class="quiz-btns"><button type="button" class="btn-widget" data-v="si">🚨 Hay leakage</button><button type="button" class="btn-widget btn-widget-ghost" data-v="no">✅ No hay</button></div>
+      <div class="quiz-reveal">🚨 <b>Hay fuga — la más elegante.</b> Elegiste al ganador por sus respuestas al examen: el test ya participó del entrenamiento (del tuyo). Para comparar 30 modelos está la validación cruzada; el test se visita una sola vez.</div>
+    </div>
+    <div class="quiz10-score" id="leak-score"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var card = document.getElementById("wg-leak");
+  if (!card) return;
+  var items = card.querySelectorAll(".quiz-item");
+  var done = 0, ok = 0;
+  function marcador() {
+    var s = document.getElementById("leak-score");
+    if (done === items.length) {
+      s.textContent = "Resultado: " + ok + " de " + items.length + (ok === items.length ? " — olfato de auditor. 🕵️" : " — relee las reglas de la fuga y vuelve a intentar mañana.");
+    } else if (done > 0) {
+      s.textContent = "Llevas " + done + " de " + items.length + " (aciertos: " + ok + ").";
+    }
+  }
+  items.forEach(function (it) {
+    var btns = it.querySelectorAll("button[data-v]");
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (it.classList.contains("q-ok") || it.classList.contains("q-bad")) return;
+        var acierto = b.getAttribute("data-v") === it.getAttribute("data-ans");
+        it.classList.add(acierto ? "q-ok" : "q-bad");
+        done++; if (acierto) ok++;
+        marcador();
+      });
+    });
+  });
+})();
+</script>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="los-videos-métricas-con-lápiz-y-papel" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Los videos: métricas con lápiz y papel</h1>
+<p>Hasta aquí, el juicio (“¿generaliza o memoriza?”) ha sido cualitativo. Falta el instrumento de medición: <strong>¿cómo se califica, exactamente, una predicción?</strong> Eso es lo que construyen los dos videos de esta semana — uno para clasificación, otro para regresión. En el diseño original del curso venían al final de las semanas 11 y 12; los adelantamos para que llegues a los modelos ya sabiendo calificarlos. En la clase de esta semana los usarás sin descanso.</p>
+<section id="video-1-la-matriz-de-confusión-clasificación" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="video-1-la-matriz-de-confusión-clasificación"><span class="header-section-number">11.1</span> Video 1 — La matriz de confusión (clasificación)</h2>
+<p>El video construye, celda por celda, la tabla que resume cualquier clasificador. Usa como ejemplo un modelo que decide créditos — no importa todavía <em>cómo</em> decide (eso llega la próxima semana); importa cómo se <strong>califica</strong> lo que decidió. Al final el profesor propone un ejercicio de conteo: <strong>páusalo y resuélvelo</strong> — en clase harás exactamente esa operación sobre datos reales.</p>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/TWDdeKs3org" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<p>El resumen para tener a la mano. Comparas cada predicción con la realidad; hay cuatro resultados posibles (con “Aprobado” como clase <strong>positiva</strong>):</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Predicho: Aprobado</strong></th>
+<th><strong>Predicho: Rechazado</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Real: Aprobado</strong></td>
+<td>Verdadero Positivo (TP)</td>
+<td>Falso Negativo (FN)</td>
+</tr>
+<tr class="even">
+<td><strong>Real: Rechazado</strong></td>
+<td>Falso Positivo (FP)</td>
+<td>Verdadero Negativo (TN)</td>
+</tr>
+</tbody>
+</table>
+<div class="callout-remember">
+<p><strong>Regla de memoria:</strong> la primera palabra (Verdadero/Falso) dice si el modelo <strong>acertó</strong>. La segunda (Positivo/Negativo) dice <strong>qué predijo</strong> el modelo. Un Falso Positivo es “predijo positivo… y falló”.</p>
+</div>
+<p>De esa tabla salen las tres métricas del curso:</p>
+<div class="callout-key">
+<p><strong>Accuracy</strong> — ¿qué fracción del total clasificó bien? <span class="math display">\[\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}\]</span> <em>Trampa conocida: con clases desbalanceadas se infla (el “modelo” que responde siempre lo mismo ya saca la accuracy de la clase mayoritaria — el detector de fraude del 98%).</em></p>
+<p><strong>Precisión</strong> — de los que el modelo marcó como positivos, ¿cuántos lo eran? <span class="math display">\[\text{Precisión} = \frac{TP}{TP + FP}\]</span> <em>En crédito: de los que aprobó, ¿qué fracción pagó de verdad? Cada FP aquí es plata perdida.</em></p>
+<p><strong>Recall</strong> — de los positivos reales, ¿cuántos detectó el modelo? <span class="math display">\[\text{Recall} = \frac{TP}{TP + FN}\]</span> <em>En crédito: de los buenos clientes que llegaron, ¿qué fracción aprobó? Cada FN aquí es un buen cliente rechazado.</em></p>
+</div>
+<p>¿Cuál importa más? Depende de <strong>cuál error cuesta más</strong> — y esa es una decisión de negocio, no del algoritmo:</p>
+<table class="table-striped caption-top table">
+<colgroup>
+<col style="width: 38%">
+<col style="width: 38%">
+<col style="width: 24%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Situación</th>
+<th>El error caro</th>
+<th>Conviene vigilar</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Aprobar créditos (el impago es caro)</td>
+<td>FP: aprobar a quien no pagará</td>
+<td>Precisión alta</td>
+</tr>
+<tr class="even">
+<td>Detectar fraude</td>
+<td>FN: dejar pasar un fraude</td>
+<td>Recall alto</td>
+</tr>
+<tr class="odd">
+<td>Diagnóstico médico</td>
+<td>FN: no detectar un caso real</td>
+<td>Recall alto</td>
+</tr>
+<tr class="even">
+<td>Retener clientes</td>
+<td>FN: no ver al que se va</td>
+<td>Recall alto</td>
+</tr>
+</tbody>
+</table>
+<p>Ahora hazlo tú. Diez decisiones de un modelo de crédito — clasifica cada una en su celda:</p>
+<div class="widget-card" id="wg-matriz">
+  <div class="widget-head">🧮 Arma la matriz — clase positiva: Aprobado</div>
+  <div class="widget-body">
+    <div class="cmx-caso" id="cmx-caso">
+      <b id="cmx-titulo">Caso 1 de 10</b>
+      <div class="cmx-tags"><span class="cmx-tag t-modelo" id="cmx-dijo"></span><span class="cmx-tag t-real" id="cmx-fue"></span></div>
+    </div>
+    <div class="cmx-wrap">
+      <div></div>
+      <div class="cmx-head">Predicho:<br>Aprobado</div>
+      <div class="cmx-head">Predicho:<br>Rechazado</div>
+      <div class="cmx-side">Real:<br>Aprobado</div>
+      <button type="button" class="cmx-cell" data-k="TP"><div class="cmx-k">TP</div><div class="cmx-n" id="cmx-tp">0</div><div class="cmx-d">verdadero positivo</div></button>
+      <button type="button" class="cmx-cell" data-k="FN"><div class="cmx-k">FN</div><div class="cmx-n" id="cmx-fn">0</div><div class="cmx-d">falso negativo</div></button>
+      <div class="cmx-side">Real:<br>Rechazado</div>
+      <button type="button" class="cmx-cell" data-k="FP"><div class="cmx-k">FP</div><div class="cmx-n" id="cmx-fp">0</div><div class="cmx-d">falso positivo</div></button>
+      <button type="button" class="cmx-cell" data-k="TN"><div class="cmx-k">TN</div><div class="cmx-n" id="cmx-tn">0</div><div class="cmx-d">verdadero negativo</div></button>
+    </div>
+    <div class="cmx-msg" id="cmx-msg">¿En qué celda cae este caso? Haz clic en la celda.</div>
+    <div class="cmx-mets" id="cmx-mets" style="display:none;">
+      <div class="cmx-met"><div class="cmx-n">70%</div><div class="cmx-d">Accuracy = (4+3)/10</div></div>
+      <div class="cmx-met"><div class="cmx-n">66.7%</div><div class="cmx-d">Precisión = 4/(4+2)</div></div>
+      <div class="cmx-met"><div class="cmx-n">80%</div><div class="cmx-d">Recall = 4/(4+1)</div></div>
+    </div>
+    <div class="widget-note" id="cmx-nota" style="display:none;">Léelo en negocio: de <b>6 créditos que aprobó, 2 eran morosos</b> (precisión 66.7%), y <b>detectó 4 de los 5 buenos clientes</b> (recall 80%). ¿Y la accuracy del 70% es "buena"? El baseline aquí — decir siempre "Aprobado" (5 reales de 10) — acierta el 50%. El modelo aporta, pero la matriz muestra <em>dónde</em> se equivoca.</div>
+    <div style="margin-top:0.6em;"><button type="button" class="btn-widget btn-widget-ghost" id="cmx-reset">↺ Reiniciar</button></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var card = document.getElementById("wg-matriz");
+  if (!card) return;
+  // (dijo el modelo, fue en la realidad) → celda correcta
+  var CASOS = [
+    ["Aprobado", "Aprobado", "TP"], ["Aprobado", "Rechazado", "FP"],
+    ["Rechazado", "Rechazado", "TN"], ["Aprobado", "Aprobado", "TP"],
+    ["Rechazado", "Aprobado", "FN"], ["Rechazado", "Rechazado", "TN"],
+    ["Aprobado", "Aprobado", "TP"], ["Aprobado", "Rechazado", "FP"],
+    ["Rechazado", "Rechazado", "TN"], ["Aprobado", "Aprobado", "TP"]
+  ];
+  var i = 0, cnt = { TP: 0, FN: 0, FP: 0, TN: 0 };
+  var celdas = card.querySelectorAll(".cmx-cell");
+  function muestra() {
+    if (i < CASOS.length) {
+      document.getElementById("cmx-titulo").textContent = "Caso " + (i + 1) + " de " + CASOS.length;
+      document.getElementById("cmx-dijo").textContent = "🤖 El modelo dijo: " + CASOS[i][0];
+      document.getElementById("cmx-fue").textContent = "📋 La realidad fue: " + CASOS[i][1];
+    } else {
+      document.getElementById("cmx-titulo").textContent = "¡Matriz completa!";
+      document.getElementById("cmx-dijo").textContent = "🤖 TP=4 · FP=2";
+      document.getElementById("cmx-fue").textContent = "📋 FN=1 · TN=3";
+      document.getElementById("cmx-msg").textContent = "Con la matriz llena, las métricas salen solas:";
+      document.getElementById("cmx-mets").style.display = "flex";
+      document.getElementById("cmx-nota").style.display = "block";
+    }
+  }
+  function limpia(el) { setTimeout(function () { el.classList.remove("flash-ok", "flash-bad"); }, 550); }
+  celdas.forEach(function (c) {
+    c.addEventListener("click", function () {
+      if (i >= CASOS.length) return;
+      var k = c.getAttribute("data-k");
+      if (k === CASOS[i][2]) {
+        cnt[k]++; c.classList.add("flash-ok"); limpia(c);
+        document.getElementById("cmx-" + k.toLowerCase()).textContent = cnt[k];
+        document.getElementById("cmx-msg").textContent = "✔ Correcto: " + (k[0] === "T" ? "el modelo acertó" : "el modelo falló") + " y había predicho " + (k[1] === "P" ? "positivo (Aprobado)" : "negativo (Rechazado)") + " → " + k + ".";
+        i++; muestra();
+      } else {
+        c.classList.add("flash-bad"); limpia(c);
+        document.getElementById("cmx-msg").textContent = "✘ Ahí no. Primera palabra: ¿acertó o falló? Segunda: ¿qué predijo el modelo? Intenta de nuevo.";
+      }
+    });
+  });
+  document.getElementById("cmx-reset").addEventListener("click", function () {
+    i = 0; cnt = { TP: 0, FN: 0, FP: 0, TN: 0 };
+    ["tp", "fn", "fp", "tn"].forEach(function (s) { document.getElementById("cmx-" + s).textContent = "0"; });
+    document.getElementById("cmx-mets").style.display = "none";
+    document.getElementById("cmx-nota").style.display = "none";
+    document.getElementById("cmx-msg").textContent = "¿En qué celda cae este caso? Haz clic en la celda.";
+    muestra();
+  });
+  muestra();
+})();
+</script>
+</section>
+<section id="video-2-mae-y-rmse-regresión" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="video-2-mae-y-rmse-regresión"><span class="header-section-number">11.2</span> Video 2 — MAE y RMSE (regresión)</h2>
+<p>En regresión no hay “acierto”: el modelo predijo 3.6 y la nota real fue 3.8. ¿Un error de 0.2 es mucho o poco? El video calcula las dos métricas estándar con un ejemplo paso a paso — míralo con calculadora a la mano y replica las cuentas.</p>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/bSHrtLHCPvc" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<p>El resumen. Para cada fila del test, el error es <span class="math inline">\(y_i - \hat{y}_i\)</span> (real menos predicho). Las dos formas de promediarlo:</p>
+<div class="callout-key">
+<p><strong>MAE — Error Absoluto Medio</strong> <span class="math display">\[\text{MAE} = \frac{1}{n} \sum_{i=1}^{n} |y_i - \hat{y}_i|\]</span> “En promedio, el modelo se equivoca por X unidades” — en las <strong>mismas unidades del target</strong> (puntos de nota, pesos, unidades vendidas). Fácil de comunicar a un gerente.</p>
+<p><strong>RMSE — Raíz del Error Cuadrático Medio</strong> <span class="math display">\[\text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}\]</span> Eleva cada error al cuadrado antes de promediar: los errores <strong>grandes pesan mucho más</strong>. Por eso siempre <span class="math inline">\(\text{RMSE} \geq \text{MAE}\)</span>, y por eso es la métrica preferida cuando equivocarse feo es especialmente caro.</p>
+</div>
+<p>Míralo en miniatura — cinco predicciones de nota, errores: 0.2, −0.4, 0.1, −0.1 y <strong>1.2</strong> (una embarrada grande):</p>
+<p><span class="math display">\[\text{MAE} = \frac{0.2 + 0.4 + 0.1 + 0.1 + 1.2}{5} = 0.40\]</span></p>
+<p><span class="math display">\[\text{RMSE} = \sqrt{\frac{0.04 + 0.16 + 0.01 + 0.01 + 1.44}{5}} = \sqrt{0.332} \approx 0.58\]</span></p>
+<p>El RMSE quedó muy por encima del MAE por culpa de un solo error grande: esa <strong>distancia entre las dos métricas</strong> es una pista de que el modelo tiene fallas graves ocasionales, aunque “en promedio” se vea decente.</p>
+<table class="table-striped caption-top table">
+<colgroup>
+<col style="width: 64%">
+<col style="width: 36%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Situación</th>
+<th>Preferir</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Los errores grandes son igual de malos que los pequeños</td>
+<td>MAE</td>
+</tr>
+<tr class="even">
+<td>Los errores grandes son especialmente costosos</td>
+<td>RMSE</td>
+</tr>
+<tr class="odd">
+<td>Comunicar a una audiencia no técnica</td>
+<td>MAE</td>
+</tr>
+<tr class="even">
+<td>Detectar modelos con embarradas ocasionales</td>
+<td>Comparar ambos</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Y siempre, siempre, contra el baseline</strong></p>
+<p>El baseline de regresión es predecir el <strong>promedio</strong> (calculado en train) para todo el mundo. Calcula el MAE y el RMSE de esa regla tonta antes de emocionarte con tu modelo: si el modelo no la mejora, no aprendió nada útil. Lo comprobarás en carne propia en el taller de esta semana.</p>
+</div>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="y-esto-cómo-se-ve-en-tu-semestre" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> ¿Y esto cómo se ve en tu semestre?</h1>
+<ul>
+<li><strong>En la clase de esta semana</strong>: recibirás las predicciones de modelos ya entrenados — uno que decide créditos, otro que pronostica notas — y harás el trabajo del analista: matriz de confusión, precisión, recall, MAE, RMSE, comparación contra el baseline y veredicto de negocio. Sin entrenar nada todavía: primero juez.</li>
+<li><strong>Semanas 11 y 12</strong>: construirás tus propios modelos (árboles de clasificación y de regresión, y sus ensambles) y los calificarás con exactamente estas métricas. La validación cruzada dejará de ser un dibujo.</li>
+<li><strong>Semana 13</strong>: segmentación — el caso sin target, con sus propias métricas (codo, silueta).</li>
+<li><strong>Tu proyecto final</strong>: la Entrega 3 debe reportar la métrica correcta para tu tipo de pregunta, <strong>medida en test y comparada contra un baseline</strong>. Un jurado de esta materia siempre pregunta lo mismo: <em>“¿y eso comparado con qué?”</em> — desde hoy tienes la respuesta.</li>
+</ul>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="para-pensar" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> Para pensar 🤔</h1>
+<ol type="1">
+<li>Una farmacéutica usa un modelo para detectar reacciones adversas graves a un medicamento. ¿Qué prefiere: precisión alta o recall alto? ¿Quién paga el costo de cada tipo de error?</li>
+<li>Tu modelo de fraude saca 99.5% de accuracy y el fraude ocurre en el 0.5% de las transacciones. ¿Motivo de celebración o de sospecha? ¿Qué mirarías inmediatamente después?</li>
+<li>Un compañero te dice: <em>“mi modelo da error cero en los datos de entrenamiento — es perfecto”</em>. ¿Qué le respondes, en una frase, usando lo del dial de complejidad?</li>
+</ol>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="checklist-de-salida" class="level1" data-number="14">
+<h1 data-number="14"><span class="header-section-number">14</span> Checklist de salida</h1>
+<p>Al terminar el podcast, los videos y esta lectura debes poder explicar:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">¿Por qué <strong>nunca</strong> se evalúa un modelo con los datos con que se entrenó?</label></li>
+<li><label><input type="checkbox">¿Qué es el target y qué son las features? ¿Clasificación o regresión: cómo se distingue?</label></li>
+<li><label><input type="checkbox">¿Qué es el baseline en clasificación y en regresión, y por qué es la vara mínima?</label></li>
+<li><label><input type="checkbox">¿Cómo se ve el sobreajuste en las curvas train/test? ¿Y el subajuste?</label></li>
+<li><label><input type="checkbox">¿Para qué sirve la validación cruzada y qué problema resuelve (pista: el test se usa una vez)?</label></li>
+<li><label><input type="checkbox">¿Qué es data leakage? Da dos ejemplos distintos.</label></li>
+<li><label><input type="checkbox">¿Qué son TP, FP, TN y FN, y cómo se calculan accuracy, precisión y recall?</label></li>
+<li><label><input type="checkbox">¿Qué mide el MAE, en qué unidades, y por qué el RMSE siempre es mayor o igual?</label></li>
+</ul>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="preguntas-de-comprensión" class="level1" data-number="15">
+<h1 data-number="15"><span class="header-section-number">15</span> Preguntas de comprensión</h1>
+<p><strong>1.</strong> Un modelo de clasificación se evalúa sobre 50 casos del test y produce: TP = 18, FN = 2, FP = 6, TN = 24. Calcula accuracy, precisión y recall. ¿Qué error comete más: FP o FN? ¿Y si cada FP cuesta el doble que cada FN, el modelo es tan bueno como parece?</p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+<p>Accuracy = (18+24)/50 = <strong>84%</strong>. Precisión = 18/(18+6) = <strong>75%</strong>. Recall = 18/(18+2) = <strong>90%</strong>.</p>
+<p>Comete el triple de FP (6) que de FN (2): cuando marca “positivo” se equivoca 1 de cada 4 veces. Si el FP es el error caro, el 84% de accuracy es engañoso — el modelo concentra sus errores justo donde más cuestan, y habría que ajustarlo (o rechazarlo) aunque la accuracy “se vea bien”.</p>
+</details>
+<p><strong>2.</strong> Tu modelo alcanza accuracy de 99% en entrenamiento y 62% en test. (a) ¿Cómo se llama este cuadro clínico y qué lo delata? (b) Menciona dos acciones razonables para tratarlo.</p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+<ol type="a">
+<li><p><strong>Sobreajuste</strong>: la brecha gigante entre train (99%) y test (62%) delata que el modelo memorizó el ruido de entrenamiento en vez de aprender el patrón. La nota de train nunca es evidencia de calidad — siempre mejora con la complejidad.</p></li>
+<li><p>Entre otras: reducir la complejidad del modelo (menos profundidad, menos parámetros), conseguir más datos de entrenamiento, usar validación cruzada para elegir la versión con mejor desempeño <em>fuera</em> de train. Cualquier par de estas vale.</p></li>
+</ol>
+</details>
+<p><strong>3.</strong> Una cadena de tiendas evalúa dos modelos que pronostican unidades a pedir por semana. El modelo A tiene MAE = 8 y RMSE = 9; el modelo B tiene MAE = 7 y RMSE = 15. Quedarse corto o pasarse <strong>por mucho</strong> produce pérdidas graves (bodega llena o estantes vacíos). ¿Cuál eliges y por qué?</p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+<p>El <strong>modelo A</strong>. Aunque B gana por MAE (7 &lt; 8), su RMSE dispara la alarma: 15 muy por encima de 7 significa que B comete <strong>errores enormes de vez en cuando</strong> — exactamente lo que el negocio dice que no tolera. A es apenas peor “en promedio” pero mucho más estable (RMSE 9 ≈ MAE 8). Cuando los errores grandes son los caros, manda el RMSE.</p>
+</details>
+<p><strong>4.</strong> Un equipo predice deserción estudiantil. Imputan la asistencia faltante con el promedio de <strong>toda la base</strong>, parten train/test, entrenan y obtienen métricas excelentes que luego no se repiten en producción. ¿Dónde estuvo la fuga, por qué infló la métrica y cómo se corrige el procedimiento?</p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+<p>La imputación usó el promedio de toda la base — que incluye las filas que después serían test. Información del “examen” se coló al entrenamiento: <strong>data leakage</strong>. La métrica de test quedó inflada porque el test ya no era independiente; en producción, con datos de verdad nuevos, esa ventaja desaparece y el desempeño cae.</p>
+<p>Corrección: partir train/test <strong>primero</strong>; calcular el promedio de asistencia <strong>solo con train</strong>; usar ese valor congelado para imputar train y test (y el mismo principio para escalas y cualquier parámetro aprendido de los datos).</p>
+</details>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="material-adicional" class="level1" data-number="16">
+<h1 data-number="16"><span class="header-section-number">16</span> Material adicional</h1>
+<ul>
+<li>📘 <strong>An Introduction to Statistical Learning (ISLR)</strong> — capítulos 2 y 5 (evaluación y validación cruzada), el libro gratuito de referencia: <a href="https://www.statlearning.com" target="_blank">statlearning.com</a></li>
+<li>🎓 <strong>Google ML Crash Course</strong> — módulos de clasificación y regresión con ejercicios interactivos: <a href="https://developers.google.com/machine-learning/crash-course" target="_blank">developers.google.com</a></li>
+<li>🖼️ <strong>MLU-Explain</strong> — explicaciones visuales e interactivas de train/test, validación cruzada y precisión/recall: <a href="https://mlu-explain.github.io" target="_blank">mlu-explain.github.io</a></li>
+<li>🎥 <strong>StatQuest</strong> — repaso alternativo (en inglés, con humor) de la matriz de confusión: <a href="https://www.youtube.com/@statquest" target="_blank">youtube.com/<span class="citation" data-cites="statquest">@statquest</span></a></li>
+</ul>
+<hr>
+<p><strong>Los recursos de esta semana →</strong> esta teoría continúa en la <a href="../practice/week-10.html"><strong>práctica guiada en clase</strong></a> y cierra con el <a href="../task/week-10.html"><strong>taller evaluable</strong></a>.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-10_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

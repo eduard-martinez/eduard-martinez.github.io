@@ -1,0 +1,263 @@
+---
+title: "Unidad 3 - Práctica: tu primer agente de código"
+subtitle: "Aplicación guiada en clase · Semana 8 · 06327-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Reglas de juego
+
+::: {.callout-key}
+**Esta sesión asume que ya estudiaste la teoría**
+
+Aquí no volvemos a explicar qué es un agente, el bucle agéntico ni el manifiesto: eso quedó en el podcast (y su versión escrita) y en el quiz. Hoy **lo vives**. Si un término se te escapa, el [glosario de la teoría](../theory/week-08.html) queda a un clic.
+
+**Lo que necesitas ahora mismo:**
+
+- 💻 **VS Code** instalado, con la extensión **GitHub Copilot** activa (sesión iniciada con tu cuenta de GitHub Education). Si en cambio tienes **Claude Code** o **Cursor**: perfecto, todo lo de hoy funciona igual — abajo te decimos qué cambia.
+- 📦 **R** funcionando (semana 3) con `dplyr` y `ggplot2` (semana 4).
+- 🗜️ El proyecto de hoy: **[proyecto_semana8.zip](proyecto_semana8.zip)** ⬅️ descárgalo ya.
+:::
+
+::: {.callout-warning}
+**¿No tienes agente funcionando? (plan B, sin drama)**
+
+- **Copilot no activa / sin cuenta Education:** trabaja **en pareja** con alguien que sí lo tenga — hoy el rol de *auditor* (el que lee los diffs y verifica) es tan importante como el de *piloto*.
+- **El agente no puede ejecutar comandos en tu máquina:** activa el modo "manos humanas": tú corres en la terminal el comando que el agente proponga y le pegas la salida. Es el mismo bucle — con tus manos como intermediarias. (Y de paso entiendes exactamente qué automatiza el agente.)
+:::
+
+**El plan de hoy:** primero sentirás la diferencia con un experimento control (el "mecánico por teléfono"), luego le darás reglas al agente (tu primer manifiesto) y dirigirás **tres misiones reales** sobre una base sucia: diagnóstico, limpieza documentada y KPIs con gráficos. Cerramos afilando un gráfico a punta de iteración. En todo momento el flujo es el mismo: **tú diriges y verificas — el agente ejecuta**.
+
+<!--=================-->
+<!--=================-->
+# El proyecto: Tiendas Andinas <span class="badge-time">≈ 10 min</span>
+
+Tu cliente de hoy: una cadena de 6 minimercados en Cali, Bogotá y Medellín. Su base de ventas la armaron las tiendas a mano y la gerente necesita un informe para el viernes. El detalle: **nadie ha revisado esos datos**.
+
+**Monta el proyecto (3 pasos):**
+
+1. Descomprime `proyecto_semana8.zip`. Te deja una carpeta `tiendas_andinas/`.
+2. En VS Code: **File → Open Folder…** y elige `tiendas_andinas` (la carpeta completa, no un archivo suelto).
+3. Abre la terminal integrada (**Terminal → New Terminal**) y verifica que R responde:
+
+```default
+Rscript --version
+```
+
+::: {.callout-key}
+**¿Por qué "Open Folder" y no abrir el archivo?**
+
+Porque **la carpeta es el contexto**. Al abrir la carpeta, el agente puede ver el `README.md` (la misión), `data/` (la base sucia), `scripts/` y `output/`. Eso — exactamente eso — es lo que el chat del navegador nunca tuvo. Dale un vistazo de 2 minutos al `README.md` del proyecto: es el mismo documento que el agente va a leer.
+:::
+
+::: {.callout-practice}
+**Si usas Claude Code o Cursor**
+
+- **Claude Code:** abre la terminal, entra a la carpeta (`cd tiendas_andinas`) y lanza `claude`. Listo: el proyecto entero es su contexto.
+- **Cursor:** File → Open Folder, igual que VS Code; el panel de agente está en el costado derecho.
+:::
+
+<!--=================-->
+<!--=================-->
+# Momento 0: la prueba del mecánico <span class="badge-time">≈ 10 min</span>
+
+Antes de tocar el agente, un **experimento control** — para que la diferencia no te la cuente nadie.
+
+Abre el chat que usaste toda la semana 2 (claude.ai, ChatGPT, Gemini — en el **navegador**, fuera de VS Code) y hazle este encargo, tal cual:
+
+```default
+Tengo un archivo ventas_tiendas.csv con ventas de una cadena de minimercados.
+Está sucio. Escríbeme el código R que lo limpie y calcule el ingreso total
+por ciudad.
+```
+
+Observa la respuesta con ojo clínico y responde en tu cuaderno:
+
+a. ¿El código que te dio usa los **nombres reales** de tus columnas… o se los inventó?
+b. ¿"Limpió" problemas que tu base **no tiene**, y omitió los que sí tiene?
+c. Ahora pégale las primeras 10 filas del CSV y repite. ¿Mejoró? ¿Detectó los duplicados, que no están en esas 10 filas?
+
+::: {.callout-workflow}
+**La conclusión que debes llevarte**
+
+El chat hizo lo único que podía: **adivinar con elegancia**. No vio tus columnas, no conoce tus problemas de calidad y no puede probar si su código corre. Guarda esas respuestas — al final de la clase compararás este resultado con lo que logró el agente, sobre la misma base.
+:::
+
+<!--=================-->
+<!--=================-->
+# El manifiesto: dale la constitución <span class="badge-time">≈ 15 min</span>
+
+Antes de soltarle la primera misión, el agente necesita **tus reglas**. En la raíz del proyecto, crea el archivo de instrucciones de tu herramienta:
+
+| Herramienta | Archivo que lee automáticamente |
+|---|---|
+| GitHub Copilot | `.github/copilot-instructions.md` (crea la carpeta `.github` primero) |
+| Claude Code | `CLAUDE.md` |
+| Cursor | `.cursor/rules/proyecto.mdc` (o `AGENTS.md`) |
+
+: {tbl-colwidths="[30,70]"}
+
+Y pega dentro este contenido — nuestro manifiesto de partida:
+
+```default
+# Reglas del proyecto — Tiendas Andinas
+
+- Responde y comenta todo el código en español.
+- Nunca modifiques los archivos de data/: toda limpieza produce un archivo nuevo.
+- Usa dplyr y ggplot2 (no otras librerías) y estilo de código legible.
+- Usa siempre set.seed(2026) en cualquier paso aleatorio.
+- Todo gráfico se exporta con ggsave() a output/, en PNG, con theme_minimal().
+- Los valores de unidades que no sean enteros positivos se convierten en NA y
+  se reportan en output/log_limpieza.md — no se eliminan en silencio.
+- Todo script debe correr de arriba a abajo con Rscript sin errores.
+- Si una decisión de limpieza es discutible, pregúntame antes de aplicarla.
+```
+
+**Ahora hazlo tuyo:** agrega **una regla más, verificable**, pensada por ti (¿formato de los títulos de gráficos? ¿separador decimal? ¿idioma de los nombres de columnas?). Recuerda el criterio del quiz de la teoría: si no puedes *comprobar* que se cumplió, no es una regla — es un deseo.
+
+::: {.callout-practice}
+**Checkpoint** ✅ — pídele al agente (en el chat del editor): *"¿Qué reglas del proyecto conoces?"*. Debe recitarte el manifiesto — incluida tu regla nueva. Si no lo hace, revisa el nombre y la ubicación del archivo.
+:::
+
+<!--=================-->
+<!--=================-->
+# Misión 1: el diagnóstico <span class="badge-time">≈ 20 min</span>
+
+Abre el panel de chat de tu editor y **cambia el modo a "Agent"** (en Copilot es el selector del propio panel; en Claude Code ya estás ahí). Primer encargo — cópialo tal cual (fíjate: es C-T-F-R de manual):
+
+```default
+Lee el README.md del proyecto. Tu primera tarea es la Misión 1: explora
+data/ventas_tiendas.csv y documenta TODOS los problemas de calidad que
+encuentres, con conteos exactos (usa R para contarlos, no los estimes).
+Escribe el diagnóstico en output/diagnostico.md, organizado por columna.
+Restricciones: en esta misión NO modifiques ningún dato; si necesitas
+ejecutar algo, muéstrame el comando antes de correrlo.
+```
+
+Y ahora, **mira trabajar el bucle** — tu rol en cada fase:
+
+| Cuando el agente… | Tú… |
+|---|---|
+| Lee el README y examina el CSV | Confirma en el panel qué archivos está leyendo. ¿Fue solo? ¿O tuviste que pegarle rutas? |
+| Propone ejecutar un comando de R | **Léelo antes de aprobar.** ¿Entiendes qué hace? Si no: *"explícame ese comando antes de correrlo"*. |
+| Observa la salida y saca conteos | Compara: ¿los números salen de código ejecutado o "de su cabeza"? (Regla de oro.) |
+| Escribe `output/diagnostico.md` | Ábrelo y léelo completo. |
+
+: {tbl-colwidths="[45,55]"}
+
+::: {.callout-practice}
+**Checkpoint** ✅ — tu `diagnostico.md` debería reportar **siete familias de problemas**. Compara contra esta lista (los conteos exactos pueden variar ±1 según cómo cuente):
+
+1. Filas **duplicadas** exactas (≈ 10-11)
+2. `precio` como **texto**, con coma decimal en ~16 filas
+3. `precio` con **outliers** absurdos (4 valores ×100)
+4. `unidades` ilegibles: vacíos y `"ND"` (≈ 13) y **negativas** (3)
+5. `ciudad` con ~10 variantes de escritura (mayúsculas, tildes, espacios)
+6. `canal` con ~6 variantes (`Tienda/tienda/TIENDA/Online/online/En línea`)
+7. `fecha` en **dos formatos** mezclados (ISO y `dd/mm/aaaa`, 18 filas)
+
+¿Al agente se le escapó alguna? Díselo: *"revisa también la columna fecha"* — y observa cómo corrige. ¿Encontró una que no está en la lista? Verifícala tú antes de creerle.
+:::
+
+<!--=================-->
+<!--=================-->
+# Misión 2: limpieza documentada (y auditada) <span class="badge-time">≈ 25 min</span>
+
+Ahora sí, manos a los datos — con el manifiesto como ley:
+
+```default
+Misión 2 del README: escribe scripts/01_limpieza.R que corrija los problemas
+del diagnóstico y guarde el resultado en data/ventas_limpias.csv. Cada
+corrección va comentada en el script (qué corrige, cuántas filas afecta) y
+resumida en output/log_limpieza.md. Recuerda las reglas del proyecto.
+Cuando el script corra completo sin errores, muéstrame el resumen.
+```
+
+Mientras el agente escribe, ejecuta, (probablemente) falla, corrige y re-ejecuta — tu trabajo es de **auditor**. Tres controles, en orden:
+
+**Control 1 — el diff.** Antes de aceptar el script, léelo en el panel de cambios. Pregúntate: ¿respeta el manifiesto? Chequea al menos: ¿`data/ventas_tiendas.csv` quedó **intacto**? ¿Las `unidades` inválidas se volvieron `NA` **y quedaron reportadas**, o las borró en silencio? Si algo viola una regla, no lo corrijas tú: **díselo** — *"la regla dice que no se eliminan en silencio; ajusta el script"* — y mira el bucle girar otra vez.
+
+**Control 2 — reproducibilidad.** Cuando el agente diga "listo", no le creas: pruébalo tú. En la terminal:
+
+```default
+Rscript scripts/01_limpieza.R
+```
+
+¿Corre de arriba a abajo sin errores? ¿Produce el mismo `ventas_limpias.csv`? Eso — un script que cualquiera puede re-ejecutar — es la reproducibilidad de la que hablamos desde la semana 3.
+
+**Control 3 — la cifra.** Pregúntale al agente cuántas filas quedaron en la base limpia, y verifícalo tú mismo en la terminal:
+
+```default
+Rscript -e 'nrow(read.csv("data/ventas_limpias.csv"))'
+```
+
+::: {.callout-practice}
+**Checkpoint** ✅ — con decisiones razonables (quitar duplicados, `NA` fuera del cálculo, outliers excluidos o marcados), la base limpia queda **alrededor de 280 filas** (275–300 según tus criterios). Lo importante no es clavar el número: es que **el log explique exactamente cómo se llegó a él**. Si tu pareja tomó una decisión distinta y obtuvo 292 — ¿pueden explicar la diferencia con sus logs? Eso es un análisis auditable.
+:::
+
+<!--=================-->
+<!--=================-->
+# Misión 3: KPIs y gráficos <span class="badge-time">≈ 20 min</span>
+
+La gerente quiere números y dos gráficos para el comité:
+
+```default
+Misión 3 del README: escribe scripts/02_eda.R que, partiendo de
+data/ventas_limpias.csv, calcule el ingreso (precio × unidades) y produzca:
+(1) output/kpis_ciudad.csv con ingreso total, ticket promedio y número de
+transacciones por ciudad; (2) dos gráficos PNG en output/: ingreso total
+por ciudad (barras) e ingreso por semana (línea), ambos con título en
+español y ejes etiquetados. Ejecuta el script y muéstrame la tabla final.
+```
+
+Cuando termine, aplica **la regla de oro** con tus propias manos. El agente te reportó un ingreso total — ahora recalcúlalo tú, sin el agente:
+
+```default
+Rscript -e 'd <- read.csv("data/ventas_limpias.csv"); sum(d$precio * d$unidades, na.rm = TRUE)'
+```
+
+a. ¿Coincide con lo que reportó el agente? (Debería, **exactamente** — su cifra salió del mismo intérprete.)
+b. Pregunta de control: ¿en qué caso NO habrían coincidido? (Pista: si el agente hubiera "recordado" la cifra en lugar de ejecutar…)
+
+::: {.callout-practice}
+**Checkpoint** ✅ — órdenes de magnitud para saber si vas bien: ingreso total **≈ $6.6 millones COP** en los dos meses; **Cali lidera** (≈ $3.2M), Bogotá segunda (≈ $2.5M), Medellín tercera (≈ $1.0M). Abre los dos PNG de `output/`: ¿tienen título, ejes con nombre y tema limpio, como exige el manifiesto?
+:::
+
+<!--=================-->
+<!--=================-->
+# Afinar iterando <span class="badge-time">≈ 10 min</span>
+
+Los gráficos "salieron" — ahora que **comuniquen** (semana 4). Usa los movimientos de iteración de la semana 2, ahora sobre código vivo. Por ejemplo:
+
+- 🔧 **Ajustar:** *"En el gráfico de barras, formatea el eje Y en millones de pesos (ej: $3,2M) y ordena las ciudades de mayor a menor ingreso."*
+- 🔍 **Profundizar:** *"Agrega al gráfico de línea una anotación en la semana de mayor ingreso."*
+- 🥊 **Cuestionar:** *"¿Es la línea semanal el mejor gráfico para mostrar la evolución con solo 9 semanas? Propón una alternativa y justifícala."*
+
+Cada instrucción dispara el bucle completo: editar → ejecutar → regenerar el PNG. Ábrelo después de cada vuelta y decide si aceptas. **Tres vueltas máximo** — el objetivo es que sientas el ritmo de trabajo, no la perfección.
+
+::: {.callout-connect}
+**Compara con el Momento 0**
+
+Vuelve a las respuestas del chat del navegador que guardaste. Misma IA por debajo, mismo encargo… ¿qué cambió? Contexto (leyó el README y los datos), manos (ejecutó y probó) y reglas (tu manifiesto). Esa es toda la filosofía de la semana, vivida en 90 minutos.
+:::
+
+<!--=================-->
+<!--=================-->
+# Cierre: lo que te llevas
+
+- Un proyecto que **corre completo con dos comandos** (`Rscript scripts/01_limpieza.R && Rscript scripts/02_eda.R`) — reproducible por cualquiera, sin ti al lado.
+- La disciplina del trabajo agéntico: **manifiesto** primero, **leer antes de aprobar**, **verificar cifras con tus manos**. La IA aceleró; tú nunca soltaste el timón.
+- La comparación vivida: chat ciego vs. agente con contexto.
+
+⏭️ **Ahora demuéstralo solo:** el [Taller 8](../task/week-08.html) es exactamente este flujo, de principio a fin, sin guía — con un encargo nuevo de la gerente. Tienes el resto de la clase.

@@ -1,0 +1,3371 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Unidad 1 - Fundamentos de R</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="week-03_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-03_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-03_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-03_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="week-03_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-03_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-03_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-03_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-03_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-03_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-03_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-03_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+<style type="text/css">
+.monaco-editor pre {
+  background-color: unset !important;
+}
+
+.qwebr-editor-toolbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.qwebr-editor-toolbar-left-buttons, .qwebr-editor-toolbar-right-buttons {
+  display: flex;
+}
+
+.qwebr-non-interactive-loading-container.qwebr-cell-needs-evaluation, .qwebr-non-interactive-loading-container.qwebr-cell-evaluated {
+  justify-content: center;
+  display: flex;
+  background-color: rgba(250, 250, 250, 0.65);
+  border: 1px solid rgba(233, 236, 239, 0.65);
+  border-radius: 0.5rem;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.qwebr-r-project-logo {
+  color: #2767B0; /* R Project's blue color */
+}
+
+.qwebr-icon-status-spinner {
+  color: #7894c4;
+}
+
+.qwebr-icon-run-code {
+  color: #0d9c29
+}
+
+body.quarto-light .qwebr-output-code-stdout {
+  color: #111;
+}
+
+body.quarto-dark .qwebr-output-code-stdout {
+  color: #EEE;
+}
+
+.qwebr-output-code-stderr {
+  color: #db4133;
+}
+
+body.quarto-light .qwebr-editor {
+  border: 1px solid #EEEEEE;
+}
+
+body.quarto-light .qwebr-editor-toolbar {
+  background-color: #EEEEEE;
+  padding: 0.2rem 0.5rem;
+}
+
+body.quarto-dark .qwebr-editor {
+  border: 1px solid #111;
+}
+
+body.quarto-dark .qwebr-editor-toolbar {
+  background-color: #111;
+  padding: 0.2rem 0.5rem;
+}
+
+.qwebr-button {
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+  text-align: center;
+  padding: 0.375rem 0.75rem;
+  font-size: .9rem;
+  border-radius: 0.25rem;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+body.quarto-light .qwebr-button {
+  background-color: #EEEEEE;
+  color: #000;
+  border-color: #dee2e6;
+  border: 1px solid rgba(0,0,0,0);
+}
+
+body.quarto-dark .qwebr-button {
+  background-color: #111;
+  color: #EEE;
+  border-color: #dee2e6;
+  border: 1px solid rgba(0,0,0,0);
+}
+
+body.quarto-light .qwebr-button:hover {
+  color: #000;
+  background-color: #d9dce0;
+  border-color: #c8ccd0;
+}
+
+body.quarto-dark .qwebr-button:hover {
+  color: #d9dce0;
+  background-color: #323232;
+  border-color: #d9dce0;
+}
+
+.qwebr-button:disabled,.qwebr-button.disabled,fieldset:disabled .qwebr-button {
+  pointer-events: none;
+  opacity: .65
+}
+
+.qwebr-button-reset {
+  color: #696969; /*#4682b4;*/
+}
+
+.qwebr-button-copy {
+  color: #696969;
+}
+
+/* Style the code highlight lines */
+body.quarto-light .qwebr-editor-highlight-line {
+  background-color: lightblue;
+}
+
+body.quarto-dark .qwebr-editor-highlight-line {
+  background-color: darkblue;
+}
+
+/* Style the modal pop-up */
+
+/* The Modal (background) */
+.qwebr-modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
+
+/* Modal Content */
+.qwebr-modal-content {
+  background-color: #fefefe;
+  margin: 5% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.qwebr-modal-content-code {
+  max-height: 50vh;
+  min-height: 5vh;
+  overflow: scroll;
+  border: 1px solid #888;
+}
+
+/* The Close Button */
+.qwebr-modal-close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.qwebr-modal-close:hover,
+.qwebr-modal-close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.qwebr-download-btn {
+  margin-top: 10px;
+  text-decoration: none !important;
+}
+
+/* Styling to download image that is created */
+
+.qwebr-canvas-image {
+  position: relative;
+  display: inline-block;
+  margin: 10px;
+}
+
+.qwebr-canvas-image-download-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: none;
+}
+
+figure:hover .qwebr-canvas-image-download-btn {
+  display: block;
+}
+
+/* Custom styling for RevealJS Presentations*/
+
+/* Reset the style of the interactive area */
+.reveal div.qwebr-interactive-area {
+  display: block;
+  box-shadow: none;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Provide space to entries */
+.reveal div.qwebr-output-code-area pre div {
+  margin: 1px 2px 1px 10px;
+}
+
+/* Collapse the inside code tags to avoid extra space between line outputs */
+.reveal pre div code.qwebr-output-code-stdout, .reveal pre div code.qwebr-output-code-stderr {
+  padding: 0;
+  display: contents;
+}
+
+body.reveal.quarto-light pre div code.qwebr-output-code-stdout {
+  color: #111;
+}
+
+body.reveal.quarto-dark pre div code.qwebr-output-code-stdout {
+  color: #EEEEEE;
+}
+
+.reveal pre div code.qwebr-output-code-stderr {
+  color: #db4133;
+}
+
+
+/* Create a border around console and output (does not effect graphs) */
+body.reveal.quarto-light div.qwebr-console-area {
+  border: 1px solid #EEEEEE;
+  box-shadow: 2px 2px 10px #EEEEEE;
+}
+
+body.reveal.quarto-dark div.qwebr-console-area {
+  border: 1px solid #111;
+  box-shadow: 2px 2px 10px #111;
+}
+
+
+/* Cap output height and allow text to scroll */
+/* TODO: Is there a better way to fit contents/max it parallel to the monaco editor size? */
+.reveal div.qwebr-output-code-area pre {
+  max-height: 400px;
+  overflow: scroll;
+}
+
+iframe.qwebr-output-code-browse {
+  width: 100%;
+
+  /*
+    TODO: How to make the height automatic according to the widget size,
+    or respect the quarto code block options?
+  */
+  min-height: 500px;
+}
+
+</style>
+<script type="module">
+// Document level settings ----
+
+// Determine if we need to install R packages
+globalThis.qwebrInstallRPackagesList = ['dplyr'];
+
+// Specify possible locations to search for the repository
+globalThis.qwebrPackageRepoURLS = ['https://repo.r-wasm.org/'];
+
+// Check to see if we have an empty array, if we do set to skip the installation.
+globalThis.qwebrSetupRPackages = !(qwebrInstallRPackagesList.indexOf("") !== -1);
+globalThis.qwebrAutoloadRPackages = true;
+
+// Display a startup message?
+globalThis.qwebrShowStartupMessage = true;
+globalThis.qwebrShowHeaderMessage = false;
+
+// Describe the webR settings that should be used
+globalThis.qwebrCustomizedWebROptions = {
+  "baseURL": "https://webr.r-wasm.org/v0.5.2/",
+  "serviceWorkerUrl": "",
+  "homedir": "/home/web_user", 
+  "channelType": "ChannelType.Automatic"
+};
+
+// Store cell data
+globalThis.qwebrCellDetails = [{"code":"# Suma, resta, multiplicación, división\n10 + 5\n20 - 8\n4 * 7\n100 / 4\n\n# Potencia\n2^3\n\n# Módulo: el residuo de una división\n17 %% 5","id":1,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-1","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Sin paréntesis: primero multiplica\n2 + 3 * 4\n\n# Con paréntesis: primero suma\n(2 + 3) * 4","id":2,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-2","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"10 > 5      # ¿mayor que?\n10 < 5      # ¿menor que?\n10 == 10    # ¿igual a? — OJO: dos signos igual\n10 != 5     # ¿diferente de?","id":3,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-3","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"10 > 5 & 10 < 20   # ¿ambas son ciertas?\n10 > 5 | 10 > 20   # ¿al menos una es cierta?","id":4,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-4","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"42          # numérico\n\"Cali\"      # carácter\nTRUE        # lógico\n10 > 5      # las comparaciones producen lógicos","id":5,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-5","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Quita el # de la segunda línea, ejecútala y LEE el error\n100 + 5\n# \"100\" + 5","id":6,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-6","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"NA      # dato faltante (Not Available): el valor existe pero no lo conocemos\nNULL    # vacío absoluto: ni siquiera hay espacio reservado\n1/0     # Inf: infinito\n0/0     # NaN: \"Not a Number\", operación indefinida","id":7,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-7","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Crear el objeto (mira el panel Environment 📦 después de ejecutar)\nventas_enero <- 15000\n\n# Usarlo\nventas_enero\n\n# Operar con él\nventas_enero * 1.15   # escenario: crecen 15%","id":8,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-8","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Los objetos se combinan entre sí\nprecio_unitario <- 100 * 1.19          # precio con IVA\nunidades       <- 50\ntotal          <- precio_unitario * unidades\ntotal","id":9,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-9","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Válidos\nventas_2026 <- 50000\ntasa_iva    <- 0.19\n\n# Inválidos (quita un # y mira el error)\n# 2026_ventas <- 50000     # empieza con número\n# ventas totales <- 50000  # contiene espacio","id":10,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-10","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"x <- 42\nclass(x)    # ¿cómo lo interpreta R? → \"numeric\"\ntypeof(x)   # ¿cómo lo guarda internamente? → \"double\"\nstr(x)      # estructura completa y compacta","id":11,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-11","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ciudad <- \"Cali\"\nactivo <- TRUE\nclass(ciudad)\nclass(activo)","id":12,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-12","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"mean(c(10, 20, 30))","id":13,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-13","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Raíz de un número negativo: R responde NaN y te lo advierte\nsqrt(-4)","id":14,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-14","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ventas <- c(100, 200, NA, 400)\nmean(ventas)                 # devuelve NA: no puede promediar lo desconocido\nmean(ventas, na.rm = TRUE)   # na.rm = \"remueve los NA antes de calcular\"","id":15,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-15","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# El objeto no existe en el Environment (léelo: \"object ... not found\")\nmi_dato_inexistente","id":16,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-16","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# El argumento está mal escrito (\"unused argument\"): es naa.rm, con doble a\nmean(c(1, 2, 3), naa.rm = TRUE)","id":17,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-17","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Ventas diarias de una semana (lunes a domingo)\nventas_semana <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)\nventas_semana\n\n# También hay vectores de texto y lógicos\ndias <- c(\"Lun\", \"Mar\", \"Mie\", \"Jue\", \"Vie\", \"Sab\", \"Dom\")\nmeta_cumplida <- c(FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE)\ndias","id":18,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-18","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"1:10                            # secuencia de 1 en 1\nseq(from = 0, to = 100, by = 10) # secuencia con paso a la medida\nrep(5, times = 6)               # repetir un valor","id":19,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-19","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ventas_semana <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)\n\nventas_semana[1]         # el primero (lunes)\nventas_semana[2:5]       # del segundo al quinto\nventas_semana[c(1, 7)]   # posiciones sueltas (lunes y domingo)\nventas_semana[-3]        # todos MENOS el tercero","id":20,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-20","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ventas_semana <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)\n\n# ¿Qué ventas superaron 1500?\nventas_semana[ventas_semana > 1500]\n\n# ¿CUÁNTOS días superaron 1500? (sum cuenta los TRUE)\nsum(ventas_semana > 1500)","id":21,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-21","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ventas_semana <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)\nventas_semana[1] <- 1250     # corregir el dato del lunes\nventas_semana","id":22,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-22","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ventas_semana <- c(1250, 1500, 1100, 1800, 2000, 1300, 1700)\n\nlength(ventas_semana)   # ¿cuántos elementos?\nsum(ventas_semana)      # total\nmean(ventas_semana)     # promedio\nmedian(ventas_semana)   # mediana\nmax(ventas_semana)      # máximo\nwhich.max(ventas_semana) # ¿en qué POSICIÓN está el máximo?","id":23,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-23","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ventas_diarias <- c(1250, 1500, 1100, 1800, 2000, 1300, 1700)\n\n# 1. ¿Cuál fue el total de la semana?\n\n\n# 2. ¿Cuál fue el promedio diario?\n\n\n# 3. ¿Cuántos días estuvieron POR ENCIMA del promedio?\n#    Pista: sum(vector > valor)","id":24,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-24","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# 6 números organizados en 2 filas y 3 columnas\nm <- matrix(1:6, nrow = 2, ncol = 3)\nm\n\ndim(m)   # dimensiones: filas, columnas","id":25,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-25","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"m <- matrix(1:6, nrow = 2, ncol = 3)\n\nm[1, 3]   # fila 1, columna 3\nm[2, ]    # toda la fila 2 (columna vacía = \"todas\")\nm[, 1]    # toda la columna 1","id":26,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-26","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"clientes <- data.frame(\n  nombre = c(\"Ana\", \"Juan\", \"María\", \"Pedro\"),\n  edad   = c(28, 35, 42, 31),\n  ventas = c(15000, 22000, 18000, 25000),\n  activo = c(TRUE, TRUE, FALSE, TRUE)\n)\n\nclientes","id":27,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-27","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"str(clientes)        # estructura: tipos de cada columna\ndim(clientes)        # filas y columnas\nhead(clientes, 2)    # primeras filas\ncolnames(clientes)   # nombres de las columnas","id":28,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-28","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"clientes$ventas          # la columna como vector\nmean(clientes$ventas)    # el promedio de esa columna","id":29,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-29","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"clientes[1, ]                     # primera fila completa\nclientes[, 2]                     # segunda columna completa\nclientes[2, 3]                    # una celda: fila 2, columna 3\nclientes[clientes$edad > 30, ]    # filtro: clientes mayores de 30","id":30,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-30","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"clientes$comision <- clientes$ventas * 0.10\nclientes","id":31,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-31","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"clientes <- data.frame(\n  nombre = c(\"Ana\", \"Juan\", \"María\", \"Pedro\", \"Lucía\"),\n  ventas = c(15000, 22000, 18000, 25000, 19000),\n  region = c(\"Norte\", \"Sur\", \"Norte\", \"Centro\", \"Sur\")\n)\n\n# 1. ¿Cuántos clientes hay? (pista: nrow)\n\n\n# 2. ¿Cuál es el promedio de ventas?\n\n\n# 3. Muestra los clientes con ventas mayores a 20000\n\n\n# 4. ¿Cuántos clientes hay en la región Norte?\n#    Pista: sum(clientes$region == \"Norte\")","id":32,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-32","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Función con dos argumentos con nombre\nseq(from = 0, to = 100, by = 25)\n\n# Los nombres de argumentos se pueden omitir si respetas el orden\nseq(0, 100, 25)","id":33,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-33","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"?mean","id":34,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-34","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"# Cargar: va al inicio de cada script, en cada sesión\nlibrary(dplyr)\n# Si no hay error, el paquete quedó activo y sus funciones disponibles","id":35,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-35","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"ventas <- 10000\ncostos <- 7000\nutilidad <- ventas - costos\n\nls()          # listar todos los objetos de la sesión\nrm(costos)    # eliminar un objeto\nls()          # verifica: costos ya no está","id":36,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-36","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}}];
+
+</script>
+<script type="module">
+// Declare startupMessageQWebR globally
+globalThis.qwebrStartupMessage = document.createElement("p");
+
+// Verify if OffScreenCanvas is supported
+globalThis.qwebrOffScreenCanvasSupport = function() {
+  return typeof OffscreenCanvas !== 'undefined'
+}
+
+// Function to set the button text
+globalThis.qwebrSetInteractiveButtonState = function(buttonText, enableCodeButton = true) {
+  document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+    btn.innerHTML = buttonText;
+    btn.disabled = !enableCodeButton;
+  });
+}
+
+// Function to update the status message in non-interactive cells
+globalThis.qwebrUpdateStatusMessage = function(message) {
+  document.querySelectorAll(".qwebr-status-text.qwebr-cell-needs-evaluation").forEach((elem) => {
+    elem.innerText = message;
+  });
+}
+
+// Function to update the status message
+globalThis.qwebrUpdateStatusHeader = function(message) {
+  qwebrStartupMessage.innerHTML = `
+    <i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i>
+    <span>${message}</span>`;
+}
+
+// Function to return true if element is found, false if not
+globalThis.qwebrCheckHTMLElementExists = function(selector) {
+  const element = document.querySelector(selector);
+  return !!element;
+}
+
+// Function that detects whether reveal.js slides are present
+globalThis.qwebrIsRevealJS = function() {
+  // If the '.reveal .slides' selector exists, RevealJS is likely present
+  return qwebrCheckHTMLElementExists('.reveal .slides');
+}
+
+// Initialize the Quarto sidebar element
+function qwebrSetupQuartoSidebar() {
+  var newSideBarDiv = document.createElement('div');
+  newSideBarDiv.id = 'quarto-margin-sidebar';
+  newSideBarDiv.className = 'sidebar margin-sidebar';
+  newSideBarDiv.style.top = '0px';
+  newSideBarDiv.style.maxHeight = 'calc(0px + 100vh)';
+
+  return newSideBarDiv;
+}
+
+// Position the sidebar in the document
+function qwebrPlaceQuartoSidebar() {
+  // Get the reference to the element with id 'quarto-document-content'
+  var referenceNode = document.getElementById('quarto-document-content');
+
+  // Create the new div element
+  var newSideBarDiv = qwebrSetupQuartoSidebar();
+
+  // Insert the new div before the 'quarto-document-content' element
+  referenceNode.parentNode.insertBefore(newSideBarDiv, referenceNode);
+}
+
+function qwebrPlaceMessageContents(content, html_location = "title-block-header", revealjs_location = "title-slide") {
+
+  // Get references to header elements
+  const headerHTML = document.getElementById(html_location);
+  const headerRevealJS = document.getElementById(revealjs_location);
+
+  // Determine where to insert the quartoTitleMeta element
+  if (headerHTML || headerRevealJS) {
+    // Append to the existing "title-block-header" element or "title-slide" div
+    (headerHTML || headerRevealJS).appendChild(content);
+  } else {
+    // If neither headerHTML nor headerRevealJS is found, insert after "webr-monaco-editor-init" script
+    const monacoScript = document.getElementById("qwebr-monaco-editor-init");
+    const header = document.createElement("header");
+    header.setAttribute("id", "title-block-header");
+    header.appendChild(content);
+    monacoScript.after(header);
+  }
+}
+
+
+
+function qwebrOffScreenCanvasSupportWarningMessage() {
+  
+  // Verify canvas is supported.
+  if(qwebrOffScreenCanvasSupport()) return;
+
+  // Create the main container div
+  var calloutContainer = document.createElement('div');
+  calloutContainer.classList.add('callout', 'callout-style-default', 'callout-warning', 'callout-titled');
+
+  // Create the header div
+  var headerDiv = document.createElement('div');
+  headerDiv.classList.add('callout-header', 'd-flex', 'align-content-center');
+
+  // Create the icon container div
+  var iconContainer = document.createElement('div');
+  iconContainer.classList.add('callout-icon-container');
+
+  // Create the icon element
+  var iconElement = document.createElement('i');
+  iconElement.classList.add('callout-icon');
+
+  // Append the icon element to the icon container
+  iconContainer.appendChild(iconElement);
+
+  // Create the title container div
+  var titleContainer = document.createElement('div');
+  titleContainer.classList.add('callout-title-container', 'flex-fill');
+  titleContainer.innerText = 'Warning: Web Browser Does Not Support Graphing!';
+
+  // Append the icon container and title container to the header div
+  headerDiv.appendChild(iconContainer);
+  headerDiv.appendChild(titleContainer);
+
+  // Create the body container div
+  var bodyContainer = document.createElement('div');
+  bodyContainer.classList.add('callout-body-container', 'callout-body');
+
+  // Create the paragraph element for the body content
+  var paragraphElement = document.createElement('p');
+  paragraphElement.innerHTML = 'This web browser does not have support for displaying graphs through the <code>quarto-webr</code> extension since it lacks an <code>OffScreenCanvas</code>. Please upgrade your web browser to one that supports <code>OffScreenCanvas</code>.';
+
+  // Append the paragraph element to the body container
+  bodyContainer.appendChild(paragraphElement);
+
+  // Append the header div and body container to the main container div
+  calloutContainer.appendChild(headerDiv);
+  calloutContainer.appendChild(bodyContainer);
+
+  // Append the main container div to the document depending on format
+  qwebrPlaceMessageContents(calloutContainer, "title-block-header"); 
+
+}
+
+
+// Function that attaches the document status message and diagnostics
+function displayStartupMessage(showStartupMessage, showHeaderMessage) {
+  if (!showStartupMessage) {
+    return;
+  }
+
+  // Create the outermost div element for metadata
+  const quartoTitleMeta = document.createElement("div");
+  quartoTitleMeta.classList.add("quarto-title-meta");
+
+  // Create the first inner div element
+  const firstInnerDiv = document.createElement("div");
+  firstInnerDiv.setAttribute("id", "qwebr-status-message-area");
+
+  // Create the second inner div element for "WebR Status" heading and contents
+  const secondInnerDiv = document.createElement("div");
+  secondInnerDiv.setAttribute("id", "qwebr-status-message-title");
+  secondInnerDiv.classList.add("quarto-title-meta-heading");
+  secondInnerDiv.innerText = "WebR Status";
+
+  // Create another inner div for contents
+  const secondInnerDivContents = document.createElement("div");
+  secondInnerDivContents.setAttribute("id", "qwebr-status-message-body");
+  secondInnerDivContents.classList.add("quarto-title-meta-contents");
+
+  // Describe the WebR state
+  qwebrStartupMessage.innerText = "🟡 Loading...";
+  qwebrStartupMessage.setAttribute("id", "qwebr-status-message-text");
+  // Add `aria-live` to auto-announce the startup status to screen readers
+  qwebrStartupMessage.setAttribute("aria-live", "assertive");
+
+  // Append the startup message to the contents
+  secondInnerDivContents.appendChild(qwebrStartupMessage);
+
+  // Add a status indicator for COOP and COEP Headers if needed
+  if (showHeaderMessage) {
+    const crossOriginMessage = document.createElement("p");
+    crossOriginMessage.innerText = `${crossOriginIsolated ? '🟢' : '🟡'} COOP & COEP Headers`;
+    crossOriginMessage.setAttribute("id", "qwebr-coop-coep-header");
+    secondInnerDivContents.appendChild(crossOriginMessage);
+  }
+
+  // Combine the inner divs and contents
+  firstInnerDiv.appendChild(secondInnerDiv);
+  firstInnerDiv.appendChild(secondInnerDivContents);
+  quartoTitleMeta.appendChild(firstInnerDiv);
+
+  // Place message on webpage
+  qwebrPlaceMessageContents(quartoTitleMeta); 
+}
+
+function qwebrAddCommandHistoryModal() {
+  // Create the modal div
+  var modalDiv = document.createElement('div');
+  modalDiv.id = 'qwebr-history-modal';
+  modalDiv.className = 'qwebr-modal';
+
+  // Create the modal content div
+  var modalContentDiv = document.createElement('div');
+  modalContentDiv.className = 'qwebr-modal-content';
+
+  // Create the span for closing the modal
+  var closeSpan = document.createElement('span');
+  closeSpan.id = 'qwebr-command-history-close-btn';
+  closeSpan.className = 'qwebr-modal-close';
+  closeSpan.innerHTML = '&times;';
+
+  // Create the h1 element for the modal
+  var modalH1 = document.createElement('h1');
+  modalH1.textContent = 'R History Command Contents';
+
+  // Create an anchor element for downloading the Rhistory file 
+  var downloadLink = document.createElement('a');
+  downloadLink.href = '#';
+  downloadLink.id = 'qwebr-download-history-btn';
+  downloadLink.className = 'qwebr-download-btn';
+
+  // Create an 'i' element for the icon
+  var icon = document.createElement('i');
+  icon.className = 'bi bi-file-code';
+
+  // Append the icon to the anchor element
+  downloadLink.appendChild(icon);
+
+  // Add the text 'Download R History' to the anchor element
+  downloadLink.appendChild(document.createTextNode(' Download R History File'));
+
+  // Create the pre for command history contents
+  var commandContentsPre = document.createElement('pre');
+  commandContentsPre.id = 'qwebr-command-history-contents';
+  commandContentsPre.className = 'qwebr-modal-content-code';
+
+  // Append the close span, h1, and history contents pre to the modal content div
+  modalContentDiv.appendChild(closeSpan);
+  modalContentDiv.appendChild(modalH1);
+  modalContentDiv.appendChild(downloadLink);
+  modalContentDiv.appendChild(commandContentsPre);
+
+  // Append the modal content div to the modal div
+  modalDiv.appendChild(modalContentDiv);
+
+  // Append the modal div to the body
+  document.body.appendChild(modalDiv);
+}
+
+function qwebrRegisterRevealJSCommandHistoryModal() {
+  // Select the <ul> element inside the <div> with data-panel="Custom0"
+  let ulElement = document.querySelector('div[data-panel="Custom0"] > ul.slide-menu-items');
+
+  // Find the last <li> element with class slide-tool-item
+  let lastItem = ulElement.querySelector('li.slide-tool-item:last-child');
+
+  // Calculate the next data-item value
+  let nextItemValue = 0;
+  if (lastItem) {
+      nextItemValue = parseInt(lastItem.dataset.item) + 1;
+  }
+
+  // Create a new <li> element
+  let newListItem = document.createElement('li');
+  newListItem.className = 'slide-tool-item';
+  newListItem.dataset.item = nextItemValue.toString(); // Set the next available data-item value
+
+  // Create the <a> element inside the <li>
+  let newLink = document.createElement('a');
+  newLink.href = '#';
+  newLink.id = 'qwebrRHistoryButton'; // Set the ID for the new link
+  
+  // Create the <kbd> element inside the <a>
+  let newKbd = document.createElement('kbd');
+  newKbd.textContent = ' '; // Set to empty as we are not registering a keyboard shortcut
+
+  // Create text node for the link text
+  let newText = document.createTextNode(' View R History');
+
+  // Append <kbd> and text node to <a>
+  newLink.appendChild(newKbd);
+  newLink.appendChild(newText);
+
+  // Append <a> to <li>
+  newListItem.appendChild(newLink);
+
+  // Append <li> to <ul>
+  ulElement.appendChild(newListItem);
+}
+
+// Handle setting up the R history modal
+function qwebrCodeLinks() {
+
+  if (qwebrIsRevealJS()) {
+    qwebrRegisterRevealJSCommandHistoryModal();
+    return;
+  }
+
+  // Create the container div
+  var containerDiv = document.createElement('div');
+  containerDiv.className = 'quarto-code-links';
+
+  // Create the h2 element
+  var h2 = document.createElement('h2');
+  h2.textContent = 'webR Code Links';
+
+  // Create the ul element
+  var ul = document.createElement('ul');
+
+  // Create the li element
+  var li = document.createElement('li');
+
+  // Create the a_history_btn element
+  var a_history_btn = document.createElement('a');
+  a_history_btn.href = 'javascript:void(0)';
+  a_history_btn.setAttribute('id', 'qwebrRHistoryButton');
+
+  // Create the i_history_btn element
+  var i_history_btn = document.createElement('i');
+  i_history_btn.className = 'bi bi-file-code';
+
+  // Create the text node for the link text
+  var text_history_btn = document.createTextNode('View R History');
+
+  // Append the icon element and link text to the a element
+  a_history_btn.appendChild(i_history_btn);
+  a_history_btn.appendChild(text_history_btn);
+
+  // Append the a element to the li element
+  li.appendChild(a_history_btn);
+
+  // Append the li element to the ul element
+  ul.appendChild(li);
+
+  // Append the h2 and ul elements to the container div
+  containerDiv.appendChild(h2);
+  containerDiv.appendChild(ul);
+
+  // Append the container div to the element with the ID 'quarto-margin-sidebar'
+  var sidebar = document.getElementById('quarto-margin-sidebar');
+    
+  // If the sidebar element is not found, create it
+  if(!sidebar) {
+    qwebrPlaceQuartoSidebar();
+  }
+  
+  // Re-select the sidebar element (if it was just created)
+  sidebar = document.getElementById('quarto-margin-sidebar');   
+
+
+  // If the sidebar element exists, append the container div to it
+  if(sidebar) {
+    // Append the container div to the sidebar
+    sidebar.appendChild(containerDiv);
+    // Force the sidebar to be clickable by removing the 'zindex-bottom' class
+    // added in pre-release: https://github.com/quarto-dev/quarto-cli/commit/f0c53a1ffcaa1de4eccbf07803b096898248adcc
+    sidebar.className = 'sidebar margin-sidebar';
+  } else {
+    // Get a debugger ...
+    console.warn('Element with ID "quarto-margin-sidebar" not found.');
+  }
+}
+
+// Call the function to append the code links for qwebR into the right sidebar
+qwebrCodeLinks();
+
+// Add the command history modal
+qwebrAddCommandHistoryModal();
+
+displayStartupMessage(qwebrShowStartupMessage, qwebrShowHeaderMessage);
+qwebrOffScreenCanvasSupportWarningMessage();
+</script>
+<script type="module">
+// Define a global storage and retrieval solution ----
+
+// Store commands executed in R
+globalThis.qwebrRCommandHistory = [];
+
+// Function to retrieve the command history
+globalThis.qwebrFormatRHistory = function() {
+   return qwebrRCommandHistory.join("\n\n");
+}
+
+// Retrieve HTML Elements ----
+
+// Get the command modal
+const command_history_modal = document.getElementById("qwebr-history-modal");
+
+// Get the button that opens the command modal
+const command_history_btn = document.getElementById("qwebrRHistoryButton");
+
+// Get the <span> element that closes the command modal
+const command_history_close_span = document.getElementById("qwebr-command-history-close-btn");
+
+// Get the download button for r history information
+const command_history_download_btn = document.getElementById("qwebr-download-history-btn");
+
+// Plug in command history into modal/download button ----
+
+// Function to populate the modal with command history
+function populateCommandHistoryModal() {
+    document.getElementById("qwebr-command-history-contents").innerHTML = qwebrFormatRHistory() || "No commands have been executed yet.";
+}
+
+// Function to format the current date and time to
+// a string with the format YYYY-MM-DD-HH-MM-SS
+function formatDateTime() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+}
+
+
+// Function to convert document title with datetime to a safe filename
+function safeFileName() {
+    // Get the current page title
+    let pageTitle = document.title;
+
+    // Combine the current page title with the current date and time
+    let pageNameWithDateTime = `Rhistory-${pageTitle}-${formatDateTime()}`;
+
+    // Replace unsafe characters with safe alternatives
+    let safeFilename = pageNameWithDateTime.replace(/[\\/:\*\?! "<>\|]/g, '-');
+
+    return safeFilename;
+}
+
+
+// Function to download list contents as text file
+function downloadRHistory() {
+    // Get the current page title + datetime and use it as the filename
+    const filename = `${safeFileName()}.R`;
+
+    // Get the text contents of the R History list
+    const text = qwebrFormatRHistory();
+
+    // Create a new Blob object with the text contents
+    const blob = new Blob([text], { type: 'text/plain' });
+  
+    // Create a new anchor element for the download
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+
+    // Append the anchor to the body, click it, and remove it
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// Register event handlers ----
+
+// When the user clicks the View R History button, open the command modal
+command_history_btn.onclick = function() {
+    populateCommandHistoryModal();
+    command_history_modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the command modal
+command_history_close_span.onclick = function() {
+    command_history_modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the command modal, close it
+window.onclick = function(event) {
+    if (event.target == command_history_modal) {
+        command_history_modal.style.display = "none";
+    }
+}
+
+// Add an onclick event listener to the download button so that
+// the user can download the R history as a text file
+command_history_download_btn.onclick = function() {
+    downloadRHistory();
+};
+</script>
+<script type="module">
+// Supported Evaluation Types for Context
+globalThis.EvalTypes = Object.freeze({
+  Interactive: 'interactive',
+  Setup: 'setup',
+  Output: 'output',
+});
+
+// Function that obtains the font size for a given element 
+globalThis.qwebrCurrentFontSizeOnElement = function(element, cssProperty = 'font-size') {
+
+  const currentFontSize = parseFloat(
+    window
+    .getComputedStyle(element)
+    .getPropertyValue(cssProperty)
+  );
+  
+  return currentFontSize;
+}
+
+// Function to determine font scaling
+globalThis.qwebrScaledFontSize = function(div, qwebrOptions) {
+  // Determine if we should compute font-size using RevealJS's `--r-main-font-size` 
+  // or if we can directly use the document's `font-size`.
+  const cssProperty = document.body.classList.contains('reveal') ? 
+    "--r-main-font-size" : "font-size";
+  
+  // Get the current font size on the div element
+  const elementFontSize = qwebrCurrentFontSizeOnElement(div, cssProperty);
+
+  // Determine the scaled font size value
+  const scaledFontSize = ((qwebrOptions['editor-font-scale'] ?? 1) * elementFontSize) ?? 17.5;
+
+  return scaledFontSize;
+}
+
+
+// Function that dispatches the creation request
+globalThis.qwebrCreateHTMLElement = function (
+  cellData
+) {
+
+  // Extract key components
+  const evalType = cellData.options.context;
+  const qwebrCounter = cellData.id;
+
+  // We make an assumption that insertion points are defined by the Lua filter as:
+  // qwebr-insertion-location-{qwebrCounter} 
+  const elementLocator = document.getElementById(`qwebr-insertion-location-${qwebrCounter}`);
+
+  // Figure out the routine to use to insert the element.
+  let qwebrElement;
+  switch ( evalType ) {
+    case EvalTypes.Interactive:
+      qwebrElement = qwebrCreateInteractiveElement(qwebrCounter, cellData.options);
+      break;
+    case EvalTypes.Output: 
+      qwebrElement = qwebrCreateNonInteractiveOutputElement(qwebrCounter, cellData.options);
+      break;
+    case EvalTypes.Setup: 
+      qwebrElement = qwebrCreateNonInteractiveSetupElement(qwebrCounter, cellData.options);
+      break;
+    default: 
+      qwebrElement = document.createElement('div');
+      qwebrElement.textContent = 'Error creating `quarto-webr` element';
+  }
+
+  // Insert the dynamically generated object at the document location.
+  elementLocator.appendChild(qwebrElement);
+};
+
+// Function that setups the interactive element creation
+globalThis.qwebrCreateInteractiveElement = function (qwebrCounter, qwebrOptions) {
+
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = 'qwebr-interactive-area-' + qwebrCounter;
+  mainDiv.className = `qwebr-interactive-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+
+  // Create toolbar div
+  var toolbarDiv = document.createElement('div');
+  toolbarDiv.className = 'qwebr-editor-toolbar';
+  toolbarDiv.id = 'qwebr-editor-toolbar-' + qwebrCounter;
+
+  // Create a div to hold the left buttons
+  var leftButtonsDiv = document.createElement('div');
+  leftButtonsDiv.className = 'qwebr-editor-toolbar-left-buttons';
+
+  // Create a div to hold the right buttons
+  var rightButtonsDiv = document.createElement('div');
+  rightButtonsDiv.className = 'qwebr-editor-toolbar-right-buttons';
+
+  // Create Run Code button
+  var runCodeButton = document.createElement('button');
+  runCodeButton.className = 'btn btn-default qwebr-button qwebr-button-run';
+  runCodeButton.disabled = true;
+  runCodeButton.type = 'button';
+  runCodeButton.id = 'qwebr-button-run-' + qwebrCounter;
+  runCodeButton.textContent = '🟡 Loading webR...';
+  runCodeButton.title = `Run code (Shift + Enter)`;
+
+  // Append buttons to the leftButtonsDiv
+  leftButtonsDiv.appendChild(runCodeButton);
+
+  // Create Reset button
+  var resetButton = document.createElement('button');
+  resetButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-reset';
+  resetButton.type = 'button';
+  resetButton.id = 'qwebr-button-reset-' + qwebrCounter;
+  resetButton.title = 'Start over';
+  resetButton.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i>';
+
+  // Create Copy button
+  var copyButton = document.createElement('button');
+  copyButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-copy';
+  copyButton.type = 'button';
+  copyButton.id = 'qwebr-button-copy-' + qwebrCounter;
+  copyButton.title = 'Copy code';
+  copyButton.innerHTML = '<i class="fa-regular fa-copy"></i>';
+
+  // Append buttons to the rightButtonsDiv
+  rightButtonsDiv.appendChild(resetButton);
+  rightButtonsDiv.appendChild(copyButton);
+
+  // Create console area div
+  var consoleAreaDiv = document.createElement('div');
+  consoleAreaDiv.id = 'qwebr-console-area-' + qwebrCounter;
+  consoleAreaDiv.className = 'qwebr-console-area';
+
+  // Create editor div
+  var editorDiv = document.createElement('div');
+  editorDiv.id = 'qwebr-editor-' + qwebrCounter;
+  editorDiv.className = 'qwebr-editor';
+
+  // Create output code area div
+  var outputCodeAreaDiv = document.createElement('div');
+  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
+  outputCodeAreaDiv.className = 'qwebr-output-code-area';
+  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
+
+  // Create pre element inside output code area
+  var preElement = document.createElement('pre');
+  preElement.style.visibility = 'hidden';
+  outputCodeAreaDiv.appendChild(preElement);
+
+  // Create output graph area div
+  var outputGraphAreaDiv = document.createElement('div');
+  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
+  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
+
+  // Append buttons to the toolbar
+  toolbarDiv.appendChild(leftButtonsDiv);
+  toolbarDiv.appendChild(rightButtonsDiv);
+
+  // Append all elements to the main div
+  mainDiv.appendChild(toolbarDiv);
+  consoleAreaDiv.appendChild(editorDiv);
+  consoleAreaDiv.appendChild(outputCodeAreaDiv);
+  mainDiv.appendChild(consoleAreaDiv);
+  mainDiv.appendChild(outputGraphAreaDiv);
+
+  return mainDiv;
+}
+
+// Function that adds output structure for non-interactive output
+globalThis.qwebrCreateNonInteractiveOutputElement = function(qwebrCounter, qwebrOptions) {
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = 'qwebr-noninteractive-area-' + qwebrCounter;
+  mainDiv.className = `qwebr-noninteractive-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+  
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+  
+  // Create a status container div
+  var statusContainer = createLoadingContainer(qwebrCounter);
+
+  // Create output code area div
+  var outputCodeAreaDiv = document.createElement('div');
+  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
+  outputCodeAreaDiv.className = 'qwebr-output-code-area';
+  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
+
+  // Create pre element inside output code area
+  var preElement = document.createElement('pre');
+  preElement.style.visibility = 'hidden';
+  outputCodeAreaDiv.appendChild(preElement);
+
+  // Create output graph area div
+  var outputGraphAreaDiv = document.createElement('div');
+  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
+  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
+
+  // Append all elements to the main div
+  mainDiv.appendChild(statusContainer);
+  mainDiv.appendChild(outputCodeAreaDiv);
+  mainDiv.appendChild(outputGraphAreaDiv);
+
+  return mainDiv;
+};
+
+// Function that adds a stub in the page to indicate a setup cell was used.
+globalThis.qwebrCreateNonInteractiveSetupElement = function(qwebrCounter, qwebrOptions) {
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = `qwebr-noninteractive-setup-area-${qwebrCounter}`;
+  mainDiv.className = `qwebr-noninteractive-setup-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+
+
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+
+  // Create a status container div
+  var statusContainer = createLoadingContainer(qwebrCounter);
+
+  // Append status onto the main div
+  mainDiv.appendChild(statusContainer);
+
+  return mainDiv;
+}
+
+
+// Function to create loading container with specified ID
+globalThis.createLoadingContainer = function(qwebrCounter) {
+
+  // Create a status container
+  const container = document.createElement('div');
+  container.id = `qwebr-non-interactive-loading-container-${qwebrCounter}`;
+  container.className = 'qwebr-non-interactive-loading-container qwebr-cell-needs-evaluation';
+
+  // Create an R project logo to indicate its a code space
+  const rProjectIcon = document.createElement('i');
+  rProjectIcon.className = 'fa-brands fa-r-project fa-3x qwebr-r-project-logo';
+
+  // Setup a loading icon from font awesome
+  const spinnerIcon = document.createElement('i');
+  spinnerIcon.className = 'fa-solid fa-spinner fa-spin fa-1x qwebr-icon-status-spinner';
+
+  // Add a section for status text
+  const statusText = document.createElement('p');
+  statusText.id = `qwebr-status-text-${qwebrCounter}`;
+  statusText.className = `qwebr-status-text qwebr-cell-needs-evaluation`;
+  statusText.innerText = 'Loading webR...';
+
+  // Incorporate an inner container
+  const innerContainer = document.createElement('div');
+
+  // Append elements to the inner container
+  innerContainer.appendChild(spinnerIcon);
+  innerContainer.appendChild(statusText);
+
+  // Append elements to the main container
+  container.appendChild(rProjectIcon);
+  container.appendChild(innerContainer);
+
+  return container;
+}
+</script>
+<script type="module">
+// Function to install a single package
+async function qwebrInstallRPackage(packageName) {
+  await mainWebR.evalRVoid(`webr::install('${packageName}');`);
+}
+
+// Function to load a single package
+async function qwebrLoadRPackage(packageName) {
+  await mainWebR.evalRVoid(`require('${packageName}', quietly = TRUE)`);
+}
+
+// Generic function to process R packages
+async function qwebrProcessRPackagesWithStatus(packages, processType, displayStatusMessageUpdate = true) {
+  // Switch between contexts
+  const messagePrefix = processType === 'install' ? 'Installing' : 'Loading';
+
+  // Modify button state
+  qwebrSetInteractiveButtonState(`🟡 ${messagePrefix} package ...`, false);
+
+  // Iterate over packages
+  for (let i = 0; i < packages.length; i++) {
+    const activePackage = packages[i];
+    const formattedMessage = `${messagePrefix} package ${i + 1} out of ${packages.length}: ${activePackage}`;
+
+    // Display the update in header
+    if (displayStatusMessageUpdate) {
+      qwebrUpdateStatusHeader(formattedMessage);
+    }
+
+    // Display the update in non-active areas
+    qwebrUpdateStatusMessage(formattedMessage);
+
+    // Run package installation
+    if (processType === 'install') {
+      await qwebrInstallRPackage(activePackage);
+    } else {
+      await qwebrLoadRPackage(activePackage);
+    }
+  }
+
+  // Clean slate
+  if (processType === 'load') {
+    await mainWebR.flush();
+  }
+}
+
+// Start a timer
+const initializeWebRTimerStart = performance.now();
+
+// Encase with a dynamic import statement
+globalThis.qwebrInstance = import(qwebrCustomizedWebROptions.baseURL + "webr.mjs").then(
+  async ({ WebR, ChannelType }) => {
+    // Populate WebR options with defaults or new values based on `webr` meta
+    globalThis.mainWebR = new WebR(qwebrCustomizedWebROptions);
+
+    // Initialization WebR
+    await mainWebR.init();
+
+    // Setup a shelter
+    globalThis.mainWebRCodeShelter = await new mainWebR.Shelter();
+
+    // Setup a pager to allow processing help documentation
+    await mainWebR.evalRVoid('webr::pager_install()');
+
+    // Setup a viewer to allow processing htmlwidgets.
+    // This might not be available in old webr version
+    await mainWebR.evalRVoid('try({ webr::viewer_install() })');
+
+    // Override the existing install.packages() to use webr::install()
+    await mainWebR.evalRVoid('webr::shim_install()');
+
+    // Specify the repositories to pull from
+    // Note: webR does not use the `repos` option, but instead uses `webr_pkg_repos`
+    // inside of `install()`. However, other R functions still pull from `repos`.
+    await mainWebR.evalRVoid(`
+      options(
+        webr_pkg_repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')}),
+        repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')})
+      )
+    `);
+
+    // Check to see if any packages need to be installed
+    if (qwebrSetupRPackages) {
+      // Obtain only a unique list of packages
+      const uniqueRPackageList = Array.from(new Set(qwebrInstallRPackagesList));
+
+      // Install R packages one at a time (either silently or with a status update)
+      await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'install', qwebrShowStartupMessage);
+
+      if (qwebrAutoloadRPackages) {
+        // Load R packages one at a time (either silently or with a status update)
+        await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'load', qwebrShowStartupMessage);
+      }
+    }
+  }
+);
+
+// Stop timer
+const initializeWebRTimerEnd = performance.now();
+
+</script>
+<script type="module">
+// Function to verify a given JavaScript Object is empty
+globalThis.qwebrIsObjectEmpty = function (arr) {
+    return Object.keys(arr).length === 0;
+}
+
+// Global version of the Escape HTML function that converts HTML
+// characters to their HTML entities.
+globalThis.qwebrEscapeHTMLCharacters = function(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+};
+
+// Passthrough results
+globalThis.qwebrIdentity = function(x) {
+    return x;
+};
+
+// Append a comment
+globalThis.qwebrPrefixComment = function(x, comment) {
+    return `${comment}${x}`;
+};
+
+// Function to store the code in the history
+globalThis.qwebrLogCodeToHistory = function(codeToRun, options) {
+    qwebrRCommandHistory.push(
+        `# Ran code in ${options.label} at ${new Date().toLocaleString()} ----\n${codeToRun}`
+    );
+};
+
+// Function to attach a download button onto the canvas
+// allowing the user to download the image.
+function qwebrImageCanvasDownloadButton(canvas, canvasContainer) {
+
+    // Create the download button
+    const downloadButton = document.createElement('button');
+    downloadButton.className = 'qwebr-canvas-image-download-btn';
+    downloadButton.textContent = 'Download Image';
+    canvasContainer.appendChild(downloadButton);
+
+    // Trigger a download of the image when the button is clicked
+    downloadButton.addEventListener('click', function() {
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = 'qwebr-canvas-image.png';
+        link.click();
+    });
+}
+
+
+// Function to parse the pager results
+globalThis.qwebrParseTypePager = async function (msg) {
+
+    // Split out the event data
+    const { path, title, deleteFile } = msg.data;
+
+    // Process the pager data by reading the information from disk
+    const paged_data = await mainWebR.FS.readFile(path).then((data) => {
+        // Obtain the file content
+        let content = new TextDecoder().decode(data);
+
+        // Remove excessive backspace characters until none remain
+        while(content.match(/.[\b]/)){
+            content = content.replace(/.[\b]/g, '');
+        }
+
+        // Returned cleaned data
+        return content;
+    });
+
+    // Unlink file if needed
+    if (deleteFile) {
+        await mainWebR.FS.unlink(path);
+    }
+
+    // Return extracted data with spaces
+    return paged_data;
+};
+
+
+// Function to parse the browse results
+globalThis.qwebrParseTypeBrowse = async function (msg) {
+
+    // msg.type === "browse"
+    const path = msg.data.url;
+
+    // Process the browse data by reading the information from disk
+    const browse_data = await mainWebR.FS.readFile(path).then((data) => {
+        // Obtain the file content
+        let content = new TextDecoder().decode(data);
+
+        return content;
+    });
+
+    // Return extracted data as-is
+    return browse_data;
+};
+
+// Function to run the code using webR and parse the output
+globalThis.qwebrComputeEngine = async function(
+    codeToRun,
+    elements,
+    options) {
+
+    // Call into the R compute engine that persists within the document scope.
+    // To be prepared for all scenarios, the following happens:
+    // 1. We setup a canvas device to write to by making a namespace call into the {webr} package
+    // 2. We use values inside of the options array to set the figure size.
+    // 3. We capture the output stream information (STDOUT and STERR)
+    // 4. We disable the current device's image creation.
+    // 5. Piece-wise parse the results into the different output areas
+
+    // Create a pager variable for help/file contents
+    let pager = [];
+
+    // Handle how output is processed
+    let showMarkup = options.results === "markup" && options.output !== "asis";
+    let processOutput;
+
+    if (showMarkup) {
+        processOutput = qwebrEscapeHTMLCharacters;
+    } else {
+        processOutput = qwebrIdentity;
+    }
+
+    // ----
+    // Convert from Inches to Pixels by using DPI (dots per inch)
+    // for bitmap devices (dpi * inches = pixels)
+    let fig_width = options["fig-width"] * options["dpi"];
+    let fig_height = options["fig-height"] * options["dpi"];
+
+    // Initialize webR
+    await mainWebR.init();
+
+    // Configure capture output
+    let captureOutputOptions = {
+        withAutoprint: true,
+        captureStreams: true,
+        captureConditions: false,
+        // env: webR.objs.emptyEnv, // maintain a global environment for webR v0.2.0
+    };
+
+    // Determine if the browser supports OffScreen
+    if (qwebrOffScreenCanvasSupport()) {
+        // Mirror default options of webr::canvas()
+        // with changes to figure height and width.
+        captureOutputOptions.captureGraphics = {
+            width: fig_width,
+            height: fig_height,
+            bg: "white", // default: transparent
+            pointsize: 12,
+            capture: true
+        };
+    }  else {
+        // Disable generating graphics
+        captureOutputOptions.captureGraphics = false;
+    }
+
+    // Store the code to run in history
+    qwebrLogCodeToHistory(codeToRun, options);
+
+    // Setup a webR canvas by making a namespace call into the {webr} package
+    // Evaluate the R code
+    // Remove the active canvas silently
+    const result = await mainWebRCodeShelter.captureR(
+        `${codeToRun}`,
+        captureOutputOptions
+    );
+
+    // -----
+
+    // Start attempting to parse the result data
+    processResultOutput:try {
+
+        // Avoid running through output processing
+        if (options.results === "hide" || options.output === "false") {
+            break processResultOutput;
+        }
+
+        // Merge output streams of STDOUT and STDErr (messages and errors are combined.)
+        // Require both `warning` and `message` to be true to display `STDErr`.
+        const out = result.output
+        .filter(
+            evt => evt.type === "stdout" ||
+            ( evt.type === "stderr" && (options.warning === "true" && options.message === "true"))
+        )
+        .map((evt, index) => {
+            const className = `qwebr-output-code-${evt.type}`;
+            const outputResult = qwebrPrefixComment(processOutput(evt.data), options.comment);
+            return `<code id="${className}-editor-${elements.id}-result-${index + 1}" class="${className}">${outputResult}</code>`;
+        })
+        .join("\n");
+
+
+        // Clean the state
+        // We're now able to process pager events.
+        // As a result, we cannot maintain a true 1-to-1 output order
+        // without individually feeding each line
+        const msgs = await mainWebR.flush();
+
+        // Use `map` to process the filtered "pager" events asynchronously
+        const pager = [];
+        const browse = [];
+
+        await Promise.all(
+            msgs.map(
+                async (msg) => {
+
+                    const msgType = msg.type || "unknown";
+
+                    switch(msgType) {
+                        case 'pager':
+                            const pager_data = await qwebrParseTypePager(msg);
+                            pager.push(pager_data);
+                            break;
+                        case 'browse':
+                            const browse_data = await qwebrParseTypeBrowse(msg);
+                            browse.push(browse_data);
+                            break;
+                    }
+                    return;
+                }
+            )
+        );
+
+        // Nullify the output area of content
+        elements.outputCodeDiv.innerHTML = "";
+        elements.outputGraphDiv.innerHTML = "";
+
+        // Design an output object for messages
+        const pre = document.createElement("pre");
+        if (/\S/.test(out)) {
+            // Display results as HTML elements to retain output styling
+            const div = document.createElement("div");
+            div.innerHTML = out;
+
+            // Calculate a scaled font-size value
+            const scaledFontSize = qwebrScaledFontSize(
+                elements.outputCodeDiv, options);
+
+            // Override output code cell size
+            pre.style.fontSize = `${scaledFontSize}px`;
+            pre.appendChild(div);
+        } else {
+            // If nothing is present, hide the element.
+            pre.style.visibility = "hidden";
+        }
+
+        elements.outputCodeDiv.appendChild(pre);
+
+        // Determine if we have graphs to display
+        if (result.images.length > 0) {
+
+            // Create figure element
+            const figureElement = document.createElement("figure");
+            figureElement.className = "qwebr-canvas-image";
+
+            // Place each rendered graphic onto a canvas element
+            result.images.forEach((img) => {
+
+                // Construct canvas for object
+                const canvas = document.createElement("canvas");
+
+                // Add an image download button
+                qwebrImageCanvasDownloadButton(canvas, figureElement);
+
+                // Set canvas size to image
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                // Apply output truncations
+                canvas.style.width = options["out-width"] ? options["out-width"] : `${fig_width}px`;
+                if (options["out-height"]) {
+                    canvas.style.height = options["out-height"];
+                }
+
+                // Apply styling
+                canvas.style.display = "block";
+                canvas.style.margin = "auto";
+
+                // Draw image onto Canvas
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                // Append canvas to figure output area
+                figureElement.appendChild(canvas);
+
+            });
+
+            if (options['fig-cap']) {
+                // Create figcaption element
+                const figcaptionElement = document.createElement('figcaption');
+                figcaptionElement.innerText = options['fig-cap'];
+                // Append figcaption to figure
+                figureElement.appendChild(figcaptionElement);
+            }
+
+            elements.outputGraphDiv.appendChild(figureElement);
+
+        }
+
+        // Display the pager data
+        if (pager.length > 0) {
+            // Use the `pre` element to preserve whitespace.
+            pager.forEach((paged_data, index) => {
+                const pre_pager = document.createElement("pre");
+                pre_pager.innerText = paged_data;
+                pre_pager.classList.add("qwebr-output-code-pager");
+                pre_pager.setAttribute("id", `qwebr-output-code-pager-editor-${elements.id}-result-${index + 1}`);
+                elements.outputCodeDiv.appendChild(pre_pager);
+            });
+        }
+
+        // Display the browse data
+        if (browse.length > 0) {
+            // Use the `pre` element to preserve whitespace.
+            browse.forEach((browse_data, index) => {
+                const iframe_browse = document.createElement('iframe');
+                iframe_browse.classList.add("qwebr-output-code-browse");
+                iframe_browse.setAttribute("id", `qwebr-output-code-browse-editor-${elements.id}-result-${index + 1}`);
+                iframe_browse.style.width = "100%";
+                iframe_browse.style.minHeight = "500px";
+                elements.outputCodeDiv.appendChild(iframe_browse);
+
+                iframe_browse.contentWindow.document.open();
+                iframe_browse.contentWindow.document.write(browse_data);
+                iframe_browse.contentWindow.document.close();
+            });
+        }
+    } finally {
+        // Clean up the remaining code
+        mainWebRCodeShelter.purge();
+    }
+};
+
+// Function to execute the code (accepts code as an argument)
+globalThis.qwebrExecuteCode = async function (
+    codeToRun,
+    id,
+    options = {}) {
+
+    // If options are not passed, we fall back on the bare minimum to handle the computation
+    if (qwebrIsObjectEmpty(options)) {
+        options = {
+            "context": "interactive",
+            "fig-width": 7, "fig-height": 5,
+            "out-width": "700px", "out-height": "",
+            "dpi": 72,
+            "results": "markup",
+            "warning": "true", "message": "true",
+        };
+    }
+
+    // Next, we access the compute areas values
+    const elements = {
+        runButton: document.getElementById(`qwebr-button-run-${id}`),
+        outputCodeDiv: document.getElementById(`qwebr-output-code-area-${id}`),
+        outputGraphDiv: document.getElementById(`qwebr-output-graph-area-${id}`),
+        id: id,
+    }
+
+    // Disallowing execution of other code cells
+    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+        btn.disabled = true;
+    });
+
+    if (options.context == EvalTypes.Interactive) {
+        // Emphasize the active code cell
+        elements.runButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i> <span>Run Code</span>';
+    }
+
+    // Evaluate the code and parse the output into the document
+    await qwebrComputeEngine(codeToRun, elements, options);
+
+    // Switch to allowing execution of code
+    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+        btn.disabled = false;
+    });
+
+    if (options.context == EvalTypes.Interactive) {
+        // Revert to the initial code cell state
+        elements.runButton.innerHTML = '<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>';
+    }
+}
+
+</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#cómo-estudiar-esta-semana" id="toc-cómo-estudiar-esta-semana" class="nav-link active" data-scroll-target="#cómo-estudiar-esta-semana"><span class="header-section-number">1</span> Cómo estudiar esta semana</a></li>
+  <li><a href="#glosario-de-la-semana" id="toc-glosario-de-la-semana" class="nav-link" data-scroll-target="#glosario-de-la-semana"><span class="header-section-number">2</span> Glosario de la semana</a></li>
+  <li><a href="#r-y-rstudio-motor-y-cabina" id="toc-r-y-rstudio-motor-y-cabina" class="nav-link" data-scroll-target="#r-y-rstudio-motor-y-cabina"><span class="header-section-number">3</span> R y RStudio: motor y cabina</a>
+  <ul class="collapse">
+  <li><a href="#los-cuatro-paneles" id="toc-los-cuatro-paneles" class="nav-link" data-scroll-target="#los-cuatro-paneles"><span class="header-section-number">3.1</span> Los cuatro paneles</a></li>
+  <li><a href="#el-flujo-de-trabajo-que-repetirás-mil-veces" id="toc-el-flujo-de-trabajo-que-repetirás-mil-veces" class="nav-link" data-scroll-target="#el-flujo-de-trabajo-que-repetirás-mil-veces"><span class="header-section-number">3.2</span> El flujo de trabajo que repetirás mil veces</a></li>
+  </ul></li>
+  <li><a href="#r-como-calculadora" id="toc-r-como-calculadora" class="nav-link" data-scroll-target="#r-como-calculadora"><span class="header-section-number">4</span> R como calculadora</a>
+  <ul class="collapse">
+  <li><a href="#orden-de-las-operaciones" id="toc-orden-de-las-operaciones" class="nav-link" data-scroll-target="#orden-de-las-operaciones"><span class="header-section-number">4.1</span> Orden de las operaciones</a></li>
+  <li><a href="#comparar-valores" id="toc-comparar-valores" class="nav-link" data-scroll-target="#comparar-valores"><span class="header-section-number">4.2</span> Comparar valores</a></li>
+  </ul></li>
+  <li><a href="#tipos-de-datos" id="toc-tipos-de-datos" class="nav-link" data-scroll-target="#tipos-de-datos"><span class="header-section-number">5</span> Tipos de datos</a>
+  <ul class="collapse">
+  <li><a href="#valores-especiales" id="toc-valores-especiales" class="nav-link" data-scroll-target="#valores-especiales"><span class="header-section-number">5.1</span> Valores especiales</a></li>
+  </ul></li>
+  <li><a href="#objetos-guardar-para-reutilizar" id="toc-objetos-guardar-para-reutilizar" class="nav-link" data-scroll-target="#objetos-guardar-para-reutilizar"><span class="header-section-number">6</span> Objetos: guardar para reutilizar</a>
+  <ul class="collapse">
+  <li><a href="#todo-en-r-es-un-objeto" id="toc-todo-en-r-es-un-objeto" class="nav-link" data-scroll-target="#todo-en-r-es-un-objeto"><span class="header-section-number">6.1</span> Todo en R es un objeto</a></li>
+  <li><a href="#crear-objetos-con--" id="toc-crear-objetos-con--" class="nav-link" data-scroll-target="#crear-objetos-con--"><span class="header-section-number">6.2</span> Crear objetos con <code>&lt;-</code></a></li>
+  <li><a href="#reglas-para-nombrar" id="toc-reglas-para-nombrar" class="nav-link" data-scroll-target="#reglas-para-nombrar"><span class="header-section-number">6.3</span> Reglas para nombrar</a></li>
+  <li><a href="#las-tres-lupas-class-typeof-str" id="toc-las-tres-lupas-class-typeof-str" class="nav-link" data-scroll-target="#las-tres-lupas-class-typeof-str"><span class="header-section-number">6.4</span> Las tres lupas: <code>class()</code>, <code>typeof()</code>, <code>str()</code></a></li>
+  </ul></li>
+  <li><a href="#la-consola-te-habla-resultado-warning-o-error" id="toc-la-consola-te-habla-resultado-warning-o-error" class="nav-link" data-scroll-target="#la-consola-te-habla-resultado-warning-o-error"><span class="header-section-number">7</span> La consola te habla: resultado, warning o error</a>
+  <ul class="collapse">
+  <li><a href="#resultado-normal" id="toc-resultado-normal" class="nav-link" data-scroll-target="#resultado-normal"><span class="header-section-number">7.1</span> 1. Resultado normal</a></li>
+  <li><a href="#warning-corrió-pero-revisa" id="toc-warning-corrió-pero-revisa" class="nav-link" data-scroll-target="#warning-corrió-pero-revisa"><span class="header-section-number">7.2</span> 2. Warning: corrió, pero revisa</a></li>
+  <li><a href="#error-se-detuvo-todo" id="toc-error-se-detuvo-todo" class="nav-link" data-scroll-target="#error-se-detuvo-todo"><span class="header-section-number">7.3</span> 3. Error: se detuvo todo</a></li>
+  <li><a href="#ponte-a-prueba-triage-de-consola" id="toc-ponte-a-prueba-triage-de-consola" class="nav-link" data-scroll-target="#ponte-a-prueba-triage-de-consola"><span class="header-section-number">7.4</span> Ponte a prueba: triage de consola</a></li>
+  </ul></li>
+  <li><a href="#vectores" id="toc-vectores" class="nav-link" data-scroll-target="#vectores"><span class="header-section-number">8</span> Vectores</a>
+  <ul class="collapse">
+  <li><a href="#crear-vectores-con-c" id="toc-crear-vectores-con-c" class="nav-link" data-scroll-target="#crear-vectores-con-c"><span class="header-section-number">8.1</span> Crear vectores con <code>c()</code></a></li>
+  <li><a href="#indexación-sacar-elementos-con" id="toc-indexación-sacar-elementos-con" class="nav-link" data-scroll-target="#indexación-sacar-elementos-con"><span class="header-section-number">8.2</span> Indexación: sacar elementos con <code>[ ]</code></a></li>
+  <li><a href="#indexación-lógica-el-superpoder" id="toc-indexación-lógica-el-superpoder" class="nav-link" data-scroll-target="#indexación-lógica-el-superpoder"><span class="header-section-number">8.3</span> Indexación lógica: el superpoder</a></li>
+  <li><a href="#funciones-que-resumen-un-vector" id="toc-funciones-que-resumen-un-vector" class="nav-link" data-scroll-target="#funciones-que-resumen-un-vector"><span class="header-section-number">8.4</span> Funciones que resumen un vector</a></li>
+  <li><a href="#mini-ejercicio-la-semana-en-números" id="toc-mini-ejercicio-la-semana-en-números" class="nav-link" data-scroll-target="#mini-ejercicio-la-semana-en-números"><span class="header-section-number">8.5</span> Mini-ejercicio: la semana en números</a></li>
+  </ul></li>
+  <li><a href="#matrices-la-prima-ordenada-del-vector" id="toc-matrices-la-prima-ordenada-del-vector" class="nav-link" data-scroll-target="#matrices-la-prima-ordenada-del-vector"><span class="header-section-number">9</span> Matrices: la prima ordenada del vector</a></li>
+  <li><a href="#data-frames-la-estrella-del-curso" id="toc-data-frames-la-estrella-del-curso" class="nav-link" data-scroll-target="#data-frames-la-estrella-del-curso"><span class="header-section-number">10</span> Data frames: la estrella del curso</a>
+  <ul class="collapse">
+  <li><a href="#crear-e-inspeccionar" id="toc-crear-e-inspeccionar" class="nav-link" data-scroll-target="#crear-e-inspeccionar"><span class="header-section-number">10.1</span> Crear e inspeccionar</a></li>
+  <li><a href="#acceder-a-la-información" id="toc-acceder-a-la-información" class="nav-link" data-scroll-target="#acceder-a-la-información"><span class="header-section-number">10.2</span> Acceder a la información</a></li>
+  <li><a href="#mini-ejercicio-primer-análisis-de-clientes" id="toc-mini-ejercicio-primer-análisis-de-clientes" class="nav-link" data-scroll-target="#mini-ejercicio-primer-análisis-de-clientes"><span class="header-section-number">10.3</span> Mini-ejercicio: primer análisis de clientes</a></li>
+  </ul></li>
+  <li><a href="#funciones-y-el-sistema-de-ayuda" id="toc-funciones-y-el-sistema-de-ayuda" class="nav-link" data-scroll-target="#funciones-y-el-sistema-de-ayuda"><span class="header-section-number">11</span> Funciones y el sistema de ayuda</a>
+  <ul class="collapse">
+  <li><a href="#la-ayuda-antes-que-nadie" id="toc-la-ayuda-antes-que-nadie" class="nav-link" data-scroll-target="#la-ayuda-antes-que-nadie"><span class="header-section-number">11.1</span> <code>?</code>: la ayuda antes que nadie</a></li>
+  </ul></li>
+  <li><a href="#paquetes-instalar-una-vez-cargar-siempre" id="toc-paquetes-instalar-una-vez-cargar-siempre" class="nav-link" data-scroll-target="#paquetes-instalar-una-vez-cargar-siempre"><span class="header-section-number">12</span> Paquetes: instalar una vez, cargar siempre</a>
+  <ul class="collapse">
+  <li><a href="#el-estándar-del-curso-pacman" id="toc-el-estándar-del-curso-pacman" class="nav-link" data-scroll-target="#el-estándar-del-curso-pacman"><span class="header-section-number">12.1</span> El estándar del curso: <code>pacman</code></a></li>
+  </ul></li>
+  <li><a href="#el-environment-y-tu-primer-proyecto" id="toc-el-environment-y-tu-primer-proyecto" class="nav-link" data-scroll-target="#el-environment-y-tu-primer-proyecto"><span class="header-section-number">13</span> El Environment y tu primer proyecto</a>
+  <ul class="collapse">
+  <li><a href="#gestionar-el-inventario" id="toc-gestionar-el-inventario" class="nav-link" data-scroll-target="#gestionar-el-inventario"><span class="header-section-number">13.1</span> Gestionar el inventario</a></li>
+  <li><a href="#rstudio-projects-dónde-vive-tu-trabajo" id="toc-rstudio-projects-dónde-vive-tu-trabajo" class="nav-link" data-scroll-target="#rstudio-projects-dónde-vive-tu-trabajo"><span class="header-section-number">13.2</span> RStudio Projects: dónde vive tu trabajo</a></li>
+  </ul></li>
+  <li><a href="#lo-esencial-de-la-semana" id="toc-lo-esencial-de-la-semana" class="nav-link" data-scroll-target="#lo-esencial-de-la-semana"><span class="header-section-number">14</span> Lo esencial de la semana</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">15</span> Preguntas de comprensión</a></li>
+  <li><a href="#material-adicional" id="toc-material-adicional" class="nav-link" data-scroll-target="#material-adicional"><span class="header-section-number">16</span> Material adicional</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
+<script type="module" id="qwebr-monaco-editor-init">
+
+  // Configure the Monaco Editor's loader
+  require.config({
+    paths: {
+      'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs'
+    }
+  });
+</script>
+<script type="module">
+// Function to update Monaco Editors when body class changes
+function updateMonacoEditorsOnBodyClassChange() {
+    // Select the body element
+    const body = document.querySelector('body');
+
+    // Options for the observer (which mutations to observe)
+    const observerOptions = {
+        attributes: true,  // Observe changes to attributes
+        attributeFilter: ['class'] // Only observe changes to the 'class' attribute
+    };
+
+    // Callback function to execute when mutations are observed
+    const bodyClassChangeCallback = function(mutationsList, observer) {
+        for(let mutation of mutationsList) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                // Class attribute has changed
+                // Update all Monaco Editors on the page
+                updateMonacoEditorTheme();
+            }
+        }
+    };
+
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver(bodyClassChangeCallback);
+
+    // Start observing the target node for configured mutations
+    observer.observe(body, observerOptions);
+}
+
+// Function to update all instances of Monaco Editors on the page
+function updateMonacoEditorTheme() {
+    // Determine what VS Theme to use
+    const vsThemeToUse = document.body.classList.contains("quarto-dark") ? 'vs-dark' : 'vs' ;
+
+    // Iterate through all initialized Monaco Editors
+    qwebrEditorInstances.forEach( function(editorInstance) { 
+        editorInstance.updateOptions({ theme: vsThemeToUse }); 
+    });
+}
+
+// Call the function to start observing changes to body class
+updateMonacoEditorsOnBodyClassChange();
+</script>
+<script type="module">
+// Global array to store Monaco Editor instances
+globalThis.qwebrEditorInstances = [];
+
+function isValidCodeLineNumbers(stringCodeLineNumbers) {
+  // Regular expression to match valid input strings
+  const regex = /^(\d+(-\d+)?)(,\d+(-\d+)?)*$/;
+  return regex.test(stringCodeLineNumbers);
+}
+
+// Function that builds and registers a Monaco Editor instance    
+globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
+
+  const initialCode = cellData.code;
+  const qwebrCounter = cellData.id;
+  const qwebrOptions = cellData.options;
+
+  // Retrieve the previously created document elements
+  let runButton = document.getElementById(`qwebr-button-run-${qwebrCounter}`);
+  let resetButton = document.getElementById(`qwebr-button-reset-${qwebrCounter}`);
+  let copyButton = document.getElementById(`qwebr-button-copy-${qwebrCounter}`);
+  let editorDiv = document.getElementById(`qwebr-editor-${qwebrCounter}`);
+
+  // Load the Monaco Editor and create an instance
+  let editor;
+  require(['vs/editor/editor.main'], function () {
+    editor = monaco.editor.create(editorDiv, {
+      value: initialCode,
+      language: 'r',
+      theme: 'vs-light',
+      automaticLayout: true,           // Works wonderfully with RevealJS
+      scrollBeyondLastLine: false,
+      minimap: {
+        enabled: false
+      },
+      fontSize: qwebrScaledFontSize(editorDiv, qwebrOptions),         
+      renderLineHighlight: "none",      // Disable current line highlighting
+      hideCursorInOverviewRuler: true,  // Remove cursor indictor in right hand side scroll bar
+      readOnly: qwebrOptions['read-only'] ?? false,
+      quickSuggestions: qwebrOptions['editor-quick-suggestions'] ?? false,
+      wordWrap: (qwebrOptions['editor-word-wrap'] == 'true' ? "on" : "off")
+    });
+
+    // Store the official counter ID to be used in keyboard shortcuts
+    editor.__qwebrCounter = qwebrCounter;
+
+    // Store the official div container ID
+    editor.__qwebrEditorId = `qwebr-editor-${qwebrCounter}`;
+
+    // Store the initial code value and options
+    editor.__qwebrinitialCode = initialCode;
+    editor.__qwebrOptions = qwebrOptions;
+
+    // Set at the model level the preferred end of line (EOL) character to LF.
+    // This prevent `\r\n` from being given to the webR engine if the user is on Windows.
+    // See details in: https://github.com/coatless/quarto-webr/issues/94
+    // Associated error text: 
+    // Error: <text>:1:7 unexpected input
+
+    // Retrieve the underlying model
+    const model = editor.getModel();
+    // Set EOL for the model
+    model.setEOL(monaco.editor.EndOfLineSequence.LF);
+    
+    // Dynamically modify the height of the editor window if new lines are added.
+    let ignoreEvent = false;
+    const updateHeight = () => {
+      // Increment editor height by 2 to prevent vertical scroll bar from appearing
+      const contentHeight = editor.getContentHeight() + 2;
+
+      // Retrieve editor-max-height option
+      const maxEditorHeight = qwebrOptions['editor-max-height'];
+
+      // If editor-max-height is missing, allow infinite growth. Otherwise, threshold.
+      const editorHeight = !maxEditorHeight ?  contentHeight : Math.min(contentHeight, maxEditorHeight);
+
+      // We're avoiding a width change
+      //editorDiv.style.width = `${width}px`;
+      editorDiv.style.height = `${editorHeight}px`;
+      try {
+        ignoreEvent = true;
+
+        // The key to resizing is this call
+        editor.layout();
+      } finally {
+        ignoreEvent = false;
+      }
+    };
+
+    // Function to generate decorations to highlight lines
+    // in the editor based on input string.
+    function decoratorHighlightLines(codeLineNumbers) {
+      // Store the lines to be lighlight
+      let linesToHighlight = [];
+      
+      // Parse the codeLineNumbers string to get the line numbers to highlight
+      // First, split the string by commas
+      codeLineNumbers.split(',').forEach(part => {
+        // Check if we have a range of lines
+        if (part.includes('-')) {
+            // Handle range of lines (e.g., "6-8")
+            const [start, end] = part.split('-').map(Number);
+            for (let i = start; i <= end; i++) {
+                linesToHighlight.push(i);
+            }
+        } else {
+            // Handle single line (e.g., "7")
+            linesToHighlight.push(Number(part));
+        }
+      });
+  
+      // Create monaco decorations for the lines to highlight
+      const decorations = linesToHighlight.map(lineNumber => ({
+          range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+          options: {
+              isWholeLine: true,
+              className: 'qwebr-editor-highlight-line'
+          }
+      }));
+  
+      // Return decorations to be applied to the editor
+      return decorations;
+    }
+
+    // Ensure that the editor-code-line-numbers option is set and valid
+    // then apply styling
+    if (qwebrOptions['editor-code-line-numbers']) {
+      // Remove all whitespace from the string
+      const codeLineNumbers = qwebrOptions['editor-code-line-numbers'].replace(/\s/g,'');
+      // Check if the string is valid for line numbers, e.g., "1,3-5,7"
+      if (isValidCodeLineNumbers(codeLineNumbers)) {
+        // Apply the decorations to the editor
+        editor.createDecorationsCollection(decoratorHighlightLines(codeLineNumbers));
+      } else {
+        // Warn the user that the input is invalid
+        console.warn(`Invalid "editor-code-line-numbers" value in code cell ${qwebrOptions['label']}: ${codeLineNumbers}`);
+      }
+    }
+
+    // Helper function to check if selected text is empty
+    function isEmptyCodeText(selectedCodeText) {
+      return (selectedCodeText === null || selectedCodeText === undefined || selectedCodeText === "");
+    }
+
+    // Registry of keyboard shortcuts that should be re-added to each editor window
+    // when focus changes.
+    const addWebRKeyboardShortCutCommands = () => {
+      // Add a keydown event listener for Shift+Enter to run all code in cell
+      editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
+
+        // Retrieve all text inside the editor
+        qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
+      });
+
+      // Add a keydown event listener for CMD/Ctrl+Enter to run selected code
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+
+        // Get the selected text from the editor
+        const selectedText = editor.getModel().getValueInRange(editor.getSelection());
+        // Check if no code is selected
+        if (isEmptyCodeText(selectedText)) {
+          // Obtain the current cursor position
+          let currentPosition = editor.getPosition();
+          // Retrieve the current line content
+          let currentLine = editor.getModel().getLineContent(currentPosition.lineNumber);
+
+          // Propose a new position to move the cursor to
+          let newPosition = new monaco.Position(currentPosition.lineNumber + 1, 1);
+
+          // Check if the new position is beyond the last line of the editor
+          if (newPosition.lineNumber > editor.getModel().getLineCount()) {
+            // Add a new line at the end of the editor
+            editor.executeEdits("addNewLine", [{
+            range: new monaco.Range(newPosition.lineNumber, 1, newPosition.lineNumber, 1),
+            text: "\n", 
+            forceMoveMarkers: true,
+            }]);
+          }
+          
+          // Run the entire line of code.
+          qwebrExecuteCode(currentLine, editor.__qwebrCounter, editor.__qwebrOptions);
+
+          // Move cursor to new position
+          editor.setPosition(newPosition);
+        } else {
+          // Code to run when Ctrl+Enter is pressed with selected code
+          qwebrExecuteCode(selectedText, editor.__qwebrCounter, editor.__qwebrOptions);
+        }
+      });
+    }
+
+    // Register an on focus event handler for when a code cell is selected to update
+    // what keyboard shortcut commands should work.
+    // This is a workaround to fix a regression that happened with multiple
+    // editor windows since Monaco 0.32.0 
+    // https://github.com/microsoft/monaco-editor/issues/2947
+    editor.onDidFocusEditorText(addWebRKeyboardShortCutCommands);
+
+    // Register an on change event for when new code is added to the editor window
+    editor.onDidContentSizeChange(updateHeight);
+
+    // Manually re-update height to account for the content we inserted into the call
+    updateHeight();
+
+    // Store the editor instance in the global dictionary
+    qwebrEditorInstances[editor.__qwebrCounter] = editor;
+
+  });
+
+  // Add a click event listener to the run button
+  runButton.onclick = function () {
+    qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
+  };
+
+  // Add a click event listener to the reset button
+  copyButton.onclick = function () {
+    // Retrieve current code data
+    const data = editor.getValue();
+    
+    // Write code data onto the clipboard.
+    navigator.clipboard.writeText(data || "");
+  };
+  
+  // Add a click event listener to the copy button
+  resetButton.onclick = function () {
+    editor.setValue(editor.__qwebrinitialCode);
+  };
+  
+}
+</script>
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 1 - Fundamentos de R</h1>
+<p class="subtitle lead">Analítica para los negocios · Semana 3 · 06327-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a> <span id="webr-status-anchor"></span></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="cómo-estudiar-esta-semana" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Cómo estudiar esta semana</h1>
+<p>La semana pasada aprendiste a <strong>pedirle cosas a la IA</strong> con prompts profesionales. Esta semana empieza la otra mitad de la historia: aprender a <strong>leer y ejecutar el idioma en el que trabaja el analista</strong> — el lenguaje R. Durante el resto del semestre la IA te va a proponer código en R constantemente; tu ventaja competitiva no será teclear más rápido, sino <strong>entender qué hace ese código, correrlo y verificarlo</strong>.</p>
+<div class="callout-key">
+<p><strong>Tu ruta de esta semana (antes de llegar a clase)</strong></p>
+<ol type="1">
+<li>🎬 <strong>Ve el video de la semana</strong>: un recorrido por la interfaz de RStudio y los conceptos base. <!-- TODO: pegar aquí el enlace del video en Intu --></li>
+<li>📖 <strong>Lee este documento</strong>: es la versión escrita y ampliada del video, con una diferencia enorme — <strong>el código se ejecuta aquí mismo, en tu navegador</strong>.</li>
+<li>✅ <strong>Presenta el quiz</strong> de teoría en Intu.</li>
+<li>💾 <strong>Instala R y RStudio</strong> en tu computador (instrucciones abajo). En la clase trabajaremos en RStudio de verdad, no en el navegador.</li>
+</ol>
+</div>
+<div class="callout-workflow">
+<p><strong>Este documento es interactivo: úsalo como un laboratorio</strong></p>
+<p>Los bloques de código de esta página corren <strong>R de verdad dentro de tu navegador</strong> (una tecnología llamada webR). En cada celda puedes presionar <strong>Run Code</strong>, editar el código y volver a ejecutarlo. Nada de lo que hagas puede dañar algo: si te enredas, recarga la página y todo vuelve a empezar.</p>
+<p>Abajo a la derecha encontrarás un panel flotante 📦 <strong>Environment</strong> que imita el panel de RStudio: cada vez que ejecutes una celda, verás aparecer allí los objetos que vas creando. Úsalo — entender ese panel es uno de los objetivos de la semana.</p>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Antes de clase: instala R y RStudio (10 minutos, en este orden)</strong></p>
+<ol type="1">
+<li><strong>Instala R</strong> (el motor): entra a <a href="https://cran.r-project.org">cran.r-project.org</a>, elige tu sistema operativo (Windows / macOS) y descarga la versión más reciente. Instálala con las opciones por defecto.</li>
+<li><strong>Instala RStudio Desktop</strong> (la cabina): descárgalo gratis de <a href="https://posit.co/download/rstudio-desktop/">posit.co/download/rstudio-desktop</a>. También con las opciones por defecto.</li>
+<li><strong>Verifica</strong>: abre RStudio, escribe <code>2 + 2</code> en el panel de la izquierda (la consola) y presiona Enter. Si responde <code>[1] 4</code>, estás listo.</li>
+</ol>
+<p>El orden importa: RStudio necesita que R ya esté instalado. Si algo falla, llega 10 minutos antes a clase y lo resolvemos — pero inténtalo primero: leer e interpretar un instalador también es una habilidad de analista.</p>
+</div>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="glosario-de-la-semana" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Glosario de la semana</h1>
+<p>Estos son los términos que vas a usar toda la semana (y todo el semestre). Vuelve aquí cada vez que uno se te escape.</p>
+<div class="glossary-grid">
+  <div class="gloss-card"><div class="gloss-term">🖥️ Consola</div><div class="gloss-def">El panel donde R ejecuta órdenes y muestra resultados de inmediato. Es la "conversación" con R: tú escribes, R responde. Lo que escribes ahí <b>no queda guardado</b>.</div></div>
+  <div class="gloss-card"><div class="gloss-term">📝 Script</div><div class="gloss-def">Archivo de texto (extensión <code>.R</code>) donde escribes y guardas tu código. Es la memoria de tu análisis: permite repetirlo, corregirlo y compartirlo.</div></div>
+  <div class="gloss-card"><div class="gloss-term">📦 Objeto</div><div class="gloss-def">Un nombre que guarda información en la memoria de R (un número, una tabla, un gráfico, un modelo). Se crea con el operador de asignación <code>&lt;-</code>.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🧬 Vector</div><div class="gloss-def">La estructura más básica de R: una secuencia de elementos <b>del mismo tipo</b> (todos números, o todos textos...). Las columnas de una tabla son vectores.</div></div>
+  <div class="gloss-card"><div class="gloss-term">📊 Data frame</div><div class="gloss-def">La tabla de datos de R: filas = observaciones, columnas = variables. Cada columna puede ser de un tipo distinto. Es la estructura central de todo el curso.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🕳️ NA</div><div class="gloss-def"><i>Not Available</i>: dato faltante. Había un espacio para un valor, pero no lo conocemos (ej.: un cliente no reportó su edad). Aparece en casi toda base de datos real.</div></div>
+  <div class="gloss-card"><div class="gloss-term">⚙️ Función</div><div class="gloss-def">Una orden con nombre que recibe insumos (<b>argumentos</b>, entre paréntesis) y devuelve un resultado: <code>mean(ventas, na.rm = TRUE)</code>. En R, casi todo lo que haces es llamar funciones.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🧰 Paquete</div><div class="gloss-def">Colección de funciones creada por la comunidad para una tarea específica (<code>dplyr</code> manipula datos, <code>ggplot2</code> grafica). Se <b>instala una vez</b> y se <b>carga en cada sesión</b>.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🗂️ Environment</div><div class="gloss-def">El "inventario" de la sesión: panel de RStudio que lista todos los objetos que existen en memoria en este momento. Si un objeto no está ahí, R no lo conoce.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🚦 Warning / Error</div><div class="gloss-def">Las dos alertas de la consola. <b>Warning</b>: algo raro pasó, pero el código corrió (revisa el resultado). <b>Error</b>: el código se detuvo y nada se ejecutó (hay que corregir).</div></div>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="r-y-rstudio-motor-y-cabina" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> R y RStudio: motor y cabina</h1>
+<p>Primero, una distinción que evita confusiones eternas:</p>
+<ul>
+<li><strong>R</strong> es el <strong>lenguaje</strong> y el motor de cálculo. Es lo que realmente ejecuta tu código.</li>
+<li><strong>RStudio</strong> es un <span class="term">IDE</span> (<em>Integrated Development Environment</em>): la cabina de mando que hace cómodo trabajar con R. Organiza el espacio en cuatro paneles.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/interfaz_rstudio.png" class="img-fluid figure-img" width="700"></p>
+<figcaption>Distribución de paneles en RStudio</figcaption>
+</figure>
+</div>
+<section id="los-cuatro-paneles" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="los-cuatro-paneles"><span class="header-section-number">3.1</span> Los cuatro paneles</h2>
+<p><strong>Superior izquierdo — Source (editor de scripts).</strong> Tu cuaderno de trabajo: aquí escribes código que quieres guardar y reutilizar, y lo ejecutas línea a línea con <code>Ctrl + Enter</code> (Windows) o <code>Cmd + Enter</code> (Mac). ¿Por qué escribir aquí y no directo en la consola? Porque un análisis serio se debe poder <strong>reproducir, corregir y compartir</strong>. El script es la memoria del proceso.</p>
+<p><strong>Inferior izquierdo — Console (consola).</strong> Donde R “te habla”: muestra resultados, advertencias y errores. Puedes escribir código directamente, pero no se guarda — úsala para probar cosas rápidas.</p>
+<p><strong>Superior derecho — Environment / History.</strong> El <span class="term">Environment</span> es el inventario de los objetos que existen en la sesión (datos, variables, resultados). <em>History</em> registra los comandos que has ejecutado.</p>
+<p><strong>Inferior derecho — Files / Plots / Packages / Help.</strong> Navegador de archivos, visor de gráficos, lista de paquetes y documentación de funciones (se abre cuando pides ayuda con <code>?</code>).</p>
+<div class="callout-key">
+<p><strong>El Environment es tu aliado</strong></p>
+<p>Durante todo el curso, la pregunta “¿por qué me sale error?” tendrá muchas veces la misma respuesta: <em>el objeto que intentas usar no existe en el Environment</em>. Si ejecutaste código correctamente, deberías ver los objetos nuevos aparecer en ese panel. Revisarlo debe volverse un reflejo.</p>
+</div>
+</section>
+<section id="el-flujo-de-trabajo-que-repetirás-mil-veces" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="el-flujo-de-trabajo-que-repetirás-mil-veces"><span class="header-section-number">3.2</span> El flujo de trabajo que repetirás mil veces</h2>
+<div class="callout-workflow">
+<p><strong>La rutina de RStudio</strong></p>
+<ol type="1">
+<li><strong>Escribo</strong> código en el script (Source)</li>
+<li><strong>Ejecuto</strong> la línea con <code>Ctrl/Cmd + Enter</code></li>
+<li><strong>Reviso</strong> la consola: ¿resultado, warning o error?</li>
+<li><strong>Verifico</strong> el Environment: ¿se creó el objeto que esperaba?</li>
+</ol>
+<p>No lo memorices: se volverá automático con la práctica. Pero fíjate desde ya en que los pasos 3 y 4 existen — la mitad de los problemas de los principiantes vienen de ejecutar sin revisar.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="r-como-calculadora" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> R como calculadora</h1>
+<p>Empecemos por lo más simple: pedirle cuentas a R. Ejecuta la celda (botón <strong>Run Code</strong>) y luego modifícala — es tuya.</p>
+<div id="qwebr-insertion-location-1"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>Los resultados aparecen pero <strong>no se guardan en ningún lado</strong>: si quieres reutilizar un valor, tendrás que aprender a crear objetos (dos secciones más abajo).</p>
+<section id="orden-de-las-operaciones" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="orden-de-las-operaciones"><span class="header-section-number">4.1</span> Orden de las operaciones</h2>
+<p>R sigue las reglas matemáticas de siempre: paréntesis → potencias → multiplicación/división → suma/resta.</p>
+<div id="qwebr-insertion-location-2"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-practice">
+<p><strong>Regla práctica:</strong> ante la duda, usa paréntesis. Es mejor ser explícito que descubrir tarde que R entendió otra cosa. Un ejemplo de negocio: el precio final de un producto de $1.000 con IVA del 19% es <code>1000 * (1 + 0.19)</code> — sin el paréntesis, el resultado sería otro.</p>
+</div>
+</section>
+<section id="comparar-valores" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="comparar-valores"><span class="header-section-number">4.2</span> Comparar valores</h2>
+<p>R también responde preguntas de sí o no. El resultado es un valor <strong>lógico</strong>: <code>TRUE</code> o <code>FALSE</code>.</p>
+<div id="qwebr-insertion-location-3"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong><code>==</code> compara, <code>=</code> asigna</strong></p>
+<p>Para preguntar “¿son iguales?” se usan <strong>dos</strong> signos igual (<code>==</code>). El signo simple (<code>=</code>) hace otra cosa (asignar valores). Confundirlos es, literalmente, el error más común de las primeras semanas — y lo volverás a ver cuando filtremos datos en la semana 4.</p>
+</div>
+</div>
+<p>Y puedes combinar condiciones con los operadores lógicos <code>&amp;</code> (<strong>y</strong>: ambas deben cumplirse) y <code>|</code> (<strong>o</strong>: basta con una):</p>
+<div id="qwebr-insertion-location-4"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-connect">
+<p><strong>¿Para qué sirve esto?</strong> En la semana 4 estas comparaciones serán filtros de datos reales: <em>“muéstrame solo las ventas con <code>precio &gt; 100</code> y <code>region == "Norte"</code>”</em>. Hoy solo necesitas reconocerlas.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="tipos-de-datos" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Tipos de datos</h1>
+<p>R clasifica cada dato en un <strong>tipo</strong>. Los tres que usarás a diario:</p>
+<p><strong>Numérico</strong> — números enteros o decimales: <code>42</code>, <code>3.14</code>.</p>
+<p><strong>Carácter (texto)</strong> — siempre entre comillas: <code>"Cali"</code>, <code>"cliente_premium"</code>.</p>
+<p><strong>Lógico</strong> — solo dos valores, en mayúsculas y sin comillas: <code>TRUE</code>, <code>FALSE</code>.</p>
+<div id="qwebr-insertion-location-5"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Cuidado con las comillas</strong></p>
+<p><code>100</code> (sin comillas) es un número: puedes sumarlo y promediarlo. <code>"100"</code> (con comillas) es <strong>texto</strong>: R no puede hacer matemáticas con él. Este problema aparece muchísimo al importar datos de Excel — una columna de cifras que llega como texto. Pruébalo tú mismo:</p>
+<div id="qwebr-insertion-location-6"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</div>
+</div>
+<section id="valores-especiales" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="valores-especiales"><span class="header-section-number">5.1</span> Valores especiales</h2>
+<p>En bases de datos reales te cruzarás con estos cuatro personajes:</p>
+<div id="qwebr-insertion-location-7"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-practice">
+<p><strong>¿NA o NULL?</strong> <span class="term">NA</span> es una silla vacía en la mesa: el puesto existe, el invitado no llegó (un cliente sin edad registrada). <span class="term">NULL</span> es que la silla no existe. En la práctica, el protagonista es <strong>NA</strong>: casi toda base real los tiene, y aprender a manejarlos es parte del oficio (esta misma semana verás el primer truco: <code>na.rm = TRUE</code>).</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="objetos-guardar-para-reutilizar" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Objetos: guardar para reutilizar</h1>
+<section id="todo-en-r-es-un-objeto" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="todo-en-r-es-un-objeto"><span class="header-section-number">6.1</span> Todo en R es un objeto</h2>
+<p>Si calculas <code>10 + 5</code>, el <code>15</code> aparece en consola y muere ahí. Para usarlo después necesitas <strong>guardarlo con un nombre</strong>: eso es un objeto. Y en R <em>todo</em> puede ser un objeto: un número, una tabla completa, un gráfico, un modelo de machine learning. Esa filosofía te permite tener varias bases de datos abiertas a la vez, cosa que en Excel es un dolor.</p>
+</section>
+<section id="crear-objetos-con--" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="crear-objetos-con--"><span class="header-section-number">6.2</span> Crear objetos con <code>&lt;-</code></h2>
+<div id="qwebr-insertion-location-8"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>La estructura es siempre: <code>nombre &lt;- valor_o_resultado</code>. R calcula lo de la derecha, lo guarda con el nombre de la izquierda, y el objeto aparece en el Environment.</p>
+<div id="qwebr-insertion-location-9"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-practice">
+<p><strong>¿<code>&lt;-</code> o <code>=</code>?</strong> Ambos asignan, pero la convención de la comunidad R (y de este curso) es clara: usa <code>&lt;-</code> para crear objetos y reserva <code>=</code> para los argumentos de las funciones, como en <code>mean(x, na.rm = TRUE)</code>. Atajo de teclado para <code>&lt;-</code>: <code>Alt + -</code> (Windows) o <code>Option + -</code> (Mac).</p>
+</div>
+</section>
+<section id="reglas-para-nombrar" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="reglas-para-nombrar"><span class="header-section-number">6.3</span> Reglas para nombrar</h2>
+<p>Obligatorias: empieza con letra, sin espacios, sin tildes ni guion medio (<code>-</code> se interpreta como resta), y recuerda que R distingue mayúsculas (<code>ventas</code> ≠ <code>Ventas</code>). Recomendadas: nombres descriptivos en <code>snake_case</code> — <code>precio_unitario</code> dice más que <code>x</code>, y tu yo del futuro lo agradecerá.</p>
+<div id="qwebr-insertion-location-10"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</section>
+<section id="las-tres-lupas-class-typeof-str" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="las-tres-lupas-class-typeof-str"><span class="header-section-number">6.4</span> Las tres lupas: <code>class()</code>, <code>typeof()</code>, <code>str()</code></h2>
+<p>Antes de operar con un objeto conviene saber <strong>qué es</strong>. R tiene tres funciones-lupa:</p>
+<div id="qwebr-insertion-location-11"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div id="qwebr-insertion-location-12"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>De las tres, <code>class()</code> y <code>str()</code> serán tus favoritas: <code>str()</code> en particular es la <strong>radiografía instantánea</strong> de cualquier tabla de datos, como verás más abajo. ¿Cuándo usarlas? Cada vez que importes datos (“¿la columna de ventas llegó como número o como texto?”) y cada vez que un error te haga sospechar que un objeto no es lo que crees.</p>
+<div class="callout-remember">
+<p><strong>Lo esencial hasta aquí</strong></p>
+<ul>
+<li>Lo que no se asigna con <code>&lt;-</code>, se pierde. Objeto = nombre + valor en memoria.</li>
+<li>El Environment es el inventario: si no está ahí, no existe.</li>
+<li><code>class()</code> y <code>str()</code> te dicen qué es un objeto antes de que te sorprenda.</li>
+</ul>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="la-consola-te-habla-resultado-warning-o-error" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> La consola te habla: resultado, warning o error</h1>
+<p>Cuando ejecutas código, R responde de <strong>tres</strong> maneras posibles. Distinguirlas es la habilidad que separa al que se frustra del que avanza.</p>
+<section id="resultado-normal" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="resultado-normal"><span class="header-section-number">7.1</span> 1. Resultado normal</h2>
+<div id="qwebr-insertion-location-13"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>El <code>[1]</code> del resultado indica la <strong>posición</strong> del primer elemento mostrado (si el resultado fuera largo, verías <code>[1]</code>, <code>[13]</code>, <code>[25]</code>… al inicio de cada línea).</p>
+</section>
+<section id="warning-corrió-pero-revisa" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="warning-corrió-pero-revisa"><span class="header-section-number">7.2</span> 2. Warning: corrió, pero revisa</h2>
+<p>Un <span class="term">warning</span> <strong>no detiene</strong> la ejecución — es una alerta amarilla: “hice lo que pediste, pero pasó algo raro”.</p>
+<div id="qwebr-insertion-location-14"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>El warning más importante del semestre tiene que ver con los <code>NA</code>:</p>
+<div id="qwebr-insertion-location-15"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>Fíjate en el detalle: <code>mean()</code> con un <code>NA</code> devuelve <code>NA</code> <strong>sin siquiera avisar</strong>. Por eso la regla es: <em>ante un resultado extraño, sospecha primero de los datos faltantes</em>.</p>
+</section>
+<section id="error-se-detuvo-todo" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="error-se-detuvo-todo"><span class="header-section-number">7.3</span> 3. Error: se detuvo todo</h2>
+<p>Un <span class="term">error</span> es la alerta roja: R no pudo continuar y <strong>nada de la línea se ejecutó</strong>.</p>
+<div id="qwebr-insertion-location-16"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div id="qwebr-insertion-location-17"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-workflow">
+<p><strong>Protocolo ante un error (en este orden)</strong></p>
+<ol type="1">
+<li><strong>Respira.</strong> Los errores son parte del oficio; los analistas expertos ven decenas al día.</li>
+<li><strong>Lee el mensaje completo.</strong> Casi siempre dice qué pasó (<code>not found</code> = no existe; <code>unused argument</code> = argumento mal escrito; <code>unexpected symbol</code> = error de tipeo).</li>
+<li><strong>Revisa la ortografía</strong>: mayúsculas, tildes, comillas y paréntesis sin cerrar.</li>
+<li><strong>Mira el Environment</strong>: ¿el objeto que usas realmente existe y se llama así?</li>
+<li><strong>Consulta la ayuda</strong> de la función: <code>?mean</code>.</li>
+<li><strong>Y si nada funciona, pregúntale a la IA</strong> — pero con la fórmula de la semana pasada: pega el código completo, el mensaje de error completo y pide que te <em>explique la causa</em> antes que la solución. Para eso construiste tu skill <em>Explicador de código R</em>.</li>
+</ol>
+</div>
+</section>
+<section id="ponte-a-prueba-triage-de-consola" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="ponte-a-prueba-triage-de-consola"><span class="header-section-number">7.4</span> Ponte a prueba: triage de consola</h2>
+<p>Clasifica cada salida de consola. ¿Es un resultado normal, un warning o un error?</p>
+<div class="widget-card" id="wg-triage">
+  <div class="widget-head">🚦 Triage de consola · ¿normal, warning o error?</div>
+  <div class="widget-body">
+    <div id="triage-items"></div>
+    <div class="quiz-score" id="triage-score"></div>
+    <div class="widget-note">Pista: no te fijes solo en el color del mensaje — pregúntate si el código <b>se ejecutó</b> y si el resultado <b>es confiable</b>.</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var ITEMS = [
+    {
+      code: '<span class="qc-in">&gt; sum(c(10, 20, 30))</span>\n<span class="qc-out">[1] 60</span>',
+      ans: "normal",
+      fb: "Resultado normal: R ejecutó y devolvió la suma. Nada que revisar."
+    },
+    {
+      code: '<span class="qc-in">&gt; sqrt(-4)</span>\n<span class="qc-out">[1] NaN</span>\n<span class="qc-msg">Warning message: NaNs produced</span>',
+      ans: "warning",
+      fb: "Warning: el código corrió (devolvió NaN), pero R te advierte que la operación no tiene sentido matemático. Alerta amarilla."
+    },
+    {
+      code: '<span class="qc-in">&gt; promedio_ventas</span>\n<span class="qc-msg">Error: object \'promedio_ventas\' not found</span>',
+      ans: "error",
+      fb: "Error: R buscó ese objeto en el Environment y no lo encontró. Nada se ejecutó. Causa típica: no lo creaste, o escribiste mal el nombre."
+    },
+    {
+      code: '<span class="qc-in">&gt; mean(c(100, 200, NA))</span>\n<span class="qc-out">[1] NA</span>',
+      ans: "normal",
+      fb: "¡Tramposa! Técnicamente es un resultado normal: no hay warning ni error. Pero el resultado es NA porque hay un faltante — R ni siquiera te avisa. Por eso hay que MIRAR los resultados, no solo verificar que \"no salió rojo\". Solución: na.rm = TRUE."
+    },
+    {
+      code: '<span class="qc-in">&gt; as.numeric("mil pesos")</span>\n<span class="qc-out">[1] NA</span>\n<span class="qc-msg">Warning message: NAs introduced by coercion</span>',
+      ans: "warning",
+      fb: "Warning: R intentó convertir el texto a número, no pudo, y lo reemplazó por NA avisándote. Esto pasa mucho al importar columnas \"numéricas\" que traen texto escondido."
+    },
+    {
+      code: '<span class="qc-in">&gt; "100" + 5</span>\n<span class="qc-msg">Error in "100" + 5 : non-numeric argument to binary operator</span>',
+      ans: "error",
+      fb: "Error: \"100\" es texto (está entre comillas) y R no suma texto. Ejecución detenida. El clásico de las columnas mal importadas."
+    }
+  ];
+  var LABELS = { normal: "🟢 Normal", warning: "🟡 Warning", error: "🔴 Error" };
+  var box = document.getElementById("triage-items");
+  var scoreEl = document.getElementById("triage-score");
+  var answered = 0, correct = 0;
+
+  ITEMS.forEach(function (it, i) {
+    var q = document.createElement("div");
+    q.className = "quiz-q";
+    var opts = ["normal", "warning", "error"].map(function (k) {
+      return '<button type="button" class="btn-widget quiz-opt" data-k="' + k + '">' + LABELS[k] + "</button>";
+    }).join("");
+    q.innerHTML =
+      '<div class="quiz-q-title">Caso ' + (i + 1) + " de " + ITEMS.length + "</div>" +
+      '<div class="quiz-code">' + it.code + "</div>" +
+      '<div class="quiz-opts">' + opts + "</div>" +
+      '<div class="quiz-fb"></div>';
+    box.appendChild(q);
+
+    var btns = q.querySelectorAll(".quiz-opt");
+    var fb = q.querySelector(".quiz-fb");
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (q.dataset.done) return;
+        q.dataset.done = "1";
+        answered++;
+        var ok = b.dataset.k === it.ans;
+        if (ok) { correct++; b.classList.add("correct"); }
+        else {
+          b.classList.add("wrong");
+          btns.forEach(function (x) { if (x.dataset.k === it.ans) x.classList.add("correct"); });
+        }
+        btns.forEach(function (x) { x.disabled = true; });
+        fb.className = "quiz-fb show " + (ok ? "ok" : "bad");
+        fb.innerHTML = (ok ? "✔ Correcto. " : "✘ No exactamente. ") + it.fb;
+        scoreEl.textContent = "Aciertos: " + correct + " de " + answered + (answered === ITEMS.length ? " · ¡Triage completado!" : "");
+      });
+    });
+  });
+})();
+</script>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="vectores" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Vectores</h1>
+<p>Un <span class="term">vector</span> es la estructura más simple de R — y la más importante de entender, porque casi todo lo demás (incluidas las columnas de tus futuras tablas) está hecho de vectores.</p>
+<div class="callout-key">
+<p><strong>Tres características de un vector</strong></p>
+<ul>
+<li><strong>Homogéneo</strong>: todos los elementos son del mismo tipo (todos números, o todos textos, o todos lógicos).</li>
+<li><strong>Una dimensión</strong>: es una fila de casillas, no una tabla.</li>
+<li><strong>Ordenado</strong>: cada elemento tiene una posición (1, 2, 3…).</li>
+</ul>
+</div>
+<section id="crear-vectores-con-c" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="crear-vectores-con-c"><span class="header-section-number">8.1</span> Crear vectores con <code>c()</code></h2>
+<p>La función <code>c()</code> (de <em>combine</em>) une elementos:</p>
+<div id="qwebr-insertion-location-18"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>Para vectores con patrones, hay atajos:</p>
+<div id="qwebr-insertion-location-19"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</section>
+<section id="indexación-sacar-elementos-con" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="indexación-sacar-elementos-con"><span class="header-section-number">8.2</span> Indexación: sacar elementos con <code>[ ]</code></h2>
+<p>R cuenta <strong>desde 1</strong> (no desde 0, como Python). Los corchetes extraen posiciones:</p>
+<div id="qwebr-insertion-location-20"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</section>
+<section id="indexación-lógica-el-superpoder" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="indexación-lógica-el-superpoder"><span class="header-section-number">8.3</span> Indexación lógica: el superpoder</h2>
+<p>Dentro de los corchetes también cabe una <strong>condición</strong>. R devuelve solo los elementos que la cumplen:</p>
+<div id="qwebr-insertion-location-21"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-connect">
+<p><strong>Guarda esta idea.</strong> “Dame los elementos que cumplen una condición” es exactamente lo que hace <code>filter()</code>, la función estrella de la próxima semana. La sintaxis será más amable, pero la lógica es esta.</p>
+</div>
+<p>También puedes <strong>reemplazar</strong> valores usando la misma notación:</p>
+<div id="qwebr-insertion-location-22"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</section>
+<section id="funciones-que-resumen-un-vector" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="funciones-que-resumen-un-vector"><span class="header-section-number">8.4</span> Funciones que resumen un vector</h2>
+<div id="qwebr-insertion-location-23"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</section>
+<section id="mini-ejercicio-la-semana-en-números" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="mini-ejercicio-la-semana-en-números"><span class="header-section-number">8.5</span> Mini-ejercicio: la semana en números</h2>
+<div id="qwebr-insertion-location-24"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-remember">
+<p><strong>Lo esencial de vectores</strong></p>
+<ul>
+<li><code>c()</code> crea, <code>[posición]</code> extrae, <code>[condición]</code> filtra.</li>
+<li>R indexa desde <strong>1</strong>.</li>
+<li><code>sum(condición)</code> cuenta cuántos elementos cumplen la condición — trúquelo estrella.</li>
+</ul>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="matrices-la-prima-ordenada-del-vector" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Matrices: la prima ordenada del vector</h1>
+<p>Antes de llegar a las tablas de verdad, una parada corta. Una <span class="term">matriz</span> es un vector organizado en <strong>filas y columnas</strong> — dos dimensiones, pero con la misma regla del vector: <strong>todos los elementos del mismo tipo</strong>.</p>
+<div id="qwebr-insertion-location-25"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>La indexación usa la lógica <code>[fila, columna]</code> — apréndetela bien porque los data frames la heredan:</p>
+<div id="qwebr-insertion-location-26"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>¿Y para qué sirven? En este curso, poco de forma directa: como todas sus celdas deben ser del mismo tipo, una matriz no puede guardar una tabla real de negocio (texto + números + lógicos mezclados). Pero por dentro de R aparecen en todas partes — matrices de correlaciones, la matriz de confusión de los modelos de clasificación (semana 11), operaciones de álgebra lineal. Te basta con <strong>reconocerlas y saber leer <code>[fila, columna]</code></strong>.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="data-frames-la-estrella-del-curso" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Data frames: la estrella del curso</h1>
+<p>Un <span class="term">data frame</span> es LA estructura de análisis de datos: el equivalente a una hoja de Excel, pero programable.</p>
+<div class="callout-key">
+<p><strong>Qué hace especial a un data frame</strong></p>
+<ul>
+<li><strong>Heterogéneo</strong>: cada columna puede ser de un tipo distinto (nombres en texto, ventas en números, estado en lógico). Es lo que la matriz no podía hacer.</li>
+<li><strong>Rectangular</strong>: todas las columnas miden lo mismo. Cada <strong>fila es una observación</strong> (un cliente, una transacción); cada <strong>columna es una variable</strong> (edad, monto, región).</li>
+<li>Por dentro, <strong>cada columna es un vector</strong> — todo lo que aprendiste arriba aplica.</li>
+</ul>
+</div>
+<section id="crear-e-inspeccionar" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="crear-e-inspeccionar"><span class="header-section-number">10.1</span> Crear e inspeccionar</h2>
+<div id="qwebr-insertion-location-27"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>La <strong>radiografía</strong> de cualquier tabla — estas cuatro funciones se ejecutan siempre, apenas cargas datos:</p>
+<div id="qwebr-insertion-location-28"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-practice">
+<p><strong>Cómo leer <code>str()</code></strong>: la primera línea dice <code>4 obs. of 4 variables</code> (4 filas, 4 columnas); luego, cada columna con su tipo: <code>$ nombre: chr</code> (texto), <code>$ edad: num</code> (número), <code>$ activo: logi</code> (lógico). Treinta segundos de <code>str()</code> te ahorran media hora de errores.</p>
+</div>
+</section>
+<section id="acceder-a-la-información" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="acceder-a-la-información"><span class="header-section-number">10.2</span> Acceder a la información</h2>
+<p>Con <code>$</code> extraes <strong>una columna completa</strong> (que es un vector — y por eso puedes aplicarle todo lo de la sección anterior):</p>
+<div id="qwebr-insertion-location-29"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>Con <code>[fila, columna]</code> accedes a cualquier pedazo (la lógica que heredamos de las matrices):</p>
+<div id="qwebr-insertion-location-30"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>Y crear una <strong>columna nueva</strong> es asignar sobre un nombre que no existe:</p>
+<div id="qwebr-insertion-location-31"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+</section>
+<section id="mini-ejercicio-primer-análisis-de-clientes" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="mini-ejercicio-primer-análisis-de-clientes"><span class="header-section-number">10.3</span> Mini-ejercicio: primer análisis de clientes</h2>
+<div id="qwebr-insertion-location-32"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-connect">
+<p><strong>Todo el curso pasa por aquí.</strong> En la semana 4, <code>dplyr</code> te dará verbos elegantes para hacer esto mismo (<code>filter()</code> en vez de corchetes, <code>mutate()</code> en vez de <code>$ &lt;-</code>), y <code>ggplot2</code> convertirá estas tablas en gráficos. En las semanas 10-13, los modelos de machine learning se entrenan… con data frames. Si esta sección te quedó clara, tienes la base de todo lo demás.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="funciones-y-el-sistema-de-ayuda" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Funciones y el sistema de ayuda</h1>
+<p>Ya usaste muchas funciones (<code>mean()</code>, <code>str()</code>, <code>c()</code>…). Formalicemos: una <span class="term">función</span> tiene un <strong>nombre</strong>, recibe <strong>argumentos</strong> entre paréntesis (separados por comas, a veces con nombre: <code>na.rm = TRUE</code>) y <strong>devuelve un resultado</strong>.</p>
+<div id="qwebr-insertion-location-33"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<section id="la-ayuda-antes-que-nadie" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="la-ayuda-antes-que-nadie"><span class="header-section-number">11.1</span> <code>?</code>: la ayuda antes que nadie</h2>
+<p>¿Qué hace una función? ¿Qué argumentos acepta? La documentación oficial está a un signo de distancia:</p>
+<div id="qwebr-insertion-location-34"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p>En RStudio esto abre el panel <strong>Help</strong> con una estructura fija: <em>Description</em> (qué hace), <em>Usage</em> (cómo se escribe), <em>Arguments</em> (qué recibe), y la joya de la corona: <strong>Examples</strong>, código listo para copiar, ejecutar y adaptar.</p>
+<div class="callout-practice">
+<p><strong>Cómo leer la ayuda como un profesional</strong></p>
+<ol type="1">
+<li>Lee <em>Description</em>: ¿esta función hace lo que necesito?</li>
+<li>Salta directo a <em>Examples</em>: copia uno, ejecútalo, modifícalo con tus datos.</li>
+<li>Vuelve a <em>Arguments</em> solo cuando necesites ajustar algo puntual.</li>
+</ol>
+<p><strong>No memorices funciones.</strong> Nadie lo hace — ni los expertos, ni la IA (que también se equivoca con argumentos). Lo que se entrena es el reflejo de consultar: primero <code>?funcion</code>, y si la duda persiste, tu skill de la semana 2.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="paquetes-instalar-una-vez-cargar-siempre" class="level1" data-number="12">
+<h1 data-number="12"><span class="header-section-number">12</span> Paquetes: instalar una vez, cargar siempre</h1>
+<p>R trae funciones básicas de fábrica (<span class="term">base R</span>), pero su verdadero poder está en los <span class="term">paquetes</span>: colecciones de funciones creadas por la comunidad — hay más de 20.000 en el repositorio oficial (<span class="term">CRAN</span>). En este curso vivirás en dos: <code>dplyr</code> (manipular datos) y <code>ggplot2</code> (graficar).</p>
+<div class="callout-key">
+<p><strong>La distinción que evita el 90% de los enredos</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 19%">
+<col style="width: 21%">
+<col style="width: 35%">
+<col style="width: 23%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Acción</th>
+<th>Comando</th>
+<th>¿Cada cuánto?</th>
+<th>Analogía</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Instalar</strong></td>
+<td><code>install.packages("dplyr")</code></td>
+<td><strong>Una sola vez</strong> por computador</td>
+<td>Comprar el libro y ponerlo en tu estante</td>
+</tr>
+<tr class="even">
+<td><strong>Cargar</strong></td>
+<td><code>library(dplyr)</code></td>
+<td><strong>Cada sesión</strong> de R</td>
+<td>Sacar el libro del estante para leerlo</td>
+</tr>
+</tbody>
+</table>
+<p>Si te sale <code>Error: could not find function "filter"</code>, el diagnóstico es casi siempre este: el paquete está instalado pero <strong>no cargado</strong> en la sesión actual.</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Instalar: se corre UNA vez, directo en la consola (nunca dejarlo activo en el script)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"dplyr"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="qwebr-insertion-location-35"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<section id="el-estándar-del-curso-pacman" class="level2" data-number="12.1">
+<h2 data-number="12.1" class="anchored" data-anchor-id="el-estándar-del-curso-pacman"><span class="header-section-number">12.1</span> El estándar del curso: <code>pacman</code></h2>
+<p>El paquete <code>pacman</code> resuelve todo con una sola línea: <code>p_load()</code> <strong>carga</strong> los paquetes que le pidas y, si alguno no está instalado, <strong>lo instala automáticamente</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Solo la primera vez, en la consola:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"pacman"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Y de ahí en adelante, TODOS nuestros scripts empiezan así:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(pacman)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">p_load</span>(dplyr, ggplot2)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Esa pareja de líneas será el encabezado estándar de cada script del semestre: quien abra tu código podrá correrlo sin preguntarse qué le falta instalar.</p>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="el-environment-y-tu-primer-proyecto" class="level1" data-number="13">
+<h1 data-number="13"><span class="header-section-number">13</span> El Environment y tu primer proyecto</h1>
+<section id="gestionar-el-inventario" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="gestionar-el-inventario"><span class="header-section-number">13.1</span> Gestionar el inventario</h2>
+<p>Todo objeto que creas vive en el <span class="term">Environment</span> hasta que cierres la sesión (o lo borres). Dos funciones para administrarlo:</p>
+<div id="qwebr-insertion-location-36"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<div class="callout-practice">
+<p><strong>Filosofía del curso: el script manda, no el Environment</strong></p>
+<p>Al cerrar RStudio te preguntará si quieres guardar el <em>workspace</em> (<code>.RData</code>). Responde <strong>No</strong>, siempre. La versión oficial de tu análisis es el <strong>script</strong>: si tu código está bien escrito, puedes reconstruir todos los objetos ejecutándolo de arriba a abajo. Depender de objetos “que quedaron de ayer” es la receta del análisis irreproducible.</p>
+</div>
+</section>
+<section id="rstudio-projects-dónde-vive-tu-trabajo" class="level2" data-number="13.2">
+<h2 data-number="13.2" class="anchored" data-anchor-id="rstudio-projects-dónde-vive-tu-trabajo"><span class="header-section-number">13.2</span> RStudio Projects: dónde vive tu trabajo</h2>
+<p>Queda una última pieza, y es la que ordena todas las demás. Cuando le pides a R leer un archivo (<code>read.csv("ventas.csv")</code>), R lo busca en su <strong>directorio de trabajo</strong> (<em>working directory</em>) — la carpeta en la que está “parado”. Si el archivo está en otra parte: error.</p>
+<p>La solución profesional no es pelear con rutas, sino usar <strong>RStudio Projects</strong>: al abrir un proyecto (archivo <code>.Rproj</code>), R se para automáticamente en la carpeta correcta, y todas las rutas se escriben <strong>relativas</strong> a ella.</p>
+<div class="callout-workflow">
+<p><strong>Así crearemos el proyecto del curso (lo haremos juntos en clase)</strong></p>
+<ol type="1">
+<li>En RStudio: <em>File → New Project → New Directory → New Project</em>.</li>
+<li>Nombre: <code>intro_ba</code> (sin espacios ni tildes).</li>
+<li>Dentro, crearemos esta estructura de carpetas:</li>
+</ol>
+<pre><code>intro_ba/
+├── intro_ba.Rproj    # doble clic AQUÍ para abrir el proyecto
+├── data/             # datos crudos (nunca se modifican a mano)
+├── scripts/          # tu código, un script por semana
+└── output/           # resultados: tablas y gráficos exportados</code></pre>
+<ol start="4" type="1">
+<li>Regla de oro de las rutas:
+<ul>
+<li>✅ <code>read.csv("data/ventas.csv")</code> — relativa al proyecto: funciona en cualquier computador.</li>
+<li>❌ <code>read.csv("C:/Users/juan/Desktop/parcial/ventas.csv")</code> — absoluta: solo funciona en el tuyo.</li>
+</ul></li>
+</ol>
+</div>
+<div class="callout-connect">
+<p><strong>¿Por qué tanto énfasis en esto?</strong> Porque <em>reproducibilidad</em> es la palabra que une el curso: tu proyecto final, los talleres y cualquier análisis del mundo real deben poder ejecutarse en otra máquina sin retoques. El proyecto que crearemos esta semana será tu casa el resto del semestre.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="lo-esencial-de-la-semana" class="level1" data-number="14">
+<h1 data-number="14"><span class="header-section-number">14</span> Lo esencial de la semana</h1>
+<p>Al terminar la teoría (video + este documento), debes poder:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Distinguir R (motor) de RStudio (cabina) e identificar los 4 paneles y su función</label></li>
+<li><label><input type="checkbox">Ejecutar operaciones y comparaciones en la consola, y explicar la diferencia entre <code>=</code> y <code>==</code></label></li>
+<li><label><input type="checkbox">Reconocer los tipos de datos (numérico, carácter, lógico) y el significado de <code>NA</code></label></li>
+<li><label><input type="checkbox">Crear objetos con <code>&lt;-</code> e inspeccionarlos con <code>class()</code> y <code>str()</code></label></li>
+<li><label><input type="checkbox">Clasificar una salida de consola como resultado normal, warning o error — y saber qué hacer en cada caso</label></li>
+<li><label><input type="checkbox">Crear vectores con <code>c()</code>, extraer elementos con <code>[ ]</code> y filtrar con condiciones lógicas</label></li>
+<li><label><input type="checkbox">Leer la notación <code>[fila, columna]</code> de matrices y data frames</label></li>
+<li><label><input type="checkbox">Crear un data frame, radiografiarlo (<code>str</code>, <code>dim</code>, <code>head</code>) y acceder a columnas con <code>$</code></label></li>
+<li><label><input type="checkbox">Explicar la diferencia entre instalar (<code>install.packages</code>) y cargar (<code>library</code> / <code>p_load</code>) un paquete</label></li>
+<li><label><input type="checkbox">Explicar qué es un RStudio Project y por qué las rutas relativas hacen tu trabajo reproducible</label></li>
+</ul>
+<p>En la <a href="../practice/week-03.html">aplicación guiada en clase</a> convertiremos todo esto en tu <strong>primer script real</strong> dentro de RStudio, y en el <a href="../task/week-03.html">taller evaluable</a> lo harás por tu cuenta.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="preguntas-de-comprensión" class="level1" data-number="15">
+<h1 data-number="15"><span class="header-section-number">15</span> Preguntas de comprensión</h1>
+<p>Intenta responder antes de abrir cada respuesta.</p>
+<p><strong>1. Un compañero ejecuta <code>mean(ingresos)</code> y obtiene <code>NA</code>, sin warnings ni errores. ¿Qué pasó y cómo lo arregla?</strong></p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+El vector <code>ingresos</code> contiene al menos un dato faltante (<code>NA</code>), y el promedio de algo desconocido es desconocido — R lo reporta sin alarmas. Se arregla con <code>mean(ingresos, na.rm = TRUE)</code>, que remueve los faltantes antes de calcular. Moraleja: un resultado “sin errores” no es automáticamente un resultado correcto.
+</details>
+<p><strong>2. ¿Por qué <code>ventas &lt;- c(100, 200, "300")</code> no da error, pero después <code>mean(ventas)</code> sí?</strong></p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+Los vectores son homogéneos: al mezclar números con el texto <code>"300"</code>, R convierte <strong>todo</strong> el vector a texto sin protestar (<code>"100"</code>, <code>"200"</code>, <code>"300"</code>). El error aparece después, cuando <code>mean()</code> intenta promediar textos. Verifícalo con <code>class(ventas)</code>. Es el mismo fenómeno de las columnas de Excel que llegan “como texto”.
+</details>
+<p><strong>3. Ejecutas <code>library(ggplot2)</code> y R responde <code>Error in library(ggplot2) : there is no package called 'ggplot2'</code>. ¿Es un problema de carga o de instalación?</strong></p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+De instalación: el paquete no existe en ese computador (“no hay tal libro en el estante”). Se resuelve una sola vez con <code>install.packages("ggplot2")</code> y luego sí <code>library(ggplot2)</code>. El error contrario — <code>could not find function "ggplot"</code> — suele ser de carga: el paquete está instalado pero olvidaste llamarlo en esta sesión.
+</details>
+<p><strong>4. En el data frame <code>clientes</code>, ¿qué diferencia hay entre <code>clientes[3, ]</code> y <code>clientes[, 3]</code>? ¿Y qué devuelve <code>clientes$ventas</code>?</strong></p>
+<details class="answer">
+<summary>
+Ver respuesta
+</summary>
+<code>clientes[3, ]</code> devuelve la <strong>fila</strong> 3 completa (una observación: un cliente). <code>clientes[, 3]</code> devuelve la <strong>columna</strong> 3 completa (una variable, para todos los clientes). El orden es siempre <code>[fila, columna]</code>. <code>clientes$ventas</code> devuelve la columna <code>ventas</code> como <strong>vector</strong> — por eso puedes aplicarle directamente <code>mean()</code>, <code>sum()</code> o cualquier función de vectores.
+</details>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="material-adicional" class="level1" data-number="16">
+<h1 data-number="16"><span class="header-section-number">16</span> Material adicional</h1>
+<p>Para profundizar (opcional, pero recomendado):</p>
+<ul>
+<li><strong><a href="https://es.r4ds.hadley.nz">R para Ciencia de Datos</a></strong> — la traducción al español del libro clásico de Hadley Wickham; los capítulos de “Fundamentos” complementan esta semana.</li>
+<li><strong><a href="https://rstudio.github.io/cheatsheets/rstudio-ide.pdf">Cheatsheet de RStudio</a></strong> — mapa visual de la interfaz, para tener a la mano en clase.</li>
+<li><strong><a href="https://posit.cloud">Posit Cloud</a></strong> — RStudio corriendo en el navegador, gratis: tu plan B si la instalación local se complica.</li>
+<li><strong><a href="https://swirlstats.com">swirl</a></strong> — un paquete que te enseña R… dentro de R, con ejercicios interactivos en la consola (<code>install.packages("swirl")</code>).</li>
+</ul>
+<!-- Panel Environment (CSS en styles.css) -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">📦 Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">🔄</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">▲</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
+  </div>
+</div>
+
+<script type="module">
+/* ── Toggle colapsar / expandir ── */
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '▲' : '▼';
+};
+
+/* ── Consultar el environment de R ── */
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Env panel error:', e);
+    return [];
+  }
+}
+
+/* ── Renderizar la lista de objetos ── */
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. × ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+/* ── Actualizar panel ── */
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+/* ── Mover webR Status despues de los links de contacto ── */
+function moveWebRStatus() {
+  const anchor = document.getElementById('webr-status-anchor');
+  const statusArea = document.getElementById('qwebr-status-message-area');
+  if (anchor && statusArea) {
+    const wrapper = statusArea.closest('.quarto-title-meta');
+    if (wrapper) {
+      wrapper.style.display = 'inline';
+      wrapper.style.fontSize = '13px';
+      wrapper.style.marginLeft = '30px';
+      anchor.parentNode.insertBefore(wrapper, anchor);
+    }
+  }
+}
+
+/* ── Esperar webR y conectar hooks ── */
+async function init() {
+  /* Esperar a que mainWebR exista */
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
+  moveWebRStatus();
+
+  /* Esperar a que los botones Run esten habilitados (todas las celdas ocultas ejecutadas) */
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  /* Monkey-patch qwebrComputeEngine para detectar ejecucion */
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  /* Expandir panel y hacer primer scan */
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script type="module">
+// Handle cell initialization initialization
+qwebrCellDetails.map(
+  (entry) => {
+    // Handle the creation of the element
+    qwebrCreateHTMLElement(entry);
+    // In the event of interactive, initialize the monaco editor
+    if (entry.options.context == EvalTypes.Interactive) {
+      qwebrCreateMonacoEditorInstance(entry);
+    }
+  }
+);
+
+// Identify non-interactive cells (in order)
+const filteredEntries = qwebrCellDetails.filter(entry => {
+  const contextOption = entry.options && entry.options.context;
+  return ['output', 'setup'].includes(contextOption) || (contextOption == "interactive" && entry.options && entry.options.autorun === 'true');
+});
+
+// Condition non-interactive cells to only be run after webR finishes its initialization.
+qwebrInstance.then(
+  async () => {
+    const nHiddenCells = filteredEntries.length;
+    var currentHiddenCell = 0;
+
+
+    // Modify button state
+    qwebrSetInteractiveButtonState(`🟡 Running hidden code cells ...`, false);
+
+    // Begin processing non-interactive sections
+    // Due to the iteration policy, we must use a for() loop.
+    // Otherwise, we would need to switch to using reduce with an empty
+    // starting promise
+    for (const entry of filteredEntries) {
+
+      // Determine cell being examined
+      currentHiddenCell = currentHiddenCell + 1;
+      const formattedMessage = `Evaluating hidden cell ${currentHiddenCell} out of ${nHiddenCells}`;
+
+      // Update the document status header
+      if (qwebrShowStartupMessage) {
+        qwebrUpdateStatusHeader(formattedMessage);
+      }
+
+      // Display the update in non-active areas
+      qwebrUpdateStatusMessage(formattedMessage);
+
+      // Extract details on the active cell
+      const evalType = entry.options.context;
+      const cellCode = entry.code;
+      const qwebrCounter = entry.id;
+
+      if (['output', 'setup'].includes(evalType)) {
+        // Disable further global status updates
+        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
+        activeContainer.classList.remove('qwebr-cell-needs-evaluation');
+        activeContainer.classList.add('qwebr-cell-evaluated');
+
+        // Update status on the code cell
+        const activeStatus = document.getElementById(`qwebr-status-text-${qwebrCounter}`);
+        activeStatus.innerText = " Evaluating hidden code cell...";
+        activeStatus.classList.remove('qwebr-cell-needs-evaluation');
+        activeStatus.classList.add('qwebr-cell-evaluated');
+      }
+
+      switch (evalType) {
+        case 'interactive':
+          // TODO: Make this more standardized.
+          // At the moment, we're overriding the interactive status update by pretending its
+          // output-like. 
+          const tempOptions = entry.options;
+          tempOptions["context"] = "output"
+          // Run the code in a non-interactive state that is geared to displaying output
+          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, tempOptions);
+          break;
+        case 'output':
+          // Run the code in a non-interactive state that is geared to displaying output
+          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, entry.options);
+          break;
+        case 'setup':
+          const activeDiv = document.getElementById(`qwebr-noninteractive-setup-area-${qwebrCounter}`);
+
+          // Store code in history
+          qwebrLogCodeToHistory(cellCode, entry.options);
+
+          // Run the code in a non-interactive state with all output thrown away
+          await mainWebR.evalRVoid(`${cellCode}`);
+          break;
+        default: 
+          break; 
+      }
+
+      if (['output', 'setup'].includes(evalType)) {
+        // Disable further global status updates
+        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
+        // Disable visibility
+        activeContainer.style.visibility = 'hidden';
+        activeContainer.style.display = 'none';
+      }
+    }
+  }
+).then(
+  () => {
+    // Release document status as ready
+
+    if (qwebrShowStartupMessage) {
+      qwebrStartupMessage.innerText = "🟢 Ready!"
+    }
+  
+    qwebrSetInteractiveButtonState(
+      `<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>`, 
+      true
+    );  
+  }
+);
+</script>
+
+
+
+
+<script src="week-03_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

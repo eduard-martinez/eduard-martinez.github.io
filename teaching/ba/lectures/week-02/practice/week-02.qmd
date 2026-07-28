@@ -1,0 +1,393 @@
+---
+title: "Unidad 1 - Práctica: prompts efectivos y skills"
+subtitle: "Aplicación guiada en clase · Semana 2 · 06327-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Reglas de juego
+
+::: {.callout-key}
+**Esta sesión asume que ya estudiaste la teoría**
+
+Aquí no volvemos a explicar qué es un LLM, un token o una alucinación: eso quedó en el podcast (y su versión escrita) y en el quiz. Hoy esos conceptos **se usan**. Si en algún momento se te escapa uno, el [glosario de la teoría](../theory/week-02.html) queda a un clic.
+
+**Lo que necesitas ahora mismo:**
+
+- 💻 Tu computador con un **asistente conversacional abierto** (Claude, ChatGPT, Gemini... el que prefieras).
+- 📄 Un documento en blanco (Word, Docs o notas) para ir guardando tus mejores prompts: lo vas a necesitar en el taller evaluable del final de la clase.
+:::
+
+**El plan de hoy:** primero aprenderemos la fórmula de un buen prompt y la practicaremos con un constructor interactivo; luego aprenderemos a **iterar** las respuestas, aplicaremos todo a **tres tareas reales del curso**, tenderemos trampas para ver alucinaciones en vivo, y cerraremos escribiendo tu **primer skill** reutilizable.
+
+<!--=================-->
+<!--=================-->
+# La fórmula C-T-F-R <span class="badge-time">≈ 20 min</span>
+
+La diferencia entre "hágame esto" y un prompt profesional son **cuatro ingredientes**. Ninguno es opcional cuando la tarea importa:
+
+| Ingrediente | Pregunta que responde | Ejemplo en miniatura |
+|---|---|---|
+| **C — Contexto** | ¿Quién eres, para qué lo necesitas, qué debe saber el modelo? | "Soy estudiante de economía y esto es para mi clase de BA..." |
+| **T — Tarea** | ¿Qué debe hacer, exactamente? (verbo claro + objeto específico) | "Reescribe esta pregunta de negocio en 3 versiones..." |
+| **F — Formato** | ¿Cómo quieres la salida? | "...en una tabla de dos columnas, máximo 150 palabras..." |
+| **R — Restricciones** | ¿Qué NO debe hacer? ¿Qué límites tiene? | "...sin jerga técnica y sin inventar cifras." |
+
+¿Por qué funciona? Lo sabes desde el podcast: el modelo fija el significado de cada palabra **por el contexto que la acompaña**, y solo puede trabajar con lo que pongas en su ventana. Un prompt C-T-F-R no es un ritual: es literalmente **darle mejor material a la atención**.
+
+::: {.callout-workflow}
+**La restricción comodín (úsala siempre que pidas datos)**
+
+> *"Si no tienes un dato o no estás seguro, dilo explícitamente en lugar de suponerlo."*
+
+Ya sabes por qué: el modelo, por defecto, **no calla — predice**. Esta línea le da permiso de admitir que no sabe.
+:::
+
+## De "hágame esto" a un prompt profesional
+
+Mira el mismo encargo, antes y después. Los colores marcan cada ingrediente:
+
+```{=html}
+<div class="widget-card" id="wg-pv">
+  <div class="widget-head">🔬 Antes / después · el mismo encargo</div>
+  <div class="widget-body">
+    <div class="attn-btns">
+      <button type="button" class="btn-widget attn-choice active" data-pv="bad">😐 Prompt vago</button>
+      <button type="button" class="btn-widget attn-choice" data-pv="good">😎 Prompt C-T-F-R</button>
+    </div>
+    <div class="ctfr-legend" id="pv-legend" hidden>
+      <span class="ctfr-chip ctfr-c">C · Contexto</span>
+      <span class="ctfr-chip ctfr-t">T · Tarea</span>
+      <span class="ctfr-chip ctfr-f">F · Formato</span>
+      <span class="ctfr-chip ctfr-r">R · Restricciones</span>
+    </div>
+    <div class="pv-panel" id="pv-panel" style="margin-top:0.9em;"></div>
+    <div class="widget-note" id="pv-note"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var PANELS = {
+    bad: {
+      html: '<span class="pv-bad">"ayúdame con la intro de mi presentación de mañana"</span>',
+      note: "El modelo no sabe quién eres, de qué es la presentación, cuánto debe durar la intro ni qué tono usar. Va a <b>rellenar todos esos vacíos con suposiciones</b> — y recibirás un texto genérico que no sirve."
+    },
+    good: {
+      html: '<span class="mk-c">Soy estudiante de tercer semestre de economía y mañana presento los resultados de un trabajo de campo ante compañeros que no han visto estadística.</span> ' +
+            '<span class="mk-t">Escribe el guion de los primeros 2 minutos de mi presentación: un gancho, el contexto del problema y el anticipo del hallazgo principal (las ventas del barrio caen 15% cuando sube la tarifa del transporte).</span> ' +
+            '<span class="mk-f">Formato: texto hablado natural (no viñetas), máximo 220 palabras, español de Colombia.</span> ' +
+            '<span class="mk-r">Restricciones: sin jerga técnica, no cambies la cifra que te di y, si te falta un dato, pregúntamelo en lugar de suponerlo.</span>',
+      note: "Mismo encargo, cero adivinanzas: el modelo sabe <b>para quién</b> escribe (C), <b>qué</b> produce exactamente (T), <b>en qué forma</b> (F) y <b>qué tiene prohibido</b> (R). Nota que la restricción comodín va incluida."
+    }
+  };
+  var panel = document.getElementById("pv-panel");
+  var note = document.getElementById("pv-note");
+  var legend = document.getElementById("pv-legend");
+  var btns = document.querySelectorAll("#wg-pv .attn-choice");
+  function render(key) {
+    panel.innerHTML = PANELS[key].html;
+    note.innerHTML = PANELS[key].note;
+    legend.hidden = (key !== "good");
+  }
+  btns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      btns.forEach(function (x) { x.classList.remove("active"); });
+      b.classList.add("active");
+      render(b.dataset.pv);
+    });
+  });
+  render("bad");
+})();
+</script>
+```
+
+## Constructor de prompts
+
+Ahora tú. Esta herramienta arma el prompt mientras llenas los cuatro ingredientes — úsala durante toda la sesión: escoge un escenario de ejemplo, **edítalo con tu caso real**, copia y pega en tu asistente.
+
+```{=html}
+<div class="widget-card" id="wg-pb">
+  <div class="widget-head">🧰 Constructor de prompts C-T-F-R</div>
+  <div class="widget-body">
+    <div class="pb-preset-row">
+      <label for="pb-preset"><b>Empezar desde un escenario:</b></label>
+      <select id="pb-preset">
+        <option value="">— En blanco —</option>
+        <option value="r">Ayuda con R (arrancamos la próxima semana)</option>
+        <option value="viz">Elegir el gráfico correcto</option>
+        <option value="pregunta">Afinar mi pregunta de negocio (proyecto final)</option>
+        <option value="resumen">Resumir un documento de clase</option>
+      </select>
+    </div>
+    <div class="pb-grid">
+      <div class="pb-field"><label><span class="ctfr-chip ctfr-c">C</span> Contexto</label><textarea id="pb-c" spellcheck="false" placeholder="Quién eres, para qué lo necesitas, qué debe saber el modelo..."></textarea></div>
+      <div class="pb-field"><label><span class="ctfr-chip ctfr-t">T</span> Tarea</label><textarea id="pb-t" spellcheck="false" placeholder="Qué debe hacer exactamente: verbo claro + objeto específico..."></textarea></div>
+      <div class="pb-field"><label><span class="ctfr-chip ctfr-f">F</span> Formato</label><textarea id="pb-f" spellcheck="false" placeholder="Cómo quieres la salida: tabla, viñetas, extensión, tono..."></textarea></div>
+      <div class="pb-field"><label><span class="ctfr-chip ctfr-r">R</span> Restricciones</label><textarea id="pb-r" spellcheck="false" placeholder="Qué NO debe hacer, límites, supuestos prohibidos..."></textarea></div>
+    </div>
+    <div class="pb-out" id="pb-out"></div>
+    <div class="pb-actions">
+      <button type="button" class="btn-widget" id="pb-copy">📋 Copiar el prompt</button>
+      <button type="button" class="btn-widget btn-widget-ghost" id="pb-clear">🧹 Limpiar</button>
+      <span class="pb-count" id="pb-count"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var PRESETS = {
+    r: {
+      c: "Estoy en un curso introductorio de Business Analytics; la próxima semana empezamos a usar R y RStudio y nunca he programado.",
+      t: "Explícame línea por línea qué hace este código R:\nlibrary(readr)\nventas <- read_csv(\"ventas_tienda.csv\")\nhead(ventas)\nventas$ingreso <- ventas$precio * ventas$cantidad\nmean(ventas$ingreso)",
+      f: "Formato: una tabla de dos columnas (línea de código | qué hace, en palabras simples) y, al final, una analogía cotidiana de qué es un data frame.",
+      r: "No asumas conocimientos de programación. Si una línea puede fallar, dime por qué. No me expliques nada que no esté en el código."
+    },
+    viz: {
+      c: "Trabajo con una tabla de ventas mensuales de 3 regiones durante 2 años (72 filas: mes, región, ventas).",
+      t: "Recomiéndame el tipo de gráfico para mostrar cuál región crece más rápido, y justifica tu elección frente a una alternativa.",
+      f: "Formato: recomendación en un párrafo + tabla comparativa de 2 opciones (pros y contras) + un título sugerido para el gráfico.",
+      r: "No propongas gráficos 3D ni de torta. Asume que la audiencia es gerencial y verá el gráfico 10 segundos."
+    },
+    pregunta: {
+      c: "Para el proyecto final de mi curso debo formular una pregunta de negocio respondible con datos de una empresa (clasificación, regresión o segmentación).",
+      t: "Critica esta pregunta y reescríbela en 3 versiones mejoradas: \"¿por qué se van los clientes?\"",
+      f: "Formato: crítica en máximo 3 viñetas (una por criterio: específica, accionable, medible) y luego las 3 reescrituras numeradas.",
+      r: "Cada reescritura debe mencionar la decisión de negocio que cambiaría con la respuesta. No uses jerga de machine learning."
+    },
+    resumen: {
+      c: "Te voy a pegar una sección de un documento de clase de unas 3 páginas (va después de esta instrucción).",
+      t: "Resúmela en ideas accionables para estudiar para un quiz.",
+      f: "Formato: máximo 5 viñetas + 3 posibles preguntas de quiz con su respuesta corta.",
+      r: "Usa solamente el texto que te pego (no completes con conocimiento externo). Si algo queda incompleto en el texto, márcalo como [REVISAR EN EL ORIGINAL]."
+    }
+  };
+  var fields = { c: document.getElementById("pb-c"), t: document.getElementById("pb-t"),
+                 f: document.getElementById("pb-f"), r: document.getElementById("pb-r") };
+  var out = document.getElementById("pb-out");
+  var count = document.getElementById("pb-count");
+  var copyBtn = document.getElementById("pb-copy");
+
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+  function assembleText() {
+    return ["c", "t", "f", "r"].map(function (k) { return fields[k].value.trim(); })
+      .filter(Boolean).join("\n\n");
+  }
+
+  function render() {
+    var parts = [];
+    ["c", "t", "f", "r"].forEach(function (k) {
+      var v = fields[k].value.trim();
+      if (v) parts.push('<span class="mk-' + k + '">' + esc(v) + "</span>");
+    });
+    out.innerHTML = parts.length ? parts.join("\n\n")
+      : '<span class="pb-empty">Tu prompt aparecerá aquí a medida que llenes los ingredientes...</span>';
+    var n = assembleText().length;
+    count.textContent = n ? "≈ " + n + " caracteres" : "";
+  }
+
+  function copyPrompt() {
+    var text = assembleText();
+    if (!text) return;
+    function ok() {
+      copyBtn.classList.add("copied"); copyBtn.textContent = "✅ ¡Copiado!";
+      setTimeout(function () { copyBtn.classList.remove("copied"); copyBtn.textContent = "📋 Copiar el prompt"; }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(ok, function () { fallback(); });
+    } else { fallback(); }
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); ok(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  }
+
+  document.getElementById("pb-preset").addEventListener("change", function () {
+    var p = PRESETS[this.value] || { c: "", t: "", f: "", r: "" };
+    ["c", "t", "f", "r"].forEach(function (k) { fields[k].value = p[k]; });
+    render();
+  });
+  Object.keys(fields).forEach(function (k) { fields[k].addEventListener("input", render); });
+  copyBtn.addEventListener("click", copyPrompt);
+  document.getElementById("pb-clear").addEventListener("click", function () {
+    ["c", "t", "f", "r"].forEach(function (k) { fields[k].value = ""; });
+    document.getElementById("pb-preset").value = "";
+    render();
+  });
+  render();
+})();
+</script>
+```
+
+::: {.callout-practice}
+**✍️ Manos al teclado (5 min)**
+
+1. Escoge el escenario **"En blanco"** y arma un prompt C-T-F-R para algo que de verdad necesites esta semana (otra materia cuenta).
+2. Cópialo, pégalo en tu asistente y ejecuta.
+3. Antes de leer la respuesta completa, pregúntate: ¿respetó el formato (F)? ¿Violó alguna restricción (R)? Eso se revisa **primero**.
+:::
+
+<!--=================-->
+<!--=================-->
+# Iterar: la primera respuesta es un borrador <span class="badge-time">≈ 15 min</span>
+
+Nadie escribe el prompt perfecto a la primera — y no hace falta. La conversación **es** la herramienta: cada mensaje tuyo agrega contexto a la ventana y redirige al modelo. La habilidad está en iterar con intención, no en aceptar o rechazar lo que salga.
+
+Cuatro movimientos cubren casi todo:
+
+| Movimiento | Cuándo usarlo | Frases que funcionan |
+|---|---|---|
+| 🔧 **Ajustar** | La respuesta sirve pero no en esa forma | "Hazlo a la mitad de largo", "cambia el tono a formal", "quita el punto 3" |
+| 🔍 **Profundizar** | Un punto quedó superficial | "Desarrolla el punto 2 con un ejemplo numérico", "¿y eso cómo se vería en una tienda pequeña?" |
+| 🥊 **Cuestionar** | Suena convincente... demasiado | "¿Qué debilidades tiene tu propuesta?", "dame 2 alternativas que un experto preferiría y por qué" |
+| ✅ **Verificar** | Hay datos, cifras o citas de por medio | "¿De dónde sale esa cifra? ¿Qué tan seguro estás?" — y luego **verificación externa, siempre** |
+
+::: {.callout-warning}
+**"¿Qué tan seguro estás?" no reemplaza verificar**
+
+El modelo puede defender una alucinación con la misma elocuencia con que la produjo (RLHF premia sonar convincente, ¿recuerdas?). Cuestionar sirve para detectar grietas; la **fuente oficial** sigue siendo el único árbitro para un dato.
+:::
+
+::: {.callout-practice}
+**✍️ Ejercicio guiado 1 — todos con el mismo prompt (7 min)**
+
+Lancen todos este prompt tal cual (cópialo del constructor usando el escenario **"Afinar mi pregunta de negocio"**). Cuando tengas la respuesta:
+
+1. Aplica **un movimiento de ajuste** (tú eliges cuál).
+2. Aplica **un movimiento de cuestionamiento**.
+3. Compara con tu vecino: ¿les respondió igual? ¿Quién logró la mejor versión final con menos mensajes?
+
+*(Que las respuestas sean distintas entre compañeros ya no debería sorprenderte: es un modelo probabilístico, no una base de datos.)*
+:::
+
+<!--=================-->
+<!--=================-->
+# Tres tareas reales del curso <span class="badge-time">≈ 35 min</span>
+
+Ahora aplicamos la fórmula a las tres situaciones donde más vas a usar IA este semestre. En cada una: ejecuta el prompt de partida (está en el constructor como escenario), observa, e itera.
+
+## Ejercicio A — Pedir ayuda con R (sin saber R todavía)
+
+La próxima semana arranca R. Este ejercicio te deja lista la habilidad que más vas a usar: **hacer que el modelo te explique código que no entiendes**.
+
+1. Carga el escenario **"Ayuda con R"** en el constructor y ejecútalo.
+2. **Observa:** ¿la tabla respetó el formato pedido? ¿Explicó algo que *no* está en el código (violación de R)?
+3. **Itera (profundizar):** *"Explícame otra vez la línea 4, pero con una analogía de una tienda de barrio."*
+4. **Itera (cuestionar):** *"¿Qué pasaría si el archivo ventas_tienda.csv no existiera? ¿Cómo se vería el error?"*
+
+::: {.callout-connect}
+**Para la semana 3:** guarda este prompt. Cuando estés frente a RStudio y un error rojo te grite, cambiarás el código del ejemplo por el tuyo — misma estructura, mismo resultado.
+:::
+
+## Ejercicio B — Elegir el gráfico correcto
+
+1. Carga el escenario **"Elegir el gráfico correcto"** y ejecútalo.
+2. **Observa:** ¿justificó la elección o solo la afirmó? ¿La alternativa que descartó tiene sentido?
+3. **Itera (ajustar):** *"¿Y si lo que quiero mostrar no es quién crece más rápido sino cuánto vende cada región en total? ¿Cambia tu recomendación?"* — fíjate cómo **la pregunta de negocio manda sobre el gráfico** (esto será central en la semana 4).
+
+## Ejercicio C — Afinar tu pregunta de negocio
+
+El del proyecto final. Ya corriste el prompt base en el Ejercicio guiado 1; ahora hazlo tuyo:
+
+1. Reemplaza *"¿por qué se van los clientes?"* por **una idea real tuya** para el proyecto (cualquier borrador sirve).
+2. Ejecuta y lee la crítica con escepticismo: el modelo **no conoce tu empresa ni tus datos** — tú decides qué crítica acoges.
+3. **Itera:** *"De tus 3 reescrituras, ¿cuál necesita menos datos para responderse? Justifica."*
+
+::: {.callout-key}
+**El patrón que deberías estar viendo**
+
+En los tres ejercicios el modelo fue **asistente**, nunca **autor**: propone, explica, critica — pero la decisión (qué código correr, qué gráfico usar, qué pregunta investigar) siguió siendo tuya. Así se ve el "uso responsable" en la práctica.
+:::
+
+<!--=================-->
+<!--=================-->
+# Cacería de alucinaciones en vivo <span class="badge-time">≈ 10 min</span>
+
+Cierre de fuego real: vamos a **provocar** al modelo para verlo alucinar con nuestros propios ojos. Tres trampas — el profesor tiende una en el proyector; tú tiendes las otras dos:
+
+1. **El conteo imposible:** *"¿Cuántas letras R tiene la palabra ferrocarril? Cuenta con cuidado."* — Ya sabes por qué puede fallar (tokens, no letras). Si tu modelo acierta, prueba con "electroencefalografista" y la letra E.
+2. **La bibliografía fantasma:** *"Dame 3 artículos académicos (autor, año, revista y DOI) sobre el efecto del transporte público en las ventas del comercio minorista en ciudades intermedias de Colombia."* — Luego busca los DOI en Google Scholar. Spoiler: prepárate para citas hermosas... e inexistentes.
+3. **El dato después del corte:** *"¿Cuál fue la inflación mensual de Colombia el mes pasado? Dame la cifra exacta."* — Verifica contra el DANE. ¿Te dio una cifra con decimales y total confianza? ¿Te advirtió sobre su fecha de corte?
+
+**Discusión (2 min):** ¿qué tan convincente sonaba la respuesta falsa? Esa es exactamente la razón de la regla del curso: **dato citado = dato verificado**.
+
+<!--=================-->
+<!--=================-->
+# Tu primer skill <span class="badge-time">≈ 20 min</span>
+
+Si un prompt te funcionó, ¿por qué reescribirlo desde cero la próxima vez? Un **skill** es un prompt-plantilla que guardas y reutilizas para una tarea recurrente: instrucciones fijas + un espacio para lo que cambia. Es el paso de "usar IA" a "tener herramientas propias".
+
+Un skill bien escrito tiene **cuatro partes**:
+
+| Parte | Qué contiene |
+|---|---|
+| **Nombre** | Corto y descriptivo: "Explicador de código R" |
+| **Cuándo usarlo** | La situación que lo activa: "cada vez que un código R no me quede claro" |
+| **Instrucciones** | El C-T-F-R fijo: rol del modelo, formato de salida, restricciones |
+| **Ejemplo** | Una entrada y la salida esperada, para calibrar |
+
+## Construyamos el primero juntos
+
+El skill que usarás toda la semana 3 — cópialo a tu documento personal:
+
+```default
+### SKILL: Explicador de código R
+CUÁNDO USARLO: cada vez que un bloque de código R no me quede claro
+  o me salga un error que no entiendo.
+
+INSTRUCCIONES:
+Eres un tutor paciente de R para una persona que está empezando
+en un curso de Business Analytics.
+1. Explica el código que te pegaré línea por línea, en una tabla
+   de dos columnas (código | qué hace en palabras simples).
+2. Si hay un error, explica qué lo causa y da la versión corregida
+   con UN cambio a la vez.
+3. Cierra con una frase que resuma qué logra el bloque completo.
+Restricciones: no asumas que sé programar; no expliques nada que no
+esté en el código; si necesitas ver más código para estar seguro,
+pídemelo en lugar de suponer.
+
+CÓDIGO:
+[pegar aquí]
+```
+
+**¿Dónde se guarda?** Nivel básico: un documento tuyo de donde copias y pegas (suficiente para este curso). Nivel pro: las "instrucciones personalizadas" o "proyectos" de tu asistente (Claude Projects, GPTs...) para que se aplique solo. En la **semana 8** los skills se convertirán en archivos de verdad dentro de Claude Code.
+
+::: {.callout-practice}
+**✍️ Tu turno (10 min): un skill para TU vida académica**
+
+Piensa en una tarea que repites cada semana (resumir lecturas, preparar quizzes, pulir la redacción de ensayos, traducir enunciados confusos...) y escribe su skill con las 4 partes. Pruébalo una vez en tu asistente y ajústalo. **Guárdalo**: es uno de los entregables del taller.
+:::
+
+<!--=================-->
+<!--=================-->
+# Antes de pasar al taller
+
+Al final de esta práctica deberías poder, sin mirar apuntes:
+
+- [ ] Armar un prompt con los 4 ingredientes C-T-F-R e identificar cuál falta en un prompt ajeno.
+- [ ] Usar la restricción comodín contra alucinaciones.
+- [ ] Aplicar los 4 movimientos de iteración (ajustar, profundizar, cuestionar, verificar).
+- [ ] Provocar y detectar una alucinación, y explicar por qué ocurrió.
+- [ ] Escribir un skill de 4 partes para una tarea recurrente.
+
+::: {.callout-connect}
+**Ahora sí: el taller evaluable**
+
+Lo que sigue lo haces **solo y sin guía del profesor**: el [taller de la semana 2](../task/week-02.html) aplica exactamente lo que acabas de practicar. Tienes todo lo necesario en esta página, en tu documento de prompts y en tu cabeza. 🚀
+:::

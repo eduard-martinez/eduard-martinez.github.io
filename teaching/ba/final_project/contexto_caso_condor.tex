@@ -1,0 +1,518 @@
+%% ============================================================
+%% Contexto del Caso — Proyecto Final
+%% Cóndor (fintech) — Analítica para los negocios — 06327-ECO
+%% Universidad Icesi | Periodo 2026-02
+%% ============================================================
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.8cm, right=2.8cm]{geometry}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage[table]{xcolor}
+\usepackage{tcolorbox}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{lastpage}
+\tcbuselibrary{skins,breakable}
+
+%% ─── Paleta del curso ────────────────────────────────────────
+\definecolor{azulcurso}{HTML}{1F4E79}   %% azul oscuro
+\definecolor{azulmedio}{HTML}{2E75B6}   %% azul medio
+\definecolor{naranja}{HTML}{E87722}     %% naranja
+\definecolor{gristabla}{HTML}{F2F5F9}   %% fondo suave de tablas
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=azulcurso,
+  urlcolor=azulmedio,
+  citecolor=azulcurso
+}
+
+%% ─── Secciones ───────────────────────────────────────────────
+\titleformat{\section}{\large\bfseries\color{azulcurso}}{\thesection.}{0.5em}{}[\vspace{2pt}{\color{naranja}\hrule height 1.2pt}\vspace{4pt}]
+\titleformat{\subsection}{\normalsize\bfseries\color{azulmedio}}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\itshape\bfseries\color{azulcurso}}{}{0em}{}
+\titlespacing{\section}{0pt}{18pt}{6pt}
+\titlespacing{\subsection}{0pt}{12pt}{4pt}
+\titlespacing{\subsubsection}{0pt}{8pt}{2pt}
+
+%% ─── Encabezado y pie ────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\itshape\color{azulcurso} Analítica para los Negocios $|$ Caso Cóndor $|$ U. Icesi 2026-02}
+\fancyhead[R]{\footnotesize Pág.\ \thepage\ de \pageref{LastPage}}
+\fancyfoot[C]{\footnotesize\itshape\color{azulcurso} Contexto del Proyecto Final --- uso exclusivo del curso}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+%% ─── Columnas de tablas ──────────────────────────────────────
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.3}
+
+\setlist[itemize]{label=\textbullet, leftmargin=1.5em, itemsep=2pt, topsep=4pt}
+\setlist[enumerate]{leftmargin=1.8em, itemsep=3pt, topsep=4pt}
+
+%% ─── Cajas de resaltado (estilo callouts del curso) ──────────
+\newtcolorbox{cajaclave}{
+  enhanced, breakable, colback=gristabla, colframe=azulmedio,
+  boxrule=0.8pt, arc=2pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries\color{azulcurso}, title={Idea clave}}
+
+\newtcolorbox{cajaalerta}{
+  enhanced, breakable, colback=naranja!8, colframe=naranja,
+  boxrule=0.8pt, arc=2pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries\color{naranja!85!black}, title={Regla de oro (anti-fuga de información)}}
+
+\newtcolorbox{cajaconexion}{
+  enhanced, breakable, colback=azulmedio!6, colframe=azulcurso,
+  boxrule=0.8pt, arc=2pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries\color{azulcurso}, title={Conexión con la decisión de negocio}}
+
+%% comando corto para nombres de variable (respeta guion bajo)
+\newcommand{\var}[1]{\texttt{\detokenize{#1}}}
+%% marca de variable objetivo
+\newcommand{\target}{\textbf{\color{naranja}$\bigstar$ objetivo}}
+
+%% ============================================================
+\begin{document}
+
+%% ─── PORTADA ─────────────────────────────────────────────────
+\thispagestyle{empty}
+\vspace*{2.2cm}
+
+\begin{center}
+  {\large\textbf{\color{azulcurso}ANALÍTICA PARA LOS NEGOCIOS}}\\[5pt]
+  {\normalsize 06327-ECO\ $|$\ Universidad Icesi\ $|$\ Periodo 2026-02}
+\end{center}
+
+\vspace{2.4cm}
+\begin{center}
+  {\color{naranja}\rule{0.5\textwidth}{1.2pt}}\\[16pt]
+  {\LARGE\bfseries\color{azulcurso} Caso Cóndor}\\[8pt]
+  {\Large Una fintech andina de dos lados}\\[12pt]
+  {\normalsize\itshape Contexto del proyecto final: la empresa, sus dolores,\\ el ecosistema de datos y cómo elegir su ruta de análisis}\\[16pt]
+  {\color{naranja}\rule{0.5\textwidth}{1.2pt}}
+\end{center}
+
+\vspace{2.6cm}
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+  \textbf{Empresa (ficticia)} & Cóndor --- plataforma de pagos y crédito \\[3pt]
+  \textbf{Rol de ustedes}     & Equipo de analistas contratado para un diagnóstico 360° \\[3pt]
+  \textbf{Rutas disponibles}  & Clasificación, regresión o segmentación \\[3pt]
+  \textbf{Fecha de corte}     & 31 de marzo de 2026 \\
+\end{tabular}
+\end{center}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+%% ============================================================
+\section{La empresa: Cóndor}
+
+\textbf{Cóndor} es una \textit{fintech} andina con sede en Colombia y operación incipiente en Perú y Ecuador. Opera una \textbf{plataforma de pagos y crédito de dos lados}, es decir, tiene dos tipos de usuario que dependen el uno del otro:
+
+\begin{itemize}
+  \item \textbf{Lado consumidor.} Una \textit{wallet} (billetera) y app para guardar dinero, pagar con QR y tarjeta, transferir, recargar y pedir microcréditos.
+  \item \textbf{Lado comercio.} Un datáfono o código QR para que los negocios acepten pagos, más \textbf{adelantos de capital de trabajo} basados en su flujo de ventas.
+\end{itemize}
+
+Cinco años de crecimiento explosivo dejaron a Cóndor con \textbf{datos abundantes pero desarticulados} entre departamentos: cada área registró su operación por separado y nadie ha mirado el negocio como un todo. Ese es, precisamente, el terreno donde ustedes van a trabajar.
+
+\begin{cajaconexion}
+Que la empresa sea ``de dos lados'' no es un detalle decorativo: significa que hay preguntas sobre \textbf{clientes} (¿quién va a caer en mora?, ¿a quién le ofrezco qué?) y preguntas sobre \textbf{comercios} (¿cuáles van a dejar de transaccionar?). Ambos lados viven en la misma base de datos.
+\end{cajaconexion}
+
+%% ============================================================
+\section{El encargo: un diagnóstico 360°}
+
+La Gerencia General de Cóndor tiene una sospecha incómoda: \textbf{la empresa crece en usuarios pero pierde dinero por los flancos}, y no logra cuantificar dónde ni por qué. Por eso contrata a un equipo externo de analistas ---ustedes--- para hacer un diagnóstico y construir capacidades predictivas. Los síntomas que preocupan a la gerencia son:
+
+\begin{itemize}
+  \item Las \textbf{pérdidas por fraude} transaccional crecen más rápido que el volumen de operaciones.
+  \item La \textbf{cartera de microcréditos} muestra una mora preocupante.
+  \item El \textbf{costo de adquisición} de clientes sube, pero muchos usuarios se vuelven inactivos pronto.
+  \item Los \textbf{comercios se activan y luego dejan de transaccionar}, sin que nadie lo anticipe.
+  \item \textbf{Finanzas no logra proyectar} ingresos con confianza para la próxima ronda de inversión.
+\end{itemize}
+
+Ustedes \textbf{no} tienen que resolver todos estos problemas. Cada grupo elige \textbf{un} frente ---uno de los departamentos de la sección siguiente---, formula una pregunta de negocio propia y la responde con una de las tareas analíticas del curso.
+
+%% ============================================================
+\section{Los departamentos y sus dolores}
+\label{sec:departamentos}
+
+Cada departamento de Cóndor tiene un problema concreto que le duele y una o más rutas analíticas naturales para abordarlo. Este es el \textbf{menú}: elijan el frente que más les interese. La tabla indica la ruta ``natural'', pero varias preguntas admiten más de un enfoque.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{L{3.1cm} X L{3.0cm}}
+  \toprule
+  \rowcolor{gristabla}
+  \textbf{Departamento} & \textbf{Problema que le duele} & \textbf{Ruta(s) natural(es)} \\
+  \midrule
+  \textbf{Riesgo de Crédito} & Anticipar qué solicitudes de crédito van a caer en mora. & Clasificación / Regresión \\
+  \addlinespace
+  \textbf{Fraude y Seguridad} & Detectar transacciones fraudulentas casi en tiempo real. & Clasificación \\
+  \addlinespace
+  \textbf{Growth / Marketing} & A quién adquirir, a quién retener y a quién ofrecerle qué. & Segmentación / Clasificación \\
+  \addlinespace
+  \textbf{Merchant Success (Operaciones)} & Predecir y frenar la deserción de comercios. & Clasificación / Segmentación \\
+  \addlinespace
+  \textbf{Finanzas y Planeación} & Proyectar ingresos, gasto y valor de vida del cliente (CLV). & Regresión \\
+  \addlinespace
+  \textbf{Servicio al Cliente} & Anticipar la carga de tickets y su tiempo de resolución. & Regresión / Clasificación \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{cajaclave}
+El foco del proyecto \textbf{no es escribir código perfecto}. Es plantear una buena pregunta, elegir la tarea analítica adecuada, ejecutar el análisis con las herramientas del curso e \textbf{interpretar} los resultados para que alguien sin conocimientos técnicos pueda entender y actuar.
+\end{cajaclave}
+
+%% ============================================================
+\clearpage
+\section{El ecosistema de datos}
+
+Los datos de Cóndor están organizados como un \textbf{modelo tipo estrella}: una tabla de hechos masiva en el centro (\var{fact_transacciones}, con millones de filas) rodeada de tablas maestras (\textit{dimensiones}, una fila por cliente o por comercio) y de tablas satélite que registran otros procesos del negocio (créditos, campañas, soporte, uso de la app).
+
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={font=\footnotesize},
+    dim/.style={rectangle, rounded corners=3pt, draw=azulmedio, fill=azulmedio!8,
+                text width=2.5cm, align=center, minimum height=0.9cm, thick},
+    fact/.style={rectangle, rounded corners=3pt, draw=naranja, fill=naranja!12,
+                 text width=3.1cm, align=center, minimum height=1.1cm, very thick},
+    link/.style={draw=azulcurso!55, thick}]
+
+  \node[fact] (f) at (0,0) {\textbf{fact\_transacciones}\\ \scriptsize (transacción)};
+
+  \node[dim] (cli) at (-4.3, 2.1)  {dim\_clientes\\ \scriptsize (cliente)};
+  \node[dim] (com) at ( 4.3, 2.1)  {dim\_comercios\\ \scriptsize (comercio)};
+  \node[dim] (sal) at (-5.0, 0.0)  {fact\_saldos\_\\mensuales\\ \scriptsize (cliente × mes)};
+  \node[dim] (cre) at ( 5.0, 0.0)  {creditos\\ \scriptsize (solicitud)};
+  \node[dim] (log) at (-4.3,-2.1)  {logs\_interaccion\\ \scriptsize (evento)};
+  \node[dim] (cam) at ( 0.0,-2.6)  {campanas\_\\marketing\\ \scriptsize (envío)};
+  \node[dim] (tik) at ( 4.3,-2.1)  {tickets\_soporte\\ \scriptsize (ticket)};
+
+  \draw[link] (f) -- (cli);
+  \draw[link] (f) -- (com);
+  \draw[link] (f) -- (sal);
+  \draw[link] (f) -- (cre);
+  \draw[link] (f) -- (log);
+  \draw[link] (f) -- (cam);
+  \draw[link] (f) -- (tik);
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+{\footnotesize Todas las tablas se conectan por \var{cliente_id} (y las compras, además, por \var{comercio_id}).}
+\end{center}
+
+Las variables marcadas con \target\ son \textbf{variables objetivo}: lo que un modelo intentaría predecir. No están en todas las tablas y no todas las rutas usan las mismas.
+
+%% ─── Diccionarios ────────────────────────────────────────────
+\subsection{dim\_clientes --- maestro de clientes}
+\textit{Grano: una fila por cliente.} Quién es cada usuario de la wallet.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{L{3.5cm} L{2.4cm} X}
+  \toprule
+  \rowcolor{gristabla} \textbf{Variable} & \textbf{Tipo} & \textbf{Descripción} \\
+  \midrule
+  \var{cliente_id}        & id            & Identificador único del cliente (llave). \\
+  \var{fecha_registro}    & fecha         & Cuándo se registró en la plataforma. \\
+  \var{edad}              & entero        & Edad en años. \\
+  \var{genero}            & categórica    & F / M / Otro. \\
+  \var{ciudad}, \var{departamento}, \var{pais} & categóricas & Ubicación declarada del domicilio. \\
+  \var{lat_domicilio}, \var{lon_domicilio} & continuas & Coordenadas aproximadas del domicilio. \\
+  \var{canal_adquisicion} & categórica    & Cómo llegó: orgánico, ads\_meta, ads\_google, referido, influencer. \\
+  \var{ingreso_declarado} & continua      & Ingreso mensual declarado (COP). \\
+  \var{ocupacion}         & categórica    & empleado / independiente / estudiante / pensionado. \\
+  \var{kyc_nivel}         & ordinal       & Nivel de verificación de identidad (nivel\_1 a nivel\_3). \\
+  \var{antiguedad_meses}  & entero        & Meses desde el registro hasta la fecha de corte. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{dim\_comercios --- maestro de comercios}
+\textit{Grano: una fila por comercio.} Los negocios que aceptan pagos con Cóndor.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{L{3.5cm} L{2.4cm} X}
+  \toprule
+  \rowcolor{gristabla} \textbf{Variable} & \textbf{Tipo} & \textbf{Descripción} \\
+  \midrule
+  \var{comercio_id}     & id          & Identificador único del comercio (llave). \\
+  \var{fecha_alta}      & fecha       & Cuándo se afilió a la plataforma. \\
+  \var{mcc}             & categórica  & Código de categoría de comercio (ver \var{dim_mcc}). \\
+  \var{rubro}           & categórica  & Rubro legible (supermercado, restaurante, \dots). \\
+  \var{tamano}          & ordinal     & micro / pequeño / mediano. \\
+  \var{ciudad}, \var{departamento}, \var{pais} & categóricas & Ubicación del comercio. \\
+  \var{lat}, \var{lon}  & continuas   & Coordenadas del comercio. \\
+  \var{tipo_terminal}   & categórica  & QR / datáfono / link de pago. \\
+  \var{ticket_promedio} & continua    & Valor promedio de una compra en ese comercio (COP). \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{fact\_transacciones --- histórico transaccional}
+\textit{Grano: una fila por transacción} (la tabla masiva, $\sim$2 millones de filas). El corazón del negocio.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{L{3.5cm} L{2.4cm} X}
+  \toprule
+  \rowcolor{gristabla} \textbf{Variable} & \textbf{Tipo} & \textbf{Descripción} \\
+  \midrule
+  \var{transaccion_id}   & id            & Identificador único de la transacción. \\
+  \var{cliente_id}       & id (FK)       & Cliente que realiza la operación. \\
+  \var{comercio_id}      & id (FK)       & Comercio receptor (vacío si no es compra). \\
+  \var{timestamp}        & fecha-hora    & Momento exacto de la transacción. \\
+  \var{monto}            & continua      & Valor de la operación (COP). \\
+  \var{tipo}             & categórica    & compra / transferencia / retiro / recarga / pago\_servicio. \\
+  \var{canal}            & categórica    & app\_qr / tarjeta / pse / link. \\
+  \var{mcc}              & categórica    & Categoría del comercio (vacío si no es compra). \\
+  \var{moneda}           & categórica    & COP / USD / PEN. \\
+  \var{es_internacional} & binaria       & 1 si la operación es internacional. \\
+  \var{lat_tx}, \var{lon_tx} & continuas & Coordenadas donde ocurrió la transacción. \\
+  \var{dispositivo_id}   & id (FK)       & Dispositivo desde el que se operó. \\
+  \var{estado}           & categórica    & aprobada / rechazada. \\
+  \var{etiqueta_fraude}  & binaria \; \target & 1 si la transacción fue fraudulenta. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{fact\_saldos\_mensuales --- panel mensual por cliente}
+\textit{Grano: una fila por cliente y mes.} La ``foto'' financiera de cada cliente, mes a mes. Es la materia prima natural para construir un objetivo de \textbf{regresión} (por ejemplo, el gasto del próximo trimestre).
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{L{3.7cm} L{2.2cm} X}
+  \toprule
+  \rowcolor{gristabla} \textbf{Variable} & \textbf{Tipo} & \textbf{Descripción} \\
+  \midrule
+  \var{cliente_id}        & id (FK)   & Cliente. \\
+  \var{mes}               & fecha     & Mes del panel (primer día del mes). \\
+  \var{saldo_promedio}    & continua  & Saldo promedio del mes (COP). \\
+  \var{saldo_fin_mes}     & continua  & Saldo al cierre del mes (COP). \\
+  \var{gasto_total_mes}   & continua  & Gasto total del mes (COP). \\
+  \var{ingreso_total_mes} & continua  & Ingresos recibidos en el mes (COP). \\
+  \var{num_tx_mes}        & entero    & Número de transacciones del mes. \\
+  \var{productos_activos} & entero    & Productos de Cóndor activos ese mes. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{creditos --- solicitudes y desempeño de crédito}
+\textit{Grano: una fila por solicitud de crédito.} No todos los clientes piden crédito; algunos piden varias veces.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{L{3.6cm} L{2.5cm} X}
+  \toprule
+  \rowcolor{gristabla} \textbf{Variable} & \textbf{Tipo} & \textbf{Descripción} \\
+  \midrule
+  \var{credito_id}       & id            & Identificador de la solicitud. \\
+  \var{cliente_id}       & id (FK)       & Cliente solicitante. \\
+  \var{fecha_solicitud}  & fecha         & Cuándo se solicitó el crédito. \\
+  \var{monto_aprobado}   & continua      & Monto aprobado (COP). \\
+  \var{plazo_meses}      & entero        & Plazo del crédito en meses. \\
+  \var{tasa}             & continua      & Tasa de interés mensual. \\
+  \var{score_buro}       & continua      & Puntaje de buró al momento de solicitar (300--850). \\
+  \var{destino}          & categórica    & consumo / educación / negocio / salud / otros. \\
+  \var{default_90d}      & binaria \; \target & 1 si el cliente cayó en mora de 90+ días. \\
+  \var{dias_mora}        & entero        & Días de mora acumulados (0 si no hubo default). \\
+  \var{monto_recuperado} & continua \; \target & Monto recuperado de la cartera en mora (COP). \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{cajaalerta}
+En \var{creditos} hay dos variables que \textbf{solo se conocen después} de otorgar el crédito: \var{dias_mora} y \var{monto_recuperado}. Si su objetivo es predecir \var{default_90d}, \textbf{no} pueden usar esas dos como predictores: al momento de decidir el préstamo todavía no existen. Usarlas sería hacer trampa con información del futuro (\textit{data leakage}).
+\end{cajaalerta}
+
+\subsection{logs\_interaccion --- eventos de app y web}
+\textit{Grano: una fila por evento.} Alto volumen: cada login, cada pantalla abierta, cada sesión. Sirve para medir \textbf{engagement} (qué tan activo está un cliente).
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{L{3.6cm} L{2.4cm} X}
+  \toprule
+  \rowcolor{gristabla} \textbf{Variable} & \textbf{Tipo} & \textbf{Descripción} \\
+  \midrule
+  \var{cliente_id}       & id (FK)     & Cliente. \\
+  \var{timestamp}        & fecha-hora  & Momento del evento. \\
+  \var{tipo_evento}      & categórica  & login / push\_open / consulta\_saldo / pantalla\_pago / pantalla\_credito / pago\_completado. \\
+  \var{pantalla}         & categórica  & Pantalla de la app donde ocurrió el evento. \\
+  \var{duracion_sesion}  & continua    & Duración de la sesión en segundos. \\
+  \var{app_version}      & categórica  & Versión de la app. \\
+  \var{os}               & categórica  & Android / iOS. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{tickets\_soporte --- servicio al cliente}
+\textit{Grano: una fila por ticket de soporte.} La variable \var{tiempo_resolucion_horas} es un objetivo natural de \textbf{regresión}.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{L{4.2cm} L{2.2cm} X}
+  \toprule
+  \rowcolor{gristabla} \textbf{Variable} & \textbf{Tipo} & \textbf{Descripción} \\
+  \midrule
+  \var{ticket_id}                & id          & Identificador del ticket. \\
+  \var{cliente_id}               & id (FK)     & Cliente que abrió el ticket. \\
+  \var{fecha}                    & fecha       & Fecha de apertura. \\
+  \var{tema}                     & categórica  & problema\_pago / consulta\_credito / fraude\_reclamo / actualizacion\_datos / otro. \\
+  \var{canal}                    & categórica  & chat / email / teléfono. \\
+  \var{tiempo_resolucion_horas}  & continua \; \target & Horas hasta resolver el ticket. \\
+  \var{csat}                     & ordinal     & Satisfacción del cliente (1--5). \\
+  \var{reabierto}                & binaria     & 1 si el ticket se reabrió. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{campanas\_marketing --- campañas y respuesta}
+\textit{Grano: una fila por envío de campaña a un cliente.} Registra a quién se le envió qué oferta y si respondió.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{L{3.4cm} L{2.4cm} X}
+  \toprule
+  \rowcolor{gristabla} \textbf{Variable} & \textbf{Tipo} & \textbf{Descripción} \\
+  \midrule
+  \var{campana_id}   & id            & Identificador del envío. \\
+  \var{cliente_id}   & id (FK)       & Cliente que recibió la campaña. \\
+  \var{fecha_envio}  & fecha         & Cuándo se envió. \\
+  \var{canal}        & categórica    & push / email / sms. \\
+  \var{tipo_oferta}  & categórica    & cashback / descuento / upgrade\_credito / genérico. \\
+  \var{costo}        & continua      & Costo del envío para Cóndor (COP). \\
+  \var{convertido}   & binaria \; \target & 1 si el cliente respondió a la oferta. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Tablas de referencia}
+Tres tablas pequeñas de apoyo: \var{dim_geografia} (ciudades con coordenadas), \var{dim_mcc} (códigos de categoría de comercio y su rubro) y \var{dim_tiempo} (calendario día a día de la ventana de datos). Sirven para enriquecer o traducir códigos; no son obligatorias.
+
+%% ============================================================
+\clearpage
+\section{Dos formas de trabajar los datos}
+
+Cóndor les entrega \textbf{el ecosistema completo} (todas las tablas anteriores) y, además, una \textbf{tabla analítica ya construida a nivel cliente}. Ustedes eligen por dónde entrar según su nivel de comodidad con R.
+
+\subsection{Ruta básica: la tabla analítica curada}
+\var{tabla_analitica_clientes} tiene \textbf{una fila por cliente} y reúne, ya calculadas, las variables más útiles de varias tablas: perfil demográfico, comportamiento transaccional (recencia, frecuencia y monto ---\textbf{RFM}---), uso de la app, resumen de soporte, resumen de crédito y respuesta a campañas. Con esta sola tabla un grupo puede plantear una clasificación (por ejemplo, \var{default_90d} o \var{convertido}), una regresión o una segmentación RFM \textbf{sin tener que hacer joins}.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{L{4.6cm} X}
+  \toprule
+  \rowcolor{gristabla} \textbf{Grupo de variables} & \textbf{Contenido} \\
+  \midrule
+  Demografía & \var{edad}, \var{genero}, \var{ciudad}, \var{departamento}, \var{pais}, \var{canal_adquisicion}, \var{ingreso_declarado}, \var{ocupacion}, \var{kyc_nivel}, \var{antiguedad_meses}. \\
+  Comportamiento (RFM) & \var{recencia_dias}, \var{frecuencia_tx}, \var{monto_total}, \var{monto_promedio}, \var{ticket_mediano}, \var{pct_tx_internacional}, \var{num_categorias_mcc}, \var{canal_preferido}. \\
+  Saldos y app & \var{saldo_promedio_ult3m}, \var{gasto_promedio_mensual}, \var{num_sesiones_ult30d}, \var{duracion_sesion_promedio}, \var{os_principal}. \\
+  Soporte & \var{num_tickets}, \var{csat_promedio}. \\
+  Crédito & \var{tiene_credito}, \var{score_buro}, \var{default_90d}. \\
+  Campañas & \var{num_campanas_recibidas}, \var{convertido}. \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{cajaclave}
+Algunas columnas de esta tabla tienen valores faltantes \textbf{con sentido}: \var{score_buro} y \var{default_90d} están vacías para quien nunca pidió crédito; \var{convertido} está vacía para quien no recibió campaña; \var{csat_promedio} para quien no abrió tickets. Diagnosticar y decidir qué hacer con esos faltantes es parte de la Entrega~2.
+\end{cajaclave}
+
+\subsection{Ruta avanzada: las tablas crudas}
+Los grupos que quieran hacer su propio \textit{feature engineering} pueden partir de las tablas crudas y construir sus variables desde cero: unir \var{fact_transacciones} con \var{dim_clientes}, agregar \var{fact_saldos_mensuales} por cliente, cruzar \var{logs_interaccion} para medir actividad, etc. Esta ruta es \textbf{más exigente} pero se reconoce en la rúbrica del script (``pipeline correcto'').
+
+%% ============================================================
+\section{Cómo elegir su ruta de análisis}
+
+La pregunta de negocio manda: primero decidan \textbf{qué} quieren responder, y de ahí se desprende la tarea analítica y las tablas que necesitan. Aquí hay un ejemplo por cada ruta; \textbf{no} son las únicas preguntas posibles.
+
+\subsection{Ruta C --- Clasificación (predecir una categoría)}
+El objetivo es una variable \textbf{binaria}. Ejemplos servidos y listos:
+\begin{itemize}
+  \item \textbf{Fraude:} predecir \var{etiqueta_fraude} en \var{fact_transacciones} usando monto, canal, hora, si es internacional, etc.
+  \item \textbf{Mora de crédito:} predecir \var{default_90d} en \var{creditos} con \var{score_buro}, \var{monto_aprobado}, \var{plazo_meses}, ingreso del cliente\dots
+  \item \textbf{Conversión de campaña:} predecir \var{convertido} en \var{campanas_marketing} con el tipo de oferta, el canal y qué tan activo es el cliente.
+\end{itemize}
+
+\subsection{Ruta R --- Regresión (predecir un número)}
+El objetivo es una variable \textbf{continua}. Ejemplos:
+\begin{itemize}
+  \item \textbf{Gasto / CLV futuro:} agregar \var{fact_saldos_mensuales} por cliente y predecir su gasto del próximo trimestre. \textit{(Aquí ustedes construyen el objetivo a partir del panel.)}
+  \item \textbf{Tiempo de resolución:} predecir \var{tiempo_resolucion_horas} en \var{tickets_soporte}.
+  \item \textbf{Recuperación de cartera:} predecir \var{monto_recuperado} entre los créditos en mora.
+\end{itemize}
+
+\subsection{Ruta S --- Segmentación (agrupar sin objetivo)}
+No hay variable objetivo: la meta es \textbf{descubrir grupos}. Ejemplos:
+\begin{itemize}
+  \item \textbf{Segmentar clientes} por un perfil RFM + comportamiento (recencia, frecuencia, monto, mezcla de categorías y canales, uso de la app) construido desde \var{fact_transacciones} y \var{logs_interaccion}, o directo desde la tabla analítica.
+  \item \textbf{Segmentar comercios} por su rubro, tamaño, ticket promedio y actividad.
+\end{itemize}
+
+\begin{cajaconexion}
+Un segmento solo sirve si se puede \textbf{describir} y \textbf{accionar}: ``clientes jóvenes de alto gasto y baja antigüedad'' es útil porque sugiere una acción; ``grupo 3'' no dice nada. La segmentación termina en un \textbf{perfilamiento} con nombre y una recomendación para cada grupo.
+\end{cajaconexion}
+
+%% ============================================================
+\clearpage
+\section{Reglas de los datos}
+
+\subsection{Fecha de corte y anti-fuga de información}
+Todos los datos de comportamiento están medidos \textbf{hasta el 31 de marzo de 2026} (la fecha de corte). Los objetivos se refieren a lo que pasó \textbf{en o después} de esa fecha. Esta separación imita la realidad: cuando la empresa toma una decisión, solo conoce el pasado.
+
+\begin{cajaalerta}
+No usen como predictor ninguna variable que, en la práctica, \textbf{solo se conoce después} de que ocurre el evento que quieren predecir. Ejemplos: \var{dias_mora} y \var{monto_recuperado} para predecir \var{default_90d}; el \var{estado} final para predecir el fraude de una transacción que aún no se aprueba. Cuando una variable ``predice demasiado bien'', sospechen fuga de información.
+\end{cajaalerta}
+
+\subsection{Entrenamiento y prueba}
+Como se vio en el curso, para saber si un modelo \textbf{generaliza} deben separar los datos en \textbf{entrenamiento} y \textbf{prueba}, entrenar solo con la parte de entrenamiento y medir el desempeño en la de prueba, comparándolo siempre contra un \textbf{baseline} (la clase mayoritaria en clasificación, o la media/mediana en regresión). Los objetivos de este caso están servidos con esa disciplina en mente.
+
+\subsection{Grano y unión de tablas}
+Antes de unir dos tablas, verifiquen su \textbf{grano}: \var{dim_clientes} tiene una fila por cliente, pero \var{fact_transacciones} tiene muchas por cliente. Para llevar transacciones al nivel de cliente hay que \textbf{agregar} primero (contar, sumar, promediar) y luego unir. Unir sin agregar duplica filas y distorsiona el análisis.
+
+%% ============================================================
+\section{Carga de los datos en R}
+
+Todas las tablas están publicadas como archivos \texttt{.csv}. Se cargan con \texttt{read.csv()} apuntando a la URL correspondiente. Por ejemplo:
+
+\vspace{4pt}
+{\small\ttfamily
+\noindent url\_base <- "https://eduard-martinez.github.io/databases/ba/condor/"\\[2pt]
+\noindent clientes <- read.csv(paste0(url\_base, "dim\_clientes.csv"))\\
+\noindent creditos <- read.csv(paste0(url\_base, "creditos.csv"))\\
+\noindent analitica <- read.csv(paste0(url\_base, "tabla\_analitica\_clientes.csv"))
+}
+\vspace{6pt}
+
+\begin{cajaclave}
+\var{fact_transacciones.csv} es \textbf{muy grande} ($\sim$2 millones de filas). Si solo necesitan un subconjunto (por ejemplo, un rango de fechas o un tipo de transacción), conviene filtrarlo temprano. Para muchas preguntas, la \var{tabla_analitica_clientes} o las tablas satélite (\var{creditos}, \var{campanas_marketing}, \var{tickets_soporte}) son suficientes y mucho más livianas.
+\end{cajaclave}
+
+\vfill
+\begin{center}
+{\footnotesize\itshape\color{azulcurso} Cóndor es una empresa ficticia creada con fines pedagógicos. Cualquier parecido con una empresa real es coincidencia.}
+\end{center}
+
+\end{document}

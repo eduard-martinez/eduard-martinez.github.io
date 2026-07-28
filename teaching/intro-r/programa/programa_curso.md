@@ -163,10 +163,10 @@ Descripción variable a variable: [diccionario de datos](../datos/diccionario_da
 
 **Curso de Business Analytics (material ampliado del profesor):**
 
-- [Semana 3 — Fundamentos de R y Programación](https://eduard-martinez.github.io/teaching/ba/week-03/theory/week-03.html)
-- [Semana 4 — Transformación de Datos con dplyr](https://eduard-martinez.github.io/teaching/ba/week-04/theory/week-04.html)
-- [Semana 5 — Visualización de Datos con ggplot2](https://eduard-martinez.github.io/teaching/ba/week-05/theory/week-05.html)
-- [Semana 6 — Fuentes, Calidad de Datos y Análisis Exploratorio](https://eduard-martinez.github.io/teaching/ba/week-06/theory/week-06.html)
+- [Semana 3 — Fundamentos de R y Programación](https://eduard-martinez.github.io/teaching/ba/lectures/week-03/theory/week-03.html)
+- [Semana 4 — Transformación de Datos con dplyr](https://eduard-martinez.github.io/teaching/ba/lectures/week-04/theory/week-04.html)
+- [Semana 5 — Visualización de Datos con ggplot2](https://eduard-martinez.github.io/teaching/ba/lectures/week-05/theory/week-05.html)
+- [Semana 6 — Fuentes, Calidad de Datos y Análisis Exploratorio](https://eduard-martinez.github.io/teaching/ba/lectures/week-06/theory/week-06.html)
 
 **Bibliografía base:**
 

@@ -1,0 +1,274 @@
+---
+title: "Unidad 5 - Práctica: el torneo de clasificadores"
+subtitle: "Aplicación guiada en clase · Semana 11 · 06327-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Reglas de juego
+
+::: {.callout-key}
+**Hoy eres el ingeniero (el juez ya lo llevas dentro)**
+
+La semana pasada calificaste modelos ajenos. Hoy entrenas los tuyos: el mismo problema de crédito, pero ahora la base **completa y sin predicciones** — las predicciones las produces tú. Esta práctica asume la [teoría de la semana](../theory/week-11.html) (árboles, poda, bosques, umbral) y las [métricas de la semana 10](../../week-10/theory/week-10.html). Nada se re-explica.
+:::
+
+- 👥 En **parejas**: uno escribe, el otro lee los árboles en voz alta y audita cifras. Roten en el Momento 4.
+- 🖥️ **RStudio** con tu proyecto del curso. Paquetes de la semana: `rpart`, `rpart.plot`, `randomForest` (los instalaste antes de clase, ¿cierto?). Plan B: `install.packages(c("rpart","rpart.plot","randomForest"))` y a esperar el wifi.
+- 📥 El dato de hoy: <a href="credito_clasificacion.csv" download>**credito_clasificacion.csv**</a> — 300 solicitudes históricas de BancoAndes con su decisión final. Guárdalo en `data/`.
+- 🎯 La misión de la gerencia: *"la semana pasada nos convencieron de no comprar el modelo de CreditoYa. Perfecto — entonces constrúyanme uno mejor, y demuéstrenlo con las mismas métricas que usaron para tumbar el de ellos."*
+
+<!--=================-->
+<!--=================-->
+# El setup <span class="badge-time">≈ 5 min</span>
+
+Script nuevo: `scripts/11_torneo.R`.
+
+```r
+## ============================================
+## Práctica semana 11 — El torneo de clasificadores
+## Nombre(s): _______________
+## Fecha:     _______________
+## ============================================
+
+## Librerías / Libraries
+pacman::p_load(dplyr, rpart, rpart.plot, randomForest)
+
+## Cargar datos / Load data
+credito <- read.csv("data/credito_clasificacion.csv")
+
+## El target debe ser factor para clasificar / Target as factor
+credito$decision <- as.factor(credito$decision)
+
+## Radiografía / First look
+dim(credito)
+str(credito)
+table(credito$decision)
+```
+
+**Checkpoint 🎯:** **300 filas y 6 columnas**; `decision` es factor con **160 Aprobado / 140 Rechazado**. Cinco variables para predecir: ingreso, historial, deuda, antigüedad laboral y edad.
+
+<!--=================-->
+<!--=================-->
+# Momento 1 — La partición y la vara <span class="badge-time">≈ 7 min</span>
+
+Primero la disciplina de la semana 10: apartar el examen **antes** de entrenar nada, y medir la regla tonta.
+
+```r
+## Partición 80/20 / Train-test split
+set.seed(11)   # ¡en la línea inmediatamente anterior al sample!
+idx_train <- sample(1:nrow(credito), size = round(0.8 * nrow(credito)))
+train <- credito[idx_train, ]
+test  <- credito[-idx_train, ]
+
+## Verificar / Check
+table(train$decision)
+table(test$decision)
+
+## Baseline: la clase mayoritaria / Majority-class baseline
+round(max(table(test$decision)) / nrow(test), 3)
+```
+
+**Checkpoint 🎯:** train con **129 Aprobado / 111 Rechazado** (240 filas) y test con **31 / 29** (60 filas). Baseline: **0.517** — este test quedó casi parejo, así que la regla tonta apenas le gana a una moneda. Todo lo que entrenes hoy compite contra ese 51.7%.
+
+::: {.callout-warning}
+**Si tus números no coinciden con los checkpoints**, casi seguro corriste `sample()` sin ejecutar el `set.seed(11)` justo antes. Cada bloque aleatorio de hoy trae su propia semilla — ejecútala siempre junto con su bloque (o corre el script completo con *Source*).
+:::
+
+<!--=================-->
+<!--=================-->
+# Momento 2 — Tu primer árbol (y cómo leerlo) <span class="badge-time">≈ 12 min</span>
+
+Empecemos con un árbol corto y legible: máximo dos niveles de preguntas.
+
+```r
+## Entrenar un árbol de profundidad 2 / Train a depth-2 tree
+arbol <- rpart(decision ~ ., data = train, method = "class",
+               control = rpart.control(maxdepth = 2))
+
+## Verlo como texto y como diagrama / Print and plot
+arbol
+rpart.plot(arbol, type = 4, extra = 104)
+```
+
+**Checkpoint 🎯:** la **raíz** pregunta por la **deuda** (`deuda_actual < 13.36`). Con deuda alta → Rechazado directo (103 casos de train). Con deuda baja, segunda pregunta por el ingreso (`ingreso_m >= 3.41`) → Aprobado; si además el ingreso es bajo → Rechazado.
+
+::: {.callout-practice}
+**Lectura en voz alta (2 min, en pareja):** traduzcan el árbol a política de crédito en dos frases, sin decir "nodo" ni "split". Algo así como: *"si debe más de 13 millones, no; si debe poco y gana más de 3.4, sí; …"*. Después comparen: ¿se parece a lo que un comité humano haría? ¿Qué variable esperaban en la raíz que NO apareció?
+:::
+
+Ahora califícalo con el músculo de la semana 10 — matriz y métricas en test:
+
+```r
+## Predecir y evaluar / Predict and evaluate
+pred_arbol <- predict(arbol, newdata = test, type = "class")
+table(Real = test$decision, Modelo = pred_arbol)
+
+tp <- sum(test$decision == "Aprobado"  & pred_arbol == "Aprobado")
+fn <- sum(test$decision == "Aprobado"  & pred_arbol == "Rechazado")
+fp <- sum(test$decision == "Rechazado" & pred_arbol == "Aprobado")
+tn <- sum(test$decision == "Rechazado" & pred_arbol == "Rechazado")
+round((tp + tn) / nrow(test), 3)   # accuracy
+round(tp / (tp + fp), 3)           # precisión
+round(tp / (tp + fn), 3)           # recall
+```
+
+**Checkpoint 🎯:** matriz **TP=27, FN=4, FP=1, TN=28** → accuracy **0.917**, precisión **0.964**, recall **0.871**. Dos preguntas y ya vas 40 puntos arriba del baseline (91.7% vs 51.7%). Y como anécdota: el "modelo misterioso" que auditaste la semana pasada rondaba el 88% — acabas de superarlo con un árbol que se explica en dos frases (otra partición, así que tómalo como guiño, no como prueba).
+
+<!--=================-->
+<!--=================-->
+# Momento 3 — El memorizador y la poda <span class="badge-time">≈ 15 min</span>
+
+¿Y si soltamos todos los frenos? Profundidad libre, hojas de un solo caso — el árbol que puede memorizar:
+
+```r
+## El memorizador: sin frenos / No-brakes tree
+set.seed(11)   # la CV interna de rpart usa el azar
+memorizador <- rpart(decision ~ ., data = train, method = "class",
+                     control = rpart.control(cp = 0.0001, minsplit = 2, minbucket = 1))
+
+## ¿Cuántas hojas le salieron? / How many leaves?
+sum(memorizador$frame$var == "<leaf>")
+
+## Train vs test / The overfitting signature
+pred_memo_tr <- predict(memorizador, newdata = train, type = "class")
+pred_memo_te <- predict(memorizador, newdata = test,  type = "class")
+round(mean(pred_memo_tr == train$decision), 3)
+round(mean(pred_memo_te == test$decision), 3)
+```
+
+**Checkpoint 🎯:** **12 hojas**; accuracy **1.000 en train** y **0.967 en test**.
+
+::: {.callout-warning}
+**Momento incómodo (y valioso):** el memorizador NO se estrelló — en este test hasta le fue bien. ¿Entonces la teoría mintió? No: su 100% en train sigue siendo una cifra que jamás podrías reportar, y un solo test de 60 filas es un examen ruidoso donde 2-3 casos mueven todo. El árbitro confiable es la **validación cruzada** — 10 exámenes en vez de uno. Veamos qué dice.
+:::
+
+`rpart` corrió esa CV por ti mientras entrenaba. La tabla:
+
+```r
+## La CV incorporada: error por tamaño del árbol / Built-in CV table
+round(memorizador$cptable, 4)
+```
+
+**Checkpoint 🎯:** la columna **`xerror`** (error de CV, relativo) baja hasta **0.0901** con `nsplit = 3`… y de ahí en adelante **sube**: 0.1261 con 7 divisiones, 0.1351 con 11. Ahí está la curva del dial de la semana 10, dibujada por la CV: las hojas extra del memorizador no compran patrón — compran ruido.
+
+Para podar, la regla profesional (**regla 1-SE**): como la CV también trae ruido (mira la columna `xstd`), no persigas el mínimo exacto — quédate con el **árbol más pequeño que empata con el mínimo** dentro de un error estándar:
+
+```r
+## Regla 1-SE: el árbol más pequeño que empata con el mejor
+## 1-SE rule: smallest tree within one SE of the minimum
+tabla  <- memorizador$cptable
+tope   <- min(tabla[, "xerror"]) + tabla[which.min(tabla[, "xerror"]), "xstd"]
+cp_opt <- tabla[which(tabla[, "xerror"] <= tope)[1], "CP"]
+round(cp_opt, 3)
+
+arbol_podado <- prune(memorizador, cp = cp_opt)
+sum(arbol_podado$frame$var == "<leaf>")
+rpart.plot(arbol_podado, type = 4, extra = 104)
+
+## Evaluar el podado / Evaluate the pruned tree
+pred_poda <- predict(arbol_podado, newdata = test, type = "class")
+round(mean(pred_poda == test$decision), 3)
+```
+
+**Checkpoint 🎯:** el tope queda en 0.0901 + 0.0279 = 0.118, el primer árbol que cabe es el de `nsplit = 2` → `cp_opt` = **0.027** → el árbol podado tiene **3 hojas** y saca **0.917** en test. ¿Te suena? Es *esencialmente tu árbol del Momento 2*: la CV acaba de confirmar, con 10 exámenes, que las preguntas deuda → ingreso eran las correctas y que las 9 hojas extra del memorizador no compraban nada. Entre modelos empatados, gana el simple (parsimonia). En el taller, con datos más ruidosos, verás al memorizador pagar caro de verdad.
+
+<!--=================-->
+<!--=================-->
+# Momento 4 — Quinientos árboles votando <span class="badge-time">≈ 10 min</span>
+
+Roten roles. Ahora el candidato pesado del torneo:
+
+```r
+## Random Forest / The forest
+set.seed(11)   # el bootstrap usa el azar
+bosque <- randomForest(decision ~ ., data = train, ntree = 500)
+
+## Evaluar en test / Evaluate on test
+pred_rf <- predict(bosque, newdata = test)
+table(Real = test$decision, Modelo = pred_rf)
+round(mean(pred_rf == test$decision), 3)
+
+## ¿Qué variables mandan? / Variable importance
+importance(bosque)
+```
+
+**Checkpoint 🎯:** matriz **TP=29, FN=2, FP=1, TN=28** → accuracy **0.950** (precisión 0.967, recall 0.935). Y la importancia corona a la **deuda (44.0)**, seguida del **ingreso (35.8)** y la **antigüedad (25.9)** — el mismo podio que insinuó la raíz de tu árbol del Momento 2, ahora votado por 500 árboles. La edad (3.4) resultó casi decorativa.
+
+::: {.callout-practice}
+**Discusión de 2 minutos:** el bosque le ganó al árbol podado (0.950 vs 0.900) pero ya no puedes dibujarlo. Si el regulador financiero exige explicar cada rechazo, ¿cuál de los dos despliegas? ¿Hay una tercera vía? (Pista: la teoría habló de un "vocero".)
+:::
+
+<!--=================-->
+<!--=================-->
+# Momento 5 — La perilla del umbral <span class="badge-time">≈ 8 min</span>
+
+La gerencia de riesgo entra a la sala: *"un impago nos cuesta lo que ganamos con ocho créditos buenos. No quiero el modelo que más acierte — quiero el que no apruebe morosos."* Eso no pide otro modelo: pide **otro umbral**.
+
+```r
+## Probabilidades del bosque (proporción de votos) / Vote share
+prob <- predict(bosque, newdata = test, type = "prob")[, "Aprobado"]
+head(round(prob, 2))
+
+## Umbral estricto: aprobar solo con prob >= 0.8 / Strict threshold
+pred_08 <- ifelse(prob >= 0.8, "Aprobado", "Rechazado")
+table(Real = test$decision, Modelo = pred_08)
+```
+
+**Checkpoint 🎯:** con umbral 0.8 la matriz queda **TP=23, FN=8, FP=0, TN=29**: precisión **1.000** (¡ni un moroso aprobado!) pero el recall cae a **0.742** — el banco rechaza a 8 buenos clientes de 31. La accuracy bajó a 0.867 y sin embargo **este es el modelo que la gerente pidió**. Métrica correcta > métrica alta.
+
+```r
+## a) Calcula precisión y recall con umbral 0.8 (código, no calculadora)
+## b) Comentario (2-3 líneas): ¿qué le dirías a la gerente que gana
+##    y que pierde con el umbral 0.8 frente al 0.5? ¿Con qué dato
+##    del negocio decidirías el punto exacto?
+```
+
+<!--=================-->
+<!--=================-->
+# El informe del torneo <span class="badge-time">≈ 5 min</span>
+
+Cierra con la tabla que resume el torneo (el memorizador no clasifica a la final — quedó descalificado por mentiroso):
+
+```r
+## Tabla final / Final report
+torneo <- data.frame(
+  modelo   = c("Baseline (mayoritaria)", "Árbol podado (3 hojas)", "Random Forest (500)"),
+  accuracy = c(0.517, 0.917, 0.950),
+  nota     = c("la vara", "legible y estable", "el que mejor predice")
+)
+torneo
+write.csv(torneo, "output/torneo_semana11.csv", row.names = FALSE)
+
+## Dos riesgos para el informe (comentarios, 2 líneas c/u):
+## ¿qué NO garantiza este torneo? (pistas: ¿el perfil de solicitantes
+## de 2026 será igual al histórico? ¿60 filas de test bastan?)
+```
+
+**Checkpoint final 🎯:** el script corre completo con *Source*, `output/torneo_semana11.csv` existe, y los comentarios de los Momentos 2, 4 y 5 están escritos. Ese es el entregable mental de la semana: **baseline → candidatos → CV → test → umbral → riesgos**.
+
+<!--=================-->
+<!--=================-->
+# ¿Terminaste antes? El reto del bosque
+
+Dos experimentos rápidos con `randomForest` (documenta lo que observes como comentarios):
+
+1. **¿Cuántos árboles bastan?** Entrena con `ntree = 50` y con `ntree = 2000` (misma semilla). ¿Cuánto cambió la accuracy de test? ¿Y el tiempo de espera?
+2. **Amnesia regulada:** el argumento `mtry` controla cuántas variables puede mirar cada corte (por defecto ≈ √5 ≈ 2). Pruébalo con `mtry = 5` (todas las variables — bosque sin amnesia). ¿Mejora o empeora? ¿Por qué la teoría predice que árboles clones votan peor?
+
+<!--=================-->
+<!--=================-->
+# Cierre
+
+En una clase montaste el pipeline completo de un clasificador profesional: vara, candidato legible, control de sobreajuste con CV, un bosque que vota y una perilla de umbral negociada con el negocio. El [**Taller 11**](../task/week-11.html) te espera con otra empresa y otra pregunta — y una trampa que ya deberías oler: allá la clase que importa es la *minoritaria*, así que la accuracy va a mentir con ganas. Lleva tu recall.

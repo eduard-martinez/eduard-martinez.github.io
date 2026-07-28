@@ -1,0 +1,1040 @@
+---
+title: "Unidad 1 - Fundamentos de R"
+subtitle: "Analítica para los negocios · Semana 3 · 06327-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+<span id="webr-status-anchor"></span>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Cómo estudiar esta semana
+
+La semana pasada aprendiste a **pedirle cosas a la IA** con prompts profesionales. Esta semana empieza la otra mitad de la historia: aprender a **leer y ejecutar el idioma en el que trabaja el analista** — el lenguaje R. Durante el resto del semestre la IA te va a proponer código en R constantemente; tu ventaja competitiva no será teclear más rápido, sino **entender qué hace ese código, correrlo y verificarlo**.
+
+::: {.callout-key}
+**Tu ruta de esta semana (antes de llegar a clase)**
+
+1. 🎬 **Ve el video de la semana**: un recorrido por la interfaz de RStudio y los conceptos base. <!-- TODO: pegar aquí el enlace del video en Intu -->
+2. 📖 **Lee este documento**: es la versión escrita y ampliada del video, con una diferencia enorme — **el código se ejecuta aquí mismo, en tu navegador**.
+3. ✅ **Presenta el quiz** de teoría en Intu.
+4. 💾 **Instala R y RStudio** en tu computador (instrucciones abajo). En la clase trabajaremos en RStudio de verdad, no en el navegador.
+:::
+
+::: {.callout-workflow}
+**Este documento es interactivo: úsalo como un laboratorio**
+
+Los bloques de código de esta página corren **R de verdad dentro de tu navegador** (una tecnología llamada webR). En cada celda puedes presionar **Run Code**, editar el código y volver a ejecutarlo. Nada de lo que hagas puede dañar algo: si te enredas, recarga la página y todo vuelve a empezar.
+
+Abajo a la derecha encontrarás un panel flotante 📦 **Environment** que imita el panel de RStudio: cada vez que ejecutes una celda, verás aparecer allí los objetos que vas creando. Úsalo — entender ese panel es uno de los objetivos de la semana.
+:::
+
+::: {.callout-warning}
+**Antes de clase: instala R y RStudio (10 minutos, en este orden)**
+
+1. **Instala R** (el motor): entra a [cran.r-project.org](https://cran.r-project.org), elige tu sistema operativo (Windows / macOS) y descarga la versión más reciente. Instálala con las opciones por defecto.
+2. **Instala RStudio Desktop** (la cabina): descárgalo gratis de [posit.co/download/rstudio-desktop](https://posit.co/download/rstudio-desktop/). También con las opciones por defecto.
+3. **Verifica**: abre RStudio, escribe `2 + 2` en el panel de la izquierda (la consola) y presiona Enter. Si responde `[1] 4`, estás listo.
+
+El orden importa: RStudio necesita que R ya esté instalado. Si algo falla, llega 10 minutos antes a clase y lo resolvemos — pero inténtalo primero: leer e interpretar un instalador también es una habilidad de analista.
+:::
+
+<!--=================-->
+<!--=================-->
+# Glosario de la semana
+
+Estos son los términos que vas a usar toda la semana (y todo el semestre). Vuelve aquí cada vez que uno se te escape.
+
+```{=html}
+<div class="glossary-grid">
+  <div class="gloss-card"><div class="gloss-term">🖥️ Consola</div><div class="gloss-def">El panel donde R ejecuta órdenes y muestra resultados de inmediato. Es la "conversación" con R: tú escribes, R responde. Lo que escribes ahí <b>no queda guardado</b>.</div></div>
+  <div class="gloss-card"><div class="gloss-term">📝 Script</div><div class="gloss-def">Archivo de texto (extensión <code>.R</code>) donde escribes y guardas tu código. Es la memoria de tu análisis: permite repetirlo, corregirlo y compartirlo.</div></div>
+  <div class="gloss-card"><div class="gloss-term">📦 Objeto</div><div class="gloss-def">Un nombre que guarda información en la memoria de R (un número, una tabla, un gráfico, un modelo). Se crea con el operador de asignación <code>&lt;-</code>.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🧬 Vector</div><div class="gloss-def">La estructura más básica de R: una secuencia de elementos <b>del mismo tipo</b> (todos números, o todos textos...). Las columnas de una tabla son vectores.</div></div>
+  <div class="gloss-card"><div class="gloss-term">📊 Data frame</div><div class="gloss-def">La tabla de datos de R: filas = observaciones, columnas = variables. Cada columna puede ser de un tipo distinto. Es la estructura central de todo el curso.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🕳️ NA</div><div class="gloss-def"><i>Not Available</i>: dato faltante. Había un espacio para un valor, pero no lo conocemos (ej.: un cliente no reportó su edad). Aparece en casi toda base de datos real.</div></div>
+  <div class="gloss-card"><div class="gloss-term">⚙️ Función</div><div class="gloss-def">Una orden con nombre que recibe insumos (<b>argumentos</b>, entre paréntesis) y devuelve un resultado: <code>mean(ventas, na.rm = TRUE)</code>. En R, casi todo lo que haces es llamar funciones.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🧰 Paquete</div><div class="gloss-def">Colección de funciones creada por la comunidad para una tarea específica (<code>dplyr</code> manipula datos, <code>ggplot2</code> grafica). Se <b>instala una vez</b> y se <b>carga en cada sesión</b>.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🗂️ Environment</div><div class="gloss-def">El "inventario" de la sesión: panel de RStudio que lista todos los objetos que existen en memoria en este momento. Si un objeto no está ahí, R no lo conoce.</div></div>
+  <div class="gloss-card"><div class="gloss-term">🚦 Warning / Error</div><div class="gloss-def">Las dos alertas de la consola. <b>Warning</b>: algo raro pasó, pero el código corrió (revisa el resultado). <b>Error</b>: el código se detuvo y nada se ejecutó (hay que corregir).</div></div>
+</div>
+```
+
+<!--=================-->
+<!--=================-->
+# R y RStudio: motor y cabina
+
+Primero, una distinción que evita confusiones eternas:
+
+- **R** es el **lenguaje** y el motor de cálculo. Es lo que realmente ejecuta tu código.
+- **RStudio** es un [IDE]{.term} (*Integrated Development Environment*): la cabina de mando que hace cómodo trabajar con R. Organiza el espacio en cuatro paneles.
+
+![Distribución de paneles en RStudio](figures/interfaz_rstudio.png){width="700"}
+
+## Los cuatro paneles
+
+**Superior izquierdo — Source (editor de scripts).** Tu cuaderno de trabajo: aquí escribes código que quieres guardar y reutilizar, y lo ejecutas línea a línea con `Ctrl + Enter` (Windows) o `Cmd + Enter` (Mac). ¿Por qué escribir aquí y no directo en la consola? Porque un análisis serio se debe poder **reproducir, corregir y compartir**. El script es la memoria del proceso.
+
+**Inferior izquierdo — Console (consola).** Donde R "te habla": muestra resultados, advertencias y errores. Puedes escribir código directamente, pero no se guarda — úsala para probar cosas rápidas.
+
+**Superior derecho — Environment / History.** El [Environment]{.term} es el inventario de los objetos que existen en la sesión (datos, variables, resultados). *History* registra los comandos que has ejecutado.
+
+**Inferior derecho — Files / Plots / Packages / Help.** Navegador de archivos, visor de gráficos, lista de paquetes y documentación de funciones (se abre cuando pides ayuda con `?`).
+
+::: {.callout-key}
+**El Environment es tu aliado**
+
+Durante todo el curso, la pregunta "¿por qué me sale error?" tendrá muchas veces la misma respuesta: *el objeto que intentas usar no existe en el Environment*. Si ejecutaste código correctamente, deberías ver los objetos nuevos aparecer en ese panel. Revisarlo debe volverse un reflejo.
+:::
+
+## El flujo de trabajo que repetirás mil veces
+
+::: {.callout-workflow}
+**La rutina de RStudio**
+
+1. **Escribo** código en el script (Source)
+2. **Ejecuto** la línea con `Ctrl/Cmd + Enter`
+3. **Reviso** la consola: ¿resultado, warning o error?
+4. **Verifico** el Environment: ¿se creó el objeto que esperaba?
+
+No lo memorices: se volverá automático con la práctica. Pero fíjate desde ya en que los pasos 3 y 4 existen — la mitad de los problemas de los principiantes vienen de ejecutar sin revisar.
+:::
+
+<!--=================-->
+<!--=================-->
+# R como calculadora
+
+Empecemos por lo más simple: pedirle cuentas a R. Ejecuta la celda (botón **Run Code**) y luego modifícala — es tuya.
+
+```{webr-r}
+# Suma, resta, multiplicación, división
+10 + 5
+20 - 8
+4 * 7
+100 / 4
+
+# Potencia
+2^3
+
+# Módulo: el residuo de una división
+17 %% 5
+```
+
+Los resultados aparecen pero **no se guardan en ningún lado**: si quieres reutilizar un valor, tendrás que aprender a crear objetos (dos secciones más abajo).
+
+## Orden de las operaciones
+
+R sigue las reglas matemáticas de siempre: paréntesis → potencias → multiplicación/división → suma/resta.
+
+```{webr-r}
+# Sin paréntesis: primero multiplica
+2 + 3 * 4
+
+# Con paréntesis: primero suma
+(2 + 3) * 4
+```
+
+::: {.callout-practice}
+**Regla práctica:** ante la duda, usa paréntesis. Es mejor ser explícito que descubrir tarde que R entendió otra cosa. Un ejemplo de negocio: el precio final de un producto de \$1.000 con IVA del 19% es `1000 * (1 + 0.19)` — sin el paréntesis, el resultado sería otro.
+:::
+
+## Comparar valores
+
+R también responde preguntas de sí o no. El resultado es un valor **lógico**: `TRUE` o `FALSE`.
+
+```{webr-r}
+10 > 5      # ¿mayor que?
+10 < 5      # ¿menor que?
+10 == 10    # ¿igual a? — OJO: dos signos igual
+10 != 5     # ¿diferente de?
+```
+
+::: {.callout-warning}
+**`==` compara, `=` asigna**
+
+Para preguntar "¿son iguales?" se usan **dos** signos igual (`==`). El signo simple (`=`) hace otra cosa (asignar valores). Confundirlos es, literalmente, el error más común de las primeras semanas — y lo volverás a ver cuando filtremos datos en la semana 4.
+:::
+
+Y puedes combinar condiciones con los operadores lógicos `&` (**y**: ambas deben cumplirse) y `|` (**o**: basta con una):
+
+```{webr-r}
+10 > 5 & 10 < 20   # ¿ambas son ciertas?
+10 > 5 | 10 > 20   # ¿al menos una es cierta?
+```
+
+::: {.callout-connect}
+**¿Para qué sirve esto?** En la semana 4 estas comparaciones serán filtros de datos reales: *"muéstrame solo las ventas con `precio > 100` y `region == "Norte"`"*. Hoy solo necesitas reconocerlas.
+:::
+
+<!--=================-->
+<!--=================-->
+# Tipos de datos
+
+R clasifica cada dato en un **tipo**. Los tres que usarás a diario:
+
+**Numérico** — números enteros o decimales: `42`, `3.14`.
+
+**Carácter (texto)** — siempre entre comillas: `"Cali"`, `"cliente_premium"`.
+
+**Lógico** — solo dos valores, en mayúsculas y sin comillas: `TRUE`, `FALSE`.
+
+```{webr-r}
+42          # numérico
+"Cali"      # carácter
+TRUE        # lógico
+10 > 5      # las comparaciones producen lógicos
+```
+
+::: {.callout-warning}
+**Cuidado con las comillas**
+
+`100` (sin comillas) es un número: puedes sumarlo y promediarlo. `"100"` (con comillas) es **texto**: R no puede hacer matemáticas con él. Este problema aparece muchísimo al importar datos de Excel — una columna de cifras que llega como texto. Pruébalo tú mismo:
+
+```{webr-r}
+# Quita el # de la segunda línea, ejecútala y LEE el error
+100 + 5
+# "100" + 5
+```
+:::
+
+## Valores especiales
+
+En bases de datos reales te cruzarás con estos cuatro personajes:
+
+```{webr-r}
+NA      # dato faltante (Not Available): el valor existe pero no lo conocemos
+NULL    # vacío absoluto: ni siquiera hay espacio reservado
+1/0     # Inf: infinito
+0/0     # NaN: "Not a Number", operación indefinida
+```
+
+::: {.callout-practice}
+**¿NA o NULL?** [NA]{.term} es una silla vacía en la mesa: el puesto existe, el invitado no llegó (un cliente sin edad registrada). [NULL]{.term} es que la silla no existe. En la práctica, el protagonista es **NA**: casi toda base real los tiene, y aprender a manejarlos es parte del oficio (esta misma semana verás el primer truco: `na.rm = TRUE`).
+:::
+
+<!--=================-->
+<!--=================-->
+# Objetos: guardar para reutilizar
+
+## Todo en R es un objeto
+
+Si calculas `10 + 5`, el `15` aparece en consola y muere ahí. Para usarlo después necesitas **guardarlo con un nombre**: eso es un objeto. Y en R *todo* puede ser un objeto: un número, una tabla completa, un gráfico, un modelo de machine learning. Esa filosofía te permite tener varias bases de datos abiertas a la vez, cosa que en Excel es un dolor.
+
+## Crear objetos con `<-`
+
+```{webr-r}
+# Crear el objeto (mira el panel Environment 📦 después de ejecutar)
+ventas_enero <- 15000
+
+# Usarlo
+ventas_enero
+
+# Operar con él
+ventas_enero * 1.15   # escenario: crecen 15%
+```
+
+La estructura es siempre: `nombre <- valor_o_resultado`. R calcula lo de la derecha, lo guarda con el nombre de la izquierda, y el objeto aparece en el Environment.
+
+```{webr-r}
+# Los objetos se combinan entre sí
+precio_unitario <- 100 * 1.19          # precio con IVA
+unidades       <- 50
+total          <- precio_unitario * unidades
+total
+```
+
+::: {.callout-practice}
+**¿`<-` o `=`?** Ambos asignan, pero la convención de la comunidad R (y de este curso) es clara: usa `<-` para crear objetos y reserva `=` para los argumentos de las funciones, como en `mean(x, na.rm = TRUE)`. Atajo de teclado para `<-`: `Alt + -` (Windows) o `Option + -` (Mac).
+:::
+
+## Reglas para nombrar
+
+Obligatorias: empieza con letra, sin espacios, sin tildes ni guion medio (`-` se interpreta como resta), y recuerda que R distingue mayúsculas (`ventas` ≠ `Ventas`). Recomendadas: nombres descriptivos en `snake_case` — `precio_unitario` dice más que `x`, y tu yo del futuro lo agradecerá.
+
+```{webr-r}
+# Válidos
+ventas_2026 <- 50000
+tasa_iva    <- 0.19
+
+# Inválidos (quita un # y mira el error)
+# 2026_ventas <- 50000     # empieza con número
+# ventas totales <- 50000  # contiene espacio
+```
+
+## Las tres lupas: `class()`, `typeof()`, `str()`
+
+Antes de operar con un objeto conviene saber **qué es**. R tiene tres funciones-lupa:
+
+```{webr-r}
+x <- 42
+class(x)    # ¿cómo lo interpreta R? → "numeric"
+typeof(x)   # ¿cómo lo guarda internamente? → "double"
+str(x)      # estructura completa y compacta
+```
+
+```{webr-r}
+ciudad <- "Cali"
+activo <- TRUE
+class(ciudad)
+class(activo)
+```
+
+De las tres, `class()` y `str()` serán tus favoritas: `str()` en particular es la **radiografía instantánea** de cualquier tabla de datos, como verás más abajo. ¿Cuándo usarlas? Cada vez que importes datos ("¿la columna de ventas llegó como número o como texto?") y cada vez que un error te haga sospechar que un objeto no es lo que crees.
+
+::: {.callout-remember}
+**Lo esencial hasta aquí**
+
+- Lo que no se asigna con `<-`, se pierde. Objeto = nombre + valor en memoria.
+- El Environment es el inventario: si no está ahí, no existe.
+- `class()` y `str()` te dicen qué es un objeto antes de que te sorprenda.
+:::
+
+<!--=================-->
+<!--=================-->
+# La consola te habla: resultado, warning o error
+
+Cuando ejecutas código, R responde de **tres** maneras posibles. Distinguirlas es la habilidad que separa al que se frustra del que avanza.
+
+## 1. Resultado normal
+
+```{webr-r}
+mean(c(10, 20, 30))
+```
+
+El `[1]` del resultado indica la **posición** del primer elemento mostrado (si el resultado fuera largo, verías `[1]`, `[13]`, `[25]`... al inicio de cada línea).
+
+## 2. Warning: corrió, pero revisa
+
+Un [warning]{.term} **no detiene** la ejecución — es una alerta amarilla: "hice lo que pediste, pero pasó algo raro".
+
+```{webr-r}
+# Raíz de un número negativo: R responde NaN y te lo advierte
+sqrt(-4)
+```
+
+El warning más importante del semestre tiene que ver con los `NA`:
+
+```{webr-r}
+ventas <- c(100, 200, NA, 400)
+mean(ventas)                 # devuelve NA: no puede promediar lo desconocido
+mean(ventas, na.rm = TRUE)   # na.rm = "remueve los NA antes de calcular"
+```
+
+Fíjate en el detalle: `mean()` con un `NA` devuelve `NA` **sin siquiera avisar**. Por eso la regla es: *ante un resultado extraño, sospecha primero de los datos faltantes*.
+
+## 3. Error: se detuvo todo
+
+Un [error]{.term} es la alerta roja: R no pudo continuar y **nada de la línea se ejecutó**.
+
+```{webr-r}
+# El objeto no existe en el Environment (léelo: "object ... not found")
+mi_dato_inexistente
+```
+
+```{webr-r}
+# El argumento está mal escrito ("unused argument"): es naa.rm, con doble a
+mean(c(1, 2, 3), naa.rm = TRUE)
+```
+
+::: {.callout-workflow}
+**Protocolo ante un error (en este orden)**
+
+1. **Respira.** Los errores son parte del oficio; los analistas expertos ven decenas al día.
+2. **Lee el mensaje completo.** Casi siempre dice qué pasó (`not found` = no existe; `unused argument` = argumento mal escrito; `unexpected symbol` = error de tipeo).
+3. **Revisa la ortografía**: mayúsculas, tildes, comillas y paréntesis sin cerrar.
+4. **Mira el Environment**: ¿el objeto que usas realmente existe y se llama así?
+5. **Consulta la ayuda** de la función: `?mean`.
+6. **Y si nada funciona, pregúntale a la IA** — pero con la fórmula de la semana pasada: pega el código completo, el mensaje de error completo y pide que te *explique la causa* antes que la solución. Para eso construiste tu skill *Explicador de código R*.
+:::
+
+## Ponte a prueba: triage de consola
+
+Clasifica cada salida de consola. ¿Es un resultado normal, un warning o un error?
+
+```{=html}
+<div class="widget-card" id="wg-triage">
+  <div class="widget-head">🚦 Triage de consola · ¿normal, warning o error?</div>
+  <div class="widget-body">
+    <div id="triage-items"></div>
+    <div class="quiz-score" id="triage-score"></div>
+    <div class="widget-note">Pista: no te fijes solo en el color del mensaje — pregúntate si el código <b>se ejecutó</b> y si el resultado <b>es confiable</b>.</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var ITEMS = [
+    {
+      code: '<span class="qc-in">&gt; sum(c(10, 20, 30))</span>\n<span class="qc-out">[1] 60</span>',
+      ans: "normal",
+      fb: "Resultado normal: R ejecutó y devolvió la suma. Nada que revisar."
+    },
+    {
+      code: '<span class="qc-in">&gt; sqrt(-4)</span>\n<span class="qc-out">[1] NaN</span>\n<span class="qc-msg">Warning message: NaNs produced</span>',
+      ans: "warning",
+      fb: "Warning: el código corrió (devolvió NaN), pero R te advierte que la operación no tiene sentido matemático. Alerta amarilla."
+    },
+    {
+      code: '<span class="qc-in">&gt; promedio_ventas</span>\n<span class="qc-msg">Error: object \'promedio_ventas\' not found</span>',
+      ans: "error",
+      fb: "Error: R buscó ese objeto en el Environment y no lo encontró. Nada se ejecutó. Causa típica: no lo creaste, o escribiste mal el nombre."
+    },
+    {
+      code: '<span class="qc-in">&gt; mean(c(100, 200, NA))</span>\n<span class="qc-out">[1] NA</span>',
+      ans: "normal",
+      fb: "¡Tramposa! Técnicamente es un resultado normal: no hay warning ni error. Pero el resultado es NA porque hay un faltante — R ni siquiera te avisa. Por eso hay que MIRAR los resultados, no solo verificar que \"no salió rojo\". Solución: na.rm = TRUE."
+    },
+    {
+      code: '<span class="qc-in">&gt; as.numeric("mil pesos")</span>\n<span class="qc-out">[1] NA</span>\n<span class="qc-msg">Warning message: NAs introduced by coercion</span>',
+      ans: "warning",
+      fb: "Warning: R intentó convertir el texto a número, no pudo, y lo reemplazó por NA avisándote. Esto pasa mucho al importar columnas \"numéricas\" que traen texto escondido."
+    },
+    {
+      code: '<span class="qc-in">&gt; "100" + 5</span>\n<span class="qc-msg">Error in "100" + 5 : non-numeric argument to binary operator</span>',
+      ans: "error",
+      fb: "Error: \"100\" es texto (está entre comillas) y R no suma texto. Ejecución detenida. El clásico de las columnas mal importadas."
+    }
+  ];
+  var LABELS = { normal: "🟢 Normal", warning: "🟡 Warning", error: "🔴 Error" };
+  var box = document.getElementById("triage-items");
+  var scoreEl = document.getElementById("triage-score");
+  var answered = 0, correct = 0;
+
+  ITEMS.forEach(function (it, i) {
+    var q = document.createElement("div");
+    q.className = "quiz-q";
+    var opts = ["normal", "warning", "error"].map(function (k) {
+      return '<button type="button" class="btn-widget quiz-opt" data-k="' + k + '">' + LABELS[k] + "</button>";
+    }).join("");
+    q.innerHTML =
+      '<div class="quiz-q-title">Caso ' + (i + 1) + " de " + ITEMS.length + "</div>" +
+      '<div class="quiz-code">' + it.code + "</div>" +
+      '<div class="quiz-opts">' + opts + "</div>" +
+      '<div class="quiz-fb"></div>';
+    box.appendChild(q);
+
+    var btns = q.querySelectorAll(".quiz-opt");
+    var fb = q.querySelector(".quiz-fb");
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (q.dataset.done) return;
+        q.dataset.done = "1";
+        answered++;
+        var ok = b.dataset.k === it.ans;
+        if (ok) { correct++; b.classList.add("correct"); }
+        else {
+          b.classList.add("wrong");
+          btns.forEach(function (x) { if (x.dataset.k === it.ans) x.classList.add("correct"); });
+        }
+        btns.forEach(function (x) { x.disabled = true; });
+        fb.className = "quiz-fb show " + (ok ? "ok" : "bad");
+        fb.innerHTML = (ok ? "✔ Correcto. " : "✘ No exactamente. ") + it.fb;
+        scoreEl.textContent = "Aciertos: " + correct + " de " + answered + (answered === ITEMS.length ? " · ¡Triage completado!" : "");
+      });
+    });
+  });
+})();
+</script>
+```
+
+<!--=================-->
+<!--=================-->
+# Vectores
+
+Un [vector]{.term} es la estructura más simple de R — y la más importante de entender, porque casi todo lo demás (incluidas las columnas de tus futuras tablas) está hecho de vectores.
+
+::: {.callout-key}
+**Tres características de un vector**
+
+- **Homogéneo**: todos los elementos son del mismo tipo (todos números, o todos textos, o todos lógicos).
+- **Una dimensión**: es una fila de casillas, no una tabla.
+- **Ordenado**: cada elemento tiene una posición (1, 2, 3...).
+:::
+
+## Crear vectores con `c()`
+
+La función `c()` (de *combine*) une elementos:
+
+```{webr-r}
+# Ventas diarias de una semana (lunes a domingo)
+ventas_semana <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)
+ventas_semana
+
+# También hay vectores de texto y lógicos
+dias <- c("Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom")
+meta_cumplida <- c(FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE)
+dias
+```
+
+Para vectores con patrones, hay atajos:
+
+```{webr-r}
+1:10                            # secuencia de 1 en 1
+seq(from = 0, to = 100, by = 10) # secuencia con paso a la medida
+rep(5, times = 6)               # repetir un valor
+```
+
+## Indexación: sacar elementos con `[ ]`
+
+R cuenta **desde 1** (no desde 0, como Python). Los corchetes extraen posiciones:
+
+```{webr-r}
+ventas_semana <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)
+
+ventas_semana[1]         # el primero (lunes)
+ventas_semana[2:5]       # del segundo al quinto
+ventas_semana[c(1, 7)]   # posiciones sueltas (lunes y domingo)
+ventas_semana[-3]        # todos MENOS el tercero
+```
+
+## Indexación lógica: el superpoder
+
+Dentro de los corchetes también cabe una **condición**. R devuelve solo los elementos que la cumplen:
+
+```{webr-r}
+ventas_semana <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)
+
+# ¿Qué ventas superaron 1500?
+ventas_semana[ventas_semana > 1500]
+
+# ¿CUÁNTOS días superaron 1500? (sum cuenta los TRUE)
+sum(ventas_semana > 1500)
+```
+
+::: {.callout-connect}
+**Guarda esta idea.** "Dame los elementos que cumplen una condición" es exactamente lo que hace `filter()`, la función estrella de la próxima semana. La sintaxis será más amable, pero la lógica es esta.
+:::
+
+También puedes **reemplazar** valores usando la misma notación:
+
+```{webr-r}
+ventas_semana <- c(1200, 1500, 1100, 1800, 2000, 1300, 1700)
+ventas_semana[1] <- 1250     # corregir el dato del lunes
+ventas_semana
+```
+
+## Funciones que resumen un vector
+
+```{webr-r}
+ventas_semana <- c(1250, 1500, 1100, 1800, 2000, 1300, 1700)
+
+length(ventas_semana)   # ¿cuántos elementos?
+sum(ventas_semana)      # total
+mean(ventas_semana)     # promedio
+median(ventas_semana)   # mediana
+max(ventas_semana)      # máximo
+which.max(ventas_semana) # ¿en qué POSICIÓN está el máximo?
+```
+
+## Mini-ejercicio: la semana en números
+
+```{webr-r}
+ventas_diarias <- c(1250, 1500, 1100, 1800, 2000, 1300, 1700)
+
+# 1. ¿Cuál fue el total de la semana?
+
+
+# 2. ¿Cuál fue el promedio diario?
+
+
+# 3. ¿Cuántos días estuvieron POR ENCIMA del promedio?
+#    Pista: sum(vector > valor)
+
+```
+
+::: {.callout-remember}
+**Lo esencial de vectores**
+
+- `c()` crea, `[posición]` extrae, `[condición]` filtra.
+- R indexa desde **1**.
+- `sum(condición)` cuenta cuántos elementos cumplen la condición — trúquelo estrella.
+:::
+
+<!--=================-->
+<!--=================-->
+# Matrices: la prima ordenada del vector
+
+Antes de llegar a las tablas de verdad, una parada corta. Una [matriz]{.term} es un vector organizado en **filas y columnas** — dos dimensiones, pero con la misma regla del vector: **todos los elementos del mismo tipo**.
+
+```{webr-r}
+# 6 números organizados en 2 filas y 3 columnas
+m <- matrix(1:6, nrow = 2, ncol = 3)
+m
+
+dim(m)   # dimensiones: filas, columnas
+```
+
+La indexación usa la lógica `[fila, columna]` — apréndetela bien porque los data frames la heredan:
+
+```{webr-r}
+m <- matrix(1:6, nrow = 2, ncol = 3)
+
+m[1, 3]   # fila 1, columna 3
+m[2, ]    # toda la fila 2 (columna vacía = "todas")
+m[, 1]    # toda la columna 1
+```
+
+¿Y para qué sirven? En este curso, poco de forma directa: como todas sus celdas deben ser del mismo tipo, una matriz no puede guardar una tabla real de negocio (texto + números + lógicos mezclados). Pero por dentro de R aparecen en todas partes — matrices de correlaciones, la matriz de confusión de los modelos de clasificación (semana 11), operaciones de álgebra lineal. Te basta con **reconocerlas y saber leer `[fila, columna]`**.
+
+<!--=================-->
+<!--=================-->
+# Data frames: la estrella del curso
+
+Un [data frame]{.term} es LA estructura de análisis de datos: el equivalente a una hoja de Excel, pero programable.
+
+::: {.callout-key}
+**Qué hace especial a un data frame**
+
+- **Heterogéneo**: cada columna puede ser de un tipo distinto (nombres en texto, ventas en números, estado en lógico). Es lo que la matriz no podía hacer.
+- **Rectangular**: todas las columnas miden lo mismo. Cada **fila es una observación** (un cliente, una transacción); cada **columna es una variable** (edad, monto, región).
+- Por dentro, **cada columna es un vector** — todo lo que aprendiste arriba aplica.
+:::
+
+## Crear e inspeccionar
+
+```{webr-r}
+clientes <- data.frame(
+  nombre = c("Ana", "Juan", "María", "Pedro"),
+  edad   = c(28, 35, 42, 31),
+  ventas = c(15000, 22000, 18000, 25000),
+  activo = c(TRUE, TRUE, FALSE, TRUE)
+)
+
+clientes
+```
+
+La **radiografía** de cualquier tabla — estas cuatro funciones se ejecutan siempre, apenas cargas datos:
+
+```{webr-r}
+str(clientes)        # estructura: tipos de cada columna
+dim(clientes)        # filas y columnas
+head(clientes, 2)    # primeras filas
+colnames(clientes)   # nombres de las columnas
+```
+
+::: {.callout-practice}
+**Cómo leer `str()`**: la primera línea dice `4 obs. of 4 variables` (4 filas, 4 columnas); luego, cada columna con su tipo: `$ nombre: chr` (texto), `$ edad: num` (número), `$ activo: logi` (lógico). Treinta segundos de `str()` te ahorran media hora de errores.
+:::
+
+## Acceder a la información
+
+Con `$` extraes **una columna completa** (que es un vector — y por eso puedes aplicarle todo lo de la sección anterior):
+
+```{webr-r}
+clientes$ventas          # la columna como vector
+mean(clientes$ventas)    # el promedio de esa columna
+```
+
+Con `[fila, columna]` accedes a cualquier pedazo (la lógica que heredamos de las matrices):
+
+```{webr-r}
+clientes[1, ]                     # primera fila completa
+clientes[, 2]                     # segunda columna completa
+clientes[2, 3]                    # una celda: fila 2, columna 3
+clientes[clientes$edad > 30, ]    # filtro: clientes mayores de 30
+```
+
+Y crear una **columna nueva** es asignar sobre un nombre que no existe:
+
+```{webr-r}
+clientes$comision <- clientes$ventas * 0.10
+clientes
+```
+
+## Mini-ejercicio: primer análisis de clientes
+
+```{webr-r}
+clientes <- data.frame(
+  nombre = c("Ana", "Juan", "María", "Pedro", "Lucía"),
+  ventas = c(15000, 22000, 18000, 25000, 19000),
+  region = c("Norte", "Sur", "Norte", "Centro", "Sur")
+)
+
+# 1. ¿Cuántos clientes hay? (pista: nrow)
+
+
+# 2. ¿Cuál es el promedio de ventas?
+
+
+# 3. Muestra los clientes con ventas mayores a 20000
+
+
+# 4. ¿Cuántos clientes hay en la región Norte?
+#    Pista: sum(clientes$region == "Norte")
+
+```
+
+::: {.callout-connect}
+**Todo el curso pasa por aquí.** En la semana 4, `dplyr` te dará verbos elegantes para hacer esto mismo (`filter()` en vez de corchetes, `mutate()` en vez de `$ <-`), y `ggplot2` convertirá estas tablas en gráficos. En las semanas 10-13, los modelos de machine learning se entrenan... con data frames. Si esta sección te quedó clara, tienes la base de todo lo demás.
+:::
+
+<!--=================-->
+<!--=================-->
+# Funciones y el sistema de ayuda
+
+Ya usaste muchas funciones (`mean()`, `str()`, `c()`...). Formalicemos: una [función]{.term} tiene un **nombre**, recibe **argumentos** entre paréntesis (separados por comas, a veces con nombre: `na.rm = TRUE`) y **devuelve un resultado**.
+
+```{webr-r}
+# Función con dos argumentos con nombre
+seq(from = 0, to = 100, by = 25)
+
+# Los nombres de argumentos se pueden omitir si respetas el orden
+seq(0, 100, 25)
+```
+
+## `?`: la ayuda antes que nadie
+
+¿Qué hace una función? ¿Qué argumentos acepta? La documentación oficial está a un signo de distancia:
+
+```{webr-r}
+?mean
+```
+
+En RStudio esto abre el panel **Help** con una estructura fija: *Description* (qué hace), *Usage* (cómo se escribe), *Arguments* (qué recibe), y la joya de la corona: **Examples**, código listo para copiar, ejecutar y adaptar.
+
+::: {.callout-practice}
+**Cómo leer la ayuda como un profesional**
+
+1. Lee *Description*: ¿esta función hace lo que necesito?
+2. Salta directo a *Examples*: copia uno, ejecútalo, modifícalo con tus datos.
+3. Vuelve a *Arguments* solo cuando necesites ajustar algo puntual.
+
+**No memorices funciones.** Nadie lo hace — ni los expertos, ni la IA (que también se equivoca con argumentos). Lo que se entrena es el reflejo de consultar: primero `?funcion`, y si la duda persiste, tu skill de la semana 2.
+:::
+
+<!--=================-->
+<!--=================-->
+# Paquetes: instalar una vez, cargar siempre
+
+R trae funciones básicas de fábrica ([base R]{.term}), pero su verdadero poder está en los [paquetes]{.term}: colecciones de funciones creadas por la comunidad — hay más de 20.000 en el repositorio oficial ([CRAN]{.term}). En este curso vivirás en dos: `dplyr` (manipular datos) y `ggplot2` (graficar).
+
+::: {.callout-key}
+**La distinción que evita el 90% de los enredos**
+
+| Acción | Comando | ¿Cada cuánto? | Analogía |
+|--------|---------|---------------|----------|
+| **Instalar** | `install.packages("dplyr")` | **Una sola vez** por computador | Comprar el libro y ponerlo en tu estante |
+| **Cargar** | `library(dplyr)` | **Cada sesión** de R | Sacar el libro del estante para leerlo |
+
+Si te sale `Error: could not find function "filter"`, el diagnóstico es casi siempre este: el paquete está instalado pero **no cargado** en la sesión actual.
+:::
+
+```r
+## Instalar: se corre UNA vez, directo en la consola (nunca dejarlo activo en el script)
+install.packages("dplyr")
+```
+
+```{webr-r}
+# Cargar: va al inicio de cada script, en cada sesión
+library(dplyr)
+# Si no hay error, el paquete quedó activo y sus funciones disponibles
+```
+
+## El estándar del curso: `pacman`
+
+El paquete `pacman` resuelve todo con una sola línea: `p_load()` **carga** los paquetes que le pidas y, si alguno no está instalado, **lo instala automáticamente**.
+
+```r
+## Solo la primera vez, en la consola:
+install.packages("pacman")
+
+## Y de ahí en adelante, TODOS nuestros scripts empiezan así:
+require(pacman)
+p_load(dplyr, ggplot2)
+```
+
+Esa pareja de líneas será el encabezado estándar de cada script del semestre: quien abra tu código podrá correrlo sin preguntarse qué le falta instalar.
+
+<!--=================-->
+<!--=================-->
+# El Environment y tu primer proyecto
+
+## Gestionar el inventario
+
+Todo objeto que creas vive en el [Environment]{.term} hasta que cierres la sesión (o lo borres). Dos funciones para administrarlo:
+
+```{webr-r}
+ventas <- 10000
+costos <- 7000
+utilidad <- ventas - costos
+
+ls()          # listar todos los objetos de la sesión
+rm(costos)    # eliminar un objeto
+ls()          # verifica: costos ya no está
+```
+
+::: {.callout-practice}
+**Filosofía del curso: el script manda, no el Environment**
+
+Al cerrar RStudio te preguntará si quieres guardar el *workspace* (`.RData`). Responde **No**, siempre. La versión oficial de tu análisis es el **script**: si tu código está bien escrito, puedes reconstruir todos los objetos ejecutándolo de arriba a abajo. Depender de objetos "que quedaron de ayer" es la receta del análisis irreproducible.
+:::
+
+## RStudio Projects: dónde vive tu trabajo
+
+Queda una última pieza, y es la que ordena todas las demás. Cuando le pides a R leer un archivo (`read.csv("ventas.csv")`), R lo busca en su **directorio de trabajo** (*working directory*) — la carpeta en la que está "parado". Si el archivo está en otra parte: error.
+
+La solución profesional no es pelear con rutas, sino usar **RStudio Projects**: al abrir un proyecto (archivo `.Rproj`), R se para automáticamente en la carpeta correcta, y todas las rutas se escriben **relativas** a ella.
+
+::: {.callout-workflow}
+**Así crearemos el proyecto del curso (lo haremos juntos en clase)**
+
+1. En RStudio: *File → New Project → New Directory → New Project*.
+2. Nombre: `intro_ba` (sin espacios ni tildes).
+3. Dentro, crearemos esta estructura de carpetas:
+
+```
+intro_ba/
+├── intro_ba.Rproj    # doble clic AQUÍ para abrir el proyecto
+├── data/             # datos crudos (nunca se modifican a mano)
+├── scripts/          # tu código, un script por semana
+└── output/           # resultados: tablas y gráficos exportados
+```
+
+4. Regla de oro de las rutas:
+   - ✅ `read.csv("data/ventas.csv")` — relativa al proyecto: funciona en cualquier computador.
+   - ❌ `read.csv("C:/Users/juan/Desktop/parcial/ventas.csv")` — absoluta: solo funciona en el tuyo.
+:::
+
+::: {.callout-connect}
+**¿Por qué tanto énfasis en esto?** Porque *reproducibilidad* es la palabra que une el curso: tu proyecto final, los talleres y cualquier análisis del mundo real deben poder ejecutarse en otra máquina sin retoques. El proyecto que crearemos esta semana será tu casa el resto del semestre.
+:::
+
+<!--=================-->
+<!--=================-->
+# Lo esencial de la semana
+
+Al terminar la teoría (video + este documento), debes poder:
+
+- [ ] Distinguir R (motor) de RStudio (cabina) e identificar los 4 paneles y su función
+- [ ] Ejecutar operaciones y comparaciones en la consola, y explicar la diferencia entre `=` y `==`
+- [ ] Reconocer los tipos de datos (numérico, carácter, lógico) y el significado de `NA`
+- [ ] Crear objetos con `<-` e inspeccionarlos con `class()` y `str()`
+- [ ] Clasificar una salida de consola como resultado normal, warning o error — y saber qué hacer en cada caso
+- [ ] Crear vectores con `c()`, extraer elementos con `[ ]` y filtrar con condiciones lógicas
+- [ ] Leer la notación `[fila, columna]` de matrices y data frames
+- [ ] Crear un data frame, radiografiarlo (`str`, `dim`, `head`) y acceder a columnas con `$`
+- [ ] Explicar la diferencia entre instalar (`install.packages`) y cargar (`library` / `p_load`) un paquete
+- [ ] Explicar qué es un RStudio Project y por qué las rutas relativas hacen tu trabajo reproducible
+
+En la [aplicación guiada en clase](../practice/week-03.html) convertiremos todo esto en tu **primer script real** dentro de RStudio, y en el [taller evaluable](../task/week-03.html) lo harás por tu cuenta.
+
+<!--=================-->
+<!--=================-->
+# Preguntas de comprensión
+
+Intenta responder antes de abrir cada respuesta.
+
+**1. Un compañero ejecuta `mean(ingresos)` y obtiene `NA`, sin warnings ni errores. ¿Qué pasó y cómo lo arregla?**
+
+<details class="answer"><summary>Ver respuesta</summary>
+El vector `ingresos` contiene al menos un dato faltante (`NA`), y el promedio de algo desconocido es desconocido — R lo reporta sin alarmas. Se arregla con `mean(ingresos, na.rm = TRUE)`, que remueve los faltantes antes de calcular. Moraleja: un resultado "sin errores" no es automáticamente un resultado correcto.
+</details>
+
+**2. ¿Por qué `ventas <- c(100, 200, "300")` no da error, pero después `mean(ventas)` sí?**
+
+<details class="answer"><summary>Ver respuesta</summary>
+Los vectores son homogéneos: al mezclar números con el texto `"300"`, R convierte **todo** el vector a texto sin protestar (`"100"`, `"200"`, `"300"`). El error aparece después, cuando `mean()` intenta promediar textos. Verifícalo con `class(ventas)`. Es el mismo fenómeno de las columnas de Excel que llegan "como texto".
+</details>
+
+**3. Ejecutas `library(ggplot2)` y R responde `Error in library(ggplot2) : there is no package called 'ggplot2'`. ¿Es un problema de carga o de instalación?**
+
+<details class="answer"><summary>Ver respuesta</summary>
+De instalación: el paquete no existe en ese computador ("no hay tal libro en el estante"). Se resuelve una sola vez con `install.packages("ggplot2")` y luego sí `library(ggplot2)`. El error contrario — `could not find function "ggplot"` — suele ser de carga: el paquete está instalado pero olvidaste llamarlo en esta sesión.
+</details>
+
+**4. En el data frame `clientes`, ¿qué diferencia hay entre `clientes[3, ]` y `clientes[, 3]`? ¿Y qué devuelve `clientes$ventas`?**
+
+<details class="answer"><summary>Ver respuesta</summary>
+`clientes[3, ]` devuelve la **fila** 3 completa (una observación: un cliente). `clientes[, 3]` devuelve la **columna** 3 completa (una variable, para todos los clientes). El orden es siempre `[fila, columna]`. `clientes$ventas` devuelve la columna `ventas` como **vector** — por eso puedes aplicarle directamente `mean()`, `sum()` o cualquier función de vectores.
+</details>
+
+<!--=================-->
+<!--=================-->
+# Material adicional
+
+Para profundizar (opcional, pero recomendado):
+
+- **[R para Ciencia de Datos](https://es.r4ds.hadley.nz)** — la traducción al español del libro clásico de Hadley Wickham; los capítulos de "Fundamentos" complementan esta semana.
+- **[Cheatsheet de RStudio](https://rstudio.github.io/cheatsheets/rstudio-ide.pdf)** — mapa visual de la interfaz, para tener a la mano en clase.
+- **[Posit Cloud](https://posit.cloud)** — RStudio corriendo en el navegador, gratis: tu plan B si la instalación local se complica.
+- **[swirl](https://swirlstats.com)** — un paquete que te enseña R... dentro de R, con ejercicios interactivos en la consola (`install.packages("swirl")`).
+
+```{=html}
+<!-- Panel Environment (CSS en styles.css) -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">&#x1F4E6; Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">&#x1F504;</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir/Colapsar">&#x25B2;</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta un bloque de codigo para ver objetos aqui.</div>
+  </div>
+</div>
+
+<script type="module">
+/* ── Toggle colapsar / expandir ── */
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '▲' : '▼';
+};
+
+/* ── Consultar el environment de R ── */
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Env panel error:', e);
+    return [];
+  }
+}
+
+/* ── Renderizar la lista de objetos ── */
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. × ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+/* ── Actualizar panel ── */
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+/* ── Mover webR Status despues de los links de contacto ── */
+function moveWebRStatus() {
+  const anchor = document.getElementById('webr-status-anchor');
+  const statusArea = document.getElementById('qwebr-status-message-area');
+  if (anchor && statusArea) {
+    const wrapper = statusArea.closest('.quarto-title-meta');
+    if (wrapper) {
+      wrapper.style.display = 'inline';
+      wrapper.style.fontSize = '13px';
+      wrapper.style.marginLeft = '30px';
+      anchor.parentNode.insertBefore(wrapper, anchor);
+    }
+  }
+}
+
+/* ── Esperar webR y conectar hooks ── */
+async function init() {
+  /* Esperar a que mainWebR exista */
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando ejecucion...';
+  moveWebRStatus();
+
+  /* Esperar a que los botones Run esten habilitados (todas las celdas ocultas ejecutadas) */
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  /* Monkey-patch qwebrComputeEngine para detectar ejecucion */
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  /* Expandir panel y hacer primer scan */
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+```

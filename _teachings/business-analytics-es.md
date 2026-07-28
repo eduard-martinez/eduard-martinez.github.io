@@ -1,6 +1,6 @@
 ---
 layout: course
-title: Analítica para los Negocios
+title: Analítica para los negocios
 description: >
   Curso de pregrado sobre cómo convertir datos en evidencia para decisiones de negocio,
   con inteligencia artificial generativa transversal a todo el semestre: R y el tidyverse,
@@ -10,10 +10,12 @@ description: >
   sustentado oralmente.
 institution: Universidad ICESI
 department: Departamento de Economía
-course_code: 06278-ECO
+course_code: 06327-ECO
 program: Pregrado
-term: 27 de julio – 14 de noviembre de 2026 (periodo 202610)
+term: 27 de julio – 14 de noviembre de 2026 (periodo 202620)
 credits: 3
+location: "Salón 303C (Grupo 5) · Salón 305C (Grupo 7)"
+time: "Grupo 5: 14:00–17:00 · Grupo 7: 17:00–20:00"
 instructor: Eduard F. Martínez-González · Tatiana Mejía Herrera
 year: 2026
 ---
@@ -40,6 +42,8 @@ year: 2026
 
 <p>
 <a href="/teaching/business-analytics/" class="ws-btn"><i class="fas fa-language"></i>English version</a>
+<a href="/teaching/ba/syllabus/syllabus.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Syllabus (PDF)</a>
+<a href="/teaching/ba/syllabus/outline.pdf" class="ws-btn"><i class="fas fa-calendar-days"></i>Programa semana a semana (PDF)</a>
 <a href="https://open.spotify.com/show/033UvL50nPzm1gIH35udu5" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast del curso · El Dato con Contexto</a>
 </p>
 
@@ -53,9 +57,9 @@ El curso introduce el proceso de *business analytics*: cómo convertir datos cru
 
 Cada semana de contenido publica tres materiales, en el orden en que se usan:
 
-1. <i class="fas fa-book-open"></i> **Teoría** — se estudia *antes* de clase: la versión escrita del podcast o video de la semana, con ejemplos de R ejecutables. Los episodios del podcast se publican en Spotify — [*El Dato con Contexto*](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — y cada uno queda enlazado en su semana, más abajo. El quiz semanal es escrito, en papel, al inicio de la clase.
+1. <i class="fas fa-book-open"></i> **Teoría** — se estudia *antes* de clase: la versión escrita del podcast o video de la semana, con ejemplos de R ejecutables. Los episodios del podcast se publican en Spotify — [*El Dato con Contexto*](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — y cada uno queda enlazado en su semana, más abajo. El quiz semanal se presenta en Intu al inicio de la clase — en la sala de cómputo, sin IA ni ayudas.
 2. <i class="fas fa-laptop-code"></i> **Práctica guiada** — la aplicación en clase, paso a paso.
-3. <i class="fas fa-clipboard-check"></i> **Taller** — la actividad evaluable que cada estudiante desarrolla durante la sesión y entrega a través de Samán.
+3. <i class="fas fa-clipboard-check"></i> **Taller** — la actividad evaluable que cada estudiante desarrolla durante la sesión y entrega en Intu antes de terminar la clase.
 
 ## Resultados de aprendizaje
 
@@ -76,8 +80,7 @@ Al finalizar el curso, el estudiante estará en capacidad de:
 Qué es el business analytics y qué problemas resuelve; el recorrido semana a semana; la dinámica de aprendizaje (teoría antes de clase, quiz, aplicación guiada); las reglas de evaluación, el proyecto final y la política de IA — motivada por evidencia reciente sobre cómo el uso de IA afecta la formación de habilidades.
 
 <p>
-<a href="/teaching/ba/week-01/theory/week-01.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
-<a href="/teaching/ba/week-01/theory/week-01.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Diapositivas (PDF)</a>
+<a href="/teaching/ba/lectures/week-01/theory/week-01.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
 <a href="https://arxiv.org/abs/2601.20245" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-book-open"></i>Lectura: Shen &amp; Tamkin (2026)</a>
 </p>
 
@@ -85,29 +88,29 @@ Qué es el business analytics y qué problemas resuelve; el recorrido semana a s
 Qué es un modelo de lenguaje y por qué importa en economía y negocios; alcances, límites y alucinaciones; la anatomía de un buen *prompt* (contexto, tarea, formato de salida, restricciones); *skills* reutilizables para tareas recurrentes.
 
 <p>
-<a href="/teaching/ba/week-02/theory/week-02.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="/teaching/ba/lectures/week-02/theory/week-02.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
 <a href="https://open.spotify.com/episode/68vkoezzpxxmBUUsw35zAE" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
-<a href="/teaching/ba/week-02/practice/week-02.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/week-02/task/week-02.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
+<a href="/teaching/ba/lectures/week-02/practice/week-02.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-02/task/week-02.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 </p>
 
 **Semana 3 — Fundamentos de R.**
 La interfaz de RStudio y el flujo con scripts; R como calculadora; tipos de datos y valores especiales; objetos y asignación; vectores, matrices y data frames; funciones, ayuda y paquetes; el Environment y los proyectos con rutas relativas.
 
 <p>
-<a href="/teaching/ba/week-03/theory/week-03.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
-<a href="/teaching/ba/week-03/practice/week-03.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/week-03/task/week-03.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
+<a href="/teaching/ba/lectures/week-03/theory/week-03.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="/teaching/ba/lectures/week-03/practice/week-03.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-03/task/week-03.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 </p>
 
 **Semana 4 — Manipulación y visualización de datos.**
 La gramática de `dplyr` verbo a verbo para KPIs globales y por grupo, y `ggplot2` como sistema por capas (datos, estéticas, geometrías, etiquetas, temas). El producto de la semana: una tabla de KPIs y los 2–3 gráficos que la comunican.
 
 <p>
-<a href="/teaching/ba/week-04/theory/week-04.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
-<a href="/teaching/ba/week-04/practice/week-04.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/week-04/task/week-04.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
-<small class="ws-data">Datos: <a href="/teaching/ba/week-04/task/cafeteria.csv"><code>cafeteria.csv</code></a></small>
+<a href="/teaching/ba/lectures/week-04/theory/week-04.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="/teaching/ba/lectures/week-04/practice/week-04.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-04/task/week-04.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
+<small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-04/task/cafeteria.csv"><code>cafeteria.csv</code></a></small>
 </p>
 
 ### Unidad 2 — Proceso analítico y exploración de datos
@@ -116,24 +119,24 @@ La gramática de `dplyr` verbo a verbo para KPIs globales y por grupo, y `ggplot
 El business analytics como proceso que convierte datos en conocimiento accionable; traducir preguntas de negocio a tareas analíticas; el flujo de la pregunta a la decisión; los roles de un equipo de analítica. El ejercicio en clase es el insumo directo de la Entrega 1 del proyecto final.
 
 <p>
-<a href="/teaching/ba/week-05/theory/week-05.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="/teaching/ba/lectures/week-05/theory/week-05.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
 <a href="https://open.spotify.com/episode/75F2Igpy5LJbRKyyKzIOg8" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
-<a href="/teaching/ba/week-05/practice/week-05.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/week-05/task/week-05.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
+<a href="/teaching/ba/lectures/week-05/practice/week-05.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-05/task/week-05.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 </p>
 
 **Semana 6 — EDA: fuentes, limpieza y exploración.**
 Fuentes y calidad de datos; el checklist de diagnóstico — tipos, rangos, faltantes, duplicados, categorías inconsistentes, outliers; limpieza con decisiones documentadas; el pipeline reproducible **raw → clean → analysis-ready**.
 
 <p>
-<a href="/teaching/ba/week-06/theory/week-06.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="/teaching/ba/lectures/week-06/theory/week-06.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
 <a href="https://open.spotify.com/episode/1aQ02r039bDtbEbwpumQcq" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
-<a href="/teaching/ba/week-06/practice/week-06.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/week-06/task/week-06.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
-<small class="ws-data">Datos: <a href="/teaching/ba/week-06/task/ferreteria_raw.csv"><code>ferreteria_raw.csv</code></a></small>
+<a href="/teaching/ba/lectures/week-06/practice/week-06.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-06/task/week-06.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
+<small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-06/task/ferreteria_raw.csv"><code>ferreteria_raw.csv</code></a></small>
 </p>
 
-**Semana 7 — Examen Parcial 1.** Primera evaluación escrita integradora (20%), cubre las semanas 1–6. Del 7 al 13 de septiembre.
+**Semana 7 — Examen Parcial 1.** Primera evaluación escrita integradora (20%), cubre las semanas 1–6. Del 7 al 12 de septiembre.
 
 ### Unidad 3 — IA aplicada al análisis de datos
 
@@ -141,13 +144,13 @@ Fuentes y calidad de datos; el checklist de diagnóstico — tipos, rangos, falt
 Asistentes de IA para el análisis de datos y la programación; rehacer con IA lo que ya se hizo "a mano" en las semanas anteriores (manipulación, limpieza, EDA, visualización); iterar prompts, revisar el código generado y verificar resultados.
 
 <p>
-<a href="/teaching/ba/week-08/theory/week-08.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
-<a href="/teaching/ba/week-08/practice/week-08.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/week-08/task/week-08.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
-<a href="/teaching/ba/week-08/practice/proyecto_semana8.zip" class="ws-btn"><i class="fas fa-download"></i>Proyecto inicial (zip)</a>
+<a href="/teaching/ba/lectures/week-08/theory/week-08.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="/teaching/ba/lectures/week-08/practice/week-08.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-08/task/week-08.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
+<a href="/teaching/ba/lectures/week-08/practice/proyecto_semana8.zip" class="ws-btn"><i class="fas fa-download"></i>Proyecto inicial (zip)</a>
 </p>
 
-**Semana 9 — Presentación Avance del Proyecto (EDA).** Entrega 2 del proyecto final (5%): presentación oral del análisis exploratorio, con retroalimentación del profesor y los monitores. Del 21 al 27 de septiembre.
+**Semana 9 — Presentación Avance del Proyecto (EDA).** Entrega 2 del proyecto final (5%): presentación oral del análisis exploratorio, con retroalimentación del profesor y los monitores. Del 21 al 26 de septiembre.
 
 ### Unidad 4 — Fundamentos de Machine Learning
 
@@ -155,12 +158,12 @@ Asistentes de IA para el análisis de datos y la programación; rehacer con IA l
 El machine learning como generalización; el pipeline estándar — target y features, partición train/test, métricas contra un baseline; validación cruzada; sobreajuste, data leakage y métricas mal elegidas. Dos videos complementarios construyen la matriz de confusión y MAE/RMSE antes de las semanas supervisadas.
 
 <p>
-<a href="/teaching/ba/week-10/theory/week-10.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
-<a href="/teaching/ba/week-10/practice/week-10.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/week-10/task/week-10.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
+<a href="/teaching/ba/lectures/week-10/theory/week-10.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="/teaching/ba/lectures/week-10/practice/week-10.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-10/task/week-10.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <a href="https://youtu.be/TWDdeKs3org" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Matriz de confusión</a>
 <a href="https://youtu.be/bSHrtLHCPvc" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · RMSE y MAE</a>
-<small class="ws-data">Datos: <a href="/teaching/ba/week-10/task/credito_taller10.csv"><code>credito_taller10.csv</code></a> · <a href="/teaching/ba/week-10/task/notas_taller10.csv"><code>notas_taller10.csv</code></a> · <a href="/teaching/ba/week-10/practice/credito_evaluacion.csv"><code>credito_evaluacion.csv</code></a> · <a href="/teaching/ba/week-10/practice/notas_evaluacion.csv"><code>notas_evaluacion.csv</code></a></small>
+<small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-10/task/credito_taller10.csv"><code>credito_taller10.csv</code></a> · <a href="/teaching/ba/lectures/week-10/task/notas_taller10.csv"><code>notas_taller10.csv</code></a> · <a href="/teaching/ba/lectures/week-10/practice/credito_evaluacion.csv"><code>credito_evaluacion.csv</code></a> · <a href="/teaching/ba/lectures/week-10/practice/notas_evaluacion.csv"><code>notas_evaluacion.csv</code></a></small>
 </p>
 
 ### Unidad 5 — Aprendizaje supervisado
@@ -169,22 +172,22 @@ El machine learning como generalización; el pipeline estándar — target y fea
 El pipeline completo de clasificación; la matriz de confusión — por qué el accuracy engaña y el trade-off precision/recall; **CART** y **bosques aleatorios**; elegir modelo según el costo de los errores. El taller predice la fuga de clientes (churn).
 
 <p>
-<a href="/teaching/ba/week-11/theory/week-11.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
-<a href="/teaching/ba/week-11/practice/week-11.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/week-11/task/week-11.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
+<a href="/teaching/ba/lectures/week-11/theory/week-11.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="/teaching/ba/lectures/week-11/practice/week-11.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-11/task/week-11.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <a href="https://www.youtube.com/watch?v=kqaLlte6P6o" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Árboles de clasificación</a>
-<small class="ws-data">Datos: <a href="/teaching/ba/week-11/practice/credito_clasificacion.csv"><code>credito_clasificacion.csv</code></a> · <a href="/teaching/ba/week-11/task/clientes_conectatel.csv"><code>clientes_conectatel.csv</code></a></small>
+<small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-11/practice/credito_clasificacion.csv"><code>credito_clasificacion.csv</code></a> · <a href="/teaching/ba/lectures/week-11/task/clientes_conectatel.csv"><code>clientes_conectatel.csv</code></a></small>
 </p>
 
 **Semana 12 — Regresión: árboles, bosques y la ruta Lasso.**
 El pipeline de regresión con MAE/RMSE contra un baseline; regresión lineal regularizada (**Lasso**), árboles de regresión y ensambles (**random forest / XGBoost**); interpretabilidad vs. desempeño. El taller avalúa apartamentos en Cali.
 
 <p>
-<a href="/teaching/ba/week-12/theory/week-12.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
-<a href="/teaching/ba/week-12/practice/week-12.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/week-12/task/week-12.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
+<a href="/teaching/ba/lectures/week-12/theory/week-12.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="/teaching/ba/lectures/week-12/practice/week-12.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-12/task/week-12.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <a href="https://www.youtube.com/watch?v=2Miw4bjzSF0" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Árboles de regresión</a>
-<small class="ws-data">Datos: <a href="/teaching/ba/week-12/practice/notas_regresion.csv"><code>notas_regresion.csv</code></a> · <a href="/teaching/ba/week-12/task/apartamentos_cali.csv"><code>apartamentos_cali.csv</code></a></small>
+<small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-12/practice/notas_regresion.csv"><code>notas_regresion.csv</code></a> · <a href="/teaching/ba/lectures/week-12/task/apartamentos_cali.csv"><code>apartamentos_cali.csv</code></a></small>
 </p>
 
 ### Unidad 6 — Aprendizaje no supervisado
@@ -193,16 +196,16 @@ El pipeline de regresión con MAE/RMSE contra un baseline; regresión lineal reg
 El clustering como segmentación sin target; **k-means** (distancia, escalamiento, centroides); elegir *k* con elbow y silhouette; perfilar los segmentos para que sean accionables. La práctica segmenta canciones de Spotify; el taller, los socios de un gimnasio.
 
 <p>
-<a href="/teaching/ba/week-13/theory/week-13.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
-<a href="/teaching/ba/week-13/practice/week-13.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/week-13/task/week-13.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
+<a href="/teaching/ba/lectures/week-13/theory/week-13.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="/teaching/ba/lectures/week-13/practice/week-13.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-13/task/week-13.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <a href="https://www.youtube.com/watch?v=2kfY0R34Dy0" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · k-means</a>
-<small class="ws-data">Datos: <a href="/teaching/ba/week-13/practice/spotify_canciones.csv"><code>spotify_canciones.csv</code></a> · <a href="/teaching/ba/week-13/task/socios_califit.csv"><code>socios_califit.csv</code></a></small>
+<small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-13/practice/spotify_canciones.csv"><code>spotify_canciones.csv</code></a> · <a href="/teaching/ba/lectures/week-13/task/socios_califit.csv"><code>socios_califit.csv</code></a></small>
 </p>
 
 **Semana 14 — Examen Parcial 2.** Segunda evaluación escrita integradora (20%), cubre las semanas 8–13. Del 26 al 31 de octubre.
 
-**Semana 15 — Simulacro de la presentación final.** Cada grupo presenta una versión preliminar de su sustentación y recibe retroalimentación. Del 2 al 8 de noviembre.
+**Semana 15 — Simulacro de la presentación final.** Cada grupo presenta una versión preliminar de su sustentación y recibe retroalimentación. Del 2 al 7 de noviembre.
 
 **Semana 16 — Presentación del Proyecto Final.** Sustentación oral del proyecto (Entrega 3, 20%). Equivale a un examen: la asistencia es obligatoria. Del 9 al 14 de noviembre.
 
@@ -210,8 +213,8 @@ El clustering como segmentación sin target; **k-means** (distancia, escalamient
 
 | Componente | Peso | Uso permitido de IA |
 |---|---|---|
-| Quices conceptuales semanales (escritos, en papel, cada semana de contenido) | 25% | Sin IA |
-| Talleres en clase (uno por sesión, se entregan por Samán) | 10% | Colaboración con IA — cada decisión debe poder explicarse |
+| Quices conceptuales semanales (en Intu, en la sala de cómputo, cada semana de contenido) | 25% | Sin IA |
+| Talleres en clase (uno por sesión, se entregan en Intu) | 10% | Colaboración con IA — cada decisión debe poder explicarse |
 | Evaluación integradora 1 (semana 7) | 20% | Sin IA |
 | Evaluación integradora 2 (semana 14) | 20% | Sin IA |
 | Proyecto final (tres entregas) | 25% | Planificación / colaboración con IA, según la entrega |
@@ -220,7 +223,12 @@ Los quices y talleres no tienen recuperación; como mitigación, se elimina la p
 
 ## Proyecto final
 
-Cada grupo recibe una **base de datos empresarial con múltiples variables**, formula su propia pregunta de negocio y la responde con una de las tareas analíticas del curso — clasificación, regresión o segmentación. Tres entregas: **(1)** la pregunta de negocio (semana 6 — requisito para las entregas posteriores), **(2)** la presentación oral del avance/EDA (semana 9, 5%) y **(3)** la sustentación final (semana 16, 20%). No hay documento escrito: la sustentación es el producto final, y el integrante que expone puede elegirse al azar.
+Cada grupo de **3 estudiantes** recibe una **base de datos empresarial con múltiples variables** — este semestre, el **Caso Cóndor**, una fintech andina (ficticia) de pagos y crédito —, formula su propia pregunta de negocio y la responde con una de las tareas analíticas del curso — clasificación, regresión o segmentación. Tres entregas: **(1)** la pregunta de negocio (semana 6 — requisito para las entregas posteriores), **(2)** la presentación oral del avance/EDA (semana 9, 5%) y **(3)** la sustentación final (semana 16, 20%). No hay documento escrito: la sustentación es el producto final, y el integrante que expone puede elegirse al azar.
+
+<p>
+<a href="/teaching/ba/final_project/guidelines_final_project.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Lineamientos del proyecto (PDF)</a>
+<a href="/teaching/ba/final_project/contexto_caso_condor.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Caso Cóndor · contexto (PDF)</a>
+</p>
 
 ## Bibliografía y recursos
 
@@ -229,10 +237,10 @@ Cada grupo recibe una **base de datos empresarial con múltiples variables**, fo
 - Perkins, M., Roe, J. & Furze, L. (2025). [Reimagining the Artificial Intelligence Assessment Scale (AIAS)](https://doi.org/10.53761/rrm4y757){:target="_blank"}. *JUTLP, 22*(7).
 
 Handouts de referencia de la edición anterior, disponibles como lectura complementaria:
-[IA y Machine Learning](/teaching/ba/week-15/week-15-1.html) ·
-[LLMs, Skills y Agentes](/teaching/ba/week-15/week-15-2.html) ·
-[Prompts: cómo formular preguntas a una IA](/teaching/ba/week-15/week-15-3.html)
+[IA y Machine Learning](/teaching/ba/lectures/week-18/week-15-1.html) ·
+[LLMs, Skills y Agentes](/teaching/ba/lectures/week-18/week-15-2.html) ·
+[Prompts: cómo formular preguntas a una IA](/teaching/ba/lectures/week-18/week-15-3.html)
 
 ---
 
-*Los materiales se publican progresivamente a lo largo del semestre. El podcast del curso — [El Dato con Contexto](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — está en Spotify; los quices son escritos, en papel, cada semana, y los talleres se entregan a través de Samán.*
+*Los materiales se publican progresivamente a lo largo del semestre. El podcast del curso — [El Dato con Contexto](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — está en Spotify; los quices se presentan en Intu cada semana de contenido, y los talleres se entregan en Intu al cierre de cada sesión.*

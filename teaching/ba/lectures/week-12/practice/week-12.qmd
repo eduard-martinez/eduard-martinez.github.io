@@ -1,0 +1,230 @@
+---
+title: "Unidad 5 - Práctica: la revancha de PronosticaU"
+subtitle: "Aplicación guiada en clase · Semana 12 · 06327-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Reglas de juego
+
+::: {.callout-key}
+**El encargo que te ganaste tumbando al proveedor**
+
+Semana 10: auditaste el pronosticador de notas de **PronosticaU** y demostraste que perdía contra el promedio (MAE 0.55 vs 0.40). Hoy la universidad te pasa la base histórica y el contrato: *"constrúyanlo ustedes — y esta vez, que le gane al promedio y se deje explicar."* Esta práctica asume la [teoría de la semana](../theory/week-12.html) (árbol de regresión, Lasso, bosque) y las [métricas MAE/RMSE de la semana 10](../../week-10/theory/week-10.html).
+:::
+
+- 👥 En **parejas**: uno escribe, el otro lee coeficientes y audita cifras. Roten en el Momento 3.
+- 🖥️ **RStudio**. Paquetes: los de la semana 11 más `glmnet` (instalado antes de clase).
+- 📥 El dato: <a href="notas_regresion.csv" download>**notas_regresion.csv**</a> — 300 estudiantes históricos con sus notas parciales, tareas, quices, asistencia y la **nota final** (el target). Guárdalo en `data/`.
+- 🏆 Regla del torneo: tres modelos compiten contra el baseline; **todos se miden en el mismo test, una sola vez**, con MAE y RMSE.
+
+<!--=================-->
+<!--=================-->
+# El setup <span class="badge-time">≈ 5 min</span>
+
+Script nuevo: `scripts/12_revancha.R`.
+
+```r
+## ============================================
+## Práctica semana 12 — La revancha de PronosticaU
+## Nombre(s): _______________
+## Fecha:     _______________
+## ============================================
+
+## Librerías / Libraries
+pacman::p_load(dplyr, ggplot2, rpart, rpart.plot, randomForest, glmnet)
+
+## Cargar datos / Load data
+notas <- read.csv("data/notas_regresion.csv")
+
+## Radiografía / First look
+dim(notas)
+str(notas)
+summary(notas$nota_final)
+```
+
+**Checkpoint 🎯:** **300 filas y 6 columnas**; `nota_final` es numérica (va de ~0.9 a 5.0) — target continuo, problema de **regresión**. Nada de factores hoy.
+
+<!--=================-->
+<!--=================-->
+# Momento 1 — La partición y la vara <span class="badge-time">≈ 6 min</span>
+
+```r
+## Partición 80/20 / Train-test split
+set.seed(12)   # la semilla de la semana, en la línea anterior al sample
+idx_train <- sample(1:nrow(notas), size = round(0.8 * nrow(notas)))
+train <- notas[idx_train, ]
+test  <- notas[-idx_train, ]
+
+## Baseline: predecir el promedio de TRAIN / Mean baseline
+media_train <- round(mean(train$nota_final), 2)
+media_train
+
+## MAE y RMSE del baseline en test (fórmulas de la semana 10)
+round(mean(abs(test$nota_final - media_train)), 3)
+round(sqrt(mean((test$nota_final - media_train)^2)), 3)
+```
+
+**Checkpoint 🎯:** media de train **3.35** → baseline con MAE **0.344** y RMSE **0.429**. Esa es la vara de hoy. (PronosticaU cobraba por un MAE de 0.55 — tenlo a mano para la humillación final.)
+
+<!--=================-->
+<!--=================-->
+# Momento 2 — La ruta lineal: el Lasso <span class="badge-time">≈ 15 min</span>
+
+`glmnet` no recibe fórmulas como `rpart`: pide la **matriz de variables** y el **vector del target** por separado. `model.matrix()` hace la conversión (el `[, -1]` descarta la columna de intercepto que glmnet maneja por su cuenta):
+
+```r
+## Preparar matrices / Prepare matrices for glmnet
+x_train <- model.matrix(nota_final ~ ., data = train)[, -1]
+y_train <- train$nota_final
+x_test  <- model.matrix(nota_final ~ ., data = test)[, -1]
+
+## Lasso con CV de 10 pliegues para elegir lambda
+## Lasso with 10-fold CV to pick lambda
+set.seed(12)   # los pliegues de la CV usan el azar
+lasso_cv <- cv.glmnet(x = x_train, y = y_train, alpha = 1)
+
+## La curva de CV y los dos candidatos / CV curve
+plot(lasso_cv)
+round(lasso_cv$lambda.1se, 4)
+```
+
+**Checkpoint 🎯:** `lambda.1se` = **0.0382**. En el gráfico: el error de CV en forma de U (¡el dial de la teoría, con datos reales!), la línea punteada izquierda es `lambda.min` y la derecha es `lambda.1se` — el freno más fuerte que empata con el mínimo. La regla 1-SE de la semana 11, servida por `glmnet`.
+
+Ahora lo mejor del Lasso — **leer el modelo**:
+
+```r
+## Los coeficientes que sobrevivieron / Surviving coefficients
+round(as.matrix(coef(lasso_cv, s = "lambda.1se")), 4)
+```
+
+**Checkpoint 🎯:** la ecuación quedó: nota ≈ 0.944 + **0.271·parcial_2** + **0.181·parcial_1** + **0.142·tareas** + 0.049·quices + 0.0045·asistencia. El parcial 2 es el rey (cada punto suyo aporta 0.27 a la final), y `asistencia` quedó encogida casi a cero — el freno te está diciendo dónde está la señal. (Hoy no expulsó a nadie del todo; en el taller sí verás un coeficiente en 0.000 exacto.)
+
+::: {.callout-practice}
+**Traducción simultánea (2 min, en pareja):** conviertan dos coeficientes en frases que la decana entienda — *"un punto más en el parcial 2 se asocia con ___ más en la nota final"*. Ojo con el verbo: *se asocia*, no *causa*. ¿Por qué la distinción importa si la decana quiere "intervenir la asistencia"?
+:::
+
+```r
+## Evaluar el Lasso en test / Evaluate on test
+pred_lasso <- as.numeric(predict(lasso_cv, newx = x_test, s = "lambda.1se"))
+round(mean(abs(test$nota_final - pred_lasso)), 3)
+round(sqrt(mean((test$nota_final - pred_lasso)^2)), 3)
+```
+
+**Checkpoint 🎯:** MAE **0.218** y RMSE **0.270**. La vara (0.344) quedó atrás por 37%. Primer candidato instalado en el podio.
+
+<!--=================-->
+<!--=================-->
+# Momento 3 — El árbol, ritual exprés <span class="badge-time">≈ 10 min</span>
+
+Roten roles. El ritual completo lo dominas desde la semana 11 — hoy en versión compacta (`method = "anova"` es la única novedad: le dice a `rpart` que prediga números):
+
+```r
+## Árbol de regresión + poda 1-SE / Regression tree + 1-SE pruning
+set.seed(12)
+arbol <- rpart(nota_final ~ ., data = train, method = "anova")
+round(arbol$cptable, 4)
+
+tabla  <- arbol$cptable
+tope   <- min(tabla[, "xerror"]) + tabla[which.min(tabla[, "xerror"]), "xstd"]
+cp_opt <- tabla[which(tabla[, "xerror"] <= tope)[1], "CP"]
+round(cp_opt, 4)
+
+arbol_podado <- prune(arbol, cp = cp_opt)
+sum(arbol_podado$frame$var == "<leaf>")
+rpart.plot(arbol_podado, type = 4)
+
+## Evaluar / Evaluate
+pred_arbol <- predict(arbol_podado, newdata = test)
+round(mean(abs(test$nota_final - pred_arbol)), 3)
+round(sqrt(mean((test$nota_final - pred_arbol)^2)), 3)
+```
+
+**Checkpoint 🎯:** tope 1-SE **0.806** → `cp_opt` = **0.0315** → árbol de **5 hojas** con MAE **0.286** y RMSE **0.345**. Mira el `rpart.plot`: la raíz pregunta por el parcial 2 (el rey otra vez) y cada hoja es un *peldaño* — este árbol solo puede predecir 5 notas distintas. Le gana a la vara, pero la escalera pierde contra la rampa del Lasso.
+
+<!--=================-->
+<!--=================-->
+# Momento 4 — El bosque promedia <span class="badge-time">≈ 8 min</span>
+
+```r
+## Random Forest de regresión / Regression forest
+set.seed(12)
+bosque <- randomForest(nota_final ~ ., data = train, ntree = 500)
+pred_rf <- predict(bosque, newdata = test)
+round(mean(abs(test$nota_final - pred_rf)), 3)
+round(sqrt(mean((test$nota_final - pred_rf)^2)), 3)
+
+## ¿Qué variables mandan? / Importance
+importance(bosque)
+```
+
+**Checkpoint 🎯:** MAE **0.226** y RMSE **0.281** — pisándole los talones al Lasso. Y la importancia corona otra vez al **parcial_2 (14.4)**, con parcial_1 (9.0) de segundo: tres modelos distintos, la misma historia sobre qué mueve la nota. Cuando eso pasa, el hallazgo es robusto — frase para tu proyecto final.
+
+<!--=================-->
+<!--=================-->
+# Momento 5 — El podio y el diagnóstico <span class="badge-time">≈ 12 min</span>
+
+```r
+## La tabla del torneo / Tournament table
+torneo <- data.frame(
+  modelo = c("Baseline (promedio)", "Lasso (lambda.1se)",
+             "Árbol podado (5 hojas)", "Random Forest (500)"),
+  MAE    = c(0.344, 0.218, 0.286, 0.226),
+  RMSE   = c(0.429, 0.270, 0.345, 0.281)
+)
+torneo
+write.csv(torneo, "output/torneo_semana12.csv", row.names = FALSE)
+```
+
+🥇 **Ganó el Lasso.** ¿No que el bosque siempre gana? La semana pasada sí; esta no — el proceso que genera las notas es (casi) una suma ponderada de los parciales, y **en cancha lineal, el modelo lineal manda**. La moraleja que vale el semestre: *el ganador depende de la forma del patrón; por eso se monta el torneo.* Y de paso: PronosticaU cobraba por MAE 0.55 — tu Lasso lo hace en 0.218, con fórmula publicable.
+
+El diagnóstico antes de firmar — predicho contra real:
+
+```r
+## Gráfico predicho vs. real del ganador / Predicted vs actual
+resultado <- data.frame(real = test$nota_final, pred = pred_lasso)
+ggplot(resultado, aes(x = pred, y = real)) +
+  geom_point(alpha = 0.7, color = "#1e3a5f") +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "#d97706") +
+  labs(title = "Pronosticador de notas — Lasso en test",
+       x = "Nota predicha", y = "Nota real") +
+  theme_minimal()
+ggsave("output/diagnostico_lasso.png", width = 6, height = 4)
+```
+
+**Checkpoint 🎯:** la nube abraza la diagonal, sin abanicos en los extremos, y la brecha MAE–RMSE del Lasso es pequeña (0.218 vs 0.270): sin embarradas ocasionales. Este modelo se firma.
+
+```r
+## Cierre (comentarios, 3-4 líneas): la universidad te pregunta si
+## puede usar este modelo para ALERTAS TEMPRANAS a mitad de semestre.
+## a) ¿Qué le respondes con las cifras de hoy?
+## b) ¿Qué variable NO estaría disponible a mitad de semestre y qué
+##    harías al respecto? (mira las columnas de la base…)
+```
+
+::: {.callout-warning}
+**La pregunta b) no es retórica.** Una de las variables del modelo se conoce *tarde* para servir en una alerta temprana. Detectarlo es exactamente la disciplina anti-leakage de la semana 10: pregúntate siempre *"¿esta columna existirá en el momento de predecir?"*. Discútanlo — y anoten qué le pasaría al MAE si hay que sacarla.
+:::
+
+<!--=================-->
+<!--=================-->
+# ¿Terminaste antes? El reto de los dos lambdas
+
+`cv.glmnet` te dio dos candidatos y usamos `lambda.1se`. Repite la predicción con `s = "lambda.min"` y compara: ¿cuánto mejora el MAE? ¿Cuántos coeficientes cambian de tamaño? Documenta como comentario cuál elegirías para el informe de la universidad y por qué (pista: pregunta 2 de comprensión de la teoría).
+
+<!--=================-->
+<!--=================-->
+# Cierre
+
+Torneo completo en una clase: una vara, tres familias de modelos, un ganador que se deja leer y un diagnóstico que lo confirma. El [**Taller 12**](../task/week-12.html) te lleva al mercado inmobiliario: InmoValle quiere publicar un **avaluador instantáneo** en su web, y tu Lasso va a hacer algo que hoy no hizo — **expulsar variables** con coeficiente cero exacto. Atento a quién saca y por qué.

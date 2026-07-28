@@ -1,0 +1,450 @@
+---
+title: "Unidad 2 - Fuentes, calidad de datos y EDA"
+subtitle: "Analítica para los negocios · Semana 6 · 06327-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Cómo estudiar esta semana
+
+Esta semana la fundamentación teórica llega en formato **podcast**: *Fuentes, calidad de datos y EDA*.
+
+::: {.callout-key}
+**Este documento es la versión escrita del podcast**
+
+Puedes **escuchar** el episodio, **leer** este documento, o hacer ambas cosas: cubren el mismo contenido. Este documento no es una transcripción literal; es una versión organizada para facilitar el estudio, con glosario y resúmenes por bloque.
+
+- 🎧 **Podcast:** [escúchalo en Spotify](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5).
+- 📝 **Quiz de teoría:** en Intu, antes de la sesión de clase.
+- 🧑‍💻 **En clase:** aquí no hay laboratorio de R. **El código va todo en la sesión presencial**, sobre un dataset intencionalmente sucio. Lo de hoy es el criterio; lo de la clase, las manos.
+:::
+
+::: {.callout-warning}
+**Antes de venir a clase: 1 paquete (30 segundos, con internet)**
+
+En la sesión usarás `skimr` para la radiografía de la base. Instálalo **antes** de llegar — en clase, con el wifi del salón colapsado, es un mal momento:
+
+```r
+install.packages("skimr")
+```
+
+Verifica que quedó: `library(skimr)` no debe arrojar error.
+:::
+
+⚠️ **Por qué esta semana se estudia distinto:** en la semana 4 aprendiste los verbos de `dplyr` con datos de juguete — impecables, sin un solo `NA`. Ese mundo no existe. Esta semana conocemos los datos como llegan de verdad: con errores de captura, categorías escritas de cinco formas distintas y valores imposibles. El podcast te da el **criterio** para diagnosticarlos; la clase te da la **práctica** para arreglarlos.
+
+## Lo que aprenderemos esta semana
+
+**1. De dónde vienen los datos**
+
+- Fuentes primarias y secundarias, y qué suciedad es típica de cada una.
+- Por qué conocer el origen te dice **qué errores buscar**.
+
+**2. Las cuatro dimensiones de la calidad**
+
+- Completitud, consistencia, validez y unicidad: el checklist que se aplica a cualquier base, siempre.
+
+**3. Los tres problemas clásicos**
+
+- Valores faltantes: diagnosticar y decidir (eliminar, imputar, marcar).
+- Outliers: la regla del IQR y la pregunta que importa (¿error o caso real?).
+- Categorías inconsistentes: el error más silencioso y más caro.
+
+**4. Qué es y para qué sirve la EDA**
+
+- El flujo *raw → clean → analysis-ready* y el acta de decisiones.
+
+::: {.callout-connect}
+**¿Y esto qué tiene que ver con lo que ya sabemos?**
+
+La semana pasada dibujamos el mapa de siete etapas. Esta semana bajamos a las **etapas 3 y 4** — limpieza y EDA — que juntas se llevan el **80% del tiempo** de cualquier proyecto real. Y todo lo de la semana 4 (`filter`, `mutate`, `group_by`, `ggplot`) deja de ser un ejercicio de sintaxis: **son las herramientas con las que se limpia**. Además, la EDA es literalmente la **Entrega 2** de tu proyecto (semana 9).
+:::
+
+<!--=================-->
+<!--=================-->
+# Glosario de la semana
+
+```{=html}
+<div class="glossary-grid">
+  <div class="gloss-card"><span class="gloss-term">Fuente primaria</span><span class="gloss-def">Datos que recolectaste tú o tu organización para este análisis. Sabes exactamente cómo se preguntaron; el riesgo está en la captura.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Fuente secundaria</span><span class="gloss-def">Datos que alguien más recolectó para otro propósito (DANE, Kaggle, una API). Más volumen y menos costo, pero no controlas las definiciones.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Dato estructurado</span><span class="gloss-def">Una tabla con filas (observaciones) y columnas (variables). Es con lo que trabajamos en este curso: CSV, Excel, SQL.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Diccionario de variables</span><span class="gloss-def">El documento que dice qué significa cada columna, en qué unidad está y qué valores admite. Si no existe, tu primer trabajo es construirlo.</span></div>
+  <div class="gloss-card"><span class="gloss-term">NA</span><span class="gloss-def">El valor faltante en R. No es un cero ni un texto vacío: es "aquí no hay dato", y se contagia a cualquier cálculo que lo toque.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Imputar</span><span class="gloss-def">Reemplazar un valor faltante por una estimación (la media, la mediana, un valor por defecto). Es una decisión, no un trámite: siempre se documenta.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Outlier</span><span class="gloss-def">Una observación que se sale del patrón. Puede ser un error de captura o el caso más interesante de la base — distinguirlo es tu trabajo.</span></div>
+  <div class="gloss-card"><span class="gloss-term">IQR</span><span class="gloss-def">(<i>Rango intercuartílico</i>) La distancia entre el percentil 25 y el 75: donde vive la mitad central de los datos. Es la base de la regla para detectar outliers.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Cardinalidad</span><span class="gloss-def">Cuántos valores distintos tiene una columna. Si "región" tiene cardinalidad 5 y sabes que hay 3 regiones, acabas de encontrar un problema.</span></div>
+  <div class="gloss-card"><span class="gloss-term">Analysis-ready</span><span class="gloss-def">El dataset ya diagnosticado, limpio y documentado, listo para analizar. Es el producto de esta semana y el punto de partida de todas las siguientes.</span></div>
+</div>
+```
+
+<!--=================-->
+<!--=================-->
+# Los exámenes que llegaron del laboratorio
+
+La semana pasada usamos la metáfora del médico: pregunta, exámenes, diagnóstico, tratamiento. Retomémosla justo donde la dejamos.
+
+Llegaron los exámenes del laboratorio. Un médico prudente **no diagnostica de inmediato**. Primero los mira con desconfianza profesional y se hace cuatro preguntas en dos segundos:
+
+- ¿Está **completo**? (falta la mitad de la hoja)
+- ¿Es **consistente**? (la fecha de la muestra es posterior a la del resultado)
+- ¿Es **válido**? (una hemoglobina de 900 no es una enfermedad rarísima: es un error de digitación)
+- ¿Es **único**? (te repitieron el mismo examen y quedó cargado dos veces)
+
+Solo si los exámenes pasan ese filtro, el médico diagnostica. **Si diagnostica sobre un examen equivocado, todo lo que venga después estará equivocado — y con total confianza.**
+
+::: {.callout-key}
+**La idea más importante de toda la semana**
+
+Un modelo entrenado con datos sucios produce resultados sucios, **pero no produce ningún error**. R no te va a avisar. El cálculo va a salir, el gráfico se va a ver bonito y el número va a tener dos decimales. La suciedad de los datos no se manifiesta como una falla: se manifiesta como una **respuesta confiada y falsa**. Por eso el diagnóstico no es opcional.
+:::
+
+Esas cuatro preguntas del médico tienen nombre técnico, y son el checklist de esta semana.
+
+<!--=================-->
+<!--=================-->
+# Fuentes de datos: el origen te dice qué buscar
+
+Antes de limpiar, hay que saber de dónde vienen los datos. **El origen determina qué errores son probables.**
+
+## Primaria vs. secundaria
+
+**Fuente primaria** — los recolectaste tú o tu organización, para este análisis. Una encuesta de satisfacción, el registro de ventas propio, un experimento A/B.
+
+- *Ventaja:* sabes exactamente qué se preguntó y cómo.
+- *Riesgo típico:* **errores de captura** y formularios mal diseñados. Si un campo se llenaba a mano, ahí va a haber suciedad.
+
+**Fuente secundaria** — alguien más los recolectó, para otro propósito. Datos del DANE, de Nielsen, de Kaggle, de la API de una red social.
+
+- *Ventaja:* mucho más volumen, mucho menor costo.
+- *Riesgo típico:* **no conoces el proceso de recolección**, y las definiciones pueden no coincidir con las tuyas. Su "cliente activo" puede no ser tu "cliente activo".
+
+| Tipo | Descripción | Ejemplos |
+|---|---|---|
+| **Estructurado** | Tabla con filas y columnas | Excel, CSV, base de datos SQL |
+| **Semi-estructurado** | Tiene estructura, pero flexible | JSON, XML |
+| **No estructurado** | Sin formato predefinido | Texto libre, imágenes, audio |
+
+: En este curso trabajamos con datos **estructurados**. {.striped}
+
+::: {.callout-warning}
+**El origen te dice qué suciedad esperar**
+
+Si tus datos de ventas salen del ERP pero la columna `región` la llenaba el equipo **a mano en un Excel**, ya sabes que vas a encontrar `"Norte"`, `"norte"`, `"NORTE"` y `"Nortte"` conviviendo. No es una falla del sistema: es una consecuencia previsible de cómo se capturó el dato.
+
+Este es el reflejo que hay que desarrollar: **antes de abrir la base, pregunta cómo se llenó.** Te ahorra media hora de sorpresas.
+:::
+
+<!--=================-->
+<!--=================-->
+# Las cuatro dimensiones de la calidad
+
+Las cuatro preguntas del médico, con su nombre real. Este es el checklist que le vas a aplicar a **toda** base de datos que recibas en tu vida profesional.
+
+```{=html}
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>Completitud</b> — ¿están todos los datos que deberían estar? Es el terreno de los <b>valores faltantes</b> (NA) y de las columnas que llegaron vacías.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>Consistencia</b> — ¿el mismo hecho se representa siempre igual? Es el terreno de las <b>categorías inconsistentes</b> ("Norte" vs. "norte") y de los formatos que no cuadran entre tablas.</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>Validez</b> — ¿los valores son posibles? Es el terreno de los <b>valores imposibles</b> (una cantidad de −5, una fecha en el futuro, una edad de 200 años) y de los <b>tipos incorrectos</b> (un precio guardado como texto).</div></div>
+  <div class="pipe-step"><div class="pipe-num">4</div><div><b>Unicidad</b> — ¿cada observación aparece una sola vez? Es el terreno de los <b>duplicados</b>, que inflan silenciosamente todos los totales.</div></div>
+</div>
+```
+
+::: {.callout-key}
+**La revisión estructural: los primeros 30 segundos**
+
+Antes incluso de las cuatro dimensiones, hay una revisión más básica que se hace de entrada:
+
+- **Dimensiones:** ¿cuántas filas y columnas tiene? ¿Es lo que esperabas?
+- **Qué es una fila:** ¿una transacción? ¿un cliente? ¿un cliente-mes? Si no puedes responder esto, no puedes analizar nada.
+- **Nombres y tipos:** ¿las columnas se llaman como deberían? ¿los números son números?
+- **Diccionario:** ¿existe? Si no, constrúyelo tú — aunque sea de diez líneas.
+- **Cardinalidad:** ¿cuántos valores distintos tiene cada columna de texto? Aquí saltan las inconsistencias.
+:::
+
+::: {.callout-remember}
+**Resumen del bloque**
+
+Cuatro dimensiones: **completitud** (¿falta?), **consistencia** (¿se escribe siempre igual?), **validez** (¿es posible?) y **unicidad** (¿está repetido?). Y una regla de oro que las precede: saber **qué representa una fila**. Todo el diagnóstico de la clase del jueves es este checklist, ejecutado con código.
+:::
+
+<!--=================-->
+<!--=================-->
+# Problema 1: valores faltantes
+
+## Diagnosticar antes de decidir
+
+Lo primero **no** es rellenar: es **contar**. Para cada variable necesitas saber cuántos faltantes hay y qué **proporción** representan. No es lo mismo un 0,5% que un 40%.
+
+En R, una radiografía completa se pide con una sola función:
+
+```r
+skim(ventas_raw)   # del paquete skimr
+```
+
+Esa salida te da, por columna: el tipo de dato, `n_missing` (cuántos faltan), `n_unique` (cardinalidad) y, para las numéricas, mínimo, máximo, media y desviación. **Se lee de arriba abajo, columna por columna, y cualquier cosa que no tenga sentido es un hallazgo.** En clase la vamos a leer juntos.
+
+## Las tres estrategias
+
+Una vez sabes cuánto falta, hay tres caminos — y elegir es tu trabajo, no el de R:
+
+**1. Eliminar.** Razonable cuando faltan pocos y no hay patrón en quién falta. Si el 0,5% de las filas no tiene precio, eliminarlas casi no cambia nada.
+
+**2. Imputar.** Reemplazar por una estimación: la **mediana** (más robusta que la media cuando hay outliers), la media, o un valor por defecto del negocio. Útil cuando no puedes darte el lujo de perder la fila.
+
+**3. Marcar.** Crear una columna indicadora (`precio_faltaba = TRUE/FALSE`) y conservar el registro. Suena raro, pero a veces **el hecho de que falte es información**: si a los clientes que se fueron nunca les registraron el motivo, ese vacío no es aleatorio — te está diciendo algo.
+
+::: {.callout-warning}
+**El faltante que no es aleatorio**
+
+La pregunta que separa un analista de un ejecutor: **¿por qué falta?** Si los ingresos faltan justo en los clientes de mayor patrimonio (porque se negaron a declararlos), imputarlos con la mediana **sesga toda tu base hacia abajo** y ninguna estadística te va a avisar. Antes de imputar, pregúntate si los datos faltan al azar o si hay un mecanismo detrás.
+:::
+
+::: {.callout-key}
+**El principio que no se negocia**
+
+> Toda decisión sobre faltantes debe quedar **documentada**.
+
+No importa cuál de las tres elijas: importa que quede escrito qué hiciste y por qué. Eliminaste 12 filas — ¿cuáles y con qué criterio? Imputaste con la mediana — ¿por qué la mediana y no la media? Un análisis que no puede responder eso no es reproducible, y por lo tanto no es un activo de nadie.
+:::
+
+<!--=================-->
+<!--=================-->
+# Problema 2: outliers
+
+## Detectarlos
+
+Un outlier es una observación que se sale del patrón. Hay tres formas de encontrarlos, de la más simple a la más visual:
+
+**1. Reglas de rango.** Las que salen del negocio: una cantidad no puede ser negativa, una edad no puede ser 200, un porcentaje no puede pasar de 100. Estas son las más fáciles y las más ignoradas.
+
+**2. La regla del IQR.** El **rango intercuartílico** (IQR) es la distancia entre el percentil 75 y el percentil 25 — es decir, el ancho de la franja donde vive **la mitad central** de tus datos. La regla estándar marca como outlier todo lo que caiga fuera de:
+
+> `[ Q1 − 1,5 × IQR , Q3 + 1,5 × IQR ]`
+
+La intuición: si un valor está a más de una vez y media el ancho de la caja por fuera de la caja, es sospechoso. Es exactamente lo que dibuja un **boxplot**: la caja es el IQR, los bigotes llegan hasta ese límite, y los puntos sueltos más allá son los candidatos.
+
+**3. Mirarlos.** Un **histograma** con el eje X estirándose solo hasta una barrita solitaria a la derecha es un outlier gritando. Un **boxplot** te los señala uno por uno.
+
+## Tratarlos: la pregunta que importa
+
+Detectarlo es lo fácil. La decisión es esta:
+
+::: {.callout-key}
+**¿Es un error o es un caso real?**
+
+- **Un mouse con precio de $12.000** entre mouses de $25 → es un **error de captura** (probablemente eran $120). Se corrige.
+- **Una venta de $80 millones** entre ventas de $2 millones → puede ser **el cliente corporativo más importante del año**. Si lo eliminas por "limpiar", borraste el dato más valioso de la base.
+
+El mismo procedimiento estadístico los marca a los dos. **Solo el conocimiento del negocio los distingue.** Un outlier no es un error hasta que demuestres que lo es.
+:::
+
+Con eso decidido, las opciones son: **corregir** (si sabes el valor verdadero), **eliminar** (si es un error irrecuperable), **recortar o *capping*** (llevarlo al límite razonable en vez de borrarlo), o **dejarlo y reportarlo** (si es real). Y otra vez: se documenta.
+
+::: {.callout-remember}
+**Resumen del bloque**
+
+Faltantes → **cuenta primero**, luego elige entre eliminar / imputar / marcar, y pregúntate **por qué faltan**. Outliers → detecta con reglas de rango, con el **IQR** (`Q1 − 1,5·IQR` a `Q3 + 1,5·IQR`, que es lo que dibuja el boxplot) y con gráficos; después decide si es **error o caso real**. Las dos decisiones se documentan, siempre.
+:::
+
+<!--=================-->
+<!--=================-->
+# Problema 3: el error más silencioso
+
+Guardamos el peor para el final, porque no parece grave y es el que más plata cuesta.
+
+Para R, estas son **tres regiones distintas**:
+
+```r
+"Norte"    "norte"    "NORTE"
+```
+
+Ahora recuerda el `group_by(region)` de la semana 4. Si calculas el ingreso por región sobre una base así, R te devuelve **cinco grupos donde hay tres**. Los totales no cuadran. Y lo peor:
+
+::: {.callout-warning}
+**R no te va a avisar**
+
+No hay error. No hay warning. La tabla sale, se ve perfecta, tiene sus totales alineados y sus dos decimales. Se la pasas al gerente, él asigna el presupuesto regional con esa tabla, y el presupuesto queda mal repartido — **porque "Norte" y "norte" se llevaron cada uno su pedazo.**
+
+Este es el error más frecuente y más silencioso del análisis de datos. Y se arregla con **una línea** de código, si te acuerdas de buscarlo.
+:::
+
+El diagnóstico es sencillo (`n_unique` en la radiografía, o mirar los valores directamente), y la corrección también: llevar todo al mismo formato — mayúsculas, minúsculas, lo que definas — de modo que los cinco grupos vuelvan a ser tres. En clase lo hacemos.
+
+El primo hermano de este problema es el **tipo de dato incorrecto**: un `precio` que llega como texto porque alguien dejó el signo `$` adentro (`"$1200"`). R no puede sumar texto, así que cualquier cálculo se cae o, peor, devuelve `NA` sin explicar por qué.
+
+<!--=================-->
+<!--=================-->
+# Qué es la EDA (y qué no es)
+
+Con los datos ya limpios empieza el **Análisis Exploratorio de Datos**.
+
+::: {.callout-key}
+**La EDA no es "hacer gráficos bonitos"**
+
+El objetivo de la EDA **no** es responder la pregunta de negocio final. Es **entender la estructura, las distribuciones y las relaciones** antes de comprometerte con un análisis o un modelo. Es el médico leyendo los exámenes ya validados, antes de diagnosticar.
+:::
+
+La EDA busca cuatro cosas:
+
+1. **Distribuciones:** ¿cómo se comporta cada variable por su cuenta? ¿Simétrica, sesgada, con dos picos?
+2. **Resúmenes por grupo:** ¿hay diferencias reales entre regiones, categorías, trimestres?
+3. **Relaciones:** ¿precio y cantidad tienen algo que ver entre sí?
+4. **Anomalías residuales:** ¿quedó algo raro que el diagnóstico no cazó?
+
+Y combina **tablas** (`dplyr`) con **gráficos** (`ggplot2`). Ninguno de los dos alcanza solo.
+
+## Un ejemplo de por qué esto importa
+
+Supón que el histograma del precio muestra **dos jorobas**: un montón de productos alrededor de $80 y otro alrededor de $1.200. Eso es una distribución **bimodal**, y no es una curiosidad estadística: es un **hallazgo de negocio**. Significa que tienes dos segmentos de producto radicalmente distintos conviviendo en la misma tabla.
+
+Consecuencia inmediata: si el gerente te pide "el precio promedio", ese número **no representa a nadie**. Cae en el valle entre las dos jorobas, donde no hay productos. La respuesta correcta no es el promedio: es *"hay que separar los segmentos, y aquí está el promedio de cada uno"*.
+
+::: {.callout-key}
+**Lo que la EDA produce**
+
+> La EDA no produce respuestas. Produce **hipótesis** y **decisiones de limpieza**.
+
+Sales de la EDA con tres o cuatro hallazgos, un puñado de preguntas nuevas y la certeza de que los datos aguantan lo que viene. Ese es exactamente el entregable de la **Entrega 2** de tu proyecto (semana 9).
+:::
+
+<!--=================-->
+<!--=================-->
+# El producto de la semana: raw → clean → analysis-ready
+
+Todo lo anterior se organiza en un flujo con tres estados, y **los tres se conservan**:
+
+```{=html}
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>raw</b> — el dataset tal como llegó. <b>No se toca nunca.</b> Es tu punto de retorno: si te equivocas limpiando, siempre puedes volver.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>clean</b> — el dataset con los problemas corregidos, construido <b>por código</b> a partir de raw. Cada corrección es una línea que otra persona puede leer.</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>analysis-ready</b> — el clean más las variables derivadas que tu análisis necesita (<code>ingreso = precio × cantidad</code>, por ejemplo). Es lo que alimenta todo lo que viene.</div></div>
+</div>
+```
+
+::: {.callout-workflow}
+**El acta de limpieza**
+
+Al terminar, debes poder responder estas tres preguntas sin dudar:
+
+1. ¿Cuántas filas eliminé y **por qué**?
+2. ¿Qué valores imputé o corregí y **con qué criterio**?
+3. ¿Qué columnas eliminé y **por qué no aportaban**?
+
+La prueba de fuego: que **otra persona** —o tú mismo dentro de tres meses— pueda correr tu script sobre el `raw` y obtener **exactamente** el mismo `analysis-ready`. Si eso no ocurre, tu análisis no es reproducible, y un análisis no reproducible no le sirve a ninguna organización.
+:::
+
+::: {.callout-connect}
+**Hacia dónde va esto**
+
+| Lo de esta semana | Dónde lo vas a necesitar |
+|---|---|
+| Dataset limpio | La base de todos los modelos, de la semana 10 a la 13 |
+| EDA de distribuciones | En ML: verificar que train y test se parezcan |
+| Detección de outliers | En regresión (semana 12): un outlier infla el RMSE y tuerce los coeficientes |
+| Categorías estandarizadas | En clasificación (semana 11): si las etiquetas no son consistentes, el modelo inventa clases |
+| Documentar decisiones | Exigencia del proyecto final: toda transformación debe estar justificada |
+
+**Y en la semana 7 hay parcial:** el diagnóstico de calidad y la interpretación de la EDA entran. Este documento es material de estudio.
+:::
+
+<!--=================-->
+<!--=================-->
+# Checklist de salida
+
+Al terminar el podcast (o este documento), debes ser capaz de:
+
+- [ ] Distinguir fuente primaria de secundaria y decir qué riesgo típico trae cada una.
+- [ ] Explicar por qué conocer el origen del dato te dice qué suciedad buscar.
+- [ ] Nombrar las cuatro dimensiones de la calidad y dar un ejemplo de cada una.
+- [ ] Explicar por qué la suciedad de los datos no produce errores, sino respuestas confiadas y falsas.
+- [ ] Decir qué representa una fila de una base y por qué esa pregunta va primero.
+- [ ] Enumerar las tres estrategias frente a valores faltantes y cuándo conviene cada una.
+- [ ] Explicar por qué "¿por qué falta?" importa más que "¿con qué lo relleno?".
+- [ ] Definir el IQR y enunciar la regla de detección de outliers (`Q1 − 1,5·IQR` a `Q3 + 1,5·IQR`).
+- [ ] Explicar por qué un outlier no es necesariamente un error, con un ejemplo de cada caso.
+- [ ] Explicar qué le pasa a un `group_by()` cuando hay "Norte" y "norte", y por qué R no avisa.
+- [ ] Explicar qué busca la EDA y por qué no es "hacer gráficos bonitos".
+- [ ] Describir el flujo *raw → clean → analysis-ready* y qué es el acta de limpieza.
+
+<!--=================-->
+<!--=================-->
+# Preguntas de comprensión
+
+Del estilo de las que encontrarás en el quiz. Intenta responderlas **antes** de abrir la respuesta.
+
+::: {.callout-practice}
+**1. El presupuesto mal repartido**
+
+Un analista calcula el ingreso por región sobre la base sin limpiar y obtiene **5 grupos** donde la empresa tiene 3 regiones. Explica (a) por qué R genera 5 grupos y (b) qué le pasa al gerente que usa esa tabla para asignar el presupuesto regional.
+
+```{=html}
+<details class="answer"><summary>Ver respuesta</summary>
+<p><b>(a)</b> Porque para R <code>"Norte"</code>, <code>"norte"</code> y <code>"NORTE"</code> son <b>tres cadenas de texto distintas</b>, y <code>group_by()</code> agrupa por valor exacto. Es un problema de <b>consistencia</b>. <b>(b)</b> El ingreso real del Norte queda <b>partido en dos filas</b>, así que el Norte parece la mitad de rentable de lo que es y recibe menos presupuesto del que merece. Lo grave: <b>R no emitió ningún error</b> — la tabla se ve perfecta. La decisión se toma con datos falsos y nadie se entera.</p>
+</details>
+```
+:::
+
+::: {.callout-practice}
+**2. Dos precios sospechosos**
+
+En una base de una tienda de tecnología encuentras: (a) un **mouse con precio de $12.000** cuando todos los demás cuestan entre $20 y $30, y (b) una **venta de $80 millones** cuando la venta típica es de $2 millones. ¿Los tratas igual? ¿Qué haces con cada uno?
+
+```{=html}
+<details class="answer"><summary>Ver respuesta</summary>
+<p><b>No.</b> El (a) es casi con certeza un <b>error de captura</b> (probablemente $120, con dos ceros de más): se corrige y se documenta. El (b) puede ser perfectamente <b>real</b>: el cliente corporativo más grande del año. Si lo eliminas "para limpiar", borraste el dato más valioso de la base. La regla: <b>el mismo procedimiento estadístico marca a los dos, pero solo el conocimiento del negocio los distingue</b>. Un outlier no es un error hasta que demuestres que lo es — así que ve a mirar la fila completa antes de decidir.</p>
+</details>
+```
+:::
+
+::: {.callout-practice}
+**3. La imputación que sesga**
+
+Tienes una base de clientes donde falta el `ingreso_mensual` en el 15% de los casos. Un compañero propone: "fácil, lo relleno con la mediana y seguimos". ¿Qué le preguntarías antes de dejarlo?
+
+```{=html}
+<details class="answer"><summary>Ver respuesta</summary>
+<p><b>"¿Por qué faltan?"</b> Si faltan al azar, imputar con la mediana es defendible. Pero si faltan porque <b>los clientes de mayor patrimonio se negaron a declararlo</b>, el faltante <b>no es aleatorio</b>: al imputarlos a todos con la mediana estás empujando artificialmente hacia abajo justo la cola alta de la distribución, y sesgas toda la base sin que ninguna estadística te avise. En ese caso conviene <b>marcar</b> (crear un indicador de faltante) en vez de rellenar. Y decidas lo que decidas: se documenta.</p>
+</details>
+```
+:::
+
+::: {.callout-practice}
+**4. El promedio que no representa a nadie**
+
+Después de limpiar, el histograma del precio muestra dos picos bien separados: uno en ~$80 y otro en ~$1.200. El gerente te pide "el precio promedio de ventas". ¿Se lo das?
+
+```{=html}
+<details class="answer"><summary>Ver respuesta</summary>
+<p>No, o al menos no solo. Esa es una distribución <b>bimodal</b>: hay <b>dos segmentos de producto distintos</b> (accesorios baratos y equipos caros) conviviendo en la tabla. El promedio va a caer en el <b>valle entre los dos picos</b>, un rango de precios donde no existe casi ningún producto: es un número técnicamente correcto que <b>no describe a nadie</b>. La respuesta correcta es separar los segmentos y reportar el promedio de cada uno — y esa recomendación <b>salió de la EDA</b>, no del modelo. Esto es exactamente a qué nos referimos con que la EDA produce hipótesis y decisiones.</p>
+</details>
+```
+:::
+
+---
+
+## Material adicional (opcional)
+
+Si quieres profundizar por tu cuenta:
+
+- **R for Data Science — Cap. 18 (Missing values):** el tratamiento detallado de los `NA` → [r4ds.hadley.nz/missing-values](https://r4ds.hadley.nz/missing-values)
+- **Tidy Data (Hadley Wickham):** el artículo que define qué significa un dataset "ordenado" → [vita.had.co.nz/papers/tidy-data.pdf](https://vita.had.co.nz/papers/tidy-data.pdf)
+- **dplyr cheat sheet:** la referencia rápida de todos los verbos → [rstudio.github.io/cheatsheets/data-transformation.pdf](https://rstudio.github.io/cheatsheets/data-transformation.pdf)
+
+Para esta semana, el podcast (o este documento) es suficiente. **Nos vemos en clase: traemos una base bien sucia y la dejamos presentable.** 🧹
+
+---
+
+**Los recursos de esta semana →** esta teoría continúa en la [**práctica guiada en clase**](../practice/week-06.html) y cierra con el [**taller evaluable**](../task/week-06.html).

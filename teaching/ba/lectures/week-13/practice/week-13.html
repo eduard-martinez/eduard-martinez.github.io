@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Unidad 6 - Práctica: la fábrica de playlists</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="week-13_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-13_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-13_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-13_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="week-13_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-13_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-13_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-13_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-13_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-13_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-13_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-13_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#reglas-de-juego" id="toc-reglas-de-juego" class="nav-link active" data-scroll-target="#reglas-de-juego"><span class="header-section-number">1</span> Reglas de juego</a></li>
+  <li><a href="#el-setup-5-min" id="toc-el-setup-5-min" class="nav-link" data-scroll-target="#el-setup-5-min"><span class="header-section-number">2</span> El setup <span class="badge-time">≈ 5 min</span></a></li>
+  <li><a href="#momento-1-elegir-las-variables-del-sonido-5-min" id="toc-momento-1-elegir-las-variables-del-sonido-5-min" class="nav-link" data-scroll-target="#momento-1-elegir-las-variables-del-sonido-5-min"><span class="header-section-number">3</span> Momento 1 — Elegir las variables del sonido <span class="badge-time">≈ 5 min</span></a></li>
+  <li><a href="#momento-2-el-experimento-del-ingenuo-8-min" id="toc-momento-2-el-experimento-del-ingenuo-8-min" class="nav-link" data-scroll-target="#momento-2-el-experimento-del-ingenuo-8-min"><span class="header-section-number">4</span> Momento 2 — El experimento del ingenuo <span class="badge-time">≈ 8 min</span></a></li>
+  <li><a href="#momento-3-la-misma-cancha-para-todos-4-min" id="toc-momento-3-la-misma-cancha-para-todos-4-min" class="nav-link" data-scroll-target="#momento-3-la-misma-cancha-para-todos-4-min"><span class="header-section-number">5</span> Momento 3 — La misma cancha para todos <span class="badge-time">≈ 4 min</span></a></li>
+  <li><a href="#momento-4-cuántas-listas-el-codo-y-la-silueta-12-min" id="toc-momento-4-cuántas-listas-el-codo-y-la-silueta-12-min" class="nav-link" data-scroll-target="#momento-4-cuántas-listas-el-codo-y-la-silueta-12-min"><span class="header-section-number">6</span> Momento 4 — ¿Cuántas listas? El codo y la silueta <span class="badge-time">≈ 12 min</span></a></li>
+  <li><a href="#momento-5-las-cuatro-listas-y-su-perfil-12-min" id="toc-momento-5-las-cuatro-listas-y-su-perfil-12-min" class="nav-link" data-scroll-target="#momento-5-las-cuatro-listas-y-su-perfil-12-min"><span class="header-section-number">7</span> Momento 5 — Las cuatro listas y su perfil <span class="badge-time">≈ 12 min</span></a></li>
+  <li><a href="#momento-6-bautizar-las-listas-8-min" id="toc-momento-6-bautizar-las-listas-8-min" class="nav-link" data-scroll-target="#momento-6-bautizar-las-listas-8-min"><span class="header-section-number">8</span> Momento 6 — Bautizar las listas <span class="badge-time">≈ 8 min</span></a></li>
+  <li><a href="#el-reto-si-te-sobra-tiempo" id="toc-el-reto-si-te-sobra-tiempo" class="nav-link" data-scroll-target="#el-reto-si-te-sobra-tiempo"><span class="header-section-number">9</span> El reto (si te sobra tiempo) <span class="badge-time">🏆</span></a></li>
+  <li><a href="#cierre" id="toc-cierre" class="nav-link" data-scroll-target="#cierre"><span class="header-section-number">10</span> Cierre</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 6 - Práctica: la fábrica de playlists</h1>
+<p class="subtitle lead">Aplicación guiada en clase · Semana 13 · 06327-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="reglas-de-juego" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Reglas de juego</h1>
+<div class="callout-key">
+<p><strong>Hoy nadie tiene la respuesta correcta — ni siquiera yo</strong></p>
+<p>Tres semanas prediciendo con hoja de respuestas; hoy se acabaron. Vas a <strong>descubrir</strong> grupos que nadie ha etiquetado y a defenderlos con perfilamiento. Esta práctica asume la <a href="../theory/week-13.html">teoría de la semana</a> (k-means, escalamiento, codo, silueta) — nada se re-explica. El <code>dplyr</code> y el <code>ggplot2</code> de la <a href="../../week-04/theory/week-04.html">semana 4</a> hoy trabajan tiempo completo.</p>
+</div>
+<ul>
+<li>👥 En <strong>parejas</strong>: uno escribe, el otro audita cifras y lee los perfiles en voz alta. Roten en el Momento 4.</li>
+<li>🖥️ <strong>RStudio</strong> con tu proyecto del curso. Paquetes: <code>dplyr</code>, <code>ggplot2</code> y <code>cluster</code> — <strong>ninguno es nuevo</strong>; <code>cluster</code> viene instalado con R.</li>
+<li>📥 El dato de hoy: <a href="spotify_canciones.csv" download=""><strong>spotify_canciones.csv</strong></a> — 320 canciones del catálogo urbano de una plataforma de streaming, con sus características de audio medidas por el sistema. Guárdalo en <code>data/</code>.</li>
+<li>🎯 La misión de la gerencia de producto: <em>“Quiero listas de reproducción automáticas con personalidad: ‘para el gimnasio’, ‘tarde tranquila’… Y no me sirve agrupar por el género que declara la disquera — eso es marketing. Agrupen por cómo <strong>suenan</strong>.”</em></li>
+</ul>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-setup-5-min" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> El setup <span class="badge-time">≈ 5 min</span></h1>
+<p>Script nuevo: <code>scripts/13_playlists.R</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ============================================</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Práctica semana 13 — La fábrica de playlists</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Nombre(s): _______________</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Fecha:     _______________</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## ============================================</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Librerías / Libraries</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(dplyr, ggplot2, cluster)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="do">## Cargar datos / Load data</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>canciones <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/spotify_canciones.csv"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">## Radiografía / First look</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(canciones)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(canciones)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> <strong>320 filas y 8 columnas.</strong> Tres columnas de identidad (<code>cancion</code>, <code>artista</code>, <code>genero</code>) y cinco numéricas: cuatro <strong>características de audio</strong> — <code>danceability</code> (qué tan bailable, 0–1), <code>energy</code> (intensidad, 0–1), <code>acousticness</code> (probabilidad de ser acústica, 0–1), <code>tempo</code> (velocidad en BPM) — y <code>streams</code> (reproducciones).</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="momento-1-elegir-las-variables-del-sonido-5-min" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Momento 1 — Elegir las variables del sonido <span class="badge-time">≈ 5 min</span></h1>
+<p>El pipeline de la teoría, paso 2: <strong>la pregunta decide las variables</strong>. La misión dice “agrupar por cómo suenan” — entonces entran las cuatro variables de audio y quedan fuera dos tentaciones:</p>
+<ul>
+<li><code>streams</code> mide <strong>popularidad</strong>, no estilo: una canción de gimnasio y un bolero pueden tener los mismos streams.</li>
+<li><code>genero</code> es justamente la <strong>etiqueta declarada</strong> que la gerencia no se cree — la guardamos para el final, como control de calidad.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Variables de clustering / Clustering features</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>audio <span class="ot">&lt;-</span> <span class="fu">select</span>(<span class="at">.data =</span> canciones,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                danceability, energy, acousticness, tempo)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(audio, <span class="dv">3</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Las escalas de cada variable / Each variable's scale</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sapply</span>(audio, sd), <span class="dv">3</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> las desviaciones estándar: <code>danceability</code> <strong>0.183</strong>, <code>energy</code> <strong>0.234</strong>, <code>acousticness</code> <strong>0.281</strong>… y <code>tempo</code> <strong>20.239</strong>. Una de estas variables no es como las otras — habla en BPM mientras las demás susurran entre 0 y 1. Guarda ese dato: es la bomba del Momento 2.</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="momento-2-el-experimento-del-ingenuo-8-min" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Momento 2 — El experimento del ingenuo <span class="badge-time">≈ 8 min</span></h1>
+<p>La teoría advierte que escalar es obligatorio. Pero una advertencia no duele — un experimento sí. Corramos k-means <strong>sin escalar</strong>, como lo haría alguien de afán, y perfilemos lo que sale:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## k-means SIN escalar (a propósito) / k-means on raw features (on purpose)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13</span>)   <span class="co"># ¡en la línea inmediatamente anterior a kmeans()!</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>km_crudo <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(audio, <span class="at">centers =</span> <span class="dv">4</span>, <span class="at">nstart =</span> <span class="dv">25</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Perfil de los grupos resultantes / Profile the raw clusters</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>canciones_crudo <span class="ot">&lt;-</span> <span class="fu">mutate</span>(<span class="at">.data =</span> canciones, <span class="at">cluster =</span> <span class="fu">factor</span>(km_crudo<span class="sc">$</span>cluster))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>perfil_crudo <span class="ot">&lt;-</span> <span class="fu">summarise</span>(<span class="at">.data =</span> canciones_crudo,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                          <span class="at">danceability =</span> <span class="fu">mean</span>(danceability),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                          <span class="at">energy       =</span> <span class="fu">mean</span>(energy),</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                          <span class="at">acousticness =</span> <span class="fu">mean</span>(acousticness),</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                          <span class="at">tempo        =</span> <span class="fu">mean</span>(tempo),</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                          <span class="at">n_canciones  =</span> <span class="fu">n</span>(),</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                          <span class="at">.by =</span> cluster)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">arrange</span>(perfil_crudo, cluster)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> cuatro grupos con tempos <strong>88.6 / 101.0 / 75.3 / 130.4</strong> — franjas de BPM perfectamente ordenadas. Ahora mira el resto de la tabla: los clusters 1 y 3 son <strong>casi la misma canción</strong> en todo lo demás (danceability 0.60 vs 0.58, energy 0.50 vs 0.50)… separados solo por velocidad. ¿Y la lista acústica que pedía la gerencia? <strong>No existe</strong>: el acousticness más alto de la tabla es 0.44 — las canciones de guitarra quedaron regadas entre las franjas de tempo.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Qué acaba de pasar:</strong> la distancia la secuestró el <code>tempo</code>. Su desviación (20.2) es ~100 veces la de las variables 0–1, así que para el algoritmo una diferencia de 5 BPM pesa más que la diferencia entre una canción 100% acústica y una 100% electrónica. El clustering refleja <strong>unidades, no sonido</strong> — exactamente el error #1 de la teoría, y acabas de verlo con tus propios datos.</p>
+</div>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="momento-3-la-misma-cancha-para-todos-4-min" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Momento 3 — La misma cancha para todos <span class="badge-time">≈ 4 min</span></h1>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Escalar: media 0, desviación 1 / Scale to mean 0, sd 1</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>audio_esc <span class="ot">&lt;-</span> <span class="fu">scale</span>(audio)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Verificar / Verify</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">colMeans</span>(audio_esc), <span class="dv">3</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">apply</span>(audio_esc, <span class="dv">2</span>, sd), <span class="dv">3</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> medias <strong>0, 0, 0, 0</strong> y desviaciones <strong>1, 1, 1, 1</strong>. Las cuatro variables ahora pesan igual en la distancia. (Nota: <code>scale()</code> devuelve una matriz, no un data frame — para <code>kmeans()</code> da lo mismo.)</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="momento-4-cuántas-listas-el-codo-y-la-silueta-12-min" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Momento 4 — ¿Cuántas listas? El codo y la silueta <span class="badge-time">≈ 12 min</span></h1>
+<p>Nadie sabe cuántos “sonidos” hay en el catálogo. Corremos k-means para k = 1…8 y dejamos que las dos métricas de la teoría acoten la respuesta.</p>
+<p><strong>El codo</strong> (WCSS por k):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## WCSS para k = 1..8 / Elbow: WCSS for k = 1..8</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13</span>)   <span class="co"># una semilla para todo el barrido</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>wss  <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, <span class="cf">function</span>(k) <span class="fu">kmeans</span>(audio_esc, <span class="at">centers =</span> k, <span class="at">nstart =</span> <span class="dv">25</span>)<span class="sc">$</span>tot.withinss)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>codo <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">k =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, <span class="at">wss =</span> wss)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>codo</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Gráfico del codo / Elbow plot</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(codo, <span class="fu">aes</span>(<span class="at">x =</span> k, <span class="at">y =</span> wss)) <span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"#1F4E79"</span>) <span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"#E87722"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>) <span class="sc">+</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Método del codo — catálogo urbano"</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Número de clusters (k)"</span>, <span class="at">y =</span> <span class="st">"WCSS"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> la WCSS cae <strong>1276 → 499 → 255 → 137</strong> … y de ahí en adelante gotea (123, 114, 107, 100). El cuarto cluster compró −118 de compactación; el quinto, apenas −13. El codo se dobla en <strong>k = 4</strong>.</p>
+<p><strong>La silueta</strong> (el desempate con máximo):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Silueta promedio para k = 2..8 / Average silhouette for k = 2..8</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>distancias <span class="ot">&lt;-</span> <span class="fu">dist</span>(audio_esc)   <span class="co"># matriz de distancias (se calcula UNA vez)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>sil <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">8</span>, <span class="cf">function</span>(k) {</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  km <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(audio_esc, <span class="at">centers =</span> k, <span class="at">nstart =</span> <span class="dv">25</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="fu">silhouette</span>(km<span class="sc">$</span>cluster, distancias)[, <span class="dv">3</span>])</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>silueta <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">k =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">8</span>, <span class="at">sil_prom =</span> <span class="fu">round</span>(sil, <span class="dv">3</span>))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>silueta</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> <code>sil_prom</code> sube <strong>0.530 → 0.552 → 0.572</strong> y a partir de k = 5 se derrumba (0.507, 0.414…). Máximo claro en <strong>k = 4</strong>: las dos métricas votaron lo mismo. La gerencia tendrá cuatro listas — si logramos nombrarlas (Momento 6).</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Si tus números no coinciden con los checkpoints</strong>, casi seguro corriste un <code>kmeans()</code> sin ejecutar su <code>set.seed(13)</code> justo antes (recuerda: cada arranque es aleatorio; la semilla + <code>nstart = 25</code> hacen el resultado reproducible). Ejecuta siempre el bloque completo, o corre el script con <em>Source</em>.</p>
+</div>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="momento-5-las-cuatro-listas-y-su-perfil-12-min" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Momento 5 — Las cuatro listas y su perfil <span class="badge-time">≈ 12 min</span></h1>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## k-means final con k = 4 / Final k-means</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>km_final <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(audio_esc, <span class="at">centers =</span> <span class="dv">4</span>, <span class="at">nstart =</span> <span class="dv">25</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Pegar el cluster al dataset ORIGINAL (sin escalar) / Attach clusters</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>canciones <span class="ot">&lt;-</span> <span class="fu">mutate</span>(<span class="at">.data =</span> canciones, <span class="at">cluster =</span> <span class="fu">factor</span>(km_final<span class="sc">$</span>cluster))</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(canciones<span class="sc">$</span>cluster)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> cuatro grupos de <strong>74 / 70 / 96 / 80</strong> canciones. Ojo al detalle profesional: el cluster se calcula con los datos <strong>escalados</strong>, pero el perfil se lee con los datos <strong>originales</strong> — los BPM y los 0–1 son los que el negocio entiende.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Tabla de perfilamiento / Profiling table</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>perfil <span class="ot">&lt;-</span> <span class="fu">summarise</span>(<span class="at">.data =</span> canciones,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">danceability =</span> <span class="fu">mean</span>(danceability),</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">energy       =</span> <span class="fu">mean</span>(energy),</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">acousticness =</span> <span class="fu">mean</span>(acousticness),</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">tempo        =</span> <span class="fu">mean</span>(tempo),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">streams_prom =</span> <span class="fu">mean</span>(streams),</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">n_canciones  =</span> <span class="fu">n</span>(),</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                    <span class="at">.by =</span> cluster)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">arrange</span>(perfil, cluster)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="do">## La canción insignia de cada lista / Flagship song per cluster</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>top_por_cluster <span class="ot">&lt;-</span> <span class="fu">summarise</span>(<span class="at">.data =</span> canciones,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>                             <span class="at">top_cancion =</span> cancion[<span class="fu">which.max</span>(streams)],</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>                             <span class="at">top_artista =</span> artista[<span class="fu">which.max</span>(streams)],</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>                             <span class="at">max_streams =</span> <span class="fu">max</span>(streams),</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>                             <span class="at">.by =</span> cluster)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="fu">arrange</span>(top_por_cluster, cluster)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> la tabla de perfiles (redondeando):</p>
+<table class="table-striped caption-top table">
+<thead>
+<tr class="header">
+<th>cluster</th>
+<th>danceability</th>
+<th>energy</th>
+<th>acousticness</th>
+<th>tempo</th>
+<th>n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>0.87</td>
+<td>0.88</td>
+<td>0.05</td>
+<td>130</td>
+<td>74</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>0.44</td>
+<td>0.29</td>
+<td>0.75</td>
+<td>90</td>
+<td>70</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>0.83</td>
+<td>0.77</td>
+<td>0.08</td>
+<td>98</td>
+<td>96</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>0.60</td>
+<td>0.53</td>
+<td>0.16</td>
+<td>77</td>
+<td>80</td>
+</tr>
+</tbody>
+</table>
+<p>Y las canciones insignia: <em>Alto Voltaje sin Frenos</em> (Anuel AA) en el 1, <em>Brisa y Vinilo</em> (J Balvin) en el 2, <em>Vibra Eterno</em> (Farruko) en el 3 y <em>Frío en el Alma</em> (Maluma) en el 4. <strong>Esta vez sí apareció la lista acústica</strong> (cluster 2: acousticness 0.75, energy 0.29) — escalar la sacó del escondite.</p>
+<p>Ahora los dos gráficos del perfilamiento — separación y dispersión:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Mapa de los clusters / Cluster scatterplot</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canciones, <span class="fu">aes</span>(<span class="at">x =</span> tempo, <span class="at">y =</span> danceability, <span class="at">color =</span> cluster)) <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"El mapa del catálogo: 4 sonidos"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Tempo (BPM)"</span>, <span class="at">y =</span> <span class="st">"Danceability"</span>, <span class="at">color =</span> <span class="st">"Cluster"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="do">## Dispersión dentro de cada cluster / Within-cluster spread</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(canciones, <span class="fu">aes</span>(<span class="at">x =</span> cluster, <span class="at">y =</span> acousticness, <span class="at">fill =</span> cluster)) <span class="sc">+</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Acousticness por cluster"</span>,</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Cluster"</span>, <span class="at">y =</span> <span class="st">"Acousticness"</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-key">
+<p><strong>Cómo leer el scatter:</strong> muestra solo 2 de las 4 dimensiones del clustering — dos clusters que se “tocan” en este plano pueden estar bien separados en acousticness o energy (por eso el boxplot acompaña). Y recuerda la advertencia de la teoría: el centroide es el <em>promedio</em> de la lista, no una canción real.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="momento-6-bautizar-las-listas-8-min" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Momento 6 — Bautizar las listas <span class="badge-time">≈ 8 min</span></h1>
+<p>k-means entregó números; el analista entrega nombres. Este es el paso que la gerencia de producto realmente compra.</p>
+<div class="callout-practice">
+<p><strong>En parejas (y luego compartimos):</strong> con la tabla de perfiles y las canciones insignia, completen para cada cluster:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Cluster</th>
+<th>Rasgo dominante del sonido</th>
+<th>Nombre de la lista</th>
+<th>¿Cuándo suena?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Criterio de calidad:</strong> el nombre debe ser específico y evocar el momento de uso — <em>“Cardio a 130”</em>, <em>“Domingo de guitarra”</em>. Nombres penalizados por la vida real: <em>“Grupo A”</em>, <em>“Lista 2”</em>, <em>“Música variada”</em>. Si un cluster no se deja nombrar, esa es información: sospecha del k.</p>
+</div>
+<p><strong>El producto de la semana</strong> — exporta la evidencia como siempre:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Exportar perfil y mapa / Export deliverables</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(perfil, <span class="st">"output/perfil_playlists.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"output/mapa_playlists.png"</span>, <span class="at">width =</span> <span class="dv">7</span>, <span class="at">height =</span> <span class="fl">4.5</span>)  <span class="co"># guarda el último gráfico</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-reto-si-te-sobra-tiempo" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> El reto (si te sobra tiempo) <span class="badge-time">🏆</span></h1>
+<p><strong>Reto 1 — El careo con la disquera.</strong> La columna <code>genero</code> que dejamos en la banca es la etiqueta <em>declarada</em>. Confróntala con el sonido:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(canciones<span class="sc">$</span>cluster, canciones<span class="sc">$</span>genero)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>¿Los clusters coinciden con el género? Casi: cada lista tiene un género dominante… y decenas de canciones “traicionadas” (por ejemplo, mira cuántas canciones etiquetadas <code>reggaeton</code> suenan a otra cosa). Discutan: ¿por qué la etiqueta comercial y el sonido medido no coinciden? ¿A cuál le cree la playlist automática?</p>
+<p><strong>Reto 2 — La ruleta de la inicialización.</strong> Corre <code>kmeans(audio_esc, centers = 4, nstart = 1)</code> tres veces <strong>sin</strong> semilla y compara <code>tot.withinss</code> entre corridas. ¿Cambia? Esa es la lotería de la que <code>nstart = 25</code> te protege (25 boletos en vez de 1).</p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="cierre" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Cierre</h1>
+<p>Hoy corriste el pipeline completo de segmentación con acompañamiento: variables → escala → codo/silueta → k-means → perfil → nombres. En el <a href="../task/week-13.html"><strong>taller</strong></a> lo harás solo, con una vuelta de tuerca: un gimnasio te entrega su base de socios <em>y la segmentación que dejó un practicante</em> — tu primer trabajo será auditarla (pista: el practicante no leyó el Momento 2 de hoy). Misma disciplina de siempre: toda cifra sale de tu script.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-13_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

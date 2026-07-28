@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="PhD. Eduard F. Martínez-González">
+
+<title>Unidad 2 - Práctica: de la base sucia al dataset confiable</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="week-06_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-06_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-06_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-06_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="week-06_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-06_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-06_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-06_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-06_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-06_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-06_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-06_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#reglas-de-juego" id="toc-reglas-de-juego" class="nav-link active" data-scroll-target="#reglas-de-juego"><span class="header-section-number">1</span> Reglas de juego</a></li>
+  <li><a href="#el-setup-profesional-8-min" id="toc-el-setup-profesional-8-min" class="nav-link" data-scroll-target="#el-setup-profesional-8-min"><span class="header-section-number">2</span> El setup profesional <span class="badge-time">≈ 8 min</span></a></li>
+  <li><a href="#paso-1-diagnóstico-15-min" id="toc-paso-1-diagnóstico-15-min" class="nav-link" data-scroll-target="#paso-1-diagnóstico-15-min"><span class="header-section-number">3</span> Paso 1 — Diagnóstico <span class="badge-time">≈ 15 min</span></a>
+  <ul class="collapse">
+  <li><a href="#la-radiografía-completa-skim" id="toc-la-radiografía-completa-skim" class="nav-link" data-scroll-target="#la-radiografía-completa-skim"><span class="header-section-number">3.1</span> La radiografía completa: <code>skim()</code></a></li>
+  <li><a href="#zoom-1-las-categorías" id="toc-zoom-1-las-categorías" class="nav-link" data-scroll-target="#zoom-1-las-categorías"><span class="header-section-number">3.2</span> Zoom 1: las categorías</a></li>
+  <li><a href="#zoom-2-los-duplicados" id="toc-zoom-2-los-duplicados" class="nav-link" data-scroll-target="#zoom-2-los-duplicados"><span class="header-section-number">3.3</span> Zoom 2: los duplicados</a></li>
+  <li><a href="#zoom-3-el-tipo-de-precio" id="toc-zoom-3-el-tipo-de-precio" class="nav-link" data-scroll-target="#zoom-3-el-tipo-de-precio"><span class="header-section-number">3.4</span> Zoom 3: el tipo de <code>precio</code></a></li>
+  <li><a href="#zoom-4-los-valores-imposibles-y-el-outlier" id="toc-zoom-4-los-valores-imposibles-y-el-outlier" class="nav-link" data-scroll-target="#zoom-4-los-valores-imposibles-y-el-outlier"><span class="header-section-number">3.5</span> Zoom 4: los valores imposibles y el outlier</a></li>
+  </ul></li>
+  <li><a href="#paso-2-limpieza-20-min" id="toc-paso-2-limpieza-20-min" class="nav-link" data-scroll-target="#paso-2-limpieza-20-min"><span class="header-section-number">4</span> Paso 2 — Limpieza <span class="badge-time">≈ 20 min</span></a>
+  <ul class="collapse">
+  <li><a href="#eliminar-duplicados" id="toc-eliminar-duplicados" class="nav-link" data-scroll-target="#eliminar-duplicados"><span class="header-section-number">4.1</span> 2.1 — Eliminar duplicados</a></li>
+  <li><a href="#estandarizar-las-categorías" id="toc-estandarizar-las-categorías" class="nav-link" data-scroll-target="#estandarizar-las-categorías"><span class="header-section-number">4.2</span> 2.2 — Estandarizar las categorías</a></li>
+  <li><a href="#corregir-el-tipo-de-precio" id="toc-corregir-el-tipo-de-precio" class="nav-link" data-scroll-target="#corregir-el-tipo-de-precio"><span class="header-section-number">4.3</span> 2.3 — Corregir el tipo de <code>precio</code></a></li>
+  <li><a href="#eliminar-los-valores-imposibles" id="toc-eliminar-los-valores-imposibles" class="nav-link" data-scroll-target="#eliminar-los-valores-imposibles"><span class="header-section-number">4.4</span> 2.4 — Eliminar los valores imposibles</a></li>
+  <li><a href="#corregir-el-outlier" id="toc-corregir-el-outlier" class="nav-link" data-scroll-target="#corregir-el-outlier"><span class="header-section-number">4.5</span> 2.5 — Corregir el outlier</a></li>
+  <li><a href="#la-estructura-final" id="toc-la-estructura-final" class="nav-link" data-scroll-target="#la-estructura-final"><span class="header-section-number">4.6</span> 2.6 — La estructura final</a></li>
+  </ul></li>
+  <li><a href="#paso-3-eda-15-min" id="toc-paso-3-eda-15-min" class="nav-link" data-scroll-target="#paso-3-eda-15-min"><span class="header-section-number">5</span> Paso 3 — EDA <span class="badge-time">≈ 15 min</span></a>
+  <ul class="collapse">
+  <li><a href="#la-radiografía-otra-vez" id="toc-la-radiografía-otra-vez" class="nav-link" data-scroll-target="#la-radiografía-otra-vez"><span class="header-section-number">5.1</span> La radiografía, otra vez</a></li>
+  <li><a href="#gráfico-1-la-distribución-y-el-hallazgo-escondido" id="toc-gráfico-1-la-distribución-y-el-hallazgo-escondido" class="nav-link" data-scroll-target="#gráfico-1-la-distribución-y-el-hallazgo-escondido"><span class="header-section-number">5.2</span> Gráfico 1 — La distribución (y el hallazgo escondido)</a></li>
+  <li><a href="#gráfico-2-la-comparación-entre-grupos" id="toc-gráfico-2-la-comparación-entre-grupos" class="nav-link" data-scroll-target="#gráfico-2-la-comparación-entre-grupos"><span class="header-section-number">5.3</span> Gráfico 2 — La comparación entre grupos</a></li>
+  <li><a href="#gráfico-3-la-relación-entre-variables" id="toc-gráfico-3-la-relación-entre-variables" class="nav-link" data-scroll-target="#gráfico-3-la-relación-entre-variables"><span class="header-section-number">5.4</span> Gráfico 3 — La relación entre variables</a></li>
+  </ul></li>
+  <li><a href="#el-producto-de-la-sesión" id="toc-el-producto-de-la-sesión" class="nav-link" data-scroll-target="#el-producto-de-la-sesión"><span class="header-section-number">6</span> El producto de la sesión</a></li>
+  <li><a href="#cierre" id="toc-cierre" class="nav-link" data-scroll-target="#cierre"><span class="header-section-number">7</span> Cierre</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unidad 2 - Práctica: de la base sucia al dataset confiable</h1>
+<p class="subtitle lead">Aplicación guiada en clase · Semana 6 · 06327-ECO</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor/a</div>
+    <div class="quarto-title-meta-contents">
+             <p>PhD. Eduard F. Martínez-González </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<p><a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;">@emartigo</a> <a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;">Eduard F. Martínez G.</a> <a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez</a> <a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;">eduard-martinez.github.io</a></p>
+</div>
+<!--=================-->
+<!--=================-->
+<section id="reglas-de-juego" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Reglas de juego</h1>
+<div class="callout-key">
+<p><strong>Esta sesión asume que ya estudiaste la teoría</strong></p>
+<p>Aquí no volvemos a explicar qué es la completitud, por qué un outlier no siempre es un error, ni qué busca la EDA: eso quedó en el podcast (y su <a href="../theory/week-06.html">versión escrita</a>) y en el quiz. Hoy ese criterio <strong>se ejecuta</strong> sobre una base sucia de verdad. Si algo se te escapa, el <a href="../theory/week-06.html#glosario-de-la-semana">glosario</a> queda a un clic.</p>
+<p><strong>Lo que necesitas ahora mismo:</strong></p>
+<ul>
+<li>💻 RStudio abierto <strong>dentro de tu proyecto <code>intro_ba</code></strong> (semana 3).</li>
+<li>🌐 Internet (los datos se cargan desde la web del curso).</li>
+<li>📦 Un paquete nuevo: <code>skimr</code>. Si no lo tienes, <code>install.packages("skimr")</code> <strong>en la consola</strong>, no en el script.</li>
+<li>🧑‍🤝‍🧑 Trabaja en tu computador, pero comenta cada checkpoint con tu vecino: si sus números no coinciden, uno de los dos tiene un hallazgo.</li>
+</ul>
+</div>
+<p><strong>El escenario de hoy:</strong> eres el analista de la comercializadora de tecnología de la semana 4. Pero hoy no te dan el archivo pulido: te dan <strong>la base como sale del sistema</strong>, antes de que nadie la toque. Tu trabajo es entregar, al final de la sesión, un <strong>dataset confiable, un log de decisiones y tres hallazgos</strong>. Ese es el producto — y es, casi literalmente, la Entrega 2 de tu proyecto.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>La regla de oro de hoy</strong></p>
+<p><code>ventas_raw</code> <strong>no se toca nunca.</strong> Todo lo que hagamos construye un objeto nuevo (<code>ventas_clean</code>) a partir de él. Si te equivocas limpiando, el raw es tu punto de retorno. Un analista que sobrescribe su base original no tiene a dónde volver.</p>
+</div>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="el-setup-profesional-8-min" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> El setup profesional <span class="badge-time">≈ 8 min</span></h1>
+<p>Abre tu proyecto <code>intro_ba</code>, crea un script nuevo y guárdalo en <code>scripts/</code> como <code>practica_semana6.R</code>. Arranca con el encabezado de siempre — y con un paquete nuevo:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ============================================</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Práctica semana 6 — Calidad de datos y EDA</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Nombre: _______________</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Fecha:  _______________</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="do">## ============================================</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Librerías (skimr es nuevo esta semana)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(pacman)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">p_load</span>(dplyr, ggplot2, skimr)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="do">## La base "tal como sale del sistema"</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>ventas_raw <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"https://eduard-martinez.github.io/databases/ba/ventas_raw.csv"</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="do">## Radiografía de la semana 3</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(ventas_raw)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ventas_raw)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> ¿cuántas filas y columnas reporta <code>str()</code>? Anótalo — al final vamos a comparar cuántas sobrevivieron. Y responde con tu vecino la pregunta que va primero que todas: <strong>¿qué representa una fila de esta base?</strong></p>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="paso-1-diagnóstico-15-min" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Paso 1 — Diagnóstico <span class="badge-time">≈ 15 min</span></h1>
+<p>Antes de corregir <strong>nada</strong>, hay que saber qué está mal. La secuencia es siempre la misma: primero una visión general, después el zoom sobre lo que llamó la atención.</p>
+<section id="la-radiografía-completa-skim" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="la-radiografía-completa-skim"><span class="header-section-number">3.1</span> La radiografía completa: <code>skim()</code></h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Una sola función, una visión completa</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(ventas_raw)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-key">
+<p><strong>Cómo leer esta salida (léela de arriba abajo, columna por columna)</strong></p>
+<p>La salida viene partida en dos bloques según el tipo de variable.</p>
+<p><strong>Variables de texto (<code>character</code>):</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Columna</th>
+<th>Qué te dice</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>n_missing</code></td>
+<td>Cuántos valores faltan</td>
+</tr>
+<tr class="even">
+<td><code>n_unique</code></td>
+<td>Cuántos valores distintos hay ← <strong>aquí saltan las inconsistencias</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variables numéricas:</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Columna</th>
+<th>Qué te dice</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>n_missing</code></td>
+<td>Cuántos valores faltan</td>
+</tr>
+<tr class="even">
+<td><code>mean</code>, <code>sd</code></td>
+<td>Promedio y desviación</td>
+</tr>
+<tr class="odd">
+<td><code>p0</code>, <code>p100</code></td>
+<td>Mínimo y máximo ← <strong>aquí saltan los imposibles y los outliers</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Regla práctica:</strong> cualquier cosa que no tenga sentido es un hallazgo que hay que anotar.</p>
+</div>
+<p><strong>Checkpoint 🎯 — las tres cosas que <code>skim()</code> te acaba de gritar:</strong></p>
+<ol type="1">
+<li>Mira <code>n_unique</code> de <strong><code>region</code></strong>. La empresa tiene 3 regiones. ¿Cuántas dice que hay?</li>
+<li>Mira el tipo de <strong><code>precio</code></strong>. ¿Es <code>numeric</code>? ¿Debería serlo?</li>
+<li>Mira <code>p0</code> (el mínimo) de <strong><code>cantidad</code></strong>. ¿Se pueden vender esas unidades?</li>
+</ol>
+<blockquote class="blockquote">
+<p>🗣️ <strong>Discútelo con tu vecino antes de seguir.</strong> Las tres son problemas distintos: uno de <strong>consistencia</strong>, uno de <strong>validez</strong> por tipo y uno de <strong>validez</strong> por rango. Ubícalos en las cuatro dimensiones de la teoría.</p>
+</blockquote>
+</section>
+<section id="zoom-1-las-categorías" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="zoom-1-las-categorías"><span class="header-section-number">3.2</span> Zoom 1: las categorías</h2>
+<p><code>skim()</code> te dijo <em>cuántos</em> valores únicos hay. Ahora vamos a <strong>verlos</strong>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ¿Cuáles son exactamente los valores de 'region'?</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(ventas_raw<span class="sc">$</span>region)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## ¿Y cuántas veces aparece cada uno?</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(ventas_raw<span class="sc">$</span>region)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>El error más silencioso del análisis de datos</strong></p>
+<p>Ahí lo tienes: <code>"Norte"</code> conviviendo con <code>"norte"</code>, y <code>"Sur"</code> con <code>"SUR"</code>. Para R <strong>cada variante es una región distinta</strong>: la empresa tiene 3 regiones y la base reporta 5.</p>
+<p>Haz este experimento mental antes de arreglarlo: si ahora mismo corrieras <code>group_by(region)</code> y <code>summarise(sum(ingreso))</code> — el mismo código impecable de la semana 4 — te saldría una tabla con <strong>5 filas</strong>, perfectamente formateada, con sus totales y sus decimales. <strong>Y R no diría ni una palabra.</strong> El gerente reparte el presupuesto con esa tabla, y el ingreso del Norte —partido entre <code>"Norte"</code> y <code>"norte"</code>— aparece como la mitad de lo que realmente es.</p>
+<p>Ese es el punto entero de esta semana.</p>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Revisa también estas dos: ¿tienen el mismo problema?</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(ventas_raw<span class="sc">$</span>trimestre)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(ventas_raw<span class="sc">$</span>producto)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="zoom-2-los-duplicados" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="zoom-2-los-duplicados"><span class="header-section-number">3.3</span> Zoom 2: los duplicados</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ¿Cuántas filas son copias exactas de otra?</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(ventas_raw))</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-key">
+<p><strong>Qué hace <code>duplicated()</code></strong></p>
+<p>Compara cada fila con <strong>todas las anteriores</strong> y devuelve <code>TRUE</code> si ya había aparecido.</p>
+<ul>
+<li><code>sum(duplicated(df))</code> → cuántas filas son copias exactas.</li>
+<li><code>df[duplicated(df), ]</code> → cuáles son.</li>
+</ul>
+<p><strong>¿Por qué aparecen?</strong> Exportaciones dobles del sistema, <em>joins</em> mal hechos, actualizaciones que acumulan en vez de reemplazar. <strong>Siempre pregunta la causa antes de eliminar</strong> — si el sistema está duplicando, el problema no es tu base, es el sistema.</p>
+</div>
+</section>
+<section id="zoom-3-el-tipo-de-precio" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="zoom-3-el-tipo-de-precio"><span class="header-section-number">3.4</span> Zoom 3: el tipo de <code>precio</code></h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Confirmemos lo que skim() insinuó</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(ventas_raw<span class="sc">$</span>precio)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="do">## ¿Por qué llegó como texto? Mira los valores</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(ventas_raw<span class="sc">$</span>precio)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Ahí está el culpable:</strong> alguien dejó un <code>"$1200"</code> con el signo adentro. Basta <strong>un solo valor</strong> con un carácter no numérico para que R declare <em>toda la columna</em> como texto.</p>
+<div class="callout-practice">
+<p><strong>Compruébalo tú mismo (y no te asustes):</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(ventas_raw<span class="sc">$</span>precio, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="do">## Error: invalid 'type' (character) of argument</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Este error es de los <strong>buenos</strong>: R se niega a hacer aritmética con texto y te avisa. Compáralo con el problema de <code>"Norte"</code>/<code>"norte"</code>, que no avisa nada. <strong>El error que grita es menos peligroso que el que se calla.</strong></p>
+</div>
+</section>
+<section id="zoom-4-los-valores-imposibles-y-el-outlier" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="zoom-4-los-valores-imposibles-y-el-outlier"><span class="header-section-number">3.5</span> Zoom 4: los valores imposibles y el outlier</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## El mínimo de cantidad: ¿se puede vender una cantidad negativa?</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ventas_raw<span class="sc">$</span>cantidad)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Para ver el precio necesitamos convertirlo a número primero (solo para mirarlo — todavía no estamos limpiando):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Conversión temporal, solo para poder graficar</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ventas_raw <span class="ot">&lt;-</span> <span class="fu">mutate</span>(ventas_raw, <span class="at">precio_num =</span> <span class="fu">as.numeric</span>(<span class="fu">gsub</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">$"</span>, <span class="st">""</span>, precio)))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="do">## El histograma como detector de outliers</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(ventas_raw, <span class="fu">aes</span>(<span class="at">x =</span> precio_num)) <span class="sc">+</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">20</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> el eje X se estira hasta ~12.000, pero casi todas las barras están apelotonadas a la izquierda. Esa <strong>barrita solitaria a la derecha</strong> es un outlier gritando.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ¿Quién es? Vamos a mirar la fila completa antes de juzgar</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ventas_raw[<span class="sc">!</span><span class="fu">is.na</span>(ventas_raw<span class="sc">$</span>precio_num) <span class="sc">&amp;</span> ventas_raw<span class="sc">$</span>precio_num <span class="sc">&gt;</span> <span class="dv">5000</span>, ]</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-key">
+<p><strong>La pregunta de la teoría, ahora en vivo: ¿error o caso real?</strong></p>
+<p>Es un <strong>Mouse</strong> con precio 12.000, entre mouses de 20 a 30. Un mouse no cuesta 12.000: es un <strong>error de captura</strong> (casi con certeza eran 120, con dos ceros de más). Se corrige.</p>
+<p>Pero fíjate en lo que acabamos de hacer, porque es el hábito que hay que aprender: <strong>fuimos a mirar la fila completa antes de decidir</strong>. Si en vez de un Mouse a 12.000 hubiera aparecido una Laptop a 12.000 vendida a un cliente corporativo, la decisión habría sido la contraria — y el “outlier” sería el dato más valioso de la base.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="paso-2-limpieza-20-min" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Paso 2 — Limpieza <span class="badge-time">≈ 20 min</span></h1>
+<p>Ya sabemos qué está mal. Ahora lo arreglamos, <strong>en orden</strong>: primero se eliminan filas (duplicados, imposibles), después se corrigen columnas (texto, tipos, outliers) y de último se ajusta la estructura.</p>
+<p>Y desde aquí, <code>ventas_raw</code> no se vuelve a tocar.</p>
+<section id="eliminar-duplicados" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="eliminar-duplicados"><span class="header-section-number">4.1</span> 2.1 — Eliminar duplicados</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="do">## distinct() elimina las filas idénticas, conservando la primera</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ventas_clean <span class="ot">&lt;-</span> <span class="fu">distinct</span>(ventas_raw)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="do">## ¿Cuántas se fueron?</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(ventas_raw) <span class="sc">-</span> <span class="fu">nrow</span>(ventas_clean)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> el resultado debe coincidir <strong>exactamente</strong> con el <code>sum(duplicated())</code> del diagnóstico. Si no coincide, algo se te fue. Esta comparación es tu forma de confirmar que la operación hizo lo que creías.</p>
+</section>
+<section id="estandarizar-las-categorías" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="estandarizar-las-categorías"><span class="header-section-number">4.2</span> 2.2 — Estandarizar las categorías</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Todo a mayúsculas: se acabaron las tres regiones fantasma</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>ventas_clean <span class="ot">&lt;-</span> <span class="fu">mutate</span>(ventas_clean,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">trimestre =</span> <span class="fu">toupper</span>(trimestre),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">region    =</span> <span class="fu">toupper</span>(region),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">producto  =</span> <span class="fu">toupper</span>(producto))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Verificar SIEMPRE después de corregir</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(ventas_clean<span class="sc">$</span>region)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(ventas_clean<span class="sc">$</span>trimestre)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> ahora sí, <strong>3 regiones y 3 trimestres</strong>. Compara este <code>table()</code> con el del diagnóstico: los conteos de “Norte” y “norte” se sumaron en uno solo. Ese es el presupuesto del gerente, arreglado.</p>
+<div class="callout-key">
+<p><strong>Tres funciones para estandarizar texto</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Función</th>
+<th>Resultado</th>
+<th>Cuándo usarla</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>toupper(x)</code></td>
+<td><code>"NORTE"</code></td>
+<td>Códigos, IDs, siglas — la que usamos hoy</td>
+</tr>
+<tr class="even">
+<td><code>tolower(x)</code></td>
+<td><code>"norte"</code></td>
+<td>Como paso intermedio antes de capitalizar</td>
+</tr>
+<tr class="odd">
+<td><code>tools::toTitleCase(x)</code></td>
+<td><code>"Norte"</code></td>
+<td>Nombres propios, categorías de cara al usuario</td>
+</tr>
+</tbody>
+</table>
+<p>Cuál elegir es cuestión de estilo. <strong>Que elijas una y la apliques a toda la base, no.</strong></p>
+</div>
+</section>
+<section id="corregir-el-tipo-de-precio" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="corregir-el-tipo-de-precio"><span class="header-section-number">4.3</span> 2.3 — Corregir el tipo de <code>precio</code></h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Quitar el "$" y convertir a número</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>ventas_clean <span class="ot">&lt;-</span> <span class="fu">mutate</span>(ventas_clean,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">precio =</span> <span class="fu">as.numeric</span>(<span class="fu">gsub</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">$"</span>, <span class="st">""</span>, precio)))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Verificar</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(ventas_clean<span class="sc">$</span>precio)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ventas_clean<span class="sc">$</span>precio)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-key">
+<p><strong>Qué hace <code>gsub("\\$", "", precio)</code></strong></p>
+<p><code>gsub(patrón, reemplazo, texto)</code> busca y reemplaza:</p>
+<ul>
+<li><code>"\\$"</code> → el patrón es el símbolo <code>$</code>. Se escribe con doble barra porque <code>$</code> tiene un significado especial en expresiones regulares (significa “fin de línea”), y hay que decirle a R que esta vez es un peso, no un comodín.</li>
+<li><code>""</code> → reemplázalo por nada, es decir, elimínalo.</li>
+<li>Resultado: <code>"$1200"</code> → <code>"1200"</code> → <code>as.numeric()</code> → <code>1200</code>.</li>
+</ul>
+<p><strong>Ojo con la trampa:</strong> si algún valor no se puede convertir (porque tenía letras), <code>as.numeric()</code> lo vuelve <code>NA</code> <strong>con un warning fácil de ignorar</strong>. Por eso el <code>summary()</code> de verificación no es opcional: compara el <code>n_missing</code> de antes con el de ahora. Si aparecieron <code>NA</code> nuevos, los creaste tú.</p>
+</div>
+</section>
+<section id="eliminar-los-valores-imposibles" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="eliminar-los-valores-imposibles"><span class="header-section-number">4.4</span> 2.4 — Eliminar los valores imposibles</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="do">## No se pueden vender cantidades negativas</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ventas_clean <span class="ot">&lt;-</span> <span class="fu">filter</span>(ventas_clean, cantidad <span class="sc">&gt;=</span> <span class="dv">0</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Verificar: el mínimo ya no debe ser negativo</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ventas_clean<span class="sc">$</span>cantidad)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Advertencia
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>¿Eliminar, convertir a NA, o corregir?</strong></p>
+<p>Tres opciones frente a un valor imposible:</p>
+<ol type="1">
+<li><strong>Eliminar la fila</strong> — si no tienes información para corregirla (lo que hicimos).</li>
+<li><strong>Convertirla a <code>NA</code></strong> — si quieres conservar el resto de la fila para otros análisis.</li>
+<li><strong>Corregir el valor</strong> — si tienes evidencia. Y ojo: una <strong>devolución</strong> documentada puede tener cantidad negativa de forma perfectamente legítima. Si esta base incluyera devoluciones, <code>-5</code> no sería un error: sería el dato.</li>
+</ol>
+<p>La opción correcta depende del <strong>contexto de negocio</strong>, no de una regla estadística. Lo que no es opcional es <strong>documentar cuál elegiste</strong>.</p>
+</div>
+</div>
+</section>
+<section id="corregir-el-outlier" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="corregir-el-outlier"><span class="header-section-number">4.5</span> 2.5 — Corregir el outlier</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Ya confirmamos que es un error de captura: 12000 → 120</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>ventas_clean <span class="ot">&lt;-</span> <span class="fu">mutate</span>(ventas_clean,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">precio =</span> <span class="fu">ifelse</span>(producto <span class="sc">==</span> <span class="st">"MOUSE"</span> <span class="sc">&amp;</span> precio <span class="sc">&gt;</span> <span class="dv">5000</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                                       <span class="dv">120</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                                       precio))</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Verificar: el máximo debe volver al rango de las Laptops (~1.220)</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(ventas_clean<span class="sc">$</span>precio)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-key">
+<p><strong><code>ifelse()</code> y por qué la condición debe ser específica</strong></p>
+<p><code>ifelse(condición, valor_si_TRUE, valor_si_FALSE)</code> decide fila por fila.</p>
+<p>Fíjate en que la condición tiene <strong>dos partes</strong>: <code>producto == "MOUSE"</code> <strong>y</strong> <code>precio &gt; 5000</code>. ¿Por qué no solo <code>precio &gt; 5000</code>? Porque si mañana entra una Laptop legítima de 6.000, esa condición floja se la comería y la volvería 120 — un error de limpieza mucho peor que el original.</p>
+<p><strong>Corrige con bisturí, no con hacha.</strong> Y nota que <code>producto</code> ya está en mayúsculas, porque limpiamos en orden: por eso la condición dice <code>"MOUSE"</code> y no <code>"Mouse"</code>.</p>
+</div>
+</section>
+<section id="la-estructura-final" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="la-estructura-final"><span class="header-section-number">4.6</span> 2.6 — La estructura final</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="do">## 'observaciones' está casi toda vacía y no aporta nada analítico</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>ventas_clean <span class="ot">&lt;-</span> <span class="fu">select</span>(ventas_clean, <span class="sc">-</span>observaciones, <span class="sc">-</span>precio_num)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="do">## La variable derivada que necesita el análisis</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>ventas_clean <span class="ot">&lt;-</span> <span class="fu">mutate</span>(ventas_clean, <span class="at">ingreso =</span> precio <span class="sc">*</span> cantidad)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="do">## El producto de la sesión</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ventas_clean)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(ventas_clean)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Checkpoint 🎯:</strong> acabas de pasar de <code>raw</code> a <strong>analysis-ready</strong>. Compara el <code>str()</code> de ahora con el del principio: ¿cuántas filas sobrevivieron y por qué?</p>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="paso-3-eda-15-min" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Paso 3 — EDA <span class="badge-time">≈ 15 min</span></h1>
+<p>Datos confiables. Ahora sí, a explorar. <strong>Una tabla resumen y tres gráficos</strong> — el mínimo de la semana.</p>
+<section id="la-radiografía-otra-vez" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="la-radiografía-otra-vez"><span class="header-section-number">5.1</span> La radiografía, otra vez</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(ventas_clean)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-practice">
+<p><strong>Compáralo con el <code>skim()</code> del Paso 1</strong></p>
+<p>Vuelve arriba y pon las dos salidas lado a lado. Deberías poder señalar:</p>
+<ul>
+<li><code>precio</code> pasó de <code>character</code> a <code>numeric</code>.</li>
+<li><code>n_unique</code> de <code>region</code> y <code>trimestre</code> bajó a <strong>3</strong>.</li>
+<li>El mínimo de <code>cantidad</code> ya no es negativo.</li>
+<li>El máximo de <code>precio</code> volvió a un rango creíble.</li>
+<li>Los <code>n_missing</code> que quedan son <strong>los que venían del origen</strong> — no los inventamos nosotros.</li>
+</ul>
+<p><strong>Esa comparación es parte de la EDA</strong>, no un trámite: es cómo confirmas que el dataset limpio quedó como creías.</p>
+</div>
+</section>
+<section id="gráfico-1-la-distribución-y-el-hallazgo-escondido" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="gráfico-1-la-distribución-y-el-hallazgo-escondido"><span class="header-section-number">5.2</span> Gráfico 1 — La distribución (y el hallazgo escondido)</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(ventas_clean, <span class="fu">aes</span>(<span class="at">x =</span> precio)) <span class="sc">+</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">15</span>, <span class="at">fill =</span> <span class="st">"steelblue"</span>, <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"La empresa vende dos negocios distintos, no uno"</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Precio (USD)"</span>, <span class="at">y =</span> <span class="st">"Número de transacciones"</span>) <span class="sc">+</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-key">
+<p><strong>Distribución bimodal: esto es un hallazgo de negocio, no una curiosidad</strong></p>
+<p>Dos jorobas separadas: productos baratos (Mouse, Licencia, Soporte) y productos caros (Laptop).</p>
+<p>Consecuencia inmediata y concreta: si el gerente te pide <strong>“el precio promedio”</strong>, ese número cae en el <strong>valle entre las dos jorobas</strong> — un rango donde no existe casi ningún producto. Es técnicamente correcto y <strong>no describe a nadie</strong>.</p>
+<p>La respuesta profesional no es el promedio: es <em>“hay dos segmentos, y aquí está el promedio de cada uno”</em>. <strong>Eso lo descubrió la EDA, no un modelo.</strong></p>
+</div>
+</section>
+<section id="gráfico-2-la-comparación-entre-grupos" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="gráfico-2-la-comparación-entre-grupos"><span class="header-section-number">5.3</span> Gráfico 2 — La comparación entre grupos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Primero la tabla (los verbos de la semana 4)</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>ing_region <span class="ot">&lt;-</span> <span class="fu">group_by</span>(ventas_clean, region)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>ing_region <span class="ot">&lt;-</span> <span class="fu">summarise</span>(ing_region,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">ingreso_total   =</span> <span class="fu">sum</span>(ingreso, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                        <span class="at">n_transacciones =</span> <span class="fu">n</span>(),</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>                        <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>ing_region</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="do">## Después el gráfico</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(ing_region, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(region, ingreso_total), <span class="at">y =</span> ingreso_total)) <span class="sc">+</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"steelblue"</span>) <span class="sc">+</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Ingreso total por región"</span>, <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Ingreso (USD)"</span>) <span class="sc">+</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-practice">
+<p><strong>Léelo con criterio de negocio (3 min con tu vecino)</strong></p>
+<ul>
+<li>¿Alguna región tiene <strong>muchas transacciones pero poco ingreso</strong>? Eso no significa que le vaya mal: puede significar que vende <strong>productos baratos</strong>. Dos negocios distintos, otra vez.</li>
+<li><code>n_transacciones</code> te confirma cuántos registros sobrevivieron la limpieza por grupo.</li>
+<li>🚨 <strong>Y lo más importante:</strong> esta tabla, corrida sobre <code>ventas_raw</code>, te habría dado <strong>5 filas</strong>. Ese era el presupuesto mal repartido. Ahora tiene 3.</li>
+</ul>
+</div>
+</section>
+<section id="gráfico-3-la-relación-entre-variables" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="gráfico-3-la-relación-entre-variables"><span class="header-section-number">5.4</span> Gráfico 3 — La relación entre variables</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(ventas_clean, <span class="fu">aes</span>(<span class="at">x =</span> precio, <span class="at">y =</span> cantidad, <span class="at">color =</span> categoria)) <span class="sc">+</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"¿Se vende menos de lo que cuesta más?"</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Precio (USD)"</span>, <span class="at">y =</span> <span class="st">"Unidades vendidas"</span>, <span class="at">color =</span> <span class="st">"Categoría"</span>) <span class="sc">+</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-practice">
+<p><strong>Tres preguntas para el gráfico</strong></p>
+<ol type="1">
+<li>¿El Hardware tiende a tener precios más altos o más bajos que el Software?</li>
+<li>¿Hay relación entre precio y cantidad? ¿Positiva, negativa, ninguna?</li>
+<li>¿Ves algún punto que se salga del patrón?</li>
+</ol>
+<p><strong>El scatter plot no te da la respuesta: te da la pregunta correcta.</strong> Eso es exactamente lo que hace la EDA.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+</section>
+<section id="el-producto-de-la-sesión" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> El producto de la sesión</h1>
+<p>Antes de cerrar el computador, tu script debe dejar cuatro cosas. <strong>Este es el estándar del curso y es el mismo de la Entrega 2:</strong></p>
+<div class="callout-workflow">
+<p><strong>1. El script reproducible.</strong> Comentado, que corra completo de arriba abajo. Prueba de fuego: <code>rm(list = ls())</code> → <em>Source</em>. Si se cae, no es reproducible.</p>
+<p><strong>2. El dataset analysis-ready guardado.</strong></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(ventas_clean, <span class="st">"data/ventas_clean.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>3. El acta de decisiones.</strong> Al final del script, en comentarios. Cinco líneas bastan, pero deben responder qué y <strong>por qué</strong>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ============================================</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="do">## ACTA DE LIMPIEZA</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="do">## - Eliminadas ___ filas duplicadas exactas (causa probable: ______).</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="do">## - Estandarizadas region/trimestre/producto con toupper(): de 5 a 3 regiones.</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="do">## - precio: eliminado el "$" y convertido a numeric.</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="do">## - Eliminada 1 fila con cantidad negativa (imposible en este negocio).</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="do">## - Corregido outlier Mouse 12000 → 120 (error de captura confirmado en la fila).</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="do">## - Eliminada columna 'observaciones' (___% de NA, sin valor analítico).</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="do">## ============================================</span></span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>4. Tres hallazgos y tres preguntas abiertas.</strong> Los hallazgos son lo que <strong>sabes</strong> ahora; las preguntas son lo que la EDA <strong>te destapó</strong> y todavía no puedes responder. Las dos listas valen igual.</p>
+</div>
+<div class="callout-key">
+<p><strong>La prueba de fuego de la reproducibilidad</strong></p>
+<p>Pásale tu script y el link del <code>raw</code> a tu vecino. Si al correrlo <strong>no obtiene exactamente tu mismo <code>ventas_clean</code></strong>, uno de los dos tiene un problema — y descubrir cuál es el mejor uso que le pueden dar a los últimos cinco minutos de la clase.</p>
+</div>
+<!--=================-->
+<!--=================-->
+</section>
+<section id="cierre" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Cierre</h1>
+<p>Hoy la base pasó de <strong>sucia y peligrosa</strong> a <strong>confiable y documentada</strong>. Cuenta lo que hiciste: ni un modelo, ni una predicción. Solo diagnóstico, criterio y limpieza — el <strong>80% del tiempo</strong> del que hablaba la semana 5, vivido en carne propia.</p>
+<p>Y quédate con la escena de <code>"Norte"</code> / <code>"norte"</code>: la tabla que salía perfecta y estaba mal, sin un solo error en la consola. Ese es el trabajo que nadie ve y que sostiene todo lo demás.</p>
+<p><strong>Lo que sigue:</strong> el <a href="../task/week-06.html"><strong>taller</strong></a> de hoy te da una base nueva y sucia para que la dejes presentable <strong>sin guía</strong>. Y en la <strong>semana 7</strong> es el parcial: el diagnóstico de calidad y la lectura de la EDA entran. 🧹</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-06_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

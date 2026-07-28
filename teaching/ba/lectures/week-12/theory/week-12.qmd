@@ -1,0 +1,862 @@
+---
+title: "Unidad 5 - Regresión: árboles, bosques y la ruta Lasso"
+subtitle: "Analítica para los negocios · Semana 12 · 06327-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+<!--=================-->
+<!--=================-->
+# Cómo estudiar esta semana
+
+::: {.callout-key}
+**Este documento es la versión escrita del video de la semana**
+
+1. 🎬 **Mira el video de la clase** — el enlace está en Intu. <!-- TODO: pegar aquí el enlace del video -->
+2. 📖 **Lee este documento** — con un playground para entrenar árboles de regresión y un dial interactivo para sentir cómo el Lasso "apaga" variables.
+3. ✅ **Presenta el quiz en Intu** antes de la clase.
+
+Las métricas de esta semana — **MAE y RMSE** — las construiste en el video 2 de la [semana 10](../../week-10/theory/week-10.html), y la maquinaria de árboles (cptable, poda 1-SE, bosques) es la de la [semana 11](../../week-11/theory/week-11.html). Hoy todo eso se recicla — lo nuevo es el problema (predecir números) y un competidor de la familia lineal: el **Lasso**.
+:::
+
+::: {.callout-warning}
+**Antes de venir a clase: un paquete nuevo (1 minuto)**
+
+A los paquetes de la semana pasada se suma el de la regresión regularizada:
+
+```r
+install.packages("glmnet")
+```
+
+Verifica con `library(glmnet)`. Los demás (`rpart`, `rpart.plot`, `randomForest`) ya los tienes.
+:::
+
+**El plan:** la semana pasada predijiste categorías; esta semana predices **números** — notas, precios, cantidades. Primero el cambio mínimo: el árbol de la semana 11 con una sola pieza distinta (la hoja ya no vota: **promedia**). Luego el competidor nuevo: la **ruta lineal**, donde el modelo es una ecuación con coeficientes y el **Lasso** le pone un freno (λ) que encoge coeficientes y **expulsa variables** — un modelo que se poda solo y te entrega una fórmula publicable. Cerramos con el bosque en versión regresión y el torneo que enfrentará a todos en clase — con un final distinto al de la semana pasada.
+
+<!--=================-->
+<!--=================-->
+# Glosario de la semana
+
+::: {.glossary-grid}
+::: {.gloss-card}
+**Árbol de regresión** 🌳
+La misma máquina de preguntas de la semana 11, pero la hoja ya no predice una categoría: predice el **promedio** del target de los casos de entrenamiento que cayeron ahí.
+:::
+::: {.gloss-card}
+**Homogeneidad (varianza)** 🥣
+El criterio de corte: en clasificación era pureza de clases; ahora es **poca varianza** — que los casos de cada grupo tengan valores parecidos del target.
+:::
+::: {.gloss-card}
+**Modelo lineal** 📈
+Predecir con una ecuación: target ≈ intercepto + coeficiente₁·variable₁ + coeficiente₂·variable₂ + … La forma más antigua (y comunicable) de predicción.
+:::
+::: {.gloss-card}
+**Coeficiente** ⚖️
+Cuánto cambia la predicción cuando la variable sube una unidad, con las demás quietas. "Cada m² suma 2.7 millones" es un coeficiente hablando.
+:::
+::: {.gloss-card}
+**Regularización** 🧲
+Penalizar los coeficientes grandes al entrenar. El modelo solo "compra" un coeficiente si el ajuste lo justifica — un impuesto a la complejidad que combate el sobreajuste.
+:::
+::: {.gloss-card}
+**Lasso** 🪢
+La regularización con superpoder: no solo encoge coeficientes — puede dejarlos **exactamente en cero**. Las variables con coeficiente cero salen del modelo: selección automática.
+:::
+::: {.gloss-card}
+**Lambda (λ)** 🎚️
+La fuerza del freno del Lasso. λ = 0: modelo lineal sin freno. λ enorme: todos los coeficientes en cero (el modelo predice el promedio). Se elige con validación cruzada.
+:::
+::: {.gloss-card}
+**`lambda.1se`** ✂️
+La regla 1-SE de la semana 11, versión Lasso: el λ **más simple** cuyo error de CV empata (dentro de un error estándar) con el mínimo. `cv.glmnet` te lo entrega listo.
+:::
+::: {.gloss-card}
+**Bosque de regresión** 🌲
+Los 500 árboles de la semana 11, pero en vez de votar, **promedian** sus predicciones numéricas. Mismo bootstrap, misma amnesia de variables, misma pérdida de legibilidad.
+:::
+::: {.gloss-card}
+**Residual** 🔍
+Lo que el modelo no explicó: real − predicho, caso por caso. Mirar *dónde* se concentran los residuales grandes dice más que cualquier métrica promedio.
+:::
+:::
+
+<!--=================-->
+<!--=================-->
+# La revancha de PronosticaU
+
+¿Recuerdas el encargo 2 de la semana 10? Una universidad quería pronosticar la **nota final** de sus estudiantes para disparar alertas tempranas, y el proveedor **PronosticaU** ofrecía su modelo estrella… que tú mismo auditaste y hundiste: perdía contra la regla tonta de predecir el promedio (MAE 0.55 contra 0.40 del baseline). La universidad canceló el contrato.
+
+Ahora te llegó el correo: *"Ya que tumbaron al proveedor — constrúyanlo ustedes. Necesitamos un pronosticador que **sí** le gane al promedio, y necesitamos entender qué mira para confiar en él."*
+
+Esta semana tienes tres formas de construirlo, y las tres compiten en clase:
+
+1. **El árbol de regresión** — la máquina de la semana 11 con una pieza cambiada.
+2. **El Lasso** — la ruta lineal con freno: una ecuación que se poda sola.
+3. **El bosque de regresión** — los 500 árboles, ahora promediando.
+
+::: {.callout-connect}
+**El mapa completo del aprendizaje supervisado**
+
+Con esta semana cierras las dos casillas grandes de la semana 5: target categórico → clasificación (semana 11); target numérico → **regresión** (hoy). Métricas de la semana 10 en ambas. La semana 13 abre la caja distinta: cuando NO hay target (segmentación).
+:::
+
+<!--=================-->
+<!--=================-->
+# De categorías a números: ¿qué cambia?
+
+Casi nada — y esa es la buena noticia. La disciplina completa sobrevive intacta: partir train/test, baseline, validación cruzada, test una sola vez. Lo que rota es el contenido de tres casillas:
+
+| | Semana 11 (clasificación) | Semana 12 (regresión) |
+|---|---|---|
+| El target | Categoría (`Si`/`No`) | Número continuo (3.4, 250M) |
+| La hoja del árbol predice | La clase más frecuente | El **promedio** del grupo |
+| "Buen corte" significa | Grupos puros (una sola clase) | Grupos de **poca varianza** (valores parecidos) |
+| Métricas | Matriz, accuracy, precisión, recall | **MAE y RMSE** (semana 10, video 2) |
+| Baseline | Clase mayoritaria | **Predecir el promedio** de train |
+
+: {.striped tbl-colwidths="[30,35,35]"}
+
+::: {.callout-warning}
+**¿Regresión o clasificación? Lo decide la pregunta, no el algoritmo**
+
+*"¿Qué nota sacará?"* → número → regresión. *"¿Está en riesgo de perder?"* → categoría → clasificación. La misma base de datos sirve para ambas; lo que cambia es qué le prometiste al negocio. Ya viviste esta disyuntiva en la práctica de la semana 10 — y va a reaparecer en tu proyecto final.
+:::
+
+Si quieres la intuición del árbol de regresión narrada antes de leerla, este video del canal **Codificando Bits** (material complementario) recorre el algoritmo CART en versión regresión:
+
+{{< video https://www.youtube.com/watch?v=2Miw4bjzSF0 >}}
+
+<!--=================-->
+<!--=================-->
+# El árbol de regresión: la hoja es un promedio
+
+## La pieza que cambia
+
+La estructura es idéntica a la semana pasada: preguntas binarias, nodos, ramas, frenos (`maxdepth`, `cp`, mínimo por hoja). Los dos cambios:
+
+1. **El criterio de corte**: el árbol ya no busca grupos *puros* — busca grupos **homogéneos en el número**: que las notas (o precios) de cada lado del corte se parezcan entre sí (poca varianza interna).
+2. **La predicción de la hoja**: el **promedio** del target de los casos de entrenamiento que cayeron ahí.
+
+::: {.callout-key}
+**La predicción de una hoja de regresión**
+
+$$\hat{y}_{\text{hoja}} = \frac{1}{n} \sum_{i \in \text{hoja}} y_i$$
+
+Si una hoja agrupa estudiantes con notas 3.2, 3.5, 3.8 y 4.0, cualquier estudiante nuevo que caiga ahí recibe la predicción **(3.2 + 3.5 + 3.8 + 4.0) / 4 = 3.625**. El árbol no inventa números: devuelve el promedio de los casos de entrenamiento que más se parecen al nuevo.
+
+Consecuencia curiosa: un árbol de k hojas solo puede predecir **k valores distintos**. Su predicción es una escalera, no una rampa — por eso a los árboles les cuesta extrapolar suavemente.
+:::
+
+## Un árbol con profundidad 1
+
+**8 estudiantes**, dos variables (nota del parcial 1 y asistencia), target = nota final:
+
+| Estudiante | Parcial 1 | Asistencia (%) | Nota final |
+|---|---|---|---|
+| A | 2.0 | 55 | 2.3 |
+| B | 2.5 | 60 | 2.6 |
+| C | 2.8 | 65 | 2.9 |
+| D | 3.0 | 70 | 3.1 |
+| E | 3.5 | 75 | 3.6 |
+| F | 3.8 | 80 | 3.9 |
+| G | 4.2 | 85 | 4.1 |
+| H | 4.5 | 90 | 4.4 |
+
+El corte que produce los grupos más homogéneos es **Parcial 1 ≥ 3.3**:
+
+```{=html}
+<div style="margin:1.5rem 0">
+<svg width="100%" viewBox="0 0 680 320" role="img">
+<title>Árbol de regresión profundidad 1 — predicción de nota final</title>
+<desc>Nodo raíz pregunta si Parcial 1 es mayor o igual a 3.3. Rama izquierda lleva a hoja con promedio 2.73. Rama derecha lleva a hoja con promedio 4.0.</desc>
+<defs>
+  <marker id="ar1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Nodo raíz -->
+<rect x="190" y="25" width="300" height="66" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="1.3"/>
+<text x="340" y="49" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#0C447C">NODO RAÍZ</text>
+<text x="340" y="72" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="14" font-weight="500" fill="#042C53">¿Parcial 1 ≥ 3.3?</text>
+
+<!-- Conectores -->
+<line x1="255" y1="91" x2="148" y2="188" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar1)"/>
+<line x1="425" y1="91" x2="532" y2="188" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar1)"/>
+
+<!-- Etiquetas de rama -->
+<text x="170" y="144" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No  (< 3.3)</text>
+<text x="510" y="144" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí  (≥ 3.3)</text>
+
+<!-- Hoja izquierda: nota baja -->
+<rect x="32" y="188" width="232" height="90" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="1.2"/>
+<text x="148" y="210" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#633806">HOJA · predicción numérica</text>
+<text x="148" y="234" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#412402">ŷ = 2.73</text>
+<text x="148" y="264" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#633806">Casos A, B, C, D  (n = 4)</text>
+
+<!-- Hoja derecha: nota alta -->
+<rect x="416" y="188" width="232" height="90" rx="10" fill="#EAF3DE" stroke="#639922" stroke-width="1.2"/>
+<text x="532" y="210" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#3B6D11">HOJA · predicción numérica</text>
+<text x="532" y="234" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#173404">ŷ = 4.00</text>
+<text x="532" y="264" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#27500A">Casos E, F, G, H  (n = 4)</text>
+
+<text x="340" y="306" text-anchor="middle" font-family="inherit" font-size="11" fill="#999">Profundidad = 1 · La predicción es el promedio de notas en cada hoja</text>
+</svg>
+</div>
+```
+
+## ¿Y con una pregunta más?
+
+```{=html}
+<div style="margin:1.5rem 0">
+<svg width="100%" viewBox="0 0 680 445" role="img">
+<title>Árbol de regresión profundidad 2 — predicción de nota final</title>
+<desc>El árbol hace una segunda pregunta en la rama izquierda sobre asistencia, generando tres hojas con promedios más precisos.</desc>
+<defs>
+  <marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Nodo raíz -->
+<rect x="190" y="22" width="300" height="64" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="1.3"/>
+<text x="340" y="44" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#0C447C">NODO RAÍZ · profundidad 0</text>
+<text x="340" y="68" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="13" font-weight="500" fill="#042C53">¿Parcial 1 ≥ 3.3?</text>
+
+<!-- Rama izq raíz -->
+<line x1="258" y1="86" x2="148" y2="168" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar2)"/>
+<text x="168" y="130" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No</text>
+
+<!-- Rama der raíz: hoja directa -->
+<line x1="422" y1="86" x2="536" y2="168" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar2)"/>
+<text x="514" y="130" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí</text>
+
+<!-- Hoja derecha nivel 1 -->
+<rect x="412" y="168" width="232" height="82" rx="10" fill="#EAF3DE" stroke="#639922" stroke-width="1.2"/>
+<text x="528" y="191" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#3B6D11">HOJA</text>
+<text x="528" y="214" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#173404">ŷ = 4.00</text>
+<text x="528" y="238" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#27500A">E, F, G, H  (n = 4)</text>
+
+<!-- Nodo interno izq (profundidad 1) -->
+<rect x="22" y="168" width="252" height="64" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="1.2"/>
+<text x="148" y="190" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" font-weight="500" fill="#633806">NODO INTERNO · profundidad 1</text>
+<text x="148" y="214" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="13" font-weight="500" fill="#412402">¿Asistencia ≥ 63%?</text>
+
+<!-- Ramas nodo interno izq -->
+<line x1="76"  y1="232" x2="52"  y2="322" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar2)"/>
+<line x1="220" y1="232" x2="248" y2="322" stroke="#aaa" stroke-width="1.3" marker-end="url(#ar2)"/>
+<text x="40"  y="280" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">No</text>
+<text x="262" y="280" text-anchor="middle" font-family="inherit" font-size="12" fill="#666">Sí</text>
+
+<!-- Hoja 1: nota muy baja (A) -->
+<rect x="-14" y="322" width="160" height="90" rx="10" fill="#FCEBEB" stroke="#E24B4A" stroke-width="1.2"/>
+<text x="66" y="344" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#A32D2D">HOJA</text>
+<text x="66" y="368" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#501313">ŷ = 2.45</text>
+<text x="66" y="395" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#791F1F">A, B  (n = 2)</text>
+
+<!-- Hoja 2: nota media baja (C, D) -->
+<rect x="162" y="322" width="172" height="90" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="1.2"/>
+<text x="248" y="344" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#633806">HOJA</text>
+<text x="248" y="368" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="20" font-weight="500" fill="#412402">ŷ = 3.00</text>
+<text x="248" y="395" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-size="11" fill="#633806">C, D  (n = 2)</text>
+
+<text x="340" y="432" text-anchor="middle" font-family="inherit" font-size="11" fill="#999">Profundidad = 2 · La segunda pregunta refina la predicción en el grupo de notas bajas</text>
+</svg>
+</div>
+```
+
+La segunda pregunta afina la escalera: tres peldaños en vez de dos. Y aplica todo lo de la semana 11: cada nivel extra refina **y** arriesga memorizar — por eso el ritual es el mismo: dejar crecer, mirar la `cptable`, podar con la **regla 1-SE**. No aprendas nada nuevo aquí: reutiliza.
+
+<!--=================-->
+<!--=================-->
+# Explóralo tú mismo: el árbol que predice números
+
+El playground de la semana 11, versión regresión. Dos pestañas: el **Mapa de predicción** (el espacio partido en regiones, ahora coloreadas por el *valor* que predicen) y la **Estructura del árbol** (los promedios en cada hoja).
+
+**¿Qué explorar?**
+
+1. Con profundidad 1: ¿cuántos valores distintos puede predecir el árbol? Mira la escalera en el Mapa.
+2. Sube la profundidad a 5 o 6: ¿el MAE de train sigue bajando? ¿Y el de test? El dial de la semana 10, tercera aparición.
+3. Compara MAE y RMSE en el panel: ¿cuándo se separan? ¿Qué te dice esa brecha (pista: video 2 de la semana 10)?
+4. En la pestaña **Árbol**: ¿puedes leer el promedio que predice cada hoja?
+
+```{=html}
+<div style="margin:1.5rem 0;">
+<style>
+#rpl12 *{box-sizing:border-box;margin:0;padding:0}
+#rpl12{border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;font-family:inherit;background:#fff}
+#rpl12-inner{display:grid;grid-template-columns:270px 1fr;min-height:520px}
+#rpl12-panel{background:#f8f8f6;border-right:1px solid #e0e0e0;padding:16px;display:flex;flex-direction:column;gap:13px}
+#rpl12-right{display:flex;flex-direction:column;min-width:0}
+#rpl12-tabs{display:flex;border-bottom:1px solid #e0e0e0;background:#fafafa}
+.r12tab{padding:9px 18px;font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;color:#888;border-bottom:2px solid transparent;transition:all .15s}
+.r12tab.on{color:#1F4E79;border-bottom-color:#1F4E79;background:#fff}
+.r12tab:hover:not(.on){color:#555}
+#rpl12-vmap,#rpl12-vtree{flex:1;display:none;min-height:300px}
+#rpl12-vmap.vis{display:flex;flex-direction:column}
+#rpl12-vtree.vis{display:block;overflow:auto;padding:8px}
+#rpl12-cv{display:block;flex:1;width:100%}
+#rpl12-tsvg{display:block;width:100%}
+.r12ps{display:flex;flex-direction:column;gap:6px}
+.r12pl{font-size:10px;color:#888;letter-spacing:.04em;text-transform:uppercase;font-weight:500}
+.r12pv{font-size:17px;font-weight:500;color:#111}
+#rpl12-panel select{width:100%;padding:6px 8px;font-size:13px;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#111}
+#rpl12-panel input[type=range]{width:100%;accent-color:#1F4E79}
+.r12btn{width:100%;padding:7px 4px;font-size:12px;font-weight:500;border:1px solid #93c5fd;border-radius:8px;background:#dbeafe;color:#1e40af;cursor:pointer;transition:background .15s}
+.r12btn:hover{background:#bfdbfe}
+.r12rst{width:100%;padding:5px 4px;font-size:11px;font-weight:500;border:1px solid #d0d0d0;border-radius:8px;background:#fff;color:#666;cursor:pointer;transition:background .15s}
+.r12rst:hover{background:#f0f0f0}
+.r12met{display:flex;gap:6px}
+.r12mb{flex:1;background:#f0f4f8;border-radius:8px;padding:6px 4px;text-align:center}
+.r12mv{font-size:13px;font-weight:600;color:#1F4E79}
+.r12ml{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.04em}
+#rpl12-st{padding:7px 14px;font-size:11px;color:#666;border-top:1px solid #e0e0e0;display:flex;align-items:center;min-height:28px}
+</style>
+
+<div id="rpl12">
+<div id="rpl12-inner">
+  <div id="rpl12-panel">
+    <div class="r12ps">
+      <div class="r12pl">Dataset</div>
+      <select id="r12ds">
+        <option value="notas">Notas de estudiantes</option>
+        <option value="casas">Precio de viviendas</option>
+      </select>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">Profundidad máxima</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="r12depth" min="1" max="8" value="3" step="1" style="flex:1">
+        <span class="r12pv" id="r12depthv">3</span>
+      </div>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">Mín. muestras por hoja</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="r12leaf" min="1" max="20" value="5" step="1" style="flex:1">
+        <span class="r12pv" id="r12leafv">5</span>
+      </div>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">Mín. muestras para dividir</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="r12split" min="2" max="30" value="10" step="1" style="flex:1">
+        <span class="r12pv" id="r12splitv">10</span>
+      </div>
+    </div>
+    <button class="r12btn" id="r12run">▶ Entrenar árbol</button>
+    <button class="r12rst" id="r12reset">↺ Reiniciar datos</button>
+    <div class="r12ps">
+      <div class="r12pl">MAE</div>
+      <div class="r12met">
+        <div class="r12mb"><div class="r12mv" id="r12mae-tr">—</div><div class="r12ml">Train</div></div>
+        <div class="r12mb"><div class="r12mv" id="r12mae-te">—</div><div class="r12ml">Test</div></div>
+      </div>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">RMSE</div>
+      <div class="r12met">
+        <div class="r12mb"><div class="r12mv" id="r12rmse-tr">—</div><div class="r12ml">Train</div></div>
+        <div class="r12mb"><div class="r12mv" id="r12rmse-te">—</div><div class="r12ml">Test</div></div>
+      </div>
+    </div>
+    <div class="r12ps">
+      <div class="r12pl">Baseline MAE (promedio global)</div>
+      <div class="r12mv" id="r12base" style="font-size:15px;color:#888">—</div>
+    </div>
+  </div>
+
+  <div id="rpl12-right">
+    <div id="rpl12-tabs">
+      <button class="r12tab on" id="r12tab-map"  onclick="r12tab('map')">🗺 Mapa de predicción</button>
+      <button class="r12tab"    id="r12tab-tree" onclick="r12tab('tree')">🌳 Árbol</button>
+    </div>
+    <div id="rpl12-vmap" class="vis"><canvas id="rpl12-cv"></canvas></div>
+    <div id="rpl12-vtree"><svg id="rpl12-tsvg"></svg></div>
+  </div>
+</div>
+<div id="rpl12-st">Elige un dataset y entrena el árbol para comenzar</div>
+</div>
+
+<script>
+(function(){
+/* ── Paleta de calor para regresión ── */
+function valToColor(v,mn,mx){
+  const t=Math.max(0,Math.min(1,(v-mn)/(mx-mn||1)));
+  const r=Math.round(220-t*150),g=Math.round(60+t*140),b=Math.round(60+t*40);
+  return[r,g,b];
+}
+function rnd(a,b){return a+(b-a)*Math.random();}
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+/* ── Datasets ── */
+function genNotas(){
+  const pts=[];
+  for(let i=0;i<200;i++){
+    const p1=clamp(rnd(1,5)+randn()*0.3,1,5);
+    const asist=clamp(rnd(40,100)+randn()*5,40,100);
+    const nota=clamp(0.3*p1+0.004*asist+0.8+randn()*0.3,0,5);
+    pts.push({x:clamp((p1-1)/4,0.01,0.99),y:clamp((asist-40)/60,0.01,0.99),val:nota});
+  }
+  return{pts,xLabel:'Parcial 1 (normalizado)',yLabel:'Asistencia (normalizado)',unit:'pts',yMin:0,yMax:5};
+}
+function genCasas(){
+  const pts=[];
+  for(let i=0;i<200;i++){
+    const area=clamp(rnd(30,200)+randn()*15,30,200);
+    const estrato=clamp(Math.round(rnd(1,6)+randn()*0.5),1,6);
+    const precio=clamp(20+area*1.1+estrato*12+randn()*15,40,350);
+    pts.push({x:clamp((area-30)/170,0.01,0.99),y:clamp((estrato-1)/5,0.01,0.99),val:precio});
+  }
+  return{pts,xLabel:'Área (normalizado)',yLabel:'Estrato (normalizado)',unit:'M',yMin:40,yMax:350};
+}
+
+/* ── Árbol de regresión ── */
+function variance(pts){
+  if(pts.length<2)return 0;
+  const m=pts.reduce((s,p)=>s+p.val,0)/pts.length;
+  return pts.reduce((s,p)=>s+(p.val-m)**2,0)/pts.length;
+}
+function mean(pts){return pts.length?pts.reduce((s,p)=>s+p.val,0)/pts.length:0;}
+function buildReg(pts,depth,maxD,minL,minS){
+  const m=mean(pts);
+  if(depth>=maxD||pts.length<minS)return{leaf:true,pred:m,n:pts.length,depth};
+  let best=null,bestVar=Infinity;
+  for(const dim of['x','y']){
+    const vs=[...new Set(pts.map(p=>p[dim]))].sort((a,b)=>a-b);
+    for(let i=0;i<vs.length-1;i++){
+      const th=(vs[i]+vs[i+1])/2;
+      const L=pts.filter(p=>p[dim]<th),R=pts.filter(p=>p[dim]>=th);
+      if(L.length<minL||R.length<minL)continue;
+      const v=(L.length*variance(L)+R.length*variance(R))/pts.length;
+      if(v<bestVar){bestVar=v;best={dim,th,L,R};}
+    }
+  }
+  if(!best)return{leaf:true,pred:m,n:pts.length,depth};
+  return{leaf:false,dim:best.dim,th:best.th,
+    left:buildReg(best.L,depth+1,maxD,minL,minS),
+    right:buildReg(best.R,depth+1,maxD,minL,minS),
+    n:pts.length,depth};
+}
+function predReg(tree,p){if(tree.leaf)return tree.pred;return p[tree.dim]<tree.th?predReg(tree.left,p):predReg(tree.right,p);}
+
+/* ── Estado ── */
+let W=0,H=0,data=null,tree=null,trainIdx=[],testIdx=[];
+const cv=document.getElementById('rpl12-cv');
+const cx=cv.getContext('2d');
+
+/* ── Tabs ── */
+window.r12tab=function(t){
+  document.getElementById('rpl12-vmap').classList.toggle('vis',t==='map');
+  document.getElementById('rpl12-vtree').classList.toggle('vis',t==='tree');
+  document.getElementById('r12tab-map').classList.toggle('on',t==='map');
+  document.getElementById('r12tab-tree').classList.toggle('on',t==='tree');
+  if(t==='map'){resize();drawMap();}
+  else if(tree)drawTreeSVG();
+};
+
+/* ── Canvas ── */
+function resize(){
+  const r=cv.parentElement.getBoundingClientRect();
+  W=r.width;H=Math.max(r.height-4,280);
+  cv.width=W;cv.height=H;
+}
+function n2px(nx,ny){const p=36;return{x:p+nx*(W-2*p),y:(H-p)-ny*(H-2*p)};}
+
+function drawMap(){
+  if(!W||!H)return;
+  cx.clearRect(0,0,W,H);
+  if(tree&&data){
+    const img=cx.createImageData(W,H);
+    const pad=36;
+    for(let px=0;px<W;px++)for(let py=0;py<H;py++){
+      const nx=(px-pad)/(W-2*pad),ny=1-(py-pad)/(H-2*pad);
+      if(nx<0||nx>1||ny<0||ny>1)continue;
+      const v=predReg(tree,{x:nx,y:ny});
+      const [r,g,b]=valToColor(v,data.yMin,data.yMax);
+      const idx=4*(py*W+px);img.data[idx]=r;img.data[idx+1]=g;img.data[idx+2]=b;img.data[idx+3]=35;
+    }
+    cx.putImageData(img,0,0);
+  }
+  const pad=36;
+  cx.strokeStyle='#ccc';cx.lineWidth=1;
+  cx.beginPath();cx.moveTo(pad,pad);cx.lineTo(pad,H-pad);cx.lineTo(W-pad,H-pad);cx.stroke();
+  cx.fillStyle='#999';cx.font='11px inherit';cx.textAlign='center';
+  if(data){cx.fillText(data.xLabel,W/2,H-6);cx.save();cx.translate(11,H/2);cx.rotate(-Math.PI/2);cx.fillText(data.yLabel,0,0);cx.restore();}
+  if(data) data.pts.forEach((p,i)=>{
+    const c=n2px(p.x,p.y),isT=testIdx.includes(i);
+    const [r,g,b]=valToColor(p.val,data.yMin,data.yMax);
+    cx.beginPath();cx.arc(c.x,c.y,isT?5:3.5,0,6.28);
+    cx.fillStyle=`rgb(${r},${g},${b})`;cx.fill();
+    cx.strokeStyle=isT?'#000':'#fff';cx.lineWidth=isT?1.5:1;cx.stroke();
+  });
+}
+
+/* ── Árbol SVG ── */
+function drawTreeSVG(){
+  const container=document.getElementById('rpl12-tsvg');
+  const cW=Math.max(container.parentElement.getBoundingClientRect().width||400,400);
+  const NW=130,NH=58,VG=56;
+
+  function leaves(n){return n.leaf?1:leaves(n.left)+leaves(n.right);}
+  function posX(n,lo,hi){
+    if(n.leaf){n._cx=(lo+hi)/2;return;}
+    const tot=leaves(n);
+    posX(n.left,lo,lo+(hi-lo)*leaves(n.left)/tot);
+    posX(n.right,lo+(hi-lo)*leaves(n.left)/tot,hi);
+    n._cx=(n.left._cx+n.right._cx)/2;
+  }
+  function posY(n,d){n._cy=38+d*(NH+VG);if(!n.leaf){posY(n.left,d+1);posY(n.right,d+1);}}
+  function maxY(n){return n.leaf?n._cy:Math.max(maxY(n.left),maxY(n.right));}
+  posX(tree,40,cW-40);posY(tree,0);
+  const svgH=maxY(tree)+NH+36;
+
+  const dimName=d=>{if(!data)return d==='x'?'X':'Y';return d==='x'?data.xLabel.split('(')[0].trim():data.yLabel.split('(')[0].trim();};
+  const unit=data?data.unit:'';
+
+  let lines='',nodes='';
+  function walk(n){
+    if(!n.leaf){
+      lines+=`<line x1="${n._cx}" y1="${n._cy+NH/2}" x2="${n.left._cx}" y2="${n.left._cy-NH/2}" stroke="#bbb" stroke-width="1.2"/>`;
+      lines+=`<line x1="${n._cx}" y1="${n._cy+NH/2}" x2="${n.right._cx}" y2="${n.right._cy-NH/2}" stroke="#bbb" stroke-width="1.2"/>`;
+      const mlx=(n._cx+n.left._cx)/2,mly=(n._cy+NH/2+n.left._cy-NH/2)/2;
+      lines+=`<text x="${mlx-4}" y="${mly}" font-family="inherit" font-size="10" fill="#888" text-anchor="end">No</text>`;
+      const mrx=(n._cx+n.right._cx)/2,mry=(n._cy+NH/2+n.right._cy-NH/2)/2;
+      lines+=`<text x="${mrx+4}" y="${mry}" font-family="inherit" font-size="10" fill="#888">Sí</text>`;
+      walk(n.left);walk(n.right);
+    }
+    const x=n._cx-NW/2,y=n._cy-NH/2;
+    if(n.leaf){
+      nodes+=`<rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="1"/>`;
+      nodes+=`<text x="${n._cx}" y="${y+16}" font-family="inherit" font-size="10" fill="#633806" text-anchor="middle" dominant-baseline="central">HOJA · n=${n.n}</text>`;
+      nodes+=`<text x="${n._cx}" y="${y+36}" font-family="inherit" font-size="14" font-weight="500" fill="#412402" text-anchor="middle" dominant-baseline="central">ŷ = ${n.pred.toFixed(2)} ${unit}</text>`;
+    } else {
+      nodes+=`<rect x="${x}" y="${y}" width="${NW}" height="${NH}" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>`;
+      nodes+=`<text x="${n._cx}" y="${y+16}" font-family="inherit" font-size="10" fill="#0C447C" text-anchor="middle" dominant-baseline="central">prof. ${n.depth}</text>`;
+      nodes+=`<text x="${n._cx}" y="${y+38}" font-family="inherit" font-size="11" font-weight="500" fill="#042C53" text-anchor="middle" dominant-baseline="central">${dimName(n.dim)} &lt; ${n.th.toFixed(2)}</text>`;
+    }
+  }
+  walk(tree);
+  container.setAttribute('viewBox',`0 0 ${cW} ${svgH}`);
+  container.setAttribute('height',svgH);
+  container.innerHTML=lines+nodes;
+}
+
+/* ── Métricas ── */
+function mae(idxs){
+  if(!idxs.length)return null;
+  return idxs.reduce((s,i)=>s+Math.abs(predReg(tree,data.pts[i])-data.pts[i].val),0)/idxs.length;
+}
+function rmse(idxs){
+  if(!idxs.length)return null;
+  return Math.sqrt(idxs.reduce((s,i)=>s+(predReg(tree,data.pts[i])-data.pts[i].val)**2,0)/idxs.length);
+}
+function baselineMAE(idxs){
+  const m=mean(idxs.map(i=>data.pts[i]));
+  return idxs.reduce((s,i)=>s+Math.abs(data.pts[i].val-m),0)/idxs.length;
+}
+function splitTT(n){
+  const idx=Array.from({length:n},(_,i)=>i);
+  for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]];}
+  const cut=Math.floor(n*0.75);return{train:idx.slice(0,cut),test:idx.slice(cut)};
+}
+
+/* ── Cargar dataset ── */
+function loadDS(){
+  const v=document.getElementById('r12ds').value;
+  data=v==='notas'?genNotas():genCasas();
+  const{train,test}=splitTT(data.pts.length);
+  trainIdx=train;testIdx=test;
+  tree=null;
+  ['r12mae-tr','r12mae-te','r12rmse-tr','r12rmse-te','r12base'].forEach(id=>{document.getElementById(id).textContent='—';});
+  document.getElementById('rpl12-tsvg').innerHTML='';
+  resize();drawMap();
+  document.getElementById('rpl12-st').textContent=
+    `${data.pts.length} obs. (${trainIdx.length} entrenamiento, ${testIdx.length} prueba). Puntos con borde negro = conjunto de prueba.`;
+}
+
+/* ── Entrenar ── */
+document.getElementById('r12run').addEventListener('click',()=>{
+  if(!data)return;
+  const maxD=+document.getElementById('r12depth').value;
+  const minL=+document.getElementById('r12leaf').value;
+  const minS=+document.getElementById('r12split').value;
+  tree=buildReg(trainIdx.map(i=>data.pts[i]),0,maxD,minL,minS);
+  const maeT=mae(trainIdx),maeE=mae(testIdx);
+  const rmseT=rmse(trainIdx),rmseE=rmse(testIdx);
+  const base=baselineMAE(testIdx);
+  document.getElementById('r12mae-tr').textContent=maeT?maeT.toFixed(3):'—';
+  document.getElementById('r12mae-te').textContent=maeE?maeE.toFixed(3):'—';
+  document.getElementById('r12rmse-tr').textContent=rmseT?rmseT.toFixed(3):'—';
+  document.getElementById('r12rmse-te').textContent=rmseE?rmseE.toFixed(3):'—';
+  document.getElementById('r12base').textContent=base?base.toFixed(3)+' '+data.unit:'—';
+  drawMap();
+  if(document.getElementById('rpl12-vtree').classList.contains('vis'))drawTreeSVG();
+  document.getElementById('rpl12-st').textContent=
+    `Árbol entrenado: profundidad máx ${maxD}, mín hoja ${minL}, mín split ${minS}.`;
+});
+
+document.getElementById('r12reset').addEventListener('click',loadDS);
+[['r12depth','r12depthv'],['r12leaf','r12leafv'],['r12split','r12splitv']].forEach(([id,vid])=>{
+  document.getElementById(id).addEventListener('input',e=>{document.getElementById(vid).textContent=e.target.value;});
+});
+document.getElementById('r12ds').addEventListener('change',loadDS);
+window.addEventListener('resize',()=>{if(document.getElementById('rpl12-vmap').classList.contains('vis')){resize();drawMap();}});
+setTimeout(()=>{resize();loadDS();},150);
+})();
+</script>
+</div>
+```
+
+<!--=================-->
+<!--=================-->
+# La ruta lineal: el Lasso
+
+El árbol responde con reglas y escalones. Hay otra tradición — más vieja que el Machine Learning — que responde con una **ecuación**:
+
+$$\text{nota final} \approx b_0 + b_1 \cdot \text{parcial}_1 + b_2 \cdot \text{parcial}_2 + b_3 \cdot \text{tareas} + \dots$$
+
+Cada coeficiente $b$ dice cuánto suma (o resta) una unidad de esa variable, con las demás quietas. Es el modelo más **comunicable** que existe: *"cada punto del parcial 2 aporta 0.27 a la nota final"* cabe en una frase de gerencia. La regresión lineal clásica elige los $b$ que minimizan el error cuadrático en train — hasta ahí, nada nuevo bajo el sol.
+
+El problema aparece con el sospechoso de siempre: **el sobreajuste**. Con muchas variables (y peor si algunas son ruido o se duplican entre sí), la recta tiene libertad de sobra para acomodarse al ruido de train: coeficientes enormes, signos absurdos, métricas infladas. El modelo lineal también necesita un freno.
+
+::: {.callout-key}
+**El freno Lasso: un impuesto a los coeficientes**
+
+El Lasso re-escribe el objetivo del entrenamiento: minimiza el error **más una multa proporcional al tamaño total de los coeficientes**, con una perilla λ que fija la tarifa:
+
+$$\min_b \; \underbrace{\text{error de ajuste}}_{\text{lo de siempre}} \; + \; \lambda \sum_j |b_j|$$
+
+Consecuencias:
+
+- Cada variable debe **pagarse su puesto**: solo conserva coeficiente si reduce el error más de lo que cuesta su multa.
+- Con λ suficiente, los coeficientes de las variables flojas caen **exactamente a cero** — quedan **fuera del modelo**. El Lasso se poda solo, como el árbol con `prune()`.
+- λ es el dial de complejidad (¡otra vez!): λ = 0 es la recta sin freno (riesgo de memorizar); λ gigante deja el modelo vacío prediciendo el promedio (subajuste).
+:::
+
+¿Y quién elige λ? La respuesta ya la sabes de memoria: **la validación cruzada**. La función `cv.glmnet()` prueba una malla de valores de λ con CV de 10 pliegues y te reporta dos candidatos: `lambda.min` (el del error mínimo) y `lambda.1se` — el más simple que empata con el mínimo. Sí: **la regla 1-SE de la semana 11**, con otro nombre de variable. En este curso usamos `lambda.1se`.
+
+Siente el dial — mueve λ y mira qué les pasa a los coeficientes del pronosticador de notas:
+
+```{=html}
+<div class="widget-card" id="wg-lasso">
+  <style>
+    #wg-lasso .lasso-fila { display: flex; align-items: center; gap: 0.6em; margin-bottom: 0.45em; }
+    #wg-lasso .lasso-nom { flex: 0 0 6.5em; font-size: 0.85em; color: #334155; text-align: right; }
+    #wg-lasso .lasso-pista { flex: 1 1 auto; background: #f1f5f9; border-radius: 6px; height: 1.35em; position: relative; overflow: hidden; }
+    #wg-lasso .lasso-barra { position: absolute; left: 0; top: 0; bottom: 0; background: #2563eb; border-radius: 6px; transition: width 0.15s; }
+    #wg-lasso .lasso-cero .lasso-barra { background: #cbd5e1; }
+    #wg-lasso .lasso-val { flex: 0 0 4.5em; font-size: 0.85em; font-weight: 700; color: #1e3a5f; }
+    #wg-lasso .lasso-cero .lasso-val { color: #94a3b8; }
+    #wg-lasso .lasso-fuera { flex: 0 0 auto; font-size: 0.7em; font-weight: 700; color: #b91c1c; background: #fee2e2; border-radius: 999px; padding: 0.1em 0.55em; visibility: hidden; }
+    #wg-lasso .lasso-cero .lasso-fuera { visibility: visible; }
+  </style>
+  <div class="widget-head">🎚️ El dial λ — ¿qué variables sobreviven al freno?</div>
+  <div class="widget-body">
+    <div class="ofit-controls">
+      <span style="font-size:0.9em; color:#475569;">Freno λ</span>
+      <input type="range" id="lasso-slider" min="0" max="8" value="2" step="1" aria-label="Nivel del freno lambda">
+      <span class="ofit-cx" id="lasso-nivel">λ₂</span>
+    </div>
+    <div id="lasso-barras"></div>
+    <div class="ofit-boxes">
+      <div class="ofit-box"><div class="ofit-val" id="lasso-nvar">–</div><div class="ofit-lab">Variables en el modelo</div></div>
+      <div class="ofit-box ofit-test"><div class="ofit-val" id="lasso-cv">–</div><div class="ofit-lab">Error de CV (MAE)</div></div>
+    </div>
+    <div style="text-align:center; margin:0.4em 0;"><span class="ofit-verdict" id="lasso-verdict"></span></div>
+    <div class="widget-note" id="lasso-nota"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var VARS = ["parcial_2", "parcial_1", "tareas", "quices", "asistencia"];
+  // coeficientes (ilustrativos) para cada nivel de lambda, 0..8
+  var PATHS = [
+    [0.31, 0.30, 0.29, 0.27, 0.24, 0.20, 0.15, 0.08, 0.00],
+    [0.26, 0.25, 0.23, 0.20, 0.16, 0.11, 0.05, 0.00, 0.00],
+    [0.19, 0.18, 0.16, 0.14, 0.09, 0.04, 0.00, 0.00, 0.00],
+    [0.13, 0.11, 0.08, 0.05, 0.01, 0.00, 0.00, 0.00, 0.00],
+    [0.05, 0.03, 0.01, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00]
+  ];
+  var CVERR = [0.245, 0.235, 0.226, 0.222, 0.229, 0.246, 0.274, 0.318, 0.344];
+  var cont = document.getElementById("lasso-barras");
+  if (!cont) return;
+  var html = "";
+  VARS.forEach(function (v, i) {
+    html += '<div class="lasso-fila" id="lasso-f' + i + '">' +
+      '<span class="lasso-nom">' + v + '</span>' +
+      '<span class="lasso-pista"><span class="lasso-barra" id="lasso-b' + i + '"></span></span>' +
+      '<span class="lasso-val" id="lasso-v' + i + '">–</span>' +
+      '<span class="lasso-fuera">FUERA</span></div>';
+  });
+  cont.innerHTML = html;
+  var sl = document.getElementById("lasso-slider");
+  function pinta() {
+    var k = parseInt(sl.value, 10);
+    document.getElementById("lasso-nivel").textContent = "λ" + "₀₁₂₃₄₅₆₇₈"[k];
+    var nvar = 0;
+    PATHS.forEach(function (p, i) {
+      var c = p[k];
+      document.getElementById("lasso-b" + i).style.width = (c / 0.32 * 100) + "%";
+      document.getElementById("lasso-v" + i).textContent = c.toFixed(2);
+      document.getElementById("lasso-f" + i).classList.toggle("lasso-cero", c === 0);
+      if (c > 0) nvar++;
+    });
+    document.getElementById("lasso-nvar").textContent = nvar + " de 5";
+    document.getElementById("lasso-cv").textContent = CVERR[k].toFixed(3);
+    var v = document.getElementById("lasso-verdict"), n = document.getElementById("lasso-nota");
+    v.className = "ofit-verdict";
+    if (k <= 1) {
+      v.classList.add("v-sub"); v.textContent = "FRENO SUELTO";
+      n.innerHTML = "Con λ pequeño casi no hay multa: todas las variables adentro con coeficientes grandes. En datos con más ruido que estos, aquí vive el <b>sobreajuste lineal</b>.";
+    } else if (k <= 4) {
+      v.classList.add("v-dulce"); v.textContent = k === 3 ? "MÍNIMO DE CV 🎯" : "ZONA SANA";
+      n.innerHTML = (k === 3 ? "Aquí el error de CV toca su mínimo. " : (k === 4 ? "Un paso más de freno y el error casi no sube — este sería el <b>λ de la regla 1-SE</b>: el modelo más simple que empata con el mejor. " : "")) + "Nota el orden de expulsión: el freno saca primero a las variables que menos aportan (asistencia, luego quices).";
+    } else {
+      v.classList.add("v-sobre"); v.textContent = "FRENO EXCESIVO";
+      n.innerHTML = "La multa es tan cara que el modelo se queda sin variables: con todas en cero solo puede predecir el promedio — <b>el baseline con pasos extra</b>. Subajuste puro.";
+    }
+  }
+  sl.addEventListener("input", pinta);
+  pinta();
+})();
+</script>
+```
+
+*Coeficientes y errores ilustrativos — la forma del recorrido es la típica; los valores exactos los calcularás en clase con `cv.glmnet`.* Fíjate en la moraleja del dial: el Lasso convierte la selección de variables — que en la era manual era un debate de comité — en una consecuencia matemática del freno. Y el orden de expulsión es información de negocio pura: te dice qué mira (y qué ignora) el fenómeno.
+
+<!--=================-->
+<!--=================-->
+# El bosque, versión regresión
+
+El Random Forest de la semana 11 se recicla con un solo cambio: los 500 árboles ya no votan una clase — cada uno predice su número y el bosque entrega el **promedio**. Todo lo demás es idéntico: bootstrap, amnesia de variables en cada corte, importancia de variables como consuelo de interpretabilidad, y la misma advertencia — es una caja difícil de explicar.
+
+(De paso, un nombre que oirás en la industria: **XGBoost**, otro ensamble de árboles que en vez de promediarlos en paralelo los entrena *en cadena*, cada árbol corrigiendo los errores del anterior. Es el campeón habitual de las competencias de predicción; su lógica fina queda fuera de este curso, pero al leerlo en una oferta de trabajo ya sabes de qué familia viene.)
+
+Tu menú de regresión queda así:
+
+| | Lasso | Árbol podado | Bosque |
+|---|---|---|---|
+| Entrega | Una **ecuación** con coeficientes | **Reglas** legibles (escalera) | Solo la predicción + importancia |
+| Interpretabilidad | 🟢 La fórmula se publica | 🟢 Se dibuja | 🟠 Caja semi-negra |
+| Captura no linealidades | 🟠 No (es una recta) | 🟢 Sí (a escalones) | 🟢 Sí (suavizadas) |
+| Selección de variables | 🟢 Automática (ceros) | 🟢 Implícita (qué corta) | 🟠 Ranking, no selección |
+| Típicamente gana cuando… | El patrón es lineal | Hay reglas de quiebre claras | Patrones complejos y mucha interacción |
+
+: {.striped tbl-colwidths="[22,26,26,26]"}
+
+::: {.callout-remember}
+**¿Y quién gana el torneo?** La semana pasada ganó el bosque y quizás concluiste "el bosque siempre gana". Esta semana te espera una sorpresa que vale más que cualquier regla de pulgar: **el ganador depende de la forma del patrón**. Cuando el proceso que genera los datos es (casi) lineal, la recta con freno le gana a quinientos árboles — y además se deja leer. Por eso el profesional no se casa con un modelo: monta el torneo y deja que el test hable.
+:::
+
+<!--=================-->
+<!--=================-->
+# El torneo y el diagnóstico
+
+El guion de la clase — cuarta vez que lo ves, primera vez con tres familias de modelos:
+
+```{=html}
+<div class="pipe-steps">
+  <div class="pipe-step"><div class="pipe-num">1</div><div><b>Parte train/test y calcula el baseline:</b> predecir siempre el promedio de train. Su MAE y RMSE son la vara.</div></div>
+  <div class="pipe-step"><div class="pipe-num">2</div><div><b>Entrena los tres candidatos</b> — Lasso (con <code>cv.glmnet</code> eligiendo λ), árbol (podado con 1-SE) y bosque. Cada uno usa su propia CV interna; el test sigue intacto.</div></div>
+  <div class="pipe-step"><div class="pipe-num">3</div><div><b>Evalúa todos en test, una sola vez:</b> MAE y RMSE por modelo, en una tabla comparativa contra el baseline.</div></div>
+  <div class="pipe-step"><div class="pipe-num">4</div><div><b>Diagnostica al ganador antes de firmarlo:</b> el gráfico predicho-vs-real y la brecha MAE–RMSE. La métrica promedio aprueba el modelo; el diagnóstico te dice <em>dónde</em> falla.</div></div>
+</div>
+```
+
+Dos herramientas de diagnóstico que usarás en clase:
+
+- **El gráfico predicho vs. real**: un punto por caso del test; la diagonal es la perfección. Nubes pegadas a la diagonal = modelo sano; abanicos que se abren en un extremo = el modelo falla justo ahí (¿notas altas subestimadas? ¿apartamentos de lujo mal tasados?).
+- **La brecha MAE–RMSE**: la aprendiste en la semana 10 y aquí paga arriendo — si el RMSE queda muy por encima del MAE, el modelo comete **embarradas ocasionales**. Encuentra en qué casos (mira los residuales más grandes) y decide si ese segmento necesita tratamiento aparte.
+
+<!--=================-->
+<!--=================-->
+# ¿Y esto cómo se ve en tu semestre?
+
+- **La práctica**: la revancha completa — el pronosticador de notas de la universidad, con el torneo baseline → Lasso → árbol → bosque, la lectura de los coeficientes y el gráfico predicho-vs-real. Spoiler responsable: el podio de esta semana no es el de la semana pasada.
+- **El taller**: la inmobiliaria InmoValle quiere un **avaluador instantáneo** de apartamentos para su página web. Torneo completo, lectura de la ecuación del Lasso (¿cuánto vale un m²? ¿qué variable sale expulsada?) y un memorando con la letra menuda.
+- **La semana 13**: se acaba el target — segmentación con k-means, el mundo no supervisado.
+- **Tu proyecto final**: si tu pregunta es de regresión (predicción), este es el arsenal completo, con una regla de oro para la sustentación: MAE/RMSE **en test**, contra el baseline del promedio, y el jurado siempre pregunta por la brecha MAE–RMSE.
+
+<!--=================-->
+<!--=================-->
+# Para pensar 🤔
+
+1. El coeficiente del Lasso dice: "cada baño adicional suma ~12 millones al precio". Un cliente concluye: *"entonces si construyo un baño, mi apartamento vale 12 millones más"*. ¿Por qué esa lectura es un salto al vacío? (Pista: el modelo describe el mercado, no interviene en él.)
+2. Un árbol de regresión con 6 hojas solo puede predecir 6 precios distintos. ¿Por qué eso casi no le pesa en el MAE global, pero puede ser un problema serio si la inmobiliaria lo usa para tasar apartamentos muy por fuera del rango histórico?
+3. Tu Lasso expulsó la variable `habitaciones` (coeficiente 0) pero el bosque le da importancia media. ¿Contradicción? (Pista: ¿qué otra variable del dataset ya "cuenta" las habitaciones?)
+
+<!--=================-->
+<!--=================-->
+# Checklist de salida
+
+Al terminar el video y esta lectura debes poder explicar:
+
+- [ ] ¿Qué predice la hoja de un árbol de regresión y qué busca cada corte?
+- [ ] ¿Por qué la predicción del árbol es una "escalera" y qué limitación implica?
+- [ ] ¿Qué re-usas tal cual de la semana 11 para podar? (cptable, xerror, regla 1-SE)
+- [ ] ¿Qué multa agrega el Lasso al entrenamiento y qué efecto tiene sobre los coeficientes?
+- [ ] ¿Por qué el Lasso hace selección automática de variables y por qué eso es oro para el negocio?
+- [ ] ¿Qué es `lambda.1se` y con qué regla de la semana 11 rima?
+- [ ] ¿Qué cambia en el Random Forest al pasar de clasificación a regresión?
+- [ ] ¿Qué diagnósticos corres antes de firmar al ganador del torneo?
+
+<!--=================-->
+<!--=================-->
+# Preguntas de comprensión
+
+**1.** Una hoja de un árbol de regresión contiene 5 apartamentos de entrenamiento con precios 210, 230, 250, 260 y 300 millones. (a) ¿Qué precio predice esa hoja para un apartamento nuevo que caiga ahí? (b) Si el apartamento nuevo realmente vale 410 millones, ¿cuál es su residual y qué pudo salir mal?
+
+<details class="answer"><summary>Ver respuesta</summary>
+
+(a) El promedio: (210+230+250+260+300)/5 = **250 millones**. (b) Residual = real − predicho = 410 − 250 = **+160 millones**: el modelo subestimó gravemente. Causa probable: el apartamento nuevo es de un segmento que casi no existe en esa hoja (o en el entrenamiento) — p. ej., un piso de lujo. Los árboles no extrapolan: nunca predicen por fuera del rango de promedios de sus hojas, así que los casos extremos siempre quedan recortados hacia el centro.
+
+</details>
+
+**2.** Corres `cv.glmnet` y te reporta `lambda.min = 0.01` (error CV 0.220) y `lambda.1se = 0.04` (error CV 0.228, y con dos variables menos). ¿Cuál eliges para el modelo del proyecto y cómo defiendes la elección ante el jurado?
+
+<details class="answer"><summary>Ver respuesta</summary>
+
+`lambda.1se`. La diferencia de error (0.228 vs 0.220) está dentro del ruido de la propia CV — estadísticamente es un empate — y el modelo de `lambda.1se` es más simple: dos variables menos que mantener, explicar y recolectar. Es la misma lógica de la poda 1-SE de los árboles: **entre modelos empatados, el más simple generaliza mejor y se defiende mejor**. Ante el jurado: "elegí el modelo más parsimonioso cuyo desempeño de validación empata con el mínimo".
+
+</details>
+
+**3.** El torneo de una cadena de tiendas para pronosticar ventas semanales termina así (MAE en test): baseline 48, Lasso 31, árbol 29, bosque 22. Pero el gerente comercial necesita explicar a cada tienda *por qué* su pronóstico es el que es. ¿Qué recomiendas: el bosque, el árbol, u otra cosa?
+
+<details class="answer"><summary>Ver respuesta</summary>
+
+Depende del uso, y se puede partir en dos: para **planear inventario** (donde solo importa acertar), el bosque — 6 puntos menos de MAE que el árbol son plata. Para **conversar con las tiendas**, el árbol de 29 (o el Lasso) como "vocero": sus reglas explican la lógica general del pronóstico. Es la solución vocero de la semana 11: decidir con el modelo potente, comunicar con el legible — documentando que son dos piezas con roles distintos. Recomendar un único modelo "para todo" era la trampa de la pregunta.
+
+</details>
+
+**4.** En el dataset de apartamentos, `area_m2` y `habitaciones` están fuertemente correlacionadas (los apartamentos grandes tienen más cuartos). El Lasso dejó `habitaciones` casi en cero. ¿Significa que las habitaciones "no importan" para el precio? ¿Qué frase honesta pondrías en el informe?
+
+<details class="answer"><summary>Ver respuesta</summary>
+
+No. Significa que, **con el área ya en el modelo**, las habitaciones no agregan información *adicional*: el área ya las "cuenta". Si quitaras el área, las habitaciones heredarían un coeficiente grande. Frase honesta: *"el número de habitaciones no aporta poder predictivo adicional una vez conocida el área"* — muy distinto de "las habitaciones no importan". Los coeficientes del Lasso se leen siempre condicionados a las demás variables del modelo (y describen asociación, no causalidad).
+
+</details>
+
+<!--=================-->
+<!--=================-->
+# Material adicional
+
+- 📘 **ISLR** — capítulo 6 (regularización y Lasso) y capítulo 8 (árboles y bosques): [statlearning.com](https://www.statlearning.com){target="_blank"}
+- 🎥 **StatQuest — Regularization Part 2: Lasso** (en inglés): [youtube.com/@statquest](https://www.youtube.com/@statquest){target="_blank"}
+- 🖼️ **MLU-Explain — Linear Regression y Random Forest** (visuales interactivos): [mlu-explain.github.io](https://mlu-explain.github.io){target="_blank"}
+- 🎬 **Codificando Bits** — el video de árboles CART embebido arriba y su serie en español: [youtube.com/@codificandobits](https://www.youtube.com/@codificandobits){target="_blank"}
+
+---
+
+**Los recursos de esta semana →** esta teoría continúa en la [**práctica guiada en clase**](../practice/week-12.html) y cierra con el [**taller evaluable**](../task/week-12.html).
