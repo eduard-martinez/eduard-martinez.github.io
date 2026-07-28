@@ -103,6 +103,7 @@ The RStudio interface and the script-based workflow; R as a calculator; data typ
 <a href="/teaching/ba/lectures/week-03/theory/week-03.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="/teaching/ba/lectures/week-03/practice/week-03.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
 <a href="/teaching/ba/lectures/week-03/task/week-03.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
+<a href="https://youtu.be/_UnjI5eTkNc" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · R fundamentals</a>
 </p>
 
 **Week 4 — Manipulación y visualización de datos.**
@@ -112,6 +113,8 @@ The `dplyr` grammar verb by verb for global and grouped KPIs, and `ggplot2` as a
 <a href="/teaching/ba/lectures/week-04/theory/week-04.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="/teaching/ba/lectures/week-04/practice/week-04.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
 <a href="/teaching/ba/lectures/week-04/task/week-04.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
+<a href="https://youtu.be/MVNvoBbELKs" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · dplyr (part 1)</a>
+<a href="https://youtu.be/sCfhUTHA4fQ" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · ggplot2 (part 2)</a>
 <small class="ws-data">Data: <a href="/teaching/ba/lectures/week-04/task/cafeteria.csv"><code>cafeteria.csv</code></a></small>
 </p>
 
