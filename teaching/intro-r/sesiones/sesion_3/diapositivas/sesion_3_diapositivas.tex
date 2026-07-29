@@ -1,0 +1,386 @@
+% ============================================================
+%  Curso Nivelatorio de Programación en R — Sesión 3
+%  Unidades 3 y 4: Visualización, descriptivas y regresiones
+%  CIENFI · Universidad Icesi · Julio 2026
+%  Compilar con pdflatex (no requiere imágenes externas)
+% ============================================================
+\documentclass[10pt]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+
+% ---------- Código R con listings ----------
+\definecolor{codigofondo}{RGB}{247,249,251}
+\definecolor{codigocomentario}{RGB}{110,120,130}
+\definecolor{codigostring}{RGB}{0,130,90}
+\definecolor{codigokey}{RGB}{0,102,179}
+\definecolor{grisclaro}{RGB}{240,242,245}
+
+\lstdefinelanguage{Rcurso}{
+  language=R,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{codigokey}\bfseries,
+  commentstyle=\color{codigocomentario}\itshape,
+  stringstyle=\color{codigostring},
+  backgroundcolor=\color{codigofondo},
+  frame=single, rulecolor=\color{grisclaro},
+  showstringspaces=false, breaklines=true,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1
+}
+\lstset{language=Rcurso}
+
+\title[Sesión 3]{Visualización, descriptivas y regresiones}
+\subtitle{Sesión 3 --- Unidades 3 y 4}
+\author{Prof. Eduard F. Martínez-González}
+\institute[CIENFI · Icesi]{Curso Nivelatorio de Programación en R\\ CIENFI --- Universidad Icesi}
+\date{Julio de 2026}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}{Tabla de contenidos}
+  \tableofcontents
+\end{frame}
+
+% ============================================================
+\section{Dónde estamos}
+% ============================================================
+
+\begin{frame}{De dónde venimos y qué haremos hoy}
+  \begin{itemize}\setlength\itemsep{0.6em}
+    \item \textbf{Sesión 1 (U1):} R y RStudio, objetos, vectores, data frames, proyectos y scripts con estilo.
+    \item \textbf{Sesión 2 (U2):} importar, diagnosticar, limpiar, transformar con \texttt{dplyr}, agrupar y cruzar bases.
+    \item \textbf{Hoy (U3 y U4):} cerramos el flujo de trabajo --- \textbf{describir}, \textbf{visualizar}, \textbf{estimar} y \textbf{reportar}.
+  \end{itemize}
+  \bigskip
+  \begin{block}{El flujo completo}
+    \centering
+    Importar $\rightarrow$ Diagnosticar $\rightarrow$ Limpiar $\rightarrow$ Transformar $\rightarrow$ \textbf{Describir/Visualizar} $\rightarrow$ \textbf{Estimar} $\rightarrow$ Comunicar
+  \end{block}
+  \medskip
+  Hoy también se \textbf{lanza el proyecto final}.
+\end{frame}
+
+\begin{frame}{Cambiamos de base: de firmas a personas}
+  Hasta ahora trabajamos con \texttt{innovacion\_empresas.csv} (firmas, base sucia).
+  Hoy usamos la \textbf{otra base del curso}:
+  \bigskip
+  \begin{block}{\texttt{geih\_nivelacion.csv} --- extracto docente de la GEIH (DANE)}
+    \begin{itemize}
+      \item \textbf{21.821 ocupados} (18 a 65 años, ingreso laboral positivo), 24 cabeceras.
+      \item Datos \textbf{reales} del DANE, simplificados con fines docentes.
+      \item Viene \textbf{limpia}: hoy vamos directo a describir, graficar y estimar.
+    \end{itemize}
+  \end{block}
+  \medskip
+  \small\textbf{Variables:} \texttt{sexo}, \texttt{edad}, \texttt{anios\_educacion}, \texttt{nivel\_educativo}, \texttt{departamento}, \texttt{ingreso\_laboral} (COP/mes), \texttt{horas\_semana}.
+\end{frame}
+
+\begin{frame}[fragile]{Punto de partida: importar y diagnosticar}
+\begin{lstlisting}
+library(pacman)
+p_load(rio, tidyverse, skimr, fixest, modelsummary)
+
+raw <- "data/raw/geih_nivelacion.csv"
+geih <- import(raw)
+
+glimpse(geih)   # tipo de cada variable
+skim(geih)      # faltantes, min/max, percentiles
+summary(geih$ingreso_laboral)
+\end{lstlisting}
+  \begin{alertblock}{La pregunta que abre la sesión}
+    El ingreso tiene una \textbf{cola larguísima} a la derecha: la media queda muy por encima de la mediana.
+    ¿El promedio describe bien a esta población, o la mediana es más honesta?
+  \end{alertblock}
+\end{frame}
+
+% ============================================================
+\section{Unidad 3: descriptivas y visualización}
+% ============================================================
+
+\begin{frame}[fragile]{Descriptivas por grupo: el puente con la Unidad 2}
+\begin{lstlisting}
+geih %>%
+  group_by(sexo) %>%
+  summarise(n              = n(),
+            ingreso_median = median(ingreso_laboral),
+            educacion_prom = mean(anios_educacion),
+            .groups = "drop")
+\end{lstlisting}
+  \begin{center}\small
+  \begin{tabular}{lrrr}
+    \toprule
+    \textbf{sexo} & \textbf{n} & \textbf{ingreso mediano} & \textbf{educación prom.} \\
+    \midrule
+    hombre & 11.786 & 850.000 & 10,4 \\
+    mujer  & 10.035 & 781.242 & 11,3 \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \medskip
+  \small \textbf{El hallazgo que guiará la sesión:} las mujeres tienen \emph{más} educación promedio y \emph{menos} ingreso mediano (brecha $\approx$ 8,1\%).
+\end{frame}
+
+\begin{frame}[fragile]{La gramática de ggplot2: capas que se suman}
+  Un gráfico se construye por capas, y las capas se unen con \texttt{+} (no con \texttt{\%>\%}).
+\begin{lstlisting}
+# capa 1: el lienzo (datos + ejes) -- todavia vacio
+ggplot(geih, aes(x = anios_educacion, y = log(ingreso_laboral)))
+
+# capa 2: + la geometria
+... + geom_point()
+
+# capa 3: + etiquetas y tema
+... + labs(title = "Educacion e ingreso laboral",
+           caption = "Fuente: GEIH (DANE)") +
+      theme_minimal()
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{aes()} = \textbf{estética}: qué variable va en cada eje, color, relleno.
+    \item Un gráfico sin título ni fuente está incompleto.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{La geometría se elige según la pregunta}
+  \begin{center}\small
+  \begin{tabular}{p{0.42\textwidth}p{0.46\textwidth}}
+    \toprule
+    \textbf{¿Qué quiero mostrar?} & \textbf{Geometría} \\
+    \midrule
+    La distribución de una variable & \texttt{geom\_histogram()} \\
+    Comparar la distribución entre grupos & \texttt{geom\_boxplot()} \\
+    La relación entre dos variables & \texttt{geom\_point()} (+ \texttt{geom\_smooth()}) \\
+    Comparar categorías (valores ya calculados) & \texttt{geom\_col()} \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \bigskip
+  % Insertar aquí, si se desea, una figura de la galería data-to-viz
+  \begin{block}{Galerías de referencia}
+    \small \url{https://www.data-to-viz.com/} \quad · \quad Cheatsheet de \texttt{ggplot2} (Posit)
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Distribución: por qué trabajamos en logaritmos}
+\begin{lstlisting}
+# en NIVELES: asimetria extrema, cola larguisima a la derecha
+ggplot(geih, aes(x = ingreso_laboral)) + geom_histogram(bins = 50)
+
+# en LOGS: la distribucion se vuelve legible (casi simetrica)
+ggplot(geih, aes(x = log(ingreso_laboral))) + geom_histogram(bins = 50)
+\end{lstlisting}
+  % Insertar aquí los dos histogramas lado a lado (niveles vs. logs)
+  \begin{block}{Por qué importa}
+    No es un truco estético: el log hace legible la distribución \textbf{y} permite leer los coeficientes de la regresión como \textbf{cambios porcentuales}. Volveremos a esto en la Unidad 4.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Comparar grupos: boxplot}
+\begin{lstlisting}
+ggplot(geih, aes(x = nivel_educativo, y = log(ingreso_laboral))) +
+  geom_boxplot() +
+  labs(x = NULL, y = "Log del ingreso laboral") +
+  theme_minimal()
+\end{lstlisting}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \small La caja es el 50\% central (p25--p75), la línea es la \textbf{mediana} y los puntos son valores atípicos.
+    \column{0.45\textwidth}
+    \small\textbf{Ingreso mediano por nivel:}\\
+    ninguno 400.000 · primaria 600.000 · secundaria 720.000 · media 800.000 · \textbf{superior 1.200.000}
+  \end{columns}
+  \medskip
+  \small Ojo: hay que \textbf{ordenar} el nivel educativo con \texttt{factor(..., levels = ...)}, o R lo ordena alfabéticamente.
+\end{frame}
+
+\begin{frame}[fragile]{Estética: dentro vs. fuera de \texttt{aes()}}
+\begin{lstlisting}
+# FUERA de aes(): un valor fijo para todo el grafico
+geom_boxplot(fill = "steelblue")
+
+# DENTRO de aes(): el color MAPEA una variable (y aparece la leyenda)
+ggplot(geih, aes(x = nivel_educativo, y = log(ingreso_laboral),
+                 fill = sexo)) + geom_boxplot()
+\end{lstlisting}
+  \begin{alertblock}{Error clásico}
+    Poner \texttt{color = "blue"} \emph{dentro} de \texttt{aes()}: R lo interpreta como una \textbf{variable} llamada \texttt{"blue"} y termina pintando todo de rojo con una leyenda absurda. Lo provocaremos en clase.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]{Barras y facetas}
+\begin{lstlisting}
+# barras: primero resumo, LUEGO grafico con geom_col()
+ggplot(resumen_dpto, aes(x = reorder(departamento, ingreso_med),
+                         y = ingreso_med)) +
+  geom_col(fill = "steelblue") + coord_flip()
+
+# facetas: un panel por grupo, mismo codigo
+... + facet_wrap(~ sexo)
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{reorder()}: ordena las barras \textbf{por su valor}; sin él, R usa orden alfabético.
+    \item \texttt{coord\_flip()}: barras horizontales para que las etiquetas se lean.
+    \item \texttt{facet\_wrap()}: varios gráficos comparables entre sí, sin repetir código.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Exportar: la regla del curso}
+\begin{lstlisting}
+ggsave("output/01_graphs/brecha_sexo_educacion.png",
+       plot = fig_brecha, width = 8, height = 5, dpi = 300)
+
+export(tabla_desc, "output/02_tables/descriptivas_sexo_nivel.csv")
+
+datasummary_skim(geih)   # tabla descriptiva en una linea
+\end{lstlisting}
+  \begin{alertblock}{Nada de capturas de pantalla}
+    Toda figura y toda tabla del curso se \textbf{exporta desde el código}, con dimensiones y resolución explícitas. Si el resultado no se puede regenerar corriendo el script, no sirve.
+  \end{alertblock}
+\end{frame}
+
+% ============================================================
+\section{Unidad 4: regresiones básicas}
+% ============================================================
+
+\begin{frame}[fragile]{De describir a cuantificar}
+  El gráfico de dispersión ya nos mostró que educación e ingreso van juntos.
+  La regresión responde \textbf{cuánto}.
+\begin{lstlisting}
+modelo_1 <- lm(log(ingreso_laboral) ~ anios_educacion, data = geih)
+summary(modelo_1)
+\end{lstlisting}
+  \begin{itemize}
+    \item La fórmula \texttt{y \textasciitilde{} x} se lee: \emph{``log del ingreso explicado por educación''}.
+    \item En la salida: ubique \texttt{Estimate}, \texttt{Std. Error}, \texttt{Pr(>|t|)} y \texttt{R-squared}.
+    \item El modelo es un \textbf{objeto}: \texttt{coef()}, \texttt{nobs()}, \texttt{summary()}.
+  \end{itemize}
+  \medskip
+  \begin{block}{Resultado con la GEIH}
+    Un año adicional de educación se asocia a un ingreso \textbf{9,3\% mayor}, en promedio ($N = 21.821$).
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Controles: comparar personas más parecidas}
+\begin{lstlisting}
+modelo_2 <- lm(log(ingreso_laboral) ~ anios_educacion + edad, data = geih)
+cor(geih$edad, geih$anios_educacion)   # = -0.237
+\end{lstlisting}
+  \begin{itemize}\setlength\itemsep{0.5em}
+    \item Al agregar \texttt{edad}, el retorno a la educación compara personas de la \textbf{misma edad}.
+    \item ¿El coeficiente subió o bajó? \textbf{Pista:} en Colombia las cohortes jóvenes estudian más --- la correlación entre edad y educación es \textbf{negativa} ($-0{,}24$).
+  \end{itemize}
+  \medskip
+  \small Esta es la lógica de todo control: mantener fijo algo que, si se mueve, contamina la comparación.
+\end{frame}
+
+\begin{frame}[fragile]{Dummies: variables categóricas en la regresión}
+\begin{lstlisting}
+modelo_3 <- lm(log(ingreso_laboral) ~ anios_educacion + edad + sexo,
+               data = geih)
+
+# para dummies con efectos grandes, el % exacto:
+exp(coef(modelo_3)["sexomujer"]) - 1
+\end{lstlisting}
+  \begin{itemize}
+    \item \texttt{sexo} es \textbf{texto} y R crea la dummy solo: no hay que codificar nada.
+    \item El \textbf{nombre} del coeficiente dice quién es la referencia: \texttt{sexomujer} $\Rightarrow$ la referencia es \emph{hombre}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{¿Por qué no basta con \texttt{lm}?}
+  \begin{block}{Heterogeneidad no observada entre departamentos}
+    El ingreso mediano va de \textbf{700.000} a \textbf{1.000.000} según el departamento, y la educación promedio de \textbf{9,7} a \textbf{12,3} años. Los departamentos difieren en cosas que afectan el ingreso y \textbf{no están en la base}; al correlacionarse con la educación, el coeficiente queda \textbf{sesgado por variable omitida}.\\[0.5em]
+    \textbf{Solución:} \textbf{efectos fijos} de departamento.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Qué hacen los efectos fijos}
+  \begin{itemize}\setlength\itemsep{0.7em}
+    \item Incluir efectos fijos de departamento equivale a meter \textbf{una dummy por departamento} (24 en la GEIH).
+    \item Eso \textbf{absorbe} todo lo que es constante dentro de cada departamento: costo de vida, estructura productiva, instituciones locales\ldots aunque no lo hayamos medido.
+    \item El coeficiente pasa a comparar personas \textbf{dentro del mismo departamento}, no entre departamentos distintos.
+  \end{itemize}
+  \bigskip
+  \begin{alertblock}{Lo que los efectos fijos NO hacen}
+    Solo controlan lo que es \textbf{fijo dentro del grupo}. No resuelven la habilidad, la motivación o el contexto familiar, que varían \emph{entre personas del mismo departamento}. Siguen sin darnos causalidad.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{fixest}: las dos correcciones en una línea}
+\begin{lstlisting}
+modelo_fe <- feols(log(ingreso_laboral) ~ anios_educacion + edad + sexo
+                   | departamento,          # efectos fijos tras la barra
+\end{lstlisting}
+  \begin{itemize}
+    \item Misma fórmula que \texttt{lm}, más la barra \texttt{|} para los efectos fijos.
+    \item \texttt{feols} los \textbf{absorbe}: no imprime 23 dummies que nadie quiere leer, sino la línea \texttt{Fixed-effects: departamento: 24}.
+    \item Al comparar con el modelo (3): si el \textbf{coeficiente} casi no se mueve, el sesgo por departamento era menor; el \textbf{error estándar} sí cambia --- esa es la corrección por heterocedasticidad.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{La tabla profesional: \texttt{modelsummary}}
+\begin{lstlisting}
+modelos <- list("(1) Simple" = modelo_1, "(2) + Edad" = modelo_2,
+                "(3) + Sexo" = modelo_3, "(4) + EF depto" = modelo_fe)
+
+msummary(modelos,
+         coef_rename = c(anios_educacion = "Anios de educacion"),
+         gof_map = c("nobs", "r.squared"), stars = TRUE,
+         output = "output/02_tables/tabla_regresiones.csv")
+\end{lstlisting}
+  \small Una sola llamada produce la tabla de todos los modelos, con nombres legibles y lista para el informe. El argumento \texttt{output} la escribe en disco (\texttt{.csv}, \texttt{.docx}, \texttt{.tex}\ldots).
+\end{frame}
+
+\begin{frame}{Lo que la regresión NO dice}
+  \begin{enumerate}\setlength\itemsep{0.8em}
+    \item \textbf{``Asociado a'', nunca ``causa''.} Las personas con más educación difieren en cosas que no observamos: habilidad, contexto familiar, redes.
+    \item \textbf{Significancia no es magnitud.} Con $N = 21.821$ casi todo sale con estrellas; la pregunta relevante es \emph{¿de cuántos pesos estamos hablando?}
+    \item \textbf{El $R^2$ mide ajuste}, no que el modelo esté bien especificado.
+  \end{enumerate}
+  \bigskip
+  \begin{block}{Ejercicio de cierre}
+    Escriba en tres líneas la lectura \textbf{completa} del coeficiente de educación del modelo con efectos fijos: magnitud, unidades, la condición ``controlando por\ldots'' y la advertencia causal.
+  \end{block}
+\end{frame}
+
+% ============================================================
+\section{Cierre y trabajo de la semana}
+% ============================================================
+
+
+\begin{frame}{Trabajo asincrónico (27 de julio -- 2 de agosto)}
+  \begin{itemize}\setlength\itemsep{0.5em}
+    \item \textbf{Unidad 3:} teoría + video $\rightarrow$ \texttt{practica\_unidad-3.R} $\rightarrow$ \textbf{Tarea 3} + cuestionario.
+    \item \textbf{Unidad 4:} teoría + video $\rightarrow$ \texttt{practica\_unidad-4.R} $\rightarrow$ \textbf{Tarea 4} + cuestionario.
+    \item \textbf{Actividades con IA:} \emph{Mejora esta figura} (U3) y \emph{Crítica al econometrista artificial} (U4).
+    \item \textbf{Proyecto final en parejas:} pipeline + informe + README. Se lanza hoy.
+  \end{itemize}
+  \bigskip
+  \begin{block}{Próxima sesión --- Lunes 3 de agosto}
+    \textbf{Sustentación} de los proyectos finales. Se defiende el código \textbf{sin IA}: aprobar la sustentación es condición necesaria para aprobar el proyecto.
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    {\Huge\usebeamercolor[fg]{structure}\textbf{¿Preguntas?}}
+    \bigskip\bigskip
+
+    Material de la sesión: \texttt{sesiones/sesion\_3/example\_vis\_reg}\\
+    \url{https://eduard-martinez.github.io/teaching/intro-r/}
+    \bigskip
+
+    \texttt{efmartinez@icesi.edu.co}
+  \end{center}
+\end{frame}
+
+\end{document}
