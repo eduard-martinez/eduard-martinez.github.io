@@ -239,11 +239,6 @@ Cada grupo de **3 estudiantes** recibe una **base de datos empresarial con múlt
 - James, G., Witten, D., Hastie, T. & Tibshirani, R. (2021). [*An Introduction to Statistical Learning: with Applications in R*](https://www.statlearning.com){:target="_blank"} (2.ª ed.). Springer.
 - Perkins, M., Roe, J. & Furze, L. (2025). [Reimagining the Artificial Intelligence Assessment Scale (AIAS)](https://doi.org/10.53761/rrm4y757){:target="_blank"}. *JUTLP, 22*(7).
 
-Handouts de referencia de la edición anterior, disponibles como lectura complementaria:
-[IA y Machine Learning](/teaching/ba/lectures/week-18/week-15-1.html) ·
-[LLMs, Skills y Agentes](/teaching/ba/lectures/week-18/week-15-2.html) ·
-[Prompts: cómo formular preguntas a una IA](/teaching/ba/lectures/week-18/week-15-3.html)
-
 ---
 
 *Los materiales se publican progresivamente a lo largo del semestre. El podcast del curso — [El Dato con Contexto](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — está en Spotify; los quices se presentan en Intu cada semana de contenido, y los talleres se entregan en Intu al cierre de cada sesión.*
