@@ -231,6 +231,7 @@ Cada grupo de **3 estudiantes** recibe una **base de datos empresarial con múlt
 <p>
 <a href="/teaching/ba/final_project/guidelines_final_project.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Lineamientos del proyecto (PDF)</a>
 <a href="/teaching/ba/final_project/contexto_caso_condor.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Caso Cóndor · contexto (PDF)</a>
+<small class="ws-data">Datos (se unen por <code>cliente_id</code>): <a href="/teaching/ba/final_project/data/base_clientes.csv"><code>base_clientes.csv</code></a> · <a href="/teaching/ba/final_project/data/anexo_transacciones.csv"><code>anexo_transacciones.csv</code></a> · <a href="/teaching/ba/final_project/data/anexo_creditos.csv"><code>anexo_creditos.csv</code></a> · <a href="/teaching/ba/final_project/data/anexo_campanas.csv"><code>anexo_campanas.csv</code></a></small>
 </p>
 
 ## Bibliografía y recursos

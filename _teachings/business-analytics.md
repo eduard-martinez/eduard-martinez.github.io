@@ -233,6 +233,7 @@ Each group of **3 students** receives a **multi-variable business dataset** — 
 <p>
 <a href="/teaching/ba/final_project/guidelines_final_project.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Project guidelines (PDF, in Spanish)</a>
 <a href="/teaching/ba/final_project/contexto_caso_condor.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Cóndor case · context (PDF, in Spanish)</a>
+<small class="ws-data">Data (joined by <code>cliente_id</code>): <a href="/teaching/ba/final_project/data/base_clientes.csv"><code>base_clientes.csv</code></a> · <a href="/teaching/ba/final_project/data/anexo_transacciones.csv"><code>anexo_transacciones.csv</code></a> · <a href="/teaching/ba/final_project/data/anexo_creditos.csv"><code>anexo_creditos.csv</code></a> · <a href="/teaching/ba/final_project/data/anexo_campanas.csv"><code>anexo_campanas.csv</code></a></small>
 </p>
 
 ## Bibliography and resources
