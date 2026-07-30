@@ -1,6 +1,6 @@
 ---
 layout: course
-title: Analítica para los negocios
+title: Business Analytics
 description: >
   Curso de pregrado sobre cómo convertir datos en evidencia para decisiones de negocio,
   con inteligencia artificial generativa transversal a todo el semestre: R y el tidyverse,
@@ -57,7 +57,7 @@ El curso introduce el proceso de *business analytics*: cómo convertir datos cru
 
 Cada semana de contenido publica tres materiales, en el orden en que se usan:
 
-1. <i class="fas fa-book-open"></i> **Teoría** — se estudia *antes* de clase: la versión escrita del podcast o video de la semana, con ejemplos de R ejecutables. Los episodios del podcast se publican en Spotify — [*El Dato con Contexto*](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — y cada uno queda enlazado en su semana, más abajo. El quiz semanal se presenta en Intu al inicio de la clase — en la sala de cómputo, sin IA ni ayudas.
+1. <i class="fas fa-book-open"></i> **Teoría** — se estudia *antes* de clase: la versión escrita del podcast o video de la semana, con ejemplos de R ejecutables. Los episodios del podcast se publican en Spotify — [*El Dato con Contexto*](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — y cada uno queda enlazado en su semana, más abajo. El quiz semanal es impreso y se responde al inicio de la clase — primero unos minutos de dudas sobre el material, luego el quiz, sin IA ni ayudas.
 2. <i class="fas fa-laptop-code"></i> **Práctica guiada** — la aplicación en clase, paso a paso.
 3. <i class="fas fa-clipboard-check"></i> **Taller** — la actividad evaluable que cada estudiante desarrolla durante la sesión y entrega en Intu antes de terminar la clase.
 
@@ -216,7 +216,7 @@ El clustering como segmentación sin target; **k-means** (distancia, escalamient
 
 | Componente | Peso | Uso permitido de IA |
 |---|---|---|
-| Quices conceptuales semanales (en Intu, en la sala de cómputo, cada semana de contenido) | 25% | Sin IA |
+| Quices conceptuales semanales (impresos, al inicio de la clase, cada semana de contenido) | 25% | Sin IA |
 | Talleres en clase (uno por sesión, se entregan en Intu) | 10% | Colaboración con IA — cada decisión debe poder explicarse |
 | Evaluación integradora 1 (semana 7) | 20% | Sin IA |
 | Evaluación integradora 2 (semana 14) | 20% | Sin IA |
@@ -242,4 +242,4 @@ Cada grupo de **3 estudiantes** recibe una **base de datos empresarial con múlt
 
 ---
 
-*Los materiales se publican progresivamente a lo largo del semestre. El podcast del curso — [El Dato con Contexto](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — está en Spotify; los quices se presentan en Intu cada semana de contenido, y los talleres se entregan en Intu al cierre de cada sesión.*
+*Los materiales se publican progresivamente a lo largo del semestre. El podcast del curso — [El Dato con Contexto](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — está en Spotify; los quices son impresos y se responden al inicio de cada clase, y los talleres se entregan en Intu al cierre de cada sesión.*

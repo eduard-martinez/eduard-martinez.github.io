@@ -1,6 +1,6 @@
 ---
 layout: course
-title: Introduction to Business Analytics
+title: Business Analytics
 description: >
   Undergraduate course on turning data into evidence for business decisions, with
   generative AI woven through the whole semester: R and the tidyverse, the
@@ -59,7 +59,7 @@ The course introduces the business-analytics process: how to turn raw data into 
 
 Each content week publishes three materials, in the order students use them:
 
-1. <i class="fas fa-book-open"></i> **Theory** — studied *before* class: the written version of the week's podcast or video, with runnable R examples. The podcast episodes are published on Spotify — [*El Dato con Contexto*](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — and each one is linked in its week below. The weekly quiz is taken on Intu at the start of class — in the computer lab, with no AI or other aids.
+1. <i class="fas fa-book-open"></i> **Theory** — studied *before* class: the written version of the week's podcast or video, with runnable R examples. The podcast episodes are published on Spotify — [*El Dato con Contexto*](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — and each one is linked in its week below. The weekly quiz is printed and answered at the start of class — a few minutes of questions about the material first, then the quiz, with no AI or other aids.
 2. <i class="fas fa-laptop-code"></i> **Guided practice** — the in-class application, led step by step.
 3. <i class="fas fa-clipboard-check"></i> **Workshop** — the graded activity each student completes during the session and submits on Intu before class ends.
 
@@ -218,7 +218,7 @@ Clustering as segmentation without a target; **k-means** (distance, scaling, cen
 
 | Component | Weight | Allowed use of AI |
 |---|---|---|
-| Weekly concept quizzes (on Intu, in the computer lab, every content week) | 25% | No AI |
+| Weekly concept quizzes (printed, at the start of class, every content week) | 25% | No AI |
 | In-class workshops (one per session, submitted on Intu) | 10% | Collaboration with AI — every decision must be explainable |
 | Integrative written exam 1 (week 7) | 20% | No AI |
 | Integrative written exam 2 (week 14) | 20% | No AI |
@@ -244,4 +244,4 @@ Each group of **3 students** receives a **multi-variable business dataset** — 
 
 ---
 
-*Materials are released progressively as the semester advances. The course podcast — [El Dato con Contexto](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — is on Spotify; quizzes are taken on Intu every content week, and workshops are submitted on Intu at the end of each session.*
+*Materials are released progressively as the semester advances. The course podcast — [El Dato con Contexto](https://open.spotify.com/show/033UvL50nPzm1gIH35udu5){:target="_blank"} — is on Spotify; quizzes are printed and answered at the start of each class, and workshops are submitted on Intu at the end of each session.*
