@@ -32,13 +32,6 @@ nav_order: 3
   <div class="uni">Universidad ICESI · Colombia</div>
 
   <div class="course">
-    <span class="ttl"><a href="/teaching/nivelatorio-r/">R Programming Leveling Course</a></span>
-    <span class="meta">CIENFI · Master's in Economics &amp; Management Sciences · July 2026</span>
-    <p class="desc">Short, intensive R leveling course for incoming Master's students: R and RStudio fundamentals, reproducible workflows, data wrangling with the tidyverse, visualization and descriptives on real GEIH microdata, basic regressions, and a critical, verified use of AI in every unit.</p>
-    <p class="links"><a href="/teaching/nivelatorio-r/">Course page &rarr;</a> · <a href="/teaching/intro-r/">Course website &amp; materials &rarr;</a></p>
-  </div>
-
-  <div class="course">
     <span class="ttl"><a href="/teaching/causal-inference/">Causal Inference for Public Policy</a></span>
     <span class="meta">Department of Economics · Master's (ME, MCA, MFC) &amp; PhD · ECO-60116 · 2026-01</span>
     <p class="desc">Impact-evaluation methods for public policy and development economics — RCT, IV, regression discontinuity, difference-in-differences, event studies and matching — each paired with a canonical paper and applied in R.</p>
@@ -50,6 +43,13 @@ nav_order: 3
     <span class="meta">Department of Economics · Undergraduate · 06327-ECO · 2026-02</span>
     <p class="desc">Data analysis and machine learning for business decision-making, with generative AI across the whole course: R and the tidyverse, exploratory data analysis and data quality, LLMs and AI coding agents (Claude Code, Cursor, VS Code), classification and regression with trees, random forests and the Lasso, and k-means clustering.</p>
     <p class="links"><a href="/teaching/business-analytics/">Course page &amp; materials &rarr;</a> · <a href="/teaching/business-analytics-es/">Página del curso en español &rarr;</a></p>
+  </div>
+
+  <div class="course">
+    <span class="ttl"><a href="/teaching/nivelatorio-r/">R Programming Leveling Course</a></span>
+    <span class="meta">CIENFI · Master's in Economics &amp; Management Sciences · July 2026</span>
+    <p class="desc">Short, intensive R leveling course for incoming Master's students: R and RStudio fundamentals, reproducible workflows, data wrangling with the tidyverse, visualization and descriptives on real GEIH microdata, basic regressions, and a critical, verified use of AI in every unit.</p>
+    <p class="links"><a href="/teaching/nivelatorio-r/">Course page &rarr;</a> · <a href="/teaching/intro-r/">Course website &amp; materials &rarr;</a></p>
   </div>
 
   <div class="course">
