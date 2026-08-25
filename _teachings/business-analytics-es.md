@@ -114,7 +114,7 @@ La gramática de `dplyr` verbo a verbo para KPIs globales y por grupo, y `ggplot
 <a href="https://youtu.be/MVNvoBbELKs" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · dplyr (parte 1)</a>
 <a href="https://youtu.be/sCfhUTHA4fQ" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · ggplot2 (parte 2)</a>
 <a href="/teaching/ba/lectures/week-04/demo/demo_clase.R" download class="ws-btn"><i class="fas fa-download"></i>Script de la clase (.R)</a>
-<small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-04/task/cafeteria.csv"><code>cafeteria.csv</code></a></small>
+<small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-04/task/cafeteria.csv"><code>cafeteria.csv</code></a> · Taller guiado con el monitor: <a href="/teaching/ba/lectures/week-04/practice-R/taller_clase.R" download><code>taller_clase.R</code></a></small>
 </p>
 
 ### Unidad 2 — Proceso analítico y exploración de datos

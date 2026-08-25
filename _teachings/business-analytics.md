@@ -116,7 +116,7 @@ The `dplyr` grammar verb by verb for global and grouped KPIs, and `ggplot2` as a
 <a href="https://youtu.be/MVNvoBbELKs" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · dplyr (part 1)</a>
 <a href="https://youtu.be/sCfhUTHA4fQ" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · ggplot2 (part 2)</a>
 <a href="/teaching/ba/lectures/week-04/demo/demo_clase.R" download class="ws-btn"><i class="fas fa-download"></i>Class script (.R)</a>
-<small class="ws-data">Data: <a href="/teaching/ba/lectures/week-04/task/cafeteria.csv"><code>cafeteria.csv</code></a></small>
+<small class="ws-data">Data: <a href="/teaching/ba/lectures/week-04/task/cafeteria.csv"><code>cafeteria.csv</code></a> · Guided workshop with the TA: <a href="/teaching/ba/lectures/week-04/practice-R/taller_clase.R" download><code>taller_clase.R</code></a></small>
 </p>
 
 ### Unit 2 — The analytics process and EDA
