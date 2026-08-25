@@ -113,6 +113,7 @@ La gramática de `dplyr` verbo a verbo para KPIs globales y por grupo, y `ggplot
 <a href="/teaching/ba/lectures/week-04/task/week-04.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <a href="https://youtu.be/MVNvoBbELKs" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · dplyr (parte 1)</a>
 <a href="https://youtu.be/sCfhUTHA4fQ" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · ggplot2 (parte 2)</a>
+<a href="/teaching/ba/lectures/week-04/demo/demo_clase.R" download class="ws-btn"><i class="fas fa-download"></i>Script de la clase (.R)</a>
 <small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-04/task/cafeteria.csv"><code>cafeteria.csv</code></a></small>
 </p>
 
