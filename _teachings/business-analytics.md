@@ -122,14 +122,14 @@ The `dplyr` grammar verb by verb for global and grouped KPIs, and `ggplot2` as a
 ### Unit 2 — The analytics process and EDA
 
 **Week 5 — Proceso analítico y tipos de analítica.**
-Business analytics as a process that turns data into actionable knowledge; translating business questions into analytical tasks; the workflow from question to decision. The week revolves around the **Cóndor case**: the guided practice walks through two examples of turning an initial need into a business question, and in the workshop each group of 3 explores the case data and formulates one to three business questions — the direct input for Deliverable 1 (one member uploads it on Samán).
+Business analytics as a process that turns data into actionable knowledge; translating business questions into analytical tasks; the workflow from question to decision. The week revolves around the **Cóndor case**: the guided practice walks through two examples of turning an initial need into a business question, and the workshop — which doubles as **Deliverable 1** of the final project — kicks off the project: each group of 3 picks its front and formulates the business question it will work on all semester (one member uploads the deliverable).
 
 <p>
 <a href="/teaching/ba/lectures/week-05/theory/week-05.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="https://open.spotify.com/episode/75F2Igpy5LJbRKyyKzIOg8" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
 <a href="/teaching/ba/lectures/week-05/slides/week-05.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Guided practice (slides)</a>
 <a href="/teaching/ba/lectures/week-05/task/week-05.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop · Cóndor case</a>
-<small class="ws-data">For the workshop: <a href="/teaching/ba/final_project/contexto_caso_condor.pdf">case context (PDF)</a> · <a href="/teaching/ba/lectures/week-05/task/exploracion_condor.R" download><code>exploracion_condor.R</code></a> · the data lives in the <em>Final project</em> section</small>
+<small class="ws-data">For the workshop: <a href="/teaching/ba/final_project/contexto_caso_condor.pdf">case context (PDF)</a> · the data lives in the <em>Final project</em> section</small>
 </p>
 
 **Week 6 — EDA: fuentes, limpieza y exploración.**
