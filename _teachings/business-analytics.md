@@ -138,6 +138,7 @@ Data sources and quality; the diagnostic checklist — types, ranges, missing va
 <p>
 <a href="/teaching/ba/lectures/week-06/theory/week-06.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="https://open.spotify.com/episode/1aQ02r039bDtbEbwpumQcq" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
+<a href="/teaching/ba/lectures/week-06/slides/week-06.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Slides · Cóndor case EDA</a>
 <a href="/teaching/ba/lectures/week-06/practice/week-06.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
 <a href="/teaching/ba/lectures/week-06/task/week-06.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
 <small class="ws-data">Data: <a href="/teaching/ba/lectures/week-06/task/ferreteria_raw.csv"><code>ferreteria_raw.csv</code></a></small>

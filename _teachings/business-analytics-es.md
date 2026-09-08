@@ -136,6 +136,7 @@ Fuentes y calidad de datos; el checklist de diagnóstico — tipos, rangos, falt
 <p>
 <a href="/teaching/ba/lectures/week-06/theory/week-06.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
 <a href="https://open.spotify.com/episode/1aQ02r039bDtbEbwpumQcq" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
+<a href="/teaching/ba/lectures/week-06/slides/week-06.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Diapositivas · EDA del caso Cóndor</a>
 <a href="/teaching/ba/lectures/week-06/practice/week-06.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
 <a href="/teaching/ba/lectures/week-06/task/week-06.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-06/task/ferreteria_raw.csv"><code>ferreteria_raw.csv</code></a></small>
