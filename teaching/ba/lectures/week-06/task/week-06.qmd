@@ -1,5 +1,5 @@
 ---
-title: "Unidad 2 - Taller 6: la base que llegó del sistema"
+title: "Unidad 2 - Taller 6: tu primer EDA de la pregunta de Cóndor"
 subtitle: "Taller práctico evaluable · Semana 6 · 06327-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
@@ -18,126 +18,89 @@ lang: es
 <!--=================-->
 # Instrucciones generales
 
-**El caso:** *Ferretería El Tornillo*, con **4 sedes** (Norte, Sur, Centro y Palmira), quiere su primer reporte de ventas del cuatrimestre. El área de sistemas te exporta la base **tal como sale**, sin que nadie la haya revisado. El gerente te dice:
+**El caso:** *Cóndor*, la fintech del proyecto final, y la **pregunta de negocio que tu equipo formuló en el Taller 5**. En clase viste cómo se ve un análisis exploratorio completo aplicado a una pregunta del caso, y con el monitor construyeron la base analítica a partir de las cuatro tablas. Ahora te toca a ti: **un primer análisis exploratorio, tuyo, de la pregunta de tu equipo.**
 
-> *"Ahí está todo. Necesito saber cuál sede vende más y qué producto jalona. Es para mañana."*
-
-Tú ya sabes lo que él no sabe: que si corres ese reporte sobre la base como está, el número va a salir **perfecto y equivocado**. Antes del reporte va el diagnóstico.
+No se trata de responder la pregunta ni de modelar nada. Se trata de comprobar que puedes pasar de una pregunta de negocio a una exploración inicial de los datos —descriptivas, comparaciones, visualizaciones— y explicar **por qué lo que calculaste sirve para entender esa pregunta**.
 
 ::: {.callout-key}
 **Cómo funciona este taller**
 
-- Es **individual** y **evaluable**, y se desarrolla en el tiempo restante de la clase (⏱️ diseñado para **≈ 50 minutos**).
-- La entrega **solo es válida si asististe a la clase** en la que se desarrolla el taller: el taller se resuelve y se entrega **en clase**. Lo único que se entrega es este taller — la práctica no se entrega: es para trabajarla durante la clase.
-- 🤖 **Declaración de uso de IA:** es obligatoria al final de la entrega (incluso si dice "no usé IA"). Omitirla descuenta **-0.5**, y la penalización puede aumentar en caso de reincidencia.
-- Se resuelve **sin la guía del profesor**: todo lo necesario está en este documento, en la [práctica](../practice/week-06.html) y en la [teoría](../theory/week-06.html). El profesor solo atiende dudas logísticas.
-- Herramienta: **RStudio**, dentro de tu proyecto `intro_ba`.
+- Es **individual** y **evaluable**. Los tres integrantes del equipo parten de la **misma pregunta de negocio**, pero cada uno escribe y ejecuta **su propio código**, interpreta **sus** resultados y produce **al menos una exploración propia** —una descriptiva, una comparación o una visualización— que aporte algo distinto al análisis de la pregunta. Tres copias del mismo ejercicio dentro de un grupo no son tres talleres.
+- Se desarrolla en el tiempo restante de la clase, después del trabajo guiado con el monitor (⏱️ diseñado para **≈ 40 minutos**), y se apoya en lo que construyeron allí: cómo se cargan las tablas, cómo se unen y qué grano tiene la base de su pregunta.
+- La entrega **solo es válida si asististe a la clase** en la que se desarrolla el taller: se resuelve y se entrega **en clase**.
+- 🤖 **Declaración de uso de IA:** obligatoria al final del script (incluso si dice "no usé IA"). Omitirla descuenta **-0.5**, y la penalización puede aumentar en caso de reincidencia. Este taller es de **nivel 3 (colaboración con IAG)**: ver las reglas de juego.
+- Herramienta: **RStudio**, dentro de tu proyecto `intro_ba`. Los datos se leen desde la web: no hay archivos que descargar.
 :::
 
-**Los datos:** descarga 📄 [**ferreteria_raw.csv**](ferreteria_raw.csv) y guárdalo en la carpeta `data/` de tu proyecto. Tiene 7 columnas: `sede`, `mes`, `producto`, `categoria`, `precio`, `unidades` y `observaciones`.
-
-**El entregable** son **tres archivos** (si Intu solo acepta uno, comprímelos en un `.zip`):
-
-- 📄 `apellido_nombre_taller6.R` — el script con todos los puntos, comentado, **incluida el acta de limpieza**.
-- 📊 `ferreteria_clean.csv` — tu dataset analysis-ready exportado.
-- 🖼️ El **gráfico** del Punto 4, exportado con `ggsave()` como `.png`.
-- 📤 Entrega: en el espacio habilitado en Intu antes de terminar la clase. <!-- TODO: pegar aquí el enlace de entrega -->
+**El entregable** es **un archivo**: 📄 `apellido_nombre_taller6.R`, con tu **nombre y código** en el encabezado, la **pregunta de negocio de tu equipo** escrita al inicio, todo el código que usaste y tus lecturas en comentarios. Se entrega en el enlace que indicará el profesor, antes de terminar la clase. <!-- TODO: pegar aquí el enlace de entrega -->
 
 ::: {.callout-warning}
 **Reglas de juego (la rúbrica las aplica)**
 
-1. **El script debe correr completo** de arriba a abajo (con `ferreteria_raw.csv` en `data/`). Se revisa con *Source*: si se detiene en un error, se califica hasta esa línea. Prueba de fuego antes de entregar: `rm(list = ls())` → *Source*.
-2. **`ferreteria_raw` no se sobrescribe.** Todo se construye sobre `ferreteria_clean`. Sobrescribir la base original descuenta.
-3. **Cada corrección va acompañada de su verificación.** Corregir sin comprobar no cuenta como corregir: si estandarizaste, muestra el `table()` que lo demuestra.
-4. **Toda decisión se justifica** en un comentario de 1-2 líneas tuyas. Este taller evalúa **criterio**, no memoria de funciones.
-5. **Uso de IA:** permitido solo para explicar errores o conceptos después de intentarlo tú; prohibido pedir la solución de un punto. Las **decisiones de limpieza y los hallazgos son tuyos**. Declaración obligatoria al final del script.
+1. **El script debe correr completo** de arriba a abajo, con internet. Se revisa con *Source*: si se detiene en un error, se califica hasta esa línea. Prueba de fuego antes de entregar: `rm(list = ls())` → *Source*.
+2. **Los datos se cargan desde las URL del proyecto**, nunca desde una ruta local de tu computador:
+
+   ```r
+   url <- "https://eduard-martinez.github.io/teaching/ba/final_project/data/"
+   clientes      <- read.csv(paste0(url, "base_clientes.csv"))
+   ## y solo las que tu pregunta necesite:
+   transacciones <- read.csv(paste0(url, "anexo_transacciones.csv"))
+   creditos      <- read.csv(paste0(url, "anexo_creditos.csv"))
+   campanas      <- read.csv(paste0(url, "anexo_campanas.csv"))
+   ```
+
+3. **Cada salida se lee.** Debajo de cada tabla o gráfico van dos comentarios tuyos: `## HALLAZGO:` (qué muestra, en una o dos frases) y `## POR QUÉ IMPORTA:` (qué tiene que ver con la pregunta de tu equipo). Una salida sin lectura no cuenta.
+4. **Tu exploración es tuya.** Coordinen en el equipo ángulos distintos —uno mira el target y sus tramos, otro una comparación por grupos, otro una relación o un valor extremo— para que las tres entregas se complementen. Si dos integrantes entregan la misma exploración, **no cuenta como propia para ninguno**.
+5. **Uso de IA (nivel 3):** permitido para entender un error, recordar la sintaxis de una función o pulir un gráfico **después de intentarlo tú**; prohibido para decidir qué explorar o para interpretar los resultados: la elección y la lectura son tuyas. Declaración obligatoria al final.
 :::
 
-**Distribuye tu tiempo:** P1 ≈ 8 min · P2 ≈ 10 min · P3 ≈ 15 min · P4 ≈ 10 min · P5 ≈ 7 min.
+**Distribuye tu tiempo:** la base ≈ 10 min · la exploración ≈ 20 min · la lectura y el cierre ≈ 10 min.
 
 <!--=================-->
 <!--=================-->
-# Punto 1 — Setup y radiografía (0.75 puntos)
+# Punto 1 — La pregunta y la base (1.0 punto)
 
-a. Crea el script `apellido_nombre_taller6.R` en `scripts/`, con el **encabezado** estándar (nombre, código, fecha, qué hace) y el bloque de librerías (`require(pacman)` + `p_load(dplyr, ggplot2, skimr)`).
-b. Lee los datos con **ruta relativa** y guárdalos en el objeto `ferreteria_raw`.
-c. Corre `skim()` y responde en comentarios:
-   - ¿Cuántas filas y columnas tiene la base?
-   - **¿Qué representa una fila?** (la pregunta que va antes que todas)
-   - ¿Qué tipo de dato tiene `precio`? ¿Es el que debería tener?
+a. **Encabezado:** nombre, código y fecha; la **pregunta de negocio de tu equipo** tal como quedó después del Taller 5; la **variable objetivo** que le corresponde (o "sin target: segmentación", si es el caso) y la **unidad de análisis**: ¿qué es una fila en la base de tu pregunta —un cliente, una transacción, una solicitud de crédito, un envío de campaña?
+b. **La base:** carga desde las URL las tablas que tu pregunta necesita y construye la base al grano de tu pregunta. Puedes reproducir lo que hicieron con el monitor, pero **escrito y corrido por ti**. Si unes tablas de granos distintos, recuerda el orden: **agregar primero, unir después**, y comprueba el número de filas con un comentario que diga si es el esperado y por qué.
+c. **Radiografía breve:** cuántas filas y columnas tiene tu base, y qué valores faltantes hay en las columnas que vas a usar, con una línea sobre **por qué** faltan y qué decides hacer con ellos.
 
 <!--=================-->
 <!--=================-->
-# Punto 2 — El diagnóstico (1.0 punto)
+# Punto 2 — Tu exploración (2.0 puntos)
 
-**No corrijas nada todavía.** Este punto es solo detectar y documentar. Para cada literal, escribe el código que lo demuestra **y** el hallazgo en un comentario.
+Construye **al menos una exploración propia** —mejor dos o tres— que te ayude a entender la pregunta de tu equipo. **Tú decides qué explorar y cómo.** Estos son ángulos posibles, no pasos a seguir:
 
-a. **Consistencia:** ¿cuántos valores únicos tiene `sede`? La ferretería tiene **4** sedes. ¿Cuántos reporta R y por qué? Haz lo mismo con `producto` (hay **4** productos).
-b. **Unicidad:** ¿cuántas filas son copias exactas de otra?
-c. **Validez (rango):** ¿hay algún valor imposible en `unidades`? Muestra la **fila completa** del problema — no solo el número.
-d. **Validez (outlier):** grafica la distribución de `precio` (necesitarás convertirlo temporalmente a número) e identifica el valor sospechoso. **Muestra la fila completa** y di qué producto es.
-e. **Completitud:** ¿cuántos `NA` hay en `precio` y en `unidades`?
+- **El target:** cómo se distribuye. Si es binario, qué proporción vale 1 —ese número es el punto de comparación de todo lo demás—; si es continuo, su histograma y la relación entre media y mediana.
+- **Una variable candidata:** una que, según la pregunta, debería estar relacionada con el target. Su distribución: ¿simétrica o con cola larga? ¿la media y la mediana cuentan la misma historia?
+- **Una comparación por grupos:** la tasa (o la mediana) del target por tramos o categorías de una variable, con el número de casos por grupo.
+- **Una relación entre dos variables:** un cruce o un gráfico de dispersión, y la respuesta a si miden lo mismo o se complementan.
+- **Un valor extremo mirado en su fila completa:** ¿error de captura o caso real? ¿qué haces con él?
+- **Una hipótesis "obvia" puesta a prueba:** una variable que todos creían importante y que quizás resulte plana. Un gráfico plano también informa.
 
 ::: {.callout-workflow}
-**Pista de método:** en (c) y (d) te pedimos la **fila completa** a propósito. Un analista no juzga un número suelto: va y mira el registro entero antes de decidir. Esa fila te va a decir cosas que el número solo no dice — y en uno de los dos casos, te va a cambiar la decisión.
+**Lo que toda exploración debe cumplir**
+
+- Usa variables **ligadas a tu pregunta**: nada de graficar columnas porque sí.
+- Al menos una salida es un **gráfico o una tabla bien presentada**: título que diga el **mensaje** (no "gráfico de barras"), ejes etiquetados, un tema limpio.
+- **No uses como predictor** nada que solo se conozca **después** del evento que tu pregunta quiere anticipar (el caso lo advierte: es la regla de oro). Si una variable "explica demasiado bien", sospecha.
 :::
 
-<!--=================-->
-<!--=================-->
-# Punto 3 — La limpieza (1.5 puntos)
-
-Construye `ferreteria_clean` **a partir de** `ferreteria_raw`, en el orden correcto. Cada literal lleva su **verificación** y su **justificación** en comentario.
-
-a. **Duplicados:** elimínalos y demuestra cuántas filas se fueron (la cuenta debe coincidir con tu Punto 2b).
-b. **Categorías:** estandariza `sede` y `producto`. Verifica con `table()` que ahora sí queden **4 y 4**.
-c. **Tipo de dato:** convierte `precio` a número. ⚠️ Verifica con `summary()` que **no aparecieron `NA` nuevos** — compara contra tu conteo del Punto 2e. Si aparecieron, los creaste tú.
-d. **El outlier:** corrígelo. Usa una condición **específica** (producto + umbral), no solo el umbral. Justifica en un comentario **por qué** concluiste que era un error de captura y no un precio real.
-e. **El valor imposible — decisión de criterio:** en el Punto 2c encontraste unidades negativas. **Mira la columna `observaciones` de esa fila antes de decidir.** Elige **una** de las tres opciones de la teoría (eliminar / convertir a `NA` / conservar y corregir) y **defiéndela en 2 líneas**. No hay una única respuesta correcta: hay respuestas justificadas y respuestas automáticas.
-f. **Estructura final:** elimina la columna sin valor analítico (justifica cuál y por qué) y crea `ingreso = precio * unidades`.
-
-::: {.callout-warning}
-**El literal (e) es el que separa las notas**
-
-Ahí no se evalúa qué decidiste, sino **si leíste antes de decidir**. La respuesta refleja lo que dice la teoría: *"una devolución documentada puede tener cantidad negativa de forma legítima"*. Si eliminaste esa fila sin mirar el contexto que trae al lado, borraste un dato real. Si la conservaste, tienes que explicar qué le hace eso a tu cálculo de `ingreso`.
-:::
+> Un ejemplo de lo que **no** se espera: correr `skim()` sobre toda la base y pegar la salida. Y uno de lo que sí: elegir dos variables, mostrar cómo cambia el target entre sus grupos y decir qué le dice eso a quien decide en Cóndor.
 
 <!--=================-->
 <!--=================-->
-# Punto 4 — La EDA (1.0 punto)
+# Punto 3 — La lectura (1.5 puntos)
 
-a. **La verificación:** corre `skim(ferreteria_clean)` y escribe en un comentario **tres cosas** que cambiaron frente al `skim()` del Punto 1.
-b. **La tabla que pidió el gerente:** construye `kpis_sede` con el `ingreso_total`, las `unidades_totales` y el `n_transacciones` **por sede**, ordenada de mayor a menor ingreso (recuerda `.groups = "drop"`).
-c. **El gráfico:** el ingreso total por sede, en barras **horizontales y ordenadas**, con título que diga el **mensaje** (no "gráfico de ingresos"), ejes etiquetados y un tema profesional. Expórtalo con `ggsave()`.
-d. **La lectura (2 líneas tuyas):** ¿la sede que más ingreso genera es también la que más **unidades** mueve? ¿Qué te dice eso del tipo de negocio de cada sede?
+a. **Por cada salida** (tabla o gráfico), los dos comentarios: `## HALLAZGO:` —qué muestra, con su número— y `## POR QUÉ IMPORTA:` —qué aporta para entender la pregunta de tu equipo—. Escríbelos para alguien de Cóndor que no sabe R.
+b. **El cierre**, en 3 a 5 líneas de comentario: qué sabes ahora de los datos que no sabías antes respecto a la pregunta, qué explorarías después, y qué decisiones tomaste en el camino (faltantes, extremos, columnas excluidas) y por qué.
 
-::: {.callout-workflow}
-**Pista de calidad:** compara el ingreso por sede que te da tu base limpia con el que habrías obtenido corriendo el mismo `group_by()` sobre `ferreteria_raw`. La diferencia entre esas dos tablas **es el trabajo de hoy**, y es exactamente el reporte errado que el gerente iba a recibir.
-:::
+> La vara de calidad: si borráramos el código y dejáramos solo tus comentarios, alguien del equipo debería poder entender qué exploraste, qué encontraste y por qué eso le sirve al proyecto.
 
 <!--=================-->
 <!--=================-->
-# Punto 5 — El acta y los hallazgos (0.75 puntos)
+# Punto 4 — Forma y reproducibilidad (0.5 puntos)
 
-a. **El acta de limpieza (0.5).** Cierra tu script con el bloque de decisiones. Cada línea dice **qué** hiciste y **por qué**:
-
-```r
-## ============================================
-## ACTA DE LIMPIEZA
-## - Duplicados: eliminadas ___ filas exactas. Causa probable: ______
-## - Categorías: sede y producto estandarizados con ______; de ___ a 4 sedes.
-## - precio: ______________________________________
-## - Valor imposible: ______________________________
-##   Decisión: ______________ porque ______________
-## - Outlier: ____________________________________
-## - Columna eliminada: ______ porque ______________
-## ============================================
-```
-
-b. **Los hallazgos (0.25).** En comentarios, escribe:
-   - **2 hallazgos** — lo que ya *sabes* de este negocio, con el número que lo respalda.
-   - **1 pregunta abierta** — algo que la EDA te *destapó* y que todavía no puedes responder con esta base.
-
-> La vara de calidad de la pregunta abierta: debe ser una pregunta que **te haga pedir más datos**, no una que se responda con dos líneas más de código.
+El script corre completo con *Source*, está comentado, lleva tu nombre y la pregunta en el encabezado, no usa rutas locales, y cierra con la declaración de uso de IA.
 
 <!--=================-->
 <!--=================-->
@@ -145,14 +108,13 @@ b. **Los hallazgos (0.25).** En comentarios, escribe:
 
 | Punto | Qué se evalúa | Puntos |
 |---|---|---:|
-| **1. Setup y radiografía** | Encabezado + librerías + ruta relativa (0.3); qué representa una fila (0.2); tipo de `precio` detectado (0.25) | 0.75 |
-| **2. Diagnóstico** | Consistencia en `sede` y `producto` con su código (0.3); duplicados (0.15); valor imposible **con la fila completa** (0.2); outlier detectado con gráfico **y fila completa** (0.2); conteo de NA (0.15) | 1.0 |
-| **3. Limpieza** | Duplicados + verificación (0.2); estandarización + `table()` que lo prueba (0.3); `precio` a numérico **sin NA nuevos** (0.25); outlier con condición específica y justificación (0.25); **decisión defendida** sobre el valor imposible (0.3); estructura final + `ingreso` (0.2) | 1.5 |
-| **4. EDA** | Tres cambios verificados vs. el skim inicial (0.2); `kpis_sede` completo y ordenado (0.3); gráfico horizontal, ordenado y pulido + `ggsave()` (0.3); lectura propia ingreso vs. unidades (0.2) | 1.0 |
-| **5. Acta y hallazgos** | Acta completa con el **porqué** de cada decisión (0.5); 2 hallazgos con número + 1 pregunta abierta genuina (0.25) | 0.75 |
+| **1. La pregunta y la base** | Pregunta, target y unidad de análisis correctos en el encabezado (0.3); carga desde las URL y base al grano de la pregunta, con la verificación de filas (0.5); radiografía con los faltantes explicados y decididos (0.2) | 1.0 |
+| **2. Tu exploración** | Pertinencia: las variables y la exploración se conectan con la pregunta (0.8); corrección técnica del código y del gráfico o tabla (0.6); al menos una exploración **propia**, distinta de la de los compañeros (0.6) | 2.0 |
+| **3. La lectura** | `## HALLAZGO:` en cada salida, con número (0.6); `## POR QUÉ IMPORTA:` que conecte con la pregunta (0.6); cierre con lo aprendido, lo que sigue y las decisiones tomadas (0.3) | 1.5 |
+| **4. Forma** | Corre completo, comentado, encabezado completo, sin rutas locales, declaración de IA | 0.5 |
 | **Total** | | **5.0** |
 
-: El script que no corre completo se evalúa hasta la línea del primer error. Sobrescribir `ferreteria_raw` descuenta -0.3. Corregir sin verificar no cuenta como corregir. En el Punto 3e se evalúa la **justificación**, no cuál de las tres opciones elegiste. Omitir la **declaración de uso de IA** al final descuenta **-0.5**, y la penalización puede aumentar en caso de reincidencia. {.striped tbl-colwidths="[20,68,12]"}
+: El script que no corre completo se evalúa hasta la línea del primer error. Una salida sin su lectura no cuenta. Dos integrantes con la misma exploración pierden el componente "propia" del Punto 2. Usar como predictor una variable que solo se conoce después del evento descuenta en el Punto 2. Omitir la **declaración de uso de IA** al final descuenta **-0.5**, y la penalización puede aumentar en caso de reincidencia. {.striped tbl-colwidths="[22,66,12]"}
 
 <!--=================-->
 <!--=================-->
@@ -173,4 +135,4 @@ Cierra tu script con este bloque diligenciado (obligatorio, aunque sea para deci
 ## ============================================
 ```
 
-*La política de siempre: la IA para **entender** (un error de `gsub()`, qué hace `distinct()`), no para resolver los puntos. Y una advertencia específica de esta semana: si le pides a un modelo "límpiame esta base", te va a devolver un script que corre y que **elimina la fila de la devolución sin preguntar**. Va a verse impecable. Va a estar mal. En la semana 8 vas a aprender a dirigir y auditar exactamente ese tipo de código — y esta semana es la razón por la que vas a poder hacerlo.*
+*La política de siempre: la IA para **entender** (por qué falló un `left_join`, qué hace `cut()`), no para decidir. Y una advertencia propia de esta semana: si le pides a un modelo "hazme el EDA de esta base", te va a devolver treinta gráficos correctos e inútiles, sin una sola relación con tu pregunta. El EDA que vale es el que explora **lo que tu pregunta necesita** y lo lee con **tu** criterio — y eso es exactamente lo que este taller califica.*

@@ -99,9 +99,9 @@ La interfaz de RStudio y el flujo con scripts; R como calculadora; tipos de dato
 
 <p>
 <a href="/teaching/ba/lectures/week-03/theory/week-03.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="https://youtu.be/_UnjI5eTkNc" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Fundamentos de R</a>
 <a href="/teaching/ba/lectures/week-03/practice/week-03.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
 <a href="/teaching/ba/lectures/week-03/task/week-03.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
-<a href="https://youtu.be/_UnjI5eTkNc" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Fundamentos de R</a>
 </p>
 
 **Semana 4 — Manipulación y visualización de datos.**
@@ -109,11 +109,11 @@ La gramática de `dplyr` verbo a verbo para KPIs globales y por grupo, y `ggplot
 
 <p>
 <a href="/teaching/ba/lectures/week-04/theory/week-04.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
-<a href="/teaching/ba/lectures/week-04/practice/week-04.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/lectures/week-04/task/week-04.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <a href="https://youtu.be/MVNvoBbELKs" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · dplyr (parte 1)</a>
 <a href="https://youtu.be/sCfhUTHA4fQ" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · ggplot2 (parte 2)</a>
+<a href="/teaching/ba/lectures/week-04/practice/week-04.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
 <a href="/teaching/ba/lectures/week-04/demo/demo_clase.R" download class="ws-btn"><i class="fas fa-download"></i>Script de la clase (.R)</a>
+<a href="/teaching/ba/lectures/week-04/task/week-04.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-04/task/cafeteria.csv"><code>cafeteria.csv</code></a> · Taller guiado con el monitor: <a href="/teaching/ba/lectures/week-04/practice-R/taller_clase.R" download><code>taller_clase.R</code></a></small>
 </p>
 
@@ -131,15 +131,15 @@ El business analytics como proceso que convierte datos en conocimiento accionabl
 </p>
 
 **Semana 6 — EDA: fuentes, limpieza y exploración.**
-Fuentes y calidad de datos; el checklist de diagnóstico — tipos, rangos, faltantes, duplicados, categorías inconsistentes, outliers; limpieza con decisiones documentadas; el pipeline reproducible **raw → clean → analysis-ready**.
+Fuentes y calidad de datos; el checklist de diagnóstico — tipos, rangos, faltantes, duplicados, categorías inconsistentes, outliers — y el pipeline **raw → clean → analysis-ready**. La práctica guiada desarrolla, aplicado, un EDA del caso Cóndor alrededor de una pregunta de negocio; con el monitor y el script de la clase cada equipo carga y une las bases del caso y avanza su propio análisis exploratorio — el script que construyes es el entregable del taller.
 
 <p>
 <a href="/teaching/ba/lectures/week-06/theory/week-06.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
 <a href="https://open.spotify.com/episode/1aQ02r039bDtbEbwpumQcq" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
-<a href="/teaching/ba/lectures/week-06/slides/week-06.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Diapositivas · EDA del caso Cóndor</a>
-<a href="/teaching/ba/lectures/week-06/practice/week-06.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-06/slides/week-06.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Práctica guiada · EDA del caso Cóndor</a>
+<a href="/teaching/ba/lectures/week-06/slides/figuras_eda.R" download class="ws-btn"><i class="fas fa-download"></i>Script de la clase · caso Cóndor</a>
 <a href="/teaching/ba/lectures/week-06/task/week-06.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
-<small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-06/task/ferreteria_raw.csv"><code>ferreteria_raw.csv</code></a></small>
+<small class="ws-data"><strong>Otro ejercicio de práctica — limpieza de datos</strong> (para hacer por tu cuenta, en casa): <a href="/teaching/ba/lectures/week-06/practice/week-06.html">práctica guiada de limpieza</a> · <a href="/teaching/ba/lectures/week-06/task/ferreteria_raw.csv"><code>ferreteria_raw.csv</code></a></small>
 </p>
 
 **Semana 7 — Examen Parcial 1.** Primera evaluación escrita integradora (20%), cubre las semanas 1–6. Del 7 al 12 de septiembre.
@@ -152,8 +152,8 @@ Asistentes de IA para el análisis de datos y la programación; rehacer con IA l
 <p>
 <a href="/teaching/ba/lectures/week-08/theory/week-08.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
 <a href="/teaching/ba/lectures/week-08/practice/week-08.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/lectures/week-08/task/week-08.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <a href="/teaching/ba/lectures/week-08/practice/proyecto_semana8.zip" class="ws-btn"><i class="fas fa-download"></i>Proyecto inicial (zip)</a>
+<a href="/teaching/ba/lectures/week-08/task/week-08.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 </p>
 
 **Semana 9 — Presentación Avance del Proyecto (EDA).** Entrega 2 del proyecto final (5%): presentación oral del análisis exploratorio, con retroalimentación del profesor y los monitores. Del 21 al 26 de septiembre.
@@ -165,10 +165,10 @@ El machine learning como generalización; el pipeline estándar — target y fea
 
 <p>
 <a href="/teaching/ba/lectures/week-10/theory/week-10.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
-<a href="/teaching/ba/lectures/week-10/practice/week-10.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/lectures/week-10/task/week-10.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <a href="https://youtu.be/TWDdeKs3org" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Matriz de confusión</a>
 <a href="https://youtu.be/bSHrtLHCPvc" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · RMSE y MAE</a>
+<a href="/teaching/ba/lectures/week-10/practice/week-10.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-10/task/week-10.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-10/task/credito_taller10.csv"><code>credito_taller10.csv</code></a> · <a href="/teaching/ba/lectures/week-10/task/notas_taller10.csv"><code>notas_taller10.csv</code></a> · <a href="/teaching/ba/lectures/week-10/practice/credito_evaluacion.csv"><code>credito_evaluacion.csv</code></a> · <a href="/teaching/ba/lectures/week-10/practice/notas_evaluacion.csv"><code>notas_evaluacion.csv</code></a></small>
 </p>
 
@@ -179,9 +179,9 @@ El pipeline completo de clasificación; la matriz de confusión — por qué el 
 
 <p>
 <a href="/teaching/ba/lectures/week-11/theory/week-11.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="https://www.youtube.com/watch?v=kqaLlte6P6o" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Árboles de clasificación</a>
 <a href="/teaching/ba/lectures/week-11/practice/week-11.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
 <a href="/teaching/ba/lectures/week-11/task/week-11.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
-<a href="https://www.youtube.com/watch?v=kqaLlte6P6o" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Árboles de clasificación</a>
 <small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-11/practice/credito_clasificacion.csv"><code>credito_clasificacion.csv</code></a> · <a href="/teaching/ba/lectures/week-11/task/clientes_conectatel.csv"><code>clientes_conectatel.csv</code></a></small>
 </p>
 
@@ -190,9 +190,9 @@ El pipeline de regresión con MAE/RMSE contra un baseline; regresión lineal reg
 
 <p>
 <a href="/teaching/ba/lectures/week-12/theory/week-12.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="https://www.youtube.com/watch?v=2Miw4bjzSF0" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Árboles de regresión</a>
 <a href="/teaching/ba/lectures/week-12/practice/week-12.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
 <a href="/teaching/ba/lectures/week-12/task/week-12.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
-<a href="https://www.youtube.com/watch?v=2Miw4bjzSF0" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Árboles de regresión</a>
 <small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-12/practice/notas_regresion.csv"><code>notas_regresion.csv</code></a> · <a href="/teaching/ba/lectures/week-12/task/apartamentos_cali.csv"><code>apartamentos_cali.csv</code></a></small>
 </p>
 
@@ -203,9 +203,9 @@ El clustering como segmentación sin target; **k-means** (distancia, escalamient
 
 <p>
 <a href="/teaching/ba/lectures/week-13/theory/week-13.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
+<a href="https://www.youtube.com/watch?v=2kfY0R34Dy0" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · k-means</a>
 <a href="/teaching/ba/lectures/week-13/practice/week-13.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
 <a href="/teaching/ba/lectures/week-13/task/week-13.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
-<a href="https://www.youtube.com/watch?v=2kfY0R34Dy0" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · k-means</a>
 <small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-13/practice/spotify_canciones.csv"><code>spotify_canciones.csv</code></a> · <a href="/teaching/ba/lectures/week-13/task/socios_califit.csv"><code>socios_califit.csv</code></a></small>
 </p>
 
