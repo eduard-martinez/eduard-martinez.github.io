@@ -120,13 +120,14 @@ La gramática de `dplyr` verbo a verbo para KPIs globales y por grupo, y `ggplot
 ### Unidad 2 — Proceso analítico y exploración de datos
 
 **Semana 5 — Proceso analítico y tipos de analítica.**
-El business analytics como proceso que convierte datos en conocimiento accionable; traducir preguntas de negocio a tareas analíticas; el flujo de la pregunta a la decisión; los roles de un equipo de analítica. El ejercicio en clase es el insumo directo de la Entrega 1 del proyecto final.
+El business analytics como proceso que convierte datos en conocimiento accionable; traducir preguntas de negocio a tareas analíticas; el flujo de la pregunta a la decisión. La semana gira alrededor del **Caso Cóndor**: la práctica muestra, con dos ejemplos, el paso a paso de una necesidad inicial a una pregunta de negocio, y en el taller cada grupo de 3 explora los datos del caso y formula de una a tres preguntas de negocio — el insumo directo de la Entrega 1 (la carga un solo integrante en Samán).
 
 <p>
 <a href="/teaching/ba/lectures/week-05/theory/week-05.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
 <a href="https://open.spotify.com/episode/75F2Igpy5LJbRKyyKzIOg8" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
-<a href="/teaching/ba/lectures/week-05/practice/week-05.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/lectures/week-05/task/week-05.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
+<a href="/teaching/ba/lectures/week-05/slides/week-05.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Práctica guiada (diapositivas)</a>
+<a href="/teaching/ba/lectures/week-05/task/week-05.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller · Caso Cóndor</a>
+<small class="ws-data">Para el taller: <a href="/teaching/ba/final_project/contexto_caso_condor.pdf">contexto del caso (PDF)</a> · <a href="/teaching/ba/lectures/week-05/task/exploracion_condor.R" download><code>exploracion_condor.R</code></a> · los datos están en la sección <em>Proyecto final</em></small>
 </p>
 
 **Semana 6 — EDA: fuentes, limpieza y exploración.**
