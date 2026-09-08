@@ -137,6 +137,7 @@ Fuentes y calidad de datos; el checklist de diagnóstico — tipos, rangos, falt
 <a href="/teaching/ba/lectures/week-06/theory/week-06.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
 <a href="https://open.spotify.com/episode/1aQ02r039bDtbEbwpumQcq" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
 <a href="/teaching/ba/lectures/week-06/slides/week-06.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Práctica guiada · EDA del caso Cóndor</a>
+<a href="/teaching/ba/lectures/week-06/task/EDA%20Caso%20Condor.R" download class="ws-btn"><i class="fas fa-download"></i>Script de la clase · caso Cóndor</a>
 <a href="/teaching/ba/lectures/week-06/task/week-06.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
 <small class="ws-data"><strong>Otro ejercicio de práctica — limpieza de datos</strong> (para hacer por tu cuenta, en casa): <a href="/teaching/ba/lectures/week-06/practice/week-06.html">práctica guiada de limpieza</a> · <a href="/teaching/ba/lectures/week-06/task/ferreteria_raw.csv"><code>ferreteria_raw.csv</code></a></small>
 </p>

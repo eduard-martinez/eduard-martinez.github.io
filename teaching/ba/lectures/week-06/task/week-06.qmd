@@ -1,6 +1,6 @@
 ---
 title: "Unidad 2 - Taller 6: tu primer EDA de la pregunta de Cóndor"
-subtitle: "Taller práctico evaluable · Semana 6 · 06327-ECO"
+subtitle: "Monitoría y taller evaluable · Semana 6 · 06327-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
   html: default
@@ -16,115 +16,38 @@ lang: es
 
 <!--=================-->
 <!--=================-->
-# Instrucciones generales
+# Monitoría: el punto de partida <span class="badge-time">≈ 60 min</span>
 
-**El caso:** *Cóndor*, la fintech del proyecto final, y la **pregunta de negocio que tu equipo formuló en el Taller 5**. En clase viste cómo se ve un análisis exploratorio completo aplicado a una pregunta del caso, y con el monitor construyeron la base analítica a partir de las cuatro tablas. Ahora te toca a ti: **un primer análisis exploratorio, tuyo, de la pregunta de tu equipo.**
+Con el monitor (Santiago) y el script 📥 [**EDA Caso Condor.R**](EDA%20Caso%20Condor.R), guardado en la carpeta `scripts/` de tu proyecto `intro_ba`. <!-- TODO: al publicar, subir el archivo "EDA Caso Condor.R" junto a este HTML --> Se ejecuta por bloques, de arriba abajo:
 
-No se trata de responder la pregunta ni de modelar nada. Se trata de comprobar que puedes pasar de una pregunta de negocio a una exploración inicial de los datos —descriptivas, comparaciones, visualizaciones— y explicar **por qué lo que calculaste sirve para entender esa pregunta**.
+- **Bloques 1 a 4 — código completo.** Carga las cuatro tablas del caso desde las URL del proyecto (no se descarga ningún archivo de datos), responde qué es una fila en cada tabla, agrega los anexos al nivel del cliente y los une a `base_clientes` en **una base analítica** con el número de filas verificado.
+- **Bloque 5 — solo preguntas.** Radiografía, variable objetivo y baseline, distribuciones, comparaciones por grupo, relaciones, lo que no se puede usar y el acta. **El código lo escribes tú**, debajo de cada pregunta, con el monitor. Cada respuesta es una salida de R con su `## HALLAZGO:`, no una opinión.
+- Si la pregunta de tu equipo vive en un anexo (fraude → transacciones; mora → créditos; conversión → campañas), esa tabla es la principal y `base_clientes` se le pega por `cliente_id`. El bloque 5.2 te lo pide; el monitor te acompaña.
 
 ::: {.callout-key}
-**Cómo funciona este taller**
-
-- Es **individual** y **evaluable**. Los tres integrantes del equipo parten de la **misma pregunta de negocio**, pero cada uno escribe y ejecuta **su propio código**, interpreta **sus** resultados y produce **al menos una exploración propia** —una descriptiva, una comparación o una visualización— que aporte algo distinto al análisis de la pregunta. Tres copias del mismo ejercicio dentro de un grupo no son tres talleres.
-- Se desarrolla en el tiempo restante de la clase, después del trabajo guiado con el monitor (⏱️ diseñado para **≈ 40 minutos**), y se apoya en lo que construyeron allí: cómo se cargan las tablas, cómo se unen y qué grano tiene la base de su pregunta.
-- La entrega **solo es válida si asististe a la clase** en la que se desarrolla el taller: se resuelve y se entrega **en clase**.
-- 🤖 **Declaración de uso de IA:** obligatoria al final del script (incluso si dice "no usé IA"). Omitirla descuenta **-0.5**, y la penalización puede aumentar en caso de reincidencia. Este taller es de **nivel 3 (colaboración con IAG)**: ver las reglas de juego.
-- Herramienta: **RStudio**, dentro de tu proyecto `intro_ba`. Los datos se leen desde la web: no hay archivos que descargar.
+**La monitoría es el borrador del taller.** Trabaja desde el primer bloque en tu propio archivo, `apellido_nombre_taller6.R`: lo que avances con el monitor es lo que después completas y entregas.
 :::
 
-**El entregable** es **un archivo**: 📄 `apellido_nombre_taller6.R`, con tu **nombre y código** en el encabezado, la **pregunta de negocio de tu equipo** escrita al inicio, todo el código que usaste y tus lecturas en comentarios. Se entrega en el enlace que indicará el profesor, antes de terminar la clase. <!-- TODO: pegar aquí el enlace de entrega -->
+<!--=================-->
+<!--=================-->
+# Taller 6: qué debes hacer <span class="badge-time">≈ 40 min</span>
 
-::: {.callout-warning}
-**Reglas de juego (la rúbrica las aplica)**
+Individual, sobre la **pregunta de negocio de tu equipo** (la del Taller 5). Los tres integrantes parten de la misma pregunta, pero cada uno escribe **su propio código** y produce **al menos una exploración propia**, distinta de la de sus compañeros: tres copias no son tres talleres. Coordinen ángulos.
 
-1. **El script debe correr completo** de arriba a abajo, con internet. Se revisa con *Source*: si se detiene en un error, se califica hasta esa línea. Prueba de fuego antes de entregar: `rm(list = ls())` → *Source*.
-2. **Los datos se cargan desde las URL del proyecto**, nunca desde una ruta local de tu computador:
+1. **Encabezado:** nombre, código, la pregunta del equipo, su variable objetivo (o "segmentación, sin target") y la unidad de análisis: qué es una fila en la base de tu pregunta.
+2. **La base:** carga desde las URL solo las tablas que tu pregunta necesita y construye la base al grano de la pregunta —agregar primero, unir después— con una línea que confirme el número de filas. Puedes partir de lo hecho en la monitoría, escrito y corrido por ti.
+3. **Tu exploración:** al menos una —mejor dos o tres— ligada a la pregunta: la distribución del target, una comparación por grupos, una relación entre dos variables, un valor extremo mirado en su fila completa, una hipótesis "obvia" puesta a prueba. Tú decides qué y cómo. Al menos una salida es un gráfico o una tabla con un título que diga el mensaje y ejes etiquetados.
+4. **La lectura:** debajo de cada salida, `## HALLAZGO:` (qué muestra, con su número) y `## POR QUÉ IMPORTA:` (qué aporta para entender la pregunta), escritos para alguien de Cóndor que no sabe R. Cierra con 3 a 5 líneas: qué sabes ahora que no sabías, qué explorarías después y qué decidiste con los faltantes, los extremos y las columnas excluidas.
 
-   ```r
-   url <- "https://eduard-martinez.github.io/teaching/ba/final_project/data/"
-   clientes      <- read.csv(paste0(url, "base_clientes.csv"))
-   ## y solo las que tu pregunta necesite:
-   transacciones <- read.csv(paste0(url, "anexo_transacciones.csv"))
-   creditos      <- read.csv(paste0(url, "anexo_creditos.csv"))
-   campanas      <- read.csv(paste0(url, "anexo_campanas.csv"))
-   ```
-
-3. **Cada salida se lee.** Debajo de cada tabla o gráfico van dos comentarios tuyos: `## HALLAZGO:` (qué muestra, en una o dos frases) y `## POR QUÉ IMPORTA:` (qué tiene que ver con la pregunta de tu equipo). Una salida sin lectura no cuenta.
-4. **Tu exploración es tuya.** Coordinen en el equipo ángulos distintos —uno mira el target y sus tramos, otro una comparación por grupos, otro una relación o un valor extremo— para que las tres entregas se complementen. Si dos integrantes entregan la misma exploración, **no cuenta como propia para ninguno**.
-5. **Uso de IA (nivel 3):** permitido para entender un error, recordar la sintaxis de una función o pulir un gráfico **después de intentarlo tú**; prohibido para decidir qué explorar o para interpretar los resultados: la elección y la lectura son tuyas. Declaración obligatoria al final.
-:::
-
-**Distribuye tu tiempo:** la base ≈ 10 min · la exploración ≈ 20 min · la lectura y el cierre ≈ 10 min.
+**La regla de oro del caso:** no uses como predictor nada que solo se conozca **después** del evento que tu pregunta quiere anticipar.
 
 <!--=================-->
 <!--=================-->
-# Punto 1 — La pregunta y la base (1.0 punto)
+# Qué debes entregar
 
-a. **Encabezado:** nombre, código y fecha; la **pregunta de negocio de tu equipo** tal como quedó después del Taller 5; la **variable objetivo** que le corresponde (o "sin target: segmentación", si es el caso) y la **unidad de análisis**: ¿qué es una fila en la base de tu pregunta —un cliente, una transacción, una solicitud de crédito, un envío de campaña?
-b. **La base:** carga desde las URL las tablas que tu pregunta necesita y construye la base al grano de tu pregunta. Puedes reproducir lo que hicieron con el monitor, pero **escrito y corrido por ti**. Si unes tablas de granos distintos, recuerda el orden: **agregar primero, unir después**, y comprueba el número de filas con un comentario que diga si es el esperado y por qué.
-c. **Radiografía breve:** cuántas filas y columnas tiene tu base, y qué valores faltantes hay en las columnas que vas a usar, con una línea sobre **por qué** faltan y qué decides hacer con ellos.
-
-<!--=================-->
-<!--=================-->
-# Punto 2 — Tu exploración (2.0 puntos)
-
-Construye **al menos una exploración propia** —mejor dos o tres— que te ayude a entender la pregunta de tu equipo. **Tú decides qué explorar y cómo.** Estos son ángulos posibles, no pasos a seguir:
-
-- **El target:** cómo se distribuye. Si es binario, qué proporción vale 1 —ese número es el punto de comparación de todo lo demás—; si es continuo, su histograma y la relación entre media y mediana.
-- **Una variable candidata:** una que, según la pregunta, debería estar relacionada con el target. Su distribución: ¿simétrica o con cola larga? ¿la media y la mediana cuentan la misma historia?
-- **Una comparación por grupos:** la tasa (o la mediana) del target por tramos o categorías de una variable, con el número de casos por grupo.
-- **Una relación entre dos variables:** un cruce o un gráfico de dispersión, y la respuesta a si miden lo mismo o se complementan.
-- **Un valor extremo mirado en su fila completa:** ¿error de captura o caso real? ¿qué haces con él?
-- **Una hipótesis "obvia" puesta a prueba:** una variable que todos creían importante y que quizás resulte plana. Un gráfico plano también informa.
-
-::: {.callout-workflow}
-**Lo que toda exploración debe cumplir**
-
-- Usa variables **ligadas a tu pregunta**: nada de graficar columnas porque sí.
-- Al menos una salida es un **gráfico o una tabla bien presentada**: título que diga el **mensaje** (no "gráfico de barras"), ejes etiquetados, un tema limpio.
-- **No uses como predictor** nada que solo se conozca **después** del evento que tu pregunta quiere anticipar (el caso lo advierte: es la regla de oro). Si una variable "explica demasiado bien", sospecha.
-:::
-
-> Un ejemplo de lo que **no** se espera: correr `skim()` sobre toda la base y pegar la salida. Y uno de lo que sí: elegir dos variables, mostrar cómo cambia el target entre sus grupos y decir qué le dice eso a quien decide en Cóndor.
-
-<!--=================-->
-<!--=================-->
-# Punto 3 — La lectura (1.5 puntos)
-
-a. **Por cada salida** (tabla o gráfico), los dos comentarios: `## HALLAZGO:` —qué muestra, con su número— y `## POR QUÉ IMPORTA:` —qué aporta para entender la pregunta de tu equipo—. Escríbelos para alguien de Cóndor que no sabe R.
-b. **El cierre**, en 3 a 5 líneas de comentario: qué sabes ahora de los datos que no sabías antes respecto a la pregunta, qué explorarías después, y qué decisiones tomaste en el camino (faltantes, extremos, columnas excluidas) y por qué.
-
-> La vara de calidad: si borráramos el código y dejáramos solo tus comentarios, alguien del equipo debería poder entender qué exploraste, qué encontraste y por qué eso le sirve al proyecto.
-
-<!--=================-->
-<!--=================-->
-# Punto 4 — Forma y reproducibilidad (0.5 puntos)
-
-El script corre completo con *Source*, está comentado, lleva tu nombre y la pregunta en el encabezado, no usa rutas locales, y cierra con la declaración de uso de IA.
-
-<!--=================-->
-<!--=================-->
-# Rúbrica de evaluación
-
-| Punto | Qué se evalúa | Puntos |
-|---|---|---:|
-| **1. La pregunta y la base** | Pregunta, target y unidad de análisis correctos en el encabezado (0.3); carga desde las URL y base al grano de la pregunta, con la verificación de filas (0.5); radiografía con los faltantes explicados y decididos (0.2) | 1.0 |
-| **2. Tu exploración** | Pertinencia: las variables y la exploración se conectan con la pregunta (0.8); corrección técnica del código y del gráfico o tabla (0.6); al menos una exploración **propia**, distinta de la de los compañeros (0.6) | 2.0 |
-| **3. La lectura** | `## HALLAZGO:` en cada salida, con número (0.6); `## POR QUÉ IMPORTA:` que conecte con la pregunta (0.6); cierre con lo aprendido, lo que sigue y las decisiones tomadas (0.3) | 1.5 |
-| **4. Forma** | Corre completo, comentado, encabezado completo, sin rutas locales, declaración de IA | 0.5 |
-| **Total** | | **5.0** |
-
-: El script que no corre completo se evalúa hasta la línea del primer error. Una salida sin su lectura no cuenta. Dos integrantes con la misma exploración pierden el componente "propia" del Punto 2. Usar como predictor una variable que solo se conoce después del evento descuenta en el Punto 2. Omitir la **declaración de uso de IA** al final descuenta **-0.5**, y la penalización puede aumentar en caso de reincidencia. {.striped tbl-colwidths="[22,66,12]"}
-
-<!--=================-->
-<!--=================-->
-# Declaración de uso de IA
-
-::: {.callout-warning}
-**Esta declaración es obligatoria y cuenta en la nota:** omitirla descuenta **-0.5** en el taller, y la penalización puede aumentar en caso de reincidencia.
-:::
-
-Cierra tu script con este bloque diligenciado (obligatorio, aunque sea para decir que no la usaste):
+- **Un archivo:** `apellido_nombre_taller6.R`, que corre completo con *Source* (prueba antes de entregar: `rm(list = ls())` → *Source*), lee los datos desde las URL del proyecto (`https://eduard-martinez.github.io/teaching/ba/final_project/data/`, como en el script de la monitoría; nunca desde rutas locales) y termina con la declaración de uso de IA.
+- **Dónde y cuándo:** en el enlace que indicará el profesor, antes de terminar la clase. La entrega solo es válida si asististe a la sesión. <!-- TODO: pegar aquí el enlace de entrega -->
+- **IA, nivel 3:** permitida para entender un error, recordar una sintaxis o pulir un gráfico después de intentarlo tú; no para decidir qué explorar ni para interpretar los resultados. La declaración va al final del script aunque digas que no la usaste; omitirla descuenta **-0.5**.
 
 ```r
 ## ============================================
@@ -134,5 +57,3 @@ Cierra tu script con este bloque diligenciado (obligatorio, aunque sea para deci
 ## Verifiqué por mi cuenta: ____________________
 ## ============================================
 ```
-
-*La política de siempre: la IA para **entender** (por qué falló un `left_join`, qué hace `cut()`), no para decidir. Y una advertencia propia de esta semana: si le pides a un modelo "hazme el EDA de esta base", te va a devolver treinta gráficos correctos e inútiles, sin una sola relación con tu pregunta. El EDA que vale es el que explora **lo que tu pregunta necesita** y lo lee con **tu** criterio — y eso es exactamente lo que este taller califica.*
