@@ -61,6 +61,20 @@ Cada semana de contenido publica tres materiales, en el orden en que se usan:
 2. <i class="fas fa-laptop-code"></i> **Práctica guiada** — la aplicación en clase, paso a paso.
 3. <i class="fas fa-clipboard-check"></i> **Taller** — la actividad evaluable que cada estudiante desarrolla durante la sesión y entrega en Intu antes de terminar la clase.
 
+## Skills de IA del curso
+
+Tres *skills* — instrucciones empaquetadas que convierten a tu asistente de IA en un ayudante que conoce este curso. Descarga el `.zip` y cárgalo como skill en Claude, o usa el `SKILL.md` que viene adentro como instrucciones en otro asistente:
+
+<p>
+<a href="/teaching/ba/skills/curso-ba.zip" download class="ws-btn"><i class="fas fa-graduation-cap"></i>curso-ba · contexto del curso</a>
+<a href="/teaching/ba/skills/monitor-r.zip" download class="ws-btn"><i class="fa-brands fa-r-project"></i>monitor-r · tu monitor de R</a>
+<a href="/teaching/ba/skills/simulacro-ba.zip" download class="ws-btn"><i class="fas fa-stopwatch"></i>simulacro-ba · practica para el parcial</a>
+</p>
+
+- **curso-ba** — el contexto: la dinámica semanal, el caso Cóndor, la evaluación y la política de IA del curso.
+- **monitor-r** — un monitor de R que te destraba sin hacerte el taller: errores explicados, código paso a paso y diagnósticos que enseñan.
+- **simulacro-ba** — genera simulacros con el formato exacto del parcial (un contexto y cuatro preguntas, semanas 2–6) y solo muestra la clave después de que respondes.
+
 ## Resultados de aprendizaje
 
 Al finalizar el curso, el estudiante estará en capacidad de:

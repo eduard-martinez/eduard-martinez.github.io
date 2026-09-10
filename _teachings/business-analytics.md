@@ -63,6 +63,20 @@ Each content week publishes three materials, in the order students use them:
 2. <i class="fas fa-laptop-code"></i> **Guided practice** — the in-class application, led step by step.
 3. <i class="fas fa-clipboard-check"></i> **Workshop** — the graded activity each student completes during the session and submits on Intu before class ends.
 
+## Course AI skills
+
+Three *skills* — packaged instructions that turn your AI assistant into a helper that knows this course (in Spanish). Download the `.zip` and load it as a skill in Claude, or use the bundled `SKILL.md` as instructions in another assistant:
+
+<p>
+<a href="/teaching/ba/skills/curso-ba.zip" download class="ws-btn"><i class="fas fa-graduation-cap"></i>curso-ba · course context</a>
+<a href="/teaching/ba/skills/monitor-r.zip" download class="ws-btn"><i class="fa-brands fa-r-project"></i>monitor-r · your R tutor</a>
+<a href="/teaching/ba/skills/simulacro-ba.zip" download class="ws-btn"><i class="fas fa-stopwatch"></i>simulacro-ba · exam practice</a>
+</p>
+
+- **curso-ba** — the course context: the weekly dynamic, the Cóndor case, grading, and the course AI policy.
+- **monitor-r** — an R tutor that unblocks you without doing the workshop for you: explained errors, step-by-step code, diagnoses that teach.
+- **simulacro-ba** — generates practice exams in the exact format of the midterm (one context, four questions, weeks 2–6) and only reveals the key after you answer.
+
 ## Learning outcomes
 
 By the end of the course, students will be able to:
