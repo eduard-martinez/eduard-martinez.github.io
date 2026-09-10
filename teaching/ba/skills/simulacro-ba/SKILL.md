@@ -26,21 +26,26 @@ empezar.
 - Si el estudiante nombra la semana (2 a 6), no preguntes nada más. Si dice «parcial», «todo» o
   «repaso completo», arma el parcial completo (abajo). Si no dice nada, pregunta en una línea qué
   semana quiere practicar.
-- **Antes de escribir una sola pregunta, abre la página de teoría de esa semana** y, si la semana
-  los tiene, revisa las láminas y la práctica. Construye el ejercicio **únicamente** con lo que
-  dice ese material: sus conceptos, sus ejemplos de negocio, sus reglas y sus errores típicos.
-  Nada de temas que la página no trate, aunque los conozcas.
+- **Antes de escribir una sola pregunta, abre la página de teoría de esa semana.** Construye el
+  ejercicio **únicamente** con lo que dice ese material: sus conceptos, sus ejemplos de negocio,
+  sus reglas y sus errores típicos. Nada de temas que la página no trate, aunque los conozcas.
+- **En las semanas 5 y 6, abre además las láminas de la clase (PDF).** No para tomar sus casos:
+  para tomar la **intuición de cómo se aplica en clase lo que enseña la teoría**. Las láminas
+  muestran la forma de razonar del analista frente a una situación real: qué se pregunta primero,
+  qué se mira después, cómo se pasa de un dato a una decisión. Lleva esa manera de razonar a tu
+  empresa ficticia y exige lo mismo en las preguntas. No reproduzcas las empresas, las cifras, las
+  tablas ni las preguntas de las láminas, y nunca uses Cóndor.
 - Si no puedes abrir enlaces, dilo en una línea y pide al estudiante que pegue la sección
   «Checklist de salida» (o «Lo esencial de la semana») de la página de teoría; trabaja solo con
   eso.
 
-| Semana | Tema | Teoría (obligatoria) | Otros recursos de la semana |
+| Semana | Tema | Material que debes abrir | Otros recursos de la semana |
 |---|---|---|---|
 | 2 | LLMs: tokens y costo, embeddings y atención, memoria y límites, alucinaciones, RLHF, uso responsable | https://eduard-martinez.github.io/teaching/ba/lectures/week-02/theory/week-02.html | práctica https://eduard-martinez.github.io/teaching/ba/lectures/week-02/practice/week-02.html · taller https://eduard-martinez.github.io/teaching/ba/lectures/week-02/task/week-02.html |
 | 3 | Fundamentos de R: RStudio, tipos, objetos, consola (resultado, warning, error), vectores, data frames, paquetes, proyectos | https://eduard-martinez.github.io/teaching/ba/lectures/week-03/theory/week-03.html | práctica https://eduard-martinez.github.io/teaching/ba/lectures/week-03/practice/week-03.html · taller https://eduard-martinez.github.io/teaching/ba/lectures/week-03/task/week-03.html |
 | 4 | dplyr y ggplot2: verbos, group_by + summarise, pipe, la gramática de gráficos | https://eduard-martinez.github.io/teaching/ba/lectures/week-04/theory/week-04.html | práctica https://eduard-martinez.github.io/teaching/ba/lectures/week-04/practice/week-04.html · taller https://eduard-martinez.github.io/teaching/ba/lectures/week-04/task/week-04.html |
-| 5 | El proceso analítico: pregunta, etapas, tareas analíticas, roles | https://eduard-martinez.github.io/teaching/ba/lectures/week-05/theory/week-05.html | láminas https://eduard-martinez.github.io/teaching/ba/lectures/week-05/slides/week-05.pdf · taller https://eduard-martinez.github.io/teaching/ba/lectures/week-05/task/week-05.html |
-| 6 | Fuentes, calidad de datos y EDA: dimensiones, faltantes, outliers, categorías, raw → clean → analysis-ready | https://eduard-martinez.github.io/teaching/ba/lectures/week-06/theory/week-06.html | láminas https://eduard-martinez.github.io/teaching/ba/lectures/week-06/slides/week-06.pdf · práctica https://eduard-martinez.github.io/teaching/ba/lectures/week-06/practice/week-06.html · taller https://eduard-martinez.github.io/teaching/ba/lectures/week-06/task/week-06.html |
+| 5 | El proceso analítico: pregunta, etapas, tareas analíticas, roles | teoría https://eduard-martinez.github.io/teaching/ba/lectures/week-05/theory/week-05.html · láminas de la clase https://eduard-martinez.github.io/teaching/ba/lectures/week-05/slides/week-05.pdf | taller https://eduard-martinez.github.io/teaching/ba/lectures/week-05/task/week-05.html |
+| 6 | Fuentes, calidad de datos y EDA: dimensiones, faltantes, outliers, categorías, raw → clean → analysis-ready | teoría https://eduard-martinez.github.io/teaching/ba/lectures/week-06/theory/week-06.html · láminas de la clase https://eduard-martinez.github.io/teaching/ba/lectures/week-06/slides/week-06.pdf | práctica https://eduard-martinez.github.io/teaching/ba/lectures/week-06/practice/week-06.html · taller https://eduard-martinez.github.io/teaching/ba/lectures/week-06/task/week-06.html |
 
 La página del curso es https://eduard-martinez.github.io/teaching/business-analytics-es/ ; el
 único material oficial es el que cuelga de ahí. `references/material-oficial.md` resume qué cubre
@@ -92,10 +97,12 @@ simulacro es un mensaje; la calificación es otro.
 7. **Empresa ficticia y de un sector distinto en cada simulacro.** Nunca el caso Cóndor (es el
    proyecto de los estudiantes) ni cifras de empresas reales.
 8. **Solo lo que esa semana vio.** Un simulacro de la semana 3 no muestra dplyr; uno de la 4 no
-   habla de valores faltantes; uno de la 6 no entrena modelos. La tabla de arriba y
+   habla de valores faltantes; uno de la 6 no entrena modelos. En las semanas 5 y 6, lo que
+   muestran las láminas de la clase también cuenta como visto. La tabla de arriba y
    `references/material-oficial.md` dicen qué entra en cada semana.
 
-Antes de enviar, recorre la lista: ¿abrí el material de la semana? ¿hay decisión pendiente en el
+Antes de enviar, recorre la lista: ¿abrí la teoría de la semana, y las láminas si es la 5 o la 6,
+tomando la intuición y no el caso? ¿hay decisión pendiente en el
 contexto? ¿las cuatro preguntas piden interpretar y no definir? ¿opciones parejas y de la misma
 forma? ¿la correcta no es la más larga en más de una? ¿la clave no tiene patrón? ¿usé las cifras
 del contexto? ¿sector ficticio y distinto de Cóndor?
@@ -141,9 +148,10 @@ inventar reglas, fechas o contenidos del curso; mostrar salidas de R cuyas cifra
 
 ## Referencias (léelas solo cuando hagan falta)
 
-- `references/material-oficial.md`: qué cubre cada página de teoría, qué ideas son examinables y
-  cuáles son los errores típicos que sirven de distractores. Léela si no puedes abrir la página o
-  para elegir el ángulo del contexto.
+- `references/material-oficial.md`: qué cubre cada página de teoría, qué intuición de aplicación
+  traen las láminas de las semanas 5 y 6, qué ideas son examinables y cuáles son los errores
+  típicos que sirven de distractores. Léela si no puedes abrir la página o para elegir el ángulo
+  del contexto.
 - `references/ejemplo-simulacro.md`: un simulacro completo con su clave y su verificación, como
   modelo de redacción y de calibración. Léelo la primera vez que generes un simulacro en la
   conversación.

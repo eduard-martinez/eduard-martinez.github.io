@@ -58,7 +58,16 @@ vez de informar.
 
 ## Semana 5 — El proceso analítico
 Teoría: https://eduard-martinez.github.io/teaching/ba/lectures/week-05/theory/week-05.html
-Láminas: https://eduard-martinez.github.io/teaching/ba/lectures/week-05/slides/week-05.pdf
+Láminas de la clase (obligatorias): https://eduard-martinez.github.io/teaching/ba/lectures/week-05/slides/week-05.pdf
+Qué tomar de ellas: no los casos, sino la intuición de cómo se aplica la teoría. Las láminas
+muestran cómo un analista toma un encargo real y lo recorre por las siete etapas: cómo convierte
+un tema en una pregunta que cambia una decisión y le pasa el test de la pregunta; cómo el punto de
+partida cambia el trabajo cuando la respuesta no está en ningún dato y hay que construirlos, y
+cuando los datos ya existen y el reto es definir qué es lo esperado; cómo el producto final se
+piensa desde la decisión que va a habilitar, y puede ser un informe o un sistema que corre solo; y
+cómo la lectura de negocio, la cuarta pata, es la que le da valor al análisis. Para el simulacro:
+sitúa a un analista frente a un encargo de una empresa ficticia y pide ese mismo razonamiento; no
+uses las empresas, las cifras ni las preguntas de las láminas.
 Secciones: El 87 % que nunca llegó (cuatro razones, una sola técnica) · Cuatro patas de la misma
 mesa · Siete etapas y un ciclo (pregunta → datos → limpieza → EDA → modelo → comunicación →
 decisión) · Tipos de tareas analíticas (clasificación, predicción, segmentación, anomalías,
@@ -74,7 +83,18 @@ clasificar sin etiquetas históricas · culpar al modelo por una pregunta mal he
 
 ## Semana 6 — Fuentes, calidad de datos y EDA
 Teoría: https://eduard-martinez.github.io/teaching/ba/lectures/week-06/theory/week-06.html
-Láminas: https://eduard-martinez.github.io/teaching/ba/lectures/week-06/slides/week-06.pdf
+Láminas de la clase (obligatorias): https://eduard-martinez.github.io/teaching/ba/lectures/week-06/slides/week-06.pdf
+Qué tomar de ellas: no el caso, sino el orden en que un analista interroga una base antes de
+modelar, guiado por una pregunta de negocio. Primero, qué es una fila y cuántas hay; después, qué
+falta y por qué falta, distinguiendo el vacío que significa «no aplica» del dato perdido; cómo se
+ve la variable que se quiere explicar; cómo se distribuyen las candidatas y qué resumen las
+describe; qué grupos se comportan distinto, leído en tasas por tramo; qué hipótesis razonables no
+se sostienen en los datos; si dos señales miden lo mismo; qué aporta una tabla adicional, que se
+agrega a una fila por unidad antes de unirla, porque unir sin agregar multiplica las filas; y qué
+variable no se puede usar porque se conoce después del evento y filtra el futuro. Al final, qué
+produce un EDA: hipótesis y decisiones de limpieza, no respuestas. Para el simulacro: pon una base
+ficticia con su pregunta y pide recorrerla con ese mismo orden y ese mismo criterio; no uses
+Cóndor, sus tablas ni sus cifras.
 Secciones: Los exámenes que llegaron del laboratorio · Fuentes: primaria y secundaria (el origen
 dice qué suciedad esperar) · Las cuatro dimensiones de la calidad (completitud, consistencia,
 validez, unicidad; la revisión estructural: qué es una fila) · Problema 1: valores faltantes
