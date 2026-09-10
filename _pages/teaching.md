@@ -32,6 +32,13 @@ nav_order: 3
   <div class="uni">Universidad ICESI · Colombia</div>
 
   <div class="course">
+    <span class="ttl"><a href="/teaching/bdml-applied-economics/">Big Data and Machine Learning for Applied Economics</a></span>
+    <span class="meta">Department of Economics · Master's in Economics (ME) · 2026</span>
+    <p class="desc">Graduate course on statistical learning for applied economics and finance, following ISL: prediction vs. explanation, honest out-of-sample validation, regularization, trees, random forests and boosting, model interpretation with SHAP, and neural networks &mdash; applied in R on Colombian polling-station, housing and satellite data.</p>
+    <p class="links"><a href="/teaching/bdml-applied-economics/">Course page &amp; materials &rarr;</a> · <a href="https://github.com/eduard-martinez/bdml-applied-economics" target="_blank" rel="noopener">GitHub repo &rarr;</a></p>
+  </div>
+
+  <div class="course">
     <span class="ttl"><a href="/teaching/causal-inference/">Causal Inference for Public Policy</a></span>
     <span class="meta">Department of Economics · Master's (ME, MCA, MFC) &amp; PhD · ECO-60116 · 2026-01</span>
     <p class="desc">Impact-evaluation methods for public policy and development economics — RCT, IV, regression discontinuity, difference-in-differences, event studies and matching — each paired with a canonical paper and applied in R.</p>
@@ -46,17 +53,17 @@ nav_order: 3
   </div>
 
   <div class="course">
-    <span class="ttl"><a href="/teaching/nivelatorio-r/">R Programming Leveling Course</a></span>
-    <span class="meta">CIENFI · Master's in Economics &amp; Management Sciences · July 2026</span>
-    <p class="desc">Short, intensive R leveling course for incoming Master's students: R and RStudio fundamentals, reproducible workflows, data wrangling with the tidyverse, visualization and descriptives on real GEIH microdata, basic regressions, and a critical, verified use of AI in every unit.</p>
-    <p class="links"><a href="/teaching/nivelatorio-r/">Course page &rarr;</a> · <a href="/teaching/intro-r/">Course website &amp; materials &rarr;</a></p>
-  </div>
-
-  <div class="course">
     <span class="ttl"><a href="/teaching/workshop-cienfi/">Workshop CIENFI — Spatial Data in R</a></span>
     <span class="meta">CIENFI · Research workshop series · 2025 – 2026</span>
     <p class="desc">Hands-on workshops on spatial data analysis in R for applied research: vector data with sf (geocoding, OpenStreetMap, distances, maps), rasters and night lights with terra (crop and mask, raster&ndash;vector joins with census blocks), and satellite applications &mdash; Sentinel-2 vegetation and built-up indices and the monthly VIIRS night-lights series &mdash; plus class notes and paper commentaries.</p>
     <p class="links"><a href="/teaching/workshop-cienfi/">Course page &amp; materials &rarr;</a></p>
+  </div>
+
+  <div class="course">
+    <span class="ttl"><a href="/teaching/nivelatorio-r/">R Programming Leveling Course</a></span>
+    <span class="meta">CIENFI · Master's in Economics &amp; Management Sciences · July 2026</span>
+    <p class="desc">Short, intensive R leveling course for incoming Master's students: R and RStudio fundamentals, reproducible workflows, data wrangling with the tidyverse, visualization and descriptives on real GEIH microdata, basic regressions, and a critical, verified use of AI in every unit.</p>
+    <p class="links"><a href="/teaching/nivelatorio-r/">Course page &rarr;</a> · <a href="/teaching/intro-r/">Course website &amp; materials &rarr;</a></p>
   </div>
 
   <div class="uni">Universidad de los Andes · Colombia</div>
