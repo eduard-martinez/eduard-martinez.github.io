@@ -54,7 +54,7 @@ All course materials — syllabus, lecture slides, problem sets, R applications,
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-github"></i>github.com/eduard-martinez/bdml-applied-economics</a>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/syllabus/syllabus.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Full syllabus (PDF, in Spanish)</a>
-<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/final-project/projecto_final.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-graduation-cap"></i>Final project (PDF, in Spanish)</a>
+<span class="ws-btn ws-soon"><i class="fas fa-graduation-cap"></i>Final project guidelines · soon</span>
 <a href="https://www.statlearning.com" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-book"></i>Course text — ISL, 2nd ed. (free online)</a>
 </p>
 
@@ -64,7 +64,7 @@ In causal inference the goal is to identify a parameter correctly: the effect β
 
 The course introduces Master's students to the statistical-learning framework and to the machine-learning tools most used today in applied economics and finance: regression as a prediction machine, classification, cross-validation, regularization (Ridge, Lasso, Elastic Net), trees, random forests and boosting, interpretation tools (variable importance, partial dependence, SHAP values) and neural networks. The progression follows *An Introduction to Statistical Learning* (James, Witten, Hastie & Tibshirani, 2nd ed.), the course textbook. Three datasets run through the semester: a panel of Colombian polling stations with census characteristics, housing prices in Bogotá, and satellite imagery.
 
-The treatment combines **sufficient formality** with **a lot of intuition**. For each method the course presents its objective function and hyperparameters, explains what problem it solves and how it works, implements it on real data in R, evaluates its out-of-sample performance against a baseline model, and interprets the results. Long derivations live in per-session appendices, available for anyone who wants to go deeper. In the same spirit as the Causal Inference course, each session is paired with a recent applied article presented by a student, and the semester culminates in a project where teams pose a predictive question, compare several algorithms and defend their results.
+The treatment combines **sufficient formality** with **a lot of intuition**. For each method the course presents its objective function and hyperparameters, explains what problem it solves and how it works, implements it on real data in R, evaluates its out-of-sample performance against a baseline model, and interprets the results. Long derivations live in per-session appendices, available for anyone who wants to go deeper. Each session is organized around a recent applied article — the *paper of the session* — that students read beforehand and whose exercise the guided application reproduces on the course data; the semester culminates in a project where teams pose a predictive question, compare several algorithms and defend their results.
 
 ## Learning outcomes
 
@@ -84,7 +84,7 @@ Each session is organized in three parts:
 
 1. **Theory and concepts.** For every method, the same sequence: the economic problem it solves, the intuition with a figure, the essential formulation (objective function and hyperparameters), how it works and how it is tuned, and when to use it. Intuition before formalism; long derivations go to the session appendix.
 2. **Guided R application.** From around week 2 onward, the last 20–30 minutes of each class are hands-on work in R with prepared code on the three course datasets (week 1 is mostly conceptual). Every application reports out-of-sample performance against a baseline, predicted-vs-observed plots and, from week 6 on, interpretation tools. An optional Python track (`scikit-learn`) is offered.
-3. **Student presentation.** From the second session on, one student closes the class with a 15-minute presentation of an applied article related to the previous session: the question and what is predicted, the data, the ML method and how out-of-sample performance is evaluated, and the main results and how the model is interpreted.
+3. **The paper of the session.** Each session has a reference applied article that students read beforehand with a three-question guide: what is predicted and against which baseline; how out-of-sample performance is evaluated and where the model fails; what the article interprets and what it does not claim. The article opens the session, the theory explains the method it uses, and the guided application reproduces its exercise on the course data. From the second session on, one student opens the class with a 10-minute presentation of the paper (question, data, baseline, evaluation, main result); explaining the method is not required, since that is the day's topic. Papers built around broad algorithm comparisons (Gu, Kelly & Xiu 2020; Medeiros et al. 2021; Goulet Coulombe et al. 2022) are reference readings for the final project.
 
 ## Getting up to speed in R
 
@@ -99,7 +99,9 @@ Reviewing this material is mandatory and happens outside class hours. Equivalent
 
 ## Schedule
 
-Each week shows its class materials as buttons — lecture slides and, when published, the R application — with the assigned readings and the paper for the student presentation on the small lines below.
+Each week shows its class materials as buttons — lecture slides and, when published, the R application — with the assigned readings and the paper of the session on the small lines below.
+
+**Key dates.** Problem set 1: published Sep 29, due Oct 20 · Project proposal: Oct 13 · Problem set 2: published Oct 27, due Nov 17 · Project progress presentations: Nov 10 (last session) · Final report and repository: Nov 24. Deliverables after the last session fall within the 2026-2 final-exam period (Nov 17–28).
 
 ### Module 1 — Foundations and evaluation
 
@@ -110,7 +112,7 @@ From β to Y: prediction as the quantity of interest; overfitting and bias–var
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-01/week-01.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 1–2 · Mullainathan &amp; Spiess (2017) · Kleinberg, Ludwig, Mullainathan &amp; Obermeyer (2015)</small>
-<small class="ws-data"><strong>Paper presentation:</strong> Kim &amp; Zilinsky (2024), <em>Division Does Not Imply Predictability</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/Kim_Kilinsky_2024_Division_Does_Not_Imply_Predictability.pdf" target="_blank" rel="noopener">PDF</a></small>
+<small class="ws-data"><strong>Paper of the session:</strong> Kim &amp; Zilinsky (2024), <em>Division Does Not Imply Predictability</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/Kim_Kilinsky_2024_Division_Does_Not_Imply_Predictability.pdf" target="_blank" rel="noopener">PDF</a></small>
 </p>
 
 **Week 2 · Sep 22 — Linear regression as a prediction machine, and how to evaluate a prediction.**
@@ -120,7 +122,7 @@ OLS, polynomials, splines and k-NN as predictors; regression metrics, baseline m
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-02/week-02.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 3 and 7 (sections 7.1–7.7)</small>
-<small class="ws-data"><strong>Paper presentation:</strong> Bogin &amp; Shui (2020) or Pace &amp; Hayunga (2020)</small>
+<small class="ws-data"><strong>Paper of the session:</strong> Bogin &amp; Shui (2020), <em>Appraisal Accuracy and Automated Valuation Models in Rural Areas</em> · Complementary: Pace &amp; Hayunga (2020)</small>
 </p>
 
 **Week 3 · Sep 29 — Classification: from the logit to the metrics that decide.**
@@ -130,7 +132,7 @@ Logistic regression and its neighbors; probabilities vs. classes and the thresho
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-03/week-03.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 4 · Fawcett (2006)</small>
-<small class="ws-data"><strong>Paper presentation:</strong> Kleinberg, Lakkaraju, Leskovec, Ludwig &amp; Mullainathan (2018) or Fuster, Goldsmith-Pinkham, Ramadorai &amp; Walther (2022)</small>
+<small class="ws-data"><strong>Paper of the session:</strong> Kleinberg, Lakkaraju, Leskovec, Ludwig &amp; Mullainathan (2018), <em>Human Decisions and Machine Predictions</em> · Complementary: Fuster, Goldsmith-Pinkham, Ramadorai &amp; Walther (2022)</small>
 </p>
 
 **Week 4 · Oct 6 — Resampling, validation and the honest pipeline.**
@@ -140,7 +142,7 @@ k-fold CV and hyperparameter tuning; leakage; temporal and spatial CV; the pipel
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-04/week-04.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 5 · Roberts et al. (2017) · Neunhoeffer &amp; Sternberg (2019)</small>
-<small class="ws-data"><strong>Paper presentation:</strong> Deppner &amp; Cajias (2024) or Goulet Coulombe, Leroux, Stevanovic &amp; Surprenant (2022)</small>
+<small class="ws-data"><strong>Paper of the session:</strong> Deppner &amp; Cajias (2024), <em>Accounting for Spatial Autocorrelation in Algorithm-Driven Hedonic Models</em> · Project reference reading: Goulet Coulombe, Leroux, Stevanovic &amp; Surprenant (2022)</small>
 </p>
 
 **Week 5 · Oct 13 — Variable selection and regularization.**
@@ -150,7 +152,7 @@ Ridge, Lasso and Elastic Net: predicting with many predictors without overfittin
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-05/week-05.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 6 · Belloni, Chernozhukov &amp; Hansen (2014)</small>
-<small class="ws-data"><strong>Paper presentation:</strong> Gu, Kelly &amp; Xiu (2020) or Blumenstock, Cadamuro &amp; On (2015)</small>
+<small class="ws-data"><strong>Paper of the session:</strong> Blumenstock, Cadamuro &amp; On (2015), <em>Predicting Poverty and Wealth from Mobile Phone Metadata</em> · Project reference reading: Gu, Kelly &amp; Xiu (2020)</small>
 </p>
 
 ### Module 2 — Trees, ensembles and interpretation
@@ -163,7 +165,7 @@ From a single unstable tree to bagging, random forests and boosting (XGBoost, Li
 <span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 8 · Breiman (2001)</small>
 <small class="ws-data"><strong>Thread paper:</strong> Gelvez, Cardiles, Martínez-González &amp; Muñoz (2026), <em>How Predictable Is an Election?</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/democratization_AIM4D_Notre_Dame.pdf" target="_blank" rel="noopener">PDF</a></small>
-<small class="ws-data"><strong>Paper presentation:</strong> Medeiros, Vasconcelos, Veiga &amp; Zilberman (2021) or Bertrand &amp; Kamenica (2023)</small>
+<small class="ws-data"><strong>Complementary:</strong> Bertrand &amp; Kamenica (2023) · Project reference reading: Medeiros, Vasconcelos, Veiga &amp; Zilberman (2021)</small>
 </p>
 
 **Week 7 · Oct 27 — Opening the black box: importance, partial dependence and SHAP.**
@@ -173,7 +175,7 @@ Interpreting and auditing flexible models — permutation importance, PDP/ICE/AL
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-07/week-07.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
 <small class="ws-data"><strong>Readings:</strong> Molnar (2025), chapters on permutation importance, PDP, ALE and SHAP · Lundberg &amp; Lee (2017)</small>
-<small class="ws-data"><strong>Paper presentation:</strong> Bluwstein, Buckmann, Joseph, Kapadia &amp; Şimşek (2023) or Ludwig &amp; Mullainathan (2024)</small>
+<small class="ws-data"><strong>Paper of the session:</strong> Bluwstein, Buckmann, Joseph, Kapadia &amp; Şimşek (2023), <em>Credit Growth, the Yield Curve and Financial Crisis Prediction</em> · Complementary: Ludwig &amp; Mullainathan (2024)</small>
 </p>
 
 ### Module 3 — Neural networks, structure without Y, and closing
@@ -185,11 +187,11 @@ The network as composed regressions; fitting and regularizing it; when deep lear
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-08/week-08.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 10 (sections 10.1–10.3 and 10.6–10.7) · Jean et al. (2016)</small>
-<small class="ws-data"><strong>Paper presentation:</strong> Jean, Burke, Xie, Davis, Lobell &amp; Ermon (2016) or Glaeser, Kincaid &amp; Naik (2018)</small>
+<small class="ws-data"><strong>Paper of the session:</strong> Jean, Burke, Xie, Davis, Lobell &amp; Ermon (2016), <em>Combining Satellite Imagery and Machine Learning to Predict Poverty</em> · Complementary: Glaeser, Kincaid &amp; Naik (2018)</small>
 </p>
 
-**Week 9 · Nov 10 — Beyond prediction: structure without Y, the causal frontier, and final presentations.**
-PCA and k-means without a response; ML in the service of β — double selection, double ML, causal forests; the course in one slide and the final-project defenses.
+**Week 9 · Nov 10 — Beyond prediction: structure without Y, the causal frontier, and project progress presentations.**
+PCA and k-means without a response; ML in the service of β — double selection, double ML, causal forests; the course in one slide and each team's progress presentation of the final project.
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-09/week-09.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
@@ -199,8 +201,8 @@ PCA and k-means without a response; ML in the service of β — double selection
 
 ## Problem sets
 
-- **Problem set 1 — Foundations, evaluation and regularization (weeks 1–5).** Take-home, in pairs. Short conceptual questions (why training error is optimistic, what changes from OLS to Lasso, which metric to use and why) plus a complete predictive pipeline in R: splitting, cross-validation, model comparison against a baseline and error diagnostics. *PDF and datasets: available soon* — they will live in [`problem-sets/pset-1/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/problem-sets/pset-1).
-- **Problem set 2 — Trees, interpretation and networks (weeks 6–9).** Same structure: conceptual questions plus a pipeline with random forest or boosting and neural networks, out-of-sample evaluation and interpretation with variable importance, partial dependence and SHAP. *PDF and datasets: available soon* — they will live in [`problem-sets/pset-2/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/problem-sets/pset-2).
+- **Problem set 1 — Foundations, evaluation and regularization (weeks 1–5).** Published Sep 29, due Oct 20. Take-home, in pairs. Short conceptual questions (why training error is optimistic, what changes from OLS to Lasso, which metric to use and why) plus a complete predictive pipeline in R: splitting, cross-validation, model comparison against a baseline and error diagnostics. *PDF and datasets: available soon* — they will live in [`problem-sets/pset-1/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/problem-sets/pset-1).
+- **Problem set 2 — Trees, interpretation and networks (weeks 6–9).** Published Oct 27, due Nov 17. Same structure: conceptual questions plus a pipeline with random forest or boosting and neural networks, out-of-sample evaluation and interpretation with variable importance, partial dependence and SHAP. *PDF and datasets: available soon* — they will live in [`problem-sets/pset-2/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/problem-sets/pset-2).
 
 Each problem set is submitted as a single PDF accompanied by a reproducible repository (`.R`).
 
@@ -208,23 +210,23 @@ Each problem set is submitted as a single PDF accompanied by a reproducible repo
 
 | Component | Weight |
 |---|---|
-| Article presentation (15 min) | 10% |
+| Paper of the session — reading guides and a 10-minute opening | 10% |
 | Problem set 1 — Foundations, evaluation, regularization (weeks 1–5) | 15% |
 | Problem set 2 — Trees, interpretation, networks (weeks 6–9) | 15% |
-| Final project with oral defense | 60% |
+| Final project — proposal, progress presentation and final report | 60% |
 
-**Final project.** In groups of 2–3, the team defines an economic question in which prediction is the quantity of interest, identifies a dataset, applies several algorithms, and evaluates and interprets their out-of-sample performance. The results are written up as a mini academic paper: question, data, predictive strategy, results, evaluation and interpretation. Deliverables: **proposal** — question, data, target metric, baseline model and validation strategy (10% of the project); **report** — a document of at most 10 pages with model comparison, diagnostics, interpretation and limitations, plus the reproducible repository (60%); **oral defense** in the last session, discussing the fit of the methods and their policy implications (30%). Full details: [final project guidelines (PDF)](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/final-project/projecto_final.pdf).
+**Final project.** In groups of 2–3, the team defines an economic question in which prediction is the quantity of interest, identifies a dataset, applies several algorithms, and evaluates and interprets their out-of-sample performance. The results are written up as a mini academic paper: question, data, predictive strategy, results, evaluation and interpretation. Deliverables: **proposal** (Oct 13) — question, data, target metric, baseline model and validation strategy (10% of the project); **progress presentation** (Nov 10, last session) — design, pipeline, baseline and at least one flexible model with its validation, defended before the group; the feedback feeds the final report (30%); **final report and repository** (Nov 24) — at most 10 pages with model comparison, diagnostics, interpretation, limitations and policy implications (60%). Detailed guidelines will be published in the repo's [`final-project/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/final-project) folder.
 
 **AI policy:** AI tools are allowed in every component of the course, as long as their use is explicitly declared — what was used and for what.
 
 ## Reading library
 
-The repo's [`literature/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature) folder collects the papers for the student presentations as the semester advances. Available now:
+The repo's [`literature/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature) folder collects the papers of each session as the semester advances, together with the course's literature review ([`literature/revision/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/revision): 139 applied papers with their methods, metrics and suggested week). Available now:
 
 - Kim & Zilinsky (2024) — *Division Does Not Imply Predictability: Demographics Continue to Reveal Little About Voting and Partisanship* (week 1).
 - Gelvez, Cardiles, Martínez-González & Muñoz (2026) — *How Predictable Is an Election? A Machine-Learning Approach to Electoral Behavior in Colombia* (the course's thread paper, weeks 6–7).
 
-The full bibliography — framework papers, per-week presentation candidates and methodological references — is in the [course syllabus](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/syllabus/syllabus.pdf).
+The full bibliography — framework papers, the paper of each session and methodological references — is in the [course syllabus](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/syllabus/syllabus.pdf).
 
 ## Core bibliography
 
