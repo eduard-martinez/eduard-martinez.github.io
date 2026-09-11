@@ -33,7 +33,7 @@ nav_order: 3
 
   <div class="course">
     <span class="ttl"><a href="/teaching/bdml-applied-economics/">Big Data and Machine Learning for Applied Economics</a></span>
-    <span class="meta">Department of Economics · Master's in Economics (ME) · 2026</span>
+    <span class="meta">Department of Economics · Master's in Economics (ME) · 60-121 · 2026-02</span>
     <p class="desc">Graduate course on statistical learning for applied economics and finance, following ISL: prediction vs. explanation, honest out-of-sample validation, regularization, trees, random forests and boosting, model interpretation with SHAP, and neural networks &mdash; applied in R on Colombian polling-station, housing and satellite data.</p>
     <p class="links"><a href="/teaching/bdml-applied-economics/">Course page &amp; materials &rarr;</a> · <a href="https://github.com/eduard-martinez/bdml-applied-economics" target="_blank" rel="noopener">GitHub repo &rarr;</a></p>
   </div>

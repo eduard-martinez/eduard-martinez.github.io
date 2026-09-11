@@ -10,11 +10,15 @@ description: >
   applied in R on Colombian data.
 institution: Universidad ICESI
 department: Department of Economics
+course_code: "60-121 · NRC 10-993"
 program: Master's in Economics (ME)
+term: "September 15 – November 11, 2026"
 instructor: Eduard F. Martínez-González
 year: 2026
 credits: 3
 weekly_hours: 3
+location: "Room 406-E (Block E)"
+time: "8:00–11:00 a.m."
 ---
 
 <style>
@@ -33,11 +37,17 @@ weekly_hours: 3
     text-decoration: none;
   }
   .ws-btn i { color: var(--global-theme-color); margin-right: 0.35rem; }
+  .ws-soon {
+    border-style: dashed;
+    color: var(--global-text-color-light);
+    cursor: default;
+  }
+  .ws-soon i { color: var(--global-text-color-light); }
   .ws-data { display: block; color: var(--global-text-color-light); font-size: 0.85rem; margin-top: 0.2rem; }
   .ws-data code { font-size: 0.8rem; }
 </style>
 
-Original title (in Spanish): **Big Data y Machine Learning para Economía Aplicada**. Lectures and materials are in Spanish. *Prerequisites:* Econometrics I & II (or equivalent); basic R is recommended, not required.
+Original title (in Spanish): **Big Data y Machine Learning para Economía Aplicada** (60-121, NRC 10-993). Lectures and materials are in Spanish. *Prerequisites:* Econometrics I & II (or equivalent); basic R is recommended, not required.
 
 All course materials — syllabus, lecture slides, problem sets, R applications, and reference papers — are hosted on GitHub:
 
@@ -89,74 +99,103 @@ Reviewing this material is mandatory and happens outside class hours. Equivalent
 
 ## Schedule
 
+Each week shows its class materials as buttons — lecture slides and, when published, the R application — with the assigned readings and the paper for the student presentation on the small lines below.
+
 ### Module 1 — Foundations and evaluation
 
-**Week 1 — Predict, don't explain: the statistical-learning framework.**
-From β to Y: the same data, two different questions; prediction policy problems; out-of-sample predictability as the quantity of interest. What it means to learn *f*; parametric vs. non-parametric; flexibility vs. interpretability; training vs. test error, overfitting, the U-curve and bias–variance; supervised and unsupervised learning; the course workflow.
-*Readings:* ISL ch. 1–2; Mullainathan & Spiess (2017); Kleinberg, Ludwig, Mullainathan & Obermeyer (2015).
-*Paper presentation:* Kim & Zilinsky (2024), *Division Does Not Imply Predictability* — [PDF in the repo](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/Kim_Kilinsky_2024_Division_Does_Not_Imply_Predictability.pdf).
-*R application:* first train/test split with a linear model on the polling-station panel: in-sample vs. out-of-sample R². *(code available soon)*
-[Slides — week 1](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-01/week-01.pdf)
+**Week 1 · Sep 15 — Predict, don't explain: the statistical-learning framework.**
+From β to Y: prediction as the quantity of interest; overfitting and bias–variance; the course workflow.
 
-**Week 2 — Linear regression as a prediction machine — and how to evaluate a prediction.**
-OLS as a predictor: qualitative predictors, interactions, transformations; beyond linearity — polynomials, step functions, splines and GAMs; k-NN regression and the curse of dimensionality. Regression metrics: MSE, RMSE, MAE, MAPE and out-of-sample R²; baseline models; predicted vs. observed and compression toward the mean; error by decile of Y and by subgroup; extrapolation.
-*Readings:* ISL ch. 3 and 7 (sections 7.1–7.7).
-*Paper presentation:* Bogin & Shui (2020), *Appraisal Accuracy and Automated Valuation Models in Rural Areas*, or Pace & Hayunga (2020).
-*R application:* Bogotá housing prices — linear vs. polynomials and splines vs. k-NN; metrics table, predicted-vs-observed scatter, error by price decile. *(code available soon)*
-[Slides — week 2](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-02/week-02.pdf)
+<p>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-01/week-01.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
+<small class="ws-data"><strong>Readings:</strong> ISL ch. 1–2 · Mullainathan &amp; Spiess (2017) · Kleinberg, Ludwig, Mullainathan &amp; Obermeyer (2015)</small>
+<small class="ws-data"><strong>Paper presentation:</strong> Kim &amp; Zilinsky (2024), <em>Division Does Not Imply Predictability</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/Kim_Kilinsky_2024_Division_Does_Not_Imply_Predictability.pdf" target="_blank" rel="noopener">PDF</a></small>
+</p>
 
-**Week 3 — Classification: from the logit to the metrics that decide.**
-Why not OLS; logistic regression (binary and multinomial); LDA, QDA and Naive Bayes in brief; k-NN. Probabilities vs. classes: the threshold as a decision with costs; confusion matrix; accuracy, precision, recall, F1 and balanced accuracy — why accuracy misleads under unequal prevalence; ROC/AUC vs. precision–recall; calibration; class imbalance and its remedies.
-*Readings:* ISL ch. 4; Fawcett (2006).
-*Paper presentation:* Kleinberg, Lakkaraju, Leskovec, Ludwig & Mullainathan (2018), or Fuster, Goldsmith-Pinkham, Ramadorai & Walther (2022).
-*R application:* did the eventual president win this polling station? Logit vs. k-NN with a stratified split; AUC vs. accuracy under imbalance; ROC and calibration curves. *(code available soon)*
-[Slides — week 3](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-03/week-03.pdf)
+**Week 2 · Sep 22 — Linear regression as a prediction machine, and how to evaluate a prediction.**
+OLS, polynomials, splines and k-NN as predictors; regression metrics, baseline models and where a model fails.
 
-**Week 4 — Resampling, validation and the honest pipeline.**
-Validation set, LOOCV and k-fold; the bias–variance of CV; CV for hyperparameter tuning — grid, random and Bayesian search; nested CV; leakage and preprocessing inside the pipeline; temporal and spatial CV — when random k-fold lies; bootstrap intervals for metrics and model comparison.
-*Readings:* ISL ch. 5; Roberts et al. (2017); Neunhoeffer & Sternberg (2019).
-*Paper presentation:* Deppner & Cajias (2024), *Accounting for Spatial Autocorrelation in Algorithm-Driven Hedonic Models*, or Goulet Coulombe, Leroux, Stevanovic & Surprenant (2022).
-*R application:* `tidymodels` (`recipes`, `rsample`, `tune`): CV comparison of the week 2–3 models with bootstrap intervals; spatial CV on the polling stations. *(code available soon)*
-[Slides — week 4](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-04/week-04.pdf)
+<p>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-02/week-02.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
+<small class="ws-data"><strong>Readings:</strong> ISL ch. 3 and 7 (sections 7.1–7.7)</small>
+<small class="ws-data"><strong>Paper presentation:</strong> Bogin &amp; Shui (2020) or Pace &amp; Hayunga (2020)</small>
+</p>
 
-**Week 5 — Variable selection and regularization.**
-Many predictors: overfitting and collinearity; subset selection and information criteria vs. CV; Ridge (shrink) and Lasso (exact zeros); Elastic Net; choosing λ by CV; coefficient paths; PCR and PLS as compression; high dimension — the correlated proxy; "the Lasso selects predictors, not causes"; double selection as a preview of week 9.
-*Readings:* ISL ch. 6; Belloni, Chernozhukov & Hansen (2014) as complementary reading.
-*Paper presentation:* Gu, Kelly & Xiu (2020), *Empirical Asset Pricing via Machine Learning*, or Blumenstock, Cadamuro & On (2015).
-*R application:* housing prices with many covariates (`glmnet`): OLS vs. Ridge vs. Lasso vs. Elastic Net; coefficient paths, CV curve, out-of-sample comparison. *(code available soon)*
-[Slides — week 5](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-05/week-05.pdf)
+**Week 3 · Sep 29 — Classification: from the logit to the metrics that decide.**
+Logistic regression and its neighbors; probabilities vs. classes and the threshold as a decision with costs; ROC/AUC and calibration under class imbalance.
+
+<p>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-03/week-03.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
+<small class="ws-data"><strong>Readings:</strong> ISL ch. 4 · Fawcett (2006)</small>
+<small class="ws-data"><strong>Paper presentation:</strong> Kleinberg, Lakkaraju, Leskovec, Ludwig &amp; Mullainathan (2018) or Fuster, Goldsmith-Pinkham, Ramadorai &amp; Walther (2022)</small>
+</p>
+
+**Week 4 · Oct 6 — Resampling, validation and the honest pipeline.**
+k-fold CV and hyperparameter tuning; leakage; temporal and spatial CV; the pipeline reused for the rest of the course.
+
+<p>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-04/week-04.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
+<small class="ws-data"><strong>Readings:</strong> ISL ch. 5 · Roberts et al. (2017) · Neunhoeffer &amp; Sternberg (2019)</small>
+<small class="ws-data"><strong>Paper presentation:</strong> Deppner &amp; Cajias (2024) or Goulet Coulombe, Leroux, Stevanovic &amp; Surprenant (2022)</small>
+</p>
+
+**Week 5 · Oct 13 — Variable selection and regularization.**
+Ridge, Lasso and Elastic Net: predicting with many predictors without overfitting — a variable that survives the penalty is not a cause.
+
+<p>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-05/week-05.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
+<small class="ws-data"><strong>Readings:</strong> ISL ch. 6 · Belloni, Chernozhukov &amp; Hansen (2014)</small>
+<small class="ws-data"><strong>Paper presentation:</strong> Gu, Kelly &amp; Xiu (2020) or Blumenstock, Cadamuro &amp; On (2015)</small>
+</p>
 
 ### Module 2 — Trees, ensembles and interpretation
 
-**Week 6 — Trees, forests and boosting.**
-Regression and classification trees: partitions, split criterion, pruning — why a single tree is unstable; bagging and random forests (*m*, out-of-bag error, native importance); boosting — fitting residuals; learning rate, depth, number of trees and early stopping; XGBoost and LightGBM; BART as a mention; random forest vs. boosting; when trees win on tabular data.
-*Readings:* ISL ch. 8; Breiman (2001).
-*Thread paper:* Gelvez, Cardiles, Martínez-González & Muñoz (2026), *How Predictable Is an Election?* — [PDF in the repo](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/democratization_AIM4D_Notre_Dame.pdf).
-*Paper presentation:* Medeiros, Vasconcelos, Veiga & Zilberman (2021), or Bertrand & Kamenica (2023).
-*R application:* random forest and XGBoost for the vote share and the local winner, with Bayesian hyperparameter search; comparison table against logit and Lasso; OOB vs. CV. *(code available soon)*
-[Slides — week 6](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-06/week-06.pdf)
+**Week 6 · Oct 20 — Trees, forests and boosting.**
+From a single unstable tree to bagging, random forests and boosting (XGBoost, LightGBM): why ensembles dominate tabular data.
 
-**Week 7 — Opening the black box: importance, partial dependence and SHAP.**
-Why interpret: auditing, communicating, generating hypotheses; global and local interpretation; impurity vs. permutation importance and their biases with correlated predictors; partial dependence, ICE and ALE — what they show and when they mislead; Shapley values and SHAP; block ablation and R² decomposition; error by subgroup and fairness; what interpretation is *not*: causality, ecological inference, forecasting.
-*Readings:* Molnar (2025), chapters on permutation importance, PDP, ALE and SHAP; Lundberg & Lee (2017).
-*Paper presentation:* Bluwstein, Buckmann, Joseph, Kapadia & Şimşek (2023), or Ludwig & Mullainathan (2024).
-*R application:* on the week-6 models — permutation vs. impurity importance (`DALEX`), PDP/ICE, SHAP (`shapviz`), block hierarchy and error by decile; reproducing figures 3, 5 and 6 of Gelvez et al. *(code available soon)*
-[Slides — week 7](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-07/week-07.pdf)
+<p>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-06/week-06.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
+<small class="ws-data"><strong>Readings:</strong> ISL ch. 8 · Breiman (2001)</small>
+<small class="ws-data"><strong>Thread paper:</strong> Gelvez, Cardiles, Martínez-González &amp; Muñoz (2026), <em>How Predictable Is an Election?</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/democratization_AIM4D_Notre_Dame.pdf" target="_blank" rel="noopener">PDF</a></small>
+<small class="ws-data"><strong>Paper presentation:</strong> Medeiros, Vasconcelos, Veiga &amp; Zilberman (2021) or Bertrand &amp; Kamenica (2023)</small>
+</p>
+
+**Week 7 · Oct 27 — Opening the black box: importance, partial dependence and SHAP.**
+Interpreting and auditing flexible models — permutation importance, PDP/ICE/ALE and SHAP — and what interpretation does not establish.
+
+<p>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-07/week-07.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
+<small class="ws-data"><strong>Readings:</strong> Molnar (2025), chapters on permutation importance, PDP, ALE and SHAP · Lundberg &amp; Lee (2017)</small>
+<small class="ws-data"><strong>Paper presentation:</strong> Bluwstein, Buckmann, Joseph, Kapadia &amp; Şimşek (2023) or Ludwig &amp; Mullainathan (2024)</small>
+</p>
 
 ### Module 3 — Neural networks, structure without Y, and closing
 
-**Week 8 — Neural networks: what they are, when to use them, and an application with images.**
-Neuron, layers and function composition; activation functions; the loss; SGD and mini-batches; backpropagation as the chain rule; early stopping, dropout and weight decay; when deep learning pays off — tabular data vs. images and text; convolutional networks as application: transfer learning and poverty from satellite imagery; text and language models as complementary readings.
-*Readings:* ISL ch. 10 (sections 10.1–10.3 and 10.6–10.7); Jean et al. (2016).
-*Paper presentation:* Jean, Burke, Xie, Davis, Lobell & Ermon (2016), or Glaeser, Kincaid & Naik (2018).
-*R application:* feedforward network (`keras`) vs. XGBoost on the same tabular data; demo of a pre-trained convolutional network on satellite images. *(code available soon)*
-[Slides — week 8](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-08/week-08.pdf)
+**Week 8 · Nov 3 — Neural networks: what they are, when to use them, and an application with images.**
+The network as composed regressions; fitting and regularizing it; when deep learning pays off — transfer learning on satellite imagery.
 
-**Week 9 — Beyond prediction: structure without Y, the causal frontier — and final presentations.**
-PCA as an index (Filmer–Pritchett) and k-means as segmentation: what they are, how to validate them without Y, caveats; ML in the service of β: double selection, double machine learning as residuals-on-residuals with cross-fitting, causal forests for heterogeneity — identify before you estimate; the course in one slide; final-project presentations.
-*Readings:* ISL ch. 12 (sections 12.2 and 12.4); Athey & Imbens (2019); Filmer & Pritchett (2001).
-*R application:* socioeconomic index with PCA and k-means segmentation on the polling-station census; a causal forest with `grf` as a reading demo. *(code available soon)*
-[Slides — week 9](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-09/week-09.pdf)
+<p>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-08/week-08.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
+<small class="ws-data"><strong>Readings:</strong> ISL ch. 10 (sections 10.1–10.3 and 10.6–10.7) · Jean et al. (2016)</small>
+<small class="ws-data"><strong>Paper presentation:</strong> Jean, Burke, Xie, Davis, Lobell &amp; Ermon (2016) or Glaeser, Kincaid &amp; Naik (2018)</small>
+</p>
+
+**Week 9 · Nov 10 — Beyond prediction: structure without Y, the causal frontier, and final presentations.**
+PCA and k-means without a response; ML in the service of β — double selection, double ML, causal forests; the course in one slide and the final-project defenses.
+
+<p>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-09/week-09.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
+<small class="ws-data"><strong>Readings:</strong> ISL ch. 12 (sections 12.2 and 12.4) · Athey &amp; Imbens (2019) · Filmer &amp; Pritchett (2001)</small>
+</p>
 
 ## Problem sets
 
