@@ -18,7 +18,7 @@ year: 2026
 credits: 3
 weekly_hours: 3
 location: "Room 406-E (Block E)"
-time: "8:00–11:00 a.m."
+time: "Tuesdays, 8:00–11:00 a.m."
 ---
 
 <style>
@@ -110,7 +110,8 @@ From β to Y: prediction as the quantity of interest; overfitting and bias–var
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-01/week-01.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
-<span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-01/week-01.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · one dataset, three models</a>
+<small class="ws-data"><strong>Application data</strong> (the script reads them from <code>input/</code>): <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-01/input/vivienda.rds"><code>vivienda.rds</code></a> · <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-01/input/nuevos.rds"><code>nuevos.rds</code></a></small>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 1–2 · Mullainathan &amp; Spiess (2017) · Kleinberg, Ludwig, Mullainathan &amp; Obermeyer (2015)</small>
 <small class="ws-data"><strong>Paper of the session:</strong> Kim &amp; Zilinsky (2024), <em>Division Does Not Imply Predictability</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/Kim_Kilinsky_2024_Division_Does_Not_Imply_Predictability.pdf" target="_blank" rel="noopener">PDF</a></small>
 </p>
@@ -132,7 +133,7 @@ Logistic regression and its neighbors; probabilities vs. classes and the thresho
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-03/week-03.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <span class="ws-btn ws-soon"><i class="fa-brands fa-r-project"></i>R application · soon</span>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 4 · Fawcett (2006)</small>
-<small class="ws-data"><strong>Paper of the session:</strong> Kleinberg, Lakkaraju, Leskovec, Ludwig &amp; Mullainathan (2018), <em>Human Decisions and Machine Predictions</em> · Complementary: Fuster, Goldsmith-Pinkham, Ramadorai &amp; Walther (2022)</small>
+<small class="ws-data"><strong>Paper of the session:</strong> Kleinberg, Lakkaraju, Leskovec, Ludwig &amp; Mullainathan (2018), <em>Human Decisions and Machine Predictions</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/Kleinberg.pdf" target="_blank" rel="noopener">PDF</a> · Complementary: Fuster, Goldsmith-Pinkham, Ramadorai &amp; Walther (2022)</small>
 </p>
 
 **Week 4 · Oct 6 — Resampling, validation and the honest pipeline.**
@@ -201,8 +202,8 @@ PCA and k-means without a response; ML in the service of β — double selection
 
 ## Problem sets
 
-- **Problem set 1 — Foundations, evaluation and regularization (weeks 1–5).** Published Sep 29, due Oct 20. Take-home, in pairs. Short conceptual questions (why training error is optimistic, what changes from OLS to Lasso, which metric to use and why) plus a complete predictive pipeline in R: splitting, cross-validation, model comparison against a baseline and error diagnostics. *PDF and datasets: available soon* — they will live in [`problem-sets/pset-1/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/problem-sets/pset-1).
-- **Problem set 2 — Trees, interpretation and networks (weeks 6–9).** Published Oct 27, due Nov 17. Same structure: conceptual questions plus a pipeline with random forest or boosting and neural networks, out-of-sample evaluation and interpretation with variable importance, partial dependence and SHAP. *PDF and datasets: available soon* — they will live in [`problem-sets/pset-2/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/problem-sets/pset-2).
+- **Problem set 1 — Foundations, evaluation and regularization (weeks 1–5).** Published Sep 29, due Oct 20. Take-home, in pairs. Short conceptual questions (why training error is optimistic, what changes from OLS to Lasso, which metric to use and why) plus a complete predictive pipeline in R: splitting, cross-validation, model comparison against a baseline and error diagnostics. *PDF and datasets: available soon.*
+- **Problem set 2 — Trees, interpretation and networks (weeks 6–9).** Published Oct 27, due Nov 17. Same structure: conceptual questions plus a pipeline with random forest or boosting and neural networks, out-of-sample evaluation and interpretation with variable importance, partial dependence and SHAP. *PDF and datasets: available soon.*
 
 Each problem set is submitted as a single PDF accompanied by a reproducible repository (`.R`).
 
@@ -224,6 +225,7 @@ Each problem set is submitted as a single PDF accompanied by a reproducible repo
 The repo's [`literature/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature) folder collects the papers of each session as the semester advances, together with the course's literature review ([`literature/revision/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/revision): 139 applied papers with their methods, metrics and suggested week). Available now:
 
 - Kim & Zilinsky (2024) — *Division Does Not Imply Predictability: Demographics Continue to Reveal Little About Voting and Partisanship* (week 1).
+- Kleinberg, Lakkaraju, Leskovec, Ludwig & Mullainathan (2018) — *Human Decisions and Machine Predictions* (week 3).
 - Gelvez, Cardiles, Martínez-González & Muñoz (2026) — *How Predictable Is an Election? A Machine-Learning Approach to Electoral Behavior in Colombia* (the course's thread paper, weeks 6–7).
 
 The full bibliography — framework papers, the paper of each session and methodological references — is in the [course syllabus](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/syllabus/syllabus.pdf).
