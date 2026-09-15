@@ -111,7 +111,7 @@ From β to Y: prediction as the quantity of interest; overfitting and bias–var
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-01/week-01.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-01/week-01.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · one dataset, three models</a>
-<small class="ws-data"><strong>Application data</strong> (the script reads them from <code>input/</code>): <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-01/input/vivienda.rds"><code>vivienda.rds</code></a> · <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-01/input/nuevos.rds"><code>nuevos.rds</code></a></small>
+<a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-01.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 1–2 · Mullainathan &amp; Spiess (2017) · Kleinberg, Ludwig, Mullainathan &amp; Obermeyer (2015)</small>
 <small class="ws-data"><strong>Paper of the session:</strong> Kim &amp; Zilinsky (2024), <em>Division Does Not Imply Predictability</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/Kim_Kilinsky_2024_Division_Does_Not_Imply_Predictability.pdf" target="_blank" rel="noopener">PDF</a></small>
 </p>
