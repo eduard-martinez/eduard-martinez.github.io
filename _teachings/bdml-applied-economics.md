@@ -50,7 +50,7 @@ time: "Tuesdays, 8:00–11:00 a.m."
 
 Original title (in Spanish): **Big Data y Machine Learning para Economía Aplicada** (60-121, NRC 10-993). Lectures and materials are in Spanish. *Prerequisites:* Econometrics I & II (or equivalent); basic R is recommended, not required.
 
-All course materials — syllabus, lecture slides, R applications and problem sets — are hosted on GitHub:
+All course materials — syllabus, lecture slides, R applications, problem sets and the paper library — are hosted on GitHub:
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-github"></i>github.com/eduard-martinez/bdml-applied-economics</a>
@@ -160,7 +160,7 @@ Can the machine find the partitions that matter on its own? A tree you can read 
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-05/week-05.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · tree, forest and boosting</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-05.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 8 (8.1 the tree, 8.2 the ensembles) · Breiman (2001)</small>
-<small class="ws-data"><strong>Thread paper:</strong> Gelvez, Cardiles, Martínez-González &amp; Muñoz (2026), <em>How Predictable Is an Election?</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/democratization_AIM4D_Notre_Dame.pdf" target="_blank" rel="noopener">PDF</a></small>
+<small class="ws-data"><strong>Thread paper:</strong> Gelvez, Cardiles, Martínez-González &amp; Muñoz (2026), <em>How Predictable Is an Election?</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/papers/01-economia-politica/democratization_AIM4D_Notre_Dame.pdf" target="_blank" rel="noopener">PDF</a></small>
 </p>
 
 **Week 6 · Oct 20 — Opening the black box: importance, partial dependence and SHAP.**
@@ -193,7 +193,7 @@ No new method: today all of them are used. The student paper presentations (15 m
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-08/week-08.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <small class="ws-data"><strong>Readings:</strong> Athey &amp; Imbens (2019), sections 1–3 (the causal bridge)</small>
-<small class="ws-data"><strong>Session papers:</strong> two papers per field of economics; each team picks one in session 2 and presents it today — the list is defined after session 2. The PDFs are not distributed in the repository for copyright reasons.</small>
+<small class="ws-data"><strong>Session papers:</strong> eight fields of economics with two options each — political economy, crime and justice, health, development and poverty, labour and education, finance and credit, macro and forecasting, IO and demand. Each team picked its field and paper in session 2; who presents what is announced in class. <a href="https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers" target="_blank" rel="noopener">Paper library</a></small>
 <small class="ws-data"><strong>Milestone:</strong> project pitch — the idea in one page</small>
 </p>
 
@@ -229,13 +229,23 @@ Each problem set is submitted as a single PDF accompanied by a reproducible `.R`
 
 ## Reading library
 
-Each session has a reference applied article that shows the method at work in published research; from session 2 each team also picks the paper it will present in session 8, choosing between two options per field of economics. The papers themselves are not distributed in the repository for copyright reasons: each one is announced in class with its full reference, to be retrieved through the university library.
+The repo's [`literature/papers/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers) folder collects the applied articles of the course, organized by field of economics, so every student has them at hand. Session 8 is built on this library: each field offers two options and each team picked one in session 2 to present.
 
-The repo's [`literature/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature) folder holds the course's own thread paper: Gelvez, Cardiles, Martínez-González & Muñoz (2026), *How Predictable Is an Election? A Machine-Learning Approach to Electoral Behavior in Colombia* — the benchmark the class results are compared against in session 9.
+- [**Political economy**](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers/01-economia-politica) — 4 papers.
+- [**Crime and justice**](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers/02-crimen-y-justicia) — 5 papers.
+- [**Development and poverty**](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers/04-desarrollo-y-pobreza) — 4 papers.
+- [**Labour, education and human capital**](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers/05-trabajo-educacion-y-capital-humano) — 2 papers.
+- [**Housing and urban economics**](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers/06-vivienda-y-economia-urbana) — 5 papers.
+- [**Macroeconomics and forecasting**](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers/07-macroeconomia-y-pronostico) — 6 papers.
+- [**Finance and credit**](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers/08-finanzas-y-credito) — 7 papers.
+- [**IO, demand and firms**](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers/09-io-demanda-y-empresas) — 4 papers.
+- [**The prediction framework for economists**](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers/10-marco-prediccion-para-economistas) — 2 papers.
+
+The course's own thread paper — Gelvez, Cardiles, Martínez-González & Muñoz (2026), *How Predictable Is an Election? A Machine-Learning Approach to Electoral Behavior in Colombia* — is in the political-economy folder; it is the benchmark the class case is measured against.
 
 ## Core bibliography
 
-- James, G., Witten, D., Hastie, T., & Tibshirani, R. (2021). *An Introduction to Statistical Learning with Applications in R* (2nd ed.). Springer. [ISL] — [free online](https://www.statlearning.com); a course copy is in the repo's [`books/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/books) folder.
+- James, G., Witten, D., Hastie, T., & Tibshirani, R. (2021). *An Introduction to Statistical Learning with Applications in R* (2nd ed.). Springer. [ISL] — [free online](https://www.statlearning.com); a course copy is in the repo's [`literature/books/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/books) folder.
 - Molnar, C. (2025). *Interpretable Machine Learning: A Guide for Making Black Box Models Explainable* (3rd ed.) — [free online](https://christophm.github.io/interpretable-ml-book/).
 - Hastie, T., Tibshirani, R., & Friedman, J. (2009). *The Elements of Statistical Learning* (2nd ed.). Springer. [ESL]
 - Goodfellow, I., Bengio, Y., & Courville, A. (2016). *Deep Learning*. MIT Press.
