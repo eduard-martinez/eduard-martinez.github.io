@@ -50,7 +50,7 @@ time: "Tuesdays, 8:00–11:00 a.m."
 
 Original title (in Spanish): **Big Data y Machine Learning para Economía Aplicada** (60-121, NRC 10-993). Lectures and materials are in Spanish. *Prerequisites:* Econometrics I & II (or equivalent); basic R is recommended, not required.
 
-All course materials — syllabus, lecture slides, R applications, problem sets and reference papers — are hosted on GitHub:
+All course materials — syllabus, lecture slides, R applications and problem sets — are hosted on GitHub:
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-github"></i>github.com/eduard-martinez/bdml-applied-economics</a>
@@ -86,7 +86,7 @@ Each session is organized in three parts:
 
 1. **Theory and concepts.** For every method, the same sequence: the problem it solves, the intuition, the essential formulation, how it works and how it is tuned, the application on real data, the evaluation and the interpretation. Long derivations go to the session's appendix.
 2. **Applied work in R.** The last stretch of each class is hands-on work with prepared code on the running case (week 1 is the conceptual exception, with a small simulated example). Each script reports out-of-sample performance against the previous week's leader; they are written in base R plus a handful of packages (`rio`, `dplyr`, `glmnet`, `rpart`, `randomForest`, `xgboost`, `nnet`), with no hidden machinery.
-3. **The papers.** Each session has a reference applied article that shows the method at work in published research. Students choose their paper in session 2 and present it in **session 8**, where six 15-minute presentations and the course synthesis take place: the question and the decision behind it, the data, the baseline, the out-of-sample evaluation and where the model fails, and the main result.
+3. **The papers.** Each session has a reference applied article that shows the method at work in published research. In session 2 each team picks the paper it will present — two options per field of economics — and presents it in **session 8**, in 15 minutes: the question and the decision behind it, the data, the baseline, the out-of-sample evaluation and where the model fails, and the main result.
 
 ## Getting up to speed in R
 
@@ -102,9 +102,9 @@ Equivalent reference material is offered for students who choose the Python trac
 
 ## Schedule
 
-Each week shows its class materials as buttons — the lecture slides, the R application script and a zip with the script plus its data — with the readings, the session's paper and the week's milestones on the small lines below.
+Each week shows its class materials as buttons — the lecture slides, the R application script and a zip with the script plus its data — with the readings and the week's milestones on the small lines below.
 
-**Key dates.** Problem set 1: published Oct 6, due Oct 20 at 8:00 a.m. · Project pitch: Nov 3 · Problem set 2: published Oct 20, due Nov 10 at 11:59 p.m. · Final project document and presentations: Nov 24.
+**Key dates.** Problem set 1: published Oct 6, due Oct 20 at 8:00 a.m. · Project pitch: Nov 3 · Problem set 2: published Oct 20, due Nov 10 at 11:59 p.m. · Final project document (max. 8 pages) and presentations: Nov 24.
 
 ### Module 1 — Foundations and evaluation
 
@@ -126,7 +126,7 @@ The same OLS with a different criterion: what survives, what stops mattering and
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-02/week-02.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · the vote of a polling station</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-02.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 3 · ch. 7 (steps, splines and GAMs)</small>
-<small class="ws-data"><strong>Milestone:</strong> the six papers for session 8 are chosen</small>
+<small class="ws-data"><strong>Milestone:</strong> teams choose their session-8 paper (two options per field of economics)</small>
 </p>
 
 **Week 3 · Sep 29 — Cross-validation and regularization: the honest pipeline.**
@@ -137,7 +137,6 @@ Choosing between models without spending the test set: k-fold, the CV curve, lea
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-03/week-03.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · the pipeline and the Lasso</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-03.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL 5.1 (cross-validation) · 6.2 and 6.4 (Ridge, Lasso, high dimension)</small>
-<small class="ws-data"><strong>Session paper:</strong> Deppner &amp; Cajias (2024), <em>Accounting for Spatial Autocorrelation in Algorithm-Driven Hedonic Models</em></small>
 </p>
 
 **Week 4 · Oct 6 — Classification: from the logit to decisions.**
@@ -148,7 +147,6 @@ Same election, same stations, new y: does Petro win the station? Logit as the ba
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-04/week-04.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · does Petro win the station?</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-04.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL 4.1–4.3 and 4.4.2 (confusion matrix and ROC) · 4.7.6 (penalized logit) · Fawcett (2006)</small>
-<small class="ws-data"><strong>Session paper:</strong> Kleinberg, Lakkaraju, Leskovec, Ludwig &amp; Mullainathan (2018), <em>Human Decisions and Machine Predictions</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/Kleinberg.pdf" target="_blank" rel="noopener">PDF</a></small>
 <small class="ws-data"><strong>Milestone:</strong> Problem set 1 published (sessions 2–4; due Oct 20, 8:00 a.m.)</small>
 </p>
 
@@ -173,7 +171,6 @@ No new method — today we walk into the box: permutation importance (and why th
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-06/week-06.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · opening the leader</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-06.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> Molnar (2025), the permutation-importance, PDP and SHAP chapters (read the disadvantages twice)</small>
-<small class="ws-data"><strong>Session paper:</strong> Bluwstein, Buckmann, Joseph, Kapadia &amp; Şimşek (2023), <em>Credit Growth, the Yield Curve and Financial Crisis Prediction</em></small>
 <small class="ws-data"><strong>Milestones:</strong> Problem set 1 due (8:00 a.m.) · Problem set 2 published (sessions 5–7; due Nov 10, 11:59 p.m.)</small>
 </p>
 
@@ -187,17 +184,16 @@ Can the data build their own summaries? Without y, PCA compresses the 37 census 
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-07/week-07.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · PCA, k-means and a network</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-07.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL 12.2 (principal components) and 12.4.1 (k-means) · 10.1–10.3 and 10.6–10.7 (neural networks)</small>
-<small class="ws-data"><strong>Session paper:</strong> Jean, Burke, Xie, Davis, Lobell &amp; Ermon (2016), <em>Combining Satellite Imagery and Machine Learning to Predict Poverty</em></small>
 <small class="ws-data"><strong>Milestone:</strong> the session opens with the Problem set 1 debrief and ranking</small>
 </p>
 
-**Week 8 · Nov 3 — The papers and the synthesis: six presentations, the course map and the project pitches.**
-No new method: today all of them are used. Six 15-minute presentations, the map that puts papers, methods and workflow together, and the one-page project pitches (five minutes each).
+**Week 8 · Nov 3 — The papers and the synthesis: student presentations, the course map and the project pitches.**
+No new method: today all of them are used. The student paper presentations (15 minutes each), the map that puts papers, methods and workflow together, and the one-page project pitches (five minutes each).
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-08/week-08.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <small class="ws-data"><strong>Readings:</strong> Athey &amp; Imbens (2019), sections 1–3 (the causal bridge)</small>
-<small class="ws-data"><strong>The six papers, in course order:</strong> Kim &amp; Zilinsky (2024) — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/Kim_Kilinsky_2024_Division_Does_Not_Imply_Predictability.pdf" target="_blank" rel="noopener">PDF</a> · Bogin &amp; Shui (2020) · Blumenstock, Cadamuro &amp; On (2015) · Kleinberg et al. (2018) — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/Kleinberg.pdf" target="_blank" rel="noopener">PDF</a> · Bluwstein et al. (2023) · Jean et al. (2016). Gelvez et al. (2026) and Deppner &amp; Cajias (2024) are not presented: they enter the synthesis.</small>
+<small class="ws-data"><strong>Session papers:</strong> two papers per field of economics; each team picks one in session 2 and presents it today — the list is defined after session 2. The PDFs are not distributed in the repository for copyright reasons.</small>
 <small class="ws-data"><strong>Milestone:</strong> project pitch — the idea in one page</small>
 </p>
 
@@ -206,7 +202,7 @@ The Problem set 2 ranking and the course in one slide; then each team presents i
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-09/week-09.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
-<small class="ws-data"><strong>Milestones:</strong> final project presentations · project document submitted</small>
+<small class="ws-data"><strong>Milestones:</strong> final project presentations · project document submitted (max. 8 pages)</small>
 </p>
 
 ## Problem sets
@@ -227,19 +223,15 @@ Each problem set is submitted as a single PDF accompanied by a reproducible `.R`
 | Problem set 2 — sessions 5–7 | 15% |
 | Final project | 60% |
 
-**Final project.** A predictive research proposal: each team defines an economic question in which prediction is the quantity of interest, identifies its own data, and designs the study that survives the seven questions of the course — the question and the decision behind it, the unit and the outcome, the data and what is known at prediction time, the metric and the baseline, the validation strategy, the risks (leakage, extrapolation, subgroups where it fails), and the reading of the results. The idea is pitched in one page on **Nov 3** (session 8); the document and the presentation are due on **Nov 24** (session 9).
+**Final project.** A predictive research proposal: each team defines an economic question in which prediction is the quantity of interest, identifies its own data, and designs the study that survives the seven questions of the course — the question and the decision behind it, the unit and the outcome, the data and what is known at prediction time, the metric and the baseline, the validation strategy, the risks (leakage, extrapolation, subgroups where it fails), and the reading of the results. The idea is pitched in one page on **Nov 3** (session 8); the document — at most eight pages — and the presentation are due on **Nov 24** (session 9).
 
 **AI policy:** AI tools are allowed in every component of the course, as long as their use is explicitly declared — what was used and for what.
 
 ## Reading library
 
-The repo's [`literature/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature) folder holds the papers as they are released. Available now:
+Each session has a reference applied article that shows the method at work in published research; from session 2 each team also picks the paper it will present in session 8, choosing between two options per field of economics. The papers themselves are not distributed in the repository for copyright reasons: each one is announced in class with its full reference, to be retrieved through the university library.
 
-- Kim & Zilinsky (2024) — *Division Does Not Imply Predictability: Demographics Continue to Reveal Little About Voting and Partisanship.*
-- Kleinberg, Lakkaraju, Leskovec, Ludwig & Mullainathan (2018) — *Human Decisions and Machine Predictions* (session 4).
-- Gelvez, Cardiles, Martínez-González & Muñoz (2026) — *How Predictable Is an Election? A Machine-Learning Approach to Electoral Behavior in Colombia* — the course's thread paper, and the benchmark the class results are compared against.
-
-The full bibliography — framework papers, each session's paper and the methodological references — is in the [course syllabus](https://github.com/eduard-martinez/bdml-applied-economics/blob/main/syllabus/syllabus.pdf).
+The repo's [`literature/`](https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature) folder holds the course's own thread paper: Gelvez, Cardiles, Martínez-González & Muñoz (2026), *How Predictable Is an Election? A Machine-Learning Approach to Electoral Behavior in Colombia* — the benchmark the class results are compared against in session 9.
 
 ## Core bibliography
 
