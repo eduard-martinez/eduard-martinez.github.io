@@ -161,13 +161,13 @@ Fuentes y calidad de datos; el checklist de diagnóstico — tipos, rangos, falt
 ### Unidad 3 — IA aplicada al análisis de datos
 
 **Semana 8 — Agentes de código: Claude Code, Cursor y VS Code.**
-Asistentes de IA para el análisis de datos y la programación; rehacer con IA lo que ya se hizo "a mano" en las semanas anteriores (manipulación, limpieza, EDA, visualización); iterar prompts, revisar el código generado y verificar resultados.
+Qué es un agente de código, el bucle agéntico y el archivo de reglas. La práctica es la sesión completa: cada estudiante abre el proyecto del caso Cóndor con su agente y dirige el EDA de la pregunta de negocio de su equipo — un prompt, una tarea, una ejecución, una mirada — hasta salir con tres o cuatro resultados bien escogidos, cada uno en su propio script. **Esta semana no hay taller:** lo que se construye en clase es el avance que el equipo presenta en la **Entrega 2** de la semana 9.
 
 <p>
 <a href="/teaching/ba/lectures/week-08/theory/week-08.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
-<a href="/teaching/ba/lectures/week-08/practice/week-08.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
-<a href="/teaching/ba/lectures/week-08/practice/proyecto_semana8.zip" class="ws-btn"><i class="fas fa-download"></i>Proyecto inicial (zip)</a>
-<a href="/teaching/ba/lectures/week-08/task/week-08.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
+<a href="/teaching/ba/lectures/week-08/practice/week-08.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada · el EDA de tu proyecto con un agente</a>
+<a href="/teaching/ba/lectures/week-08/practice/proyecto_condor.zip" download class="ws-btn"><i class="fas fa-download"></i>Proyecto de la clase (zip, 3,3 MB)</a>
+<small class="ws-data">Cómo trabajar hoy: descarga el <code>proyecto_condor.zip</code> → descomprímelo → abre la carpeta con tu agente y sigue la práctica. Adentro vienen las cuatro tablas de Cóndor, el <code>diccionario_datos.md</code> y un <code>README.md</code> con el contexto del caso y las reglas de trabajo para el agente.</small>
 </p>
 
 **Semana 9 — Presentación Avance del Proyecto (EDA).** Entrega 2 del proyecto final (5%): presentación oral del análisis exploratorio, con retroalimentación del profesor y los monitores. Del 21 al 26 de septiembre.

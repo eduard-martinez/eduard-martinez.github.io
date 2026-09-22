@@ -163,13 +163,13 @@ Data sources and quality; the diagnostic checklist — types, ranges, missing va
 ### Unit 3 — AI applied to data analysis
 
 **Week 8 — Agentes de código: Claude Code, Cursor y VS Code.**
-AI assistants for data analysis and programming; redoing with AI what was done "by hand" in the previous weeks (manipulation, cleaning, EDA, visualization); iterating prompts, reviewing generated code, verifying results.
+What a coding agent is, the agentic loop and the rules file. The practice is the whole session: each student opens the Cóndor case project with their agent and directs the EDA of their team's business question — one prompt, one task, one run, one look — ending with three or four well-chosen results, each in its own script. **No workshop this week:** what is built in class is the progress the team presents in **Deliverable 2** in week 9.
 
 <p>
 <a href="/teaching/ba/lectures/week-08/theory/week-08.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
-<a href="/teaching/ba/lectures/week-08/practice/week-08.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
-<a href="/teaching/ba/lectures/week-08/practice/proyecto_semana8.zip" class="ws-btn"><i class="fas fa-download"></i>Starter project (zip)</a>
-<a href="/teaching/ba/lectures/week-08/task/week-08.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
+<a href="/teaching/ba/lectures/week-08/practice/week-08.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice · your project's EDA with an agent</a>
+<a href="/teaching/ba/lectures/week-08/practice/proyecto_condor.zip" download class="ws-btn"><i class="fas fa-download"></i>Class project (zip, 3.3 MB)</a>
+<small class="ws-data">How to work today: download <code>proyecto_condor.zip</code> → unzip it → open the folder with your agent and follow the practice guide. Inside are the four Cóndor tables, the <code>diccionario_datos.md</code> and a <code>README.md</code> with the case context and the working rules for the agent.</small>
 </p>
 
 **Week 9 — Presentación Avance del Proyecto (EDA).** Deliverable 2 of the final project (5%): oral presentation of the exploratory analysis, with feedback from the professor and course assistants. September 21–26.
