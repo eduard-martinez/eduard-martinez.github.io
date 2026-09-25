@@ -130,30 +130,30 @@ The same OLS with a different criterion: what survives, what stops mattering and
 </p>
 
 **Week 3 · Sep 29 — Cross-validation and regularization: the honest pipeline.**
-Choosing between models without spending the test set: k-fold, the CV curve, leakage and preprocessing inside the pipeline, validating by group, in time and in space; Ridge, Lasso and Elastic Net with λ by CV — 37 predictors, or 1,253 if each one weighs differently by department.
+Two tools that need each other. The judge: cross-validation estimates out-of-sample error inside the training set, so models and hyperparameters are chosen without touching the test. The dial: regularization puts a price on the size of the coefficients — Ridge shrinks, the Lasso switches variables off — and its intensity λ is set by the judge. With 1,291 columns OLS collapses and the Lasso keeps 202.
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-03/week-03.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
-<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-03/week-03.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · the pipeline and the Lasso</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-03/week-03.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · cross-validation and the Lasso</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-03.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL 5.1 (cross-validation) · 6.2 and 6.4 (Ridge, Lasso, high dimension)</small>
 </p>
 
-**Week 4 · Oct 6 — Classification: from the logit to decisions.**
-Same election, same stations, new y: does Petro win the station? Logit as the baseline, penalized logit and k-NN; why accuracy misleads, the confusion matrix, the threshold as a decision with costs, ROC/AUC and calibration.
+**Week 4 · Oct 6 — Classification: from probability to decision.**
+Same election, same stations, same data; the y changes: did Petro win the station? Classifying is estimating a probability and then deciding — the linear probability model breaks out of [0,1] and the logit does not; the model orders the stations (AUC), calibration says whether its probabilities are credible, and the cost of each error fixes the threshold.
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-04/week-04.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-04/week-04.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · does Petro win the station?</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-04.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
-<small class="ws-data"><strong>Readings:</strong> ISL 4.1–4.3 and 4.4.2 (confusion matrix and ROC) · 4.7.6 (penalized logit) · Fawcett (2006)</small>
-<small class="ws-data"><strong>Milestone:</strong> Problem set 1 published (sessions 2–4; due Oct 20, 8:00 a.m.)</small>
+<small class="ws-data"><strong>Readings:</strong> ISL 4.1–4.3 and 4.4.2 (confusion matrix and ROC) · 4.7.6 (the k-NN classifier lab) · Fawcett (2006)</small>
+<small class="ws-data"><strong>Milestone:</strong> Problem set 1 published — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/problem-sets/pset-1/pset-1.pdf" target="_blank" rel="noopener">PDF</a> · <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/problem-sets/pset-1/vivienda_cali.rds"><code>vivienda_cali.rds</code></a> · <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/problem-sets/pset-1/diccionario_vivienda.csv"><code>diccionario_vivienda.csv</code></a> (due Oct 20, 8:00 a.m.)</small>
 </p>
 
 ### Module 2 — Trees, ensembles and interpretation
 
-**Week 5 · Oct 13 — Trees, forests and boosting.**
-Can the machine find the partitions that matter on its own? A tree you can read and its pruning by CV; the forest that averages hundreds of trees (out-of-bag error, `mtry`); boosting that fits residuals with early stopping.
+**Week 5 · Oct 13 — Trees, forests and boosting: split, average and correct.**
+Until now we wrote the flexibility by hand — which variable crossed with which, and how. With 37 variables there are 666 pairwise crossings: nobody writes those. A tree splits the stations into similar groups and predicts the average of each, so a split inside a split is an interaction nobody had to write; the forest averages hundreds of trees and boosting adds small trees that correct the previous one (`rpart`, `randomForest`, `xgboost`).
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-05/week-05.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
@@ -209,10 +209,15 @@ The Problem set 2 ranking and the course in one slide; then each team presents i
 
 Both problem sets are applied only — no conceptual questions — and work on a second dataset: **housing prices in Cali**, so the tools travel to a problem other than the class case. Each one closes with a ranking of the teams by test error.
 
-- **Problem set 1 — sessions 2–4.** Published Oct 6, due Oct 20 at 8:00 a.m., before session 5. The session-2 to session-4 scripts are the starting point. *PDF and data: available soon.*
+- **Problem set 1 — How much is a home in Cali worth? (sessions 2–4).** In pairs, due Oct 20 at 8:00 a.m., before session 5. Real for-sale listings in Cali (2019–2020): a baseline and a regression, cross-validation and regularization, the binary version (is it social housing?), and a final model chosen with criteria. The test listings have their price hidden, so every intermediate decision is made with validation inside the training set and the test is used once, to predict.
+  <p>
+  <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/problem-sets/pset-1/pset-1.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Problem set 1 (PDF)</a>
+  <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/problem-sets/pset-1/vivienda_cali.rds" class="ws-btn"><i class="fas fa-download"></i>vivienda_cali.rds</a>
+  <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/problem-sets/pset-1/diccionario_vivienda.csv" class="ws-btn"><i class="fas fa-download"></i>diccionario_vivienda.csv</a>
+  </p>
 - **Problem set 2 — sessions 5–7.** Published Oct 20, due Nov 10 at 11:59 p.m. *PDF and data: available soon.*
 
-Each problem set is submitted as a single PDF accompanied by a reproducible `.R` script.
+Each problem set is submitted on the virtual campus as a `.zip` with the report in PDF, the code (`00_run.R` and its auxiliary scripts) and the `predicciones.csv` that the code produces: the teacher scores those predictions against the hidden prices, and that test error ranks the teams. The ranking is discussed in session 7.
 
 ## Evaluation
 
