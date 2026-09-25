@@ -163,12 +163,12 @@ Until now we wrote the flexibility by hand — which variable crossed with which
 <small class="ws-data"><strong>Thread paper:</strong> Gelvez, Cardiles, Martínez-González &amp; Muñoz (2026), <em>How Predictable Is an Election?</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/papers/01-economia-politica/democratization_AIM4D_Notre_Dame.pdf" target="_blank" rel="noopener">PDF</a></small>
 </p>
 
-**Week 6 · Oct 20 — Opening the black box: importance, partial dependence and SHAP.**
-No new method — today we walk into the box: permutation importance (and why the impurity one misleads), partial dependence and ICE curves, Shapley values and SHAP, the contribution of each census block, and where the leader gets it wrong.
+**Week 6 · Oct 20 — Opening the black box: what the machine learned.**
+No new model: today we walk into last week's, 738 trees and 38,330 leaves that nobody can read. Four questions, four tools — which variables it uses (importance), with what shape (partial dependence), why it predicts what it predicts at a given station (Shapley and SHAP) and who it fails (error by subgroup) — and a fifth, the important one: what none of them tells us. Each tool moves a variable and watches the prediction: it asks the model, not the world.
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-06/week-06.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
-<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-06/week-06.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · opening the leader</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-06/week-06.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · what the leader learned</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-06.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> Molnar (2025), the permutation-importance, PDP and SHAP chapters (read the disadvantages twice)</small>
 <small class="ws-data"><strong>Milestones:</strong> Problem set 1 due (8:00 a.m.) · Problem set 2 published (sessions 5–7; due Nov 10, 11:59 p.m.)</small>
@@ -176,8 +176,8 @@ No new method — today we walk into the box: permutation importance (and why th
 
 ### Module 3 — Representation, synthesis and project
 
-**Week 7 · Oct 27 — Representing: PCA, k-means and neural networks.**
-Can the data build their own summaries? Without y, PCA compresses the 37 census columns into a few indices and k-means groups stations into territory types; with y, a neural network learns the representation and the prediction at once, and is measured against the forest.
+**Week 7 · Oct 27 — Representing: compressing with meaning.**
+How many different things does the census actually know about a station — and who decides how to summarize them, the variance of the x's or the y? Without y: principal components compress the 37 columns and k-means groups the stations into types of territory. With y: a neural network builds its own variables and tunes them together with the prediction, and sits the usual exam against boosting. What varies most is not necessarily what predicts.
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-07/week-07.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
