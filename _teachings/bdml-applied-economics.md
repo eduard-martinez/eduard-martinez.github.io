@@ -135,6 +135,7 @@ Two tools that need each other. The judge: cross-validation estimates out-of-sam
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-03/week-03.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-03/week-03.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · cross-validation and the Lasso</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-03/week-03-b.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application B · Ridge and Lasso on the full country</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-03.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL 5.1 (cross-validation) · 6.2 and 6.4 (Ridge, Lasso, high dimension)</small>
 </p>
@@ -187,8 +188,8 @@ How many different things does the census actually know about a station — and 
 <small class="ws-data"><strong>Milestone:</strong> the session opens with the Problem set 1 debrief and ranking</small>
 </p>
 
-**Week 8 · Nov 3 — The papers and the synthesis: student presentations, the course map and the project pitches.**
-No new method: today all of them are used. The student paper presentations (15 minutes each), the map that puts papers, methods and workflow together, and the one-page project pitches (five minutes each).
+**Week 8 · Nov 3 — The papers and the synthesis of the case.**
+No new method: today all of them are used. The student paper presentations (15 minutes each), the synthesis of the case — the semester's single problem, seen whole through the seven questions every paper answers — the one-page project pitches (five minutes each), and an optional closing: the causal bridge, with the course's own data.
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-08/week-08.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
