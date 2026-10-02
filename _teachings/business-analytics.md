@@ -183,7 +183,7 @@ Data sources and quality; the diagnostic checklist — types, ranges, missing va
 <small class="ws-data"><strong>After-class practice — data cleaning</strong> (on your own, ≈ 60 min): <a href="/teaching/ba/lectures/week-06/practice/week-06.html">from the dirty table to a reliable dataset</a></small>
 </p>
 
-**Week 7 — Examen Parcial 1.** First integrative written exam (20%), covering weeks 1–6. September 7–12.
+**Week 7 — Examen Parcial 1.** First integrative written exam (20%), covering weeks 1–6. September 14–19.
 
 ### Unit 3 — AI applied to data analysis
 
@@ -200,7 +200,7 @@ What a coding agent is, the agentic loop and the rules file. The practice is the
 <small class="ws-data">How to work today: download <code>proyecto_condor.zip</code> → unzip it → open the folder with your agent and follow the practice guide. Inside are the four Cóndor tables, the <code>diccionario_datos.md</code> and a <code>README.md</code> with the case context and the working rules for the agent.</small>
 </p>
 
-**Week 9 — Presentación Avance del Proyecto (EDA).** Deliverable 2 of the final project (5%): oral presentation of the exploratory analysis, with feedback from the professor and course assistants. September 21–26.
+**Week 9 — Presentación Avance del Proyecto (EDA).** Deliverable 2 of the final project (5%): oral presentation of the exploratory analysis, with feedback from the professor and course assistants. September 28 – October 3.
 
 ### Unit 4 — Machine learning foundations
 
@@ -226,7 +226,6 @@ The full classification pipeline; the confusion matrix — why accuracy misleads
 <p>
 <span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-11/theory/week-11.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
-<a href="https://www.youtube.com/watch?v=kqaLlte6P6o" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Classification trees</a>
 <br>
 <span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-11/practice/week-11.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
@@ -240,7 +239,6 @@ The regression pipeline with MAE/RMSE against a baseline; regularized linear reg
 <p>
 <span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-12/theory/week-12.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
-<a href="https://www.youtube.com/watch?v=2Miw4bjzSF0" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Regression trees</a>
 <br>
 <span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-12/practice/week-12.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
@@ -256,7 +254,6 @@ Clustering as segmentation without a target; **k-means** (distance, scaling, cen
 <p>
 <span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-13/theory/week-13.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
-<a href="https://www.youtube.com/watch?v=2kfY0R34Dy0" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · k-means</a>
 <br>
 <span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-13/practice/week-13.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
@@ -264,11 +261,11 @@ Clustering as segmentation without a target; **k-means** (distance, scaling, cen
 <small class="ws-data">Data: <a href="/teaching/ba/lectures/week-13/practice/spotify_canciones.csv"><code>spotify_canciones.csv</code></a> · <a href="/teaching/ba/lectures/week-13/task/socios_califit.csv"><code>socios_califit.csv</code></a></small>
 </p>
 
-**Week 14 — Examen Parcial 2.** Second integrative written exam (20%), covering weeks 8–13. October 26–31.
+**Week 14 — Examen Parcial 2.** Second integrative written exam (20%), covering weeks 8–13. November 2–7.
 
-**Week 15 — Simulacro de la presentación final.** Each group presents a preliminary version of its final defense and receives feedback. November 2–7.
+**Week 15 — Simulacro de la presentación final.** Each group presents a preliminary version of its final defense and receives feedback. November 9–14.
 
-**Week 16 — Presentación del Proyecto Final.** Final oral defense of the project (Deliverable 3, 20%). It counts as an exam: attendance is mandatory. November 9–14.
+**Week 16 — Presentación del Proyecto Final.** Final oral defense of the project (Deliverable 3, 20%). It counts as an exam: attendance is mandatory. November 16–21.
 
 ## Evaluation
 
