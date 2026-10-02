@@ -129,7 +129,6 @@ The RStudio interface and the script-based workflow; R as a calculator; data typ
 <p>
 <span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-03/theory/week-03.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
-<a href="https://youtu.be/_UnjI5eTkNc" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · R fundamentals</a>
 <br>
 <span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-03/practice/week-03.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
@@ -142,8 +141,6 @@ The `dplyr` grammar verb by verb for global and grouped KPIs, and `ggplot2` as a
 <p>
 <span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-04/theory/week-04.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
-<a href="https://youtu.be/MVNvoBbELKs" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · dplyr (part 1)</a>
-<a href="https://youtu.be/sCfhUTHA4fQ" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · ggplot2 (part 2)</a>
 <br>
 <span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-04/practice/week-04.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
