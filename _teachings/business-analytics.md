@@ -41,13 +41,12 @@ year: 2026
 </style>
 
 <p>
-<a href="/teaching/business-analytics-es/" class="ws-btn"><i class="fas fa-language"></i>Versión en español</a>
 <a href="/teaching/ba/syllabus/syllabus.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Syllabus (PDF, in Spanish)</a>
 <a href="/teaching/ba/syllabus/outline.pdf" class="ws-btn"><i class="fas fa-calendar-days"></i>Week-by-week program (PDF)</a>
 <a href="https://open.spotify.com/show/033UvL50nPzm1gIH35udu5" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Course podcast · El Dato con Contexto</a>
 </p>
 
-Original title (in Spanish): **Analítica para los negocios** (06327-ECO). All materials are in Spanish — a full [Spanish version of this page](/teaching/business-analytics-es/) is available.
+Original title (in Spanish): **Analítica para los negocios** (06327-ECO). All course materials are in Spanish.
 
 The course materials are published on this site as each week is released. The documents are built with [Quarto](https://quarto.org/){:target="_blank"} and embed runnable R through [webR](https://docs.r-wasm.org/webr/latest/){:target="_blank"}, so students can execute every example directly in the browser, with no local installation required.
 
