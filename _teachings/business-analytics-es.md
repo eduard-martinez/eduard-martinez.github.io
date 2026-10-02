@@ -145,15 +145,15 @@ El business analytics como proceso que convierte datos en conocimiento accionabl
 </p>
 
 **Semana 6 — EDA: fuentes, limpieza y exploración.**
-Fuentes y calidad de datos; el checklist de diagnóstico — tipos, rangos, faltantes, duplicados, categorías inconsistentes, outliers — y el pipeline **raw → clean → analysis-ready**. La práctica guiada desarrolla, aplicado, un EDA del caso Cóndor alrededor de una pregunta de negocio; con el monitor y el script de la clase cada equipo carga y une las bases del caso y avanza su propio análisis exploratorio — el script que construyes es el entregable del taller.
+Fuentes y calidad de datos; el checklist de diagnóstico — tipos, rangos, faltantes, duplicados, categorías inconsistentes, outliers — y el pipeline **raw → clean → analysis-ready**. Tras el quiz, el profesor presenta en clase el **EDA del caso Cóndor** paso a paso y, con el monitor, cada grupo construye su base analítica y arranca el EDA de su pregunta con el script de la clase — ese script es el entregable del taller.
 
 <p>
 <a href="/teaching/ba/lectures/week-06/theory/week-06.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
 <a href="https://open.spotify.com/episode/1aQ02r039bDtbEbwpumQcq" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
-<a href="/teaching/ba/lectures/week-06/slides/week-06.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Práctica guiada · EDA del caso Cóndor</a>
-<a href="/teaching/ba/lectures/week-06/task/EDA%20Caso%20Condor.R" download class="ws-btn"><i class="fas fa-download"></i>Script de la clase · caso Cóndor</a>
+<a href="/teaching/ba/lectures/week-06/slides/week-06.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Clase (Beamer) · EDA del caso Cóndor</a>
+<a href="/teaching/ba/lectures/week-06/task/EDA%20Caso%20Condor.R" download class="ws-btn"><i class="fas fa-download"></i>Script de la clase (monitoría)</a>
 <a href="/teaching/ba/lectures/week-06/task/week-06.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
-<small class="ws-data"><strong>Otro ejercicio de práctica — limpieza de datos</strong> (para hacer por tu cuenta, en casa): <a href="/teaching/ba/lectures/week-06/practice/week-06.html">práctica guiada de limpieza</a> · <a href="/teaching/ba/lectures/week-06/task/ferreteria_raw.csv"><code>ferreteria_raw.csv</code></a></small>
+<small class="ws-data"><strong>Práctica fuera de clase — limpieza de datos</strong> (por tu cuenta, ≈ 60 min): <a href="/teaching/ba/lectures/week-06/practice/week-06.html">de la base sucia al dataset confiable</a></small>
 </p>
 
 **Semana 7 — Examen Parcial 1.** Primera evaluación escrita integradora (20%), cubre las semanas 1–6. Del 7 al 12 de septiembre.
@@ -175,15 +175,14 @@ Qué es un agente de código, el bucle agéntico y el archivo de reglas. La prá
 ### Unidad 4 — Fundamentos de Machine Learning
 
 **Semana 10 — Fundamentos de Machine Learning.**
-El machine learning como generalización; el pipeline estándar — target y features, partición train/test, métricas contra un baseline; validación cruzada; sobreajuste, data leakage y métricas mal elegidas. Dos videos complementarios construyen la matriz de confusión y MAE/RMSE antes de las semanas supervisadas.
+De describir el pasado a predecir: qué significa que una máquina aprenda, por qué la única prueba que cuenta es con datos que el modelo nunca vio, el baseline, el sobreajuste y el *data leakage* — la teoría va en cinco videos cortos, con quiz al inicio de la clase. En el Beamer, **el juez de modelos sobre el caso Cóndor**: el sobre sellado 80/20, la regla del EDA al examen, el memorizador que brilla en train y se cae en test, el detector "perfecto" que delata una fuga y la vara de Finanzas (MAE y RMSE). Con el monitor corres el script que reproduce las láminas; su bloque final es el taller que entregas.
 
 <p>
 <a href="/teaching/ba/lectures/week-10/theory/week-10.html" class="ws-btn"><i class="fas fa-book-open"></i>Teoría</a>
-<a href="https://youtu.be/TWDdeKs3org" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Matriz de confusión</a>
-<a href="https://youtu.be/bSHrtLHCPvc" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · RMSE y MAE</a>
-<a href="/teaching/ba/lectures/week-10/practice/week-10.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Práctica guiada</a>
+<a href="/teaching/ba/lectures/week-10/slides/week-10.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Clase (Beamer) · el juez de modelos</a>
+<a href="/teaching/ba/lectures/week-10/task/10_juez_condor.R" download class="ws-btn"><i class="fas fa-download"></i>Script de la clase (monitoría)</a>
 <a href="/teaching/ba/lectures/week-10/task/week-10.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Taller</a>
-<small class="ws-data">Datos: <a href="/teaching/ba/lectures/week-10/task/credito_taller10.csv"><code>credito_taller10.csv</code></a> · <a href="/teaching/ba/lectures/week-10/task/notas_taller10.csv"><code>notas_taller10.csv</code></a> · <a href="/teaching/ba/lectures/week-10/practice/credito_evaluacion.csv"><code>credito_evaluacion.csv</code></a> · <a href="/teaching/ba/lectures/week-10/practice/notas_evaluacion.csv"><code>notas_evaluacion.csv</code></a></small>
+<small class="ws-data">El script corre dentro de <code>proyecto_condor</code> — si no lo tienes, descarga el <a href="/teaching/ba/lectures/week-08/practice/proyecto_condor.zip">zip de la semana 8</a>.</small>
 </p>
 
 ### Unidad 5 — Aprendizaje supervisado

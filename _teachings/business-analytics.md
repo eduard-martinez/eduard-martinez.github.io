@@ -147,15 +147,15 @@ Business analytics as a process that turns data into actionable knowledge; trans
 </p>
 
 **Week 6 — EDA: fuentes, limpieza y exploración.**
-Data sources and quality; the diagnostic checklist — types, ranges, missing values, duplicates, inconsistent categories, outliers — and the **raw → clean → analysis-ready** pipeline. The guided practice develops a hands-on EDA of the Cóndor case around one business question; with the TA and the class script each team loads and joins the case tables and advances its own exploratory analysis — the script you build is the workshop deliverable.
+Data sources and quality; the diagnostic checklist — types, ranges, missing values, duplicates, inconsistent categories, outliers — and the **raw → clean → analysis-ready** pipeline. After the quiz, the professor walks through the **Cóndor case EDA** step by step in class and, with the TA, each team builds its analytical base and starts the EDA of its own question with the class script — that script is the workshop deliverable.
 
 <p>
 <a href="/teaching/ba/lectures/week-06/theory/week-06.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="https://open.spotify.com/episode/1aQ02r039bDtbEbwpumQcq" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
-<a href="/teaching/ba/lectures/week-06/slides/week-06.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Guided practice · Cóndor case EDA</a>
-<a href="/teaching/ba/lectures/week-06/task/EDA%20Caso%20Condor.R" download class="ws-btn"><i class="fas fa-download"></i>Class script · Cóndor case</a>
+<a href="/teaching/ba/lectures/week-06/slides/week-06.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Class slides · Cóndor case EDA</a>
+<a href="/teaching/ba/lectures/week-06/task/EDA%20Caso%20Condor.R" download class="ws-btn"><i class="fas fa-download"></i>Class script (TA session)</a>
 <a href="/teaching/ba/lectures/week-06/task/week-06.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
-<small class="ws-data"><strong>Extra practice — data cleaning</strong> (on your own, at home): <a href="/teaching/ba/lectures/week-06/practice/week-06.html">data-cleaning guided practice</a> · <a href="/teaching/ba/lectures/week-06/task/ferreteria_raw.csv"><code>ferreteria_raw.csv</code></a></small>
+<small class="ws-data"><strong>After-class practice — data cleaning</strong> (on your own, ≈ 60 min): <a href="/teaching/ba/lectures/week-06/practice/week-06.html">from the dirty table to a reliable dataset</a></small>
 </p>
 
 **Week 7 — Examen Parcial 1.** First integrative written exam (20%), covering weeks 1–6. September 7–12.
@@ -177,15 +177,14 @@ What a coding agent is, the agentic loop and the rules file. The practice is the
 ### Unit 4 — Machine learning foundations
 
 **Week 10 — Fundamentos de Machine Learning.**
-Machine learning as generalization; the standard pipeline — target and features, train/test split, metrics against a baseline; cross-validation; overfitting, data leakage, and badly chosen metrics. Two complementary videos build the confusion matrix and MAE/RMSE before the supervised weeks.
+From describing the past to predicting: what it means for a machine to learn, why the only test that counts uses data the model never saw, the baseline, overfitting and data leakage — the theory comes in five short videos, with the quiz at the start of class. In the class slides, **the model judge on the Cóndor case**: the sealed 80/20 envelope, the EDA rule taking its exam, the memorizer that shines in train and collapses in test, the "perfect" detector that reveals a leak, and the Finance yardstick (MAE and RMSE). With the TA you run the script that reproduces the slides; its final block is the workshop you hand in.
 
 <p>
 <a href="/teaching/ba/lectures/week-10/theory/week-10.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
-<a href="https://youtu.be/TWDdeKs3org" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Confusion matrix</a>
-<a href="https://youtu.be/bSHrtLHCPvc" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · RMSE &amp; MAE</a>
-<a href="/teaching/ba/lectures/week-10/practice/week-10.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
+<a href="/teaching/ba/lectures/week-10/slides/week-10.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Class slides · the model judge</a>
+<a href="/teaching/ba/lectures/week-10/task/10_juez_condor.R" download class="ws-btn"><i class="fas fa-download"></i>Class script (TA session)</a>
 <a href="/teaching/ba/lectures/week-10/task/week-10.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
-<small class="ws-data">Data: <a href="/teaching/ba/lectures/week-10/task/credito_taller10.csv"><code>credito_taller10.csv</code></a> · <a href="/teaching/ba/lectures/week-10/task/notas_taller10.csv"><code>notas_taller10.csv</code></a> · <a href="/teaching/ba/lectures/week-10/practice/credito_evaluacion.csv"><code>credito_evaluacion.csv</code></a> · <a href="/teaching/ba/lectures/week-10/practice/notas_evaluacion.csv"><code>notas_evaluacion.csv</code></a></small>
+<small class="ws-data">The script runs inside <code>proyecto_condor</code> — if you don't have it, download the <a href="/teaching/ba/lectures/week-08/practice/proyecto_condor.zip">week-8 zip</a>.</small>
 </p>
 
 ### Unit 5 — Supervised learning

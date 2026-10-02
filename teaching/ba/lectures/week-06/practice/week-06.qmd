@@ -1,6 +1,6 @@
 ---
-title: "Unidad 2 - Práctica: de la base sucia al dataset confiable"
-subtitle: "Aplicación guiada en clase · Semana 6 · 06327-ECO"
+title: "Unidad 2 - Práctica fuera de clase: de la base sucia al dataset confiable"
+subtitle: "Aplicación adicional de la teoría, para hacer por tu cuenta · Semana 6 · 06327-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
   html: default
@@ -19,22 +19,24 @@ lang: es
 # Reglas de juego
 
 ::: {.callout-key}
-**Esta sesión asume que ya estudiaste la teoría**
+**Esta práctica asume que ya estudiaste la teoría**
 
-Aquí no volvemos a explicar qué es la completitud, por qué un outlier no siempre es un error, ni qué busca la EDA: eso quedó en el podcast (y su [versión escrita](../theory/week-06.html)) y en el quiz. Hoy ese criterio **se ejecuta** sobre una base sucia de verdad. Si algo se te escapa, el [glosario](../theory/week-06.html#glosario-de-la-semana) queda a un clic.
+Aquí no volvemos a explicar qué es la completitud, por qué un outlier no siempre es un error, ni qué busca la EDA: eso quedó en el podcast (y su [versión escrita](../theory/week-06.html)) y en el quiz. Aquí ese criterio **se ejecuta** sobre una base sucia de verdad. Si algo se te escapa, el [glosario](../theory/week-06.html#glosario-de-la-semana) queda a un clic.
 
-**Lo que necesitas ahora mismo:**
+**Esta es la práctica fuera de clase de la semana 6:** no se hace en la sesión ni se entrega. Es una aplicación adicional de la teoría, para tu cuenta (≈ 60 min), sobre el lado del EDA que los datos limpios de Cóndor no dejan practicar: el diagnóstico y la limpieza. Lo de la clase —la presentación del EDA de Cóndor, la monitoría y el taller— está en la [página del taller](../task/week-06.html).
+
+**Lo que necesitas:**
 
 - 💻 RStudio abierto **dentro de tu proyecto `intro_ba`** (semana 3).
 - 🌐 Internet (los datos se cargan desde la web del curso).
 - 📦 Un paquete nuevo: `skimr`. Si no lo tienes, `install.packages("skimr")` **en la consola**, no en el script.
-- 🧑‍🤝‍🧑 Trabaja en tu computador, pero comenta cada checkpoint con tu vecino: si sus números no coinciden, uno de los dos tiene un hallazgo.
+- 🧑‍🤝‍🧑 Puedes hacerla solo o con un compañero del equipo: si comparan los checkpoints y los números no coinciden, uno de los dos tiene un hallazgo.
 :::
 
-**El escenario de hoy:** eres el analista de la comercializadora de tecnología de la semana 4. Pero hoy no te dan el archivo pulido: te dan **la base como sale del sistema**, antes de que nadie la toque. Tu trabajo es entregar, al final de la sesión, un **dataset confiable, un log de decisiones y tres hallazgos**. Ese es el producto — y es, casi literalmente, la Entrega 2 de tu proyecto.
+**El escenario:** eres el analista de la comercializadora de tecnología de la semana 4. Pero esta vez no te dan el archivo pulido: te dan **la base como sale del sistema**, antes de que nadie la toque. Tu trabajo es producir, al final de la práctica, un **dataset confiable, un log de decisiones y tres hallazgos**. Ese es el producto — y es el mismo estándar que pide la Entrega 2 de tu proyecto.
 
 ::: {.callout-warning}
-**La regla de oro de hoy**
+**La regla de oro**
 
 `ventas_raw` **no se toca nunca.** Todo lo que hagamos construye un objeto nuevo (`ventas_clean`) a partir de él. Si te equivocas limpiando, el raw es tu punto de retorno. Un analista que sobrescribe su base original no tiene a dónde volver.
 :::
@@ -64,7 +66,7 @@ str(ventas_raw)
 head(ventas_raw)
 ```
 
-**Checkpoint 🎯:** ¿cuántas filas y columnas reporta `str()`? Anótalo — al final vamos a comparar cuántas sobrevivieron. Y responde con tu vecino la pregunta que va primero que todas: **¿qué representa una fila de esta base?**
+**Checkpoint 🎯:** ¿cuántas filas y columnas reporta `str()`? Anótalo — al final vas a comparar cuántas sobrevivieron. Y responde la pregunta que va primero que todas: **¿qué representa una fila de esta base?**
 
 <!--=================-->
 <!--=================-->
@@ -108,7 +110,7 @@ La salida viene partida en dos bloques según el tipo de variable.
 2. Mira el tipo de **`precio`**. ¿Es `numeric`? ¿Debería serlo?
 3. Mira `p0` (el mínimo) de **`cantidad`**. ¿Se pueden vender esas unidades?
 
-> 🗣️ **Discútelo con tu vecino antes de seguir.** Las tres son problemas distintos: uno de **consistencia**, uno de **validez** por tipo y uno de **validez** por rango. Ubícalos en las cuatro dimensiones de la teoría.
+> 🗣️ **Piénsalo antes de seguir (mejor aún, discútelo con un compañero).** Las tres son problemas distintos: uno de **consistencia**, uno de **validez** por tipo y uno de **validez** por rango. Ubícalos en las cuatro dimensiones de la teoría.
 
 ## Zoom 1: las categorías
 
@@ -253,7 +255,7 @@ table(ventas_clean$trimestre)
 
 | Función | Resultado | Cuándo usarla |
 |---|---|---|
-| `toupper(x)` | `"NORTE"` | Códigos, IDs, siglas — la que usamos hoy |
+| `toupper(x)` | `"NORTE"` | Códigos, IDs, siglas — la que usamos aquí |
 | `tolower(x)` | `"norte"` | Como paso intermedio antes de capitalizar |
 | `tools::toTitleCase(x)` | `"Norte"` | Nombres propios, categorías de cara al usuario |
 
@@ -338,7 +340,7 @@ ventas_clean <- select(ventas_clean, -observaciones, -precio_num)
 ## La variable derivada que necesita el análisis
 ventas_clean <- mutate(ventas_clean, ingreso = precio * cantidad)
 
-## El producto de la sesión
+## El producto de la práctica
 head(ventas_clean)
 str(ventas_clean)
 ```
@@ -411,7 +413,7 @@ ggplot(ing_region, aes(x = reorder(region, ingreso_total), y = ingreso_total)) +
 ```
 
 ::: {.callout-practice}
-**Léelo con criterio de negocio (3 min con tu vecino)**
+**Léelo con criterio de negocio (3 min)**
 
 - ¿Alguna región tiene **muchas transacciones pero poco ingreso**? Eso no significa que le vaya mal: puede significar que vende **productos baratos**. Dos negocios distintos, otra vez.
 - `n_transacciones` te confirma cuántos registros sobrevivieron la limpieza por grupo.
@@ -440,7 +442,7 @@ ggplot(ventas_clean, aes(x = precio, y = cantidad, color = categoria)) +
 
 <!--=================-->
 <!--=================-->
-# El producto de la sesión
+# El producto de la práctica
 
 Antes de cerrar el computador, tu script debe dejar cuatro cosas. **Este es el estándar del curso y es el mismo de la Entrega 2:**
 
@@ -473,15 +475,15 @@ write.csv(ventas_clean, "data/ventas_clean.csv", row.names = FALSE)
 ::: {.callout-key}
 **La prueba de fuego de la reproducibilidad**
 
-Pásale tu script y el link del `raw` a tu vecino. Si al correrlo **no obtiene exactamente tu mismo `ventas_clean`**, uno de los dos tiene un problema — y descubrir cuál es el mejor uso que le pueden dar a los últimos cinco minutos de la clase.
+Pásale tu script y el link del `raw` a un compañero del equipo. Si al correrlo **no obtiene exactamente tu mismo `ventas_clean`**, uno de los dos tiene un problema — y descubrir cuál es el mejor cierre de esta práctica.
 :::
 
 <!--=================-->
 <!--=================-->
 # Cierre
 
-Hoy la base pasó de **sucia y peligrosa** a **confiable y documentada**. Cuenta lo que hiciste: ni un modelo, ni una predicción. Solo diagnóstico, criterio y limpieza — el **80% del tiempo** del que hablaba la semana 5, vivido en carne propia.
+La base pasó de **sucia y peligrosa** a **confiable y documentada**. Cuenta lo que hiciste: ni un modelo, ni una predicción. Solo diagnóstico, criterio y limpieza — el **80% del tiempo** del que hablaba la semana 5, vivido en primera persona.
 
 Y quédate con la escena de `"Norte"` / `"norte"`: la tabla que salía perfecta y estaba mal, sin un solo error en la consola. Ese es el trabajo que nadie ve y que sostiene todo lo demás.
 
-**Lo que sigue:** el [**taller**](../task/week-06.html) de hoy te da una base nueva y sucia para que la dejes presentable **sin guía**. Y en la **semana 7** es el parcial: el diagnóstico de calidad y la lectura de la EDA entran. 🧹
+**Lo que sigue:** el mismo criterio —qué es una fila, qué falta y por qué, qué es error y qué es dato— es el que aplicas en el [**Taller 6**](../task/week-06.html) sobre tu pregunta de Cóndor. Y en el **parcial 1** entran el diagnóstico de calidad y la lectura de la EDA. 🧹
