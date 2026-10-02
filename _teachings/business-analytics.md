@@ -36,6 +36,16 @@ year: 2026
     text-decoration: none;
   }
   .ws-btn i { color: var(--global-theme-color); margin-right: 0.35rem; }
+  .ws-tag {
+    display: inline-block;
+    min-width: 6.2rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--global-text-color-light);
+    margin: 0.12rem 0.45rem 0.12rem 0;
+  }
   .ws-data { display: block; color: var(--global-text-color-light); font-size: 0.85rem; margin-top: 0.2rem; }
   .ws-data code { font-size: 0.8rem; }
 </style>
@@ -95,6 +105,7 @@ By the end of the course, students will be able to:
 What business analytics is and the problems it solves; the week-by-week tour; the learning dynamic (theory before class, quiz, guided application); evaluation rules, the final project, and the AI policy — motivated by recent evidence on how AI use affects skill formation.
 
 <p>
+<span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-01/theory/week-01.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="https://arxiv.org/abs/2601.20245" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-book-open"></i>Reading: Shen &amp; Tamkin (2026)</a>
 </p>
@@ -103,8 +114,11 @@ What business analytics is and the problems it solves; the week-by-week tour; th
 What a large language model is and why it matters for economics and business; capabilities, limits and hallucinations; the anatomy of an effective prompt (context, task, output format, constraints); reusable *skills* for recurring tasks.
 
 <p>
+<span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-02/theory/week-02.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="https://open.spotify.com/episode/68vkoezzpxxmBUUsw35zAE" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
+<br>
+<span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-02/practice/week-02.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
 <a href="/teaching/ba/lectures/week-02/task/week-02.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
 </p>
@@ -113,8 +127,11 @@ What a large language model is and why it matters for economics and business; ca
 The RStudio interface and the script-based workflow; R as a calculator; data types and special values; objects and assignment; vectors, matrices and data frames; functions, help, and packages; the Environment and projects with relative paths.
 
 <p>
+<span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-03/theory/week-03.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="https://youtu.be/_UnjI5eTkNc" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · R fundamentals</a>
+<br>
+<span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-03/practice/week-03.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
 <a href="/teaching/ba/lectures/week-03/task/week-03.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
 </p>
@@ -123,9 +140,12 @@ The RStudio interface and the script-based workflow; R as a calculator; data typ
 The `dplyr` grammar verb by verb for global and grouped KPIs, and `ggplot2` as a layered system (data, aesthetics, geometries, labels, themes). The week's product: a KPI table and the 2–3 charts that communicate it.
 
 <p>
+<span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-04/theory/week-04.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="https://youtu.be/MVNvoBbELKs" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · dplyr (part 1)</a>
 <a href="https://youtu.be/sCfhUTHA4fQ" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · ggplot2 (part 2)</a>
+<br>
+<span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-04/practice/week-04.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
 <a href="/teaching/ba/lectures/week-04/demo/demo_clase.R" download class="ws-btn"><i class="fas fa-download"></i>Class script (.R)</a>
 <a href="/teaching/ba/lectures/week-04/task/week-04.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
@@ -138,8 +158,11 @@ The `dplyr` grammar verb by verb for global and grouped KPIs, and `ggplot2` as a
 Business analytics as a process that turns data into actionable knowledge; translating business questions into analytical tasks; the workflow from question to decision. The week revolves around the **Cóndor case**: the guided practice walks through two examples of turning an initial need into a business question, and the workshop — which doubles as **Deliverable 1** of the final project — kicks off the project: each group of 3 picks its front and formulates the business question it will work on all semester (one member uploads the deliverable).
 
 <p>
+<span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-05/theory/week-05.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="https://open.spotify.com/episode/75F2Igpy5LJbRKyyKzIOg8" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
+<br>
+<span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-05/slides/week-05.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Guided practice (slides)</a>
 <a href="/teaching/ba/lectures/week-05/task/week-05.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop · Cóndor case</a>
 <small class="ws-data">For the workshop: <a href="/teaching/ba/final_project/contexto_caso_condor.pdf">case context (PDF)</a> · the data lives in the <em>Final project</em> section</small>
@@ -149,8 +172,11 @@ Business analytics as a process that turns data into actionable knowledge; trans
 Data sources and quality; the diagnostic checklist — types, ranges, missing values, duplicates, inconsistent categories, outliers — and the **raw → clean → analysis-ready** pipeline. After the quiz, the professor walks through the **Cóndor case EDA** step by step in class and, with the TA, each team builds its analytical base and starts the EDA of its own question with the class script — that script is the workshop deliverable.
 
 <p>
+<span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-06/theory/week-06.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="https://open.spotify.com/episode/1aQ02r039bDtbEbwpumQcq" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-spotify"></i>Podcast</a>
+<br>
+<span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-06/slides/week-06.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Class slides · Cóndor case EDA</a>
 <a href="/teaching/ba/lectures/week-06/task/EDA%20Caso%20Condor.R" download class="ws-btn"><i class="fas fa-download"></i>Class script (TA session)</a>
 <a href="/teaching/ba/lectures/week-06/task/week-06.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
@@ -165,7 +191,10 @@ Data sources and quality; the diagnostic checklist — types, ranges, missing va
 What a coding agent is, the agentic loop and the rules file. The practice is the whole session: each student opens the Cóndor case project with their agent and directs the EDA of their team's business question — one prompt, one task, one run, one look — ending with three or four well-chosen results, each in its own script. **No workshop this week:** what is built in class is the progress the team presents in **Deliverable 2** in week 9.
 
 <p>
+<span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-08/theory/week-08.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
+<br>
+<span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-08/practice/week-08.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice · your project's EDA with an agent</a>
 <a href="/teaching/ba/lectures/week-08/practice/proyecto_condor.zip" download class="ws-btn"><i class="fas fa-download"></i>Class project (zip, 3.3 MB)</a>
 <small class="ws-data">How to work today: download <code>proyecto_condor.zip</code> → unzip it → open the folder with your agent and follow the practice guide. Inside are the four Cóndor tables, the <code>diccionario_datos.md</code> and a <code>README.md</code> with the case context and the working rules for the agent.</small>
@@ -179,7 +208,10 @@ What a coding agent is, the agentic loop and the rules file. The practice is the
 From describing the past to predicting: what it means for a machine to learn, why the only test that counts uses data the model never saw, the baseline, overfitting and data leakage — the theory comes in five short videos, with the quiz at the start of class. In the class slides, **the model judge on the Cóndor case**: the sealed 80/20 envelope, the EDA rule taking its exam, the memorizer that shines in train and collapses in test, the "perfect" detector that reveals a leak, and the Finance yardstick (MAE and RMSE). With the TA you run the script that reproduces the slides; its final block is the workshop you hand in.
 
 <p>
+<span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-10/theory/week-10.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
+<br>
+<span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-10/slides/week-10.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Class slides · the model judge</a>
 <a href="/teaching/ba/lectures/week-10/task/10_juez_condor.R" download class="ws-btn"><i class="fas fa-download"></i>Class script (TA session)</a>
 <a href="/teaching/ba/lectures/week-10/task/week-10.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
@@ -192,8 +224,11 @@ From describing the past to predicting: what it means for a machine to learn, wh
 The full classification pipeline; the confusion matrix — why accuracy misleads, and the precision/recall trade-off; **CART** and **random forests**; choosing a model by the cost of its errors. The workshop predicts customer churn.
 
 <p>
+<span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-11/theory/week-11.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="https://www.youtube.com/watch?v=kqaLlte6P6o" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Classification trees</a>
+<br>
+<span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-11/practice/week-11.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
 <a href="/teaching/ba/lectures/week-11/task/week-11.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
 <small class="ws-data">Data: <a href="/teaching/ba/lectures/week-11/practice/credito_clasificacion.csv"><code>credito_clasificacion.csv</code></a> · <a href="/teaching/ba/lectures/week-11/task/clientes_conectatel.csv"><code>clientes_conectatel.csv</code></a></small>
@@ -203,8 +238,11 @@ The full classification pipeline; the confusion matrix — why accuracy misleads
 The regression pipeline with MAE/RMSE against a baseline; regularized linear regression (**Lasso**), regression trees, and ensembles (**random forest / XGBoost**); interpretability vs. performance. The workshop prices apartments in Cali.
 
 <p>
+<span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-12/theory/week-12.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="https://www.youtube.com/watch?v=2Miw4bjzSF0" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · Regression trees</a>
+<br>
+<span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-12/practice/week-12.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
 <a href="/teaching/ba/lectures/week-12/task/week-12.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
 <small class="ws-data">Data: <a href="/teaching/ba/lectures/week-12/practice/notas_regresion.csv"><code>notas_regresion.csv</code></a> · <a href="/teaching/ba/lectures/week-12/task/apartamentos_cali.csv"><code>apartamentos_cali.csv</code></a></small>
@@ -216,8 +254,11 @@ The regression pipeline with MAE/RMSE against a baseline; regularized linear reg
 Clustering as segmentation without a target; **k-means** (distance, scaling, centroids); choosing *k* with the elbow and silhouette methods; profiling segments so they are actionable. The practice segments Spotify songs; the workshop segments gym members.
 
 <p>
+<span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-13/theory/week-13.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <a href="https://www.youtube.com/watch?v=2kfY0R34Dy0" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-youtube"></i>Video · k-means</a>
+<br>
+<span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-13/practice/week-13.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
 <a href="/teaching/ba/lectures/week-13/task/week-13.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
 <small class="ws-data">Data: <a href="/teaching/ba/lectures/week-13/practice/spotify_canciones.csv"><code>spotify_canciones.csv</code></a> · <a href="/teaching/ba/lectures/week-13/task/socios_califit.csv"><code>socios_califit.csv</code></a></small>
