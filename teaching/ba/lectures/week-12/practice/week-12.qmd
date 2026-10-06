@@ -1,17 +1,18 @@
 ---
-title: "Unidad 5 - Práctica: la revancha de PronosticaU"
+title: "Unidad 5 - Práctica: el gasto del próximo trimestre, en Cóndor"
 subtitle: "Aplicación guiada en clase · Semana 12 · 06327-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
-  html: default
+  html:
+    number-sections: false
 lang: es
 ---
 
 <div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
-<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
-<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
-<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
-<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+<a href="https://x.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="../../pic/x.svg" alt="X" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="../../pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="../../pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="../../pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
 </div>
 
 <!--=================-->
@@ -19,212 +20,435 @@ lang: es
 # Reglas de juego
 
 ::: {.callout-key}
-**El encargo que te ganaste tumbando al proveedor**
+**Hoy predices un número**
 
-Semana 10: auditaste el pronosticador de notas de **PronosticaU** y demostraste que perdía contra el promedio (MAE 0.55 vs 0.40). Hoy la universidad te pasa la base histórica y el contrato: *"constrúyanlo ustedes — y esta vez, que le gane al promedio y se deje explicar."* Esta práctica asume la [teoría de la semana](../theory/week-12.html) (árbol de regresión, Lasso, bosque) y las [métricas MAE/RMSE de la semana 10](../../week-10/theory/week-10.html).
+Llevas dos semanas con la pregunta de Growth: *¿quién se va?* Hoy vuelve la de Finanzas, la que abriste en la semana 10: *¿cuánto gastará cada cliente el próximo trimestre?* La regla de negocio "3 × gasto mensual" ya le ganó al promedio; hoy tres familias de modelos intentan ganarle a ella, en el mismo sobre sellado. Y al final juntas las dos preguntas para decidir a quién llama Growth.
 :::
 
-- 👥 En **parejas**: uno escribe, el otro lee coeficientes y audita cifras. Roten en el Momento 3.
-- 🖥️ **RStudio**. Paquetes: los de la semana 11 más `glmnet` (instalado antes de clase).
-- 📥 El dato: <a href="notas_regresion.csv" download>**notas_regresion.csv**</a> — 300 estudiantes históricos con sus notas parciales, tareas, quices, asistencia y la **nota final** (el target). Guárdalo en `data/`.
-- 🏆 Regla del torneo: tres modelos compiten contra el baseline; **todos se miden en el mismo test, una sola vez**, con MAE y RMSE.
+- 👥 En **parejas**: uno escribe, el otro lee coeficientes y audita cifras. Roten en el Momento 4.
+- 🖥️ **RStudio** con tu proyecto `proyecto_condor`. Paquetes: los de la semana 11 más `ggplot2` y `glmnet` (instalado antes de clase; plan B: `install.packages("glmnet")`).
+- 📁 De las semanas 10 y 11 necesitas tres archivos en `output/`: `particion_condor.csv`, `lider_gasto_s10.csv` y `prob_abandono.csv`. ¿Te falta alguno? Corre completos tus scripts `10_juez_condor.R` y `11_torneo_condor.R` antes de empezar.
+- 🏆 Regla del torneo: todos los modelos se miden en el mismo test, una sola vez, con MAE (y su margen) y RMSE.
+
+**Cómo funciona cada momento.** Una **pregunta de analista**, **lo que necesitas** de la teoría en dos líneas (la versión completa, en la [teoría de la semana](../theory/week-12.html)), el código, el checkpoint 🎯 y el **hallazgo**.
 
 <!--=================-->
 <!--=================-->
 # El setup <span class="badge-time">≈ 5 min</span>
 
-Script nuevo: `scripts/12_revancha.R`.
+Abre `proyecto_condor.Rproj` y crea el script `scripts/12_gasto_condor.R`:
 
 ```r
-## ============================================
-## Práctica semana 12 — La revancha de PronosticaU
-## Nombre(s): _______________
-## Fecha:     _______________
-## ============================================
+##============================================================================##
+# 12_gasto_condor.R  —  ¿cuánto gastará cada cliente de Cóndor?
+#------------------------------------------------------------------------------#
+# Analítica para los negocios (06327-ECO) · Semana 12 · práctica guiada
+# Lee input/base_clientes.csv y, de las semanas 10 y 11, output/particion_condor.csv,
+# output/lider_gasto_s10.csv y output/prob_abandono.csv. Produce:
+#   - output/lider_gasto_s12.csv     (grano: regla o modelo; la tabla del líder)
+#   - output/fig_diagnostico_s12.png (predicho contra real, el bosque en test)
+#   - output/valor_en_riesgo.csv     (grano: cliente del test; riesgo x gasto)
+# Nombre(s): _______________
+##============================================================================##
 
-## Librerías / Libraries
-pacman::p_load(dplyr, ggplot2, rpart, rpart.plot, randomForest, glmnet)
+##============================================================================##
+##=== 0. Configuración inicial                                             ===##
+##============================================================================##
+rm(list = ls())
+require(pacman)
+p_load(dplyr, ggplot2, rpart, rpart.plot, randomForest, glmnet)
 
-## Cargar datos / Load data
-notas <- read.csv("data/notas_regresion.csv")
+## la base de Cóndor: las columnas de texto entran como categorías
+clientes <- read.csv("input/base_clientes.csv", stringsAsFactors = T)
 
-## Radiografía / First look
-dim(notas)
-str(notas)
-summary(notas$nota_final)
+## de las semanas 10 y 11: el sobre, la tabla del líder del gasto y el riesgo
+particion <- read.csv("output/particion_condor.csv")
+lider     <- read.csv("output/lider_gasto_s10.csv")
+riesgo    <- read.csv("output/prob_abandono.csv")
+lider
 ```
 
-**Checkpoint 🎯:** **300 filas y 6 columnas**; `nota_final` es numérica (va de ~0.9 a 5.0) — target continuo, problema de **regresión**. Nada de factores hoy.
+**Checkpoint 🎯:** la tabla del líder del gasto: la media de train con MAE **328.494 ± 38.496** y la regla **3 × gasto mensual** con **168.728 ± 31.656** (RMSE 655.018). Esa regla es la que hay que vencer.
 
 <!--=================-->
 <!--=================-->
-# Momento 1 — La partición y la vara <span class="badge-time">≈ 6 min</span>
+# Momento 1 — ¿Con qué columnas se predice el gasto? <span class="badge-time">≈ 6 min</span>
 
-```r
-## Partición 80/20 / Train-test split
-set.seed(12)   # la semilla de la semana, en la línea anterior al sample
-idx_train <- sample(1:nrow(notas), size = round(0.8 * nrow(notas)))
-train <- notas[idx_train, ]
-test  <- notas[-idx_train, ]
+::: {.callout-remember}
+**Lo que necesitas**
 
-## Baseline: predecir el promedio de TRAIN / Mean baseline
-media_train <- round(mean(train$nota_final), 2)
-media_train
-
-## MAE y RMSE del baseline en test (fórmulas de la semana 10)
-round(mean(abs(test$nota_final - media_train)), 3)
-round(sqrt(mean((test$nota_final - media_train)^2)), 3)
-```
-
-**Checkpoint 🎯:** media de train **3.35** → baseline con MAE **0.344** y RMSE **0.429**. Esa es la vara de hoy. (PronosticaU cobraba por un MAE de 0.55 — tenlo a mano para la humillación final.)
-
-<!--=================-->
-<!--=================-->
-# Momento 2 — La ruta lineal: el Lasso <span class="badge-time">≈ 15 min</span>
-
-`glmnet` no recibe fórmulas como `rpart`: pide la **matriz de variables** y el **vector del target** por separado. `model.matrix()` hace la conversión (el `[, -1]` descarta la columna de intercepto que glmnet maneja por su cuenta):
-
-```r
-## Preparar matrices / Prepare matrices for glmnet
-x_train <- model.matrix(nota_final ~ ., data = train)[, -1]
-y_train <- train$nota_final
-x_test  <- model.matrix(nota_final ~ ., data = test)[, -1]
-
-## Lasso con CV de 10 pliegues para elegir lambda
-## Lasso with 10-fold CV to pick lambda
-set.seed(12)   # los pliegues de la CV usan el azar
-lasso_cv <- cv.glmnet(x = x_train, y = y_train, alpha = 1)
-
-## La curva de CV y los dos candidatos / CV curve
-plot(lasso_cv)
-round(lasso_cv$lambda.1se, 4)
-```
-
-**Checkpoint 🎯:** `lambda.1se` = **0.0382**. En el gráfico: el error de CV en forma de U (¡el dial de la teoría, con datos reales!), la línea punteada izquierda es `lambda.min` y la derecha es `lambda.1se` — el freno más fuerte que empata con el mínimo. La regla 1-SE de la semana 11, servida por `glmnet`.
-
-Ahora lo mejor del Lasso — **leer el modelo**:
-
-```r
-## Los coeficientes que sobrevivieron / Surviving coefficients
-round(as.matrix(coef(lasso_cv, s = "lambda.1se")), 4)
-```
-
-**Checkpoint 🎯:** la ecuación quedó: nota ≈ 0.944 + **0.271·parcial_2** + **0.181·parcial_1** + **0.142·tareas** + 0.049·quices + 0.0045·asistencia. El parcial 2 es el rey (cada punto suyo aporta 0.27 a la final), y `asistencia` quedó encogida casi a cero — el freno te está diciendo dónde está la señal. (Hoy no expulsó a nadie del todo; en el taller sí verás un coeficiente en 0.000 exacto.)
-
-::: {.callout-practice}
-**Traducción simultánea (2 min, en pareja):** conviertan dos coeficientes en frases que la decana entienda — *"un punto más en el parcial 2 se asocia con ___ más en la nota final"*. Ojo con el verbo: *se asocia*, no *causa*. ¿Por qué la distinción importa si la decana quiere "intervenir la asistencia"?
+En **regresión** el target es un número y el error se mide en sus unidades (pesos). Las predictoras siguen las reglas de la semana 11, con un cambio: ahora la variable del futuro es `abandono`, que se conoce después del corte.
 :::
 
 ```r
-## Evaluar el Lasso en test / Evaluate on test
-pred_lasso <- as.numeric(predict(lasso_cv, newx = x_test, s = "lambda.1se"))
-round(mean(abs(test$nota_final - pred_lasso)), 3)
-round(sqrt(mean((test$nota_final - pred_lasso)^2)), 3)
+##============================================================================##
+##=== 1. La base del modelo  (grano: cliente)                              ===##
+##============================================================================##
+
+## la base del modelo: fuera abandono (del futuro, la fuga en espejo de la
+## semana 10), departamento (repite a ciudad) y las tres columnas "no aplica"
+modelo <- clientes %>%
+          left_join(particion, by = "cliente_id") %>%
+          select(-abandono, -departamento,
+                 -duracion_sesion_promedio, -csat_promedio, -score_buro)
+
+## train y test: el mismo sobre de las semanas 10 y 11
+train <- modelo %>%
+         filter(conjunto == "train") %>%
+         select(-cliente_id, -conjunto)
+test <- modelo %>%
+        filter(conjunto == "test") %>%
+        select(-cliente_id, -conjunto)
+n_test <- nrow(test)
+ids_test <- modelo %>%
+            filter(conjunto == "test") %>%
+            pull(cliente_id)
+
+## el target: ¿cómo se reparte?
+c(train = nrow(train), test = n_test, predictoras = ncol(train) - 1)
+summary(train$gasto_proximo_trim)
+
+## los errores de las dos reglas de la semana 10, para comparar después
+error_media <- abs(test$gasto_proximo_trim - mean(train$gasto_proximo_trim))
+error_regla <- abs(test$gasto_proximo_trim - 3 * test$gasto_promedio_mensual)
 ```
 
-**Checkpoint 🎯:** MAE **0.218** y RMSE **0.270**. La vara (0.344) quedó atrás por 37%. Primer candidato instalado en el podio.
+**Checkpoint 🎯:** **6.400 en train, 1.600 en test y 22 predictoras**. El gasto del próximo trimestre va de **800** a **44.083.300** pesos, con mediana de **79.300** y media de **292.378**.
+
+::: {.callout-key}
+**Hallazgo 1**
+
+La media es casi cuatro veces la mediana: **cola larga**, como en la semana 6. Unos pocos clientes gastan millones y van a pesar muchísimo en todo lo que se mida al cuadrado (el RMSE, y la forma como aprenden los modelos de hoy).
+:::
 
 <!--=================-->
 <!--=================-->
-# Momento 3 — El árbol, ritual exprés <span class="badge-time">≈ 10 min</span>
+# Momento 2 — ¿Qué ecuación encuentra el Lasso? <span class="badge-time">≈ 12 min</span>
 
-Roten roles. El ritual completo lo dominas desde la semana 11 — hoy en versión compacta (`method = "anova"` es la única novedad: le dice a `rpart` que prediga números):
+::: {.callout-remember}
+**Lo que necesitas**
+
+El **Lasso** ajusta una ecuación lineal minimizando $\text{error}^2 + \lambda \sum |\beta_j|$: el primer término pide acertar; el segundo cobra por cada coeficiente, y con $\lambda$ alto **apaga variables** (las deja en cero). `cv.glmnet` elige $\lambda$ por validación cruzada; `lambda.1se` es el más simple que empata con el mejor.
+:::
+
+`glmnet` no recibe fórmulas: pide la **matriz de variables** y el **vector del target** por separado. `model.matrix()` hace la conversión (y abre cada categoría en sus propias columnas):
 
 ```r
-## Árbol de regresión + poda 1-SE / Regression tree + 1-SE pruning
-set.seed(12)
-arbol <- rpart(nota_final ~ ., data = train, method = "anova")
-round(arbol$cptable, 4)
+##============================================================================##
+##=== 2. La ruta lineal: el Lasso                                          ===##
+##============================================================================##
 
+## preparar matrices
+x_train <- model.matrix(gasto_proximo_trim ~ ., data = train)[, -1]
+y_train <- train$gasto_proximo_trim
+x_test  <- model.matrix(gasto_proximo_trim ~ ., data = test)[, -1]
+
+## Lasso con CV de 10 pliegues para elegir lambda
+set.seed(12)   # los pliegues de la CV usan el azar
+lasso_cv <- cv.glmnet(x = x_train, y = y_train, alpha = 1)
+plot(lasso_cv)
+round(lasso_cv$lambda.1se)
+
+## los coeficientes que sobrevivieron (un punto es un cero)
+coef(lasso_cv, s = "lambda.1se")
+```
+
+**Checkpoint 🎯:** `lambda.1se` = **420.267**. De las 41 columnas, **sobrevive una**: `gasto_promedio_mensual`, con coeficiente **2.888**, más un intercepto de **141.070**. La ecuación quedó: gasto próximo ≈ 141.070 + 2,888 × gasto mensual.
+
+Ahora, sin maquinaria oculta: la predicción del primer cliente del test, **a mano**, contra la del modelo.
+
+```r
+## a mano: la ecuación aplicada al primer cliente del test
+test$gasto_promedio_mensual[1]
+141070 + 2.888 * test$gasto_promedio_mensual[1]
+
+## la del modelo, y lo que de verdad gastó
+pred_lasso <- as.numeric(predict(lasso_cv, newx = x_test, s = "lambda.1se"))
+round(pred_lasso[1])
+test$gasto_proximo_trim[1]
+
+## MAE con su margen, y RMSE
+error_lasso <- abs(test$gasto_proximo_trim - pred_lasso)
+round(c(mae = mean(error_lasso), margen = 2 * sd(error_lasso) / sqrt(n_test)))
+round(sqrt(mean(error_lasso^2)))
+```
+
+**Checkpoint 🎯:** el cliente gasta **11.020** al mes; a mano, 141.070 + 2,888 × 11.020 ≈ **172.896**, y el modelo dice **172.898** (la diferencia es el redondeo del coeficiente). Gastó **40.300**. MAE del Lasso **228.481 ± 30.386** y RMSE **649.069**.
+
+::: {.callout-key}
+**Hallazgo 2**
+
+La máquina **redescubrió la regla de Finanzas**: casi 3 × gasto mensual. Pero le suma a todos una base de 141 mil pesos, y a un cliente que gasta 40 mil eso lo condena: por eso **pierde en MAE** frente a la regla (228.481 contra 168.728, una diferencia mucho mayor que los márgenes) y **gana, apenas, en RMSE** (649.069 contra 655.018). El Lasso minimiza errores al cuadrado: se acerca a los grandes gastadores y castiga a los pequeños. Gana en la métrica que optimiza.
+:::
+
+::: {.callout-practice}
+**Traducción simultánea (1 min, en pareja):** conviertan el coeficiente en una frase para Finanzas — *"cada peso de gasto mensual histórico se asocia con ___ pesos de gasto el próximo trimestre"*. Ojo con el verbo: *se asocia*, no *causa*.
+:::
+
+<!--=================-->
+<!--=================-->
+# Momento 3 — ¿Por qué el árbol no se atreve? <span class="badge-time">≈ 10 min</span>
+
+::: {.callout-remember}
+**Lo que necesitas**
+
+El **árbol de regresión** corta donde más baja el error al cuadrado y, en cada hoja, predice el **promedio** de sus clientes. `method = "anova"` es lo único que cambia frente a la semana 11. La poda, igual: la regla 1-SE sobre la tabla de validación cruzada.
+:::
+
+Roten roles.
+
+```r
+##============================================================================##
+##=== 3. El árbol de regresión                                             ===##
+##============================================================================##
+
+## el árbol, antes de podar
+set.seed(12)   # la validación cruzada interna de rpart usa el azar
+arbol <- rpart(gasto_proximo_trim ~ ., data = train, method = "anova")
+arbol
+rpart.plot(arbol, type = 4)
+
+## a mano: la hoja de los clientes más grandes es un promedio
+train %>%
+filter(gasto_promedio_mensual >= 882593.5) %>%
+summarise(clientes = n(), promedio = mean(gasto_proximo_trim))
+
+## calificarlo en test
+error_arbol_libre <- abs(test$gasto_proximo_trim - predict(arbol, newdata = test))
+round(c(mae = mean(error_arbol_libre), rmse = sqrt(mean(error_arbol_libre^2))))
+```
+
+**Checkpoint 🎯:** todas las preguntas del árbol son sobre `gasto_promedio_mensual`: escalones en unos 68 mil, 193 mil, 424 mil y 883 mil pesos al mes. Arriba del último quedan **22 clientes**, con un promedio de **10.768.641** — la cuenta a mano da lo mismo que la hoja — y a esos 22 el árbol todavía los parte **por ciudad**, 11 contra 11. En test: MAE **229.997** y RMSE **869.870**, peor que predecir la media (836.839).
+
+Ahora el juez, en tabla y en gráfico, y la poda:
+
+```r
+## la validación cruzada del árbol
+round(arbol$cptable, 4)
+plotcp(arbol)
+
+## regla 1-SE
 tabla  <- arbol$cptable
 tope   <- min(tabla[, "xerror"]) + tabla[which.min(tabla[, "xerror"]), "xstd"]
 cp_opt <- tabla[which(tabla[, "xerror"] <= tope)[1], "CP"]
-round(cp_opt, 4)
+round(c(tope = tope, cp_opt = cp_opt), 4)
 
 arbol_podado <- prune(arbol, cp = cp_opt)
 sum(arbol_podado$frame$var == "<leaf>")
-rpart.plot(arbol_podado, type = 4)
-
-## Evaluar / Evaluate
-pred_arbol <- predict(arbol_podado, newdata = test)
-round(mean(abs(test$nota_final - pred_arbol)), 3)
-round(sqrt(mean((test$nota_final - pred_arbol)^2)), 3)
+error_arbol <- abs(test$gasto_proximo_trim - predict(arbol_podado, newdata = test))
+round(c(mae = mean(error_arbol), rmse = sqrt(mean(error_arbol^2))))
 ```
 
-**Checkpoint 🎯:** tope 1-SE **0.806** → `cp_opt` = **0.0315** → árbol de **5 hojas** con MAE **0.286** y RMSE **0.345**. Mira el `rpart.plot`: la raíz pregunta por el parcial 2 (el rey otra vez) y cada hoja es un *peldaño* — este árbol solo puede predecir 5 notas distintas. Le gana a la vara, pero la escalera pierde contra la rampa del Lasso.
+**Checkpoint 🎯:** el mínimo de `xerror` es **0.7904** (5 divisiones), pero su `xstd` es **0.2464**: el tope queda en **1.0369**, por encima del error del árbol sin preguntas (1.0002). La regla 1-SE elige `cp_opt` = **0.3226**, y el árbol podado tiene **una sola hoja**: predice la media para todos (MAE 328.494, RMSE 836.839). En el gráfico de `plotcp` se ve por qué: las barras de error son enormes. (No intentes `rpart.plot()` del árbol podado: un árbol sin preguntas no se puede dibujar.)
+
+::: {.callout-key}
+**Hallazgo 3**
+
+El árbol gastó sus preguntas persiguiendo a 22 clientes extremos, y hasta los partió por ciudad: puro ruido, que el test castiga. Con una cola así de larga, la validación cruzada cambia tanto de un pliegue a otro que **no le cree ningún corte**. Es la inestabilidad del árbol que describe la teoría, en su versión extrema, y es la razón de ser del bosque.
+:::
 
 <!--=================-->
 <!--=================-->
-# Momento 4 — El bosque promedia <span class="badge-time">≈ 8 min</span>
+# Momento 4 — ¿Promediar 500 árboles arregla el árbol? <span class="badge-time">≈ 8 min</span>
+
+::: {.callout-remember}
+**Lo que necesitas**
+
+El **bosque de regresión** promedia las predicciones de 500 árboles entrenados sobre remuestras de train: cada árbol es inestable, el promedio no. La importancia de variables dice cuánto ayudó cada una a reducir el error en los cortes.
+:::
+
+Ahora el candidato pesado (tarda cerca de un minuto; un par en computadores modestos):
 
 ```r
-## Random Forest de regresión / Regression forest
-set.seed(12)
-bosque <- randomForest(nota_final ~ ., data = train, ntree = 500)
-pred_rf <- predict(bosque, newdata = test)
-round(mean(abs(test$nota_final - pred_rf)), 3)
-round(sqrt(mean((test$nota_final - pred_rf)^2)), 3)
+##============================================================================##
+##=== 4. El bosque de regresión                                            ===##
+##============================================================================##
 
-## ¿Qué variables mandan? / Importance
-importance(bosque)
+## el bosque
+set.seed(12)   # el bootstrap usa el azar
+bosque <- randomForest(gasto_proximo_trim ~ ., data = train, ntree = 500)
+
+## calificarlo en test: MAE con su margen, y RMSE
+pred_rf  <- predict(bosque, newdata = test)
+error_rf <- abs(test$gasto_proximo_trim - pred_rf)
+round(c(mae = mean(error_rf), margen = 2 * sd(error_rf) / sqrt(n_test)))
+round(sqrt(mean(error_rf^2)))
+
+## ¿qué variables mandan?
+varImpPlot(bosque)
 ```
 
-**Checkpoint 🎯:** MAE **0.226** y RMSE **0.281** — pisándole los talones al Lasso. Y la importancia corona otra vez al **parcial_2 (14.4)**, con parcial_1 (9.0) de segundo: tres modelos distintos, la misma historia sobre qué mueve la nota. Cuando eso pasa, el hallazgo es robusto — frase para tu proyecto final.
+**Checkpoint 🎯:** MAE **162.654 ± 29.017** y RMSE **602.535**: el único modelo de hoy que le gana a la regla de Finanzas en las dos métricas. En la importancia manda, de lejos, `gasto_promedio_mensual`, seguida de `antiguedad_meses` y `monto_total`.
+
+::: {.callout-key}
+**Hallazgo 4**
+
+Promediar sí arregla la inestabilidad: donde un solo árbol no se atrevía, 500 árboles superan a la regla. Y la importancia repite la lección del Lasso: lo que más dice del gasto futuro es el gasto pasado.
+:::
 
 <!--=================-->
 <!--=================-->
-# Momento 5 — El podio y el diagnóstico <span class="badge-time">≈ 12 min</span>
+# Momento 5 — ¿La ventaja del bosque es real o es ruido? <span class="badge-time">≈ 6 min</span>
+
+::: {.callout-remember}
+**Lo que necesitas**
+
+Dos modelos medidos en los **mismos** clientes se comparan cliente a cliente: se calcula la diferencia de errores y su promedio ± 2 × sd/√n. Si el margen alcanza el cero, es un **empate técnico**.
+:::
 
 ```r
-## La tabla del torneo / Tournament table
-torneo <- data.frame(
-  modelo = c("Baseline (promedio)", "Lasso (lambda.1se)",
-             "Árbol podado (5 hojas)", "Random Forest (500)"),
-  MAE    = c(0.344, 0.218, 0.286, 0.226),
-  RMSE   = c(0.429, 0.270, 0.345, 0.281)
-)
-torneo
-write.csv(torneo, "output/torneo_semana12.csv", row.names = FALSE)
+##============================================================================##
+##=== 5. La tabla del líder del gasto                                      ===##
+##============================================================================##
+
+## cliente a cliente: ¿cuánto le gana el bosque a la regla? ¿y la regla a la media?
+diferencia <- error_regla - error_rf
+round(c(ventaja = mean(diferencia), margen = 2 * sd(diferencia) / sqrt(n_test)))
+diferencia_regla <- error_media - error_regla
+round(c(ventaja = mean(diferencia_regla), margen = 2 * sd(diferencia_regla) / sqrt(n_test)))
+
+## la tabla del líder: la de la semana 10 más los candidatos de hoy
+nuevos <- data.frame(regla  = c("lasso (lambda.1se)", "arbol podado", "bosque"),
+                     mae    = round(c(mean(error_lasso), mean(error_arbol), mean(error_rf))),
+                     margen = round(2 * c(sd(error_lasso), sd(error_arbol), sd(error_rf)) / sqrt(n_test)),
+                     rmse   = round(sqrt(c(mean(error_lasso^2), mean(error_arbol^2), mean(error_rf^2)))))
+lider <- rbind(lider, nuevos)
+lider
+
+## export data
+write.csv(lider, "output/lider_gasto_s12.csv", row.names = F)
 ```
 
-🥇 **Ganó el Lasso.** ¿No que el bosque siempre gana? La semana pasada sí; esta no — el proceso que genera las notas es (casi) una suma ponderada de los parciales, y **en cancha lineal, el modelo lineal manda**. La moraleja que vale el semestre: *el ganador depende de la forma del patrón; por eso se monta el torneo.* Y de paso: PronosticaU cobraba por MAE 0.55 — tu Lasso lo hace en 0.218, con fórmula publicable.
+**Checkpoint 🎯:** el bosque le gana a la regla por **6.074 ± 14.429** pesos por cliente; la regla le ganaba a la media por **159.766 ± 13.679**. La tabla:
 
-El diagnóstico antes de firmar — predicho contra real:
+```default
+               regla    mae margen   rmse
+1     media de train 328494  38496 836839
+2  3 x gasto mensual 168728  31656 655018
+3 lasso (lambda.1se) 228481  30386 649069
+4       arbol podado 328494  38496 836839
+5             bosque 162654  29017 602535
+```
+
+::: {.callout-key}
+**Hallazgo 5 — la lección de la semana**
+
+La ventaja del bosque sobre la regla de Finanzas **cabe en el margen: empate técnico**. La mejora de verdad fue la de la semana 10: pasar de la media a la regla (160 mil pesos por cliente, casi doce veces su margen). Con estos datos, casi todo lo que se sabe del gasto futuro ya está en el gasto pasado, y ningún modelo le saca mucho más. Tres familias de modelos distintas contaron la misma historia — cuando eso pasa, el hallazgo es robusto.
+:::
+
+<!--=================-->
+<!--=================-->
+# Momento 6 — ¿Dónde se equivoca? <span class="badge-time">≈ 8 min</span>
+
+::: {.callout-remember}
+**Lo que necesitas**
+
+**Residual** = real − predicho, cliente por cliente. En el gráfico predicho contra real, la diagonal es la perfección: los puntos lejos de ella son los errores grandes. Si unos pocos concentran casi todo el error, ese segmento necesita **tratamiento aparte**.
+:::
 
 ```r
-## Gráfico predicho vs. real del ganador / Predicted vs actual
-resultado <- data.frame(real = test$nota_final, pred = pred_lasso)
+##============================================================================##
+##=== 6. El diagnóstico del bosque                                         ===##
+##============================================================================##
+
+## predicho contra real, en millones de pesos
+resultado <- data.frame(real = test$gasto_proximo_trim / 1e6,
+                        pred = pred_rf / 1e6)
 ggplot(resultado, aes(x = pred, y = real)) +
-  geom_point(alpha = 0.7, color = "#1e3a5f") +
+  geom_point(alpha = 0.5, color = "#1e3a5f") +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "#d97706") +
-  labs(title = "Pronosticador de notas — Lasso en test",
-       x = "Nota predicha", y = "Nota real") +
+  labs(title = "Diez clientes concentran casi todo el error del bosque",
+       x = "Gasto predicho (millones)", y = "Gasto real (millones)") +
   theme_minimal()
-ggsave("output/diagnostico_lasso.png", width = 6, height = 4)
+ggsave("output/fig_diagnostico_s12.png", width = 6, height = 4)
+
+## ¿qué parte del error al cuadrado se llevan los 10 peores clientes?
+error2 <- (test$gasto_proximo_trim - pred_rf)^2
+round(100 * sum(head(sort(error2, decreasing = T), 10)) / sum(error2), 1)
 ```
 
-**Checkpoint 🎯:** la nube abraza la diagonal, sin abanicos en los extremos, y la brecha MAE–RMSE del Lasso es pequeña (0.218 vs 0.270): sin embarradas ocasionales. Este modelo se firma.
+**Checkpoint 🎯:** la nube se amontona abajo a la izquierda, pegada a la diagonal, y unos pocos puntos se escapan lejos de ella, por arriba y por abajo: grandes gastadores a los que el bosque les erró por millones (uno gastó 21 millones cuando se esperaban 4). Los **10 peores** clientes, de 1.600, se llevan el **78 %** del error al cuadrado.
+
+::: {.callout-key}
+**Hallazgo 6**
+
+El pronóstico sirve para el 99 % de la cartera; los grandes gastadores **necesitan tratamiento aparte** (un ejecutivo de cuenta, un rango de escenarios), no un número del modelo. Y eso explica por qué el RMSE queda tan por encima del MAE: lo inflan diez clientes.
+:::
+
+<!--=================-->
+<!--=================-->
+# Momento 7 — ¿A quién llama Growth? <span class="badge-time">≈ 10 min</span>
+
+::: {.callout-remember}
+**Lo que necesitas**
+
+**Valor en riesgo** = probabilidad de irse (semana 11) × gasto esperado (hoy): cuánto gasto podría perder Cóndor con cada cliente. Ordenar por riesgo o por valor en riesgo produce listas de llamadas distintas.
+:::
+
+Si el tiempo aprieta, este momento se hace en plenaria, con la pantalla del profesor.
 
 ```r
-## Cierre (comentarios, 3-4 líneas): la universidad te pregunta si
-## puede usar este modelo para ALERTAS TEMPRANAS a mitad de semestre.
-## a) ¿Qué le respondes con las cifras de hoy?
-## b) ¿Qué variable NO estaría disponible a mitad de semestre y qué
-##    harías al respecto? (mira las columnas de la base…)
+##============================================================================##
+##=== 7. El valor en riesgo  (grano: cliente del test)                     ===##
+##============================================================================##
+
+## la cartera: el gasto esperado de hoy, el riesgo de la semana 11 y la realidad
+cartera <- data.frame(cliente_id = ids_test, gasto_esperado = pred_rf) %>%
+           left_join(riesgo, by = "cliente_id") %>%
+           left_join(select(clientes, cliente_id, abandono, gasto_promedio_mensual), by = "cliente_id") %>%
+           mutate(valor_en_riesgo = prob_abandono * gasto_esperado)
+
+## dos listas de 278 llamadas (el cupo de Growth)
+por_riesgo <- cartera %>%
+              arrange(desc(prob_abandono)) %>%
+              head(278)
+por_valor <- cartera %>%
+             arrange(desc(valor_en_riesgo)) %>%
+             head(278)
+
+## ¿a cuántos que se iban encuentra cada lista, y cuánto gasto trimestral está en juego?
+por_riesgo %>%
+summarise(se_van = sum(abandono == 1),
+          gasto_en_juego = sum(3 * gasto_promedio_mensual[abandono == 1]),
+          gasto_esperado_mediano = round(median(gasto_esperado)))
+por_valor %>%
+summarise(se_van = sum(abandono == 1),
+          gasto_en_juego = sum(3 * gasto_promedio_mensual[abandono == 1]),
+          gasto_esperado_mediano = round(median(gasto_esperado)))
+
+## ¿cuántos clientes están en las dos listas?
+length(intersect(por_riesgo$cliente_id, por_valor$cliente_id))
+
+## export data
+write.csv(cartera, "output/valor_en_riesgo.csv", row.names = F)
 ```
 
-::: {.callout-warning}
-**La pregunta b) no es retórica.** Una de las variables del modelo se conoce *tarde* para servir en una alerta temprana. Detectarlo es exactamente la disciplina anti-leakage de la semana 10: pregúntate siempre *"¿esta columna existirá en el momento de predecir?"*. Discútanlo — y anoten qué le pasaría al MAE si hay que sacarla.
+**Checkpoint 🎯:** llamando por **riesgo**, Growth encuentra a **156** clientes que se van, pero casi todos gastan poco (gasto esperado mediano de **11.762**): el gasto trimestral en juego es de **3.144.540**. Llamando por **valor en riesgo**, encuentra solo a **22**… con **9.221.343** en juego (mediana de **632.493**). Solo **8** clientes están en las dos listas.
+
+::: {.callout-key}
+**La decisión — no tiene respuesta única**
+
+Si la meta de Growth es **retener clientes**, llama por riesgo; si es **retener gasto**, llama por valor en riesgo: protege tres veces más plata, aunque la mayoría de sus llamadas caen en clientes que no se iban. ¿Qué le recomiendas? Escríbelo como comentario (tres líneas), con dos cifras de hoy y un dato del negocio que necesitarías para decidir (pista: ¿cuánto cuesta una llamada? ¿qué tanto funciona para retener?).
 :::
 
 <!--=================-->
 <!--=================-->
 # ¿Terminaste antes? El reto de los dos lambdas
 
-`cv.glmnet` te dio dos candidatos y usamos `lambda.1se`. Repite la predicción con `s = "lambda.min"` y compara: ¿cuánto mejora el MAE? ¿Cuántos coeficientes cambian de tamaño? Documenta como comentario cuál elegirías para el informe de la universidad y por qué (pista: pregunta 2 de comprensión de la teoría).
+`cv.glmnet` te dio dos candidatos y usamos `lambda.1se`. Repite la predicción con `s = "lambda.min"`: ¿cuántas variables sobreviven? ¿Qué pasa con el MAE y con el RMSE? ¿Le gana a la regla de Finanzas por más que el margen?
+
+**Checkpoint 🎯:** con `lambda.min` sobreviven **29** columnas; MAE **204.921** (todavía peor que la regla) y RMSE **606.020** (mejor). El freno débil compra RMSE a cambio de legibilidad — y sigue sin ganarle a la regla en el error típico.
 
 <!--=================-->
 <!--=================-->
 # Cierre
 
-Torneo completo en una clase: una vara, tres familias de modelos, un ganador que se deja leer y un diagnóstico que lo confirma. El [**Taller 12**](../task/week-12.html) te lleva al mercado inmobiliario: InmoValle quiere publicar un **avaluador instantáneo** en su web, y tu Lasso va a hacer algo que hoy no hizo — **expulsar variables** con coeficiente cero exacto. Atento a quién saca y por qué.
+Tres familias de modelos, una vara que no se dejó vencer y un diagnóstico que dice dónde falla el pronóstico: el torneo de hoy no coronó a un modelo, coronó un hallazgo. Y juntando la semana 11 con la 12 aprendiste la decisión que sigue: no basta con saber quién se va; importa cuánto vale.
+
+::: {.callout-key}
+**El giro de la próxima semana 🔮**
+
+La semana 13 deja de predecir: agrupa a los mismos 8.000 clientes en segmentos, sin target, y los cruza con el riesgo y el valor que calculaste estas dos semanas.
+:::
+
+El [**Taller 12**](../task/week-12.html) te lleva al mercado inmobiliario: InmoValle quiere publicar un **avaluador instantáneo**, y allá el Lasso se queda con varias variables, **expulsa** alguna con coeficiente cero exacto… y el torneo no termina como el de hoy. Atento a quién gana y por qué.

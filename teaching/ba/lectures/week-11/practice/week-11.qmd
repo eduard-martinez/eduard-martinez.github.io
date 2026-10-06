@@ -1,17 +1,18 @@
 ---
-title: "Unidad 5 - Práctica: el torneo de clasificadores"
+title: "Unidad 5 - Práctica: el torneo de clasificadores, en Cóndor"
 subtitle: "Aplicación guiada en clase · Semana 11 · 06327-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
-  html: default
+  html:
+    number-sections: false
 lang: es
 ---
 
 <div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
-<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
-<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
-<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
-<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+<a href="https://x.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="../../pic/x.svg" alt="X" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="../../pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="../../pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="../../pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
 </div>
 
 <!--=================-->
@@ -21,153 +22,229 @@ lang: es
 ::: {.callout-key}
 **Hoy eres el ingeniero (el juez ya lo llevas dentro)**
 
-La semana pasada calificaste modelos ajenos. Hoy entrenas los tuyos: el mismo problema de crédito, pero ahora la base **completa y sin predicciones** — las predicciones las produces tú. Esta práctica asume la [teoría de la semana](../theory/week-11.html) (árboles, poda, bosques, umbral) y las [métricas de la semana 10](../../week-10/theory/week-10.html). Nada se re-explica.
+La semana pasada juzgaste reglas escritas a mano sobre la pregunta de retención de Cóndor: la tonta, la del EDA y un memorizador. Hoy entrenas modelos que escriben sus propias reglas, con los mismos clientes de train y el mismo sobre sellado.
 :::
 
 - 👥 En **parejas**: uno escribe, el otro lee los árboles en voz alta y audita cifras. Roten en el Momento 4.
-- 🖥️ **RStudio** con tu proyecto del curso. Paquetes de la semana: `rpart`, `rpart.plot`, `randomForest` (los instalaste antes de clase, ¿cierto?). Plan B: `install.packages(c("rpart","rpart.plot","randomForest"))` y a esperar el wifi.
-- 📥 El dato de hoy: <a href="credito_clasificacion.csv" download>**credito_clasificacion.csv**</a> — 300 solicitudes históricas de BancoAndes con su decisión final. Guárdalo en `data/`.
-- 🎯 La misión de la gerencia: *"la semana pasada nos convencieron de no comprar el modelo de CreditoYa. Perfecto — entonces constrúyanme uno mejor, y demuéstrenlo con las mismas métricas que usaron para tumbar el de ellos."*
+- 🖥️ **RStudio** con tu proyecto `proyecto_condor`. Paquetes de la semana: `rpart`, `rpart.plot` y `randomForest` (los instalaste antes de clase, ¿cierto?). Plan B: `install.packages(c("rpart", "rpart.plot", "randomForest"))` y a esperar el wifi.
+- 📁 De la semana 10 necesitas dos archivos en `output/`: `particion_condor.csv` (el sobre sellado) y `lider_abandono_s10.csv` (la tabla del líder). ¿No los tienes? Corre completo `10_juez_condor.R`, el script de la semana 10, antes de empezar.
+- 🎯 La misión de Growth: *"la regla del EDA encuentra a 151 de cada 354 clientes que se van. Tenemos cupo para unas 280 llamadas por cada 1.600 clientes, las mismas que señalaba esa regla. ¿Un modelo entrenado encuentra más con ese cupo?"*
+
+**Cómo funciona cada momento.** Una **pregunta de analista**, **lo que necesitas** de la teoría en dos líneas (la versión completa, en la [teoría de la semana](../theory/week-11.html) y las [métricas de la semana 10](../../week-10/theory/week-10.html)), el código, el checkpoint 🎯 y el **hallazgo**. Todas las cifras del test llevan su margen: una diferencia menor que el margen no es una diferencia.
 
 <!--=================-->
 <!--=================-->
 # El setup <span class="badge-time">≈ 5 min</span>
 
-Script nuevo: `scripts/11_torneo.R`.
+Abre `proyecto_condor.Rproj` (**File → Open Project…**) y crea el script `scripts/11_torneo_condor.R`:
 
 ```r
-## ============================================
-## Práctica semana 11 — El torneo de clasificadores
-## Nombre(s): _______________
-## Fecha:     _______________
-## ============================================
+##============================================================================##
+# 11_torneo_condor.R  —  el torneo de clasificadores: ¿quién se va de Cóndor?
+#------------------------------------------------------------------------------#
+# Analítica para los negocios (06327-ECO) · Semana 11 · práctica guiada
+# Lee input/base_clientes.csv y, de la semana 10, output/particion_condor.csv
+# y output/lider_abandono_s10.csv. Produce:
+#   - output/prob_abandono.csv      (grano: cliente del test; probabilidad de irse)
+#   - output/lider_abandono_s11.csv (grano: regla o modelo; la tabla del líder)
+# Nombre(s): _______________
+##============================================================================##
 
-## Librerías / Libraries
-pacman::p_load(dplyr, rpart, rpart.plot, randomForest)
+##============================================================================##
+##=== 0. Configuración inicial                                             ===##
+##============================================================================##
+rm(list = ls())
+require(pacman)
+p_load(dplyr, rpart, rpart.plot, randomForest)
 
-## Cargar datos / Load data
-credito <- read.csv("data/credito_clasificacion.csv")
+## la base de Cóndor: las columnas de texto entran como categorías (el bosque lo exige)
+clientes <- read.csv("input/base_clientes.csv", stringsAsFactors = T)
 
-## El target debe ser factor para clasificar / Target as factor
-credito$decision <- as.factor(credito$decision)
-
-## Radiografía / First look
-dim(credito)
-str(credito)
-table(credito$decision)
+## de la semana 10: el sobre sellado y la tabla del líder
+particion <- read.csv("output/particion_condor.csv")
+lider     <- read.csv("output/lider_abandono_s10.csv")
+lider
 ```
 
-**Checkpoint 🎯:** **300 filas y 6 columnas**; `decision` es factor con **160 Aprobado / 140 Rechazado**. Cinco variables para predecir: ingreso, historial, deuda, antigüedad laboral y edad.
+**Checkpoint 🎯:** la tabla que dejaste la semana pasada. La regla del EDA llama a **278** clientes del test, encuentra a **151** de los 354 que se van y tiene accuracy **0.794 ± 0.020**. Todo lo que entrenes hoy compite contra esa fila.
 
 <!--=================-->
 <!--=================-->
-# Momento 1 — La partición y la vara <span class="badge-time">≈ 7 min</span>
+# Momento 1 — ¿Con qué columnas se entrena? <span class="badge-time">≈ 7 min</span>
 
-Primero la disciplina de la semana 10: apartar el examen **antes** de entrenar nada, y medir la regla tonta.
+::: {.callout-remember}
+**Lo que necesitas**
+
+Las **predictoras** deben existir el día de la decisión (nada del futuro), no repetir información y, para el bosque, no tener vacíos: `randomForest` no acepta `NA`.
+:::
 
 ```r
-## Partición 80/20 / Train-test split
-set.seed(11)   # ¡en la línea inmediatamente anterior al sample!
-idx_train <- sample(1:nrow(credito), size = round(0.8 * nrow(credito)))
-train <- credito[idx_train, ]
-test  <- credito[-idx_train, ]
+##============================================================================##
+##=== 1. La base del modelo  (grano: cliente)                              ===##
+##============================================================================##
 
-## Verificar / Check
-table(train$decision)
-table(test$decision)
+## ciudad y departamento: ¿dicen lo mismo?
+n_distinct(clientes$ciudad)
+nrow(distinct(clientes, ciudad, departamento))
 
-## Baseline: la clase mayoritaria / Majority-class baseline
-round(max(table(test$decision)) / nrow(test), 3)
+## la base del modelo: el target como factor y fuera tres tipos de columnas
+## - gasto_proximo_trim: se conoce después del corte (la fuga de la semana 10)
+## - departamento: repite a ciudad
+## - duracion_sesion, csat y score_buro: vacías cuando "no aplica"; el bosque no
+##   acepta vacíos y esa información ya está en sesiones, tickets y tiene_credito
+modelo <- clientes %>%
+          left_join(particion, by = "cliente_id") %>%
+          mutate(abandono = as.factor(abandono)) %>%
+          select(-gasto_proximo_trim, -departamento,
+                 -duracion_sesion_promedio, -csat_promedio, -score_buro)
+
+## train y test: el mismo sobre de la semana 10
+train <- modelo %>%
+         filter(conjunto == "train") %>%
+         select(-cliente_id, -conjunto)
+test <- modelo %>%
+        filter(conjunto == "test") %>%
+        select(-cliente_id, -conjunto)
+n_test  <- nrow(test)
+se_van  <- sum(test$abandono == 1)
+
+## los clientes del test, para guardar su riesgo al final
+ids_test <- modelo %>%
+            filter(conjunto == "test") %>%
+            pull(cliente_id)
+
+c(train = nrow(train), test = n_test, predictoras = ncol(train) - 1)
+table(train$abandono)
 ```
 
-**Checkpoint 🎯:** train con **129 Aprobado / 111 Rechazado** (240 filas) y test con **31 / 29** (60 filas). Baseline: **0.517** — este test quedó casi parejo, así que la regla tonta apenas le gana a una moneda. Todo lo que entrenes hoy compite contra ese 51.7%.
+**Checkpoint 🎯:** **12 ciudades y 12 combinaciones** ciudad–departamento. Quedan **6.400 clientes en train, 1.600 en test y 22 predictoras**, con los mismos **4.982 que se quedan y 1.418 que se van** de la semana pasada.
 
-::: {.callout-warning}
-**Si tus números no coinciden con los checkpoints**, casi seguro corriste `sample()` sin ejecutar el `set.seed(11)` justo antes. Cada bloque aleatorio de hoy trae su propia semilla — ejecútala siempre junto con su bloque (o corre el script completo con *Source*).
+::: {.callout-key}
+**Hallazgo 1**
+
+Cada ciudad tiene un solo departamento: `departamento` no aporta nada nuevo. Y el sobre no se movió: el test es el mismo de la semana 10, así que la comparación con la tabla del líder es justa.
 :::
 
 <!--=================-->
 <!--=================-->
-# Momento 2 — Tu primer árbol (y cómo leerlo) <span class="badge-time">≈ 12 min</span>
+# Momento 2 — ¿Qué pregunta haría la máquina? <span class="badge-time">≈ 12 min</span>
+
+::: {.callout-remember}
+**Lo que necesitas**
+
+El **árbol** prueba todas las variables y todos los cortes posibles, y se queda con el que deja los dos grupos más **puros** (menor impureza de Gini: grupos donde casi todos se van o casi todos se quedan). Después repite la jugada dentro de cada grupo.
+:::
 
 Empecemos con un árbol corto y legible: máximo dos niveles de preguntas.
 
 ```r
-## Entrenar un árbol de profundidad 2 / Train a depth-2 tree
-arbol <- rpart(decision ~ ., data = train, method = "class",
+##============================================================================##
+##=== 2. Tu primer árbol  (profundidad 2)                                  ===##
+##============================================================================##
+
+## un árbol de máximo dos niveles de preguntas
+arbol <- rpart(abandono ~ ., data = train, method = "class",
                control = rpart.control(maxdepth = 2))
 
-## Verlo como texto y como diagrama / Print and plot
+## verlo como texto y como diagrama
 arbol
 rpart.plot(arbol, type = 4, extra = 104)
 ```
 
-**Checkpoint 🎯:** la **raíz** pregunta por la **deuda** (`deuda_actual < 13.36`). Con deuda alta → Rechazado directo (103 casos de train). Con deuda baja, segunda pregunta por el ingreso (`ingreso_m >= 3.41`) → Aprobado; si además el ingreso es bajo → Rechazado.
+**Checkpoint 🎯:** la **raíz** pregunta por la **frecuencia** (`frecuencia_tx >= 8.5`). Con 8 o menos transacciones, segunda pregunta por la **recencia**: si llevan 158 días o más sin transar (`recencia_dias >= 157.5`), se va el **74 %** de esos 363 clientes, y esa es la única hoja que predice "1".
+
+Ahora, sin maquinaria oculta: el primer corte, **a mano**, con las tasas por tramo de la semana 6.
+
+```r
+## a mano: la tasa de abandono a cada lado del primer corte
+train %>%
+group_by(frecuencia_tx >= 8.5) %>%
+summarise(clientes = n(), tasa = mean(abandono == 1))
+```
+
+**Checkpoint 🎯:** con 9 o más transacciones, **4.706** clientes y tasa de **0.133**; con 8 o menos, **1.694** clientes y tasa de **0.469**.
 
 ::: {.callout-practice}
-**Lectura en voz alta (2 min, en pareja):** traduzcan el árbol a política de crédito en dos frases, sin decir "nodo" ni "split". Algo así como: *"si debe más de 13 millones, no; si debe poco y gana más de 3.4, sí; …"*. Después comparen: ¿se parece a lo que un comité humano haría? ¿Qué variable esperaban en la raíz que NO apareció?
+**Lectura en voz alta (2 min, en pareja):** traduzcan el árbol a una política para Growth en dos frases, sin decir "nodo" ni "split". Después compárenlo con la regla del EDA (cero sesiones o más de 90 días sin transar): ¿qué pregunta repitió la máquina y cuál cambió?
 :::
 
-Ahora califícalo con el músculo de la semana 10 — matriz y métricas en test:
+Ahora califícalo, con sus márgenes:
 
 ```r
-## Predecir y evaluar / Predict and evaluate
+## calificarlo en test
 pred_arbol <- predict(arbol, newdata = test, type = "class")
-table(Real = test$decision, Modelo = pred_arbol)
+table(Real = test$abandono, Modelo = pred_arbol)
 
-tp <- sum(test$decision == "Aprobado"  & pred_arbol == "Aprobado")
-fn <- sum(test$decision == "Aprobado"  & pred_arbol == "Rechazado")
-fp <- sum(test$decision == "Rechazado" & pred_arbol == "Aprobado")
-tn <- sum(test$decision == "Rechazado" & pred_arbol == "Rechazado")
-round((tp + tn) / nrow(test), 3)   # accuracy
-round(tp / (tp + fp), 3)           # precisión
-round(tp / (tp + fn), 3)           # recall
+tp <- sum(test$abandono == 1 & pred_arbol == 1)
+fn <- sum(test$abandono == 1 & pred_arbol == 0)
+fp <- sum(test$abandono == 0 & pred_arbol == 1)
+tn <- sum(test$abandono == 0 & pred_arbol == 0)
+acc_arbol  <- (tp + tn) / (tp + tn + fp + fn)
+prec_arbol <- tp / (tp + fp)
+rec_arbol  <- tp / (tp + fn)
+round(c(accuracy = acc_arbol, precision = prec_arbol, recall = rec_arbol), 3)
+
+## los márgenes (dos errores estándar, como la semana pasada)
+margen_acc_arbol <- 2 * sqrt(acc_arbol * (1 - acc_arbol) / n_test)
+margen_rec_arbol <- 2 * sqrt(rec_arbol * (1 - rec_arbol) / se_van)
+round(c(accuracy = margen_acc_arbol, recall = margen_rec_arbol), 3)
 ```
 
-**Checkpoint 🎯:** matriz **TP=27, FN=4, FP=1, TN=28** → accuracy **0.917**, precisión **0.964**, recall **0.871**. Dos preguntas y ya vas 40 puntos arriba del baseline (91.7% vs 51.7%). Y como anécdota: el "modelo misterioso" que auditaste la semana pasada rondaba el 88% — acabas de superarlo con un árbol que se explica en dos frases (otra partición, así que tómalo como guiño, no como prueba).
+**Checkpoint 🎯:** **TP = 59, FN = 295, FP = 17, TN = 1229** → accuracy **0.805 ± 0.020**, precisión **0.776**, recall **0.167 ± 0.040**.
+
+::: {.callout-key}
+**Hallazgo 2**
+
+El árbol hace **solo** lo que tú hiciste a mano en la semana 6: comparar tasas por tramo y quedarse con el corte que más las separa (13 % contra 47 %). Repitió la recencia, con un corte más exigente (158 días en vez de 90), y cambió las sesiones por la frecuencia: dos maneras de medir el mismo enganche. En accuracy empata con la regla del EDA (0.805 ± 0.020 contra 0.794 ± 0.020), pero a Growth le sirve menos: solo le pasa 76 nombres y encuentra a 59, cuando la regla del EDA encontraba 151.
+:::
 
 <!--=================-->
 <!--=================-->
-# Momento 3 — El memorizador y la poda <span class="badge-time">≈ 15 min</span>
+# Momento 3 — ¿Cuánto árbol es demasiado árbol? <span class="badge-time">≈ 12 min</span>
 
-¿Y si soltamos todos los frenos? Profundidad libre, hojas de un solo caso — el árbol que puede memorizar:
+::: {.callout-remember}
+**Lo que necesitas**
+
+El **cp** es la perilla del tamaño del árbol. La **validación cruzada** (`xerror` en la tabla de `rpart`) estima el error fuera de muestra repartiendo el train en 10 pedazos, **sin abrir el sobre**. **Regla 1-SE**: quedarse con el árbol más pequeño cuyo error de CV empata, dentro de un error estándar, con el mejor.
+:::
+
+¿Y si soltamos todos los frenos? Profundidad libre y hojas de un solo cliente: el árbol que puede memorizar.
 
 ```r
-## El memorizador: sin frenos / No-brakes tree
-set.seed(11)   # la CV interna de rpart usa el azar
-memorizador <- rpart(decision ~ ., data = train, method = "class",
+##============================================================================##
+##=== 3. El memorizador y la poda                                          ===##
+##============================================================================##
+
+## el memorizador: sin frenos
+set.seed(11)   # la validación cruzada interna de rpart usa el azar
+memorizador <- rpart(abandono ~ ., data = train, method = "class",
                      control = rpart.control(cp = 0.0001, minsplit = 2, minbucket = 1))
 
-## ¿Cuántas hojas le salieron? / How many leaves?
+## ¿cuántas hojas le salieron?
 sum(memorizador$frame$var == "<leaf>")
 
-## Train vs test / The overfitting signature
+## train contra test: la firma del sobreajuste
 pred_memo_tr <- predict(memorizador, newdata = train, type = "class")
-pred_memo_te <- predict(memorizador, newdata = test,  type = "class")
-round(mean(pred_memo_tr == train$decision), 3)
-round(mean(pred_memo_te == test$decision), 3)
+pred_memo_te <- predict(memorizador, newdata = test, type = "class")
+round(mean(pred_memo_tr == train$abandono), 3)
+acc_memo <- mean(pred_memo_te == test$abandono)
+round(c(accuracy = acc_memo, margen = 2 * sqrt(acc_memo * (1 - acc_memo) / n_test)), 3)
 ```
 
-**Checkpoint 🎯:** **12 hojas**; accuracy **1.000 en train** y **0.967 en test**.
+**Checkpoint 🎯:** **926 hojas**; accuracy de **1 en train** (el 100 %) y **0.729 ± 0.022 en test**: por debajo de la regla tonta (0.779 ± 0.021), esta vez por más que el margen.
 
-::: {.callout-warning}
-**Momento incómodo (y valioso):** el memorizador NO se estrelló — en este test hasta le fue bien. ¿Entonces la teoría mintió? No: su 100% en train sigue siendo una cifra que jamás podrías reportar, y un solo test de 60 filas es un examen ruidoso donde 2-3 casos mueven todo. El árbitro confiable es la **validación cruzada** — 10 exámenes en vez de uno. Veamos qué dice.
-:::
-
-`rpart` corrió esa CV por ti mientras entrenaba. La tabla:
+Ahora el juez: la validación cruzada que `rpart` corrió mientras entrenaba, en tabla y en gráfico.
 
 ```r
-## La CV incorporada: error por tamaño del árbol / Built-in CV table
+## la validación cruzada incorporada: error por tamaño del árbol
 round(memorizador$cptable, 4)
+plotcp(memorizador)
 ```
 
-**Checkpoint 🎯:** la columna **`xerror`** (error de CV, relativo) baja hasta **0.0901** con `nsplit = 3`… y de ahí en adelante **sube**: 0.1261 con 7 divisiones, 0.1351 con 11. Ahí está la curva del dial de la semana 10, dibujada por la CV: las hojas extra del memorizador no compran patrón — compran ruido.
-
-Para podar, la regla profesional (**regla 1-SE**): como la CV también trae ruido (mira la columna `xstd`), no persigas el mínimo exacto — quédate con el **árbol más pequeño que empata con el mínimo** dentro de un error estándar:
+**Checkpoint 🎯:** la columna **`xerror`** (el error de la CV, relativo a no tener árbol) baja de **1.0000** a **0.8914** con 2 divisiones… y de ahí **sube**: 0.8999 con 8, 0.9020 con 9, hasta **1.3216** con las 925 del memorizador, peor que no tener árbol. En el gráfico, la curva en forma de U es el dial de la semana 10, dibujado por la CV; la línea punteada horizontal es el tope de la regla 1-SE.
 
 ```r
-## Regla 1-SE: el árbol más pequeño que empata con el mejor
-## 1-SE rule: smallest tree within one SE of the minimum
+## regla 1-SE: el árbol más pequeño que empata con el mejor
 tabla  <- memorizador$cptable
 tope   <- min(tabla[, "xerror"]) + tabla[which.min(tabla[, "xerror"]), "xstd"]
 cp_opt <- tabla[which(tabla[, "xerror"] <= tope)[1], "CP"]
@@ -176,99 +253,218 @@ round(cp_opt, 3)
 arbol_podado <- prune(memorizador, cp = cp_opt)
 sum(arbol_podado$frame$var == "<leaf>")
 rpart.plot(arbol_podado, type = 4, extra = 104)
-
-## Evaluar el podado / Evaluate the pruned tree
-pred_poda <- predict(arbol_podado, newdata = test, type = "class")
-round(mean(pred_poda == test$decision), 3)
 ```
 
-**Checkpoint 🎯:** el tope queda en 0.0901 + 0.0279 = 0.118, el primer árbol que cabe es el de `nsplit = 2` → `cp_opt` = **0.027** → el árbol podado tiene **3 hojas** y saca **0.917** en test. ¿Te suena? Es *esencialmente tu árbol del Momento 2*: la CV acaba de confirmar, con 10 exámenes, que las preguntas deuda → ingreso eran las correctas y que las 9 hojas extra del memorizador no compraban nada. Entre modelos empatados, gana el simple (parsimonia). En el taller, con datos más ruidosos, verás al memorizador pagar caro de verdad.
+**Checkpoint 🎯:** el tope queda en 0.8914 + 0.0225 = 0.9139; el primer árbol que cabe es el de 2 divisiones → `cp_opt` = **0.006** → el árbol podado tiene **3 hojas**.
 
-<!--=================-->
-<!--=================-->
-# Momento 4 — Quinientos árboles votando <span class="badge-time">≈ 10 min</span>
+::: {.callout-key}
+**Hallazgo 3**
 
-Roten roles. Ahora el candidato pesado del torneo:
-
-```r
-## Random Forest / The forest
-set.seed(11)   # el bootstrap usa el azar
-bosque <- randomForest(decision ~ ., data = train, ntree = 500)
-
-## Evaluar en test / Evaluate on test
-pred_rf <- predict(bosque, newdata = test)
-table(Real = test$decision, Modelo = pred_rf)
-round(mean(pred_rf == test$decision), 3)
-
-## ¿Qué variables mandan? / Variable importance
-importance(bosque)
-```
-
-**Checkpoint 🎯:** matriz **TP=29, FN=2, FP=1, TN=28** → accuracy **0.950** (precisión 0.967, recall 0.935). Y la importancia corona a la **deuda (44.0)**, seguida del **ingreso (35.8)** y la **antigüedad (25.9)** — el mismo podio que insinuó la raíz de tu árbol del Momento 2, ahora votado por 500 árboles. La edad (3.4) resultó casi decorativa.
-
-::: {.callout-practice}
-**Discusión de 2 minutos:** el bosque le ganó al árbol podado (0.950 vs 0.900) pero ya no puedes dibujarlo. Si el regulador financiero exige explicar cada rechazo, ¿cuál de los dos despliegas? ¿Hay una tercera vía? (Pista: la teoría habló de un "vocero".)
+El árbol podado es *exactamente* tu árbol del Momento 2: la CV confirmó, con 10 exámenes y sin tocar el sobre, que dos preguntas bastan y que las otras 923 hojas del memorizador compraban ruido. Entre modelos empatados gana el simple.
 :::
 
 <!--=================-->
 <!--=================-->
-# Momento 5 — La perilla del umbral <span class="badge-time">≈ 8 min</span>
+# Momento 4 — ¿Qué gana el bosque votando? <span class="badge-time">≈ 10 min</span>
 
-La gerencia de riesgo entra a la sala: *"un impago nos cuesta lo que ganamos con ocho créditos buenos. No quiero el modelo que más acierte — quiero el que no apruebe morosos."* Eso no pide otro modelo: pide **otro umbral**.
+::: {.callout-remember}
+**Lo que necesitas**
 
-```r
-## Probabilidades del bosque (proporción de votos) / Vote share
-prob <- predict(bosque, newdata = test, type = "prob")[, "Aprobado"]
-head(round(prob, 2))
+El **bosque** entrena 500 árboles, cada uno sobre una remuestra de train y mirando en cada corte solo unas pocas variables al azar, y los pone a votar. Cada árbol deja por fuera cerca de un tercio de los clientes: ellos sirven de **juez gratis** (el error *out-of-bag*, OOB).
+:::
 
-## Umbral estricto: aprobar solo con prob >= 0.8 / Strict threshold
-pred_08 <- ifelse(prob >= 0.8, "Aprobado", "Rechazado")
-table(Real = test$decision, Modelo = pred_08)
-```
-
-**Checkpoint 🎯:** con umbral 0.8 la matriz queda **TP=23, FN=8, FP=0, TN=29**: precisión **1.000** (¡ni un moroso aprobado!) pero el recall cae a **0.742** — el banco rechaza a 8 buenos clientes de 31. La accuracy bajó a 0.867 y sin embargo **este es el modelo que la gerente pidió**. Métrica correcta > métrica alta.
+Roten roles. Ahora el candidato pesado del torneo (500 árboles sobre 6.400 clientes: tarda entre 20 segundos y un minuto).
 
 ```r
-## a) Calcula precisión y recall con umbral 0.8 (código, no calculadora)
-## b) Comentario (2-3 líneas): ¿qué le dirías a la gerente que gana
-##    y que pierde con el umbral 0.8 frente al 0.5? ¿Con qué dato
-##    del negocio decidirías el punto exacto?
+##============================================================================##
+##=== 4. Quinientos árboles votando                                        ===##
+##============================================================================##
+
+## el bosque y su juez gratis
+set.seed(11)   # el bootstrap usa el azar
+bosque <- randomForest(abandono ~ ., data = train, ntree = 500)
+bosque
+
+## calificarlo en test: la probabilidad de irse (proporción de votos) y la
+## decisión por mayoría (umbral 0.5)
+prob_rf <- predict(bosque, newdata = test, type = "prob")[, "1"]
+pred_rf <- ifelse(prob_rf >= 0.5, 1, 0)
+table(Real = test$abandono, Modelo = pred_rf)
+acc_rf  <- mean(pred_rf == test$abandono)
+prec_rf <- sum(test$abandono == 1 & pred_rf == 1) / sum(pred_rf == 1)
+rec_rf  <- sum(test$abandono == 1 & pred_rf == 1) / se_van
+round(c(accuracy = acc_rf, precision = prec_rf, recall = rec_rf), 3)
+round(c(accuracy = 2 * sqrt(acc_rf * (1 - acc_rf) / n_test),
+        recall   = 2 * sqrt(rec_rf * (1 - rec_rf) / se_van)), 3)
+
+## ¿qué variables mandan?
+importance(bosque)
+varImpPlot(bosque)
 ```
 
-<!--=================-->
-<!--=================-->
-# El informe del torneo <span class="badge-time">≈ 5 min</span>
+**Checkpoint 🎯:** el juez gratis da un error OOB de **19.77 %**, es decir, accuracy de 0.802 sin abrir el sobre. En el test: **TP = 106, FN = 248, FP = 58, TN = 1188** → accuracy **0.809 ± 0.020**, precisión **0.646**, recall **0.299 ± 0.049**. (Usamos la probabilidad con umbral 0.5 en vez de `predict()` a secas porque, con 500 árboles, puede haber empates 250 a 250 que `predict()` rompe al azar: así tus cifras siempre coinciden.) En la importancia mandan **`monto_total` (202.6)** y **`recencia_dias` (192.4)**, seguidas de `frecuencia_tx` (176.7). Casi decorativo: `os_principal` (17.6).
 
-Cierra con la tabla que resume el torneo (el memorizador no clasifica a la final — quedó descalificado por mentiroso):
+::: {.callout-key}
+**Hallazgo 4**
+
+El juez gratis (0.802) y el examen (0.809) coinciden: el bosque no se está engañando. Su accuracy es la más alta del torneo… pero con el margen, **empata** con el árbol de dos preguntas (0.805) y con la regla del EDA (0.794). Lo que manda en la importancia es el enganche del cliente, lo mismo que encontró tu EDA.
+:::
+
+::: {.callout-practice}
+**Discusión de 2 minutos:** el bosque no se puede dibujar. Si Growth tiene que explicarle a su equipo de llamadas por qué llama a cada cliente, ¿cuál despliegas? ¿Hay una tercera vía? (Pista: la teoría habló de un "vocero".)
+:::
+
+<!--=================-->
+<!--=================-->
+# Momento 5 — ¿A quién llama Growth con su cupo? <span class="badge-time">≈ 12 min</span>
+
+::: {.callout-remember}
+**Lo que necesitas**
+
+El bosque no dice "se va": da una **probabilidad** (la proporción de árboles que votaron "se va"). El **umbral** la convierte en decisión: bajarlo significa más llamadas, más recall y menos precisión. Y una probabilidad es **creíble** si, entre los clientes a los que les da 30 %, de verdad se va cerca del 30 %.
+:::
+
+Growth entra a la sala: *"no me importa la accuracy. Tengo cupo para unas 280 llamadas por cada 1.600 clientes: ¿a quién llamo?"* Eso no pide otro modelo: pide **otro umbral**.
 
 ```r
-## Tabla final / Final report
-torneo <- data.frame(
-  modelo   = c("Baseline (mayoritaria)", "Árbol podado (3 hojas)", "Random Forest (500)"),
-  accuracy = c(0.517, 0.917, 0.950),
-  nota     = c("la vara", "legible y estable", "el que mejor predice")
-)
-torneo
-write.csv(torneo, "output/torneo_semana11.csv", row.names = FALSE)
+##============================================================================##
+##=== 5. La perilla del umbral: el cupo de Growth                          ===##
+##============================================================================##
 
-## Dos riesgos para el informe (comentarios, 2 líneas c/u):
-## ¿qué NO garantiza este torneo? (pistas: ¿el perfil de solicitantes
-## de 2026 será igual al histórico? ¿60 filas de test bastan?)
+## umbral 0.4: ¿cuántas llamadas y cuántos encontrados?
+pred_04 <- ifelse(prob_rf >= 0.4, 1, 0)
+table(Real = test$abandono, Modelo = pred_04)
+sum(pred_04 == 1)                        # llamadas
+sum(pred_04 == 1 & test$abandono == 1)   # encontrados
+
+acc_rf04  <- mean(pred_04 == test$abandono)
+prec_rf04 <- sum(test$abandono == 1 & pred_04 == 1) / sum(pred_04 == 1)
+rec_rf04  <- sum(test$abandono == 1 & pred_04 == 1) / se_van
+round(c(accuracy = acc_rf04, precision = prec_rf04, recall = rec_rf04), 3)
+round(c(recall = 2 * sqrt(rec_rf04 * (1 - rec_rf04) / se_van)), 3)
 ```
 
-**Checkpoint final 🎯:** el script corre completo con *Source*, `output/torneo_semana11.csv` existe, y los comentarios de los Momentos 2, 4 y 5 están escritos. Ese es el entregable mental de la semana: **baseline → candidatos → CV → test → umbral → riesgos**.
+**Checkpoint 🎯:** con umbral 0.4 el bosque llama a **288** clientes y encuentra a **159**: precisión **0.552**, recall **0.449 ± 0.053**. La regla del EDA, con 278 llamadas, encontraba 151: recall **0.427 ± 0.053**.
+
+Tu turno: repite el bloque con **umbral 0.3** (cambia solo el número y el nombre del objeto). ¿Cuántas llamadas? ¿Cuántos encontrados?
+
+**Checkpoint 🎯:** **453 llamadas y 212 encontrados** (recall 0.599, precisión 0.468).
+
+¿Son creíbles esas probabilidades? Compáralas con la realidad en los tramos de recencia de la semana 6:
+
+```r
+## las probabilidades del bosque contra la tasa real, por tramo de recencia
+test %>%
+mutate(prob_bosque = prob_rf,
+       tramo = cut(recencia_dias, c(-1, 7, 30, 60, 90, Inf),
+                   labels = c("1-7 días", "8-30", "31-60", "61-90", "más de 90"))) %>%
+group_by(tramo) %>%
+summarise(clientes    = n(),
+          tasa_real   = round(mean(abandono == 1), 3),
+          prob_bosque = round(mean(prob_bosque), 3))
+
+## y el árbol podado: ¿cuántas probabilidades distintas sabe decir?
+prob_arbol <- predict(arbol_podado, newdata = test, type = "prob")[, "1"]
+table(round(prob_arbol, 3))
+```
+
+**Checkpoint 🎯:** la tasa real sube de **0.122** (1-7 días) a **0.601** (más de 90) y la probabilidad promedio del bosque la sigue de cerca: **0.154, 0.192, 0.265, 0.371 y 0.567**, nunca a más de 4 puntos. El árbol podado, en cambio, solo sabe decir **tres probabilidades**: 0.133 (1.182 clientes), 0.394 (342) y 0.741 (76).
+
+::: {.callout-key}
+**Hallazgo 5 — la lección de la semana**
+
+Con el cupo de Growth, el bosque encuentra a 159 y la regla del EDA a 151: ocho más, cuando el margen del recall es de ±0.053, unos **19 clientes**. **Empate técnico.** El EDA de la semana 6 ya había encontrado casi toda la señal que hay en estos datos, y ningún modelo encuentra a quien se va por razones que no están en la base. Lo que compra el bosque es **la perilla**: un riesgo creíble para cada cliente —el bosque aprendió la curva de recencia de la semana 6— con el que Growth decide hasta dónde llamar. Si consigue presupuesto para 450 llamadas, con la regla del EDA no hay nada que hacer; con el bosque, baja el umbral a 0.3 y encuentra a 212. El árbol podado no sirve para esto: su perilla salta en escalones (76, 418 o 1.600 llamadas).
+:::
+
+Guarda el riesgo de cada cliente del test: la semana 12 lo va a necesitar.
+
+```r
+## el riesgo de cada cliente del test
+riesgo <- data.frame(cliente_id = ids_test, prob_abandono = round(prob_rf, 3))
+write.csv(riesgo, "output/prob_abandono.csv", row.names = F)
+```
 
 <!--=================-->
 <!--=================-->
-# ¿Terminaste antes? El reto del bosque
+# La tabla del líder — ¿alguien desbanca a la regla del EDA? <span class="badge-time">≈ 5 min</span>
 
-Dos experimentos rápidos con `randomForest` (documenta lo que observes como comentarios):
+La tabla de la semana 10 recibe a los candidatos de hoy, con las mismas columnas: llamadas, encontrados, accuracy y su margen.
 
-1. **¿Cuántos árboles bastan?** Entrena con `ntree = 50` y con `ntree = 2000` (misma semilla). ¿Cuánto cambió la accuracy de test? ¿Y el tiempo de espera?
-2. **Amnesia regulada:** el argumento `mtry` controla cuántas variables puede mirar cada corte (por defecto ≈ √5 ≈ 2). Pruébalo con `mtry = 5` (todas las variables — bosque sin amnesia). ¿Mejora o empeora? ¿Por qué la teoría predice que árboles clones votan peor?
+```r
+##============================================================================##
+##=== 6. La tabla del líder  (grano: regla o modelo)                       ===##
+##============================================================================##
+
+## los candidatos de hoy, con las mismas columnas de la tabla de la semana 10
+acc_nuevos <- c(acc_arbol, acc_memo, acc_rf, acc_rf04)
+nuevos <- data.frame(regla       = c("arbol de dos preguntas", "arbol sin frenos",
+                                     "bosque, umbral 0.5", "bosque, umbral 0.4"),
+                     llamadas    = c(tp + fp, sum(pred_memo_te == 1),
+                                     sum(pred_rf == 1), sum(pred_04 == 1)),
+                     encontrados = c(tp, sum(pred_memo_te == 1 & test$abandono == 1),
+                                     sum(pred_rf == 1 & test$abandono == 1),
+                                     sum(pred_04 == 1 & test$abandono == 1)),
+                     accuracy    = round(acc_nuevos, 3),
+                     margen      = round(2 * sqrt(acc_nuevos * (1 - acc_nuevos) / n_test), 3))
+lider <- rbind(lider, nuevos)
+lider
+
+## export data
+write.csv(lider, "output/lider_abandono_s11.csv", row.names = F)
+
+## dos riesgos para Growth (comentarios, dos líneas cada uno)
+## 1.
+## 2.
+```
+
+**Checkpoint 🎯:** tu tabla debe verse así:
+
+```default
+                   regla llamadas encontrados accuracy margen
+1         nadie abandona        0           0    0.779  0.021
+2          regla del EDA      278         151    0.794  0.020
+3            memorizador       86          26    0.757  0.021
+4 arbol de dos preguntas       76          59    0.805  0.020
+5       arbol sin frenos      344         132    0.729  0.022
+6     bosque, umbral 0.5      164         106    0.809  0.020
+7     bosque, umbral 0.4      288         159    0.797  0.020
+```
+
+::: {.callout-key}
+**La decisión**
+
+Nadie desbanca a la regla del EDA por más que el margen. Para Growth, el bosque entra como **colíder**: no porque acierte más, sino porque su riesgo ordena a todos los clientes y deja fijar el cupo. Ideas para los dos riesgos: ¿el perfil de los clientes después del corte será igual al de estos datos? ¿Qué pasa con los que se van por razones que no están en la base? ¿Cuánto le cuestan a Growth las 129 llamadas a clientes que no se iban con el umbral 0.4?
+:::
+
+**Checkpoint final 🎯:** el script corre completo con *Source* y en `output/` aparecen `prob_abandono.csv` y `lider_abandono_s11.csv`, junto a los de la semana 10.
+
+<!--=================-->
+<!--=================-->
+# ¿Terminaste antes? Dos retos
+
+**Reto 1 — ¿Y la ciudad?** En la importancia, `ciudad` quedó en quinto lugar… aunque en tu EDA de la semana 6 salió plana (entre 20 y 25 % de abandono en todas). La importancia por defecto mide cuánto ayudó cada variable a separar las clases en los cortes, y favorece a las que tienen muchas categorías o muchos valores distintos: tienen más cortes posibles donde "encontrar" algo. Entrena un segundo bosque que mida la importancia por **permutación** —cuánto empeora el bosque si se desordena esa columna— y compara:
+
+```r
+## un bosque que mide la importancia por permutación
+set.seed(11)
+bosque_perm <- randomForest(abandono ~ ., data = train, ntree = 500, importance = T)
+importance(bosque_perm, type = 1)
+```
+
+**Checkpoint 🎯:** arriba quedan `recencia_dias` (35.6), `num_sesiones_ult30d` (34.2) y `frecuencia_tx` (33.9); `ciudad` cae a **−0.7**, junto a `canal_adquisicion` (−0.5): justo las que tu EDA encontró planas. La importancia dice qué *usó* el bosque, no qué *causa* el abandono; si choca con una comparación de tasas bien hecha, desconfía de la importancia.
+
+**Reto 2 — ¿Cuántos árboles bastan?** Entrena el bosque con `ntree = 50` y con `ntree = 2000` (misma semilla). ¿Cuánto cambia la accuracy de test? ¿Y el tiempo de espera? ¿La diferencia es mayor que el margen?
 
 <!--=================-->
 <!--=================-->
 # Cierre
 
-En una clase montaste el pipeline completo de un clasificador profesional: vara, candidato legible, control de sobreajuste con CV, un bosque que vota y una perilla de umbral negociada con el negocio. El [**Taller 11**](../task/week-11.html) te espera con otra empresa y otra pregunta — y una trampa que ya deberías oler: allá la clase que importa es la *minoritaria*, así que la accuracy va a mentir con ganas. Lleva tu recall.
+En una clase entrenaste, podaste y calibraste clasificadores sobre tu propio caso, y descubriste algo que muchos informes esconden: con el margen a la vista, el bosque empata con la regla que salió de tu EDA. Con estos datos, el análisis exploratorio ya había encontrado casi toda la señal; lo que compra el modelo es la perilla.
+
+::: {.callout-key}
+**El giro de la próxima semana 🔮**
+
+La semana 12 cambia de pregunta: *¿cuánto gastará cada cliente el próximo trimestre?* Con el mismo sobre y contra la tabla del líder del gasto (`output/lider_gasto_s10.csv`). Y al final juntarás las dos: un cliente con 70 % de riesgo que gasta poco no vale lo mismo que uno con 40 % que gasta mucho. Tu `prob_abandono.csv` es la mitad de esa cuenta.
+:::
+
+El [**Taller 11**](../task/week-11.html) te espera con otra empresa y su propia fuga de clientes, y una trampa que ya deberías oler: allá la clase que importa es la *minoritaria*, así que la accuracy va a mentir con ganas. Lleva tu recall.

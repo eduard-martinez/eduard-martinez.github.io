@@ -1,17 +1,18 @@
 ---
-title: "Unidad 6 - Práctica: la fábrica de playlists"
+title: "Unidad 6 - Práctica: los segmentos de Cóndor"
 subtitle: "Aplicación guiada en clase · Semana 13 · 06327-ECO"
 author: "PhD. Eduard F. Martínez-González"
 format:
-  html: default
+  html:
+    number-sections: false
 lang: es
 ---
 
 <div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
-<a href="https://twitter.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/twitter.jpg" alt="Twitter" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
-<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
-<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
-<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+<a href="https://x.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="../../pic/x.svg" alt="X" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="../../pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="../../pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="../../pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
 </div>
 
 <!--=================-->
@@ -21,270 +22,364 @@ lang: es
 ::: {.callout-key}
 **Hoy nadie tiene la respuesta correcta — ni siquiera yo**
 
-Tres semanas prediciendo con hoja de respuestas; hoy se acabaron. Vas a **descubrir** grupos que nadie ha etiquetado y a defenderlos con perfilamiento. Esta práctica asume la [teoría de la semana](../theory/week-13.html) (k-means, escalamiento, codo, silueta) — nada se re-explica. El `dplyr` y el `ggplot2` de la [semana 4](../../week-04/theory/week-04.html) hoy trabajan tiempo completo.
+Tres semanas prediciendo con hoja de respuestas; hoy se acabaron. Vas a **descubrir** grupos en los mismos 8.000 clientes de Cóndor, sin target, y a defenderlos con perfilamiento. Y al final los cruzas con lo que construiste en las semanas 11 y 12: el riesgo de irse y el valor en riesgo.
 :::
 
 - 👥 En **parejas**: uno escribe, el otro audita cifras y lee los perfiles en voz alta. Roten en el Momento 4.
-- 🖥️ **RStudio** con tu proyecto del curso. Paquetes: `dplyr`, `ggplot2` y `cluster` — **ninguno es nuevo**; `cluster` viene instalado con R.
-- 📥 El dato de hoy: <a href="spotify_canciones.csv" download>**spotify_canciones.csv**</a> — 320 canciones del catálogo urbano de una plataforma de streaming, con sus características de audio medidas por el sistema. Guárdalo en `data/`.
-- 🎯 La misión de la gerencia de producto: *"Quiero listas de reproducción automáticas con personalidad: 'para el gimnasio', 'tarde tranquila'… Y no me sirve agrupar por el género que declara la disquera — eso es marketing. Agrupen por cómo **suenan**."*
+- 🖥️ **RStudio** con tu proyecto `proyecto_condor`. Paquetes: `dplyr`, `ggplot2` y `cluster` — `cluster` viene instalado con R.
+- 📁 De la semana 12 necesitas `output/valor_en_riesgo.csv`. ¿No lo tienes? Corre completos tus scripts de las semanas 10, 11 y 12 antes de empezar.
+- 🎯 La misión de Marketing y Growth: *"Queremos segmentos de clientes con personalidad, para diseñar una acción distinta para cada uno. Y queremos saber en cuál de ellos está la plata en riesgo."*
+
+**Cómo funciona cada momento.** Una **pregunta de analista**, **lo que necesitas** de la teoría en dos líneas (la versión completa, en la [teoría de la semana](../theory/week-13.html)), el código, el checkpoint 🎯 y el **hallazgo**.
 
 <!--=================-->
 <!--=================-->
 # El setup <span class="badge-time">≈ 5 min</span>
 
-Script nuevo: `scripts/13_playlists.R`.
+Abre `proyecto_condor.Rproj` y crea el script `scripts/13_segmentos_condor.R`:
 
 ```r
-## ============================================
-## Práctica semana 13 — La fábrica de playlists
-## Nombre(s): _______________
-## Fecha:     _______________
-## ============================================
+##============================================================================##
+# 13_segmentos_condor.R  —  ¿qué segmentos hay en Cóndor y dónde está la plata en riesgo?
+#------------------------------------------------------------------------------#
+# Analítica para los negocios (06327-ECO) · Semana 13 · práctica guiada
+# Lee input/base_clientes.csv y, de la semana 12, output/valor_en_riesgo.csv. Produce:
+#   - output/fig_codo_s13.png       (el codo: WCSS según el número de segmentos)
+#   - output/segmentos_condor.csv   (grano: cliente; su segmento)
+#   - output/perfil_segmentos.csv   (grano: segmento; perfil, abandono y valor en riesgo)
+# Nombre(s): _______________
+##============================================================================##
 
-## Librerías / Libraries
-pacman::p_load(dplyr, ggplot2, cluster)
+##============================================================================##
+##=== 0. Configuración inicial                                             ===##
+##============================================================================##
+rm(list = ls())
+require(pacman)
+p_load(dplyr, ggplot2, cluster)
 
-## Cargar datos / Load data
-canciones <- read.csv("data/spotify_canciones.csv")
-
-## Radiografía / First look
-dim(canciones)
-str(canciones)
+## la base de Cóndor (grano: cliente) y el valor en riesgo de la semana 12
+clientes <- read.csv("input/base_clientes.csv")
+valor    <- read.csv("output/valor_en_riesgo.csv")
+dim(clientes)
 ```
 
-**Checkpoint 🎯:** **320 filas y 8 columnas.** Tres columnas de identidad (`cancion`, `artista`, `genero`) y cinco numéricas: cuatro **características de audio** — `danceability` (qué tan bailable, 0–1), `energy` (intensidad, 0–1), `acousticness` (probabilidad de ser acústica, 0–1), `tempo` (velocidad en BPM) — y `streams` (reproducciones).
+**Checkpoint 🎯:** **8000 filas y 29 columnas**.
 
 <!--=================-->
 <!--=================-->
-# Momento 1 — Elegir las variables del sonido <span class="badge-time">≈ 5 min</span>
+# Momento 1 — ¿Con qué variables se segmenta? <span class="badge-time">≈ 5 min</span>
 
-El pipeline de la teoría, paso 2: **la pregunta decide las variables**. La misión dice "agrupar por cómo suenan" — entonces entran las cuatro variables de audio y quedan fuera dos tentaciones:
+::: {.callout-remember}
+**Lo que necesitas**
 
-- `streams` mide **popularidad**, no estilo: una canción de gimnasio y un bolero pueden tener los mismos streams.
-- `genero` es justamente la **etiqueta declarada** que la gerencia no se cree — la guardamos para el final, como control de calidad.
+**Segmentar** es agrupar sin target: la pregunta decide las variables. **k-means** agrupa por **distancia**: cada cliente es un punto y los grupos se arman alrededor de centroides — así que cada variable pesa según su escala.
+:::
+
+La pregunta de la teoría —*¿qué perfiles de clientes tenemos según frecuencia, monto y recencia?*— es la de hoy: entran las tres variables del bloque **RFM** de la base. Quedan fuera `abandono` (lo guardamos para después: ¿los segmentos lo separan sin haberlo visto?) y `gasto_proximo_trim` (del futuro).
 
 ```r
-## Variables de clustering / Clustering features
-audio <- select(.data = canciones,
-                danceability, energy, acousticness, tempo)
+##============================================================================##
+##=== 1. Las variables del segmento  (grano: cliente)                      ===##
+##============================================================================##
 
-head(audio, 3)
+## las tres variables RFM: recencia, frecuencia y monto
+rfm <- clientes %>%
+       select(recencia_dias, frecuencia_tx, monto_total)
+head(rfm, 3)
 
-## Las escalas de cada variable / Each variable's scale
-round(sapply(audio, sd), 3)
+## la escala de cada variable
+round(sapply(rfm, sd), 1)
 ```
 
-**Checkpoint 🎯:** las desviaciones estándar: `danceability` **0.183**, `energy` **0.234**, `acousticness` **0.281**… y `tempo` **20.239**. Una de estas variables no es como las otras — habla en BPM mientras las demás susurran entre 0 y 1. Guarda ese dato: es la bomba del Momento 2.
+**Checkpoint 🎯:** desviaciones de **63.4** días (recencia), **21.0** transacciones (frecuencia) y **623.353.1** pesos (monto).
 
-<!--=================-->
-<!--=================-->
-# Momento 2 — El experimento del ingenuo <span class="badge-time">≈ 8 min</span>
+::: {.callout-key}
+**Hallazgo 1**
 
-La teoría advierte que escalar es obligatorio. Pero una advertencia no duele — un experimento sí. Corramos k-means **sin escalar**, como lo haría alguien de afán, y perfilemos lo que sale:
-
-```r
-## k-means SIN escalar (a propósito) / k-means on raw features (on purpose)
-set.seed(13)   # ¡en la línea inmediatamente anterior a kmeans()!
-km_crudo <- kmeans(audio, centers = 4, nstart = 25)
-
-## Perfil de los grupos resultantes / Profile the raw clusters
-canciones_crudo <- mutate(.data = canciones, cluster = factor(km_crudo$cluster))
-
-perfil_crudo <- summarise(.data = canciones_crudo,
-                          danceability = mean(danceability),
-                          energy       = mean(energy),
-                          acousticness = mean(acousticness),
-                          tempo        = mean(tempo),
-                          n_canciones  = n(),
-                          .by = cluster)
-arrange(perfil_crudo, cluster)
-```
-
-**Checkpoint 🎯:** cuatro grupos con tempos **88.6 / 101.0 / 75.3 / 130.4** — franjas de BPM perfectamente ordenadas. Ahora mira el resto de la tabla: los clusters 1 y 3 son **casi la misma canción** en todo lo demás (danceability 0.60 vs 0.58, energy 0.50 vs 0.50)… separados solo por velocidad. ¿Y la lista acústica que pedía la gerencia? **No existe**: el acousticness más alto de la tabla es 0.44 — las canciones de guitarra quedaron regadas entre las franjas de tempo.
-
-::: {.callout-warning}
-**Qué acaba de pasar:** la distancia la secuestró el `tempo`. Su desviación (20.2) es ~100 veces la de las variables 0–1, así que para el algoritmo una diferencia de 5 BPM pesa más que la diferencia entre una canción 100% acústica y una 100% electrónica. El clustering refleja **unidades, no sonido** — exactamente el error #1 de la teoría, y acabas de verlo con tus propios datos.
+Una variable no es como las otras: el monto habla en cientos de miles de pesos, la recencia y la frecuencia en decenas. Guarda ese dato: es la bomba del Momento 2.
 :::
 
 <!--=================-->
 <!--=================-->
-# Momento 3 — La misma cancha para todos <span class="badge-time">≈ 4 min</span>
+# Momento 2 — ¿Qué pasa si no se escala? <span class="badge-time">≈ 8 min</span>
+
+::: {.callout-remember}
+**Lo que necesitas**
+
+`kmeans(datos, centers = k, nstart = 25)` arma k grupos; `nstart = 25` lo arranca 25 veces y se queda con el mejor. La semilla, en la línea anterior, hace que todos obtengan los mismos grupos.
+:::
+
+La teoría advierte que escalar es obligatorio. Pero una advertencia no duele — un experimento sí. Corramos k-means **sin escalar**, como lo haría alguien de afán:
 
 ```r
-## Escalar: media 0, desviación 1 / Scale to mean 0, sd 1
-audio_esc <- scale(audio)
+##============================================================================##
+##=== 2. El experimento del ingenuo                                        ===##
+##============================================================================##
 
-## Verificar / Verify
-round(colMeans(audio_esc), 3)
-round(apply(audio_esc, 2, sd), 3)
+## k-means SIN escalar (a propósito)
+set.seed(13)   # en la línea inmediatamente anterior a kmeans()
+km_crudo <- kmeans(rfm, centers = 4, nstart = 25)
+
+## el perfil de los grupos crudos, con los datos originales
+clientes %>%
+mutate(grupo = km_crudo$cluster) %>%
+group_by(grupo) %>%
+summarise(clientes   = n(),
+          recencia   = median(recencia_dias),
+          frecuencia = median(frecuencia_tx),
+          monto      = median(monto_total))
+
+## ¿dónde quedaron los que llevan más de 90 días sin transar?
+table(grupo = km_crudo$cluster, mas_de_90_dias = clientes$recencia_dias > 90)
 ```
 
-**Checkpoint 🎯:** medias **0, 0, 0, 0** y desviaciones **1, 1, 1, 1**. Las cuatro variables ahora pesan igual en la distancia. (Nota: `scale()` devuelve una matriz, no un data frame — para `kmeans()` da lo mismo.)
+**Checkpoint 🎯:** cuatro grupos ordenados por plata: montos medianos de **202.500**, **700.900**, **1.442.800** y **2.656.750** pesos. Y de los **886** clientes que llevan más de 90 días sin transar, **872** quedaron en el grupo más grande —4.358 clientes, con recencia mediana de apenas 30 días— y los otros 14 en otro grupo.
+
+::: {.callout-key}
+**Hallazgo 2**
+
+La distancia la secuestró el monto: su desviación es unas 10.000 veces la de la recencia y 30.000 la de la frecuencia, así que para el algoritmo una diferencia de 10.000 pesos pesa más que la de un cliente de ayer contra uno de hace un año. Resultado: franjas de plata… y los clientes dormidos —el grupo de mayor riesgo de la semana 6— **no aparecen por ningún lado**.
+:::
 
 <!--=================-->
 <!--=================-->
-# Momento 4 — ¿Cuántas listas? El codo y la silueta <span class="badge-time">≈ 12 min</span>
+# Momento 3 — ¿Cómo se pone a todos en la misma cancha? <span class="badge-time">≈ 3 min</span>
 
-Nadie sabe cuántos "sonidos" hay en el catálogo. Corremos k-means para k = 1…8 y dejamos que las dos métricas de la teoría acoten la respuesta.
+::: {.callout-remember}
+**Lo que necesitas**
 
-**El codo** (WCSS por k):
+`scale()` le resta a cada variable su media y la divide por su desviación: todas quedan con media 0 y desviación 1, y pesan igual en la distancia.
+:::
 
 ```r
-## WCSS para k = 1..8 / Elbow: WCSS for k = 1..8
+##============================================================================##
+##=== 3. La misma cancha para todos                                        ===##
+##============================================================================##
+
+## escalar: media 0, desviación 1
+rfm_esc <- scale(rfm)
+
+## verificar
+round(colMeans(rfm_esc), 3)
+round(apply(rfm_esc, 2, sd), 3)
+```
+
+**Checkpoint 🎯:** medias **0, 0, 0** y desviaciones **1, 1, 1**. (`scale()` devuelve una matriz, no un data frame: para `kmeans()` da lo mismo.)
+
+<!--=================-->
+<!--=================-->
+# Momento 4 — ¿Cuántos segmentos? <span class="badge-time">≈ 14 min</span>
+
+::: {.callout-remember}
+**Lo que necesitas**
+
+**WCSS**: la suma de las distancias al cuadrado de cada cliente a su centroide (compactación). Siempre baja al subir k, así que se busca el **codo**, donde deja de comprar. **Silueta**: de −1 a 1, qué tan bien está cada cliente en su grupo frente al grupo vecino; se busca el **máximo**.
+:::
+
+Nadie sabe cuántos segmentos hay en Cóndor. Corremos k-means para k = 1…8 y dejamos que las dos métricas acoten la respuesta.
+
+```r
+##============================================================================##
+##=== 4. ¿Cuántos segmentos? El codo y la silueta                          ===##
+##============================================================================##
+
+## el codo: WCSS para k = 1..8
 set.seed(13)   # una semilla para todo el barrido
-wss  <- sapply(1:8, function(k) kmeans(audio_esc, centers = k, nstart = 25)$tot.withinss)
-codo <- data.frame(k = 1:8, wss = wss)
+wss  <- sapply(1:8, function(k) kmeans(rfm_esc, centers = k, nstart = 25)$tot.withinss)
+codo <- data.frame(k = 1:8, wss = round(wss))
 codo
 
-## Gráfico del codo / Elbow plot
 ggplot(codo, aes(x = k, y = wss)) +
   geom_line(color = "#1F4E79") +
   geom_point(color = "#E87722", size = 3) +
   scale_x_continuous(breaks = 1:8) +
-  theme_minimal() +
-  labs(title = "Método del codo — catálogo urbano",
-       x = "Número de clusters (k)", y = "WCSS")
-```
+  labs(title = "El codo se dobla entre 3 y 4 segmentos",
+       x = "Número de segmentos (k)", y = "WCSS") +
+  theme_minimal()
+ggsave("output/fig_codo_s13.png", width = 7, height = 4)
 
-**Checkpoint 🎯:** la WCSS cae **1276 → 499 → 255 → 137** … y de ahí en adelante gotea (123, 114, 107, 100). El cuarto cluster compró −118 de compactación; el quinto, apenas −13. El codo se dobla en **k = 4**.
-
-**La silueta** (el desempate con máximo):
-
-```r
-## Silueta promedio para k = 2..8 / Average silhouette for k = 2..8
-distancias <- dist(audio_esc)   # matriz de distancias (se calcula UNA vez)
-
+## la silueta promedio para k = 2..8 (las distancias se calculan UNA vez)
+distancias <- dist(rfm_esc)
 set.seed(13)
 sil <- sapply(2:8, function(k) {
-  km <- kmeans(audio_esc, centers = k, nstart = 25)
+  km <- kmeans(rfm_esc, centers = k, nstart = 25)
   mean(silhouette(km$cluster, distancias)[, 3])
 })
-silueta <- data.frame(k = 2:8, sil_prom = round(sil, 3))
-silueta
+data.frame(k = 2:8, silueta = round(sil, 3))
 ```
 
-**Checkpoint 🎯:** `sil_prom` sube **0.530 → 0.552 → 0.572** y a partir de k = 5 se derrumba (0.507, 0.414…). Máximo claro en **k = 4**: las dos métricas votaron lo mismo. La gerencia tendrá cuatro listas — si logramos nombrarlas (Momento 6).
+**Checkpoint 🎯:** la WCSS cae **23.997 → 13.732 → 8.112 → 5.690 → 4.506** y de ahí gotea (3.508, 3.030, 2.645): el tercer segmento compra −5.620 de compactación, el cuarto −2.422 y el quinto apenas −1.184. La silueta: **0.502, 0.545, 0.461, 0.439…** — máximo en **k = 3**.
 
-::: {.callout-warning}
-**Si tus números no coinciden con los checkpoints**, casi seguro corriste un `kmeans()` sin ejecutar su `set.seed(13)` justo antes (recuerda: cada arranque es aleatorio; la semilla + `nstart = 25` hacen el resultado reproducible). Ejecuta siempre el bloque completo, o corre el script con *Source*.
+::: {.callout-key}
+**Hallazgo 4**
+
+Esta vez las métricas no votan lo mismo: el codo dice 3 o 4 y la silueta dice 3. La regla práctica de la teoría: **perfila ambos** y quédate con el que produzca segmentos más claros y accionables.
+:::
+
+```r
+## perfila ambos: tamaño, monto mediano y abandono de cada segmento
+set.seed(13)
+km3 <- kmeans(rfm_esc, centers = 3, nstart = 25)
+clientes %>%
+mutate(segmento = km3$cluster) %>%
+group_by(segmento) %>%
+summarise(clientes = n(), monto = median(monto_total), abandono = round(mean(abandono), 3))
+
+set.seed(13)
+km4 <- kmeans(rfm_esc, centers = 4, nstart = 25)
+clientes %>%
+mutate(segmento = km4$cluster) %>%
+group_by(segmento) %>%
+summarise(clientes = n(), monto = median(monto_total), abandono = round(mean(abandono), 3))
+```
+
+**Checkpoint 🎯:** con k = 3, el segmento de más valor tiene **1.554** clientes, con monto mediano de **1.415.950** y abandono de 6.8 %. Con k = 4, la parte alta se reorganiza en dos: **2.261** clientes con **928.800** y **549** con **2.094.800** de monto mediano.
+
+::: {.callout-key}
+**La decisión: k = 4**
+
+Con k = 4 aparecen los **VIP**: 549 clientes con más del doble de monto que los activos, que merecen una acción propia (un ejecutivo de cuenta, el "tratamiento aparte" de la semana 12). Dos segmentos que recibirían acciones distintas deben ser dos segmentos: k = 4 es más accionable, aunque la silueta prefiera 3.
 :::
 
 <!--=================-->
 <!--=================-->
-# Momento 5 — Las cuatro listas y su perfil <span class="badge-time">≈ 12 min</span>
+# Momento 5 — ¿Quiénes son? <span class="badge-time">≈ 12 min</span>
+
+::: {.callout-remember}
+**Lo que necesitas**
+
+El **centroide** de un segmento es el promedio de sus clientes, en la escala estandarizada. El **perfil** se lee con los datos **originales**, en las unidades que entiende el negocio — y con cola larga, con medianas (la lección de la semana 6).
+:::
 
 ```r
-## k-means final con k = 4 / Final k-means
+##============================================================================##
+##=== 5. Los cuatro segmentos y su perfil  (grano: segmento)               ===##
+##============================================================================##
+
+## el k-means final
 set.seed(13)
-km_final <- kmeans(audio_esc, centers = 4, nstart = 25)
+km_final <- kmeans(rfm_esc, centers = 4, nstart = 25)
+table(km_final$cluster)
 
-## Pegar el cluster al dataset ORIGINAL (sin escalar) / Attach clusters
-canciones <- mutate(.data = canciones, cluster = factor(km_final$cluster))
-table(canciones$cluster)
+## a mano: el centroide es el promedio del segmento, en la escala estandarizada
+round(km_final$centers, 2)
+data.frame(rfm_esc) %>%
+mutate(segmento = km_final$cluster) %>%
+group_by(segmento) %>%
+summarise(recencia   = round(mean(recencia_dias), 2),
+          frecuencia = round(mean(frecuencia_tx), 2),
+          monto      = round(mean(monto_total), 2))
+
+## el perfil con los datos originales, y el abandono real con su margen
+clientes <- clientes %>%
+            mutate(segmento = km_final$cluster)
+perfil <- clientes %>%
+          group_by(segmento) %>%
+          summarise(clientes   = n(),
+                    recencia   = median(recencia_dias),
+                    frecuencia = median(frecuencia_tx),
+                    monto      = median(monto_total),
+                    abandono   = mean(abandono)) %>%
+          mutate(margen   = round(2 * sqrt(abandono * (1 - abandono) / clientes), 3),
+                 abandono = round(abandono, 3))
+perfil
 ```
 
-**Checkpoint 🎯:** cuatro grupos de **74 / 70 / 96 / 80** canciones. Ojo al detalle profesional: el cluster se calcula con los datos **escalados**, pero el perfil se lee con los datos **originales** — los BPM y los 0–1 son los que el negocio entiende.
+**Checkpoint 🎯:** segmentos de **582, 2.261, 4.608 y 549** clientes, y la cuenta a mano da exactamente los centroides. El perfil:
 
-```r
-## Tabla de perfilamiento / Profiling table
-perfil <- summarise(.data = canciones,
-                    danceability = mean(danceability),
-                    energy       = mean(energy),
-                    acousticness = mean(acousticness),
-                    tempo        = mean(tempo),
-                    streams_prom = mean(streams),
-                    n_canciones  = n(),
-                    .by = cluster)
-arrange(perfil, cluster)
-
-## La canción insignia de cada lista / Flagship song per cluster
-top_por_cluster <- summarise(.data = canciones,
-                             top_cancion = cancion[which.max(streams)],
-                             top_artista = artista[which.max(streams)],
-                             max_streams = max(streams),
-                             .by = cluster)
-arrange(top_por_cluster, cluster)
-```
-
-**Checkpoint 🎯:** la tabla de perfiles (redondeando):
-
-| cluster | danceability | energy | acousticness | tempo | n |
-|---|---|---|---|---|---|
-| 1 | 0.87 | 0.88 | 0.05 | 130 | 74 |
-| 2 | 0.44 | 0.29 | 0.75 | 90 | 70 |
-| 3 | 0.83 | 0.77 | 0.08 | 98 | 96 |
-| 4 | 0.60 | 0.53 | 0.16 | 77 | 80 |
-
-: {.striped}
-
-Y las canciones insignia: *Alto Voltaje sin Frenos* (Anuel AA) en el 1, *Brisa y Vinilo* (J Balvin) en el 2, *Vibra Eterno* (Farruko) en el 3 y *Frío en el Alma* (Maluma) en el 4. **Esta vez sí apareció la lista acústica** (cluster 2: acousticness 0.75, energy 0.29) — escalar la sacó del escondite.
-
-Ahora los dos gráficos del perfilamiento — separación y dispersión:
-
-```r
-## Mapa de los clusters / Cluster scatterplot
-ggplot(canciones, aes(x = tempo, y = danceability, color = cluster)) +
-  geom_point(alpha = 0.5, size = 2) +
-  theme_minimal() +
-  labs(title = "El mapa del catálogo: 4 sonidos",
-       x = "Tempo (BPM)", y = "Danceability", color = "Cluster")
-
-## Dispersión dentro de cada cluster / Within-cluster spread
-ggplot(canciones, aes(x = cluster, y = acousticness, fill = cluster)) +
-  geom_boxplot(show.legend = FALSE) +
-  theme_minimal() +
-  labs(title = "Acousticness por cluster",
-       x = "Cluster", y = "Acousticness")
+```default
+# A tibble: 4 × 7
+  segmento clientes recencia frecuencia   monto abandono margen
+     <int>    <int>    <dbl>      <dbl>   <dbl>    <dbl>  <dbl>
+1        1      582     204.          2   54850    0.687  0.038
+2        2     2261       7          36  928800    0.093  0.012
+3        3     4608      22          12  276850    0.247  0.013
+4        4      549       4          72 2094800    0.046  0.018
 ```
 
 ::: {.callout-key}
-**Cómo leer el scatter:** muestra solo 2 de las 4 dimensiones del clustering — dos clusters que se "tocan" en este plano pueden estar bien separados en acousticness o energy (por eso el boxplot acompaña). Y recuerda la advertencia de la teoría: el centroide es el *promedio* de la lista, no una canción real.
+**Hallazgo 5**
+
+Los segmentos se armaron **sin mirar el abandono**… y lo separan: del **68.7 %** en el segmento 1 al **4.6 %** en el 4, diferencias muchas veces mayores que los márgenes. El RFM contiene el enganche que la semana 6 encontró.
 :::
 
-<!--=================-->
-<!--=================-->
-# Momento 6 — Bautizar las listas <span class="badge-time">≈ 8 min</span>
-
-k-means entregó números; el analista entrega nombres. Este es el paso que la gerencia de producto realmente compra.
-
 ::: {.callout-practice}
-**En parejas (y luego compartimos):** con la tabla de perfiles y las canciones insignia, completen para cada cluster:
+**Bautizar los segmentos (en parejas, 3 min):** con el perfil, completen para cada segmento un **nombre** específico (nada de "grupo 1") y una **acción** distinta. Si dos segmentos recibirían la misma acción, quizá deberían ser uno.
 
-| Cluster | Rasgo dominante del sonido | Nombre de la lista | ¿Cuándo suena? |
+| Segmento | Rasgo dominante | Nombre | Acción |
 |---|---|---|---|
 | 1 | | | |
 | 2 | | | |
 | 3 | | | |
 | 4 | | | |
-
-**Criterio de calidad:** el nombre debe ser específico y evocar el momento de uso — *"Cardio a 130"*, *"Domingo de guitarra"*. Nombres penalizados por la vida real: *"Grupo A"*, *"Lista 2"*, *"Música variada"*. Si un cluster no se deja nombrar, esa es información: sospecha del k.
 :::
 
-**El producto de la semana** — exporta la evidencia como siempre:
+<!--=================-->
+<!--=================-->
+# Momento 6 — ¿Dónde está la plata en riesgo? <span class="badge-time">≈ 10 min</span>
+
+::: {.callout-remember}
+**Lo que necesitas**
+
+El **valor en riesgo** de la semana 12 = probabilidad de irse (semana 11) × gasto esperado (semana 12). Solo existe para los 1.600 clientes del sobre, los que tienen un pronóstico honesto.
+:::
 
 ```r
-## Exportar perfil y mapa / Export deliverables
-write.csv(perfil, "output/perfil_playlists.csv", row.names = FALSE)
-ggsave("output/mapa_playlists.png", width = 7, height = 4.5)  # guarda el último gráfico
+##============================================================================##
+##=== 6. El valor en riesgo por segmento  (los 1.600 del test)             ===##
+##============================================================================##
+
+riesgo_segmento <- valor %>%
+                   left_join(select(clientes, cliente_id, segmento), by = "cliente_id") %>%
+                   group_by(segmento) %>%
+                   summarise(clientes_test   = n(),
+                             riesgo_medio    = round(mean(prob_abandono), 3),
+                             valor_en_riesgo = round(sum(valor_en_riesgo))) %>%
+                   mutate(parte = round(valor_en_riesgo / sum(valor_en_riesgo), 3))
+riesgo_segmento
+
+## export data
+write.csv(select(clientes, cliente_id, segmento), "output/segmentos_condor.csv", row.names = F)
+write.csv(left_join(perfil, riesgo_segmento, by = "segmento"), "output/perfil_segmentos.csv", row.names = F)
+```
+
+**Checkpoint 🎯:**
+
+```default
+# A tibble: 4 × 5
+  segmento clientes_test riesgo_medio valor_en_riesgo parte
+     <int>         <int>        <dbl>           <dbl> <dbl>
+1        1           110        0.637          736440 0.012
+2        2           467        0.113        32544130 0.51 
+3        3           925        0.275        22690842 0.356
+4        4            98        0.067         7785733 0.122
+```
+
+::: {.callout-key}
+**Hallazgo 6 — la lección de la semana**
+
+**La plata en riesgo no está donde está el riesgo.** El segmento 1 tiene la probabilidad de irse más alta (0.637), pero pone solo el **1.2 %** del valor en riesgo: sus clientes casi no gastan. El segmento 2 se va poco (0.113) y concentra **la mitad** del valor en riesgo. Una campaña que solo mire el riesgo llamaría a quienes menos plata ponen en juego.
+:::
+
+```r
+## la decisión (comentario, cuatro líneas): una acción para cada segmento,
+## con dos cifras de hoy. Pistas: ¿reactivación barata y automática para los
+## dormidos? ¿retención personalizada donde está la mitad de la plata?
+## ¿un ejecutivo de cuenta para los VIP?
 ```
 
 <!--=================-->
 <!--=================-->
-# El reto (si te sobra tiempo) <span class="badge-time">🏆</span>
+# ¿Terminaste antes? Dos retos
 
-**Reto 1 — El careo con la disquera.** La columna `genero` que dejamos en la banca es la etiqueta *declarada*. Confróntala con el sonido:
+**Reto 1 — La ruleta de la inicialización.** Corre `kmeans(rfm_esc, centers = 4, nstart = 1)` tres veces **sin** semilla y compara `tot.withinss` entre corridas. ¿Cambia? Esa es la lotería de la que `nstart = 25` te protege (25 boletos en vez de 1).
 
-```r
-table(canciones$cluster, canciones$genero)
-```
-
-¿Los clusters coinciden con el género? Casi: cada lista tiene un género dominante… y decenas de canciones "traicionadas" (por ejemplo, mira cuántas canciones etiquetadas `reggaeton` suenan a otra cosa). Discutan: ¿por qué la etiqueta comercial y el sonido medido no coinciden? ¿A cuál le cree la playlist automática?
-
-**Reto 2 — La ruleta de la inicialización.** Corre `kmeans(audio_esc, centers = 4, nstart = 1)` tres veces **sin** semilla y compara `tot.withinss` entre corridas. ¿Cambia? Esa es la lotería de la que `nstart = 25` te protege (25 boletos en vez de 1).
+**Reto 2 — ¿Y el uso de la app?** Agrega `num_sesiones_ult30d` a las variables del segmento, escala, y repite el k-means con k = 4. ¿Cambian los segmentos? ¿Aparece un grupo que el RFM no veía? Documenta lo que observes como comentario.
 
 <!--=================-->
 <!--=================-->
 # Cierre
 
-Hoy corriste el pipeline completo de segmentación con acompañamiento: variables → escala → codo/silueta → k-means → perfil → nombres. En el [**taller**](../task/week-13.html) lo harás solo, con una vuelta de tuerca: un gimnasio te entrega su base de socios *y la segmentación que dejó un practicante* — tu primer trabajo será auditarla (pista: el practicante no leyó el Momento 2 de hoy). Misma disciplina de siempre: toda cifra sale de tu script.
+De la semana 6 a la 13, la misma base y la misma pregunta de fondo: describiste a los clientes (EDA), juzgaste reglas, predijiste quién se va y cuánto gasta, y hoy los agrupaste sin target. La visión completa del problema de retención cabe en una tabla: **quiénes son, cuánto riesgo tienen y cuánta plata ponen en juego** — y una acción distinta para cada segmento.
+
+El [**Taller 13**](../task/week-13.html) te lleva a un gimnasio: CaliFit te entrega su base de socios *y la segmentación que dejó un practicante*. Tu primer trabajo será auditarla (pista: el practicante no leyó el Momento 2 de hoy). Misma disciplina de siempre: toda cifra sale de tu script.
