@@ -1,144 +1,135 @@
 ##============================================================================##
 # _verificacion_practica10.R  —  cifras de la clase de la semana 10
 #------------------------------------------------------------------------------#
-# Solo para el profesor: rehace, sobre la base publicada de Cóndor y el archivo
-# de predicciones (../script/predicciones_s10.csv), cada checkpoint del script
-# 10_juez_condor.R y cada cifra del Beamer, y comprueba que lo que heredan las
-# semanas 11 y 12 no cambió. Correr desde lectures/week-10/input/:
-#   Rscript _verificacion_practica10.R
+# Solo para el profesor: corre el script de la clase (../script/script_clase10.R)
+# con la base publicada de Cóndor y las predicciones de ../script/, y comprueba
+# cada checkpoint del script, cada cifra del Beamer (láminas 4 a 10) y que las
+# preguntas del taller se responden con la salida del script. Si las
+# predicciones ya están publicadas, comprueba que son las mismas de ../script/.
+# Correr desde lectures/week-10/input/:  Rscript _verificacion_practica10.R
 ##============================================================================##
 rm(list = ls())
+options(warn = 2)
 require(pacman)
 p_load(dplyr)
 
-url <- "https://eduard-martinez.github.io/teaching/ba/final_project/data/"
-clientes     <- read.csv(paste0(url, "base_clientes.csv"))
-predicciones <- read.csv("../script/predicciones_s10.csv")
-campanas     <- read.csv(paste0(url, "anexo_campanas.csv"))
+url      <- "https://eduard-martinez.github.io/teaching/ba/final_project/data/"
+url_pred <- "https://eduard-martinez.github.io/teaching/ba/lectures/week-10/script/"
+clientes <- read.csv(paste0(url, "base_clientes.csv"))
+campanas <- read.csv(paste0(url, "anexo_campanas.csv"))
+pred_a   <- read.csv("../script/predicciones_modelo_a.csv")
+pred_b   <- read.csv("../script/predicciones_modelo_b.csv")
 
-##=== 0-1. el archivo, la realidad y el sobre ================================##
-stopifnot(identical(dim(clientes), c(8000L, 29L)), identical(dim(predicciones), c(1600L, 10L)))
+##=== 1. los archivos de predicciones ========================================##
+stopifnot(identical(names(pred_a), c("cliente_id", "pred_a")),
+          identical(names(pred_b), c("cliente_id", "pred_b")),
+          nrow(pred_a) == 1600, nrow(pred_b) == 1600,
+          identical(pred_a$cliente_id, pred_b$cliente_id),
+          all(pred_a$pred_a %in% 0:1), all(pred_b$pred_b %in% 0:1))
+## los 1.600 son el sobre de siempre (80/20 con set.seed(10))
 set.seed(10)
 idx_train <- sample(1:nrow(clientes), size = round(0.8 * nrow(clientes)))
-stopifnot(identical(sort(predicciones$cliente_id), sort(clientes$cliente_id[-idx_train])))
-ev <- predicciones %>% left_join(clientes %>% select(cliente_id, abandono, gasto_proximo_trim), by = "cliente_id")
-stopifnot(sum(ev$abandono == 0) == 1246, sum(ev$abandono == 1) == 354)
-## costos de la campaña que cita el Beamer
+stopifnot(identical(sort(pred_a$cliente_id), sort(clientes$cliente_id[-idx_train])))
+## el costo de un envío que citan el Beamer y el taller ($2.250)
 stopifnot(round(mean(campanas$costo)) == 2248)
-trim <- paste0(substr(campanas$fecha_envio, 1, 4), "-", ceiling(as.numeric(substr(campanas$fecha_envio, 6, 7)) / 3))
-stopifnot(all(table(trim)[c("2025-1", "2025-2", "2025-3", "2025-4")] %in% 2767:2866))
-cat("OK bloques 0-1: 1.600 del test (el sobre de siempre), 354 se fueron\n")
-
-##=== 2. cliente por cliente =================================================##
-tipo <- ifelse(ev$lista_regla_eda == 1 & ev$abandono == 1, "TP",
-        ifelse(ev$lista_regla_eda == 1, "FP", ifelse(ev$abandono == 1, "FN", "TN")))
-stopifnot(identical(tipo[1:12], c("TN","TN","TN","TN","TN","TP","TN","FN","TN","FN","TN","FP")))
-stopifnot(identical(ev$cliente_id[c(6, 8, 10, 12)], c(3000027L, 3000030L, 3000050L, 3000077L)))
-stopifnot(sum(tipo == "TP") == 151, sum(tipo == "FP") == 127, sum(tipo == "FN") == 203, sum(tipo == "TN") == 1119)
-cat("OK bloque 2: los doce primeros y los cuatro totales\n")
-
-##=== 3-4. matrices y métricas ===============================================##
-celdas <- function(pred) c(tp = sum(pred == 1 & ev$abandono == 1), fp = sum(pred == 1 & ev$abandono == 0),
-                           fn = sum(pred == 0 & ev$abandono == 1), tn = sum(pred == 0 & ev$abandono == 0))
-m_memo <- celdas(ev$lista_memorizador); m_a <- celdas(ev$lista_proveedor_a); m_b <- celdas(ev$lista_proveedor_b)
-stopifnot(identical(unname(m_memo), c(26L, 60L, 328L, 1186L)),
-          identical(unname(m_a),    c(77L, 33L, 277L, 1213L)),
-          identical(unname(m_b),    c(211L, 236L, 143L, 1010L)))
-acc  <- function(m) unname((m["tp"] + m["tn"]) / 1600)
-prec <- function(m) unname(m["tp"] / (m["tp"] + m["fp"]))
-rec  <- function(m) unname(m["tp"] / (m["tp"] + m["fn"]))
-mrg  <- function(p, n) 2 * sqrt(p * (1 - p) / n)
-m_regla <- celdas(ev$lista_regla_eda)
-stopifnot(round(acc(m_regla), 3) == 0.794, round(prec(m_regla), 3) == 0.543, round(rec(m_regla), 3) == 0.427,
-          round(mrg(rec(m_regla), 354), 3) == 0.053)
-stopifnot(round(acc(m_memo), 3) == 0.757, round(prec(m_memo), 3) == 0.302, round(rec(m_memo), 3) == 0.073)
-stopifnot(round(acc(m_a), 3) == 0.806, round(prec(m_a), 3) == 0.700, round(rec(m_a), 3) == 0.218,
-          round(mrg(rec(m_a), 354), 3) == 0.044)
-stopifnot(round(acc(m_b), 3) == 0.763, round(prec(m_b), 3) == 0.472, round(rec(m_b), 3) == 0.596,
-          round(mrg(rec(m_b), 354), 3) == 0.052)
-acc_nadie <- mean(ev$abandono == 0)
-stopifnot(round(acc_nadie, 3) == 0.779, round(mrg(acc_nadie, 1600), 3) == 0.021)
-## "ninguna lista se separa de no hacer nada más allá del margen" (intervalos que se tocan)
-for (m in list(m_regla, m_memo, m_a, m_b)) {
-  stopifnot(abs(acc(m) - acc_nadie) <= mrg(acc(m), 1600) + mrg(acc_nadie, 1600))
+## las copias publicadas, si ya están en línea
+for (f in c("predicciones_modelo_a.csv", "predicciones_modelo_b.csv")) {
+  publicada <- tryCatch(suppressWarnings(read.csv(paste0(url_pred, f))), error = function(e) NULL)
+  if (is.null(publicada)) {
+    cat("AVISO:", f, "aún no está publicada en", url_pred, "\n")
+  } else {
+    stopifnot(identical(publicada, read.csv(file.path("../script", f))))
+    cat("OK", f, "publicada e idéntica a ../script/\n")
+  }
 }
-## B le gana a la regla en recall por más que los márgenes
-stopifnot(rec(m_b) - rec(m_regla) > mrg(rec(m_b), 354) + mrg(rec(m_regla), 354))
-cat("OK bloques 3-4: matrices, accuracy, precisión, recall y márgenes\n")
+cat("OK 1: dos archivos de 1.600 clientes, el sobre de siempre\n")
 
-##=== 5. umbral, AUC y mismo presupuesto =====================================##
-stopifnot(all(ev$lista_proveedor_a == (ev$prob_proveedor_a >= 0.5)),
-          all(ev$lista_proveedor_b == (ev$prob_proveedor_b >= 0.3)))
-stopifnot(sum(ev$lista_proveedor_a) == 110, sum(ev$lista_proveedor_b) == 447)
-auc <- function(p) { d <- outer(p[ev$abandono == 1], p[ev$abandono == 0], "-"); mean(d > 0) + 0.5 * mean(d == 0) }
-stopifnot(round(auc(ev$prob_proveedor_a), 3) == 0.780, round(auc(ev$prob_proveedor_b), 3) == 0.763)
-stopifnot(354 * 1246 == 441084)
-cat("OK bloque 9 (opcional): umbrales 0.5 y 0.3, AUC 0.780 y 0.763\n")
+##=== 2. el script de la clase, de punta a punta y sin advertencias ==========##
+codigo <- readLines("../script/script_clase10.R", encoding = "UTF-8")
+stopifnot(sum(grepl("^url_pred <- ", codigo)) == 1,
+          sum(grepl(url, codigo, fixed = T)) == 1)
+codigo <- sub("^url_pred <- .*$", paste0("url_pred <- \"", normalizePath("../script"), "/\""), codigo)
+copia  <- file.path(tempdir(), "script_clase10.R")
+writeLines(codigo, copia)
+salida <- system2("Rscript", shQuote(copia), stdout = T, stderr = T, env = "LC_ALL=en_US.UTF-8")
+stopifnot(is.null(attr(salida, "status")), !any(grepl("warn", salida, ignore.case = T)))
+clase <- new.env()
+invisible(capture.output(source(copia, local = clase, encoding = "UTF-8")))
+comparacion <- clase$comparacion
+cat("OK 2: el script corre completo, sin advertencias\n")
 
-##=== 6. la cuenta de Growth =================================================##
-stopifnot(278 * 2250 == 625500, 86 * 2250 == 193500, 110 * 2250 == 247500, 447 * 2250 == 1005750)
-stopifnot(round(625500 / 151) == 4142, round(193500 / 26) == 7442,
-          round(247500 / 77) == 3214, round(1005750 / 211) == 4767)
-stopifnot(211 - 151 == 60, 1005750 - 625500 == 380250)
-## el costo marginal: nadie -> A -> regla -> B (el memorizador queda por debajo)
-stopifnot(round(247500 / 77) == 3214,
-          round((625500 - 247500) / (151 - 77)) == 5108,
-          round((1005750 - 625500) / (211 - 151)) == 6338)
-stopifnot(110 - 86 == 24, 77 - 26 == 51)
-cat("OK bloque 5: envíos, costos, costo por encontrado y costo marginal (3.214, 5.108, 6.338)\n")
+##=== 3. checkpoints del script y láminas 4 a 7 ==============================##
+stopifnot(identical(dim(clase$clientes), c(8000L, 29L)))
+stopifnot(round(mean(clientes$abandono), 4) == 0.2215)
+## lámina 5: los doce primeros, con la predicción del proveedor A
+stopifnot(identical(clase$modelo_a$cliente_id[1:12],
+                    c(3000003L, 3000004L, 3000007L, 3000010L, 3000026L, 3000027L,
+                      3000029L, 3000030L, 3000035L, 3000050L, 3000075L, 3000077L)),
+          identical(clase$modelo_a$resultado[1:12],
+                    c("TN","TN","TN","TN","TN","TP","TN","FN","TN","FN","TN","FP")))
+## las casillas (bloques 1 a 4; lámina 6)
+stopifnot(identical(comparacion$opcion, c("línea base", "proveedor A", "proveedor B")),
+          identical(comparacion$TP, c(0L, 77L, 211L)),
+          identical(comparacion$FP, c(0L, 33L, 236L)),
+          identical(comparacion$FN, c(354L, 277L, 143L)),
+          identical(comparacion$TN, c(1246L, 1213L, 1010L)),
+          identical(comparacion$envios, c(0L, 110L, 447L)))
+## las métricas (bloque 4; lámina 7)
+stopifnot(identical(comparacion$accuracy, c(0.779, 0.806, 0.763)),
+          is.nan(comparacion$precision[1]),
+          identical(comparacion$precision[2:3], c(0.700, 0.472)),
+          identical(comparacion$recall, c(0, 0.218, 0.596)))
+## lámina 3: «decir que nadie se va ya acierta el 78 %»; lámina 7: «7 de cada 10»
+## y «6 de cada 10»
+stopifnot(round(100 * comparacion$accuracy[1]) == 78,
+          round(10 * comparacion$precision[2]) == 7, round(10 * comparacion$recall[3]) == 6)
+cat("OK 3: checkpoints del script y láminas 3 a 7\n")
 
-##=== 6. los escenarios de la recomendación ==================================##
-encontrados <- c(a = 77, regla = 151, b = 211, memo = 26, nadie = 0)
-costos      <- c(a = 247500, regla = 625500, b = 1005750, memo = 193500, nadie = 0)
-neto1 <- encontrados * (0.10 * 40000) - costos
-neto2 <- encontrados * (0.20 * 40000) - costos
-stopifnot(identical(unname(neto1), c(60500, -21500, -161750, -89500, 0)),
-          identical(unname(neto2), c(368500, 582500, 682250, 14500, 0)),
-          names(which.max(neto1)) == "a", names(which.max(neto2)) == "b")
-cat("OK bloque 6: escenario 1 gana A ($60.500); escenario 2 gana B ($682.250)\n")
+##=== 4. el dinero: láminas 8 a 10 ===========================================##
+costo       <- comparacion$envios * 2250
+encontrados <- comparacion$TP
+stopifnot(identical(costo, c(0, 247500, 1005750)),
+          identical(round(costo[2:3] / encontrados[2:3]), c(3214, 4767)))
+## lámina 8: «casi el triple» y «un 48 % más caro»
+stopifnot(round(encontrados[3] / encontrados[2], 2) == 2.74,
+          round(100 * (4767 / 3214 - 1)) == 48)
+## lámina 9: el costo de cada cliente adicional
+stopifnot(round(costo[2] / encontrados[2]) == 3214,
+          encontrados[3] - encontrados[2] == 134, costo[3] - costo[2] == 758250,
+          round((costo[3] - costo[2]) / (encontrados[3] - encontrados[2])) == 5659)
+## lámina 10: beneficio neto = encontrados x valor - costo
+neto_4 <- encontrados * 4000 - costo
+neto_8 <- encontrados * 8000 - costo
+stopifnot(identical(neto_4, c(0, 60500, -161750)), identical(neto_8, c(0, 368500, 682250)),
+          which.max(neto_4) == 2, which.max(neto_8) == 3,
+          0.1 * 40000 == 4000, 0.2 * 40000 == 8000)
+cat("OK 4: láminas 8 a 10\n")
 
-##=== Beamer: el ejemplo ilustrativo de MAE y RMSE ==========================##
-real <- c(120, 80, 200, 150, 400); pron <- c(120, 90, 190, 120, 270)
-stopifnot(mean(abs(real - pron)) == 36, sqrt(mean((real - pron)^2)) == 60)
-cat("OK ejemplo ilustrativo: MAE 36 mil, RMSE 60 mil\n")
+##=== 5. el taller se responde con la tabla comparacion ======================##
+## costo total = envíos x 2.250 + FN x valor de dejar ir a un cliente
+total_5 <- comparacion$envios * 2250 + comparacion$FN * 5000
+total_3 <- comparacion$envios * 2250 + comparacion$FN * 3000
+stopifnot(identical(total_5, c(1770000, 1632500, 1720750)),
+          identical(total_3, c(1062000, 1078500, 1434750)))
+## pregunta 1: con $5.000 la más barata es el proveedor A; pregunta 2: con $3.000,
+## no enviársela a nadie (no adoptar ningún modelo)
+stopifnot(comparacion$opcion[which.min(total_5)] == "proveedor A",
+          comparacion$opcion[which.min(total_3)] == "línea base")
+## minimizar el costo total es maximizar el beneficio neto de la lámina 10: los
+## mismos umbrales ($3.214 para preferir A a nadie, $5.659 para preferir B a A)
+umbral <- function(v) comparacion$opcion[which.min(comparacion$envios * 2250 + comparacion$FN * v)]
+stopifnot(umbral(3200) == "línea base", umbral(3230) == "proveedor A",
+          umbral(5650) == "proveedor A", umbral(5670) == "proveedor B")
+cat("OK 5: el taller (A con $5.000; ningún modelo con $3.000)\n")
 
-##=== 7. el pronóstico de Finanzas ===========================================##
-stopifnot(sum(ev$pron_proveedor_a < 0) == 413, min(ev$pron_proveedor_a) == -204192,
-          min(ev$pron_regla_finanzas) == 0, min(ev$pron_proveedor_b) == 3329)
-stopifnot(round(median(ev$pron_regla_finanzas)) == 78021, round(mean(ev$pron_regla_finanzas)) == 162185,
-          round(median(ev$pron_proveedor_a)) == 105494, round(mean(ev$pron_proveedor_a)) == 301423,
-          round(median(ev$pron_proveedor_b)) == 115448, round(mean(ev$pron_proveedor_b)) == 298206,
-          max(ev$pron_regla_finanzas) == 4477500, max(ev$pron_proveedor_a) == 10027051,
-          max(ev$pron_proveedor_b) == 12684627)
-media_train <- mean(clientes$gasto_proximo_trim[idx_train])
-stopifnot(round(media_train) == 292378)
-err <- list(media = abs(ev$gasto_proximo_trim - media_train),
-            regla = abs(ev$gasto_proximo_trim - ev$pron_regla_finanzas),
-            a     = abs(ev$gasto_proximo_trim - ev$pron_proveedor_a),
-            b     = abs(ev$gasto_proximo_trim - ev$pron_proveedor_b))
-mae  <- sapply(err, mean)
-mmae <- sapply(err, function(e) 2 * sd(e) / sqrt(1600))
-rmse <- sapply(err, function(e) sqrt(mean(e^2)))
-stopifnot(identical(unname(round(mae)),  c(328494, 168728, 201363, 165540)),
-          identical(unname(round(mmae)), c(38496, 31656, 28408, 29485)),
-          identical(unname(round(rmse)), c(836839, 655018, 602617, 612315)))
-## la regla y B empatan en MAE; A tiene el mejor RMSE y el peor MAE de los tres
-stopifnot(abs(mae["regla"] - mae["b"]) < mmae["regla"] + mmae["b"],
-          which.min(rmse) == 3, which.max(mae[2:4]) == 2)
-cat("OK bloque 7: 413 negativos, MAE, márgenes y RMSE\n")
-
-##=== 8. lo que heredan las semanas 11 y 12 ==================================##
-lider_abandono <- data.frame(regla       = c("nadie abandona", "regla del EDA", "memorizador"),
-                             llamadas    = c(0, 278, 86),
-                             encontrados = c(0, 151, 26),
-                             accuracy    = c(0.779, 0.794, 0.757),
-                             margen      = c(0.021, 0.020, 0.021))
-lider_gasto    <- data.frame(regla  = c("media de train", "3 x gasto mensual"),
-                             mae    = c(328494, 168728),
-                             margen = c(38496, 31656),
-                             rmse   = c(836839, 655018))
-stopifnot(round(mrg(acc(m_regla), 1600), 3) == 0.020, round(mrg(acc(m_memo), 1600), 3) == 0.021)
-cat("OK bloque 8: las tablas del líder (los valores que leen las semanas 11 y 12)\n")
-print(lider_abandono); print(lider_gasto)
-
-cat("\nVERIFICACIÓN COMPLETA: todas las cifras del script y del Beamer de la semana 10.\n")
+##=== 6. las cifras del Beamer están en el .tex ==============================##
+tex <- paste(readLines("../slides/week-10.tex", encoding = "UTF-8"), collapse = " ")
+cifras <- c("6 de octubre de 2026", "22\\,\\%", "78\\,\\%", "0.806", "0.779", "0.763",
+            "7 de cada 10", "6 de cada 10", "\\$247.500", "\\$1.005.750", "\\$3.214",
+            "\\$4.767", "48\\,\\%", "\\$5.659", "134", "\\$758.250", "\\$60.500",
+            "\\$161.750", "\\$368.500", "\\$682.250", "\\$40.000", "\\$2.250")
+faltan <- cifras[!sapply(cifras, grepl, x = tex, fixed = T)]
+if (length(faltan) > 0) stop("no están en el .tex: ", paste(faltan, collapse = ", "))
+stopifnot(!grepl("Finanzas|memorizador|regla del EDA|AUC", tex))
+cat("OK 6: las cifras del Beamer están en el .tex, sin Finanzas, regla del EDA, memorizador ni AUC\n")
+cat("\nTODO OK\n")
