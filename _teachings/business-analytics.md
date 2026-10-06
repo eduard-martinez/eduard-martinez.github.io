@@ -202,17 +202,17 @@ What a coding agent is, the agentic loop and the rules file. The practice is the
 ### Unit 4 — Machine learning foundations
 
 **Week 10 — Fundamentos de Machine Learning.**
-From describing the past to predicting: what it means for a machine to learn, why the only test that counts uses data the model never saw, the baseline, overfitting and data leakage — the theory comes in five short videos, with the quiz at the start of class. In the class slides, **the model judge on the Cóndor case**: the sealed 80/20 envelope, the EDA rule taking its exam, the memorizer that shines in train and collapses in test, the "perfect" detector that reveals a leak, and the Finance yardstick (MAE and RMSE). With the TA you run the script that reproduces the slides; its final block is the workshop you hand in.
+From describing the past to predicting: what it means for a machine to learn, why the only test that counts uses data the model never saw, the baseline, overfitting and data leakage — the theory comes in five short videos, with the quiz at the start of class. In class, **from predictions to the decision**: two vendors handed Growth, client by client, their model's churn prediction for Cóndor — nothing is trained today; their predictions are compared against what actually happened, with the confusion matrix and the cost of each error deciding which model Growth keeps. With the TA you run the class script; its final block is the workshop you hand in.
 
 <p>
 <span class="ws-tag">Before class</span>
 <a href="/teaching/ba/lectures/week-10/theory/week-10.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
 <br>
 <span class="ws-tag">In class</span>
-<a href="/teaching/ba/lectures/week-10/slides/week-10.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Class slides · the model judge</a>
-<a href="/teaching/ba/lectures/week-10/task/10_juez_condor.R" download class="ws-btn"><i class="fas fa-download"></i>Class script (TA session)</a>
+<a href="/teaching/ba/lectures/week-10/slides/week-10.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Class slides · from predictions to the decision</a>
+<a href="/teaching/ba/lectures/week-10/script/script_clase10.R" download class="ws-btn"><i class="fas fa-download"></i>Class script (TA session)</a>
 <a href="/teaching/ba/lectures/week-10/task/week-10.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
-<small class="ws-data">The script runs inside <code>proyecto_condor</code> — if you don't have it, download the <a href="/teaching/ba/lectures/week-08/practice/proyecto_condor.zip">week-8 zip</a>.</small>
+<small class="ws-data">The script loads everything by URL (<code>base_clientes.csv</code> and the two vendors' predictions) — no download or project folder needed.</small>
 </p>
 
 ### Unit 5 — Supervised learning
