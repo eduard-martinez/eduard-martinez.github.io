@@ -25,6 +25,9 @@
 \definecolor{grisclaro}{RGB}{242,243,246}
 \definecolor{azulcaso}{RGB}{28,60,120}
 
+%% Una cuenta en dos renglones: la operación y su resultado
+\newcommand{\cuenta}[2]{\begin{tabular}[c]{@{}c@{}}#1\\ $=$ \textbf{#2}\end{tabular}}
+
 %% Encabezado
 \title[06327-ECO]{Analítica para los negocios \\ 06327-ECO}
 \subtitle{Semana 10: De las predicciones a la decisión --- ¿con qué modelo se queda Growth?}
@@ -175,6 +178,34 @@ Cada métrica premia a una opción distinta. Antes de elegir, hay que decidir qu
 \end{frame}
 
 %%=================================================
+\begin{frame}{¿Cómo se calcula el costo de cada lista?}
+\small
+Con las casillas de la lámina 6 y \$2.250 por envío, en cuatro pasos:
+
+\vspace{0.15cm}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}m{3.3cm} c c c@{}}
+\toprule
+\textbf{Paso} & \textbf{Línea base} & \textbf{Proveedor A} & \textbf{Proveedor B} \\
+\midrule
+\textbf{1. Envíos} \newline TP $+$ FP & \cuenta{$0 + 0$}{0} & \cuenta{$77 + 33$}{110} & \cuenta{$211 + 236$}{447} \\[0.05cm]
+\textbf{2. Costo} \newline envíos $\times$ \$2.250 & \cuenta{$0 \times 2.250$}{\$0} & \cuenta{$110 \times 2.250$}{\$247.500} & \cuenta{$447 \times 2.250$}{\$1.005.750} \\[0.05cm]
+\textbf{3. Encontrados} \newline TP & \textbf{0} & \textbf{77} & \textbf{211} \\[0.05cm]
+\textbf{4. Por encontrado} \newline costo $\div$ encontrados & \begin{tabular}[c]{@{}c@{}}$0 \div 0$\\ no aplica\end{tabular} & \cuenta{$247.500 \div 77$}{\$3.214} & \cuenta{$1.005.750 \div 211$}{\$4.767} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.05cm}
+\begin{alertblock}{Lo que importa}
+Cada envío cuesta lo mismo, encuentre o no a alguien: cada encontrado cuesta \$2.250 $\div$ precisión. A: \$2.250 $\div$ 0.700 $=$ \$3.214; B: \$2.250 $\div$ 0.472 $=$ \$4.767.
+\end{alertblock}
+\end{frame}
+
+%%=================================================
 \begin{frame}{¿Cuánto cuesta cada lista y a cuántos encuentra?}
 \small
 \begin{columns}[T]
@@ -221,6 +252,39 @@ Encontrar más clientes cuesta más: B encuentra casi el triple que A, pero cada
 \vspace{0.15cm}
 \begin{alertblock}{Lo que importa}
 Ampliar la lista conviene mientras cada cliente adicional valga más de lo que cuesta encontrarlo.
+\end{alertblock}
+\end{frame}
+
+%%=================================================
+\begin{frame}{¿Cómo se calcula el beneficio neto de cada lista?}
+\small
+Con \$40.000 por cliente retenido (cifras ilustrativas), en cuatro pasos:
+
+\vspace{0.1cm}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}l r r r@{}}
+\toprule
+ & \textbf{2. Valor} & \textbf{3. Costo} & \textbf{4. Beneficio neto} \\
+ & \textit{encontrados $\times$ valor} & \textit{lámina 8} & \textit{valor $-$ costo} \\
+\midrule
+\multicolumn{4}{@{}l}{\textcolor{azulcaso}{\textbf{Retiene 1 de cada 10.} 1. Cada encontrado vale \$40.000 $\div$ 10 $=$ \textbf{\$4.000}}} \\
+\quad Proveedor A & $77 \times 4.000 =$ \$308.000 & \$247.500 & \textbf{\$60.500} \\
+\quad Proveedor B & $211 \times 4.000 =$ \$844.000 & \$1.005.750 & \textbf{$-$\$161.750} \\
+\quad Línea base & $0 \times 4.000 =$ \$0 & \$0 & \textbf{\$0} \\
+\midrule
+\multicolumn{4}{@{}l}{\textcolor{azulcaso}{\textbf{Retiene 2 de cada 10.} 1. Cada encontrado vale 2 $\times$ \$40.000 $\div$ 10 $=$ \textbf{\$8.000}}} \\
+\quad Proveedor A & $77 \times 8.000 =$ \$616.000 & \$247.500 & \textbf{\$368.500} \\
+\quad Proveedor B & $211 \times 8.000 =$ \$1.688.000 & \$1.005.750 & \textbf{\$682.250} \\
+\quad Línea base & $0 \times 8.000 =$ \$0 & \$0 & \textbf{\$0} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.05cm}
+\begin{alertblock}{Lo que importa}
+Una lista conviene solo si lo que encuentra vale más de lo que cuesta enviarla: si su beneficio neto supera los \$0 de no enviarle la campaña a nadie.
 \end{alertblock}
 \end{frame}
 
