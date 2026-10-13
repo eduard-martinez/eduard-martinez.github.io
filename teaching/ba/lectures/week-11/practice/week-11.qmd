@@ -1,0 +1,228 @@
+---
+title: "Unidad 5 - Práctica: tu árbol con los datos de Cóndor"
+subtitle: "Práctica opcional fuera de clase · Semana 11 · 06327-ECO"
+author: "PhD. Eduard F. Martínez-González"
+format:
+  html: default
+lang: es
+---
+
+<div id="contact-links" style="text-align:center; font-size:15px; color:#555; margin-top:-0.3em; margin-bottom:1em;">
+<a href="https://x.com/emartigo" style="color:#555; text-decoration:none; margin-right:16px;"><img src="../../pic/x.svg" alt="X" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>\@emartigo</a>
+<a href="https://www.linkedin.com/in/eduard-fernando-mart%C3%ADnez-gonz%C3%A1lez-b99937117/" style="color:#555; text-decoration:none; margin-right:16px;"><img src="../../pic/linkeding.png" alt="LinkedIn" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>Eduard F. Martínez G.</a>
+<a href="https://github.com/eduard-martinez" style="color:#555; text-decoration:none; margin-right:16px;"><img src="../../pic/github.png" alt="GitHub" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez</a>
+<a href="https://eduard-martinez.github.io" style="color:#555; text-decoration:none;"><img src="../../pic/link.png" alt="Web" width="16" height="16" style="vertical-align:middle; margin-right:4px;"/>eduard-martinez.github.io</a>
+</div>
+
+Esta práctica es **opcional y no se entrega**: es para afianzar, a tu ritmo, lo que hicimos en la sesión. Reproduce el recorrido completo de la clase — los datos, el sobre, el árbol y su evaluación — con los **datos reales de Cóndor**, en celdas que corren en tu navegador: puedes ejecutarlas, editarlas y volver a correrlas sin instalar nada.
+
+::: {.callout-warning}
+**La primera celda tarda unos segundos**: el navegador descarga R (webR) y los paquetes `dplyr`, `rpart` y `rpart.plot`. Verás el estado de la carga debajo del título. Las celdas comparten memoria: **córrelas en orden**, de arriba hacia abajo.
+:::
+
+<!--=================-->
+<!--=================-->
+# Los datos y las variables
+
+El **target** es la columna que el modelo intenta predecir: `abandono` (1 = el cliente se fue). Las **predictoras** son las columnas con las que puede preguntar. Dos reglas para elegirlas:
+
+- que **existan el día de la decisión**: nada que se conozca después, como `dias_mora` o `gasto_proximo_trim` — la fuga de información de la semana 6;
+- que **no tengan vacíos**: el árbol necesita un valor para cada cliente.
+
+Nos quedamos con cinco señales de comportamiento, las mismas que el EDA de la semana 6 mostró que separan a quienes se van: recencia, sesiones, frecuencia, antigüedad y gasto promedio.
+
+```{webr-r}
+## la base de Cóndor, desde la página del curso
+url_base <- "https://eduard-martinez.github.io/teaching/ba/final_project/data/base_clientes.csv"
+clientes <- read.csv(url_base)
+dim(clientes)
+```
+
+```{webr-r}
+## el target y las cinco predictoras; abandono como categoría, no como número
+base <- clientes %>%
+        select(cliente_id, abandono, recencia_dias, num_sesiones_ult30d,
+               frecuencia_tx, antiguedad_meses, gasto_promedio_mensual) %>%
+        mutate(abandono = factor(abandono))
+colSums(is.na(base))
+```
+
+Debes ver 8.000 filas con 29 columnas, y después 7 columnas sin un solo vacío. La línea `factor(abandono)` le dice a R que 0 y 1 son **categorías** (se queda / se va), no cantidades: sin ella, el árbol intentaría predecir un promedio en vez de una clase.
+
+<!--=================-->
+<!--=================-->
+# Entrenamiento y prueba
+
+Lo que queremos del árbol es que **generalice**: que aprenda el patrón del abandono, no que se memorice la respuesta de cada cliente. Y eso solo se comprueba con clientes que no vio: si se califica con los mismos con los que aprendió, el examen trae las respuestas vistas y la nota sale inflada. Por eso los datos se parten en dos: una parte para **entrenar** (el árbol ve qué hicieron los clientes y si se fueron) y otra para **probar** (el árbol no los ve al entrenar; ahí se mide la nota).
+
+```{webr-r}
+proporcion <- 0.8   ## fracción que entrena: cámbiala (0.5, 0.95) y vuelve a correr
+
+set.seed(10)
+idx_train <- sample(1:nrow(base), size = round(proporcion * nrow(base)))
+train <- base[idx_train, ]
+test  <- base[-idx_train, ]
+
+nrow(train)
+nrow(test)
+table(test$abandono)
+```
+
+Con `proporcion = 0.8` quedan **6.400 clientes para entrenar y 1.600 para probar**, y de esos 1.600 se fueron **354**. Prueba `0.5` (más examen, menos material de estudio) y `0.95` (al revés: el árbol aprende de casi todos, pero la nota se mide en apenas 400 clientes) y mira cómo cambian los tamaños.
+
+::: {.callout-warning}
+**Antes de seguir, deja `proporcion = 0.8` y corre la celda otra vez.** Con `set.seed(10)` y 80/20, este es exactamente **el sobre de la clase**: los mismos 1.600 clientes que calificaron a los proveedores en la semana 10. Para comparar árboles entre sí, la partición **se congela**: si cada modelo rindiera examen con preguntas distintas, la comparación no diría nada.
+:::
+
+<!--=================-->
+<!--=================-->
+# El árbol inicial
+
+Un árbol aprende **haciendo preguntas a los datos**. Mira todas las variables, prueba todos los cortes posibles (`¿recencia_dias >= 158?`, `¿frecuencia_tx >= 9?`, …) y elige el que mejor separa a quienes se van de quienes se quedan. Luego repite el proceso dentro de cada grupo que creó. Cada punto donde pregunta es un **nodo**; cada grupo final donde ya no pregunta más es una **hoja**, y la **profundidad** es el número máximo de preguntas en cadena que le permitimos.
+
+```{webr-r}
+PROFUNDIDAD <- 2
+
+arbol_inicial <- rpart(abandono ~ recencia_dias + num_sesiones_ult30d +
+                                  frecuencia_tx + antiguedad_meses +
+                                  gasto_promedio_mensual,
+                       data = train, method = "class",
+                       control = rpart.control(maxdepth = PROFUNDIDAD, cp = 0,
+                                               minsplit = 2, minbucket = 1))
+rpart.plot(arbol_inicial, extra = 101)
+```
+
+Los otros tres argumentos de `rpart.control` solo sueltan los demás frenos de `rpart`, para que la profundidad sea el único límite: no los cambies (`extra = 101` solo cambia qué muestra el dibujo). Cómo leer cada caja — un grupo de clientes:
+
+- **arriba**, la clase que el árbol predice para ese grupo (**1 = se va**);
+- **en el medio**, **cuántos se quedaron y cuántos se fueron** (ceros | unos: la raíz trae los 6.400, con 4.982 | 1.418);
+- **abajo**, qué porcentaje de los clientes cae en ese grupo.
+
+El árbol queda con **2 nodos de decisión y 3 hojas**: pregunta ¿`frecuencia_tx >= 9`? y, para quienes transan poco, ¿`recencia_dias < 158`? Solo la hoja que **transa poco y lleva 158 días o más sin transar** recibe la predicción «se va»: ahí hay 94 que se quedaron y 269 que se fueron. De las cinco variables, el árbol usó dos — las demás no mejoraban la separación lo suficiente para ganarse una pregunta.
+
+::: {.callout-remember}
+Este árbol de profundidad 2 es exactamente el que `rpart` entrega con su configuración de fábrica (`rpart(abandono ~ ..., data = train, method = "class")`, sin `control`). En clase lo entrenaremos así.
+:::
+
+<!--=================-->
+<!--=================-->
+# Predicciones y evaluación
+
+El árbol ya puede predecir sobre los 1.600 clientes que no vio. A cada predicción se le pega lo que de verdad pasó, en las mismas cuatro casillas de la semana 10: **TP** (predijo que se iba y se fue), **FP** (predijo que se iba y se quedó: un envío de más), **FN** (predijo que se quedaba y se fue: un cliente perdido) y **TN** (predijo que se quedaba y se quedó).
+
+```{webr-r}
+test <- test %>%
+        mutate(pred_arbol = predict(arbol_inicial, newdata = test, type = "class"),
+               resultado  = case_when(pred_arbol == 1 & abandono == 1 ~ "TP",
+                                      pred_arbol == 1 & abandono == 0 ~ "FP",
+                                      pred_arbol == 0 & abandono == 1 ~ "FN",
+                                      pred_arbol == 0 & abandono == 0 ~ "TN"))
+table(test$resultado)
+```
+
+```{webr-r}
+## las tres métricas de la semana 10, ahora para nuestro árbol
+accuracy  <- mean(test$pred_arbol == test$abandono)
+precision <- sum(test$resultado == "TP") / sum(test$pred_arbol == 1)
+recall    <- sum(test$resultado == "TP") / sum(test$abandono == 1)
+round(c(accuracy = accuracy, precision = precision, recall = recall), 3)
+```
+
+Debes ver **59 TP, 17 FP, 295 FN y 1.229 TN**, y las métricas respondiendo cada una a una pregunta de Growth:
+
+- **Accuracy 0.805** — *¿qué fracción clasificó bien?* Gana poco: la línea base ya acertaba 0.779 sin encontrar a nadie.
+- **Precisión 0.776** — *de los que recibirían la campaña, ¿cuántos se iban de verdad?* 3 de cada 4 envíos aciertan.
+- **Recall 0.167** — *de los que se van, ¿a cuántos encontró?* Solo 59 de 354: a los otros 295 nadie los busca.
+
+<!--=================-->
+<!--=================-->
+# El árbol ajustado: mueve la profundidad
+
+¿Y si lo dejamos preguntar más? Sube la profundidad y vuelve a entrenar **sobre la misma partición**:
+
+```{webr-r}
+PROFUNDIDAD_2 <- 4   ## prueba también 8, 15 y 30
+
+arbol_ajustado <- rpart(abandono ~ recencia_dias + num_sesiones_ult30d +
+                                   frecuencia_tx + antiguedad_meses +
+                                   gasto_promedio_mensual,
+                        data = train, method = "class",
+                        control = rpart.control(maxdepth = PROFUNDIDAD_2, cp = 0,
+                                                minsplit = 2, minbucket = 1))
+
+## la nota en los clientes que vio (train) y en los que no vio (test)
+pred_train <- predict(arbol_ajustado, newdata = train, type = "class")
+pred_test  <- predict(arbol_ajustado, newdata = test,  type = "class")
+c(hojas     = sum(arbol_ajustado$frame$var == "<leaf>"),
+  acc_train = round(mean(pred_train == train$abandono), 3),
+  acc_test  = round(mean(pred_test  == test$abandono), 3))
+```
+
+Esto es lo que verás al probar distintas profundidades (todas con la misma partición):
+
+| Profundidad | Hojas | Accuracy en train | Accuracy en test | Recall en test |
+|:---:|---:|---:|---:|---:|
+| 2 | 3 | 0.806 | 0.805 | 0.167 |
+| **4** | **7** | **0.807** | **0.811** | **0.370** |
+| 8 | 128 | 0.836 | 0.796 | 0.263 |
+| 15 | 739 | 0.930 | 0.742 | 0.319 |
+| 30 | 1.360 | 1.000 | 0.693 | 0.359 |
+
+: {.striped tbl-colwidths="[20,16,22,22,20]"}
+
+Dos cosas pasan a la vez. Hasta profundidad 4, el árbol **aprende**: pregunta más y encuentra más de los que se van (el recall sube de 0.167 a 0.370) sin perder nota en test. De ahí en adelante **memoriza**: en train la nota sube hasta 1.000 — se sabe a cada cliente de memoria — mientras en test cae hasta 0.693. Eso es el **sobreajuste**: el modelo estudió las respuestas en vez de la materia, y se nota exactamente cuando la nota en train sube y la nota en test baja.
+
+::: {.callout-key}
+**Explorar no es evaluar.** Aquí movimos la profundidad para *entender* cómo cambia el árbol. En un proyecto real no se elige el parámetro persiguiendo la nota del test una y otra vez: a fuerza de intentos, el test deja de ser examen y se vuelve parte del estudio. Esa búsqueda se hace con los datos de entrenamiento (se llama *validación*, y la verás si sigues en esto); el test se abre **una sola vez**, al final, para la nota oficial.
+:::
+
+<!--=================-->
+<!--=================-->
+# Comparar y decidir
+
+Deja `PROFUNDIDAD_2 = 4` (el ajustado que aprende sin memorizar) y arma la tabla final: la línea base y las dos configuraciones del árbol, con sus envíos y su costo a $2.250 cada uno.
+
+```{webr-r}
+pred_inicial  <- predict(arbol_inicial,  newdata = test, type = "class")
+pred_ajustado <- predict(arbol_ajustado, newdata = test, type = "class")
+
+resumen_base <- test %>%
+                summarise(opcion = "línea base",
+                          TP = 0, FP = 0,
+                          FN = sum(abandono == 1), TN = sum(abandono == 0))
+
+resumen_inicial <- test %>%
+                   summarise(opcion = "árbol inicial (prof. 2)",
+                             TP = sum(pred_inicial == 1 & abandono == 1),
+                             FP = sum(pred_inicial == 1 & abandono == 0),
+                             FN = sum(pred_inicial == 0 & abandono == 1),
+                             TN = sum(pred_inicial == 0 & abandono == 0))
+
+resumen_ajustado <- test %>%
+                    summarise(opcion = "árbol ajustado (prof. 4)",
+                              TP = sum(pred_ajustado == 1 & abandono == 1),
+                              FP = sum(pred_ajustado == 1 & abandono == 0),
+                              FN = sum(pred_ajustado == 0 & abandono == 1),
+                              TN = sum(pred_ajustado == 0 & abandono == 0))
+
+comparacion <- bind_rows(resumen_base, resumen_inicial, resumen_ajustado) %>%
+               mutate(envios    = TP + FP,
+                      accuracy  = round((TP + TN) / 1600, 3),
+                      precision = round(TP / (TP + FP), 3),
+                      recall    = round(TP / (TP + FN), 3),
+                      costo     = envios * 2250)
+comparacion
+```
+
+Léela como la leería Growth, con la lógica de dinero de la semana 10:
+
+- El **inicial** envía 76 campañas ($171.000) y encuentra a 59: **$2.898 por cliente encontrado** — más barato que los $3.214 del proveedor A de la semana pasada.
+- El **ajustado** envía 210 ($472.500) y encuentra a 131: $3.607 por encontrado. Los **72 clientes adicionales** que encuentra frente al inicial cuestan **$4.188 cada uno** ($301.500 ÷ 72).
+- La **línea base** no cuesta nada y no encuentra a nadie: deja escapar a los 354.
+
+¿Cuál llevarías a la reunión? No basta la accuracy: el inicial casi no comete envíos de más (precisión 0.776) pero deja escapar a 295; el ajustado encuentra el doble pagando más por cada uno. La respuesta depende de **cuánto vale un cliente encontrado** — exactamente la discusión de la semana 10, y la del taller de esta semana.
+
+::: {.callout-practice}
+**El cierre.** Con los valores de referencia (`proporcion = 0.8`, `PROFUNDIDAD = 2`, `PROFUNDIDAD_2 = 4`) esta página reproduce exactamente la clase: el árbol inicial es el de la presentación y el ajustado es el del taller. A partir de ahí, explora lo que quieras — otra proporción, otras profundidades, quitar una variable — y mira cómo cambian el árbol y sus números: aquí nada se entrega y nada se daña.
+:::
+

@@ -3,8 +3,9 @@
 #------------------------------------------------------------------------------#
 # Solo para el profesor: corre el script de la clase (../script/script_clase11.R)
 # con la base publicada de Cóndor y comprueba cada checkpoint, cada cifra del
-# Beamer (y que esté en el .tex), la teoría interactiva (misma partición: aquí
-# se recalculan sus números) y que el taller sea resoluble sin estar filtrado.
+# Beamer (y que esté en el .tex), la práctica interactiva webR (misma
+# partición: aquí se recalculan sus números), la teoría (video + aplicaciones,
+# sin celdas de R) y que el taller sea resoluble sin estar filtrado.
 # Correr desde lectures/week-11/input/:  Rscript _verificacion_practica11.R
 ##============================================================================##
 rm(list = ls())
@@ -133,7 +134,7 @@ stopifnot(tp == 131, fp == 79, tp + fp == 210, (tp + fp) * 2250 == 472500,
           round(472500 / 131) == 3607,
           472500 - 171000 == 301500, 131 - 59 == 72,
           round(301500 / 72) == 4188)
-cat("OK 5: teoría (fábrica = prof. 2; profundidades) y taller resoluble (prof. 4)\n")
+cat("OK 5: práctica webR (fábrica = prof. 2; profundidades) y taller resoluble (prof. 4)\n")
 
 ##=== 6. las cifras están en el .tex, la página y el taller ==================##
 tex <- paste(readLines("../slides/week-11.tex", encoding = "UTF-8"), collapse = " ")
@@ -151,16 +152,26 @@ stopifnot(!grepl("bosque|poda|Finanzas|AUC|umbral|memorizador|plata|tonta", tex)
           !grepl("Comprobación a mano|46,9|74,1", tex),
           ## 12 frames: la portada, el roadmap sin número y las láminas 2 a 11
           lengths(regmatches(tex, gregexpr("\\begin{frame}", tex, fixed = T))) == 12)
+## la práctica interactiva (webR) trae el recorrido con las cifras de la clase
+prac <- paste(readLines("../practice/week-11.qmd", encoding = "UTF-8"), collapse = " ")
+cifras_prac <- c("0.805", "0.776", "0.167", "59 TP, 17 FP, 295 FN y 1.229 TN",
+                 "2.898", "3.607", "4.188", "301.500", "$3.214", "6.400",
+                 "354", "set.seed(10)", "proporcion <- 0.8", "PROFUNDIDAD <- 2",
+                 "PROFUNDIDAD_2 <- 4", "extra = 101", "generalice",
+                 "4.982 | 1.418", "2 nodos de decisión y 3 hojas",
+                 "94 que se quedaron y 269", "128", "739", "1.360", "0.930",
+                 "1.000", "0.742", "0.693", "0.811", "0.370", "opcional",
+                 "no se entrega")
+faltan <- cifras_prac[!sapply(cifras_prac, grepl, x = prac, fixed = T)]
+if (length(faltan) > 0) stop("no están en la práctica: ", paste(faltan, collapse = " · "))
+stopifnot(lengths(regmatches(prac, gregexpr("{webr-r}", prac, fixed = T))) == 8)
+## la teoría: video + aplicaciones interactivas, sin celdas de R
 qmd <- paste(readLines("../theory/week-11.qmd", encoding = "UTF-8"), collapse = " ")
-cifras_qmd <- c("0.805", "0.776", "0.167", "59 TP, 17 FP, 295 FN y 1.229 TN",
-                "2.898", "3.607", "4.188", "301.500", "$3.214", "6.400",
-                "354", "set.seed(10)", "proporcion <- 0.8", "PROFUNDIDAD <- 2",
-                "PROFUNDIDAD_2 <- 4", "extra = 101", "generalice",
-                "4.982 | 1.418", "2 nodos de decisión y 3 hojas",
-                "94 que se quedaron y 269", "128", "739", "1.360", "0.930",
-                "1.000", "0.742", "0.693", "0.811", "0.370")
+cifras_qmd <- c("kqaLlte6P6o", "dt11w", "mlu-explain.github.io/decision-tree",
+                "../practice/week-11.html")
 faltan <- cifras_qmd[!sapply(cifras_qmd, grepl, x = qmd, fixed = T)]
 if (length(faltan) > 0) stop("no están en la teoría: ", paste(faltan, collapse = " · "))
+stopifnot(!grepl("{webr-r}", qmd, fixed = T))
 task <- paste(readLines("../task/week-11.qmd", encoding = "UTF-8"), collapse = " ")
 stopifnot(grepl("rpart.control(maxdepth = 4, cp = 0, minsplit = 2, minbucket = 1)", task, fixed = T),
           grepl("extra = 101", task, fixed = T), grepl("Intu", task),
@@ -171,5 +182,5 @@ stopifnot(grepl("rpart.control(maxdepth = 4, cp = 0, minsplit = 2, minbucket = 1
 scr <- paste(readLines("../script/script_clase11.R", encoding = "UTF-8"), collapse = " ")
 stopifnot(grepl("extra = 101", scr, fixed = T),
           grepl("rpart.control(maxdepth = 4, cp = 0, minsplit = 2, minbucket = 1)", scr, fixed = T))
-cat("OK 6: cifras del Beamer, la teoría, el taller y el script\n")
+cat("OK 6: cifras del Beamer, la práctica, la teoría, el taller y el script\n")
 cat("\nTODO OK\n")

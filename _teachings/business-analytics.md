@@ -218,17 +218,18 @@ From describing the past to predicting: what it means for a machine to learn, wh
 ### Unit 5 — Supervised learning
 
 **Week 11 — Clasificación: el árbol de decisión.**
-From evaluating to training: Cóndor builds its own decision tree to predict churn. The theory is an interactive page — every code cell runs in the browser, no installs — and in class the tree is trained, read as a policy, and graded on clients it never saw, against week 10's vendors. With the TA you run the class script; its final block is the workshop you hand in.
+From evaluating to training: Cóndor builds its own decision tree to predict churn. Before class, a 15-minute video and interactive apps where you train your first tree by moving its depth; in class, the Beamer takes the Cóndor tree from the data to Growth's decision and, with the TA, you run the class script — its final block is the workshop you hand in.
 
 <p>
 <span class="ws-tag">Before class</span>
-<a href="/teaching/ba/lectures/week-11/theory/week-11.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory (interactive, ≈ 40 min)</a>
+<a href="/teaching/ba/lectures/week-11/theory/week-11.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory (video + interactive apps)</a>
 <br>
 <span class="ws-tag">In class</span>
 <a href="/teaching/ba/lectures/week-11/slides/week-11.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Class slides · the first in-house tree</a>
 <a href="/teaching/ba/lectures/week-11/script/script_clase11.R" download class="ws-btn"><i class="fas fa-download"></i>Class script (TA session)</a>
 <a href="/teaching/ba/lectures/week-11/task/week-11.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
 <small class="ws-data">The script loads everything by URL (<code>base_clientes.csv</code>) — no download or project folder needed.</small>
+<small class="ws-data"><strong>After-class practice</strong> (optional, not graded): <a href="/teaching/ba/lectures/week-11/practice/week-11.html">your tree with the Cóndor data</a> — the full class walkthrough, in cells that run in the browser.</small>
 </p>
 
 **Week 12 — Regresión: árboles, bosques y la ruta Lasso.**
