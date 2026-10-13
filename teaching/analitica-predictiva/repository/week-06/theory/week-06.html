@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Árboles de regresión: predicción y error en pesos</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="week-06_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-06_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-06_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-06_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="week-06_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-06_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-06_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-06_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-06_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-06_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-06_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-06_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#un-número-sin-su-error-no-es-un-pronóstico" id="toc-un-número-sin-su-error-no-es-un-pronóstico" class="nav-link active" data-scroll-target="#un-número-sin-su-error-no-es-un-pronóstico"><span class="header-section-number">1</span> Un número sin su error no es un pronóstico</a></li>
+  <li><a href="#qué-cambia-al-predecir-un-número" id="toc-qué-cambia-al-predecir-un-número" class="nav-link" data-scroll-target="#qué-cambia-al-predecir-un-número"><span class="header-section-number">2</span> Qué cambia al predecir un número</a></li>
+  <li><a href="#una-escalera-no-una-rampa" id="toc-una-escalera-no-una-rampa" class="nav-link" data-scroll-target="#una-escalera-no-una-rampa"><span class="header-section-number">3</span> Una escalera, no una rampa</a>
+  <ul class="collapse">
+  <li><a href="#la-escalera-con-locales-del-estudio" id="toc-la-escalera-con-locales-del-estudio" class="nav-link" data-scroll-target="#la-escalera-con-locales-del-estudio"><span class="header-section-number">3.1</span> La escalera con locales del estudio</a></li>
+  <li><a href="#el-árbol-de-ventas-en-r" id="toc-el-árbol-de-ventas-en-r" class="nav-link" data-scroll-target="#el-árbol-de-ventas-en-r"><span class="header-section-number">3.2</span> El árbol de ventas en R</a></li>
+  </ul></li>
+  <li><a href="#el-error-en-pesos" id="toc-el-error-en-pesos" class="nav-link" data-scroll-target="#el-error-en-pesos"><span class="header-section-number">4</span> El error en pesos</a></li>
+  <li><a href="#le-gana-a-la-regla-del-sector" id="toc-le-gana-a-la-regla-del-sector" class="nav-link" data-scroll-target="#le-gana-a-la-regla-del-sector"><span class="header-section-number">5</span> ¿Le gana a la regla del sector?</a></li>
+  <li><a href="#dónde-falla-los-diez-peores" id="toc-dónde-falla-los-diez-peores" class="nav-link" data-scroll-target="#dónde-falla-los-diez-peores"><span class="header-section-number">6</span> Dónde falla: los diez peores</a></li>
+  <li><a href="#de-la-hoja-a-la-banda" id="toc-de-la-hoja-a-la-banda" class="nav-link" data-scroll-target="#de-la-hoja-a-la-banda"><span class="header-section-number">7</span> De la hoja a la banda</a></li>
+  <li><a href="#recuadro-opcional-el-bosque-y-el-tarifario" id="toc-recuadro-opcional-el-bosque-y-el-tarifario" class="nav-link" data-scroll-target="#recuadro-opcional-el-bosque-y-el-tarifario"><span class="header-section-number">8</span> Recuadro opcional: el bosque y el tarifario</a></li>
+  <li><a href="#y-esto-cómo-se-ve-en-tu-organización" id="toc-y-esto-cómo-se-ve-en-tu-organización" class="nav-link" data-scroll-target="#y-esto-cómo-se-ve-en-tu-organización"><span class="header-section-number">9</span> ¿Y esto cómo se ve en tu organización?</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">10</span> Preguntas de comprensión</a></li>
+  <li><a href="#lectura-corta-opcional" id="toc-lectura-corta-opcional" class="nav-link" data-scroll-target="#lectura-corta-opcional"><span class="header-section-number">11</span> Lectura corta (opcional)</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Árboles de regresión: predicción y error en pesos</h1>
+<p class="subtitle lead">Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 6 · Teoría</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout-key">
+<div class="callout-title">
+La idea central
+</div>
+<p>Un árbol de regresión predice un número con el promedio de los locales parecidos, y ese número solo sirve acompañado de su error en pesos. Esta semana se entrena el árbol que predice las ventas del arrendatario con el estudio de locales, se compara contra la regla del sector en el ranking de modelos, se examina dónde falla y cada hoja se convierte en una <strong>banda de ventas base</strong> para los tres locales candidatos de Barranquilla: la cifra que entra al VPN de la semana 7.</p>
+</div>
+<p><strong>Tiempo de estudio:</strong> 30 a 40 minutos. <strong>Qué necesitas:</strong> este navegador. Las dos partes interactivas (la escalera y el error en pesos) están en la página; las celdas de R de la semana viven en <a href="../practice/cocina.html">el código de la semana 6</a>, una página aparte y opcional.</p>
+<section id="un-número-sin-su-error-no-es-un-pronóstico" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Un número sin su error no es un pronóstico</h1>
+<p>Un portal inmobiliario entrega en dos segundos un avalúo automático: el apartamento vale 412 millones. La cifra acierta lo suficiente para que la gente la consulte, pero el portal nunca reporta cuánto se equivoca. ¿Conviene vender por 412? ¿Rechazar una oferta de 380? Sin saber si el error típico es de 10 millones o de 80, la cifra no sirve para decidir; sirve para conversar. Meridiano, que vive del negocio de los avalúos, conoce bien la diferencia.</p>
+<p>La junta de Meridiano recibe pronósticos así con frecuencia. “El arrendatario del local de Barranquilla vendería 150 millones al mes”, una cifra redonda, en una lámina del comité de inversiones. El canon del contrato es el 10 % de esas ventas: si con 150 el VPN de la compra es positivo y con 120 es negativo, la cifra sola no decide: decide la <strong>banda</strong> en la que puede caer, y quien la calculó tiene la obligación de entregarla. Esta semana se construye esa banda con el mismo árbol de la semana pasada, ahora preguntando por un número.</p>
+</section>
+<section id="qué-cambia-al-predecir-un-número" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Qué cambia al predecir un número</h1>
+<p>El árbol es el mismo: preguntas de sí o no en secuencia, un corte en cada nodo, una hoja al final. Lo que cambia es la pregunta que se le hace al estudio, y con ella cambian cuatro cosas:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Semana 5: ¿cierra o sobrevive?</th>
+<th>Semana 6: ¿cuánto vende?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Lo que predice la hoja</strong></td>
+<td>La proporción de cierres entre los locales parecidos (p = 0.55)</td>
+<td>El <span class="term">promedio de la hoja</span>: las ventas promedio de los arrendatarios de los locales parecidos (207.2 millones)</td>
+</tr>
+<tr class="even">
+<td><strong>Lo que busca el corte</strong></td>
+<td>Grupos puros: casi todos cerrados o casi todos abiertos</td>
+<td>Grupos con poca <span class="term">varianza</span>: ventas parecidas dentro de cada grupo</td>
+</tr>
+<tr class="odd">
+<td><strong>Cómo se mide el error</strong></td>
+<td>La matriz de confusión: exactitud, precisión, sensibilidad</td>
+<td>Distancias en pesos: <span class="term">MAE</span> y <span class="term">RMSE</span>, los de la semana 4</td>
+</tr>
+<tr class="even">
+<td><strong>El baseline</strong></td>
+<td>“Nadie cierra” (0.800) y las consultoras</td>
+<td>La mediana del entrenamiento (93.1) y la <span class="term">regla del sector</span>: ventas ≈ 8 × canon de mercado</td>
+</tr>
+<tr class="odd">
+<td><strong>Lo que se le entrega a la junta</strong></td>
+<td>Una probabilidad y un umbral con costos</td>
+<td>Una predicción con su banda: ventas base ± error típico</td>
+</tr>
+</tbody>
+</table>
+<p>Lo decide la pregunta, no el algoritmo. En R es la misma función con otro método: <code>rpart(..., method = "class")</code> para el cierre; <code>rpart(..., method = "anova")</code> para las ventas. Y la regla de la semana 3 sigue en pie: solo entran las doce columnas que se conocen <strong>antes de comprar</strong>.</p>
+</section>
+<section id="una-escalera-no-una-rampa" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Una escalera, no una rampa</h1>
+<p>Vuelve al ejemplo de juguete de la semana pasada: ocho locales, A a H, con su tráfico. Ahora, en lugar de si el arrendatario cerró, se anotan sus ventas mensuales:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Local</th>
+<th>Tráfico (personas por hora)</th>
+<th>Ventas (millones al mes)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td>90</td>
+<td>50</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td>110</td>
+<td>56</td>
+</tr>
+<tr class="odd">
+<td>C</td>
+<td>130</td>
+<td>66</td>
+</tr>
+<tr class="even">
+<td>D</td>
+<td>150</td>
+<td>68</td>
+</tr>
+<tr class="odd">
+<td>E</td>
+<td>190</td>
+<td>96</td>
+</tr>
+<tr class="even">
+<td>F</td>
+<td>260</td>
+<td>104</td>
+</tr>
+<tr class="odd">
+<td>G</td>
+<td>340</td>
+<td>130</td>
+</tr>
+<tr class="even">
+<td>H</td>
+<td>520</td>
+<td>150</td>
+</tr>
+</tbody>
+</table>
+<p>Las ventas suben con el tráfico, con ruido. Un árbol de profundidad 1 tiene que elegir <strong>una</strong> pregunta sobre el tráfico y responder con <strong>dos</strong> números, el promedio de cada lado. Ensaya los siete cortes posibles (a mitad de camino entre dos locales vecinos) y mide, en cada uno, cuánto se alejan las ventas del promedio de su grupo: la <span class="term">suma de cuadrados</span>. El corte en 170 deja los grupos más apretados (2.048, contra 2.581 del corte en 300 y 9.248 sin ningún corte), así que esa es la pregunta:</p>
+<div style="margin:1.2rem 0">
+<svg width="100%" viewbox="0 0 680 300" role="img" aria-label="Árbol de profundidad 1 sobre los ocho locales: la escalera de dos peldaños">
+<line x1="60" y1="256" x2="664" y2="256" stroke="#cecfd4"></line>
+<line x1="60" y1="16" x2="60" y2="256" stroke="#cecfd4"></line>
+<text x="108" y="272" text-anchor="middle" font-size="11" fill="#88898c">100</text>
+<text x="229" y="272" text-anchor="middle" font-size="11" fill="#88898c">200</text>
+<text x="350" y="272" text-anchor="middle" font-size="11" fill="#88898c">300</text>
+<text x="471" y="272" text-anchor="middle" font-size="11" fill="#88898c">400</text>
+<text x="592" y="272" text-anchor="middle" font-size="11" fill="#88898c">500</text>
+<text x="54" y="232" text-anchor="end" font-size="11" fill="#88898c">50</text>
+<text x="54" y="140" text-anchor="end" font-size="11" fill="#88898c">100</text>
+<text x="54" y="48" text-anchor="end" font-size="11" fill="#88898c">150</text>
+<text x="362" y="292" text-anchor="middle" font-size="12" fill="#1b1d29">Tráfico peatonal (personas por hora)</text>
+<text x="14" y="136" text-anchor="middle" font-size="12" fill="#1b1d29" transform="rotate(-90 14 136)">Ventas (millones al mes)</text>
+<polyline points="60,209.8 192.9,209.8 192.9,99.1 664,99.1" fill="none" stroke="#e9683b" stroke-width="3"></polyline>
+<line x1="192.9" y1="16" x2="192.9" y2="256" stroke="#88898c" stroke-dasharray="4 3"></line>
+<text x="198" y="30" font-size="11" fill="#52555f">¿tráfico menor que 170?</text>
+<circle cx="96.2" cy="228.3" r="5" fill="#5454e9"></circle><text x="96.2" y="246" text-anchor="middle" font-size="11" fill="#3a3acb">A</text>
+<circle cx="120.4" cy="217.2" r="5" fill="#5454e9"></circle><text x="120.4" y="235" text-anchor="middle" font-size="11" fill="#3a3acb">B</text>
+<circle cx="144.6" cy="198.8" r="5" fill="#5454e9"></circle><text x="144.6" y="189" text-anchor="middle" font-size="11" fill="#3a3acb">C</text>
+<circle cx="168.7" cy="195.1" r="5" fill="#5454e9"></circle><text x="168.7" y="186" text-anchor="middle" font-size="11" fill="#3a3acb">D</text>
+<circle cx="217" cy="143.4" r="5" fill="#5454e9"></circle><text x="217" y="161" text-anchor="middle" font-size="11" fill="#3a3acb">E</text>
+<circle cx="301.6" cy="128.6" r="5" fill="#5454e9"></circle><text x="301.6" y="146" text-anchor="middle" font-size="11" fill="#3a3acb">F</text>
+<circle cx="398.2" cy="80.6" r="5" fill="#5454e9"></circle><text x="398.2" y="71" text-anchor="middle" font-size="11" fill="#3a3acb">G</text>
+<circle cx="615.7" cy="43.7" r="5" fill="#5454e9"></circle><text x="615.7" y="34" text-anchor="middle" font-size="11" fill="#3a3acb">H</text>
+<text x="126" y="204" text-anchor="middle" font-size="12" font-weight="700" fill="#c2552f">hoja: promedio 60 (A, B, C, D)</text>
+<text x="430" y="93" text-anchor="middle" font-size="12" font-weight="700" fill="#c2552f">hoja: promedio 120 (E, F, G, H)</text>
+<text x="660" y="116" text-anchor="end" font-size="11" fill="#88898c">el tope: 120</text>
+</svg>
+</div>
+<p>Dos hojas, dos valores posibles: 60 y 120. El punto H vende 150 y el árbol le asigna 120, porque es lo que vende en promedio su grupo. Con profundidad 2 cada lado se vuelve a partir (en 120 y en 300) y la escalera gana dos peldaños:</p>
+<div style="margin:1.2rem 0">
+<svg width="100%" viewbox="0 0 680 300" role="img" aria-label="Árbol de profundidad 2 sobre los ocho locales: la escalera de cuatro peldaños">
+<line x1="60" y1="256" x2="664" y2="256" stroke="#cecfd4"></line>
+<line x1="60" y1="16" x2="60" y2="256" stroke="#cecfd4"></line>
+<text x="108" y="272" text-anchor="middle" font-size="11" fill="#88898c">100</text>
+<text x="229" y="272" text-anchor="middle" font-size="11" fill="#88898c">200</text>
+<text x="350" y="272" text-anchor="middle" font-size="11" fill="#88898c">300</text>
+<text x="471" y="272" text-anchor="middle" font-size="11" fill="#88898c">400</text>
+<text x="592" y="272" text-anchor="middle" font-size="11" fill="#88898c">500</text>
+<text x="54" y="232" text-anchor="end" font-size="11" fill="#88898c">50</text>
+<text x="54" y="140" text-anchor="end" font-size="11" fill="#88898c">100</text>
+<text x="54" y="48" text-anchor="end" font-size="11" fill="#88898c">150</text>
+<text x="362" y="292" text-anchor="middle" font-size="12" fill="#1b1d29">Tráfico peatonal (personas por hora)</text>
+<text x="14" y="136" text-anchor="middle" font-size="12" fill="#1b1d29" transform="rotate(-90 14 136)">Ventas (millones al mes)</text>
+<polyline points="60,222.8 132.5,222.8 132.5,196.9 192.9,196.9 192.9,136 349.9,136 349.9,62.2 664,62.2" fill="none" stroke="#e9683b" stroke-width="3"></polyline>
+<line x1="192.9" y1="16" x2="192.9" y2="256" stroke="#88898c" stroke-dasharray="4 3"></line>
+<line x1="132.5" y1="16" x2="132.5" y2="256" stroke="#cecfd4" stroke-dasharray="4 3"></line>
+<line x1="349.9" y1="16" x2="349.9" y2="256" stroke="#cecfd4" stroke-dasharray="4 3"></line>
+<text x="198" y="30" font-size="11" fill="#52555f">170</text>
+<text x="136" y="30" font-size="11" fill="#88898c">120</text>
+<text x="354" y="30" font-size="11" fill="#88898c">300</text>
+<circle cx="96.2" cy="228.3" r="5" fill="#5454e9"></circle><text x="96.2" y="246" text-anchor="middle" font-size="11" fill="#3a3acb">A</text>
+<circle cx="120.4" cy="217.2" r="5" fill="#5454e9"></circle><text x="120.4" y="208" text-anchor="middle" font-size="11" fill="#3a3acb">B</text>
+<circle cx="144.6" cy="198.8" r="5" fill="#5454e9"></circle><text x="144.6" y="216" text-anchor="middle" font-size="11" fill="#3a3acb">C</text>
+<circle cx="168.7" cy="195.1" r="5" fill="#5454e9"></circle><text x="168.7" y="186" text-anchor="middle" font-size="11" fill="#3a3acb">D</text>
+<circle cx="217" cy="143.4" r="5" fill="#5454e9"></circle><text x="217" y="161" text-anchor="middle" font-size="11" fill="#3a3acb">E</text>
+<circle cx="301.6" cy="128.6" r="5" fill="#5454e9"></circle><text x="301.6" y="121" text-anchor="middle" font-size="11" fill="#3a3acb">F</text>
+<circle cx="398.2" cy="80.6" r="5" fill="#5454e9"></circle><text x="398.2" y="98" text-anchor="middle" font-size="11" fill="#3a3acb">G</text>
+<circle cx="615.7" cy="43.7" r="5" fill="#5454e9"></circle><text x="615.7" y="34" text-anchor="middle" font-size="11" fill="#3a3acb">H</text>
+<text x="96" y="240" text-anchor="middle" font-size="11" font-weight="700" fill="#c2552f">53</text>
+<text x="162" y="214" text-anchor="middle" font-size="11" font-weight="700" fill="#c2552f">67</text>
+<text x="271" y="152" text-anchor="middle" font-size="11" font-weight="700" fill="#c2552f">100</text>
+<text x="500" y="56" text-anchor="middle" font-size="12" font-weight="700" fill="#c2552f">hoja: promedio 140 (G, H)</text>
+<text x="660" y="80" text-anchor="end" font-size="11" fill="#88898c">el tope: 140</text>
+</svg>
+</div>
+<p>Tres cosas que se ven en la escalera y que valen para cualquier árbol de regresión:</p>
+<ul>
+<li><strong>k hojas, k valores posibles.</strong> Con cuatro hojas el árbol solo sabe decir 53, 67, 100 o 140. No hay rampa entre peldaños: dos locales con tráfico 200 y 290 reciben exactamente lo mismo.</li>
+<li><strong>El árbol no extrapola.</strong> La hoja más alta es el techo. Un local frente al que pasaran 900 personas por hora recibiría 140, igual que G y H, porque el árbol solo sabe lo que vendieron los arrendatarios que vio. Guarda esto para el local 2 de Barranquilla.</li>
+<li><strong>Cada peldaño nuevo baja el error en los locales con los que se construyó</strong>, siempre: el MAE de los ocho pasa de 30 (la mediana, 82, para todos) a 13.5 con un corte y a 4.5 con tres. Si cada hoja termina con un solo local, el error llega a cero y el árbol no aprendió nada: es el memorizador de la semana pasada, ahora con números.</li>
+</ul>
+<section id="la-escalera-con-locales-del-estudio" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="la-escalera-con-locales-del-estudio"><span class="header-section-number">3.1</span> La escalera con locales del estudio</h2>
+<p>Cuarenta locales del estudio, con una sola variable, el tráfico. Treinta sirven para construir el árbol; diez, con borde negro, son de prueba: el árbol no los vio. El baseline es la mediana de los treinta.</p>
+<div class="widget-card" id="wg-escalera">
+  <div class="widget-head">La escalera · 40 locales del estudio, solo el tráfico</div>
+  <div class="widget-body">
+    <div class="widget-instr">Empieza con profundidad 1 y lee los dos valores que el árbol puede decir. Sube a 2 y a 3 y mira qué pasa con el error en los treinta locales de construcción y con el de los diez de prueba. Luego baja el mínimo por hoja a 2: cuenta los locales de la hoja más pequeña.</div>
+    <div class="widget-row">
+      <label for="es-prof">Profundidad: <span id="es-profv">1</span></label>
+      <input type="range" id="es-prof" min="1" max="3" step="1" value="1">
+      <label for="es-min">Mínimo de locales por hoja</label>
+      <select id="es-min"><option value="2">2</option><option value="4" selected="">4</option><option value="8">8</option></select>
+      <button type="button" class="btn-widget btn-widget-ghost" id="es-reset">Volver al inicio</button>
+    </div>
+    <div class="widget-stats">
+      <div class="widget-stat"><div class="k">MAE en construcción (30 locales)</div><div class="v" id="es-tr">—</div></div>
+      <div class="widget-stat ok"><div class="k">MAE en prueba (10 locales)</div><div class="v" id="es-te">—</div></div>
+      <div class="widget-stat warn"><div class="k">MAE del baseline en prueba</div><div class="v" id="es-base">—</div></div>
+      <div class="widget-stat"><div class="k">Hojas · tope</div><div class="v" id="es-hojas">—</div></div>
+    </div>
+    <svg id="es-svg" class="widget-svg" viewbox="0 0 680 330" role="img" aria-label="Los cuarenta locales y la escalera de predicciones del árbol"></svg>
+    <div class="widget-note" id="es-nota"></div>
+  </div>
+</div>
+<script>
+(function () {
+  // >>> puntos de la escalera (los inserta input/_datos_en_linea_week06.R; no editar a mano)
+  // [id del local, tráfico peatonal (personas por hora), ventas del arrendatario (millones al mes), 1 = lote de prueba]
+  const PUNTOS = [
+    [326, 79, 47.4, 0],
+    [205, 93, 69.4, 0],
+    [204, 105, 46.0, 0],
+    [109, 120, 57.3, 0],
+    [248, 137, 59.2, 0],
+    [87, 146, 141.8, 0],
+    [154, 152, 104.1, 0],
+    [55, 161, 108.0, 0],
+    [73, 167, 70.0, 0],
+    [209, 172, 102.6, 0],
+    [252, 182, 50.4, 0],
+    [264, 191, 87.5, 0],
+    [374, 198, 66.9, 0],
+    [319, 213, 76.9, 0],
+    [403, 225, 65.4, 0],
+    [116, 236, 100.3, 0],
+    [179, 251, 132.6, 0],
+    [372, 259, 84.6, 0],
+    [217, 275, 118.4, 0],
+    [395, 289, 95.9, 0],
+    [221, 304, 75.3, 0],
+    [5, 319, 220.6, 0],
+    [310, 334, 107.8, 0],
+    [254, 356, 120.9, 0],
+    [96, 377, 75.3, 0],
+    [187, 397, 119.3, 0],
+    [453, 431, 127.3, 0],
+    [111, 485, 201.2, 0],
+    [269, 532, 98.4, 0],
+    [262, 644, 161.8, 0],
+    [321, 92, 50.5, 1],
+    [79, 134, 53.0, 1],
+    [35, 161, 46.9, 1],
+    [416, 195, 88.7, 1],
+    [449, 239, 121.8, 1],
+    [258, 274, 121.3, 1],
+    [423, 323, 91.9, 1],
+    [43, 383, 89.2, 1],
+    [455, 468, 144.2, 1],
+    [405, 678, 101.1, 1]
+  ];
+  // <<< fin de los puntos de la escalera
+  const C = { morado: "#5454e9", moradoOsc: "#3a3acb", naranja: "#e9683b", verde: "#4cb979", gris: "#88898c", borde: "#cecfd4", tinta: "#1b1d29", amarillo: "#c9a227" };
+  const $ = (id) => document.getElementById(id);
+  const pts = PUNTOS.map((c) => ({ id: c[0], x: c[1], y: c[2], test: c[3] === 1 }));
+  const tr = pts.filter((p) => !p.test), te = pts.filter((p) => p.test);
+  const media = (a) => a.reduce((s, p) => s + p.y, 0) / a.length;
+  const sse = (a) => { const m = media(a); return a.reduce((s, p) => s + (p.y - m) * (p.y - m), 0); };
+  const ys = tr.map((p) => p.y).sort((u, v) => u - v);
+  const baseline = (ys[14] + ys[15]) / 2;      // el baseline: la mediana de los treinta de construcción
+  let prev = null, arbol = null;
+  function construir(a, prof, maxP, minH, x0, x1) {
+    const nodo = { n: a.length, pred: media(a), hoja: true, x0, x1 };
+    if (prof >= maxP || a.length < 2 * minH) return nodo;
+    const xs = [...new Set(a.map((p) => p.x))].sort((u, v) => u - v);
+    let mejor = null, mejorS = sse(a);
+    for (let i = 0; i < xs.length - 1; i++) {
+      const th = (xs[i] + xs[i + 1]) / 2;
+      const L = a.filter((p) => p.x < th), R = a.filter((p) => p.x >= th);
+      if (L.length < minH || R.length < minH) continue;
+      const s = sse(L) + sse(R);
+      if (s < mejorS - 1e-9) { mejorS = s; mejor = { th, L, R }; }
+    }
+    if (!mejor) return nodo;
+    nodo.hoja = false; nodo.th = mejor.th;
+    nodo.izq = construir(mejor.L, prof + 1, maxP, minH, x0, mejor.th);
+    nodo.der = construir(mejor.R, prof + 1, maxP, minH, mejor.th, x1);
+    return nodo;
+  }
+  function predecir(nd, x) { while (!nd.hoja) nd = x < nd.th ? nd.izq : nd.der; return nd.pred; }
+  function hojas(nd, acc) { if (nd.hoja) acc.push(nd); else { hojas(nd.izq, acc); hojas(nd.der, acc); } return acc; }
+  function cortes(nd, acc) { if (!nd.hoja) { acc.push(nd.th); cortes(nd.izq, acc); cortes(nd.der, acc); } return acc; }
+  const mae = (a, f) => a.reduce((s, p) => s + Math.abs(p.y - f(p.x)), 0) / a.length;
+  function svgEl(tag, attrs, text) { const el = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) el.setAttribute(k, attrs[k]); if (text !== undefined) el.textContent = text; return el; }
+  const W = 680, H = 330, L = 56, R = 16, T = 16, B = 44, X0 = 60, X1 = 700, Y0 = 30, Y1 = 230;
+  const sx = (x) => L + (x - X0) / (X1 - X0) * (W - L - R), sy = (y) => T + (1 - (y - Y0) / (Y1 - Y0)) * (H - T - B);
+  function dibujar() {
+    const svg = $("es-svg"); svg.innerHTML = "";
+    svg.appendChild(svgEl("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: C.borde }));
+    svg.appendChild(svgEl("line", { x1: L, y1: T, x2: L, y2: H - B, stroke: C.borde }));
+    [100, 200, 300, 400, 500, 600, 700].forEach((x) => svg.appendChild(svgEl("text", { x: sx(x), y: H - B + 15, "text-anchor": "middle", "font-size": 11, fill: C.gris }, x)));
+    [50, 100, 150, 200].forEach((y) => svg.appendChild(svgEl("text", { x: L - 6, y: sy(y) + 4, "text-anchor": "end", "font-size": 11, fill: C.gris }, y)));
+    svg.appendChild(svgEl("text", { x: (L + W - R) / 2, y: H - 6, "text-anchor": "middle", "font-size": 12, fill: C.tinta }, "Tráfico peatonal (personas por hora)"));
+    svg.appendChild(svgEl("text", { x: 14, y: (T + H - B) / 2, "text-anchor": "middle", "font-size": 12, fill: C.tinta, transform: `rotate(-90 14 ${(T + H - B) / 2})` }, "Ventas (millones al mes)"));
+    svg.appendChild(svgEl("line", { x1: L, y1: sy(baseline), x2: W - R, y2: sy(baseline), stroke: C.amarillo, "stroke-width": 1.5, "stroke-dasharray": "5 4" }));
+    svg.appendChild(svgEl("text", { x: W - R, y: sy(baseline) - 5, "text-anchor": "end", "font-size": 11, fill: C.amarillo }, `el baseline: mediana de construcción = ${baseline.toFixed(1)}`));
+    const hs = hojas(arbol, []);
+    hs.forEach((h, i) => {
+      const xa = Math.max(h.x0, X0), xb = Math.min(h.x1, X1);
+      svg.appendChild(svgEl("line", { x1: sx(xa), y1: sy(h.pred), x2: sx(xb), y2: sy(h.pred), stroke: C.naranja, "stroke-width": 3.5 }));
+      svg.appendChild(svgEl("text", { x: (sx(xa) + sx(xb)) / 2, y: sy(h.pred) - 7, "text-anchor": "middle", "font-size": 11, "font-weight": 700, fill: "#c2552f" }, `${h.pred.toFixed(1)} (n = ${h.n})`));
+      if (i < hs.length - 1) svg.appendChild(svgEl("line", { x1: sx(h.x1), y1: sy(h.pred), x2: sx(h.x1), y2: sy(hs[i + 1].pred), stroke: C.naranja, "stroke-width": 3.5 }));
+    });
+    pts.forEach((p) => svg.appendChild(svgEl("circle", { cx: sx(p.x), cy: sy(p.y), r: p.test ? 5.5 : 4, fill: p.test ? "#fff" : C.morado, stroke: p.test ? C.tinta : "#fff", "stroke-width": p.test ? 1.8 : 1 })));
+    svg.appendChild(svgEl("text", { x: L + 6, y: T + 10, "font-size": 11, fill: C.gris }, "morado: construcción (30) · borde negro: prueba (10) · naranja: lo que el árbol dice"));
+  }
+  function actualizar(cambio) {
+    const prof = Number($("es-prof").value), min = Number($("es-min").value);
+    $("es-profv").textContent = prof;
+    arbol = construir(tr, 0, prof, min, -Infinity, Infinity);
+    const hs = hojas(arbol, []), f = (x) => predecir(arbol, x);
+    const e = { prof, min, tr: mae(tr, f), te: mae(te, f), base: mae(te, () => baseline), hojas: hs.length, tope: Math.max(...hs.map((h) => h.pred)), chica: Math.min(...hs.map((h) => h.n)) };
+    $("es-tr").textContent = e.tr.toFixed(1); $("es-te").textContent = e.te.toFixed(1); $("es-base").textContent = e.base.toFixed(1);
+    $("es-hojas").textContent = `${e.hojas} · ${e.tope.toFixed(1)}`;
+    dibujar();
+    let t;
+    if (prev && cambio !== "inicio") {
+      t = `Pasaste de ${prev.hojas} a ${e.hojas} hojas. El MAE de construcción ${e.tr <= prev.tr ? "baja" : "sube"} de ${prev.tr.toFixed(1)} a ${e.tr.toFixed(1)} y el de prueba ${e.te <= prev.te ? "baja" : "sube"} de ${prev.te.toFixed(1)} a ${e.te.toFixed(1)}.`;
+      if (e.tr < prev.tr - 0.05 && e.te >= prev.te - 0.05) t += " Lo que ganó en los treinta locales con los que se construyó no se repite en los diez nuevos: el árbol empezó a memorizar.";
+      else if (e.te < prev.te - 0.05) t += " Esta vez el peldaño nuevo también redujo el error en los locales que no vio.";
+    } else {
+      t = `Profundidad ${prof}: ${e.hojas === 1 ? "ninguna pregunta, un solo promedio" : e.hojas === 2 ? "una pregunta, dos valores posibles" : `${e.hojas - 1} preguntas, ${e.hojas} valores posibles`}. El tope del árbol es ${e.tope.toFixed(1)} millones: ningún local, por alto que sea su tráfico, recibe más.`;
+    }
+    t += ` Frente al baseline (la mediana, MAE ${e.base.toFixed(1)} en prueba), el árbol ${e.te < e.base - 0.05 ? "le gana" : "no le gana"} en los locales nuevos.`;
+    if (e.chica < 4) t += ` Alarma: la hoja más pequeña tiene ${e.chica} local${e.chica === 1 ? "" : "es"}; su promedio es una anécdota, no una regla.`;
+    $("es-nota").textContent = t;
+    prev = e;
+  }
+  $("es-prof").addEventListener("input", () => actualizar("control"));
+  $("es-min").addEventListener("change", () => actualizar("control"));
+  $("es-reset").addEventListener("click", () => { $("es-prof").value = 1; $("es-min").value = 4; prev = null; actualizar("inicio"); });
+  actualizar("inicio");
+})();
+</script>
+<p>Con una sola variable y cuarenta locales el árbol es tosco: el tráfico explica una parte de las ventas y el resto lo explican el canon, el área, el ticket previsto. Pero la lección ya está completa: el error de construcción baja con cada peldaño y el de prueba no necesariamente; lo que vale es el segundo.</p>
+</section>
+<section id="el-árbol-de-ventas-en-r" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="el-árbol-de-ventas-en-r"><span class="header-section-number">3.2</span> El árbol de ventas en R</h2>
+<p>Ahora los 480 locales del estudio con sus doce columnas de antes de comprar, la partición fija del curso (360 de entrenamiento y 120 de validación) y el freno del generador: un mínimo de diez locales por hoja. Con esa receta, <code>rpart</code> entrena los dos árboles de la semana: el de profundidad 2, que se deja leer completo, y el de profundidad 3, el árbol de referencia, con ocho hojas.</p>
+<div class="callout-practice">
+<div class="callout-title">
+El código de la semana 6 (opcional)
+</div>
+<p>El árbol en pesos, el ranking de modelos, la pareada, los diez peores y las bandas de los tres locales candidatos, celda a celda en R, en <a href="../practice/cocina.html">el código de la semana 6</a>. El laboratorio con controles —la práctica obligatoria— es <a href="../practice/week-06.html">otra página</a>.</p>
+</div>
+<p>El árbol se lee como política. La primera pregunta no es el tráfico, como en el cierre, sino el <strong>canon de mercado</strong> (la columna <code>arriendo_mes</code>): ¿el local arrienda por menos de 14.15 millones al mes? Es lógico: el canon ya resume la ciudad, la zona, el área y el tráfico (por eso la regla del sector funciona), así que es la pregunta que más varianza quita de un solo golpe. Con profundidad 2, cuatro perfiles: canon bajo y tráfico bajo, 74.9 millones (146 locales); canon bajo y tráfico alto, 101.0 (126); canon alto y tráfico medio, 118.0 (53); canon alto y tráfico alto, 164.2 (35). Con profundidad 3, ocho perfiles entre 63.3 y 207.2, y la hoja más alta tiene apenas diez locales. Esa hoja es el techo del árbol: ningún local, por bueno que sea, recibe más de 207.2.</p>
+</section>
+</section>
+<section id="el-error-en-pesos" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> El error en pesos</h1>
+<p>Para un número no hay acierto ni fallo: hay una distancia. Si el árbol dijo 147.0 y el arrendatario vendió 252.0, se equivocó por 105. Las dos formas de promediar esas distancias ya las conoces de la semana 4, y aquí se vuelven la cifra central:</p>
+<ul>
+<li>El <strong>MAE</strong> es el <span class="term">error típico</span>: “en promedio, el árbol se equivoca por 22.6 millones al mes”. Está en la unidad del negocio y es el que se le dice a la junta.</li>
+<li>El <strong>RMSE</strong> castiga los errores grandes: 32.2 para el mismo árbol. La <strong>brecha</strong> entre los dos (22.6 contra 32.2) delata que en unos pocos locales el error es muy grande. En la sección 6 los vas a ver uno por uno.</li>
+</ul>
+<p>Y la traducción a la decisión. Como el canon del contrato es el 10 % de las ventas del arrendatario, cada millón mensual de ventas mueve el VPN a cinco años de la compra en <strong>3 millones</strong> (la hoja de costos de la semana 4). Un error típico de 22.6 millones al mes es un error típico de 22.6 × 3 ≈ <strong>68 millones de VPN</strong> en una compra de 700. Mueve el control y mira cuánto pesa cada millón de error:</p>
+<div class="widget-card" id="wg-error">
+  <div class="widget-head">El error en pesos · la banda de un local y su traducción a VPN</div>
+  <div class="widget-body">
+    <div class="widget-instr">Elige un local candidato de Barranquilla (su predicción es la del árbol de profundidad 3) y mueve el error típico. La banda de ventas es predicción ± error; la de VPN multiplica por 3. Mira si la regla del sector (8 × canon) cae dentro de la banda.</div>
+    <div class="widget-row">
+      <label for="er-local">Local</label>
+      <select id="er-local">
+        <option value="0" selected="">Local 1: oficinas, 95 m², canon 16.5</option>
+        <option value="1">Local 2: mixta, 160 m², canon 27</option>
+        <option value="2">Local 3: residencial, 70 m², canon 8</option>
+      </select>
+      <label for="er-mae">Error típico (MAE): <span id="er-maev">22.6</span> millones al mes</label>
+      <input type="range" id="er-mae" min="5" max="40" step="any" value="22.6496">
+    </div>
+    <div class="widget-stats">
+      <div class="widget-stat"><div class="k">Ventas base del árbol</div><div class="v" id="er-base">—</div></div>
+      <div class="widget-stat ok"><div class="k">Banda de ventas (millones al mes)</div><div class="v" id="er-banda">—</div></div>
+      <div class="widget-stat warn"><div class="k">Banda en VPN a cinco años (millones)</div><div class="v" id="er-vpn">—</div></div>
+      <div class="widget-stat"><div class="k">Regla del sector: 8 × canon</div><div class="v" id="er-regla">—</div></div>
+    </div>
+    <svg id="er-svg" class="widget-svg" viewbox="0 0 680 150" role="img" aria-label="La banda de ventas y la banda de VPN del local elegido"></svg>
+    <div class="widget-note" id="er-nota"></div>
+  </div>
+</div>
+<script>
+(function () {
+  // los tres locales candidatos: ventas base del árbol de profundidad 3 (cifras selladas, sin redondear para que
+  // las bandas coincidan con el sobre: 147.0 [124.4, 169.7], 207.2 [184.5, 229.8], 63.3 [40.6, 85.9]) y la regla 8 x canon
+  const LOCALES = [
+    { nombre: "local 1", base: 147.04, regla: 132, canon: 16.5 },
+    { nombre: "local 2", base: 207.18, regla: 216, canon: 27 },
+    { nombre: "local 3", base: 63.275, regla: 64, canon: 8 }
+  ];
+  const VPN = 3, MAE_ARBOL = 22.6496;   // 3 millones de VPN por millón mensual (canon del 10 %); MAE del árbol de profundidad 3 en validación (22.6)
+  const C = { morado: "#5454e9", naranja: "#e9683b", verde: "#4cb979", gris: "#88898c", borde: "#cecfd4", tinta: "#1b1d29", amarillo: "#c9a227" };
+  const $ = (id) => document.getElementById(id);
+  const svg = $("er-svg");
+  function svgEl(tag, attrs, text) { const el = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) el.setAttribute(k, attrs[k]); if (text !== undefined) el.textContent = text; return el; }
+  const fmt = (x) => Math.round(x).toLocaleString("es-CO");
+  let prev = null;
+  function barra(y, x0, x1, base, lo, hi, marca, etiqueta, unidad) {
+    const W = 680, L = 120, R = 20, sx = (v) => L + (v - x0) / (x1 - x0) * (W - L - R);
+    svg.appendChild(svgEl("text", { x: L - 8, y: y + 4, "text-anchor": "end", "font-size": 11, fill: C.tinta, "font-weight": 600 }, etiqueta));
+    svg.appendChild(svgEl("line", { x1: L, y1: y, x2: W - R, y2: y, stroke: C.borde, "stroke-width": 1.5 }));
+    svg.appendChild(svgEl("rect", { x: sx(Math.max(lo, x0)), y: y - 9, width: Math.max(0, sx(Math.min(hi, x1)) - sx(Math.max(lo, x0))), height: 18, rx: 4, fill: C.morado, opacity: 0.28 }));
+    svg.appendChild(svgEl("line", { x1: sx(base), y1: y - 12, x2: sx(base), y2: y + 12, stroke: C.morado, "stroke-width": 3 }));
+    if (marca !== null) svg.appendChild(svgEl("polygon", { points: `${sx(marca)},${y - 13} ${sx(marca) - 6},${y - 23} ${sx(marca) + 6},${y - 23}`, fill: C.amarillo }));
+    svg.appendChild(svgEl("text", { x: sx(Math.max(lo, x0)) - 4, y: y + 26, "text-anchor": "end", "font-size": 11, fill: C.morado }, fmt(lo) + unidad));
+    svg.appendChild(svgEl("text", { x: sx(Math.min(hi, x1)) + 4, y: y + 26, "font-size": 11, fill: C.morado }, fmt(hi) + unidad));
+    [x0, (x0 + x1) / 2, x1].forEach((t) => svg.appendChild(svgEl("text", { x: sx(t), y: y + 42, "text-anchor": "middle", "font-size": 10, fill: C.gris }, fmt(t))));
+  }
+  function pinta() {
+    const loc = LOCALES[Number($("er-local").value)], e = parseFloat($("er-mae").value);
+    const lo = loc.base - e, hi = loc.base + e;
+    $("er-maev").textContent = e.toFixed(1);
+    $("er-base").textContent = loc.base.toFixed(1);
+    $("er-banda").textContent = `${lo.toFixed(1)} a ${hi.toFixed(1)}`;
+    $("er-vpn").textContent = `${fmt(VPN * lo)} a ${fmt(VPN * hi)}`;
+    $("er-regla").textContent = loc.regla;
+    svg.innerHTML = "";
+    barra(40, 0, 300, loc.base, lo, hi, loc.regla, "ventas al mes", "");
+    barra(110, 0, 900, VPN * loc.base, VPN * lo, VPN * hi, null, "VPN a cinco años", "");
+    svg.appendChild(svgEl("text", { x: 660, y: 14, "text-anchor": "end", "font-size": 10, fill: C.gris }, "triángulo: la regla del sector · barra: ventas base · sombra: la banda"));
+    const dentro = loc.regla >= lo && loc.regla <= hi;
+    let t = `Con un error típico de ${e.toFixed(1)} millones al mes, el ${loc.nombre} vende entre ${lo.toFixed(1)} y ${hi.toFixed(1)}; en VPN a cinco años, la banda va de ${fmt(VPN * lo)} a ${fmt(VPN * hi)} millones: ± ${fmt(VPN * e)} alrededor de ${fmt(VPN * loc.base)}.`;
+    if (prev && prev.loc === loc.nombre && Math.abs(prev.e - e) > 1e-9) t += ` Pasar de ${prev.e.toFixed(1)} a ${e.toFixed(1)} ${e > prev.e ? "ensancha" : "estrecha"} la banda de VPN en ${fmt(VPN * Math.abs(e - prev.e))} millones a cada lado: cada millón mensual de error son 3 millones de VPN.`;
+    t += dentro ? ` La regla del sector (${loc.regla}) cae dentro de la banda: el árbol y la regla no se contradicen.` : ` La regla del sector (${loc.regla}) queda fuera de la banda: el árbol y la regla se contradicen, y antes de elegir uno hay que saber por qué.`;
+    if (Math.abs(e - MAE_ARBOL) < 0.05) t += " Este es el error del árbol de referencia en validación.";
+    if (lo <= 0) t += " La banda llega a cero: con ese error el pronóstico no dice nada.";
+    $("er-nota").textContent = t;
+    prev = { loc: loc.nombre, e };
+  }
+  $("er-local").addEventListener("change", pinta);
+  $("er-mae").addEventListener("input", pinta);
+  pinta();
+})();
+</script>
+<p>Dos lecturas del control. La banda se entrega en las dos unidades: en ventas, porque es la unidad en la que piensan la gerencia de inversión y el arrendatario; en VPN, porque es la que la junta compara con la inversión. Y la regla del sector cae dentro de la banda del árbol en los tres locales con el error de referencia: cuando dos pronósticos distintos caben en la misma banda, ninguno le ha ganado al otro.</p>
+</section>
+<section id="le-gana-a-la-regla-del-sector" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> ¿Le gana a la regla del sector?</h1>
+<p>El ranking de modelos de la semana 4 tenía cuatro filas de ventas; hoy entran las dos del árbol. Todo medido en los 120 locales de validación, con el margen de dos errores estándar y la comparación pareada contra la regla, punto por punto:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Predicción de ventas</th>
+<th>MAE</th>
+<th>Margen (2 EE)</th>
+<th>RMSE</th>
+<th>MAE en VPN (× 3)</th>
+<th>Pareada: regla − modelo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Mediana del entrenamiento (93.1 para todos)</td>
+<td>31.1</td>
+<td>± 5.7</td>
+<td>43.9</td>
+<td>93</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Regla del sector: 8 × canon</td>
+<td>22.4</td>
+<td>± 3.7</td>
+<td>30.0</td>
+<td>67</td>
+<td>el baseline</td>
+</tr>
+<tr class="odd">
+<td>Consultora A (ecuación lineal)</td>
+<td>22.9</td>
+<td>± 3.7</td>
+<td>30.6</td>
+<td>69</td>
+<td>−0.57 ± 3.97: empate técnico</td>
+</tr>
+<tr class="even">
+<td>Consultora B (bosque)</td>
+<td>17.9</td>
+<td>± 3.4</td>
+<td>25.9</td>
+<td>54</td>
+<td>4.44 ± 2.76: gana B</td>
+</tr>
+<tr class="odd">
+<td><strong>Árbol de profundidad 2</strong></td>
+<td>23.5</td>
+<td>± 3.9</td>
+<td>31.7</td>
+<td>71</td>
+<td>−1.19 ± 3.35: empate técnico</td>
+</tr>
+<tr class="even">
+<td><strong>Árbol de profundidad 3</strong></td>
+<td>22.6</td>
+<td>± 4.2</td>
+<td>32.2</td>
+<td>68</td>
+<td>−0.29 ± 3.55: empate técnico</td>
+</tr>
+</tbody>
+</table>
+<p>El veredicto honesto: el árbol, en cualquiera de las dos profundidades, <strong>empata con la regla del sector</strong>. La diferencia pareada es de menos de un millón al mes y el margen cruza el cero por los dos lados. Lo mismo le pasaba a la consultora A. La única que le gana a la regla es B, por 4.4 millones al mes por local, y B no es un árbol: es un bosque (sección 8). Un pronóstico que empata con “8 × canon” no es inútil (dice lo mismo que la gerencia de inversión ya sabe de memoria, pero lo dice con una banda medida), aunque tampoco justifica una factura. Esa es una línea de la posición actualizada del task 6.</p>
+</section>
+<section id="dónde-falla-los-diez-peores" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Dónde falla: los diez peores</h1>
+<p>Un MAE de 22.6 con un RMSE de 32.2 dice que el error no está repartido parejo. La prueba son los diez locales de validación en los que el árbol de profundidad 3 más se equivoca (el código de la semana los lista uno por uno, con su ficha completa).</p>
+<p>Diez locales de 120 (el 8 %) concentran el <strong>61.8 %</strong> del error cuadrático. En ocho de los diez el arrendatario vende mucho más de lo que el árbol dice; seis venden más de 150 millones, y siete están en zona de oficinas. El patrón se ve en el gráfico de predicho contra observado, que la práctica y el código de la semana dibujan: a la derecha y arriba, las ventas observadas se despegan de la línea porque el árbol no tiene ninguna hoja por encima de 207.2 y los arrendatarios de ventas altas (el del local 52 vende 250.2; el del 458, 252.0) caen en hojas que promedian 100 o 147. Los dos que el árbol <strong>sobre</strong>estima (366 y 36) están en la hoja de 207.2 y venden 133 y 145: la hoja de diez locales es, otra vez, la menos confiable.</p>
+<p>¿Qué se hace con eso? No se arregla con más profundidad: la sección 3 ya mostró que los peldaños nuevos mejoran la construcción y no la prueba. Se hace un <span class="term">tratamiento aparte</span>: el modelo para la mayoría, una persona para los grandes. El árbol pronostica bien un local típico (sin los diez peores, el MAE baja a 17.1); un local que pueda albergar un arrendatario de ventas altas (oficinas, canon alto, tráfico alto) se evalúa a fondo, con visita y con el criterio de alguien que conozca la zona, porque el estudio no tiene suficientes locales así para que el árbol los aprenda. El 17.1 es un diagnóstico, no un desempeño: la cifra que se reporta sigue siendo 22.6.</p>
+</section>
+<section id="de-la-hoja-a-la-banda" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> De la hoja a la banda</h1>
+<p>Ahora lo que la junta necesita: cuánto vendería el arrendatario de cada uno de los tres locales candidatos de Barranquilla, con su banda. La banda es la predicción del árbol de referencia ± su error típico en validación (22.6), y se entrega al lado de lo que dice la regla del sector:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Local</th>
+<th>Ventas base (millones al mes)</th>
+<th>Banda: ± 22.6</th>
+<th>Regla 8 × canon</th>
+<th>Nota de extrapolación</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Local 1 (oficinas, 95 m², canon 16.5)</td>
+<td><strong>147.0</strong></td>
+<td>[124.4, 169.7]</td>
+<td>132</td>
+<td>* Barranquilla no está en el estudio</td>
+</tr>
+<tr class="even">
+<td>Local 2 (mixta, 160 m², canon 27)</td>
+<td><strong>207.2</strong></td>
+<td>[184.5, 229.8]</td>
+<td>216</td>
+<td>* Barranquilla no está en el estudio; canon 27 por encima del máximo del estudio (25); cae en la hoja más alta (n = 10): el árbol no puede decir más de 207.2</td>
+</tr>
+<tr class="odd">
+<td>Local 3 (residencial, 70 m², canon 8)</td>
+<td><strong>63.3</strong></td>
+<td>[40.6, 85.9]</td>
+<td>64</td>
+<td>* Barranquilla no está en el estudio</td>
+</tr>
+</tbody>
+</table>
+<p>Estas tres cifras son las <strong>ventas base</strong> del expediente: las que entran, con su banda, al VPN de la alternativa A de Meridiano, la compra del primer local en Barranquilla, en la semana 7 (cada millón mensual son 3 de VPN: la banda del local 1 va de 373 a 509 millones de VPN). Tres observaciones que van pegadas a la tabla, no en una nota al pie:</p>
+<ul>
+<li><strong>Ningún local del estudio está en Barranquilla.</strong> Las tres predicciones aplican una regla aprendida en seis ciudades a una séptima. Llevan asterisco, como la semana pasada.</li>
+<li><strong>El local 2 está fuera del rango.</strong> Su canon de mercado es 27 millones y el máximo del estudio es 25. El árbol responde igual, porque solo pregunta si el canon pasa de 14.15, pero lo manda a la hoja de diez locales, la del techo. 207.2 no es “lo que vendería un arrendatario ahí”: es lo máximo que este árbol sabe decir. Si el arrendatario del local 2 fuera a vender 260, el árbol no podría verlo.</li>
+<li><strong>La regla y el árbol no se contradicen.</strong> En los tres locales, 8 × canon cae dentro de la banda del árbol. Para el local 3 son casi la misma cifra. Esa coincidencia es informativa: dos métodos distintos, una misma banda.</li>
+</ul>
+</section>
+<section id="recuadro-opcional-el-bosque-y-el-tarifario" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Recuadro opcional: el bosque y el tarifario</h1>
+<p>Dos modelos más aparecen en el ranking y conviene saber qué son.</p>
+<div class="callout-key">
+<div class="callout-title">
+La consultora B es un bosque
+</div>
+<p>La cura conocida para la inestabilidad del árbol es la misma que en clasificación: entrenar quinientos árboles, cada uno con una muestra distinta de locales y un subconjunto distinto de preguntas, y <strong>promediar</strong> sus predicciones. Es un bosque aleatorio de regresión. Promediar muchos árboles toscos da una rampa en lugar de una escalera y reduce el ruido: por eso B tiene el mejor MAE de la tabla (17.9) y es la única que le gana a la regla. El precio es el de siempre: quinientos árboles no se leen. Cuando B decide, el árbol de profundidad 3 es su vocero: dice, con cuatro preguntas, cuál es la lógica general.</p>
+</div>
+<div class="callout-key">
+<div class="callout-title">
+La consultora A es un tarifario
+</div>
+<p>A usa una ecuación lineal con cuatro variables: ventas = una constante + tanto por cada persona de tráfico + tanto por metro cuadrado − tanto por competidor + tanto por cada peso del ticket previsto. Es la lógica de un avalúo, la del tarifario de la semana 4: cada variable tiene un precio fijo y las ventas suben por una rampa, sin peldaños. Extrapola sin restricción (para el local 2 daría una cifra por encima del techo del árbol) y empata con la regla del sector (22.9 contra 22.4). Cuando la relación es suave, el tarifario compite; cuando hay perfiles distintos con reglas distintas, el árbol lo encuentra y el tarifario no.</p>
+</div>
+<div class="callout-connect">
+<div class="callout-title">
+En la sesión
+</div>
+<ul>
+<li><strong>El paper:</strong> Mullainathan y Spiess (2017) preguntaron qué aporta el aprendizaje automático a la economía aplicada, con un ejemplo que es el nuestro a otra escala: predecir el valor de viviendas a partir de sus características, con una regresión, un árbol, un bosque y otros, todos juzgados fuera de muestra. Qué investigaron, con qué datos, qué encontraron y por qué un pronóstico de ventas se juzga por su error en pesos fuera de muestra y no por su ajuste.</li>
+<li><strong>La aplicación:</strong> el árbol de ventas de Meridiano leído en voz alta; el promedio de una hoja rehecho a mano, con los ocho locales del ejemplo y con la hoja real de diez locales de la que sale 207.2; el ranking en pesos con un error sembrado que hay que encontrar; los diez peores y el tratamiento aparte; las ventas base con banda; y un giro: el vendedor del local 2 sube el precio de compra y hay que decidir si la compra aguanta.</li>
+<li><strong>El cierre:</strong> la discusión del task 5. Cada equipo traduce una rama de su árbol en voz alta; ¿aguantó la raíz al cambiar la semilla?; qué sí se le dice a la junta.</li>
+</ul>
+</div>
+</section>
+<section id="y-esto-cómo-se-ve-en-tu-organización" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> ¿Y esto cómo se ve en tu organización?</h1>
+<p>Piensa en un pronóstico que tu área entrega como una cifra: las ventas del trimestre, la demanda de un producto nuevo, el costo de un proyecto, el tiempo de entrega. ¿Alguien lo acompaña con su error típico, medido en casos que el método no vio? ¿Contra qué baseline se compara: contra la cifra del año pasado, contra la estimación rápida de un experto, contra nada? ¿Y qué pasa con los casos en los que el pronóstico se equivoca por mucho: se revisan aparte o se promedian con los demás? Llévalo pensado: es la pregunta de la próxima sesión para tu caso.</p>
+<p><strong>Para verlo en movimiento (opcional, en inglés).</strong> <a href="https://mlu-explain.github.io/linear-regression/">Linear Regression</a> —el tarifario de la consultora A, animado— y <a href="https://mlu-explain.github.io/random-forest/">Random Forest</a> —el bosque de la B—, de Machine Learning University.</p>
+</section>
+<section id="preguntas-de-comprensión" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Preguntas de comprensión</h1>
+<details class="pregunta">
+<summary>
+<ol type="1">
+<li>Un pronóstico de ventas reporta MAE 14 y RMSE 31. ¿Qué está pasando?
+</li></ol></summary>
+Dos cosas que hay que mirar antes de creerle. La brecha entre 14 y 31 dice que la mayoría de los locales se predice con pocos millones de error y en unos pocos el error es muy grande: el cuadrado los infla. Antes de usar el “14 en promedio” hay que ver esos casos, que suelen tener algo en común (aquí, los arrendatarios de ventas altas en zona de oficinas), y decidir si se tratan aparte. Y la pregunta incómoda: ¿14 es el error en validación o en entrenamiento? El árbol de referencia obtiene 17.8 en los locales con los que se construyó y 22.6 en los que no vio. Un MAE sospechosamente bajo suele ser el de entrenamiento.
+</details>
+
+<details class="pregunta">
+<summary>
+<ol start="2" type="1">
+<li>¿Por qué el árbol no puede predecir 300 millones si el máximo del estudio es 259?
+</li></ol></summary>
+Porque cada hoja predice el promedio de los locales que cayeron en ella, y ningún promedio supera al mayor de sus miembros. La hoja más alta del árbol de referencia promedia 207.2 con diez locales cuyos arrendatarios venden entre 159.7 y 259.0; esa es la cifra máxima que el árbol puede decir, bastante por debajo del máximo observado. El árbol no extrapola: un arrendatario que fuera a vender 300 recibiría 207.2, y el error quedaría entre los diez peores. Por eso el local 2, con un canon por encima del rango del estudio, lleva nota: 207.2 es el techo del árbol, no una medida del local.
+</details>
+
+<details class="pregunta">
+<summary>
+<ol start="3" type="1">
+<li>¿Qué se hace con los diez peores?
+</li></ol></summary>
+Primero se miran: diez de 120 locales concentran el 61.8 % del error cuadrático, en ocho el arrendatario vende mucho más de lo predicho, seis pasan de 150 millones y siete están en zona de oficinas. Luego se decide el tratamiento aparte: el modelo para la mayoría (sin los diez, el MAE baja a 17.1) y una persona para los grandes, porque el estudio no tiene suficientes locales de ventas altas para que el árbol los aprenda. Lo que no se hace es subir la profundidad hasta que desaparezcan (eso es memorizar) ni reportar el 17.1 como desempeño: la cifra que se reporta es 22.6, y el diagnóstico va al lado.
+</details>
+
+<details class="pregunta">
+<summary>
+<ol start="4" type="1">
+<li>¿Qué banda le das a la junta para el local 1?
+</li></ol></summary>
+Las ventas base del árbol de referencia con su error típico en validación: 147.0 millones al mes, entre 124.4 y 169.7. En VPN a cinco años, cada millón mensual son 3: una banda de 373 a 509 millones de VPN, ± 68 alrededor de 441. Al lado, la regla del sector (8 × 16.5 = 132), que cae dentro de la banda, y la nota de extrapolación: Barranquilla no está en el estudio. Sin la banda, la cifra no es un pronóstico; sin la nota, la banda no cuenta.
+</details>
+
+</section>
+<section id="lectura-corta-opcional" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Lectura corta (opcional)</h1>
+<p>Walter Sosa Escudero, <em>Big data</em> (Siglo XXI, 2019), el capítulo sobre árboles y predicción: por qué un algoritmo que predice bien no necesariamente explica, y por qué la prueba de un pronóstico son los datos que no vio (verificar el número del capítulo en el índice de la edición que tengas).</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-06_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

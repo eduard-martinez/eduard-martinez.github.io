@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>El código de la semana 3</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="cocina_files/libs/clipboard/clipboard.min.js"></script>
+<script src="cocina_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="cocina_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="cocina_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="cocina_files/libs/quarto-html/popper.min.js"></script>
+<script src="cocina_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="cocina_files/libs/quarto-html/anchor.min.js"></script>
+<link href="cocina_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="cocina_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="cocina_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="cocina_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="cocina_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/editor/editor.main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+<style type="text/css">
+.monaco-editor pre {
+  background-color: unset !important;
+}
+
+.qwebr-editor-toolbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.qwebr-editor-toolbar-left-buttons, .qwebr-editor-toolbar-right-buttons {
+  display: flex;
+}
+
+.qwebr-non-interactive-loading-container.qwebr-cell-needs-evaluation, .qwebr-non-interactive-loading-container.qwebr-cell-evaluated {
+  justify-content: center;
+  display: flex;
+  background-color: rgba(250, 250, 250, 0.65);
+  border: 1px solid rgba(233, 236, 239, 0.65);
+  border-radius: 0.5rem;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.qwebr-r-project-logo {
+  color: #2767B0; /* R Project's blue color */
+}
+
+.qwebr-icon-status-spinner {
+  color: #7894c4;
+}
+
+.qwebr-icon-run-code {
+  color: #0d9c29
+}
+
+body.quarto-light .qwebr-output-code-stdout {
+  color: #111;
+}
+
+body.quarto-dark .qwebr-output-code-stdout {
+  color: #EEE;
+}
+
+.qwebr-output-code-stderr {
+  color: #db4133;
+}
+
+body.quarto-light .qwebr-editor {
+  border: 1px solid #EEEEEE;
+}
+
+body.quarto-light .qwebr-editor-toolbar {
+  background-color: #EEEEEE;
+  padding: 0.2rem 0.5rem;
+}
+
+body.quarto-dark .qwebr-editor {
+  border: 1px solid #111;
+}
+
+body.quarto-dark .qwebr-editor-toolbar {
+  background-color: #111;
+  padding: 0.2rem 0.5rem;
+}
+
+.qwebr-button {
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+  text-align: center;
+  padding: 0.375rem 0.75rem;
+  font-size: .9rem;
+  border-radius: 0.25rem;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+body.quarto-light .qwebr-button {
+  background-color: #EEEEEE;
+  color: #000;
+  border-color: #dee2e6;
+  border: 1px solid rgba(0,0,0,0);
+}
+
+body.quarto-dark .qwebr-button {
+  background-color: #111;
+  color: #EEE;
+  border-color: #dee2e6;
+  border: 1px solid rgba(0,0,0,0);
+}
+
+body.quarto-light .qwebr-button:hover {
+  color: #000;
+  background-color: #d9dce0;
+  border-color: #c8ccd0;
+}
+
+body.quarto-dark .qwebr-button:hover {
+  color: #d9dce0;
+  background-color: #323232;
+  border-color: #d9dce0;
+}
+
+.qwebr-button:disabled,.qwebr-button.disabled,fieldset:disabled .qwebr-button {
+  pointer-events: none;
+  opacity: .65
+}
+
+.qwebr-button-reset {
+  color: #696969; /*#4682b4;*/
+}
+
+.qwebr-button-copy {
+  color: #696969;
+}
+
+/* Style the code highlight lines */
+body.quarto-light .qwebr-editor-highlight-line {
+  background-color: lightblue;
+}
+
+body.quarto-dark .qwebr-editor-highlight-line {
+  background-color: darkblue;
+}
+
+/* Style the modal pop-up */
+
+/* The Modal (background) */
+.qwebr-modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
+
+/* Modal Content */
+.qwebr-modal-content {
+  background-color: #fefefe;
+  margin: 5% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.qwebr-modal-content-code {
+  max-height: 50vh;
+  min-height: 5vh;
+  overflow: scroll;
+  border: 1px solid #888;
+}
+
+/* The Close Button */
+.qwebr-modal-close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.qwebr-modal-close:hover,
+.qwebr-modal-close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.qwebr-download-btn {
+  margin-top: 10px;
+  text-decoration: none !important;
+}
+
+/* Styling to download image that is created */
+
+.qwebr-canvas-image {
+  position: relative;
+  display: inline-block;
+  margin: 10px;
+}
+
+.qwebr-canvas-image-download-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: none;
+}
+
+figure:hover .qwebr-canvas-image-download-btn {
+  display: block;
+}
+
+/* Custom styling for RevealJS Presentations*/
+
+/* Reset the style of the interactive area */
+.reveal div.qwebr-interactive-area {
+  display: block;
+  box-shadow: none;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Provide space to entries */
+.reveal div.qwebr-output-code-area pre div {
+  margin: 1px 2px 1px 10px;
+}
+
+/* Collapse the inside code tags to avoid extra space between line outputs */
+.reveal pre div code.qwebr-output-code-stdout, .reveal pre div code.qwebr-output-code-stderr {
+  padding: 0;
+  display: contents;
+}
+
+body.reveal.quarto-light pre div code.qwebr-output-code-stdout {
+  color: #111;
+}
+
+body.reveal.quarto-dark pre div code.qwebr-output-code-stdout {
+  color: #EEEEEE;
+}
+
+.reveal pre div code.qwebr-output-code-stderr {
+  color: #db4133;
+}
+
+
+/* Create a border around console and output (does not effect graphs) */
+body.reveal.quarto-light div.qwebr-console-area {
+  border: 1px solid #EEEEEE;
+  box-shadow: 2px 2px 10px #EEEEEE;
+}
+
+body.reveal.quarto-dark div.qwebr-console-area {
+  border: 1px solid #111;
+  box-shadow: 2px 2px 10px #111;
+}
+
+
+/* Cap output height and allow text to scroll */
+/* TODO: Is there a better way to fit contents/max it parallel to the monaco editor size? */
+.reveal div.qwebr-output-code-area pre {
+  max-height: 400px;
+  overflow: scroll;
+}
+
+iframe.qwebr-output-code-browse {
+  width: 100%;
+
+  /*
+    TODO: How to make the height automatic according to the widget size,
+    or respect the quarto code block options?
+  */
+  min-height: 500px;
+}
+
+</style>
+<script type="module">
+// Document level settings ----
+
+// Determine if we need to install R packages
+globalThis.qwebrInstallRPackagesList = [''];
+
+// Specify possible locations to search for the repository
+globalThis.qwebrPackageRepoURLS = ['https://repo.r-wasm.org/'];
+
+// Check to see if we have an empty array, if we do set to skip the installation.
+globalThis.qwebrSetupRPackages = !(qwebrInstallRPackagesList.indexOf("") !== -1);
+globalThis.qwebrAutoloadRPackages = true;
+
+// Display a startup message?
+globalThis.qwebrShowStartupMessage = false;
+globalThis.qwebrShowHeaderMessage = false;
+
+// Describe the webR settings that should be used
+globalThis.qwebrCustomizedWebROptions = {
+  "baseURL": "https://webr.r-wasm.org/v0.5.2/",
+  "serviceWorkerUrl": "",
+  "homedir": "/home/web_user", 
+  "channelType": "ChannelType.Automatic"
+};
+
+// Store cell data
+globalThis.qwebrCellDetails = [{"code":"## Los 480 locales del estudio de locales, en línea. El bloque entre las\n## marcas lo escribe week-03/input/_datos_en_linea_week03.R; no se edita a mano.\n## >>> datos en línea\ndatos <- read.csv(text = \"\nid_local,ciudad,zona,area_m2,arriendo_mes,trafico_peatonal,competidores_500m,estrato,parqueadero,terraza,zona_comidas,ticket_promedio,experiencia_arrendatario,calificacion_google,meses_atraso_arriendo,ventas_mes,estado_3a\n1,Cartagena,residencial,60,9.3,151,2,3,0,1,0,9800,9,3.9,1,71,abierto\n2,Cartagena,mixta,54,10.5,141,5,5,0,1,1,13400,16,4.2,0,64.8,abierto\n3,Cartagena,oficinas,123,12,283,3,3,1,1,1,10900,5,4.4,1,133.9,abierto\n4,Pereira,mixta,105,14.4,382,4,6,0,0,1,13300,5,4.4,0,90.4,abierto\n5,Bogotá,mixta,143,20,319,0,6,0,0,1,13700,4,4.3,2,220.6,abierto\n6,Pereira,residencial,109,8.5,108,3,4,0,1,0,11600,1,3.4,4,62.3,cerró\n7,Cartagena,universitaria,93,12.2,508,3,4,0,0,0,9800,2,4.4,1,90.6,abierto\n8,Cali,residencial,135,10.9,151,2,5,0,0,1,12100,5,3.9,2,94.6,abierto\n9,Bogotá,universitaria,65,10.3,368,1,3,0,0,0,9600,3,4.1,0,117.1,abierto\n10,Cali,oficinas,90,14,243,3,5,1,1,1,12300,14,4.4,2,149.6,abierto\n11,Medellín,residencial,105,15.4,186,1,5,0,1,1,11900,8,3.5,1,127.8,abierto\n12,Medellín,mixta,82,11.9,224,4,4,0,0,0,11900,14,4,0,75.1,abierto\n13,Bogotá,mixta,95,14.5,347,4,4,1,0,0,12700,5,4,0,136.7,abierto\n14,Medellín,residencial,69,9.7,257,2,5,0,0,1,12500,5,3.5,2,76.2,abierto\n15,Bucaramanga,oficinas,65,12.3,461,3,5,1,0,0,12400,6,4.1,1,102.1,abierto\n16,Cali,oficinas,172,15.6,251,3,5,0,0,1,11800,2,4.6,0,139.6,abierto\n17,Cali,oficinas,73,10.4,331,4,4,0,0,0,11300,4,4.1,0,86.4,abierto\n18,Cali,oficinas,80,9.4,180,2,5,1,0,0,12300,16,4.4,1,88.5,abierto\n19,Bogotá,universitaria,127,15.1,260,10,5,0,1,1,12600,5,4.1,4,95.3,cerró\n20,Medellín,residencial,90,10.8,86,2,5,1,1,0,13600,7,4.2,1,61.8,abierto\n21,Cartagena,residencial,163,14.7,158,1,4,0,0,1,11700,4,4.5,0,84.9,abierto\n22,Pereira,oficinas,100,12.5,449,0,5,0,0,1,11600,8,4.3,0,119.1,abierto\n23,Cartagena,oficinas,81,13.8,425,7,4,0,0,0,12300,5,4.5,0,90.3,abierto\n24,Cali,mixta,75,12.7,171,2,3,0,0,1,10800,13,4.3,0,55.4,abierto\n25,Bogotá,residencial,69,8.9,106,1,6,0,1,1,15100,2,4.5,0,86.8,abierto\n26,Medellín,mixta,93,13.7,357,5,6,0,1,0,14100,1,3.9,0,131.8,abierto\n27,Medellín,oficinas,76,14.9,251,5,4,0,0,0,11300,7,4.3,1,114.2,abierto\n28,Cali,residencial,101,11.6,105,0,4,0,0,0,10900,3,3.8,0,72,abierto\n29,Bucaramanga,oficinas,76,9.1,373,2,4,0,0,0,12300,2,4,4,93.3,abierto\n30,Bogotá,universitaria,106,10.3,397,6,4,0,0,1,12600,3,4.2,1,109.3,abierto\n31,Cali,mixta,115,9.8,335,2,5,0,1,0,14400,7,3.6,0,130.3,abierto\n32,Cali,mixta,81,10.3,262,4,4,0,1,0,12100,5,4.8,1,68.8,abierto\n33,Cartagena,residencial,67,8.8,147,4,4,0,0,1,13100,4,3.7,6,76.5,cerró\n34,Bogotá,oficinas,138,20,213,4,6,1,1,1,12400,4,3.8,2,149.7,cerró\n35,Cartagena,residencial,48,6.9,161,4,4,1,0,0,11200,8,3.8,0,46.9,abierto\n36,Cartagena,oficinas,99,16.8,900,8,5,0,0,1,14100,13,4,0,144.7,abierto\n37,Medellín,residencial,117,9.8,101,2,4,1,1,1,12100,11,4.3,6,71.2,cerró\n38,Bogotá,universitaria,92,15.2,623,4,5,1,1,0,12400,4,4.7,1,101.3,abierto\n39,Cali,oficinas,95,15,211,5,4,0,0,0,11800,15,3.9,0,77.2,abierto\n40,Cartagena,oficinas,78,9.4,172,1,6,1,1,0,13900,5,4,0,104.7,abierto\n41,Bucaramanga,residencial,84,5.7,155,3,5,1,1,1,11800,2,4.1,0,63.2,abierto\n42,Medellín,mixta,181,20.8,221,0,5,0,0,1,12000,0,3.1,4,187.7,cerró\n43,Cali,oficinas,75,12,383,8,4,0,0,1,11500,3,3.4,0,89.2,abierto\n44,Cali,oficinas,105,18.9,704,3,5,0,0,1,14000,5,5,0,192.6,abierto\n45,Bucaramanga,residencial,42,5.7,81,2,5,0,1,0,13100,6,4,1,43.5,abierto\n46,Medellín,mixta,106,12.1,145,2,4,1,0,1,11600,4,4.2,0,78.5,abierto\n47,Medellín,residencial,109,9.9,103,3,5,0,1,0,13400,3,3.4,5,87.1,cerró\n48,Medellín,residencial,74,16.5,109,0,4,1,0,0,11600,4,3.8,3,68,cerró\n49,Cali,universitaria,80,10.1,639,2,4,0,1,1,11300,9,4.3,0,110.1,abierto\n50,Cali,universitaria,96,12.5,157,4,3,0,1,1,8000,8,4,5,64.7,cerró\n51,Bucaramanga,mixta,127,11.3,373,3,4,0,0,0,10000,3,4.3,0,103.4,abierto\n52,Bogotá,mixta,218,23.4,166,1,3,0,0,0,8700,24,4,3,250.2,abierto\n53,Cartagena,oficinas,79,12.4,282,6,5,0,1,0,11200,14,4.4,1,134,abierto\n54,Bogotá,mixta,80,13.8,730,2,4,0,0,1,12500,3,4.2,0,197.6,abierto\n55,Medellín,residencial,139,16.5,161,1,5,1,1,0,11200,5,4.4,0,108,abierto\n56,Bogotá,mixta,92,19.4,368,2,5,0,0,0,13500,2,4.2,0,133.7,abierto\n57,Bucaramanga,universitaria,166,12.7,232,1,3,1,0,1,9100,3,4.4,1,79.7,abierto\n58,Bucaramanga,residencial,126,10.8,130,4,4,1,0,1,11300,0,3.5,6,59.9,cerró\n59,Medellín,mixta,122,16.3,220,1,4,0,0,1,9900,14,3.7,1,137.4,abierto\n60,Bogotá,universitaria,44,12.1,349,4,3,0,0,1,11300,3,4.2,0,77.7,abierto\n61,Cartagena,universitaria,117,13.5,277,5,4,1,1,1,12400,10,4.7,1,125.5,abierto\n62,Cartagena,mixta,64,8.6,202,2,3,0,1,1,12000,12,4.4,0,70.5,abierto\n63,Cali,residencial,62,10.1,232,5,3,1,0,1,10000,17,3.9,0,72,abierto\n64,Cartagena,universitaria,101,13,417,5,4,0,1,0,12300,2,4.4,0,97.1,abierto\n65,Medellín,mixta,58,12.8,343,2,5,0,0,1,13200,2,4.2,0,122.3,abierto\n66,Cali,universitaria,70,5.5,162,4,3,0,1,1,9700,3,3.9,7,52.8,cerró\n67,Medellín,mixta,63,6.9,281,6,5,0,1,1,13500,6,3.9,2,85.7,abierto\n68,Bucaramanga,universitaria,106,10.3,432,6,3,1,1,0,9500,3,4.5,0,69.9,abierto\n69,Cali,oficinas,106,13.1,183,4,6,0,0,0,15100,7,3.9,0,90.2,abierto\n70,Medellín,universitaria,76,9.6,601,2,5,0,1,1,12400,12,3.7,1,131,abierto\n71,Bogotá,mixta,79,11.8,108,5,5,1,1,0,13600,12,3.9,8,79.4,cerró\n72,Cali,residencial,84,9.8,163,2,5,1,0,1,14500,9,3.9,0,79.2,abierto\n73,Cali,universitaria,122,11.4,167,3,3,0,0,0,8800,12,4.9,0,70,abierto\n74,Bucaramanga,residencial,150,8.8,81,2,5,1,1,1,12200,6,4.1,0,81.6,abierto\n75,Bogotá,universitaria,78,12,418,6,4,0,0,1,12400,5,4.5,1,95.6,abierto\n76,Pereira,mixta,155,15.2,363,5,4,1,1,0,13000,9,4,1,106.9,abierto\n77,Bucaramanga,residencial,54,4.5,165,1,4,0,0,0,12100,4,4,2,39.8,abierto\n78,Bogotá,mixta,92,11.8,152,1,4,0,0,1,11400,8,4.5,1,99.8,abierto\n79,Bucaramanga,residencial,77,7.7,134,3,6,1,1,1,14600,10,5,1,53,abierto\n80,Bucaramanga,mixta,120,14.4,168,2,5,0,0,0,11500,23,3.9,1,87.6,abierto\n81,Bogotá,mixta,71,14.2,226,3,4,0,0,0,10500,1,4.1,0,101.2,abierto\n82,Medellín,mixta,145,13.8,264,3,5,1,1,1,11400,2,4.3,0,126.5,abierto\n83,Cali,oficinas,52,12.9,253,1,4,0,1,1,12200,1,4.5,1,89.1,abierto\n84,Bogotá,residencial,93,9.5,92,6,5,0,0,1,13300,3,3.4,4,72.8,cerró\n85,Cali,oficinas,127,14.3,261,3,5,0,1,0,12300,7,4.5,2,120.8,abierto\n86,Medellín,mixta,111,13.2,382,4,4,0,1,1,11200,25,4.4,0,101.4,abierto\n87,Bucaramanga,oficinas,191,16,146,0,6,0,0,1,13700,5,4.2,0,141.8,abierto\n88,Bucaramanga,mixta,99,9,346,2,3,0,1,0,10100,4,4.6,1,115.9,abierto\n89,Bogotá,mixta,80,13.7,345,4,4,0,0,1,10700,12,4,1,129.2,abierto\n90,Bogotá,oficinas,170,22,334,3,5,1,1,1,14600,9,4.9,2,247.3,abierto\n91,Bucaramanga,residencial,108,16.1,311,2,5,1,0,1,12400,3,4.2,1,106,abierto\n92,Cartagena,residencial,95,12.2,119,2,5,1,0,1,14300,1,4.8,0,65.9,abierto\n93,Bucaramanga,oficinas,61,10.9,204,4,4,0,1,0,11000,6,3.2,6,80.4,cerró\n94,Cali,universitaria,116,11.2,293,4,6,0,0,1,16000,9,4.2,0,122.4,abierto\n95,Bogotá,residencial,67,10.2,75,0,5,0,0,1,13900,7,4,0,65.5,abierto\n96,Pereira,mixta,53,8.5,377,3,3,0,0,1,10000,8,3.7,0,75.3,abierto\n97,Cali,residencial,47,7.2,163,1,5,1,0,0,11100,3,4.4,0,64.1,abierto\n98,Cali,mixta,71,11.4,405,2,4,0,1,1,11800,5,3.9,0,138.2,abierto\n99,Cartagena,universitaria,104,12.2,416,3,4,0,1,0,11900,1,4.6,0,109.2,abierto\n100,Bogotá,residencial,86,12.1,326,2,5,1,0,0,11400,3,4.2,0,97.5,abierto\n101,Medellín,oficinas,82,13.3,257,5,4,0,1,0,12500,4,4.1,0,107,abierto\n102,Pereira,residencial,162,14.2,143,1,6,1,0,0,13600,4,4,5,67.9,cerró\n103,Bogotá,universitaria,103,20.1,632,3,4,0,1,0,11400,3,3.7,4,128.2,abierto\n104,Pereira,mixta,96,8.8,215,5,3,0,1,0,8700,8,4.3,4,65.4,abierto\n105,Cali,mixta,133,10.9,164,1,3,0,1,1,9200,8,3.4,2,89.5,abierto\n106,Bogotá,residencial,93,11.7,171,2,5,1,0,1,13000,14,4.3,0,114,abierto\n107,Medellín,universitaria,85,12.2,495,5,5,1,0,0,12500,3,4,0,137.8,abierto\n108,Bogotá,residencial,61,7,118,1,6,0,0,0,13400,19,4.4,1,58.1,abierto\n109,Medellín,residencial,77,8.6,120,0,5,0,0,0,13200,3,3.9,1,57.3,cerró\n110,Bucaramanga,mixta,62,13.5,287,5,4,1,0,1,10200,13,4.2,0,68.4,abierto\n111,Bogotá,mixta,66,16.5,485,1,5,0,1,1,14800,9,4,0,201.2,abierto\n112,Bucaramanga,residencial,94,9.2,116,0,3,1,0,0,10200,2,5,8,49.1,cerró\n113,Medellín,mixta,102,13.2,343,5,5,0,0,0,11500,6,3.7,0,98,abierto\n114,Cali,mixta,71,8,102,5,3,1,1,0,10800,7,4.3,7,51.5,cerró\n115,Cali,mixta,115,19,138,2,3,0,0,1,9500,4,3.8,6,96.7,cerró\n116,Medellín,oficinas,61,12.2,236,2,5,0,0,0,13400,3,3.5,2,100.3,abierto\n117,Cali,mixta,73,9.5,151,7,4,0,0,1,10400,7,4,3,62.5,cerró\n118,Medellín,residencial,116,10.1,96,2,6,1,1,0,13900,1,4.1,2,77,cerró\n119,Pereira,mixta,146,8.1,381,2,4,0,0,0,10700,2,4.1,0,112.6,abierto\n120,Bucaramanga,universitaria,58,6.6,224,7,5,0,0,0,13000,6,4.1,6,36.9,cerró\n121,Pereira,mixta,70,8.5,90,1,6,0,0,0,15000,8,3,7,52.4,cerró\n122,Bogotá,residencial,48,7.4,143,4,5,1,1,1,12000,6,3.3,8,56.2,cerró\n123,Bogotá,residencial,72,13.3,149,2,6,0,1,0,14300,2,4.1,0,78.7,abierto\n124,Cartagena,residencial,74,10.2,251,2,6,0,1,1,13900,2,4.6,0,109.8,abierto\n125,Medellín,mixta,78,11.2,243,3,5,0,1,1,10600,9,3.8,3,96.8,cerró\n126,Bogotá,mixta,94,12,87,2,5,0,0,0,13500,3,4.6,0,123.7,abierto\n127,Bogotá,oficinas,68,18.3,371,1,4,0,0,0,11900,11,4,0,91.8,abierto\n128,Bogotá,residencial,71,14,171,2,4,0,0,0,11100,8,4.3,1,85.9,abierto\n129,Cali,oficinas,113,11.3,162,4,3,0,1,0,9700,5,3.9,0,93.5,abierto\n130,Bogotá,mixta,97,17.8,404,1,4,0,0,1,12600,2,4.2,1,187.3,abierto\n131,Bogotá,mixta,89,22.8,338,0,4,0,0,0,11400,8,4.1,2,148.1,abierto\n132,Bucaramanga,oficinas,74,13,654,5,5,0,0,0,11800,3,3.9,0,115.5,abierto\n133,Bogotá,residencial,45,9.2,101,6,4,0,0,0,12200,3,3.5,4,49.3,cerró\n134,Bucaramanga,residencial,106,11.1,186,2,5,0,0,1,12500,4,3.8,0,72.6,abierto\n135,Medellín,mixta,89,13.4,434,4,4,0,0,1,11000,5,4.2,2,90.5,abierto\n136,Bogotá,mixta,70,9.6,234,0,5,0,1,1,12900,17,3.6,0,131.5,abierto\n137,Cali,residencial,103,11.6,194,1,5,0,1,1,11600,1,4.9,0,82.4,abierto\n138,Medellín,mixta,104,11.3,143,3,5,1,0,0,11700,5,4.4,1,73.6,abierto\n139,Cartagena,mixta,55,7.9,239,2,4,0,0,0,12700,2,4,0,105.6,abierto\n140,Bogotá,oficinas,86,16.2,373,5,5,0,1,0,13600,1,3.9,0,136.5,abierto\n141,Bucaramanga,oficinas,101,9.8,396,2,4,1,0,1,12100,4,4.5,0,101.7,abierto\n142,Bucaramanga,universitaria,73,6.9,524,3,3,0,1,0,9400,11,4.4,0,100.8,abierto\n143,Cartagena,mixta,56,14.1,267,3,4,0,1,1,12700,1,4,0,76.1,abierto\n144,Cartagena,universitaria,53,7.1,158,4,4,0,1,0,11400,2,4,10,52.6,cerró\n145,Bogotá,mixta,98,14.6,264,2,4,1,0,1,11000,1,4,1,155.5,abierto\n146,Cali,residencial,159,18.7,160,2,4,1,0,1,11300,4,4.3,4,93.1,cerró\n147,Bogotá,oficinas,70,16.4,818,3,6,1,1,1,15900,6,4.3,0,225.2,abierto\n148,Cali,oficinas,101,12.7,282,4,6,0,0,0,12900,4,4.2,0,97.5,abierto\n149,Bogotá,oficinas,91,23.8,381,5,4,0,0,1,9500,1,4.3,0,143.4,abierto\n150,Cali,mixta,91,11.5,147,2,3,0,1,0,9200,5,3.9,5,69.2,cerró\n151,Cartagena,oficinas,102,17.8,476,2,4,0,1,1,13700,2,4.2,2,163.3,abierto\n152,Cali,residencial,113,10,169,2,6,0,0,0,14600,3,3.8,0,101.1,abierto\n153,Bogotá,mixta,108,18.8,301,6,5,0,1,1,15200,5,4,1,144.3,abierto\n154,Bogotá,residencial,92,10.3,152,0,4,1,0,0,11900,11,3,2,104.1,abierto\n155,Cartagena,oficinas,71,13.9,163,3,5,0,1,1,13100,5,3.6,7,95,cerró\n156,Medellín,residencial,74,8.7,160,2,4,0,0,1,10500,3,4.2,0,73.6,abierto\n157,Cartagena,residencial,112,10.5,195,2,5,1,1,1,12300,1,4.4,2,97.2,abierto\n158,Bogotá,residencial,88,11.6,302,1,5,0,0,1,13700,13,4.2,1,84.3,abierto\n159,Cartagena,residencial,69,9,90,1,6,0,1,0,15900,7,4.1,9,55.2,cerró\n160,Cali,universitaria,82,8.7,257,3,3,0,0,0,9500,12,4.6,0,79.3,abierto\n161,Bogotá,oficinas,57,10.1,258,1,4,0,1,0,11700,3,4.4,0,110.6,abierto\n162,Medellín,oficinas,60,10.6,296,3,5,0,1,1,11400,12,4.7,0,91.3,abierto\n163,Cartagena,residencial,110,12.3,325,3,3,1,0,1,10000,1,4.7,2,97.4,abierto\n164,Pereira,residencial,105,9,185,0,5,0,0,1,12200,3,4.7,1,79.2,abierto\n165,Bogotá,mixta,80,12.6,492,5,5,0,0,1,13700,2,3.8,0,110.5,abierto\n166,Bogotá,mixta,80,15.5,183,4,5,1,0,0,11600,9,4.2,2,117.5,abierto\n167,Bucaramanga,mixta,92,9.6,167,3,4,1,1,1,10400,2,4.8,2,95,abierto\n168,Bucaramanga,oficinas,141,18.4,536,3,5,0,1,0,12000,14,4.5,0,131.9,abierto\n169,Cartagena,oficinas,70,13,267,4,5,0,1,0,12300,6,4.4,0,116.1,abierto\n170,Medellín,mixta,105,15.9,354,5,6,1,1,0,12900,1,4.3,0,123.2,abierto\n171,Medellín,oficinas,77,13.9,167,1,6,0,0,1,13100,10,3.9,0,107.8,abierto\n172,Medellín,mixta,95,10.9,266,4,5,1,0,1,10300,3,5,0,99.4,abierto\n173,Bucaramanga,residencial,130,13.6,218,1,4,0,1,0,11200,2,4.2,2,79,abierto\n174,Bucaramanga,residencial,74,7.2,263,1,4,0,0,0,12700,15,4.7,0,81.3,abierto\n175,Bogotá,residencial,82,13.9,118,1,5,0,0,1,14100,5,3.9,2,85.5,cerró\n176,Medellín,oficinas,68,12.6,279,0,5,0,1,0,13100,5,3.8,1,145.2,abierto\n177,Bogotá,residencial,88,14.7,114,1,6,1,1,0,14400,2,4.3,3,107,cerró\n178,Medellín,oficinas,103,15.9,408,4,4,0,0,0,9200,2,3.8,1,128,abierto\n179,Bogotá,universitaria,98,14.6,251,3,3,0,1,0,10900,6,4.3,0,132.6,abierto\n180,Bogotá,oficinas,121,18.5,141,2,5,1,1,0,13400,9,4.1,0,149.9,abierto\n181,Bucaramanga,mixta,76,10,337,1,3,0,0,1,10800,8,4.3,1,79.4,abierto\n182,Bogotá,oficinas,85,12.7,172,5,5,0,1,0,12500,6,3.5,8,104.9,cerró\n183,Cali,oficinas,164,17.9,383,7,4,1,0,1,11000,3,3.5,0,133.1,abierto\n184,Cali,residencial,105,11.8,104,2,5,0,0,0,12600,8,4,0,89.6,abierto\n185,Cali,residencial,100,6.8,96,1,6,0,0,1,13600,10,4.2,0,54.5,abierto\n186,Pereira,oficinas,110,11.9,269,2,5,0,1,0,11200,7,4.7,1,108.7,abierto\n187,Cali,oficinas,73,11.4,397,3,4,0,1,1,11600,5,4,0,119.3,abierto\n188,Bucaramanga,residencial,176,10.3,107,5,5,1,0,1,11600,5,4.1,6,56.4,cerró\n189,Bogotá,mixta,100,13.2,276,2,4,0,0,0,11200,6,4.4,2,136.2,abierto\n190,Medellín,residencial,48,6.9,106,2,6,0,0,0,12800,1,4.2,0,57.7,abierto\n191,Cali,oficinas,98,16,658,5,5,0,1,0,10900,3,4.5,0,212.2,abierto\n192,Medellín,mixta,80,11.5,281,9,6,0,1,1,14300,4,3.5,7,80.8,cerró\n193,Medellín,residencial,122,15.4,163,2,5,1,1,1,13400,7,3.9,4,109.9,cerró\n194,Bucaramanga,mixta,59,10.8,256,4,5,0,1,0,12700,4,4.6,0,68.5,abierto\n195,Cali,oficinas,97,14.1,205,6,3,0,1,0,9900,12,4.7,0,88.6,abierto\n196,Bucaramanga,residencial,109,10.2,176,2,5,1,0,1,12000,13,4.1,1,93.7,abierto\n197,Pereira,mixta,213,20.6,383,3,5,0,0,0,12900,6,4,0,119.1,abierto\n198,Bogotá,residencial,67,11.7,117,1,5,0,0,0,13800,3,3.9,1,68.7,abierto\n199,Pereira,mixta,105,10,501,4,3,0,1,0,10000,12,5,0,109.1,abierto\n200,Bogotá,oficinas,131,23.3,359,2,6,0,0,1,14000,2,3.8,0,199.6,abierto\n201,Bogotá,mixta,70,10.9,312,6,3,0,0,1,10400,1,4.7,0,91.2,abierto\n202,Bucaramanga,oficinas,60,10,251,2,5,0,0,1,12400,15,4.5,0,83,abierto\n203,Cartagena,universitaria,85,10.8,325,8,3,1,0,1,10400,18,3.7,0,56.8,abierto\n204,Bogotá,residencial,56,7.7,105,5,4,0,0,0,11600,16,3.8,1,46,abierto\n205,Pereira,residencial,105,7.5,93,3,6,1,0,1,12400,5,4.2,4,69.4,cerró\n206,Bucaramanga,universitaria,54,6.3,296,5,3,0,0,0,9300,5,3.8,0,51.9,abierto\n207,Cali,mixta,86,14.7,179,1,3,0,0,1,8900,8,4.7,0,76.8,abierto\n208,Pereira,residencial,142,9.8,118,1,4,0,1,0,10700,14,4.1,2,64.2,abierto\n209,Cali,residencial,101,10.3,172,1,5,0,1,0,11600,13,4.3,0,102.6,abierto\n210,Cali,residencial,204,23.8,236,1,4,0,0,0,11000,2,3.7,0,120.6,abierto\n211,Pereira,mixta,97,10.5,307,1,5,0,0,0,11900,15,4.2,2,131.3,abierto\n212,Bucaramanga,residencial,124,8.8,128,2,5,1,1,0,12800,1,3.5,4,61.8,cerró\n213,Cali,oficinas,72,10.1,315,3,5,0,1,1,12800,14,4.4,0,99.1,abierto\n214,Cali,mixta,61,8.3,182,2,4,0,0,0,11700,1,4.5,0,57.5,abierto\n215,Bogotá,universitaria,132,21.5,441,2,5,0,0,1,13800,3,4.4,0,159.7,abierto\n216,Cali,residencial,86,8,150,3,3,1,0,1,9800,3,4.2,5,89.9,cerró\n217,Bogotá,oficinas,59,15.1,275,5,6,0,0,1,14600,17,4.6,1,118.4,abierto\n218,Cartagena,residencial,134,10.7,127,4,5,1,1,1,13200,25,4.7,1,111.8,abierto\n219,Bogotá,mixta,166,18.8,625,4,4,0,1,0,11700,4,4.5,0,254.8,abierto\n220,Bogotá,mixta,220,21,144,2,4,0,1,0,12400,4,3.9,8,151.9,cerró\n221,Medellín,mixta,65,10.8,304,3,5,0,0,0,13700,3,4.4,0,75.3,abierto\n222,Cali,oficinas,111,15,329,7,4,1,1,1,10500,11,4.1,0,138,abierto\n223,Bogotá,residencial,84,10.3,210,3,5,1,1,0,13300,8,4.4,0,72.3,abierto\n224,Cali,oficinas,116,15.6,185,4,3,1,0,0,9100,6,3.4,3,104,cerró\n225,Medellín,oficinas,89,19.1,543,3,4,0,0,1,10700,4,4.5,0,156.5,abierto\n226,Cartagena,residencial,121,12.5,169,0,4,1,1,0,12600,24,4.8,2,114.8,abierto\n227,Bogotá,residencial,110,11.9,204,0,5,1,0,1,11900,5,4.9,2,121.8,abierto\n228,Pereira,oficinas,69,8.7,471,2,3,0,0,1,9400,6,4,1,114.1,abierto\n229,Pereira,oficinas,69,8.1,498,3,5,0,0,0,11300,2,4.9,1,85.9,abierto\n230,Cartagena,residencial,48,7.6,384,1,4,1,0,1,10200,5,4,0,116.3,abierto\n231,Medellín,residencial,60,12.1,283,3,4,0,0,1,9900,8,4.8,0,80.3,abierto\n232,Pereira,universitaria,64,7.9,173,2,3,0,1,0,8800,2,3.7,5,42.9,cerró\n233,Bogotá,residencial,99,13.1,170,1,6,1,0,1,13900,0,4.3,0,97.2,abierto\n234,Bogotá,oficinas,125,17.6,288,4,5,0,1,0,13300,10,3.8,2,143.2,abierto\n235,Bogotá,residencial,136,13.2,73,2,6,1,0,1,15100,12,3.3,2,96.1,cerró\n236,Cali,mixta,67,13.4,326,3,6,0,0,1,13600,1,4.9,0,78.9,abierto\n237,Bogotá,oficinas,56,14.4,104,3,6,1,0,0,14800,10,3.7,8,80.4,cerró\n238,Bucaramanga,universitaria,101,8.7,214,3,3,0,0,0,11000,17,4,0,47.6,abierto\n239,Cartagena,mixta,76,10.6,245,4,4,0,0,1,12000,5,3.7,2,111.7,abierto\n240,Pereira,oficinas,46,8.8,441,1,4,1,0,0,13000,5,4,2,77.5,abierto\n241,Pereira,mixta,127,12.7,291,4,4,0,1,1,11700,1,4.2,1,93.5,abierto\n242,Bucaramanga,mixta,83,11.5,412,4,3,0,1,1,11200,0,4,1,119,abierto\n243,Cali,mixta,55,8.6,263,3,5,0,0,0,11800,11,4.2,1,61.6,abierto\n244,Bogotá,mixta,70,14.6,204,4,3,1,0,0,11200,17,3.8,9,69.2,cerró\n245,Bogotá,residencial,86,8,215,1,5,1,1,1,12200,3,3.9,5,120.3,abierto\n246,Medellín,residencial,102,13.3,132,1,5,0,0,1,11900,2,4,4,83.3,cerró\n247,Cali,residencial,53,9.8,177,4,4,1,0,1,10800,0,3.5,3,43.7,cerró\n248,Bucaramanga,residencial,73,8.7,137,1,4,0,0,1,11100,19,3.8,0,59.2,abierto\n249,Cali,residencial,85,12.6,127,3,5,0,0,0,13100,7,3.3,6,55,cerró\n250,Cali,oficinas,67,13.5,426,3,5,1,0,0,10900,8,4.7,0,98,abierto\n251,Cali,residencial,66,8.8,127,2,4,0,0,1,11900,9,4.3,0,50.1,abierto\n252,Pereira,universitaria,68,8.2,182,7,3,0,0,0,8300,7,3.2,7,50.4,cerró\n253,Medellín,residencial,67,9,76,3,5,1,0,0,13100,2,3.8,6,61.8,cerró\n254,Cartagena,mixta,121,11.6,356,4,6,1,0,0,16000,8,4.4,0,120.9,abierto\n255,Bucaramanga,universitaria,91,10.7,432,4,4,0,0,0,10500,4,4.9,0,87.4,abierto\n256,Cali,mixta,106,12.9,243,2,4,0,0,1,10300,7,4,1,101.4,abierto\n257,Bucaramanga,oficinas,72,11.1,700,3,4,0,1,0,10400,7,4.1,0,111,abierto\n258,Cartagena,mixta,92,15.4,274,2,4,0,0,0,11600,17,4.7,1,121.3,abierto\n259,Bucaramanga,oficinas,72,12.3,463,2,3,0,0,1,11200,7,4.6,0,114,abierto\n260,Cali,mixta,135,13.5,242,3,3,0,0,0,11700,1,3.3,5,121.3,cerró\n261,Medellín,mixta,128,12.5,356,5,5,1,0,1,13000,11,3.7,0,126.1,abierto\n262,Cali,oficinas,74,12.9,644,4,5,0,1,1,14400,7,4,0,161.8,abierto\n263,Medellín,oficinas,45,10.5,456,1,5,0,1,1,11500,9,4.2,0,124.5,abierto\n264,Medellín,residencial,86,10.1,191,4,6,0,0,0,13500,2,4.4,0,87.5,abierto\n265,Cartagena,mixta,84,11,290,4,3,1,1,0,11400,16,4.6,3,89.6,abierto\n266,Cali,universitaria,87,10.4,414,7,3,0,0,0,8300,4,3.3,0,81,abierto\n267,Pereira,oficinas,69,7.6,529,3,6,0,0,1,14100,15,4.2,3,110.2,abierto\n268,Cartagena,mixta,68,15.2,118,4,3,1,1,1,11500,5,3.7,2,61.4,cerró\n269,Cali,oficinas,58,9.7,532,1,5,0,1,1,12400,6,3.9,0,98.4,abierto\n270,Bogotá,oficinas,100,21.5,430,2,5,0,1,1,13900,6,4,1,193.6,abierto\n271,Cali,universitaria,73,9.4,219,6,5,0,1,0,12800,3,4.2,2,71.7,abierto\n272,Bogotá,mixta,122,16.8,374,3,5,0,1,0,12000,21,3.8,0,194.6,abierto\n273,Cali,mixta,60,9.5,195,1,4,0,1,0,10300,6,4,0,77.6,abierto\n274,Cali,mixta,78,10.8,269,1,4,1,0,0,10300,10,3.9,2,97.2,abierto\n275,Cartagena,mixta,61,9.5,349,4,3,0,0,1,8400,8,4.2,2,64.4,abierto\n276,Pereira,oficinas,126,14,395,1,4,0,0,0,10800,3,4.4,1,168,abierto\n277,Medellín,mixta,59,11.9,164,2,5,0,0,0,12100,4,4,4,59.4,cerró\n278,Cartagena,residencial,100,11.8,274,0,5,0,0,0,14600,1,4.3,0,116.5,abierto\n279,Pereira,residencial,134,8.2,51,1,5,1,1,1,13000,9,4.6,0,70.7,abierto\n280,Bogotá,oficinas,104,19,426,6,6,1,1,0,14600,2,4.3,2,209.3,abierto\n281,Bogotá,oficinas,137,20.4,377,3,5,0,0,0,12100,5,3.8,0,173.4,abierto\n282,Pereira,mixta,91,9.9,282,2,3,1,1,0,7800,12,4.2,0,73.8,abierto\n283,Bogotá,oficinas,53,10.4,306,3,5,1,0,1,14500,7,4.3,0,108.7,abierto\n284,Pereira,oficinas,93,10.4,352,8,4,0,0,0,11200,3,3.8,0,84.7,abierto\n285,Bogotá,mixta,100,15.5,137,3,4,1,0,1,11900,17,4.2,0,80.8,abierto\n286,Bogotá,mixta,89,14.8,450,3,4,0,1,1,10600,4,4.9,0,154.5,abierto\n287,Bogotá,residencial,89,13.4,325,2,5,1,0,0,13700,2,3.7,0,114.7,abierto\n288,Bucaramanga,mixta,124,10.7,157,3,5,1,1,0,13100,17,4.4,0,77.2,abierto\n289,Bogotá,residencial,95,11.4,60,0,6,0,1,1,15000,11,3.9,0,70.3,abierto\n290,Cali,mixta,101,10.6,150,1,5,0,0,1,11700,3,4.1,0,100,abierto\n291,Bucaramanga,residencial,69,9.1,223,0,5,0,0,1,12400,9,4.7,0,75.8,abierto\n292,Medellín,mixta,80,11.5,182,1,4,0,0,0,9500,5,4.3,4,78.3,abierto\n293,Pereira,oficinas,69,9.1,207,0,6,1,0,0,13900,1,4.8,1,77.3,abierto\n294,Bogotá,residencial,91,15.2,285,1,5,0,1,1,13800,7,4.9,1,118.3,abierto\n295,Bogotá,residencial,93,11.8,231,6,3,0,1,0,10000,3,3.9,0,114.8,abierto\n296,Cali,universitaria,89,10.7,294,3,5,0,0,0,11900,1,3.8,5,59.1,cerró\n297,Bogotá,residencial,88,13,172,2,4,0,1,1,10200,1,4.4,0,115.8,abierto\n298,Bogotá,residencial,107,12.2,140,3,5,1,0,0,13900,6,4.5,2,79.1,abierto\n299,Bucaramanga,universitaria,147,10.3,217,4,4,0,0,0,11100,4,3.5,0,52.1,abierto\n300,Medellín,universitaria,56,11.3,717,5,5,0,0,0,12100,3,4.1,1,114.7,abierto\n301,Cartagena,residencial,142,14.4,153,1,5,0,0,1,13600,0,4.4,2,102.6,abierto\n302,Bogotá,universitaria,157,16.2,279,2,5,1,0,0,12000,5,4,8,118.9,cerró\n303,Bogotá,oficinas,44,11.8,279,4,5,0,0,1,13300,3,4.3,0,108.5,abierto\n304,Bucaramanga,mixta,73,8,231,4,6,1,0,1,15400,8,5,1,60.3,abierto\n305,Pereira,residencial,118,10.8,141,1,3,0,0,0,9400,3,4.1,0,87.2,abierto\n306,Cali,universitaria,56,6.1,211,4,3,0,0,0,9400,2,3.9,7,56.2,cerró\n307,Cartagena,universitaria,133,13.4,163,0,4,1,1,1,12400,4,4.4,0,103.8,abierto\n308,Bogotá,oficinas,84,22.4,586,5,5,1,0,0,12500,7,4.6,0,164,abierto\n309,Cali,mixta,100,11.5,399,1,3,0,1,0,7900,10,4.2,0,96.4,abierto\n310,Bucaramanga,oficinas,88,12.8,334,2,6,1,0,0,14400,16,3.8,0,107.8,abierto\n311,Cali,universitaria,94,9.8,181,3,3,1,0,1,9400,11,4.1,2,38.8,abierto\n312,Cali,mixta,91,13.4,561,5,4,0,1,0,11100,13,4.6,0,88.1,abierto\n313,Bogotá,oficinas,220,25,206,7,6,0,1,0,14300,2,3.6,5,141,cerró\n314,Cartagena,mixta,83,12.3,121,4,4,1,0,1,11400,2,3.6,3,54.9,cerró\n315,Cali,oficinas,59,12,289,8,4,0,1,0,11300,9,5,0,81.1,abierto\n316,Cali,oficinas,79,16,269,3,4,0,1,1,10700,4,4.7,0,139.3,abierto\n317,Bogotá,residencial,66,9.4,302,1,4,1,0,1,10500,3,4.2,0,101.5,abierto\n318,Medellín,residencial,80,7.6,168,1,4,0,1,0,10200,0,4.6,2,64.1,abierto\n319,Bucaramanga,mixta,97,12,213,3,4,1,0,1,9700,4,4.3,7,76.9,cerró\n320,Bucaramanga,residencial,179,11.9,137,2,5,1,0,0,10600,1,4,7,90.9,cerró\n321,Cali,residencial,66,7.3,92,4,6,0,0,1,11900,7,4.1,5,50.5,cerró\n322,Bucaramanga,residencial,109,9.2,183,3,6,1,0,0,13400,5,4.8,0,76.6,abierto\n323,Cali,universitaria,220,14.2,708,5,3,0,1,0,9400,7,3.8,0,186,abierto\n324,Cali,mixta,130,14.9,220,4,3,0,0,1,10700,7,3.7,0,202,abierto\n325,Cali,mixta,83,12,198,3,5,0,0,1,12100,8,4.2,0,78.7,abierto\n326,Medellín,residencial,58,6.8,79,1,3,0,0,1,9300,3,4.5,4,47.4,cerró\n327,Bogotá,universitaria,111,15.1,307,4,4,1,1,1,12000,8,4.6,1,125.2,abierto\n328,Bucaramanga,residencial,88,9.1,128,1,3,0,0,0,11000,4,4.3,1,53.8,abierto\n329,Bogotá,universitaria,144,16.4,258,4,3,1,1,0,10300,9,4.8,0,107.7,abierto\n330,Bogotá,oficinas,107,16,250,5,5,0,0,0,12400,10,4.7,0,146.9,abierto\n331,Pereira,mixta,134,10,104,7,3,1,0,1,10600,5,3.1,4,62.6,cerró\n332,Bogotá,oficinas,194,24.5,247,5,6,0,0,0,14800,5,3.9,0,220.3,abierto\n333,Cali,residencial,44,5.6,76,3,5,0,1,0,11800,2,4,2,29.9,abierto\n334,Pereira,oficinas,89,11.8,183,2,6,0,0,0,14000,5,3.9,0,80.9,abierto\n335,Bogotá,mixta,105,10.2,150,0,5,0,0,0,11600,6,3.9,0,173.3,abierto\n336,Cartagena,oficinas,74,13.8,502,7,6,0,0,1,14000,7,4.4,0,154.1,abierto\n337,Cali,residencial,40,6.5,333,2,4,0,1,0,10400,8,3.7,0,66.1,abierto\n338,Bucaramanga,mixta,63,8.7,251,2,5,0,1,0,12300,4,3.7,6,76.8,cerró\n339,Bucaramanga,mixta,114,10.4,130,2,4,0,1,0,11000,8,4.1,0,78.7,abierto\n340,Bogotá,mixta,126,23.1,157,1,3,0,1,0,10500,3,4.4,4,112.1,cerró\n341,Medellín,mixta,106,15.9,192,2,4,0,0,1,9000,3,3.8,0,105.6,abierto\n342,Cartagena,mixta,78,14.2,378,2,4,1,1,1,11200,5,4.4,0,131.2,abierto\n343,Bogotá,universitaria,55,12,375,5,4,0,1,1,9100,4,3.6,4,105.1,cerró\n344,Bucaramanga,mixta,122,12.8,472,8,5,1,0,1,14800,8,4,0,104,abierto\n345,Pereira,residencial,107,8.8,192,0,5,0,1,1,12900,11,3.9,1,71.1,abierto\n346,Bogotá,universitaria,65,12.3,378,2,4,0,1,1,11500,4,4.2,0,97.4,abierto\n347,Bucaramanga,mixta,111,9.3,258,2,4,1,0,0,10600,4,4.7,0,90.6,abierto\n348,Medellín,mixta,77,10.1,168,3,4,0,0,1,10600,3,4.4,1,111.8,abierto\n349,Bogotá,oficinas,58,13.2,569,2,5,0,0,0,13500,2,4.7,2,111.1,abierto\n350,Bogotá,residencial,110,17.7,100,0,5,1,0,1,14600,6,4.4,4,90.8,cerró\n351,Bucaramanga,mixta,73,7.5,189,1,4,0,0,0,10900,11,4.2,0,60.1,abierto\n352,Cali,oficinas,85,14.4,306,7,5,1,0,1,11200,14,4.2,0,93.7,abierto\n353,Bogotá,mixta,127,15.6,291,2,4,0,1,1,11800,2,4,0,219.7,abierto\n354,Bogotá,oficinas,89,21.1,515,3,5,1,0,0,12700,19,4,2,146.7,abierto\n355,Cartagena,universitaria,105,10.6,376,6,5,0,0,1,11000,4,4.4,0,116.5,abierto\n356,Cali,oficinas,85,10.8,196,2,3,0,1,0,10100,10,4.2,0,123.1,abierto\n357,Bucaramanga,universitaria,113,9.7,383,3,3,1,0,0,9900,8,4.6,1,79.7,abierto\n358,Bucaramanga,universitaria,153,13.9,467,8,5,0,0,0,13300,2,3.6,1,91.9,abierto\n359,Bogotá,mixta,57,11.6,234,7,5,1,1,0,12400,21,4.2,4,90.3,cerró\n360,Bogotá,mixta,119,15.6,171,3,5,0,1,1,12800,6,4.1,1,133.5,abierto\n361,Medellín,oficinas,136,14.8,277,3,5,1,1,0,12600,16,3.9,0,129.9,abierto\n362,Bucaramanga,oficinas,80,11.1,543,6,5,0,1,0,11100,11,3.6,0,113,abierto\n363,Medellín,universitaria,140,15.9,316,2,3,0,1,1,9600,7,4,4,106.3,cerró\n364,Medellín,universitaria,77,9.7,390,2,6,0,1,0,13400,5,3.9,2,102.2,abierto\n365,Cali,residencial,129,10.2,272,2,3,0,1,1,9600,9,4.5,0,122.6,abierto\n366,Cartagena,oficinas,97,18.6,757,7,6,0,0,1,15400,3,4.1,0,133.5,abierto\n367,Bucaramanga,oficinas,72,8.7,220,2,6,0,0,0,15000,5,3.6,8,97.3,cerró\n368,Bogotá,mixta,52,11.3,233,0,6,0,0,1,13100,3,4.3,0,130.9,abierto\n369,Bucaramanga,residencial,161,10.1,229,2,4,0,0,1,11700,2,3.8,1,99.9,abierto\n370,Medellín,mixta,95,14,160,5,4,0,0,0,10800,4,3,6,57.4,cerró\n371,Medellín,residencial,158,18.2,154,1,5,1,0,1,10900,8,4.1,1,90.6,abierto\n372,Cali,mixta,91,12.3,259,3,5,0,1,0,11900,18,4,1,84.6,abierto\n373,Bogotá,residencial,91,13.4,113,1,6,0,0,1,13100,20,4.3,0,64,abierto\n374,Bucaramanga,residencial,85,8.4,198,3,4,0,0,1,10500,3,4.1,6,66.9,cerró\n375,Medellín,oficinas,52,11.2,364,4,5,0,1,0,11300,9,4.5,0,95,abierto\n376,Cartagena,residencial,96,12.7,228,0,4,0,0,0,12200,5,4.4,1,79.5,abierto\n377,Bucaramanga,universitaria,124,10,131,4,4,0,0,1,10400,14,3.8,3,53.9,cerró\n378,Bucaramanga,residencial,106,7.4,132,2,4,1,1,0,11300,16,3.8,0,67.9,abierto\n379,Bogotá,universitaria,175,14.2,527,4,3,0,1,1,10100,2,4,0,194.2,abierto\n380,Cartagena,mixta,72,10.4,447,7,4,0,0,0,12700,13,3.8,1,91.6,abierto\n381,Cali,oficinas,98,13.5,258,3,5,0,0,1,12700,3,4.4,1,112,abierto\n382,Bogotá,oficinas,64,14.8,196,2,5,0,0,1,13500,2,4.7,0,104,abierto\n383,Pereira,oficinas,113,14.6,900,3,4,1,0,0,13000,2,4.6,0,178.4,abierto\n384,Cali,mixta,47,7.4,180,4,3,0,0,0,8400,14,3.4,1,66.2,abierto\n385,Bucaramanga,residencial,51,7.8,75,2,5,1,1,0,11300,4,3.5,2,43.2,cerró\n386,Medellín,mixta,64,11,305,3,6,1,1,0,14600,8,3.9,0,102.8,abierto\n387,Cartagena,universitaria,103,10.3,197,5,3,0,1,1,10100,1,3.9,2,106.4,cerró\n388,Bogotá,oficinas,100,13.2,314,3,4,0,0,0,11400,2,3.8,5,156.6,cerró\n389,Bogotá,oficinas,84,12.7,260,2,5,0,1,1,13600,2,3.9,0,163.3,abierto\n390,Cali,mixta,178,15.9,399,0,3,0,0,1,9700,10,4.3,0,124.8,abierto\n391,Bogotá,oficinas,40,13.1,226,2,6,0,1,1,15300,15,3.9,1,87.7,abierto\n392,Cartagena,oficinas,93,14.2,508,1,4,0,1,1,10900,3,4,2,145.8,abierto\n393,Cali,mixta,66,9.2,459,3,3,0,1,0,9000,4,4,7,112.3,cerró\n394,Bogotá,oficinas,78,11.6,486,2,5,0,1,1,11400,11,4.1,0,184.6,abierto\n395,Cartagena,oficinas,79,13.9,289,5,5,0,0,1,15100,6,3.5,0,95.9,abierto\n396,Bogotá,residencial,140,17.3,319,2,5,1,0,1,12000,8,4.3,0,192.5,abierto\n397,Pereira,oficinas,135,10.6,353,3,6,1,0,1,14300,3,4.2,2,121,abierto\n398,Cartagena,oficinas,115,20,365,4,4,0,0,0,11900,0,3.4,2,133,cerró\n399,Bucaramanga,residencial,46,7.4,127,0,6,0,1,0,13700,5,3.7,6,49.9,cerró\n400,Pereira,mixta,89,10.4,500,2,5,0,1,1,12100,6,3.9,0,91.3,abierto\n401,Bucaramanga,residencial,95,10,146,1,5,0,0,0,12800,16,4.5,1,72.2,abierto\n402,Cartagena,oficinas,175,21.2,423,3,5,0,1,1,13400,3,4.7,0,237.3,abierto\n403,Pereira,mixta,99,10.9,225,2,4,0,0,0,10700,6,4.8,0,65.4,abierto\n404,Bucaramanga,residencial,54,5.6,176,2,5,1,0,0,12200,9,4.2,0,56.3,abierto\n405,Bucaramanga,oficinas,42,9,678,6,5,0,0,0,14100,1,4.4,2,101.1,abierto\n406,Bucaramanga,mixta,56,10.2,321,2,3,1,0,0,10000,7,4.1,0,154.1,abierto\n407,Cartagena,mixta,92,10.2,137,3,4,0,0,1,12800,7,3.7,3,92.8,cerró\n408,Bucaramanga,oficinas,107,15.1,238,3,5,0,1,1,14100,18,3.9,2,93.6,abierto\n409,Medellín,residencial,169,16.3,88,1,6,0,0,1,14500,12,4.3,0,71,abierto\n410,Bucaramanga,mixta,122,11.5,226,2,5,0,0,0,13100,5,4.2,0,98.7,abierto\n411,Bucaramanga,oficinas,131,14.8,240,1,4,0,0,1,10600,9,4.1,2,103.6,abierto\n412,Bucaramanga,mixta,65,8.4,165,3,5,1,0,0,11200,15,3.8,4,51.1,abierto\n413,Pereira,oficinas,128,15.4,194,3,6,1,0,0,12900,7,3.5,7,80.7,cerró\n414,Cali,oficinas,66,14,707,3,4,1,0,1,11300,7,4.7,0,120.2,abierto\n415,Pereira,oficinas,52,11,514,2,4,0,0,1,13100,6,3.7,1,98.1,abierto\n416,Cartagena,residencial,121,15.1,195,3,3,0,0,0,11000,6,4.3,1,88.7,abierto\n417,Cali,mixta,190,16.5,155,8,4,0,1,1,11000,2,3.3,4,88.5,cerró\n418,Bogotá,oficinas,82,15.5,348,2,4,1,1,1,11400,7,3.8,0,158.1,abierto\n419,Cartagena,mixta,120,12.1,162,2,3,0,0,0,9700,13,4.5,2,106.2,abierto\n420,Cali,residencial,49,8.1,86,3,5,0,0,0,13500,2,3.4,7,36.4,cerró\n421,Bogotá,mixta,75,9.7,125,3,4,1,1,1,11100,1,4.1,1,72.7,abierto\n422,Medellín,mixta,71,10.7,123,2,4,1,0,0,10000,3,4.3,0,66.2,abierto\n423,Cartagena,mixta,63,9.2,323,3,4,0,1,1,11400,10,4.4,2,91.9,abierto\n424,Cartagena,universitaria,55,7,308,5,3,0,0,1,10600,8,4.3,0,72.8,abierto\n425,Cali,mixta,137,11.4,222,4,4,0,0,1,10400,16,4,0,77.2,abierto\n426,Bogotá,universitaria,102,11.8,298,3,4,1,0,1,9800,3,3.5,0,106.4,abierto\n427,Pereira,residencial,54,6.5,90,3,5,1,0,0,12700,3,4.5,0,42.8,abierto\n428,Bucaramanga,residencial,53,7.7,230,1,5,1,1,0,13200,25,5,1,82.7,abierto\n429,Medellín,residencial,74,9.9,187,2,6,0,0,1,15200,8,3.9,0,59,abierto\n430,Bucaramanga,residencial,122,9.9,126,4,4,1,0,0,10800,7,3.6,4,59.5,cerró\n431,Bucaramanga,residencial,74,9.3,275,2,3,1,1,1,9800,7,3.9,4,84.9,cerró\n432,Bogotá,residencial,81,12.7,84,2,5,1,0,1,12300,6,4.1,0,73.8,abierto\n433,Cali,universitaria,47,7.9,206,4,3,0,0,0,8700,2,3.8,0,30.1,abierto\n434,Medellín,mixta,103,17.1,306,2,4,0,0,1,9600,6,4.8,0,125,abierto\n435,Cali,oficinas,92,14.5,558,6,3,0,0,1,8300,3,3.3,6,108.6,cerró\n436,Medellín,residencial,55,7.9,197,3,4,1,0,0,11300,10,4.4,0,73.1,abierto\n437,Cali,universitaria,84,11,503,4,4,0,0,1,10400,1,3.6,1,94.6,abierto\n438,Cartagena,universitaria,93,13,322,5,5,0,1,1,10900,2,3.8,0,73,abierto\n439,Cartagena,residencial,130,13.6,155,0,3,0,1,1,11100,8,3,4,117,cerró\n440,Medellín,mixta,113,18,218,3,5,0,1,0,14300,3,4.8,0,105.3,abierto\n441,Bucaramanga,mixta,106,9,143,1,6,0,1,0,14000,12,4,0,85.9,abierto\n442,Bucaramanga,oficinas,136,12.8,350,2,4,0,0,0,11600,3,4.4,0,122.2,abierto\n443,Medellín,universitaria,128,12.2,300,4,5,0,1,1,13300,8,4.3,0,91.9,abierto\n444,Cali,residencial,86,12.9,139,1,4,1,0,1,11400,3,3,6,63.6,cerró\n445,Medellín,oficinas,84,11.5,151,3,4,0,0,1,10300,5,4,0,119.9,abierto\n446,Bogotá,universitaria,88,12.8,163,2,5,0,1,0,13300,5,4.4,1,102.9,abierto\n447,Bogotá,mixta,66,11.5,157,4,5,0,0,1,11700,3,4.4,5,78.9,cerró\n448,Cali,residencial,40,7,86,2,5,0,1,0,12600,8,3.7,8,41.1,cerró\n449,Bogotá,residencial,91,15.6,239,2,5,0,0,1,13800,2,3.3,6,121.8,cerró\n450,Cali,residencial,100,10.7,115,0,5,0,0,0,14100,8,4.1,1,82.3,abierto\n451,Bogotá,universitaria,94,16.4,156,3,4,0,0,1,10900,2,3.3,6,84,cerró\n452,Medellín,oficinas,82,15.1,606,1,6,1,1,1,13800,3,3.9,0,259,abierto\n453,Bucaramanga,residencial,161,17,431,4,5,0,0,1,11900,3,3.6,1,127.3,abierto\n454,Pereira,residencial,77,8.2,89,0,5,1,1,1,13200,6,4.3,1,47.6,abierto\n455,Medellín,mixta,77,11.6,468,2,4,0,0,0,12700,0,3.8,1,144.2,abierto\n456,Bogotá,mixta,141,16.8,236,4,3,0,1,1,11500,8,3.6,0,122,abierto\n457,Bogotá,residencial,95,21.6,158,0,5,1,0,0,14100,1,4.2,0,104.2,abierto\n458,Cali,oficinas,121,16.1,607,5,5,0,1,0,12600,11,4.3,1,252,abierto\n459,Bogotá,mixta,65,13.5,194,2,4,0,1,0,12100,10,4.7,1,102.3,abierto\n460,Pereira,mixta,86,8.8,209,4,3,1,0,0,11400,2,4.3,0,78,abierto\n461,Cartagena,residencial,74,10.9,190,2,3,0,1,0,10100,2,4.7,2,79.8,abierto\n462,Bogotá,mixta,120,13.8,225,1,4,1,1,1,12800,5,3.5,2,103.2,abierto\n463,Bogotá,residencial,129,14,88,1,6,0,0,0,13600,3,4,0,80.3,abierto\n464,Cali,residencial,118,13.6,126,0,3,1,0,0,10500,10,4.4,1,71.7,abierto\n465,Medellín,residencial,88,13.2,258,3,6,1,1,0,13100,3,4.4,0,99.6,abierto\n466,Cartagena,mixta,115,13.7,299,2,4,1,0,0,11900,4,4.3,7,100.6,cerró\n467,Bucaramanga,oficinas,41,8.3,542,2,6,1,1,0,12800,9,3.7,1,77.6,abierto\n468,Bogotá,oficinas,69,12.7,176,0,4,0,1,0,11000,1,4,0,83.7,abierto\n469,Bogotá,residencial,80,12.2,149,1,4,0,0,0,12600,17,4.7,0,93.1,abierto\n470,Pereira,mixta,75,11.8,194,2,5,1,1,0,12500,4,4.7,1,77.7,abierto\n471,Bucaramanga,universitaria,97,12.1,370,4,4,1,1,0,11100,8,3.6,3,66.9,abierto\n472,Bucaramanga,oficinas,79,12.2,94,1,5,0,1,0,11800,4,4,4,83.5,cerró\n473,Cartagena,universitaria,75,10.6,666,2,3,0,0,0,9200,4,4.4,2,117.5,abierto\n474,Bogotá,mixta,94,16.9,262,1,3,0,0,1,9800,2,3.8,0,123.6,abierto\n475,Bucaramanga,oficinas,64,10.3,619,1,5,0,1,1,12300,3,4.1,0,112.3,abierto\n476,Pereira,oficinas,123,10.6,177,3,4,1,1,0,11700,11,4.3,1,76.7,abierto\n477,Bogotá,mixta,87,12.8,170,5,4,1,1,0,12400,4,4.2,6,74.6,cerró\n478,Bogotá,mixta,92,15,252,5,5,1,1,1,12500,7,4.1,0,152.4,abierto\n479,Bucaramanga,mixta,79,8.4,192,0,4,0,0,1,10900,8,4.5,0,74.9,abierto\n480,Medellín,mixta,53,12.5,255,3,3,1,0,0,7600,2,3.2,1,45.5,abierto\n\")\n## <<< fin de los datos en línea\n## El indicador de cierre, por si corres las celdas en desorden\ncierre <- datos$estado_3a == \"cerró\"","id":1,"options":{"autorun":"true","classes":"","comment":"","context":"setup","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-1","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## a) ¿Qué es una fila? Un local; cuántos hay y qué columnas traen\nnrow(datos)                       # 480 locales\nncol(datos)                       # 17 columnas\nlength(unique(datos$id_local))    # 480: ningún local repetido\nnames(datos)                      # las 17 columnas del diccionario","id":2,"options":{"autorun":"true","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-2","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## b) El target: la tasa de cierre a tres años y las ventas típicas\ntable(datos$estado_3a)              # 384 contratos siguen vigentes, 96 cerraron\ncierre <- datos$estado_3a == \"cerró\"\nmean(cierre)                        # tasa de cierre: 0.200\nmedian(datos$ventas_mes)            # mediana de ventas: 95.0 millones al mes","id":3,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-3","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## c) Mediana frente a media: la cola larga\nsummary(datos$ventas_mes)             # mínimo 29.9, mediana 95.0, media 100.7, máximo 259.0\nquantile(datos$ventas_mes, 0.9)       # el 10 % que más vende supera 146.7\nsum(datos$ventas_mes > mean(datos$ventas_mes))   # 209 de 480 están por encima de la media\nhist(datos$ventas_mes, breaks = 25, col = \"#5454e9\", border = \"white\",\n     main = \"La media (100.7) queda por encima de la mediana (95.0)\",\n     xlab = \"Ventas mensuales del arrendatario (millones de pesos)\", ylab = \"Locales\")\nabline(v = median(datos$ventas_mes), col = \"#4cb979\", lwd = 3)\nabline(v = mean(datos$ventas_mes), col = \"#e9683b\", lwd = 3, lty = 2)","id":4,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-4","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## d) ¿Quiénes cierran más? La tasa de cierre por zona y por competidores\nround(tapply(cierre, datos$zona, mean), 3)        # residencial 0.289 … oficinas 0.106\ntable(datos$zona)                                 # cuántos locales hay en cada zona\ntramo <- cut(datos$competidores_500m, c(-1, 2, 5, 99), labels = c(\"0-2\", \"3-5\", \"6+\"))\nround(tapply(cierre, tramo, mean), 3)             # 0.165, 0.221, 0.293: sube con la competencia\ntable(tramo)                                      # 231, 208 y 41 locales","id":5,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-5","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## e) Un gráfico plano también es un hallazgo: la tasa de cierre por ciudad\npor_ciudad <- round(tapply(cierre, datos$ciudad, mean), 3)\npor_ciudad                                   # de 0.180 (Cartagena) a 0.216 (Cali)\nbarplot(100 * por_ciudad, ylim = c(0, 50), col = \"#5454e9\", border = NA,\n        ylab = \"Tasa de cierre del arrendatario a tres años (%)\",\n        main = \"La ciudad no separa: todas cerca del 20 %\")\nabline(h = 100 * mean(cierre), lty = 2, col = \"#88898c\")","id":6,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-6","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}},{"code":"## f) La fuga: dos columnas que separan demasiado bien\nmora <- datos$meses_atraso_arriendo >= 3\nround(tapply(cierre, mora, mean), 3)              # sin mora 0.023 | con mora 0.897\ntable(mora, datos$estado_3a)                      # la tabla cruzada: 87 de los 96 cierres tienen mora\nround(cor(datos$calificacion_google, cierre), 3)  # -0.428: a peor calificación, más cierre\nround(tapply(datos$calificacion_google, datos$estado_3a, mean), 2)   # 4.20 abiertos, 3.77 cerrados","id":7,"options":{"autorun":"false","classes":"","comment":"","context":"interactive","dpi":72,"editor-font-scale":"1","editor-max-height":"","editor-quick-suggestions":"false","editor-word-wrap":"true","fig-cap":"","fig-height":5,"fig-width":7,"label":"unnamed-chunk-7","message":"true","out-height":"","out-width":"700px","output":"true","read-only":"false","results":"markup","warning":"true"}}];
+
+</script>
+<script type="module">
+// Declare startupMessageQWebR globally
+globalThis.qwebrStartupMessage = document.createElement("p");
+
+// Verify if OffScreenCanvas is supported
+globalThis.qwebrOffScreenCanvasSupport = function() {
+  return typeof OffscreenCanvas !== 'undefined'
+}
+
+// Function to set the button text
+globalThis.qwebrSetInteractiveButtonState = function(buttonText, enableCodeButton = true) {
+  document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+    btn.innerHTML = buttonText;
+    btn.disabled = !enableCodeButton;
+  });
+}
+
+// Function to update the status message in non-interactive cells
+globalThis.qwebrUpdateStatusMessage = function(message) {
+  document.querySelectorAll(".qwebr-status-text.qwebr-cell-needs-evaluation").forEach((elem) => {
+    elem.innerText = message;
+  });
+}
+
+// Function to update the status message
+globalThis.qwebrUpdateStatusHeader = function(message) {
+  qwebrStartupMessage.innerHTML = `
+    <i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i>
+    <span>${message}</span>`;
+}
+
+// Function to return true if element is found, false if not
+globalThis.qwebrCheckHTMLElementExists = function(selector) {
+  const element = document.querySelector(selector);
+  return !!element;
+}
+
+// Function that detects whether reveal.js slides are present
+globalThis.qwebrIsRevealJS = function() {
+  // If the '.reveal .slides' selector exists, RevealJS is likely present
+  return qwebrCheckHTMLElementExists('.reveal .slides');
+}
+
+// Initialize the Quarto sidebar element
+function qwebrSetupQuartoSidebar() {
+  var newSideBarDiv = document.createElement('div');
+  newSideBarDiv.id = 'quarto-margin-sidebar';
+  newSideBarDiv.className = 'sidebar margin-sidebar';
+  newSideBarDiv.style.top = '0px';
+  newSideBarDiv.style.maxHeight = 'calc(0px + 100vh)';
+
+  return newSideBarDiv;
+}
+
+// Position the sidebar in the document
+function qwebrPlaceQuartoSidebar() {
+  // Get the reference to the element with id 'quarto-document-content'
+  var referenceNode = document.getElementById('quarto-document-content');
+
+  // Create the new div element
+  var newSideBarDiv = qwebrSetupQuartoSidebar();
+
+  // Insert the new div before the 'quarto-document-content' element
+  referenceNode.parentNode.insertBefore(newSideBarDiv, referenceNode);
+}
+
+function qwebrPlaceMessageContents(content, html_location = "title-block-header", revealjs_location = "title-slide") {
+
+  // Get references to header elements
+  const headerHTML = document.getElementById(html_location);
+  const headerRevealJS = document.getElementById(revealjs_location);
+
+  // Determine where to insert the quartoTitleMeta element
+  if (headerHTML || headerRevealJS) {
+    // Append to the existing "title-block-header" element or "title-slide" div
+    (headerHTML || headerRevealJS).appendChild(content);
+  } else {
+    // If neither headerHTML nor headerRevealJS is found, insert after "webr-monaco-editor-init" script
+    const monacoScript = document.getElementById("qwebr-monaco-editor-init");
+    const header = document.createElement("header");
+    header.setAttribute("id", "title-block-header");
+    header.appendChild(content);
+    monacoScript.after(header);
+  }
+}
+
+
+
+function qwebrOffScreenCanvasSupportWarningMessage() {
+  
+  // Verify canvas is supported.
+  if(qwebrOffScreenCanvasSupport()) return;
+
+  // Create the main container div
+  var calloutContainer = document.createElement('div');
+  calloutContainer.classList.add('callout', 'callout-style-default', 'callout-warning', 'callout-titled');
+
+  // Create the header div
+  var headerDiv = document.createElement('div');
+  headerDiv.classList.add('callout-header', 'd-flex', 'align-content-center');
+
+  // Create the icon container div
+  var iconContainer = document.createElement('div');
+  iconContainer.classList.add('callout-icon-container');
+
+  // Create the icon element
+  var iconElement = document.createElement('i');
+  iconElement.classList.add('callout-icon');
+
+  // Append the icon element to the icon container
+  iconContainer.appendChild(iconElement);
+
+  // Create the title container div
+  var titleContainer = document.createElement('div');
+  titleContainer.classList.add('callout-title-container', 'flex-fill');
+  titleContainer.innerText = 'Warning: Web Browser Does Not Support Graphing!';
+
+  // Append the icon container and title container to the header div
+  headerDiv.appendChild(iconContainer);
+  headerDiv.appendChild(titleContainer);
+
+  // Create the body container div
+  var bodyContainer = document.createElement('div');
+  bodyContainer.classList.add('callout-body-container', 'callout-body');
+
+  // Create the paragraph element for the body content
+  var paragraphElement = document.createElement('p');
+  paragraphElement.innerHTML = 'This web browser does not have support for displaying graphs through the <code>quarto-webr</code> extension since it lacks an <code>OffScreenCanvas</code>. Please upgrade your web browser to one that supports <code>OffScreenCanvas</code>.';
+
+  // Append the paragraph element to the body container
+  bodyContainer.appendChild(paragraphElement);
+
+  // Append the header div and body container to the main container div
+  calloutContainer.appendChild(headerDiv);
+  calloutContainer.appendChild(bodyContainer);
+
+  // Append the main container div to the document depending on format
+  qwebrPlaceMessageContents(calloutContainer, "title-block-header"); 
+
+}
+
+
+// Function that attaches the document status message and diagnostics
+function displayStartupMessage(showStartupMessage, showHeaderMessage) {
+  if (!showStartupMessage) {
+    return;
+  }
+
+  // Create the outermost div element for metadata
+  const quartoTitleMeta = document.createElement("div");
+  quartoTitleMeta.classList.add("quarto-title-meta");
+
+  // Create the first inner div element
+  const firstInnerDiv = document.createElement("div");
+  firstInnerDiv.setAttribute("id", "qwebr-status-message-area");
+
+  // Create the second inner div element for "WebR Status" heading and contents
+  const secondInnerDiv = document.createElement("div");
+  secondInnerDiv.setAttribute("id", "qwebr-status-message-title");
+  secondInnerDiv.classList.add("quarto-title-meta-heading");
+  secondInnerDiv.innerText = "WebR Status";
+
+  // Create another inner div for contents
+  const secondInnerDivContents = document.createElement("div");
+  secondInnerDivContents.setAttribute("id", "qwebr-status-message-body");
+  secondInnerDivContents.classList.add("quarto-title-meta-contents");
+
+  // Describe the WebR state
+  qwebrStartupMessage.innerText = "🟡 Loading...";
+  qwebrStartupMessage.setAttribute("id", "qwebr-status-message-text");
+  // Add `aria-live` to auto-announce the startup status to screen readers
+  qwebrStartupMessage.setAttribute("aria-live", "assertive");
+
+  // Append the startup message to the contents
+  secondInnerDivContents.appendChild(qwebrStartupMessage);
+
+  // Add a status indicator for COOP and COEP Headers if needed
+  if (showHeaderMessage) {
+    const crossOriginMessage = document.createElement("p");
+    crossOriginMessage.innerText = `${crossOriginIsolated ? '🟢' : '🟡'} COOP & COEP Headers`;
+    crossOriginMessage.setAttribute("id", "qwebr-coop-coep-header");
+    secondInnerDivContents.appendChild(crossOriginMessage);
+  }
+
+  // Combine the inner divs and contents
+  firstInnerDiv.appendChild(secondInnerDiv);
+  firstInnerDiv.appendChild(secondInnerDivContents);
+  quartoTitleMeta.appendChild(firstInnerDiv);
+
+  // Place message on webpage
+  qwebrPlaceMessageContents(quartoTitleMeta); 
+}
+
+function qwebrAddCommandHistoryModal() {
+  // Create the modal div
+  var modalDiv = document.createElement('div');
+  modalDiv.id = 'qwebr-history-modal';
+  modalDiv.className = 'qwebr-modal';
+
+  // Create the modal content div
+  var modalContentDiv = document.createElement('div');
+  modalContentDiv.className = 'qwebr-modal-content';
+
+  // Create the span for closing the modal
+  var closeSpan = document.createElement('span');
+  closeSpan.id = 'qwebr-command-history-close-btn';
+  closeSpan.className = 'qwebr-modal-close';
+  closeSpan.innerHTML = '&times;';
+
+  // Create the h1 element for the modal
+  var modalH1 = document.createElement('h1');
+  modalH1.textContent = 'R History Command Contents';
+
+  // Create an anchor element for downloading the Rhistory file 
+  var downloadLink = document.createElement('a');
+  downloadLink.href = '#';
+  downloadLink.id = 'qwebr-download-history-btn';
+  downloadLink.className = 'qwebr-download-btn';
+
+  // Create an 'i' element for the icon
+  var icon = document.createElement('i');
+  icon.className = 'bi bi-file-code';
+
+  // Append the icon to the anchor element
+  downloadLink.appendChild(icon);
+
+  // Add the text 'Download R History' to the anchor element
+  downloadLink.appendChild(document.createTextNode(' Download R History File'));
+
+  // Create the pre for command history contents
+  var commandContentsPre = document.createElement('pre');
+  commandContentsPre.id = 'qwebr-command-history-contents';
+  commandContentsPre.className = 'qwebr-modal-content-code';
+
+  // Append the close span, h1, and history contents pre to the modal content div
+  modalContentDiv.appendChild(closeSpan);
+  modalContentDiv.appendChild(modalH1);
+  modalContentDiv.appendChild(downloadLink);
+  modalContentDiv.appendChild(commandContentsPre);
+
+  // Append the modal content div to the modal div
+  modalDiv.appendChild(modalContentDiv);
+
+  // Append the modal div to the body
+  document.body.appendChild(modalDiv);
+}
+
+function qwebrRegisterRevealJSCommandHistoryModal() {
+  // Select the <ul> element inside the <div> with data-panel="Custom0"
+  let ulElement = document.querySelector('div[data-panel="Custom0"] > ul.slide-menu-items');
+
+  // Find the last <li> element with class slide-tool-item
+  let lastItem = ulElement.querySelector('li.slide-tool-item:last-child');
+
+  // Calculate the next data-item value
+  let nextItemValue = 0;
+  if (lastItem) {
+      nextItemValue = parseInt(lastItem.dataset.item) + 1;
+  }
+
+  // Create a new <li> element
+  let newListItem = document.createElement('li');
+  newListItem.className = 'slide-tool-item';
+  newListItem.dataset.item = nextItemValue.toString(); // Set the next available data-item value
+
+  // Create the <a> element inside the <li>
+  let newLink = document.createElement('a');
+  newLink.href = '#';
+  newLink.id = 'qwebrRHistoryButton'; // Set the ID for the new link
+  
+  // Create the <kbd> element inside the <a>
+  let newKbd = document.createElement('kbd');
+  newKbd.textContent = ' '; // Set to empty as we are not registering a keyboard shortcut
+
+  // Create text node for the link text
+  let newText = document.createTextNode(' View R History');
+
+  // Append <kbd> and text node to <a>
+  newLink.appendChild(newKbd);
+  newLink.appendChild(newText);
+
+  // Append <a> to <li>
+  newListItem.appendChild(newLink);
+
+  // Append <li> to <ul>
+  ulElement.appendChild(newListItem);
+}
+
+// Handle setting up the R history modal
+function qwebrCodeLinks() {
+
+  if (qwebrIsRevealJS()) {
+    qwebrRegisterRevealJSCommandHistoryModal();
+    return;
+  }
+
+  // Create the container div
+  var containerDiv = document.createElement('div');
+  containerDiv.className = 'quarto-code-links';
+
+  // Create the h2 element
+  var h2 = document.createElement('h2');
+  h2.textContent = 'webR Code Links';
+
+  // Create the ul element
+  var ul = document.createElement('ul');
+
+  // Create the li element
+  var li = document.createElement('li');
+
+  // Create the a_history_btn element
+  var a_history_btn = document.createElement('a');
+  a_history_btn.href = 'javascript:void(0)';
+  a_history_btn.setAttribute('id', 'qwebrRHistoryButton');
+
+  // Create the i_history_btn element
+  var i_history_btn = document.createElement('i');
+  i_history_btn.className = 'bi bi-file-code';
+
+  // Create the text node for the link text
+  var text_history_btn = document.createTextNode('View R History');
+
+  // Append the icon element and link text to the a element
+  a_history_btn.appendChild(i_history_btn);
+  a_history_btn.appendChild(text_history_btn);
+
+  // Append the a element to the li element
+  li.appendChild(a_history_btn);
+
+  // Append the li element to the ul element
+  ul.appendChild(li);
+
+  // Append the h2 and ul elements to the container div
+  containerDiv.appendChild(h2);
+  containerDiv.appendChild(ul);
+
+  // Append the container div to the element with the ID 'quarto-margin-sidebar'
+  var sidebar = document.getElementById('quarto-margin-sidebar');
+    
+  // If the sidebar element is not found, create it
+  if(!sidebar) {
+    qwebrPlaceQuartoSidebar();
+  }
+  
+  // Re-select the sidebar element (if it was just created)
+  sidebar = document.getElementById('quarto-margin-sidebar');   
+
+
+  // If the sidebar element exists, append the container div to it
+  if(sidebar) {
+    // Append the container div to the sidebar
+    sidebar.appendChild(containerDiv);
+    // Force the sidebar to be clickable by removing the 'zindex-bottom' class
+    // added in pre-release: https://github.com/quarto-dev/quarto-cli/commit/f0c53a1ffcaa1de4eccbf07803b096898248adcc
+    sidebar.className = 'sidebar margin-sidebar';
+  } else {
+    // Get a debugger ...
+    console.warn('Element with ID "quarto-margin-sidebar" not found.');
+  }
+}
+
+// Call the function to append the code links for qwebR into the right sidebar
+qwebrCodeLinks();
+
+// Add the command history modal
+qwebrAddCommandHistoryModal();
+
+displayStartupMessage(qwebrShowStartupMessage, qwebrShowHeaderMessage);
+qwebrOffScreenCanvasSupportWarningMessage();
+</script>
+<script type="module">
+// Define a global storage and retrieval solution ----
+
+// Store commands executed in R
+globalThis.qwebrRCommandHistory = [];
+
+// Function to retrieve the command history
+globalThis.qwebrFormatRHistory = function() {
+   return qwebrRCommandHistory.join("\n\n");
+}
+
+// Retrieve HTML Elements ----
+
+// Get the command modal
+const command_history_modal = document.getElementById("qwebr-history-modal");
+
+// Get the button that opens the command modal
+const command_history_btn = document.getElementById("qwebrRHistoryButton");
+
+// Get the <span> element that closes the command modal
+const command_history_close_span = document.getElementById("qwebr-command-history-close-btn");
+
+// Get the download button for r history information
+const command_history_download_btn = document.getElementById("qwebr-download-history-btn");
+
+// Plug in command history into modal/download button ----
+
+// Function to populate the modal with command history
+function populateCommandHistoryModal() {
+    document.getElementById("qwebr-command-history-contents").innerHTML = qwebrFormatRHistory() || "No commands have been executed yet.";
+}
+
+// Function to format the current date and time to
+// a string with the format YYYY-MM-DD-HH-MM-SS
+function formatDateTime() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+}
+
+
+// Function to convert document title with datetime to a safe filename
+function safeFileName() {
+    // Get the current page title
+    let pageTitle = document.title;
+
+    // Combine the current page title with the current date and time
+    let pageNameWithDateTime = `Rhistory-${pageTitle}-${formatDateTime()}`;
+
+    // Replace unsafe characters with safe alternatives
+    let safeFilename = pageNameWithDateTime.replace(/[\\/:\*\?! "<>\|]/g, '-');
+
+    return safeFilename;
+}
+
+
+// Function to download list contents as text file
+function downloadRHistory() {
+    // Get the current page title + datetime and use it as the filename
+    const filename = `${safeFileName()}.R`;
+
+    // Get the text contents of the R History list
+    const text = qwebrFormatRHistory();
+
+    // Create a new Blob object with the text contents
+    const blob = new Blob([text], { type: 'text/plain' });
+  
+    // Create a new anchor element for the download
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+
+    // Append the anchor to the body, click it, and remove it
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+// Register event handlers ----
+
+// When the user clicks the View R History button, open the command modal
+command_history_btn.onclick = function() {
+    populateCommandHistoryModal();
+    command_history_modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the command modal
+command_history_close_span.onclick = function() {
+    command_history_modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the command modal, close it
+window.onclick = function(event) {
+    if (event.target == command_history_modal) {
+        command_history_modal.style.display = "none";
+    }
+}
+
+// Add an onclick event listener to the download button so that
+// the user can download the R history as a text file
+command_history_download_btn.onclick = function() {
+    downloadRHistory();
+};
+</script>
+<script type="module">
+// Supported Evaluation Types for Context
+globalThis.EvalTypes = Object.freeze({
+  Interactive: 'interactive',
+  Setup: 'setup',
+  Output: 'output',
+});
+
+// Function that obtains the font size for a given element 
+globalThis.qwebrCurrentFontSizeOnElement = function(element, cssProperty = 'font-size') {
+
+  const currentFontSize = parseFloat(
+    window
+    .getComputedStyle(element)
+    .getPropertyValue(cssProperty)
+  );
+  
+  return currentFontSize;
+}
+
+// Function to determine font scaling
+globalThis.qwebrScaledFontSize = function(div, qwebrOptions) {
+  // Determine if we should compute font-size using RevealJS's `--r-main-font-size` 
+  // or if we can directly use the document's `font-size`.
+  const cssProperty = document.body.classList.contains('reveal') ? 
+    "--r-main-font-size" : "font-size";
+  
+  // Get the current font size on the div element
+  const elementFontSize = qwebrCurrentFontSizeOnElement(div, cssProperty);
+
+  // Determine the scaled font size value
+  const scaledFontSize = ((qwebrOptions['editor-font-scale'] ?? 1) * elementFontSize) ?? 17.5;
+
+  return scaledFontSize;
+}
+
+
+// Function that dispatches the creation request
+globalThis.qwebrCreateHTMLElement = function (
+  cellData
+) {
+
+  // Extract key components
+  const evalType = cellData.options.context;
+  const qwebrCounter = cellData.id;
+
+  // We make an assumption that insertion points are defined by the Lua filter as:
+  // qwebr-insertion-location-{qwebrCounter} 
+  const elementLocator = document.getElementById(`qwebr-insertion-location-${qwebrCounter}`);
+
+  // Figure out the routine to use to insert the element.
+  let qwebrElement;
+  switch ( evalType ) {
+    case EvalTypes.Interactive:
+      qwebrElement = qwebrCreateInteractiveElement(qwebrCounter, cellData.options);
+      break;
+    case EvalTypes.Output: 
+      qwebrElement = qwebrCreateNonInteractiveOutputElement(qwebrCounter, cellData.options);
+      break;
+    case EvalTypes.Setup: 
+      qwebrElement = qwebrCreateNonInteractiveSetupElement(qwebrCounter, cellData.options);
+      break;
+    default: 
+      qwebrElement = document.createElement('div');
+      qwebrElement.textContent = 'Error creating `quarto-webr` element';
+  }
+
+  // Insert the dynamically generated object at the document location.
+  elementLocator.appendChild(qwebrElement);
+};
+
+// Function that setups the interactive element creation
+globalThis.qwebrCreateInteractiveElement = function (qwebrCounter, qwebrOptions) {
+
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = 'qwebr-interactive-area-' + qwebrCounter;
+  mainDiv.className = `qwebr-interactive-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+
+  // Create toolbar div
+  var toolbarDiv = document.createElement('div');
+  toolbarDiv.className = 'qwebr-editor-toolbar';
+  toolbarDiv.id = 'qwebr-editor-toolbar-' + qwebrCounter;
+
+  // Create a div to hold the left buttons
+  var leftButtonsDiv = document.createElement('div');
+  leftButtonsDiv.className = 'qwebr-editor-toolbar-left-buttons';
+
+  // Create a div to hold the right buttons
+  var rightButtonsDiv = document.createElement('div');
+  rightButtonsDiv.className = 'qwebr-editor-toolbar-right-buttons';
+
+  // Create Run Code button
+  var runCodeButton = document.createElement('button');
+  runCodeButton.className = 'btn btn-default qwebr-button qwebr-button-run';
+  runCodeButton.disabled = true;
+  runCodeButton.type = 'button';
+  runCodeButton.id = 'qwebr-button-run-' + qwebrCounter;
+  runCodeButton.textContent = '🟡 Loading webR...';
+  runCodeButton.title = `Run code (Shift + Enter)`;
+
+  // Append buttons to the leftButtonsDiv
+  leftButtonsDiv.appendChild(runCodeButton);
+
+  // Create Reset button
+  var resetButton = document.createElement('button');
+  resetButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-reset';
+  resetButton.type = 'button';
+  resetButton.id = 'qwebr-button-reset-' + qwebrCounter;
+  resetButton.title = 'Start over';
+  resetButton.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i>';
+
+  // Create Copy button
+  var copyButton = document.createElement('button');
+  copyButton.className = 'btn btn-light btn-xs qwebr-button qwebr-button-copy';
+  copyButton.type = 'button';
+  copyButton.id = 'qwebr-button-copy-' + qwebrCounter;
+  copyButton.title = 'Copy code';
+  copyButton.innerHTML = '<i class="fa-regular fa-copy"></i>';
+
+  // Append buttons to the rightButtonsDiv
+  rightButtonsDiv.appendChild(resetButton);
+  rightButtonsDiv.appendChild(copyButton);
+
+  // Create console area div
+  var consoleAreaDiv = document.createElement('div');
+  consoleAreaDiv.id = 'qwebr-console-area-' + qwebrCounter;
+  consoleAreaDiv.className = 'qwebr-console-area';
+
+  // Create editor div
+  var editorDiv = document.createElement('div');
+  editorDiv.id = 'qwebr-editor-' + qwebrCounter;
+  editorDiv.className = 'qwebr-editor';
+
+  // Create output code area div
+  var outputCodeAreaDiv = document.createElement('div');
+  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
+  outputCodeAreaDiv.className = 'qwebr-output-code-area';
+  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
+
+  // Create pre element inside output code area
+  var preElement = document.createElement('pre');
+  preElement.style.visibility = 'hidden';
+  outputCodeAreaDiv.appendChild(preElement);
+
+  // Create output graph area div
+  var outputGraphAreaDiv = document.createElement('div');
+  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
+  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
+
+  // Append buttons to the toolbar
+  toolbarDiv.appendChild(leftButtonsDiv);
+  toolbarDiv.appendChild(rightButtonsDiv);
+
+  // Append all elements to the main div
+  mainDiv.appendChild(toolbarDiv);
+  consoleAreaDiv.appendChild(editorDiv);
+  consoleAreaDiv.appendChild(outputCodeAreaDiv);
+  mainDiv.appendChild(consoleAreaDiv);
+  mainDiv.appendChild(outputGraphAreaDiv);
+
+  return mainDiv;
+}
+
+// Function that adds output structure for non-interactive output
+globalThis.qwebrCreateNonInteractiveOutputElement = function(qwebrCounter, qwebrOptions) {
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = 'qwebr-noninteractive-area-' + qwebrCounter;
+  mainDiv.className = `qwebr-noninteractive-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+  
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+  
+  // Create a status container div
+  var statusContainer = createLoadingContainer(qwebrCounter);
+
+  // Create output code area div
+  var outputCodeAreaDiv = document.createElement('div');
+  outputCodeAreaDiv.id = 'qwebr-output-code-area-' + qwebrCounter;
+  outputCodeAreaDiv.className = 'qwebr-output-code-area';
+  outputCodeAreaDiv.setAttribute('aria-live', 'assertive');
+
+  // Create pre element inside output code area
+  var preElement = document.createElement('pre');
+  preElement.style.visibility = 'hidden';
+  outputCodeAreaDiv.appendChild(preElement);
+
+  // Create output graph area div
+  var outputGraphAreaDiv = document.createElement('div');
+  outputGraphAreaDiv.id = 'qwebr-output-graph-area-' + qwebrCounter;
+  outputGraphAreaDiv.className = 'qwebr-output-graph-area';
+
+  // Append all elements to the main div
+  mainDiv.appendChild(statusContainer);
+  mainDiv.appendChild(outputCodeAreaDiv);
+  mainDiv.appendChild(outputGraphAreaDiv);
+
+  return mainDiv;
+};
+
+// Function that adds a stub in the page to indicate a setup cell was used.
+globalThis.qwebrCreateNonInteractiveSetupElement = function(qwebrCounter, qwebrOptions) {
+  // Create main div element
+  var mainDiv = document.createElement('div');
+  mainDiv.id = `qwebr-noninteractive-setup-area-${qwebrCounter}`;
+  mainDiv.className = `qwebr-noninteractive-setup-area`;
+  if (qwebrOptions.classes) {
+    mainDiv.className += " " + qwebrOptions.classes
+  }
+
+
+  // Add a unique cell identifier that users can customize
+  if (qwebrOptions.label) {
+    mainDiv.setAttribute('data-id', qwebrOptions.label);
+  }
+
+  // Create a status container div
+  var statusContainer = createLoadingContainer(qwebrCounter);
+
+  // Append status onto the main div
+  mainDiv.appendChild(statusContainer);
+
+  return mainDiv;
+}
+
+
+// Function to create loading container with specified ID
+globalThis.createLoadingContainer = function(qwebrCounter) {
+
+  // Create a status container
+  const container = document.createElement('div');
+  container.id = `qwebr-non-interactive-loading-container-${qwebrCounter}`;
+  container.className = 'qwebr-non-interactive-loading-container qwebr-cell-needs-evaluation';
+
+  // Create an R project logo to indicate its a code space
+  const rProjectIcon = document.createElement('i');
+  rProjectIcon.className = 'fa-brands fa-r-project fa-3x qwebr-r-project-logo';
+
+  // Setup a loading icon from font awesome
+  const spinnerIcon = document.createElement('i');
+  spinnerIcon.className = 'fa-solid fa-spinner fa-spin fa-1x qwebr-icon-status-spinner';
+
+  // Add a section for status text
+  const statusText = document.createElement('p');
+  statusText.id = `qwebr-status-text-${qwebrCounter}`;
+  statusText.className = `qwebr-status-text qwebr-cell-needs-evaluation`;
+  statusText.innerText = 'Loading webR...';
+
+  // Incorporate an inner container
+  const innerContainer = document.createElement('div');
+
+  // Append elements to the inner container
+  innerContainer.appendChild(spinnerIcon);
+  innerContainer.appendChild(statusText);
+
+  // Append elements to the main container
+  container.appendChild(rProjectIcon);
+  container.appendChild(innerContainer);
+
+  return container;
+}
+</script>
+<script type="module">
+// Function to install a single package
+async function qwebrInstallRPackage(packageName) {
+  await mainWebR.evalRVoid(`webr::install('${packageName}');`);
+}
+
+// Function to load a single package
+async function qwebrLoadRPackage(packageName) {
+  await mainWebR.evalRVoid(`require('${packageName}', quietly = TRUE)`);
+}
+
+// Generic function to process R packages
+async function qwebrProcessRPackagesWithStatus(packages, processType, displayStatusMessageUpdate = true) {
+  // Switch between contexts
+  const messagePrefix = processType === 'install' ? 'Installing' : 'Loading';
+
+  // Modify button state
+  qwebrSetInteractiveButtonState(`🟡 ${messagePrefix} package ...`, false);
+
+  // Iterate over packages
+  for (let i = 0; i < packages.length; i++) {
+    const activePackage = packages[i];
+    const formattedMessage = `${messagePrefix} package ${i + 1} out of ${packages.length}: ${activePackage}`;
+
+    // Display the update in header
+    if (displayStatusMessageUpdate) {
+      qwebrUpdateStatusHeader(formattedMessage);
+    }
+
+    // Display the update in non-active areas
+    qwebrUpdateStatusMessage(formattedMessage);
+
+    // Run package installation
+    if (processType === 'install') {
+      await qwebrInstallRPackage(activePackage);
+    } else {
+      await qwebrLoadRPackage(activePackage);
+    }
+  }
+
+  // Clean slate
+  if (processType === 'load') {
+    await mainWebR.flush();
+  }
+}
+
+// Start a timer
+const initializeWebRTimerStart = performance.now();
+
+// Encase with a dynamic import statement
+globalThis.qwebrInstance = import(qwebrCustomizedWebROptions.baseURL + "webr.mjs").then(
+  async ({ WebR, ChannelType }) => {
+    // Populate WebR options with defaults or new values based on `webr` meta
+    globalThis.mainWebR = new WebR(qwebrCustomizedWebROptions);
+
+    // Initialization WebR
+    await mainWebR.init();
+
+    // Setup a shelter
+    globalThis.mainWebRCodeShelter = await new mainWebR.Shelter();
+
+    // Setup a pager to allow processing help documentation
+    await mainWebR.evalRVoid('webr::pager_install()');
+
+    // Setup a viewer to allow processing htmlwidgets.
+    // This might not be available in old webr version
+    await mainWebR.evalRVoid('try({ webr::viewer_install() })');
+
+    // Override the existing install.packages() to use webr::install()
+    await mainWebR.evalRVoid('webr::shim_install()');
+
+    // Specify the repositories to pull from
+    // Note: webR does not use the `repos` option, but instead uses `webr_pkg_repos`
+    // inside of `install()`. However, other R functions still pull from `repos`.
+    await mainWebR.evalRVoid(`
+      options(
+        webr_pkg_repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')}),
+        repos = c(${qwebrPackageRepoURLS.map(repoURL => `'${repoURL}'`).join(',')})
+      )
+    `);
+
+    // Check to see if any packages need to be installed
+    if (qwebrSetupRPackages) {
+      // Obtain only a unique list of packages
+      const uniqueRPackageList = Array.from(new Set(qwebrInstallRPackagesList));
+
+      // Install R packages one at a time (either silently or with a status update)
+      await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'install', qwebrShowStartupMessage);
+
+      if (qwebrAutoloadRPackages) {
+        // Load R packages one at a time (either silently or with a status update)
+        await qwebrProcessRPackagesWithStatus(uniqueRPackageList, 'load', qwebrShowStartupMessage);
+      }
+    }
+  }
+);
+
+// Stop timer
+const initializeWebRTimerEnd = performance.now();
+
+</script>
+<script type="module">
+// Function to verify a given JavaScript Object is empty
+globalThis.qwebrIsObjectEmpty = function (arr) {
+    return Object.keys(arr).length === 0;
+}
+
+// Global version of the Escape HTML function that converts HTML
+// characters to their HTML entities.
+globalThis.qwebrEscapeHTMLCharacters = function(unsafe) {
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+};
+
+// Passthrough results
+globalThis.qwebrIdentity = function(x) {
+    return x;
+};
+
+// Append a comment
+globalThis.qwebrPrefixComment = function(x, comment) {
+    return `${comment}${x}`;
+};
+
+// Function to store the code in the history
+globalThis.qwebrLogCodeToHistory = function(codeToRun, options) {
+    qwebrRCommandHistory.push(
+        `# Ran code in ${options.label} at ${new Date().toLocaleString()} ----\n${codeToRun}`
+    );
+};
+
+// Function to attach a download button onto the canvas
+// allowing the user to download the image.
+function qwebrImageCanvasDownloadButton(canvas, canvasContainer) {
+
+    // Create the download button
+    const downloadButton = document.createElement('button');
+    downloadButton.className = 'qwebr-canvas-image-download-btn';
+    downloadButton.textContent = 'Download Image';
+    canvasContainer.appendChild(downloadButton);
+
+    // Trigger a download of the image when the button is clicked
+    downloadButton.addEventListener('click', function() {
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = 'qwebr-canvas-image.png';
+        link.click();
+    });
+}
+
+
+// Function to parse the pager results
+globalThis.qwebrParseTypePager = async function (msg) {
+
+    // Split out the event data
+    const { path, title, deleteFile } = msg.data;
+
+    // Process the pager data by reading the information from disk
+    const paged_data = await mainWebR.FS.readFile(path).then((data) => {
+        // Obtain the file content
+        let content = new TextDecoder().decode(data);
+
+        // Remove excessive backspace characters until none remain
+        while(content.match(/.[\b]/)){
+            content = content.replace(/.[\b]/g, '');
+        }
+
+        // Returned cleaned data
+        return content;
+    });
+
+    // Unlink file if needed
+    if (deleteFile) {
+        await mainWebR.FS.unlink(path);
+    }
+
+    // Return extracted data with spaces
+    return paged_data;
+};
+
+
+// Function to parse the browse results
+globalThis.qwebrParseTypeBrowse = async function (msg) {
+
+    // msg.type === "browse"
+    const path = msg.data.url;
+
+    // Process the browse data by reading the information from disk
+    const browse_data = await mainWebR.FS.readFile(path).then((data) => {
+        // Obtain the file content
+        let content = new TextDecoder().decode(data);
+
+        return content;
+    });
+
+    // Return extracted data as-is
+    return browse_data;
+};
+
+// Function to run the code using webR and parse the output
+globalThis.qwebrComputeEngine = async function(
+    codeToRun,
+    elements,
+    options) {
+
+    // Call into the R compute engine that persists within the document scope.
+    // To be prepared for all scenarios, the following happens:
+    // 1. We setup a canvas device to write to by making a namespace call into the {webr} package
+    // 2. We use values inside of the options array to set the figure size.
+    // 3. We capture the output stream information (STDOUT and STERR)
+    // 4. We disable the current device's image creation.
+    // 5. Piece-wise parse the results into the different output areas
+
+    // Create a pager variable for help/file contents
+    let pager = [];
+
+    // Handle how output is processed
+    let showMarkup = options.results === "markup" && options.output !== "asis";
+    let processOutput;
+
+    if (showMarkup) {
+        processOutput = qwebrEscapeHTMLCharacters;
+    } else {
+        processOutput = qwebrIdentity;
+    }
+
+    // ----
+    // Convert from Inches to Pixels by using DPI (dots per inch)
+    // for bitmap devices (dpi * inches = pixels)
+    let fig_width = options["fig-width"] * options["dpi"];
+    let fig_height = options["fig-height"] * options["dpi"];
+
+    // Initialize webR
+    await mainWebR.init();
+
+    // Configure capture output
+    let captureOutputOptions = {
+        withAutoprint: true,
+        captureStreams: true,
+        captureConditions: false,
+        // env: webR.objs.emptyEnv, // maintain a global environment for webR v0.2.0
+    };
+
+    // Determine if the browser supports OffScreen
+    if (qwebrOffScreenCanvasSupport()) {
+        // Mirror default options of webr::canvas()
+        // with changes to figure height and width.
+        captureOutputOptions.captureGraphics = {
+            width: fig_width,
+            height: fig_height,
+            bg: "white", // default: transparent
+            pointsize: 12,
+            capture: true
+        };
+    }  else {
+        // Disable generating graphics
+        captureOutputOptions.captureGraphics = false;
+    }
+
+    // Store the code to run in history
+    qwebrLogCodeToHistory(codeToRun, options);
+
+    // Setup a webR canvas by making a namespace call into the {webr} package
+    // Evaluate the R code
+    // Remove the active canvas silently
+    const result = await mainWebRCodeShelter.captureR(
+        `${codeToRun}`,
+        captureOutputOptions
+    );
+
+    // -----
+
+    // Start attempting to parse the result data
+    processResultOutput:try {
+
+        // Avoid running through output processing
+        if (options.results === "hide" || options.output === "false") {
+            break processResultOutput;
+        }
+
+        // Merge output streams of STDOUT and STDErr (messages and errors are combined.)
+        // Require both `warning` and `message` to be true to display `STDErr`.
+        const out = result.output
+        .filter(
+            evt => evt.type === "stdout" ||
+            ( evt.type === "stderr" && (options.warning === "true" && options.message === "true"))
+        )
+        .map((evt, index) => {
+            const className = `qwebr-output-code-${evt.type}`;
+            const outputResult = qwebrPrefixComment(processOutput(evt.data), options.comment);
+            return `<code id="${className}-editor-${elements.id}-result-${index + 1}" class="${className}">${outputResult}</code>`;
+        })
+        .join("\n");
+
+
+        // Clean the state
+        // We're now able to process pager events.
+        // As a result, we cannot maintain a true 1-to-1 output order
+        // without individually feeding each line
+        const msgs = await mainWebR.flush();
+
+        // Use `map` to process the filtered "pager" events asynchronously
+        const pager = [];
+        const browse = [];
+
+        await Promise.all(
+            msgs.map(
+                async (msg) => {
+
+                    const msgType = msg.type || "unknown";
+
+                    switch(msgType) {
+                        case 'pager':
+                            const pager_data = await qwebrParseTypePager(msg);
+                            pager.push(pager_data);
+                            break;
+                        case 'browse':
+                            const browse_data = await qwebrParseTypeBrowse(msg);
+                            browse.push(browse_data);
+                            break;
+                    }
+                    return;
+                }
+            )
+        );
+
+        // Nullify the output area of content
+        elements.outputCodeDiv.innerHTML = "";
+        elements.outputGraphDiv.innerHTML = "";
+
+        // Design an output object for messages
+        const pre = document.createElement("pre");
+        if (/\S/.test(out)) {
+            // Display results as HTML elements to retain output styling
+            const div = document.createElement("div");
+            div.innerHTML = out;
+
+            // Calculate a scaled font-size value
+            const scaledFontSize = qwebrScaledFontSize(
+                elements.outputCodeDiv, options);
+
+            // Override output code cell size
+            pre.style.fontSize = `${scaledFontSize}px`;
+            pre.appendChild(div);
+        } else {
+            // If nothing is present, hide the element.
+            pre.style.visibility = "hidden";
+        }
+
+        elements.outputCodeDiv.appendChild(pre);
+
+        // Determine if we have graphs to display
+        if (result.images.length > 0) {
+
+            // Create figure element
+            const figureElement = document.createElement("figure");
+            figureElement.className = "qwebr-canvas-image";
+
+            // Place each rendered graphic onto a canvas element
+            result.images.forEach((img) => {
+
+                // Construct canvas for object
+                const canvas = document.createElement("canvas");
+
+                // Add an image download button
+                qwebrImageCanvasDownloadButton(canvas, figureElement);
+
+                // Set canvas size to image
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                // Apply output truncations
+                canvas.style.width = options["out-width"] ? options["out-width"] : `${fig_width}px`;
+                if (options["out-height"]) {
+                    canvas.style.height = options["out-height"];
+                }
+
+                // Apply styling
+                canvas.style.display = "block";
+                canvas.style.margin = "auto";
+
+                // Draw image onto Canvas
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                // Append canvas to figure output area
+                figureElement.appendChild(canvas);
+
+            });
+
+            if (options['fig-cap']) {
+                // Create figcaption element
+                const figcaptionElement = document.createElement('figcaption');
+                figcaptionElement.innerText = options['fig-cap'];
+                // Append figcaption to figure
+                figureElement.appendChild(figcaptionElement);
+            }
+
+            elements.outputGraphDiv.appendChild(figureElement);
+
+        }
+
+        // Display the pager data
+        if (pager.length > 0) {
+            // Use the `pre` element to preserve whitespace.
+            pager.forEach((paged_data, index) => {
+                const pre_pager = document.createElement("pre");
+                pre_pager.innerText = paged_data;
+                pre_pager.classList.add("qwebr-output-code-pager");
+                pre_pager.setAttribute("id", `qwebr-output-code-pager-editor-${elements.id}-result-${index + 1}`);
+                elements.outputCodeDiv.appendChild(pre_pager);
+            });
+        }
+
+        // Display the browse data
+        if (browse.length > 0) {
+            // Use the `pre` element to preserve whitespace.
+            browse.forEach((browse_data, index) => {
+                const iframe_browse = document.createElement('iframe');
+                iframe_browse.classList.add("qwebr-output-code-browse");
+                iframe_browse.setAttribute("id", `qwebr-output-code-browse-editor-${elements.id}-result-${index + 1}`);
+                iframe_browse.style.width = "100%";
+                iframe_browse.style.minHeight = "500px";
+                elements.outputCodeDiv.appendChild(iframe_browse);
+
+                iframe_browse.contentWindow.document.open();
+                iframe_browse.contentWindow.document.write(browse_data);
+                iframe_browse.contentWindow.document.close();
+            });
+        }
+    } finally {
+        // Clean up the remaining code
+        mainWebRCodeShelter.purge();
+    }
+};
+
+// Function to execute the code (accepts code as an argument)
+globalThis.qwebrExecuteCode = async function (
+    codeToRun,
+    id,
+    options = {}) {
+
+    // If options are not passed, we fall back on the bare minimum to handle the computation
+    if (qwebrIsObjectEmpty(options)) {
+        options = {
+            "context": "interactive",
+            "fig-width": 7, "fig-height": 5,
+            "out-width": "700px", "out-height": "",
+            "dpi": 72,
+            "results": "markup",
+            "warning": "true", "message": "true",
+        };
+    }
+
+    // Next, we access the compute areas values
+    const elements = {
+        runButton: document.getElementById(`qwebr-button-run-${id}`),
+        outputCodeDiv: document.getElementById(`qwebr-output-code-area-${id}`),
+        outputGraphDiv: document.getElementById(`qwebr-output-graph-area-${id}`),
+        id: id,
+    }
+
+    // Disallowing execution of other code cells
+    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+        btn.disabled = true;
+    });
+
+    if (options.context == EvalTypes.Interactive) {
+        // Emphasize the active code cell
+        elements.runButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin qwebr-icon-status-spinner"></i> <span>Run Code</span>';
+    }
+
+    // Evaluate the code and parse the output into the document
+    await qwebrComputeEngine(codeToRun, elements, options);
+
+    // Switch to allowing execution of code
+    document.querySelectorAll(".qwebr-button-run").forEach((btn) => {
+        btn.disabled = false;
+    });
+
+    if (options.context == EvalTypes.Interactive) {
+        // Revert to the initial code cell state
+        elements.runButton.innerHTML = '<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>';
+    }
+}
+
+</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#a-qué-es-una-fila" id="toc-a-qué-es-una-fila" class="nav-link active" data-scroll-target="#a-qué-es-una-fila"><span class="header-section-number">1</span> a) ¿Qué es una fila?</a></li>
+  <li><a href="#b-el-target" id="toc-b-el-target" class="nav-link" data-scroll-target="#b-el-target"><span class="header-section-number">2</span> b) El target</a></li>
+  <li><a href="#c-mediana-frente-a-media" id="toc-c-mediana-frente-a-media" class="nav-link" data-scroll-target="#c-mediana-frente-a-media"><span class="header-section-number">3</span> c) Mediana frente a media</a></li>
+  <li><a href="#d-quiénes-cierran-más" id="toc-d-quiénes-cierran-más" class="nav-link" data-scroll-target="#d-quiénes-cierran-más"><span class="header-section-number">4</span> d) ¿Quiénes cierran más?</a></li>
+  <li><a href="#e-un-gráfico-plano-también-es-un-hallazgo" id="toc-e-un-gráfico-plano-también-es-un-hallazgo" class="nav-link" data-scroll-target="#e-un-gráfico-plano-también-es-un-hallazgo"><span class="header-section-number">5</span> e) Un gráfico plano también es un hallazgo</a></li>
+  <li><a href="#f-la-fuga" id="toc-f-la-fuga" class="nav-link" data-scroll-target="#f-la-fuga"><span class="header-section-number">6</span> f) La fuga</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs/loader.js"></script>
+<script type="module" id="qwebr-monaco-editor-init">
+
+  // Configure the Monaco Editor's loader
+  require.config({
+    paths: {
+      'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.47.0/min/vs'
+    }
+  });
+</script>
+<script type="module">
+// Function to update Monaco Editors when body class changes
+function updateMonacoEditorsOnBodyClassChange() {
+    // Select the body element
+    const body = document.querySelector('body');
+
+    // Options for the observer (which mutations to observe)
+    const observerOptions = {
+        attributes: true,  // Observe changes to attributes
+        attributeFilter: ['class'] // Only observe changes to the 'class' attribute
+    };
+
+    // Callback function to execute when mutations are observed
+    const bodyClassChangeCallback = function(mutationsList, observer) {
+        for(let mutation of mutationsList) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                // Class attribute has changed
+                // Update all Monaco Editors on the page
+                updateMonacoEditorTheme();
+            }
+        }
+    };
+
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver(bodyClassChangeCallback);
+
+    // Start observing the target node for configured mutations
+    observer.observe(body, observerOptions);
+}
+
+// Function to update all instances of Monaco Editors on the page
+function updateMonacoEditorTheme() {
+    // Determine what VS Theme to use
+    const vsThemeToUse = document.body.classList.contains("quarto-dark") ? 'vs-dark' : 'vs' ;
+
+    // Iterate through all initialized Monaco Editors
+    qwebrEditorInstances.forEach( function(editorInstance) { 
+        editorInstance.updateOptions({ theme: vsThemeToUse }); 
+    });
+}
+
+// Call the function to start observing changes to body class
+updateMonacoEditorsOnBodyClassChange();
+</script>
+<script type="module">
+// Global array to store Monaco Editor instances
+globalThis.qwebrEditorInstances = [];
+
+function isValidCodeLineNumbers(stringCodeLineNumbers) {
+  // Regular expression to match valid input strings
+  const regex = /^(\d+(-\d+)?)(,\d+(-\d+)?)*$/;
+  return regex.test(stringCodeLineNumbers);
+}
+
+// Function that builds and registers a Monaco Editor instance    
+globalThis.qwebrCreateMonacoEditorInstance = function (cellData) {
+
+  const initialCode = cellData.code;
+  const qwebrCounter = cellData.id;
+  const qwebrOptions = cellData.options;
+
+  // Retrieve the previously created document elements
+  let runButton = document.getElementById(`qwebr-button-run-${qwebrCounter}`);
+  let resetButton = document.getElementById(`qwebr-button-reset-${qwebrCounter}`);
+  let copyButton = document.getElementById(`qwebr-button-copy-${qwebrCounter}`);
+  let editorDiv = document.getElementById(`qwebr-editor-${qwebrCounter}`);
+
+  // Load the Monaco Editor and create an instance
+  let editor;
+  require(['vs/editor/editor.main'], function () {
+    editor = monaco.editor.create(editorDiv, {
+      value: initialCode,
+      language: 'r',
+      theme: 'vs-light',
+      automaticLayout: true,           // Works wonderfully with RevealJS
+      scrollBeyondLastLine: false,
+      minimap: {
+        enabled: false
+      },
+      fontSize: qwebrScaledFontSize(editorDiv, qwebrOptions),         
+      renderLineHighlight: "none",      // Disable current line highlighting
+      hideCursorInOverviewRuler: true,  // Remove cursor indictor in right hand side scroll bar
+      readOnly: qwebrOptions['read-only'] ?? false,
+      quickSuggestions: qwebrOptions['editor-quick-suggestions'] ?? false,
+      wordWrap: (qwebrOptions['editor-word-wrap'] == 'true' ? "on" : "off")
+    });
+
+    // Store the official counter ID to be used in keyboard shortcuts
+    editor.__qwebrCounter = qwebrCounter;
+
+    // Store the official div container ID
+    editor.__qwebrEditorId = `qwebr-editor-${qwebrCounter}`;
+
+    // Store the initial code value and options
+    editor.__qwebrinitialCode = initialCode;
+    editor.__qwebrOptions = qwebrOptions;
+
+    // Set at the model level the preferred end of line (EOL) character to LF.
+    // This prevent `\r\n` from being given to the webR engine if the user is on Windows.
+    // See details in: https://github.com/coatless/quarto-webr/issues/94
+    // Associated error text: 
+    // Error: <text>:1:7 unexpected input
+
+    // Retrieve the underlying model
+    const model = editor.getModel();
+    // Set EOL for the model
+    model.setEOL(monaco.editor.EndOfLineSequence.LF);
+    
+    // Dynamically modify the height of the editor window if new lines are added.
+    let ignoreEvent = false;
+    const updateHeight = () => {
+      // Increment editor height by 2 to prevent vertical scroll bar from appearing
+      const contentHeight = editor.getContentHeight() + 2;
+
+      // Retrieve editor-max-height option
+      const maxEditorHeight = qwebrOptions['editor-max-height'];
+
+      // If editor-max-height is missing, allow infinite growth. Otherwise, threshold.
+      const editorHeight = !maxEditorHeight ?  contentHeight : Math.min(contentHeight, maxEditorHeight);
+
+      // We're avoiding a width change
+      //editorDiv.style.width = `${width}px`;
+      editorDiv.style.height = `${editorHeight}px`;
+      try {
+        ignoreEvent = true;
+
+        // The key to resizing is this call
+        editor.layout();
+      } finally {
+        ignoreEvent = false;
+      }
+    };
+
+    // Function to generate decorations to highlight lines
+    // in the editor based on input string.
+    function decoratorHighlightLines(codeLineNumbers) {
+      // Store the lines to be lighlight
+      let linesToHighlight = [];
+      
+      // Parse the codeLineNumbers string to get the line numbers to highlight
+      // First, split the string by commas
+      codeLineNumbers.split(',').forEach(part => {
+        // Check if we have a range of lines
+        if (part.includes('-')) {
+            // Handle range of lines (e.g., "6-8")
+            const [start, end] = part.split('-').map(Number);
+            for (let i = start; i <= end; i++) {
+                linesToHighlight.push(i);
+            }
+        } else {
+            // Handle single line (e.g., "7")
+            linesToHighlight.push(Number(part));
+        }
+      });
+  
+      // Create monaco decorations for the lines to highlight
+      const decorations = linesToHighlight.map(lineNumber => ({
+          range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+          options: {
+              isWholeLine: true,
+              className: 'qwebr-editor-highlight-line'
+          }
+      }));
+  
+      // Return decorations to be applied to the editor
+      return decorations;
+    }
+
+    // Ensure that the editor-code-line-numbers option is set and valid
+    // then apply styling
+    if (qwebrOptions['editor-code-line-numbers']) {
+      // Remove all whitespace from the string
+      const codeLineNumbers = qwebrOptions['editor-code-line-numbers'].replace(/\s/g,'');
+      // Check if the string is valid for line numbers, e.g., "1,3-5,7"
+      if (isValidCodeLineNumbers(codeLineNumbers)) {
+        // Apply the decorations to the editor
+        editor.createDecorationsCollection(decoratorHighlightLines(codeLineNumbers));
+      } else {
+        // Warn the user that the input is invalid
+        console.warn(`Invalid "editor-code-line-numbers" value in code cell ${qwebrOptions['label']}: ${codeLineNumbers}`);
+      }
+    }
+
+    // Helper function to check if selected text is empty
+    function isEmptyCodeText(selectedCodeText) {
+      return (selectedCodeText === null || selectedCodeText === undefined || selectedCodeText === "");
+    }
+
+    // Registry of keyboard shortcuts that should be re-added to each editor window
+    // when focus changes.
+    const addWebRKeyboardShortCutCommands = () => {
+      // Add a keydown event listener for Shift+Enter to run all code in cell
+      editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Enter, () => {
+
+        // Retrieve all text inside the editor
+        qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
+      });
+
+      // Add a keydown event listener for CMD/Ctrl+Enter to run selected code
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+
+        // Get the selected text from the editor
+        const selectedText = editor.getModel().getValueInRange(editor.getSelection());
+        // Check if no code is selected
+        if (isEmptyCodeText(selectedText)) {
+          // Obtain the current cursor position
+          let currentPosition = editor.getPosition();
+          // Retrieve the current line content
+          let currentLine = editor.getModel().getLineContent(currentPosition.lineNumber);
+
+          // Propose a new position to move the cursor to
+          let newPosition = new monaco.Position(currentPosition.lineNumber + 1, 1);
+
+          // Check if the new position is beyond the last line of the editor
+          if (newPosition.lineNumber > editor.getModel().getLineCount()) {
+            // Add a new line at the end of the editor
+            editor.executeEdits("addNewLine", [{
+            range: new monaco.Range(newPosition.lineNumber, 1, newPosition.lineNumber, 1),
+            text: "\n", 
+            forceMoveMarkers: true,
+            }]);
+          }
+          
+          // Run the entire line of code.
+          qwebrExecuteCode(currentLine, editor.__qwebrCounter, editor.__qwebrOptions);
+
+          // Move cursor to new position
+          editor.setPosition(newPosition);
+        } else {
+          // Code to run when Ctrl+Enter is pressed with selected code
+          qwebrExecuteCode(selectedText, editor.__qwebrCounter, editor.__qwebrOptions);
+        }
+      });
+    }
+
+    // Register an on focus event handler for when a code cell is selected to update
+    // what keyboard shortcut commands should work.
+    // This is a workaround to fix a regression that happened with multiple
+    // editor windows since Monaco 0.32.0 
+    // https://github.com/microsoft/monaco-editor/issues/2947
+    editor.onDidFocusEditorText(addWebRKeyboardShortCutCommands);
+
+    // Register an on change event for when new code is added to the editor window
+    editor.onDidContentSizeChange(updateHeight);
+
+    // Manually re-update height to account for the content we inserted into the call
+    updateHeight();
+
+    // Store the editor instance in the global dictionary
+    qwebrEditorInstances[editor.__qwebrCounter] = editor;
+
+  });
+
+  // Add a click event listener to the run button
+  runButton.onclick = function () {
+    qwebrExecuteCode(editor.getValue(), editor.__qwebrCounter, editor.__qwebrOptions);
+  };
+
+  // Add a click event listener to the reset button
+  copyButton.onclick = function () {
+    // Retrieve current code data
+    const data = editor.getValue();
+    
+    // Write code data onto the clipboard.
+    navigator.clipboard.writeText(data || "");
+  };
+  
+  // Add a click event listener to the copy button
+  resetButton.onclick = function () {
+    editor.setValue(editor.__qwebrinitialCode);
+  };
+  
+}
+</script>
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">El código de la semana 3</h1>
+<p class="subtitle lead">Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 3 · Práctica opcional</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout-key">
+<div class="callout-title">
+Qué es esta página
+</div>
+<p>El EDA de la semana 3, reproducido celda a celda sobre los 480 locales del estudio de locales: cada cifra sale aquí del código que la produce, y es la misma que trae el sobre sellado. La página es <strong>opcional</strong> —la teoría ya cuenta los seis hallazgos completos— y es, a la vez, <strong>la referencia del task 3</strong>: una cifra que reporte el agente no vale hasta que coincide con estas celdas o con el sobre. El panel <strong>Environment</strong>, en la esquina inferior derecha, muestra los objetos de R a medida que corres las celdas.</p>
+</div>
+<p><strong>Cómo se usa:</strong> corre las celdas de una en una, en orden, y lee cada salida antes de pasar a la siguiente; después cambia la variable, el tramo o el grupo y vuelve a correr: el código es corto a propósito. La primera celda corre sola cuando R termina de cargarse en el navegador —la primera visita tarda un poco—; si un botón no responde, espera unos segundos.</p>
+<div id="qwebr-insertion-location-1"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<section id="a-qué-es-una-fila" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="a-qué-es-una-fila"><span class="header-section-number">1</span> a) ¿Qué es una fila?</h2>
+<p>Antes de cualquier cifra: cuántas filas, cuántas columnas y qué representa cada fila. Si <code>id_local</code> no se repite, una fila es un local.</p>
+<div id="qwebr-insertion-location-2"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Hallazgo:</strong> 480 filas, 17 columnas, un local por fila y ningún identificador repetido. <strong>Por qué importa:</strong> toda tasa que calculemos es “de cada 100 locales”, no de cada 100 meses ni de cada 100 ciudades. Y no hay valores faltantes, así que ninguna decisión sobre imputar nos espera.</p>
+</section>
+<section id="b-el-target" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="b-el-target"><span class="header-section-number">2</span> b) El target</h2>
+<p>Lo que se quiere predecir se llama target, y hay dos: si el contrato sigue vigente a los tres años (<code>estado_3a</code>) y cuánto vende el arrendatario (<code>ventas_mes</code>, en millones de pesos al mes: la base del canon variable).</p>
+<div id="qwebr-insertion-location-3"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Hallazgo:</strong> uno de cada cinco arrendatarios cierra antes de los tres años (0.200, 96 de 480) y deja el local vacante; el arrendatario típico vende 95.0 millones al mes. <strong>Por qué importa:</strong> 0.200 es la regla ingenua contra la que se medirá cualquier modelo de la semana 4: decir “ningún arrendatario cierra” acierta el 80 % de las veces y no sirve para nada.</p>
+</section>
+<section id="c-mediana-frente-a-media" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="c-mediana-frente-a-media"><span class="header-section-number">3</span> c) Mediana frente a media</h2>
+<p>Las ventas tienen cola larga: unos pocos arrendatarios venden mucho más que el resto y arrastran el promedio hacia arriba. La <span class="term">mediana</span> (el local del medio, cuando se ordenan por ventas) no se deja arrastrar.</p>
+<div id="qwebr-insertion-location-4"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Hallazgo:</strong> la media es 100.7 y la mediana 95.0; el máximo (259.0) está a más del doble de la mediana. <strong>Por qué importa:</strong> si la junta escucha “un arrendatario vende 100 millones al mes”, espera más de lo que vende la mayoría: 271 de los 480 arrendatarios venden menos que la media. A la junta se le dice la mediana, y se le muestra la cola.</p>
+</section>
+<section id="d-quiénes-cierran-más" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="d-quiénes-cierran-más"><span class="header-section-number">4</span> d) ¿Quiénes cierran más?</h2>
+<p>La primera exploración por grupos. Se parte la base por una variable conocida antes de comprar y se compara la tasa de cierre, siempre con el conteo al lado: una tasa sobre diez locales no dice lo mismo que una sobre doscientos.</p>
+<div id="qwebr-insertion-location-5"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Hallazgo:</strong> en zona residencial cierra el 28.9 % de los arrendatarios (n = 142); en zona de oficinas, el 10.6 % (n = 123). Con seis o más competidores a 500 metros cierra el 29.3 % (n = 41); con dos o menos, el 16.5 % (n = 231). <strong>Por qué importa:</strong> la zona y la competencia se conocen antes de comprar un local en Barranquilla, y separan el riesgo de cierre en más de dieciocho puntos. Son candidatas a entrar al árbol de la semana 5.</p>
+</section>
+<section id="e-un-gráfico-plano-también-es-un-hallazgo" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="e-un-gráfico-plano-también-es-un-hallazgo"><span class="header-section-number">5</span> e) Un gráfico plano también es un hallazgo</h2>
+<p>Lo que “debería” importar no siempre importa. La ciudad es la primera variable que cualquiera miraría.</p>
+<div id="qwebr-insertion-location-6"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Hallazgo:</strong> la tasa de cierre por ciudad va de 0.180 (Cartagena) a 0.216 (Cali): 3.6 puntos de diferencia entre la más baja y la más alta, con la misma escala del gráfico anterior. <strong>Por qué importa:</strong> la ciudad, por sí sola, no explica el cierre; lo que importa es el local y su barrio. Para Barranquilla, que no está en el estudio, es una buena noticia con una advertencia: el perfil del local viaja entre ciudades; la ciudad misma no está en los datos.</p>
+</section>
+<section id="f-la-fuga" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="f-la-fuga"><span class="header-section-number">6</span> f) La fuga</h2>
+<p>Hay dos columnas que separan a los arrendatarios que cerraron de los que siguen abiertos mejor que cualquier otra. Antes de celebrarlas, mira el diccionario: su momento es “después de arrendar”.</p>
+<div id="qwebr-insertion-location-7"></div>
+<noscript>Please enable JavaScript to experience the dynamic code cell content on this page.</noscript>
+<p><strong>Hallazgo:</strong> con tres o más meses de mora en el canon cierra el 89.7 % de los arrendatarios (n = 97); con menos, el 2.3 % (n = 383). La calificación de Google también separa: 4.20 en los que siguen abiertos y 3.77 en los que cerraron. <strong>Por qué importa:</strong> ninguna de las dos sirve para un local que todavía no se compra. La mora se acumula <em>mientras</em> el contrato corre: el arrendatario que va a cerrar deja de pagar el canon meses antes; la variable no predice el cierre, lo acompaña. La calificación solo existe cuando el negocio ya tiene clientes. Para los tres locales candidatos de Barranquilla la mora es cero por definición y la calificación no existe.</p>
+<!-- ═══════════════════════════════════════════════════════════════
+     PANEL FLOTANTE ENVIRONMENT (webR)
+     Portado de las teorías 3 y 4 del curso BA (02_class/lectures/).
+     El CSS vive en styles.css, sección 8 (#env-panel, .env-item, .env-badge).
+     Solo funciona en páginas con celdas webR de coatless (qwebrInstance);
+     NO incluir en las prácticas de Quarto Live ni en páginas sin webR.
+     Se incluye con el shortcode "include" de Quarto al final de la teoría
+     (ver cualquier week-NN/theory con webR como ejemplo).
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="env-panel" class="collapsed">
+  <div id="env-header" onclick="toggleEnvPanel()">
+    <span id="env-header-left">📦 Environment</span>
+    <span id="env-header-right">
+      <button class="env-btn" id="env-refresh-btn" onclick="event.stopPropagation(); refreshEnv()" title="Actualizar">🔄</button>
+      <button class="env-btn" id="env-toggle-btn" title="Expandir o colapsar">▲</button>
+    </span>
+  </div>
+  <div id="env-status">Esperando a webR...</div>
+  <div id="env-body">
+    <div class="env-empty">Ejecuta una celda de código para ver aquí los objetos.</div>
+  </div>
+</div>
+
+<script type="module">
+/* ── Colapsar y expandir ── */
+window.toggleEnvPanel = function() {
+  const panel = document.getElementById('env-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  panel.classList.toggle('collapsed');
+  btn.innerHTML = panel.classList.contains('collapsed') ? '▲' : '▼';
+};
+
+/* ── Consultar el environment global de R ── */
+async function getEnvData() {
+  if (!globalThis.mainWebR) return [];
+  try {
+    const shelter = await new globalThis.mainWebR.Shelter();
+    const result  = await shelter.evalR(`
+      local({
+        objs <- ls(envir = .GlobalEnv)
+        objs <- objs[!startsWith(objs, ".")]
+        if (length(objs) == 0) return("")
+        info <- vapply(objs, function(nm) {
+          obj <- get(nm, envir = .GlobalEnv)
+          cls <- paste(class(obj), collapse = ", ")
+          len <- length(obj)
+          dm  <- if (!is.null(dim(obj))) paste(dim(obj), collapse = "x") else ""
+          prev <- tryCatch({
+            if (is.data.frame(obj)) {
+              paste(names(obj), collapse = ", ")
+            } else if (is.function(obj)) {
+              a <- names(formals(obj))
+              paste0("function(", paste(a, collapse = ", "), ")")
+            } else if (is.atomic(obj) && len <= 6) {
+              paste(format(obj, digits = 4), collapse = ", ")
+            } else if (is.atomic(obj) && len > 6) {
+              paste(c(format(head(obj, 5), digits = 4), "..."), collapse = ", ")
+            } else if (is.list(obj)) {
+              paste0("List of ", len)
+            } else { "" }
+          }, error = function(e) "")
+          paste(nm, cls, len, dm, prev, sep = "\\t")
+        }, character(1))
+        paste(info, collapse = "\\n")
+      })
+    `);
+    const raw = await result.toString();
+    shelter.purge();
+    if (!raw || raw === '') return [];
+    return raw.split('\n').map(line => {
+      const p = line.split('\t');
+      return { name: p[0], cls: p[1], len: p[2], dim: p[3], preview: p[4] || '' };
+    });
+  } catch (e) {
+    console.warn('Panel environment:', e);
+    return [];
+  }
+}
+
+/* ── Pintar la lista de objetos ── */
+function renderEnv(items) {
+  const body   = document.getElementById('env-body');
+  const status = document.getElementById('env-status');
+  if (items.length === 0) {
+    body.innerHTML = '<div class="env-empty">No hay objetos en el environment global.</div>';
+    status.textContent = '0 objetos';
+    return;
+  }
+  status.textContent = items.length + ' objeto' + (items.length > 1 ? 's' : '');
+  body.innerHTML = items.map(it => {
+    let meta = '<span class="env-badge">' + escHtml(it.cls) + '</span>';
+    if (it.dim) {
+      meta += it.dim.replace('x', ' obs. × ') + ' vars.';
+    } else {
+      meta += 'Length: ' + it.len;
+    }
+    let prev = it.preview ? '<div class="env-item-preview">' + escHtml(it.preview) + '</div>' : '';
+    return '<div class="env-item">' +
+           '  <div class="env-item-name">' + escHtml(it.name) + '</div>' +
+           '  <div class="env-item-meta">' + meta + '</div>' +
+           prev +
+           '</div>';
+  }).join('');
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+/* ── Actualizar el panel ── */
+async function updateEnvPanel() {
+  const items = await getEnvData();
+  renderEnv(items);
+}
+window.refreshEnv = function() {
+  const btn = document.getElementById('env-refresh-btn');
+  btn.style.animation = 'none';
+  void btn.offsetWidth;
+  updateEnvPanel();
+};
+
+/* ── Esperar a webR y conectar el gancho ── */
+async function init() {
+  /* Esperar a que exista la promesa de la extensión coatless */
+  while (!globalThis.qwebrInstance) {
+    await new Promise(r => setTimeout(r, 300));
+  }
+  await globalThis.qwebrInstance;
+  document.getElementById('env-status').textContent = 'webR listo. Esperando la primera ejecución...';
+
+  /* Esperar a que los botones Run estén habilitados (las celdas ocultas ya corrieron) */
+  await new Promise(resolve => {
+    const check = setInterval(() => {
+      const btns = document.querySelectorAll('.qwebr-button-run');
+      if (btns.length === 0 || Array.from(btns).some(b => !b.disabled)) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 400);
+  });
+
+  /* Tras cada ejecución de una celda (incluidas las autorun), refrescar */
+  const original = globalThis.qwebrComputeEngine;
+  globalThis.qwebrComputeEngine = async function(...args) {
+    const res = await original.apply(this, args);
+    setTimeout(updateEnvPanel, 150);
+    return res;
+  };
+
+  /* Expandir el panel y hacer el primer barrido */
+  const panel = document.getElementById('env-panel');
+  if (panel.classList.contains('collapsed')) {
+    toggleEnvPanel();
+  }
+  await updateEnvPanel();
+}
+
+init();
+</script>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script type="module">
+// Handle cell initialization initialization
+qwebrCellDetails.map(
+  (entry) => {
+    // Handle the creation of the element
+    qwebrCreateHTMLElement(entry);
+    // In the event of interactive, initialize the monaco editor
+    if (entry.options.context == EvalTypes.Interactive) {
+      qwebrCreateMonacoEditorInstance(entry);
+    }
+  }
+);
+
+// Identify non-interactive cells (in order)
+const filteredEntries = qwebrCellDetails.filter(entry => {
+  const contextOption = entry.options && entry.options.context;
+  return ['output', 'setup'].includes(contextOption) || (contextOption == "interactive" && entry.options && entry.options.autorun === 'true');
+});
+
+// Condition non-interactive cells to only be run after webR finishes its initialization.
+qwebrInstance.then(
+  async () => {
+    const nHiddenCells = filteredEntries.length;
+    var currentHiddenCell = 0;
+
+
+    // Modify button state
+    qwebrSetInteractiveButtonState(`🟡 Running hidden code cells ...`, false);
+
+    // Begin processing non-interactive sections
+    // Due to the iteration policy, we must use a for() loop.
+    // Otherwise, we would need to switch to using reduce with an empty
+    // starting promise
+    for (const entry of filteredEntries) {
+
+      // Determine cell being examined
+      currentHiddenCell = currentHiddenCell + 1;
+      const formattedMessage = `Evaluating hidden cell ${currentHiddenCell} out of ${nHiddenCells}`;
+
+      // Update the document status header
+      if (qwebrShowStartupMessage) {
+        qwebrUpdateStatusHeader(formattedMessage);
+      }
+
+      // Display the update in non-active areas
+      qwebrUpdateStatusMessage(formattedMessage);
+
+      // Extract details on the active cell
+      const evalType = entry.options.context;
+      const cellCode = entry.code;
+      const qwebrCounter = entry.id;
+
+      if (['output', 'setup'].includes(evalType)) {
+        // Disable further global status updates
+        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
+        activeContainer.classList.remove('qwebr-cell-needs-evaluation');
+        activeContainer.classList.add('qwebr-cell-evaluated');
+
+        // Update status on the code cell
+        const activeStatus = document.getElementById(`qwebr-status-text-${qwebrCounter}`);
+        activeStatus.innerText = " Evaluating hidden code cell...";
+        activeStatus.classList.remove('qwebr-cell-needs-evaluation');
+        activeStatus.classList.add('qwebr-cell-evaluated');
+      }
+
+      switch (evalType) {
+        case 'interactive':
+          // TODO: Make this more standardized.
+          // At the moment, we're overriding the interactive status update by pretending its
+          // output-like. 
+          const tempOptions = entry.options;
+          tempOptions["context"] = "output"
+          // Run the code in a non-interactive state that is geared to displaying output
+          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, tempOptions);
+          break;
+        case 'output':
+          // Run the code in a non-interactive state that is geared to displaying output
+          await qwebrExecuteCode(`${cellCode}`, qwebrCounter, entry.options);
+          break;
+        case 'setup':
+          const activeDiv = document.getElementById(`qwebr-noninteractive-setup-area-${qwebrCounter}`);
+
+          // Store code in history
+          qwebrLogCodeToHistory(cellCode, entry.options);
+
+          // Run the code in a non-interactive state with all output thrown away
+          await mainWebR.evalRVoid(`${cellCode}`);
+          break;
+        default: 
+          break; 
+      }
+
+      if (['output', 'setup'].includes(evalType)) {
+        // Disable further global status updates
+        const activeContainer = document.getElementById(`qwebr-non-interactive-loading-container-${qwebrCounter}`);
+        // Disable visibility
+        activeContainer.style.visibility = 'hidden';
+        activeContainer.style.display = 'none';
+      }
+    }
+  }
+).then(
+  () => {
+    // Release document status as ready
+
+    if (qwebrShowStartupMessage) {
+      qwebrStartupMessage.innerText = "🟢 Ready!"
+    }
+  
+    qwebrSetInteractiveButtonState(
+      `<i class="fa-solid fa-play qwebr-icon-run-code"></i> <span>Run Code</span>`, 
+      true
+    );  
+  }
+);
+</script>
+
+
+
+
+<script src="cocina_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

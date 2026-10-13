@@ -1,0 +1,358 @@
+---
+title: "El código de la semana 7"
+subtitle: "Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 7 · Práctica opcional"
+lang: es
+webr:
+  show-startup-message: false
+---
+
+::: {.callout-key}
+<div class="callout-title">Qué es esta página</div>
+El código de la semana 7 es opcional: estas celdas de R reproducen, con la plantilla de la gerencia financiera, las cifras del sobre — el VPN de A línea a línea, las cuatro alternativas en el escenario base, la tabla de robustez, los tramos de la administración, el equilibrio y el análisis de banda, el choque de vacancia y el Monte Carlo con su tornado. El panel Environment, abajo a la derecha, muestra los objetos cargados. La mesa de escenarios completa —la práctica recomendada de la semana— es [otra página](week-07.html).
+:::
+
+**Cómo se usa.** Ejecuta las celdas de una en una y en orden: la primera carga la plantilla de fondo (solo R base, así que tarda segundos) y cada salida tiene debajo su lectura. Cambia un número, vuelve a ejecutar y compara con la cifra del sobre: esa es toda la mecánica.
+
+# La plantilla en R
+
+La celda oculta de esta página carga la plantilla de la gerencia financiera (horizonte de 5 años, tasa 12 %, impuesto 30 % sobre la utilidad operativa positiva, la reventa del año 5 por el precio de compra), los tres locales candidatos con sus ventas base, los parámetros de la administración y de la opción de compra, las funciones `vpn`, `vpn_A`, `vpn_B`, `vpn_C`, `vpn_D`, `vpn_escenario` y `tabla_robustez`, y los escenarios de referencia: el mismo código que selló las cifras. La primera celda rehace la cuenta que [la teoría](../theory/week-07.html) muestra línea a línea (su sección 5); la segunda calcula las cuatro alternativas en el escenario base.
+
+```{webr-r}
+#| context: setup
+#| edit: false
+#| echo: false
+#| output: false
+## >>> datos en línea (los inserta input/_datos_en_linea_week07.R; no editar a mano)
+## La plantilla de VPN del curso (millones de pesos). Cinco años, flujos al final de cada año;
+## en el año 5 el local se vende por su precio de compra (supuesto conservador: sin valorización);
+## impuesto solo sobre la utilidad operativa positiva (si es negativa no hay impuesto ni crédito).
+## Generado por datasets/week-07/_generar_vpn_meridiano.R; no editar a mano.
+horizonte <- 5          # años
+tasa      <- 0.12       # tasa de descuento (por año)
+impuesto  <- 0.30       # sobre la utilidad operativa, cuando es positiva
+## A: comprar el primer local de Meridiano en Barranquilla y arrendarlo (ventas base del árbol de la
+## semana 6; el canon de mercado de cada local queda como referencia: el contrato de Meridiano ata el
+## canon a la operación, 10 % de las ventas mensuales del arrendatario)
+locales <- data.frame(local = c("local_1", "local_2", "local_3"), zona = c("oficinas", "mixta", "residencial"),
+                      ventas_base = c(147, 207.2, 63.3), banda_baja = c(124.4, 184.5, 40.6), banda_alta = c(169.7, 229.8, 85.9),
+                      canon_mercado = c(16.5, 27, 8))
+mae_arbol   <- 22.6     # el error del árbol de la semana 6: la banda es ventas_base +- 22.6 (extremos sellados en la semana 6)
+inversion_A <- 700      # precio de compra del local (incluye obra y escrituración)
+canon_pct   <- 0.10     # canon mensual = 10 % de las ventas del arrendatario
+egresos_mes <- 2.5      # predial, seguro y mantenimiento a cargo del propietario (millones al mes)
+reventa_A   <- 700      # en el año 5 el local se vende por su precio de compra (sin valorización)
+## B: la administración de inmuebles por tramos (hasta tres); cada propietario paga 80.000 pesos al mes
+inversion_tramo <- 150; nuevos_por_tramo <- c(1000, 750, 500)
+ingreso_propietario <- 0.08; margen_admin <- 0.25; retencion <- 0.70; fijos_tramo <- 2
+## C: arrendar un local con opción de compra durante seis meses, antes de decidir la compra
+costo_opcion <- 120
+
+anualidad <- function(tasa, horizonte = 5) sum(1 / (1 + tasa)^(1:horizonte))
+## el VPN de una inversión hoy, una serie de utilidades operativas anuales y una reventa al final
+vpn <- function(inversion, utilidad, tasa = 0.12, impuesto = 0.30, reventa = 0) {
+  flujo <- utilidad - impuesto * pmax(utilidad, 0)
+  -inversion + sum(flujo / (1 + tasa)^seq_along(utilidad)) + reventa / (1 + tasa)^length(utilidad)
+}
+## A: el canon es el 10 % de unas ventas mensuales que crecen (o caen) a la tasa `crecimiento`;
+## una vacancia de `meses_sin_canon` meses en el año `anio_vacancia` deja ese año sin canon esos
+## meses y el contrato nuevo rige desde entonces al nivel `canon_post` (1 = el canon pactado)
+vpn_A <- function(ventas_base, crecimiento = 0, canon = 0.10, egresos_mes = 2.5,
+                  meses_sin_canon = 0, anio_vacancia = 1, canon_post = 1,
+                  inversion = 700, reventa = 700, tasa = 0.12, impuesto = 0.30, horizonte = 5) {
+  ventas <- ventas_base * (1 + crecimiento)^(0:(horizonte - 1))
+  meses  <- rep(12, horizonte)                      # meses con canon en cada año
+  nivel  <- rep(1, horizonte)                       # nivel del canon frente al pactado
+  if (meses_sin_canon > 0) {
+    meses[anio_vacancia] <- 12 - meses_sin_canon
+    nivel[anio_vacancia:horizonte] <- canon_post
+  }
+  utilidad <- canon * ventas * meses * nivel - 12 * egresos_mes
+  vpn(inversion, utilidad, tasa, impuesto, reventa)
+}
+## B: k tramos comprados en el año 0; los propietarios comprados se retienen a la tasa `retencion`
+## cada año; sin reventa (B no compra inmuebles)
+vpn_B <- function(tramos = 2, factor_nuevos = 1, retencion = 0.70, margen_admin = 0.25, ingreso = 0.08, fijos_tramo = 2,
+                  inversion_tramo = 150, nuevos = c(1000, 750, 500), tasa = 0.12, impuesto = 0.30, horizonte = 5) {
+  if (tramos < 1) return(0)
+  comprados <- sum(nuevos[1:tramos]) * factor_nuevos
+  vigentes  <- comprados * retencion^(0:(horizonte - 1))
+  utilidad  <- 12 * (vigentes * ingreso * margen_admin - fijos_tramo * tramos)
+  vpn(inversion_tramo * tramos, utilidad, tasa, impuesto)
+}
+## C: la opción cuesta `costo` hoy; en el año 1 se compra A solo si su VPN en ese escenario es positivo
+vpn_C <- function(vpn_A_escenario, costo = 120, tasa = 0.12) -costo + max(0, vpn_A_escenario) / (1 + tasa)
+vpn_D <- function() 0
+## las cuatro alternativas con los parámetros de un escenario (una fila de escenarios_referencia)
+vpn_escenario <- function(e, local = 1, tramos = 2) {
+  A <- vpn_A(locales$ventas_base[local], e$crecimiento, e$canon_pct, e$egresos_mes, tasa = e$tasa)
+  B <- vpn_B(tramos, e$factor_nuevos, e$retencion, e$margen_admin, tasa = e$tasa)
+  c(A = A, B = B, C = vpn_C(A, tasa = e$tasa), D = 0)
+}
+## la tabla de robustez: VPN por alternativa y escenario, ganador, peor caso y arrepentimiento máximo
+tabla_robustez <- function(escenarios, local = 1, tramos = 2) {
+  M <- sapply(seq_len(nrow(escenarios)), function(i) vpn_escenario(escenarios[i, ], local, tramos))
+  colnames(M) <- escenarios$nombre
+  arrepentimiento <- sweep(-M, 2, apply(M, 2, max), "+")     # el mejor VPN del escenario menos el de la alternativa
+  list(vpn = round(M, 1), ganador = rownames(M)[apply(M, 2, which.max)], peor = round(apply(M, 1, min), 1),
+       arrepentimiento = round(arrepentimiento, 1), arrepentimiento_max = round(apply(arrepentimiento, 1, max), 1))
+}
+## el escenario base y los cuatro de referencia. Eje 1, la demanda de espacio comercial (columna
+## `demanda`: crece o se estanca); eje 2, los costos del propietario y la tasa (columna `costos`:
+## estables o suben; cuando suben, los egresos aumentan 20 %, la tasa pasa a 14 % y el canon se
+## renegocia al 9 % de las ventas)
+escenarios_referencia <- data.frame(
+  escenario = c("base", "E1", "E2", "E3", "E4"),
+  nombre    = c("Base", "Expansión", "Expansión con costos", "Contracción", "Estancamiento"),
+  demanda   = c("sin ajuste", "crece", "crece", "se estanca", "se estanca"),
+  costos    = c("sin ajuste", "estables", "suben", "suben", "estables"),
+  crecimiento = c(0, 0.04, 0.04, -0.03, -0.03), canon_pct = c(0.10, 0.10, 0.09, 0.09, 0.10),
+  egresos_mes = c(2.5, 2.5, 3.0, 3.0, 2.5), margen_admin = c(0.25, 0.25, 0.20, 0.20, 0.25),
+  factor_nuevos = c(1, 1, 1, 0.75, 0.75), retencion = c(0.70, 0.70, 0.70, 0.65, 0.65),
+  tasa = c(0.12, 0.12, 0.14, 0.14, 0.12),
+  stringsAsFactors = FALSE)
+referencia <- escenarios_referencia[escenarios_referencia$escenario != "base", ]
+## <<< fin de los datos en línea
+```
+
+## El VPN de A con el local 1, línea a línea
+
+```{webr-r}
+#| autorun: true
+## El VPN de A con el local 1, línea a línea (escenario base)
+## el canon: 10 % de las ventas mensuales del arrendatario, por doce meses
+canon_anual        <- 12 * canon_pct * 147.0
+## predial, seguro y mantenimiento a cargo del propietario
+egresos_anuales    <- 12 * egresos_mes
+utilidad           <- canon_anual - egresos_anuales
+impuesto_anual     <- impuesto * max(utilidad, 0)
+flujo              <- utilidad - impuesto_anual
+factor             <- anualidad(tasa)             # 1/1.12 + 1/1.12^2 + ... + 1/1.12^5
+valor_presente     <- flujo * factor
+## en el año 5 el local se vende por su precio de compra (sin valorización)
+reventa_descontada <- reventa_A / (1 + tasa)^horizonte
+vpn_local_1        <- -inversion_A + valor_presente + reventa_descontada
+## la cuenta completa, cada cifra con su nombre
+round(c(canon_anual = canon_anual, egresos_anuales = egresos_anuales,
+        utilidad_operativa = utilidad, impuesto = impuesto_anual, flujo = flujo,
+        factor_anualidad = factor, valor_presente_flujos = valor_presente,
+        reventa_descontada = reventa_descontada, inversion = inversion_A,
+        vpn = vpn_local_1), 1)
+```
+
+La cuenta termina en **66.6**: positivo, no holgado. Dos lecturas quedan a la vista: la reventa descontada (397.2) es más de la mitad del valor de A, y el flujo anual (102.5) supera por poco el costo financiero del capital (700 × 0.12 = 84). Por eso el equilibrio, más abajo, queda tan cerca de la predicción del árbol.
+
+## Las cuatro alternativas en el escenario base
+
+```{webr-r}
+## Las cuatro alternativas en el escenario base
+## A: comprar el local y arrendarlo, con las ventas base de cada local candidato
+A <- sapply(locales$ventas_base, vpn_A)
+cat("VPN de A con cada local (millones):", round(A, 1), "\n")
+
+## B: la administración de inmuebles con uno, dos y tres tramos
+B <- sapply(1:3, vpn_B)
+cat("VPN de B por tramos (millones):", round(B, 1), "\n")
+
+## C: pagar la opción hoy y comprar en el año 1 solo si A con el local 1 resulta positiva
+C_opcion  <- vpn_C(A[1])
+## D: esperar no cuesta ni rinde
+D_esperar <- vpn_D()
+
+## las ocho cifras del escenario base, juntas
+vpn_base <- c(A_local_1 = A[1], A_local_2 = A[2], A_local_3 = A[3],
+              B_1_tramo = B[1], B_2_tramos = B[2], B_3_tramos = B[3],
+              C_opcion = C_opcion, D_esperar = D_esperar)
+round(vpn_base, 1)
+```
+
+**Qué significa.** En el base, B con dos tramos (212.1) supera a B con uno (151.3), y el tercer tramo resta valor (182.5: los últimos quinientos propietarios cuestan 300.000 pesos cada uno y no se pagan en cinco años). A con el local 1 vale 66.6; con el local 2 valdría 248.9, pero ese número lleva asterisco doble (canon de mercado de 27 fuera del rango del estudio y la hoja más alta del árbol, de diez locales) y la calidad de su venta base es baja; con el local 3, −186.8: un canon del 10 % sobre 63.3 de ventas no paga 700 de inversión. C vale −60.5: se pagan 120 por una opción que, con las ventas base, vale 59.5. D vale 0. El orden del base es **B (2 tramos) > B (1 tramo) > A local 1 > D > C.** Pero eso es un solo futuro.
+
+# La tabla de robustez
+
+La tabla de referencia: A con el local 1 y B con dos tramos en los cuatro escenarios. De ella salen el ganador por columna, el peor caso por fila y el arrepentimiento máximo; la alternativa robusta es la del menor arrepentimiento máximo.
+
+```{webr-r}
+## La tabla de robustez de referencia: A con el local 1 y B con dos tramos en los cuatro escenarios
+referencia[, c("escenario", "nombre", "crecimiento", "canon_pct",
+               "egresos_mes", "margen_admin", "factor_nuevos", "retencion", "tasa")]
+tabla <- tabla_robustez(referencia, local = 1, tramos = 2)
+tabla$vpn                    # VPN por alternativa (filas) y escenario (columnas)
+tabla$ganador                # quién gana en cada escenario
+tabla$peor                   # el peor VPN de cada alternativa
+tabla$arrepentimiento        # lo que cada alternativa deja de ganar frente a la mejor del escenario
+tabla$arrepentimiento_max    # la robusta es la del menor arrepentimiento máximo
+```
+
+**Qué significa.** B gana en Expansión y en Expansión con costos; D gana en Contracción, donde nada rinde; y A gana en Estancamiento, porque con costos estables el canon cubre los egresos y la reventa del año 5 sostiene el valor del local. A pierde solo en dos escenarios y nunca más de 60.8 (la reventa acota la pérdida), pero en Expansión deja de ganar 112.7 frente a B. Los arrepentimientos máximos: A 112.7, **B 77.5**, C 243.3, D 212.1. La robusta es B.
+
+## ¿Cuántos tramos?
+
+Una pregunta que la tabla también responde: el número óptimo de tramos de B depende del escenario, y por eso el task pide decirlo. Como el eje 2 también mueve la tasa, la cuenta de cada escenario usa la suya.
+
+```{webr-r}
+## ¿Cuántos tramos? El VPN de la administración con 1, 2 y 3 tramos en cada escenario de referencia
+## la cuenta de un escenario: vpn_B con los supuestos de la fila i de la referencia
+vpn_admin_escenario <- function(i) {
+  sapply(1:3, vpn_B, factor_nuevos = referencia$factor_nuevos[i],
+         retencion = referencia$retencion[i], margen_admin = referencia$margen_admin[i],
+         tasa = referencia$tasa[i])
+}
+
+## primero un solo escenario, para ver la cuenta: Expansión (la fila 1)
+admin_expansion <- vpn_admin_escenario(1)
+cat("La administración en Expansión, 1 a 3 tramos (millones):", round(admin_expansion, 1), "\n")
+
+## ahora los cuatro: una fila por número de tramos, una columna por escenario
+tramos <- sapply(1:4, vpn_admin_escenario)
+dimnames(tramos) <- list(c("1 tramo", "2 tramos", "3 tramos"), referencia$nombre)
+round(tramos, 1)
+```
+
+En Expansión el óptimo es dos tramos; en Expansión con costos, dos por un margen mínimo (72.5 frente a 71.1); en Estancamiento, uno (39.9 frente a 17.1: el segundo no se paga); en Contracción, ninguno. El tercer tramo no se paga en ningún escenario.
+
+# El equilibrio y el análisis de banda
+
+Con la reventa del año 5 al precio de compra, el equilibrio de A es exacto: el VPN es cero cuando el flujo después de impuestos iguala el costo financiero anual del capital (700 × 0.12 = 84). La banda calcula A, C y D con las ventas del local 1 en la banda baja, base y alta de la semana 6; C se calcula como lo que es: pagar 120 hoy y comprar en el año 1 solo si las ventas observadas lo justifican.
+
+```{webr-r}
+## El equilibrio: las ventas mensuales con las que el VPN de A es exactamente cero
+## flujo requerido = inversion x tasa; utilidad requerida = flujo / (1 - impuesto);
+## ventas de equilibrio = (utilidad requerida + egresos anuales) / canon anual por millón vendido
+ventas_equilibrio <- (inversion_A * tasa / (1 - impuesto) + 12 * egresos_mes) / (12 * canon_pct)
+round(c(ventas_equilibrio = ventas_equilibrio,
+        vpn_en_el_equilibrio = vpn_A(ventas_equilibrio),
+        margen_frente_al_arbol = locales$ventas_base[1] - ventas_equilibrio,
+        mae_del_arbol = mae_arbol), 1)
+
+## la banda: A, C y D con las ventas del local 1 en la banda baja, base y alta
+ventas <- c(baja = locales$banda_baja[1],
+            base = locales$ventas_base[1],
+            alta = locales$banda_alta[1])
+A <- sapply(ventas, vpn_A)
+C_banda <- sapply(A, vpn_C)
+banda <- rbind(A = A, C = C_banda, D = 0)
+round(banda, 1)
+```
+
+**Qué significa.** El equilibrio está en 125.0 y el árbol predice 147.0: un margen de 22.0, casi exactamente el error promedio del árbol (22.6). Por eso el signo de A depende del error de la semana 6 (−1.8 en la banda baja, 135.4 en la alta), pero la reventa acota la pérdida: el peor caso ya no es profundo. Y eso deja a **C dominada por A en toda la banda** (−120.0, −60.5 y 0.9 contra −1.8, 66.6 y 135.4): pagar 120 por esperar un año protege contra una pérdida máxima de 1.8. El valor de la información se calcula contra la plantilla, y aquí la opción no vale lo que cuesta.
+
+# El choque de la sesión: la vacancia
+
+El choque mueve el contrato, no la demanda: el arrendatario sale al inicio del año 1, el local pasa 8 meses sin canon (los egresos siguen corriendo), el contrato nuevo queda 10 % por debajo y la tasa sube a 14 %. Cambia `meses_vacancia`, `canon_nuevo` o `tasa_nueva`, ejecuta, y mira qué recomendaciones sobreviven.
+
+```{webr-r}
+## El choque de la sesión. Cambia estos tres supuestos y vuelve a ejecutar:
+## ¿qué recomendaciones sobreviven?
+meses_vacancia <- 8        # meses sin canon en el año 1 (el base: 0)
+canon_nuevo    <- 0.90     # el contrato nuevo, como fracción del pactado (el base: 1)
+tasa_nueva     <- 0.14     # la tasa de descuento (el base: 0.12)
+
+## A con cada local: la vacancia y la tasa golpean al propietario
+A <- sapply(locales$ventas_base, vpn_A, meses_sin_canon = meses_vacancia,
+            canon_post = canon_nuevo, tasa = tasa_nueva)
+cat("VPN de A con el choque, por local (millones):", round(A, 1), "\n")
+
+## B por tramos: la administración no depende de ningún local; solo la toca la tasa
+B <- sapply(1:3, vpn_B, tasa = tasa_nueva)
+cat("VPN de B con el choque, por tramos (millones):", round(B, 1), "\n")
+
+## C depende de A con el local 1; D sigue valiendo cero
+C_choque <- vpn_C(A[1], tasa = tasa_nueva)
+
+## el cuadro completo del choque
+choque <- c("A local 1" = A[1], "A local 2" = A[2], "A local 3" = A[3],
+            "B 1 tramo" = B[1], "B 2 tramos" = B[2], "B 3 tramos" = B[3],
+            "C opcion" = C_choque, "D esperar" = 0)
+round(choque, 1)
+
+## las piezas por separado, con el local 1: ¿qué parte del golpe pone cada supuesto?
+por_partes <- c(solo_vacancia = vpn_A(147, meses_sin_canon = 8, canon_post = 0.90),
+                solo_tasa     = vpn_A(147, tasa = 0.14),
+                los_dos       = A[1])
+round(por_partes, 1)
+```
+
+Con la vacancia y la tasa, A con el local 1 pasa de 66.6 a −92.0 (la vacancia sola la deja en −44.0; la tasa sola, en 15.4: lo que cambia el signo es el contrato, no la tasa), el local 2 cae a 37.6 y B con dos tramos sigue en 194.5. Sobreviven B y D; A y C no. Una recomendación que no sobrevive este choque era una apuesta a que el arrendatario se quedaba.
+
+# El Monte Carlo y el tornado
+
+Deja los supuestos del base y ponles ruido: mil corridas que sortean las ventas base alrededor de 147 (con la desviación del error del árbol), el crecimiento entre −3 % y +4 %, el canon entre 9 % y 11 %, una vacancia de seis meses que ocurre con probabilidad de entre 10 % y 30 % (si ocurre, cae en un año sorteado de 1 a 5), la retención entre 62 % y 75 % y el factor de propietarios entre 0.75 y 1.10. Cambia `n_corridas` y vuelve a ejecutar; con 1.000 corridas y la semilla 7, el sorteo reproduce el sobre.
+
+```{webr-r}
+## Opcional: ponerle ruido a los supuestos. Cambia n_corridas y vuelve a ejecutar
+n_corridas <- 1000
+set.seed(7)      # la semilla fija el sorteo: las mismas corridas en cada ejecución
+
+## el sorteo: n_corridas valores de cada supuesto, dentro de su rango del libro de supuestos
+sorteo <- data.frame(ventas_base   = rnorm(n_corridas, 147, 28),
+                     crecimiento   = runif(n_corridas, -0.03, 0.04),
+                     canon         = runif(n_corridas, 0.09, 0.11),
+                     p_vacancia    = runif(n_corridas, 0.10, 0.30),
+                     retencion     = runif(n_corridas, 0.62, 0.75),
+                     factor_nuevos = runif(n_corridas, 0.75, 1.10))
+## ¿hay una vacancia de seis meses en los cinco años? y, si la hay, ¿en qué año cae?
+hay_vacancia <- rbinom(n_corridas, 1, sorteo$p_vacancia)
+anio_vac     <- sample(1:5, n_corridas, replace = TRUE)
+
+## las tres primeras corridas, para ver qué se sorteó
+round(head(sorteo, 3), 3)
+
+## cada corrida pasa por la misma plantilla: el VPN de A (local 1) y el de B (dos tramos)
+vA <- mapply(function(v, g, c, oc, an) vpn_A(v, crecimiento = g, canon = c,
+                                             meses_sin_canon = if (oc == 1) 6 else 0,
+                                             anio_vacancia = an),
+             sorteo$ventas_base, sorteo$crecimiento, sorteo$canon, hay_vacancia, anio_vac)
+vB <- mapply(vpn_B, factor_nuevos = sorteo$factor_nuevos, retencion = sorteo$retencion,
+             MoreArgs = list(tramos = 2))
+cat("VPN de A en las tres primeras corridas (millones):", round(vA[1:3], 1), "\n")
+cat("fracción de corridas con una vacancia:", mean(hay_vacancia), "\n")
+
+## el resumen: los percentiles 10, 50 y 90 del VPN y la fracción de corridas con pérdida
+percentiles_A <- quantile(vA, c(0.1, 0.5, 0.9))
+percentiles_B <- quantile(vB, c(0.1, 0.5, 0.9))
+perdida_A <- mean(vA < 0)     # la fracción de corridas en que A pierde dinero
+perdida_B <- mean(vB < 0)
+resumen <- rbind(A_local_1  = c(percentiles_A, fraccion_con_perdida = perdida_A),
+                 B_2_tramos = c(percentiles_B, fraccion_con_perdida = perdida_B))
+round(resumen, 2)
+
+## el histograma de A: la masa a la izquierda del cero son las corridas con pérdida
+hist(vA, breaks = 30, col = "#5454e9", border = "white",
+     main = "VPN de A (local 1) en las corridas", xlab = "millones de pesos")
+abline(v = 0, lwd = 2)     # la línea del cero
+```
+
+```{webr-r}
+## El tornado: qué parámetro mueve más el VPN de A entre su mínimo y su máximo
+## (se mueve un parámetro a la vez; los demás quedan en el base)
+vpn_A_moviendo <- function(parametro, valor) {
+  argumentos <- list(ventas_base = 147)    # el base del local 1
+  argumentos[[parametro]] <- valor         # se reemplaza solo el parámetro que se mueve
+  do.call(vpn_A, argumentos)               # la misma plantilla de toda la página
+}
+
+## el recorrido de cada parámetro: de dónde a dónde se mueve
+## (las ventas, entre los percentiles 10 y 90 de su ruido: 147 ± 1.2816 × 28)
+z <- qnorm(0.90)
+rangos <- data.frame(parametro = c("ventas_base", "canon", "crecimiento", "meses_sin_canon"),
+                     minimo    = c(147 - z * 28, 0.09, -0.03, 0),
+                     maximo    = c(147 + z * 28, 0.11, 0.04, 6))
+rangos
+
+## el VPN de A con cada parámetro en su mínimo y en su máximo
+vpn_en_minimo <- mapply(vpn_A_moviendo, rangos$parametro, rangos$minimo)
+vpn_en_maximo <- mapply(vpn_A_moviendo, rangos$parametro, rangos$maximo)
+tornado <- rbind(minimo = vpn_en_minimo, maximo = vpn_en_maximo)
+
+## el recorrido del VPN: cuánto lo mueve cada parámetro entre sus dos extremos
+recorrido <- abs(tornado["maximo", ] - tornado["minimo", ])
+round(rbind(tornado, recorrido = recorrido), 1)
+
+## la lectura del tornado en una línea
+parametro_que_manda <- names(which.max(recorrido))
+cat("el parámetro que más mueve el VPN de A:", parametro_que_manda, "\n")
+```
+
+**Qué significa.** Con ese ruido, A pierde en el 25.4 % de las corridas (P10 −52.1, P50 56.9, P90 181.0; hay una vacancia en el 20.4 % de ellas) y B con dos tramos casi nunca (P10 62.5, P50 156.7, P90 251.8; pierde en el 0.1 %). El tornado dice qué parámetro manda: las ventas base mueven el VPN de A en 217.3 millones entre sus extremos; el canon, 89.0; el crecimiento, 55.8; la vacancia de hasta seis meses, 55.1. Lo que más pesa sigue siendo la estimación del árbol de la semana 6: por eso la banda acompaña la recomendación hasta el final, y el riesgo de vacancia, que no depende del árbol, se vigila con un disparador.
+
+{{< include ../../_includes/panel_entorno.qmd >}}

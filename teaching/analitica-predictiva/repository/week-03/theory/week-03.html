@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Programación agéntica: dirigir y verificar</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="week-03_files/libs/clipboard/clipboard.min.js"></script>
+<script src="week-03_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="week-03_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="week-03_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="week-03_files/libs/quarto-html/popper.min.js"></script>
+<script src="week-03_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="week-03_files/libs/quarto-html/anchor.min.js"></script>
+<link href="week-03_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="week-03_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="week-03_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="week-03_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="week-03_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#el-mecánico-por-teléfono" id="toc-el-mecánico-por-teléfono" class="nav-link active" data-scroll-target="#el-mecánico-por-teléfono">El mecánico por teléfono</a></li>
+  <li><a href="#qué-hay-dentro-del-agente" id="toc-qué-hay-dentro-del-agente" class="nav-link" data-scroll-target="#qué-hay-dentro-del-agente"><span class="header-section-number">1</span> Qué hay dentro del agente</a></li>
+  <li><a href="#chat-o-agente" id="toc-chat-o-agente" class="nav-link" data-scroll-target="#chat-o-agente"><span class="header-section-number">2</span> Chat o agente</a></li>
+  <li><a href="#el-bucle" id="toc-el-bucle" class="nav-link" data-scroll-target="#el-bucle"><span class="header-section-number">3</span> El bucle</a></li>
+  <li><a href="#el-encargo-las-reglas-del-proyecto" id="toc-el-encargo-las-reglas-del-proyecto" class="nav-link" data-scroll-target="#el-encargo-las-reglas-del-proyecto"><span class="header-section-number">4</span> El encargo: las reglas del proyecto</a></li>
+  <li><a href="#la-regla-de-oro-y-los-tres-frenos" id="toc-la-regla-de-oro-y-los-tres-frenos" class="nav-link" data-scroll-target="#la-regla-de-oro-y-los-tres-frenos"><span class="header-section-number">5</span> La regla de oro y los tres frenos</a></li>
+  <li><a href="#privacidad-analizar-sin-mirar" id="toc-privacidad-analizar-sin-mirar" class="nav-link" data-scroll-target="#privacidad-analizar-sin-mirar"><span class="header-section-number">6</span> Privacidad: analizar sin mirar</a></li>
+  <li><a href="#el-eda-con-pregunta-en-seis-pasos" id="toc-el-eda-con-pregunta-en-seis-pasos" class="nav-link" data-scroll-target="#el-eda-con-pregunta-en-seis-pasos"><span class="header-section-number">7</span> El EDA con pregunta, en seis pasos</a>
+  <ul class="collapse">
+  <li><a href="#a-qué-es-una-fila" id="toc-a-qué-es-una-fila" class="nav-link" data-scroll-target="#a-qué-es-una-fila"><span class="header-section-number">7.1</span> a) ¿Qué es una fila?</a></li>
+  <li><a href="#b-el-target" id="toc-b-el-target" class="nav-link" data-scroll-target="#b-el-target"><span class="header-section-number">7.2</span> b) El target</a></li>
+  <li><a href="#c-mediana-frente-a-media" id="toc-c-mediana-frente-a-media" class="nav-link" data-scroll-target="#c-mediana-frente-a-media"><span class="header-section-number">7.3</span> c) Mediana frente a media</a></li>
+  <li><a href="#d-quiénes-cierran-más" id="toc-d-quiénes-cierran-más" class="nav-link" data-scroll-target="#d-quiénes-cierran-más"><span class="header-section-number">7.4</span> d) ¿Quiénes cierran más?</a></li>
+  <li><a href="#e-un-gráfico-plano-también-es-un-hallazgo" id="toc-e-un-gráfico-plano-también-es-un-hallazgo" class="nav-link" data-scroll-target="#e-un-gráfico-plano-también-es-un-hallazgo"><span class="header-section-number">7.5</span> e) Un gráfico plano también es un hallazgo</a></li>
+  <li><a href="#f-la-fuga" id="toc-f-la-fuga" class="nav-link" data-scroll-target="#f-la-fuga"><span class="header-section-number">7.6</span> f) La fuga</a></li>
+  <li><a href="#esta-columna-sirve-para-evaluar-un-local-que-todavía-no-se-compra" id="toc-esta-columna-sirve-para-evaluar-un-local-que-todavía-no-se-compra" class="nav-link" data-scroll-target="#esta-columna-sirve-para-evaluar-un-local-que-todavía-no-se-compra"><span class="header-section-number">7.7</span> ¿Esta columna sirve para evaluar un local que todavía no se compra?</a></li>
+  <li><a href="#cómo-se-escribe-un-hallazgo" id="toc-cómo-se-escribe-un-hallazgo" class="nav-link" data-scroll-target="#cómo-se-escribe-un-hallazgo"><span class="header-section-number">7.8</span> Cómo se escribe un hallazgo</a></li>
+  </ul></li>
+  <li><a href="#y-esto-cómo-se-ve-en-tu-organización" id="toc-y-esto-cómo-se-ve-en-tu-organización" class="nav-link" data-scroll-target="#y-esto-cómo-se-ve-en-tu-organización"><span class="header-section-number">8</span> ¿Y esto cómo se ve en tu organización?</a></li>
+  <li><a href="#preguntas-de-comprensión" id="toc-preguntas-de-comprensión" class="nav-link" data-scroll-target="#preguntas-de-comprensión"><span class="header-section-number">9</span> Preguntas de comprensión</a></li>
+  <li><a href="#lectura-corta-opcional" id="toc-lectura-corta-opcional" class="nav-link" data-scroll-target="#lectura-corta-opcional"><span class="header-section-number">10</span> Lectura corta (opcional)</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Programación agéntica: dirigir y verificar</h1>
+<p class="subtitle lead">Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 3 · Teoría</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout-key">
+<div class="callout-title">
+La idea central
+</div>
+<p>Un agente de IA puede abrir la base, escribir el código, ejecutarlo y leer lo que salió; no puede calcular de memoria ni decidir qué pregunta importa. Esta semana se aprende a dirigirlo —qué encargarle y cómo frenarlo— y a verificar cada cifra antes de firmarla.</p>
+</div>
+<p><strong>Tiempo de estudio:</strong> 30 a 40 minutos. <strong>Lectura previa:</strong> <a href="llm.html"><em>Introducción a los LLMs</em></a> (unos 25 minutos): léela antes de esta página si nunca te has preguntado qué hay dentro de un asistente de IA. <strong>Qué necesitas:</strong> este navegador; en esta página no se corre código. Las partes interactivas (chat o agente, el bucle, las directivas, el momento de cada columna) están en la página; las celdas de R del EDA, reproducidas paso a paso, están en <a href="../practice/cocina.html">el código de la semana 3</a>, una práctica opcional.</p>
+<section id="el-mecánico-por-teléfono" class="level1 unnumbered">
+<h1 class="unnumbered">El mecánico por teléfono</h1>
+<p>El carro no arranca y llamas a un mecánico. Por teléfono, él solo sabe lo que tú le cuentas: “hace un ruido”, “se prendió una luz”. Te da instrucciones generales, tú las pruebas, le cuentas qué pasó y él vuelve a adivinar. Puede ser un mecánico excelente; está ciego.</p>
+<p>Ahora el mismo mecánico está en el taller, con el carro enfrente. Abre el capó, prueba, escucha el motor, cambia una pieza y vuelve a probar. No es más inteligente que por teléfono: tiene el carro.</p>
+<p>Esa es la diferencia entre un <span class="term">chat</span> y un <span class="term">agente</span>. Al chat le pegas diez filas y un mensaje de error, y te devuelve una sugerencia al aire. El agente trabaja dentro de la carpeta del proyecto: lee la base completa, escribe un script, lo ejecuta, mira la salida y corrige. Esta semana el carro es el estudio de locales, el estudio de mercado que la gerencia de inversión de Meridiano compró para evaluar la alternativa A: 480 locales comerciales comprados por gestoras inmobiliarias y arrendados a minoristas, en seis ciudades, con lo que le pasó a cada contrato a los tres años de la firma.</p>
+<p>Y hay una segunda idea, menos intuitiva: <strong>el agente no es calculadora</strong>. Para entender por qué —y por qué a veces afirma cifras que nadie calculó— hay que abrir la máquina un momento.</p>
+</section>
+<section id="qué-hay-dentro-del-agente" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Qué hay dentro del agente</h1>
+<p>Debajo de cualquier asistente de IA hay un <span class="term">modelo de lenguaje</span>: un programa entrenado con una porción enorme del texto que ha producido la humanidad, cuya única tarea es predecir la palabra siguiente, una y otra vez. Cuando le escribes, no busca la respuesta en ninguna parte: la <strong>construye por probabilidad</strong>, palabra a palabra, con los patrones que aprendió. Por eso siempre suena seguro: el texto más probable casi nunca suena dudoso.</p>
+<p>Ese motor no ve letras ni palabras: ve <span class="term">tokens</span>, pedazos de texto que trata como unidades. “Ferrocarril” no es para él una cadena de letras sino algo como <code>ferr</code> + <code>ocar</code> + <code>ril</code>, tres piezas opacas: por eso puede contar mal las erres, y por eso <strong>no es calculadora</strong>. Si le preguntas “¿cuál es la tasa de cierre?” sin que haya corrido nada, te dará un número plausible e inventado: predice qué cifra suena bien, no la calcula. Lo que sí hace bien es escribir el código que calcula y leer lo que salió. Dirigirlo es exigirle lo primero y prohibirle lo segundo.</p>
+<p>Su memoria de trabajo es la <span class="term">ventana de contexto</span>: todo lo que tiene presente en la conversación —tu encargo, los archivos que leyó, los errores de la terminal—. Es finita, como una encimera de cocina: lo que no cabe se cae y lo del medio se le pierde de vista. Por eso las reglas del proyecto que verás más abajo son cortas —cada línea consume atención— y por eso se le dan por escrito, en un archivo que relee al empezar, y no de memoria en el chat.</p>
+<p>Y cuando le falta información, el motor no se detiene: igual completa la frase con lo más plausible. Eso es una <span class="term">alucinación</span>, y es la razón de fondo del método de esta semana: al agente se le <strong>dirige</strong> —exigirle que escriba el código que calcula— y se le <strong>verifica</strong> —no firmar ninguna cifra que no hayas visto salir de una ejecución—.</p>
+<p>La versión completa de esta sección —con la calculadora de tokens, el mapa de significados de los embeddings y la encimera para llenar— está en la lectura previa: <a href="llm.html"><em>Introducción a los LLMs</em></a>.</p>
+</section>
+<section id="chat-o-agente" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Chat o agente</h1>
+<p>Un agente es un modelo de lenguaje con tres cosas más: acceso a la carpeta del proyecto (eso es su <span class="term">contexto</span>: los datos, el diccionario, las reglas, los errores de la terminal), la capacidad de ejecutar código, y un bucle que lo obliga a probar lo que escribe. Las herramientas cambian de nombre cada semestre (Claude Code, Codex, Gemini CLI, Copilot en modo agente, o el chat de claude.ai con la ejecución de código activada); el método es el mismo. Pulsa los dos botones y compara qué puede ver cada uno.</p>
+<div class="widget-card" id="wg-ciego">
+  <div class="widget-head">¿Qué puede ver cada uno? · Seis capacidades</div>
+  <div class="widget-body">
+    <div class="widget-instr">Las seis capacidades son las que hacen falta para explorar <code>estudio_locales.csv</code> sin pegarle nada a nadie. Pulsa cada botón.</div>
+    <div class="widget-row">
+      <button type="button" class="btn-widget" id="cg-chat">Chat en el navegador</button>
+      <button type="button" class="btn-widget btn-widget-ghost" id="cg-agente">Agente en el proyecto</button>
+    </div>
+    <ul class="cg-list" id="cg-list"></ul>
+    <div class="widget-note" id="cg-note"></div>
+  </div>
+</div>
+<style>
+  .cg-list { list-style: none; padding: 0; margin: 0.6em 0 0; }
+  .cg-list li { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-top: 1px solid var(--borde-suave); }
+  .cg-list li:first-child { border-top: none; }
+  .cg-ico { font-weight: 700; font-family: var(--font-mono); min-width: 1.4em; }
+  .cg-si .cg-ico { color: var(--exito-osc); }
+  .cg-no .cg-ico { color: var(--aviso-osc); }
+  .cg-no span:last-child { color: var(--tinta-suave); }
+</style>
+<script>
+(function () {
+  const CAPS = [
+    "Ve la carpeta del proyecto: el CSV, el diccionario y las reglas",
+    "Sabe qué versión de R o de Python hay y qué paquetes están instalados",
+    "Lee los 480 locales de estudio_locales.csv, no las diez filas que le pegaste",
+    "Ejecuta el código y observa el resultado verdadero",
+    "Lee el error completo en la terminal, sin que se lo copies",
+    "Corrige y vuelve a probar hasta que el script corre"
+  ];
+  const MODOS = {
+    chat: {
+      ok: [false, false, false, false, false, false],
+      nota: "El chat <b>solo conoce lo que le pegas en la ventana</b>. Da instrucciones al aire y no puede comprobar si funcionan: es el mecánico por teléfono. Lo que sí hace bien: ayudarte a formular la pregunta y a leer una salida que tú le pegues."
+    },
+    agente: {
+      ok: [true, true, true, true, true, true],
+      nota: "El agente trabaja <b>dentro de la carpeta del proyecto</b>: lee la base y el diccionario, escribe el script, lo corre, mira la salida y corrige. Es el mecánico en el taller. Lo que no cambia: sigue sin saber calcular de memoria y sigue sin saber qué pregunta importa."
+    }
+  };
+  const lista = document.getElementById("cg-list");
+  const nota = document.getElementById("cg-note");
+  const bChat = document.getElementById("cg-chat");
+  const bAg = document.getElementById("cg-agente");
+  function pintar(modo) {
+    const m = MODOS[modo];
+    lista.innerHTML = CAPS.map((c, i) => {
+      const si = m.ok[i];
+      return '<li class="' + (si ? "cg-si" : "cg-no") + '"><span class="cg-ico">' + (si ? "sí" : "no") + '</span><span>' + c + '</span></li>';
+    }).join("");
+    nota.innerHTML = m.nota;
+    bChat.classList.toggle("btn-widget-ghost", modo !== "chat");
+    bAg.classList.toggle("btn-widget-ghost", modo !== "agente");
+  }
+  bChat.addEventListener("click", () => pintar("chat"));
+  bAg.addEventListener("click", () => pintar("agente"));
+  pintar("chat");
+})();
+</script>
+<p>Dos cosas para fijar. Primera: la diferencia <strong>no es inteligencia, es contexto y manos</strong>. El mismo modelo que en el chat adivina, en el proyecto comprueba. Segunda: ninguna de las seis capacidades incluye “sabe qué pregunta le importa a la junta directiva de Meridiano”. Eso lo pones tú, y es lo que el task califica.</p>
+<div class="callout-key">
+<div class="callout-title">
+Lo que importa
+</div>
+<p>Un agente no reemplaza al analista: reemplaza el copiar y pegar. Lo que queda para ti es lo que siempre fue tuyo: la pregunta, el criterio sobre qué columnas valen, y la firma de cada cifra.</p>
+</div>
+</section>
+<section id="el-bucle" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> El bucle</h1>
+<p>Lo que convierte al modelo en agente es un ciclo de cuatro fases que se repite hasta que el código corre limpio: <span class="term">planear</span> (leer la carpeta y anunciar qué va a hacer), <span class="term">ejecutar</span> (correr el script en la terminal), <span class="term">observar</span> (leer la salida real, incluido el error) y <span class="term">corregir</span> (ajustar el código con esa información). Nadie copia ni pega nada en el medio. Es el <span class="term">bucle agéntico</span>.</p>
+<p>Míralo en cámara lenta, con un encargo real sobre el estudio de locales. Pulsa <strong>Siguiente paso</strong> nueve veces.</p>
+<div class="widget-card" id="wg-loop">
+  <div class="widget-head">El bucle, paso a paso · Un encargo sobre estudio_locales.csv</div>
+  <div class="widget-body">
+    <div class="loop-phases" id="loop-phases">
+      <span class="loop-chip" data-f="0">1 · Planear</span>
+      <span class="loop-chip" data-f="1">2 · Ejecutar</span>
+      <span class="loop-chip" data-f="2">3 · Observar</span>
+      <span class="loop-chip" data-f="3">4 · Corregir</span>
+      <span class="loop-chip" data-f="4">Listo</span>
+    </div>
+    <div class="sim-term" id="sim-term"></div>
+    <div class="sim-caption" id="sim-caption">Pulsa <b>Siguiente paso</b> para ver cómo trabaja el agente con un encargo real.</div>
+    <div class="widget-row" style="margin-top:.8em">
+      <button type="button" class="btn-widget" id="loop-next">Siguiente paso</button>
+      <button type="button" class="btn-widget btn-widget-ghost" id="loop-reset">Reiniciar</button>
+    </div>
+  </div>
+</div>
+<style>
+  .loop-phases { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 0.7em; }
+  .loop-chip { border: 1px solid var(--borde); border-radius: 999px; padding: 4px 12px; font-size: 0.85rem; color: var(--tinta-suave); background: var(--superficie); }
+  .loop-chip.active { background: var(--primario); color: #fff; border-color: var(--primario); font-weight: 700; }
+  .loop-chip.done { background: #eafaf1; color: var(--exito-osc); border-color: var(--exito); }
+  .sim-term { background: #1b1d29; color: #e7e8ee; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.5; padding: 14px 16px; border-radius: var(--r-md); min-height: 170px; max-height: 400px; overflow: auto; white-space: pre-wrap; }
+  .sim-term .t-cmd { color: #e4eb60; font-weight: 700; }
+  .sim-term .t-ai { color: #a9a9ff; font-weight: 700; }
+  .sim-term .t-note { color: #9a9ba0; }
+  .sim-term .t-err { color: #ff9f80; }
+  .sim-term .t-ok { color: #8be0aa; }
+  .sim-caption { margin-top: 0.7em; font-size: 0.95rem; color: var(--tinta-suave); }
+</style>
+<script>
+(function () {
+  const PASOS = [
+    { f: -1, add: '<span class="t-cmd">Tú › </span>Lee input/diccionario_estudio_locales.md y confirma qué es una fila\n     de estudio_locales.csv. Luego calcula la tasa de cierre a tres años.\n     Solo eso.\n',
+      cap: "Un encargo en español con una sola tarea. No le pegaste ni una fila: la base y el diccionario están en la carpeta." },
+    { f: 0, add: '<span class="t-ai">Agente › </span>Antes de escribir código reviso la carpeta.\n<span class="t-note">  ✓ Leí input/diccionario_estudio_locales.md: un local por fila,\n    480 filas, 17 columnas.\n  ✓ El diccionario marca dos columnas "después de arrendar": calificacion_google\n    y meses_atraso_arriendo. No las uso.</span>\n',
+      cap: "PLANEAR (1 de 2): junta contexto por su cuenta. Qué es una fila y qué columnas no se tocan salen del diccionario, no de su memoria." },
+    { f: 0, add: '<span class="t-ai">Agente › </span>Plan, en un script corto (scripts/01_tasa_cierre.R): leer el CSV,\n         comprobar que id_local no se repite y calcular la proporción de\n         locales cuyo arrendatario cerró antes de los tres años. Nada más.\n',
+      cap: "PLANEAR (2 de 2): anuncia el plan y lo limita a la tarea pedida. Un resultado, un script." },
+    { f: 1, add: '\n<span class="t-cmd">$ Rscript scripts/01_tasa_cierre.R</span>\n',
+      cap: "EJECUTAR: escribió el script y lo corre en la terminal, con el R que hay instalado en esa máquina." },
+    { f: 2, add: '<span class="t-ok">filas: 480   ids distintos: 480</span>\n<span class="t-err">[1] NA\nWarning message:\nIn mean.default(datos$estado_3a) :\n  argument is not numeric or logical: returning NA</span>\n',
+      cap: "OBSERVAR: el grano de la tabla se confirma (480 ids distintos: un local por fila), pero la tasa salió NA. En el método del chat, este aviso había que copiarlo y pegarlo a mano. El agente lo lee solo." },
+    { f: 3, add: '<span class="t-ai">Agente › </span>La columna estado_3a llegó como texto ("abierto" / "cerró"), no como\n         0/1, y mean() no promedia texto. Corrijo: cierre <- datos$estado_3a == "cerró"\n         y promedio ese indicador.\n<span class="t-note">  ✎ Editó scripts/01_tasa_cierre.R (líneas 6 a 8)</span>\n',
+      cap: "CORREGIR: usa el aviso como información, no como derrota. El diccionario ya decía que el target es texto; el código tiene que respetarlo." },
+    { f: 1, add: '\n<span class="t-cmd">$ Rscript scripts/01_tasa_cierre.R</span>\n',
+      cap: "EJECUTAR, segunda vuelta. El bucle se repite las veces que haga falta." },
+    { f: 2, add: '<span class="t-ok">filas: 480   ids distintos: 480\ncierres: 96   tasa_cierre: 0.200\n✓ output/01_tasa_cierre.txt escrito</span>\n',
+      cap: "OBSERVAR: ahora sí. La cifra existe porque el código corrió, no porque el modelo la recordara." },
+    { f: 4, add: '<span class="t-ai">Agente › </span>Listo. La tasa de cierre a tres años es 0.200 (96 de 480), de la salida\n         de scripts/01_tasa_cierre.R. No excluí filas: no hay ids repetidos ni\n         valores faltantes. Dejé fuera las dos columnas "después de arrendar".\n         ¿Sigo con la mediana de ventas o paro aquí?\n',
+      cap: "LISTO. Dice de dónde sale la cifra, qué revisó y qué dejó por fuera, y pregunta antes de seguir. Una cifra con trazabilidad: tiene script, salida y exclusiones explícitas." }
+  ];
+  const term = document.getElementById("sim-term");
+  const cap = document.getElementById("sim-caption");
+  const chips = document.querySelectorAll("#loop-phases .loop-chip");
+  const bNext = document.getElementById("loop-next");
+  let i = 0;
+  function pintar() {
+    let html = "";
+    for (let k = 0; k < i; k++) html += PASOS[k].add;
+    term.innerHTML = html || '<span class="t-note">— terminal vacía —</span>';
+    chips.forEach((c) => c.classList.remove("active", "done"));
+    if (i > 0) {
+      cap.innerHTML = "Paso " + i + " de " + PASOS.length + ". " + PASOS[i - 1].cap;
+      const f = PASOS[i - 1].f;
+      chips.forEach((c) => { if (parseInt(c.dataset.f, 10) === f) c.classList.add("active"); });
+      if (f === 4) chips.forEach((c) => { if (parseInt(c.dataset.f, 10) < 4) c.classList.add("done"); });
+    } else {
+      cap.innerHTML = "Pulsa <b>Siguiente paso</b> para ver cómo trabaja el agente con un encargo real.";
+    }
+    term.scrollTop = term.scrollHeight;
+    bNext.disabled = (i >= PASOS.length);
+    bNext.textContent = (i >= PASOS.length) ? "Fin del encargo" : "Siguiente paso";
+  }
+  bNext.addEventListener("click", () => { if (i < PASOS.length) { i++; pintar(); } });
+  document.getElementById("loop-reset").addEventListener("click", () => { i = 0; pintar(); });
+  pintar();
+})();
+</script>
+<p>Tres cosas para observar en la terminal:</p>
+<ol type="1">
+<li><strong>No le pegaste nada.</strong> Leyó el diccionario y la base por su cuenta, y confirmó el <span class="term">grano</span> de la tabla (qué es una fila: un local) antes de calcular. Esa es la primera pregunta de cualquier análisis, y el agente la respondió con un conteo, no con una suposición.</li>
+<li><strong>El primer intento falló y el error fue información.</strong> En el método del chat, ese aviso había que copiarlo y pegarlo a mano, sin poder comprobar la corrección. Aquí el agente lo leyó, entendió que el <span class="term">target</span> (<code>estado_3a</code>, lo que se quiere predecir) es texto, y corrigió.</li>
+<li><strong>La cifra final tiene fuente.</strong> 0.200 existe porque un script corrió; el agente dijo cuál, qué revisó y qué dejó por fuera. Y preguntó antes de seguir. Eso es lo que el task pide.</li>
+</ol>
+</section>
+<section id="el-encargo-las-reglas-del-proyecto" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> El encargo: las reglas del proyecto</h1>
+<p>Un agente obedece lo que encuentra en la carpeta. Por eso la primera salvaguardia no es un prompt: es un archivo de texto con las reglas del proyecto, que el agente lee al empezar cada sesión (en Claude Code se llama <code>CLAUDE.md</code>; en otras herramientas, <code>AGENTS.md</code> o un archivo de instrucciones; en este curso, <code>reglas_proyecto.md</code>, que viene dentro del skill <code>eda-con-agente</code>). Dos propiedades lo hacen funcionar: es <strong>corto</strong>, porque todo lo que pongas ahí consume la atención del modelo, y es <strong>verificable</strong>, porque una regla que no se puede comprobar es una regla que el agente interpreta a su manera.</p>
+<p>Las ocho reglas del proyecto de esta semana:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a># Reglas del proyecto · Estudio de locales (Meridiano)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>1. Responde y comenta el código en español, en frases cortas.</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>2. Escribe código sencillo y legible, en R o en Python. Si quien dirige</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>   no lo entiende, no sirve.</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>3. Haz solo la tarea que se te pide en cada prompt. No te adelantes a</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>   pasos siguientes ni agregues análisis que nadie pidió.</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>4. Cada resultado va en un script corto e independiente, numerado</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>   (01_..., 02_...), que corre completo de arriba abajo.</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>5. Los archivos de datos no se modifican nunca; toda tabla o gráfico</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>   nuevo se guarda en output/.</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>6. Nunca afirmes una cifra que no salga de una ejecución que acabas de</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>   correr, y di de qué script sale.</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>7. Antes de cualquier cálculo, lee diccionario_estudio_locales.md,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>   confirma qué es una fila y lista las columnas con momento "después</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>   de arrendar": no se usan como predictoras.</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>8. Si una decisión es discutible (qué hacer con faltantes, cómo partir</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>   tramos, qué filas excluir), pregunta antes de aplicarla.</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Fíjate en que ninguna regla pide virtudes (“sé cuidadoso”, “sé riguroso”). Todas dicen <strong>qué</strong> debe cumplirse, de forma que puedas revisar si se cumplió. A eso lo llamamos una <span class="term">directiva verificable</span>. Practica la diferencia con seis reglas candidatas para el proyecto de Meridiano:</p>
+<div class="widget-card" id="wg-directivas">
+  <div class="widget-head">¿Directiva verificable o vaga? · Seis reglas candidatas para el proyecto</div>
+  <div class="widget-body">
+    <div class="widget-instr">Una directiva es <b>verificable</b> si, al terminar, puedes comprobar en un minuto si el agente la cumplió. Si no puedes, es <b>vaga</b>, y el agente decidirá por ti.</div>
+    <div id="dir-items"></div>
+    <div class="quiz-score" id="dir-score"></div>
+  </div>
+</div>
+<script>
+(function () {
+  const OPC = ["Verificable", "Vaga"];
+  const ITEMS = [
+    { t: "\"Explora bien la base antes de modelar.\"", a: 1, fb: "¿Qué es \"bien\"? ¿Cuántas exploraciones, cuáles? El agente decidirá por ti, que es justo lo que quieres evitar. Verificable sería: \"Haz estas cuatro exploraciones, una por script, y nada más\"." },
+    { t: "\"Antes de cualquier cálculo, lee diccionario_estudio_locales.md y lista las columnas con momento 'después de arrendar'; no las uses como predictoras.\"", a: 0, fb: "Se comprueba en un minuto: o la lista aparece en la primera respuesta y ningún script usa esas columnas, o no." },
+    { t: "\"Sé riguroso con los valores atípicos.\"", a: 1, fb: "\"Riguroso\" significa algo distinto para cada persona y para cada modelo. Verificable sería: \"No elimines ningún local por sus ventas; si un valor te parece atípico, repórtalo con su id_local y pregunta\"." },
+    { t: "\"Nunca modifiques estudio_locales.csv; toda tabla o gráfico nuevo se guarda en output/.\"", a: 0, fb: "Prohibición absoluta y comprobable: basta mirar la fecha del archivo original y el contenido de output/." },
+    { t: "\"Ten en cuenta que la decisión es comprar un local en Barranquilla.\"", a: 1, fb: "Es la frase más importante del proyecto y, sin embargo, no hay forma de comprobar si el agente la \"tuvo en cuenta\". Verificable: \"Barranquilla no está en el estudio; cada vez que reportes una cifra por ciudad, dilo en la misma línea\"." },
+    { t: "\"Toda cifra que reportes va acompañada del nombre del script que la produjo.\"", a: 0, fb: "Concreta: cada número trae su fuente, y tú puedes abrir el script y volverlo a correr. Es la regla de oro convertida en directiva." }
+  ];
+  const cont = document.getElementById("dir-items");
+  let hechos = 0, aciertos = 0;
+  ITEMS.forEach((it, i) => {
+    const div = document.createElement("div"); div.className = "quiz-item";
+    const q = document.createElement("div"); q.className = "quiz-q"; q.textContent = (i + 1) + ". " + it.t; div.appendChild(q);
+    const opts = document.createElement("div"); opts.className = "quiz-opts";
+    const fb = document.createElement("div"); fb.className = "quiz-fb";
+    let listo = false;
+    OPC.forEach((o, j) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = o;
+      b.addEventListener("click", () => {
+        if (listo) return; listo = true; hechos++;
+        if (j === it.a) { b.classList.add("ok"); aciertos++; fb.textContent = "Correcto. " + it.fb; }
+        else { b.classList.add("bad"); opts.children[it.a].classList.add("ok"); fb.textContent = "Es " + OPC[it.a].toLowerCase() + ". " + it.fb; }
+        document.getElementById("dir-score").textContent = hechos === ITEMS.length ? ("Resultado: " + aciertos + " de " + ITEMS.length + ".") : ("Llevas " + hechos + " de " + ITEMS.length + ".");
+      });
+      opts.appendChild(b);
+    });
+    div.appendChild(opts); div.appendChild(fb); cont.appendChild(div);
+  });
+})();
+</script>
+<p>Qué cambió y qué significa: las tres directivas verificables se pueden auditar mirando la carpeta; las tres vagas trasladan la decisión al agente. Regla mental para escribir las tuyas: dile al agente <strong>qué</strong> debe cumplirse, no <strong>cómo</strong> debe ser.</p>
+<div class="callout-workflow">
+<div class="callout-title">
+La regla de la sesión: un prompt, una tarea, una ejecución, una mirada
+</div>
+<p>No le pides el análisis completo: le pides un paso, dejas que corra el código, lees la salida y solo entonces escribes el siguiente prompt. Quien dirige eres tú. El agente escribe rápido y se equivoca en silencio; tu trabajo es decidir qué se pregunta, mirar cada salida y no aceptar una cifra que no viste correr.</p>
+</div>
+</section>
+<section id="la-regla-de-oro-y-los-tres-frenos" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> La regla de oro y los tres frenos</h1>
+<p>Por avanzados que sean, estos modelos siguen siendo motores de lenguaje: estiman la palabra siguiente. Si le preguntas en el chat “¿cuál es la mediana de ventas?”, generará un número que parece razonable y que no salió de ningún cálculo. Es la <span class="term">alucinación numérica</span>: una cifra falsa envuelta en un lenguaje impecable, producida por el mismo mecanismo que inventa bibliografía.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="La regla de oro">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Advertencia</span>La regla de oro
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El agente <strong>escribe</strong> el código. La máquina <strong>calcula</strong>. El agente <strong>lee</strong> la salida y la <strong>reporta</strong> con su fuente. Si un número no salió de un script que corrió, ese número no existe.</p>
+</div>
+</div>
+<p>El bucle de la sección 3 encarna esta regla: la tasa de cierre no la “supo” el modelo; salió de <code>Rscript</code> sobre los 480 locales. Un agente bien dirigido ataca la raíz del problema: ninguna cifra se reporta sin ejecución. Y aun así el último control sigue siendo tuyo: en el task, cada cifra que entregues se compara con el sobre sellado, y en la sesión haremos esa comparación en vivo.</p>
+<p>Tres cosas salen mal con frecuencia, y para cada una hay un freno de una línea:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Si el agente…</th>
+<th>Cómo lo notas</th>
+<th>Escríbele</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>hace de más</strong>: pediste un paso y entregó el EDA completo, con un modelo de regalo</td>
+<td>Una respuesta larguísima, varios scripts, “además calculé…”</td>
+<td>“Hiciste más de lo que te pedí. Deja solo <em>la tarea</em> y borra el resto.”</td>
+</tr>
+<tr class="even">
+<td><strong>inventa columnas</strong>: usa <code>margen</code> o <code>rotacion</code>, que no existen en la base</td>
+<td>Un nombre que no está en el diccionario</td>
+<td>“No supongas los nombres. Lee el diccionario y usa los que existen.”</td>
+</tr>
+<tr class="odd">
+<td><strong>afirma una cifra que no corrió</strong>: “la tasa de cierre es 19.8 %” antes de ejecutar nada</td>
+<td>No hay script ni salida de la que venga</td>
+<td>“¿De qué salida sale ese número? Muéstrame el código y córrelo.”</td>
+</tr>
+</tbody>
+</table>
+<p>Los tres frenos valen para esta semana y para todo el proyecto. En la sesión los verás actuar sobre una demostración en vivo.</p>
+</section>
+<section id="privacidad-analizar-sin-mirar" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Privacidad: analizar sin mirar</h1>
+<p>Hay un obstáculo que aparece en cuanto uno quiere usar esto con los datos de su propia empresa: muchas bases no pueden salir de la organización, por contrato, por ley o por sentido común. ¿Cómo se usa un agente sobre datos que no pueden viajar?</p>
+<p>Piensa en un chef al que contratan para organizar la cocina de un restaurante con ingredientes secretos. Le dan el menú, el inventario y las reglas de higiene, pero le prohíben abrir la nevera. El chef diseña la receta completa, con precisión, porque no necesita ver los ingredientes: le basta conocer su estructura.</p>
+<p>En datos, la estructura son los <span class="term">metadatos</span> y el <span class="term">diccionario de datos</span>: el nombre de cada columna, su tipo, su unidad, su rango y, en este curso, el momento en que se conoce. Con eso el agente puede diseñar el análisis entero, escribir los scripts y los controles de calidad sin haber visto una sola fila. Tres capas, de la más simple a la más completa:</p>
+<ol type="1">
+<li><strong>Bloquear archivos.</strong> Al agente se le prohíbe abrir los archivos de datos; ve que existen y no puede leerlos. Escribe el código; lo corre alguien que sí tiene acceso, o se corre en una máquina de la empresa.</li>
+<li><strong>Trabajar con el diccionario.</strong> El análisis se diseña sobre los metadatos; el agente nunca recibe un registro individual.</li>
+<li><strong>Que la base calcule.</strong> Para bases grandes, el agente envía consultas a una base de datos local, la base hace el cálculo y devuelve solo agregados: promedios, conteos, totales. Los registros no se mueven.</li>
+</ol>
+<div class="callout-key">
+<div class="callout-title">
+Lo que importa
+</div>
+<p>El agente no necesita ver todos los datos para ayudar bien: necesita el diccionario, la estructura y reglas claras. Es la regla de confidencialidad del curso: los datos de tu empresa no se suben a un chat; en el memo individual trabajarás con metadatos y diccionario.</p>
+</div>
+</section>
+<section id="el-eda-con-pregunta-en-seis-pasos" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> El EDA con pregunta, en seis pasos</h1>
+<p>El <span class="term">análisis exploratorio</span> (EDA) no responde la pregunta de negocio: la prepara. Sirve para saber qué es una fila, cómo se ve lo que queremos predecir, quién se diferencia de quién y qué columnas no se pueden usar. Y tiene una regla que lo distingue de “hacer gráficos”: cada paso lleva una pregunta en el título, y cada resultado se escribe como un <span class="term">hallazgo</span> con su cifra y su “por qué importa”.</p>
+<p>La pregunta de esta semana viene de la junta directiva: para evaluar la alternativa A (comprar el primer local en Barranquilla para arrendarlo), ¿qué perfil de local, entre lo que se conoce <strong>antes de comprar</strong>, tiene arrendatarios que cierran menos y venden más? Los seis pasos que siguen la preparan sobre los 480 locales del estudio: cada uno abre con su pregunta y cierra con el hallazgo y su cifra, el mismo formato que pide el task. Aquí no hay nada que correr; el código que produce cada cifra está, celda a celda y listo para modificar, en <a href="../practice/cocina.html">el código de la semana 3</a>.</p>
+<section id="a-qué-es-una-fila" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="a-qué-es-una-fila"><span class="header-section-number">7.1</span> a) ¿Qué es una fila?</h2>
+<p>Antes de cualquier cifra: cuántas filas, cuántas columnas y qué representa cada fila. Si <code>id_local</code> no se repite, una fila es un local.</p>
+<p><strong>Hallazgo:</strong> 480 filas, 17 columnas, un local por fila y ningún identificador repetido. <strong>Por qué importa:</strong> toda tasa que calculemos es “de cada 100 locales”, no de cada 100 meses ni de cada 100 ciudades. Y no hay valores faltantes, así que ninguna decisión sobre imputar nos espera.</p>
+</section>
+<section id="b-el-target" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="b-el-target"><span class="header-section-number">7.2</span> b) El target</h2>
+<p>Lo que se quiere predecir se llama target, y hay dos: si el contrato sigue vigente a los tres años (<code>estado_3a</code>) y cuánto vende el arrendatario (<code>ventas_mes</code>, en millones de pesos al mes: la base del canon variable del contrato estándar).</p>
+<p><strong>Hallazgo:</strong> uno de cada cinco arrendatarios cierra antes de los tres años (0.200, 96 de 480) y deja el local vacante; el arrendatario típico vende 95.0 millones al mes. <strong>Por qué importa:</strong> 0.200 es la regla ingenua contra la que se medirá cualquier modelo de la semana 4: decir “ningún arrendatario cierra” acierta el 80 % de las veces y no sirve para nada.</p>
+</section>
+<section id="c-mediana-frente-a-media" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="c-mediana-frente-a-media"><span class="header-section-number">7.3</span> c) Mediana frente a media</h2>
+<p>Las ventas tienen cola larga: unos pocos arrendatarios venden mucho más que el resto y arrastran el promedio hacia arriba. La <span class="term">mediana</span> (el local del medio, cuando se ordenan por ventas) no se deja arrastrar.</p>
+<p><strong>Hallazgo:</strong> la media es 100.7 y la mediana 95.0; el máximo (259.0) está a más del doble de la mediana. <strong>Por qué importa:</strong> si la junta escucha “un arrendatario vende 100 millones al mes”, espera más de lo que vende la mayoría: 271 de los 480 arrendatarios venden menos que la media. A la junta se le dice la mediana, y se le muestra la cola.</p>
+</section>
+<section id="d-quiénes-cierran-más" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="d-quiénes-cierran-más"><span class="header-section-number">7.4</span> d) ¿Quiénes cierran más?</h2>
+<p>La primera exploración por grupos. Se parte la base por una variable conocida antes de comprar y se compara la tasa de cierre, siempre con el conteo al lado: una tasa sobre diez locales no dice lo mismo que una sobre doscientos.</p>
+<p><strong>Hallazgo:</strong> en zona residencial cierra el 28.9 % de los arrendatarios (tasa 0.289; 41 de 142); en zona de oficinas, el 10.6 % (0.106; 13 de 123). Con seis o más competidores a 500 metros cierra el 29.3 % (n = 41); con dos o menos, el 16.5 % (n = 231). Y el corte que más separa de todos los que se conocen antes de comprar: con tráfico peatonal bajo (menos de 120 personas por hora) la tasa de cierre es 0.528 (n = 53), frente a 0.159 en el resto (n = 427). <strong>Por qué importa:</strong> la zona, la competencia y el tráfico se conocen antes de comprar un local en Barranquilla, y separan el riesgo de cierre: más de dieciocho puntos entre zonas, casi treinta y siete entre tráfico bajo y alto. Son candidatas a entrar al árbol de la semana 5.</p>
+</section>
+<section id="e-un-gráfico-plano-también-es-un-hallazgo" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="e-un-gráfico-plano-también-es-un-hallazgo"><span class="header-section-number">7.5</span> e) Un gráfico plano también es un hallazgo</h2>
+<p>Lo que “debería” importar no siempre importa. La ciudad es la primera variable que cualquiera miraría.</p>
+<p><strong>Hallazgo:</strong> la tasa de cierre por ciudad va de 0.180 (Cartagena) a 0.216 (Cali): 3.6 puntos de diferencia entre la más baja y la más alta. <strong>Por qué importa:</strong> la ciudad, por sí sola, no explica el cierre; lo que importa es el local y su barrio. Para Barranquilla, que no está en el estudio, es una buena noticia con una advertencia: el perfil del local viaja entre ciudades; la ciudad misma no está en los datos.</p>
+</section>
+<section id="f-la-fuga" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="f-la-fuga"><span class="header-section-number">7.6</span> f) La fuga</h2>
+<p>Hay dos columnas que separan a los arrendatarios que cerraron de los que siguen abiertos mejor que cualquier otra. Antes de celebrarlas, mira el diccionario: su momento es “después de arrendar”.</p>
+<p><strong>Hallazgo:</strong> con tres o más meses de mora en el canon cierra el 89.7 % de los arrendatarios (tasa 0.897, n = 97); con menos, el 2.3 % (0.023, n = 383): 87 de los 96 cierres tienen mora. La calificación de Google también separa (correlación de −0.428 con el cierre): 4.20 en los que siguen abiertos y 3.77 en los que cerraron. <strong>Por qué importa:</strong> ninguna de las dos sirve para un local que todavía no se compra. La mora se acumula <em>mientras</em> el contrato corre: el arrendatario que va a cerrar deja de pagar el canon meses antes; la variable no predice el cierre, lo acompaña. La calificación solo existe cuando el negocio ya tiene clientes. Para los tres locales candidatos de Barranquilla la mora es cero por definición y la calificación no existe.</p>
+<p>Eso es una <span class="term">fuga</span>: una columna que contiene información del resultado que no existiría en el momento de decidir. Un modelo entrenado con ella alcanza una exactitud espectacular en la base y no sirve para nada en la decisión. El criterio que la atrapa no es estadístico; es de calendario: el <span class="term">momento de la decisión</span>. Una variable es legítima solo si estaría disponible cuando hay que decidir.</p>
+<div class="callout-workflow">
+<div class="callout-title">
+La regla del curso
+</div>
+<p>Antes de modelar, lista las columnas con momento “después de arrendar” y exclúyelas. Si una variable separa demasiado bien, sospecha primero y celebra después. Las dos variables target tampoco se usan como predictoras la una de la otra.</p>
+</div>
+</section>
+<section id="esta-columna-sirve-para-evaluar-un-local-que-todavía-no-se-compra" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="esta-columna-sirve-para-evaluar-un-local-que-todavía-no-se-compra"><span class="header-section-number">7.7</span> ¿Esta columna sirve para evaluar un local que todavía no se compra?</h2>
+<p>Ocho columnas del diccionario. Clasifica cada una según el momento en que se conoce respecto de la decisión de comprar.</p>
+<div class="widget-card" id="wg-momento">
+  <div class="widget-head">¿Antes de comprar, después de arrendar o target? · Ocho columnas del estudio</div>
+  <div class="widget-body">
+    <div class="widget-instr">Pregúntate una sola cosa: para un local candidato en Barranquilla, que todavía no se compra y no tiene contrato, ¿este dato existe hoy?</div>
+    <div id="mom-items"></div>
+    <div class="quiz-score" id="mom-score"></div>
+  </div>
+</div>
+<script>
+(function () {
+  const OPC = ["Antes de comprar", "Después de arrendar", "Target"];
+  const ITEMS = [
+    { t: "trafico_peatonal (personas por hora frente al local)", a: 0, fb: "Se mide parado frente al local candidato, antes de comprar. Sirve, y en la semana 5 será la raíz del árbol." },
+    { t: "calificacion_google (estrellas del negocio del arrendatario a los tres años)", a: 1, fb: "Solo existe cuando el negocio del arrendatario ya tiene clientes que lo califican. Para un local que aún no se arrienda no hay nada que consultar, aunque en la base separe (4.20 frente a 3.77)." },
+    { t: "estado_3a (el contrato sigue vigente o el arrendatario cerró)", a: 2, fb: "Es lo que queremos predecir. No es predictor de nada: es la respuesta." },
+    { t: "arriendo_mes (canon mensual de mercado, en millones de pesos)", a: 0, fb: "El canon de mercado se conoce al evaluar el local, antes de comprar. Sirve, y además entra en la cuenta del VPN de la semana 7." },
+    { t: "meses_atraso_arriendo (meses de canon en mora acumulados en tres años)", a: 1, fb: "La mora se acumula mientras el contrato corre; un local que todavía no se compra tiene cero por definición. Separa muy bien en la base (0.897 frente a 0.023) y no sirve para decidir: es la fuga." },
+    { t: "ventas_mes (ventas mensuales del arrendatario en el tercer año)", a: 2, fb: "El otro target: cuánto vende el arrendatario, que solo se observa con el contrato corriendo. Lo predice la semana 6, y no se usa para predecir el cierre." },
+    { t: "zona_comidas (1 si el local tiene zona de comidas preparadas)", a: 0, fb: "Se comprueba visitando el local candidato: la zona de comidas existe o no existe antes de comprar. Sirve." },
+    { t: "experiencia_arrendatario (años del arrendatario en comercio minorista)", a: 0, fb: "Figura en el plan de negocio que el arrendatario presenta al firmar. Sirve, y es un factor que Meridiano controla en parte: la gestora decide a quién le arrienda." }
+  ];
+  const cont = document.getElementById("mom-items");
+  let hechos = 0, aciertos = 0;
+  ITEMS.forEach((it, i) => {
+    const div = document.createElement("div"); div.className = "quiz-item";
+    const q = document.createElement("div"); q.className = "quiz-q"; q.textContent = (i + 1) + ". " + it.t; div.appendChild(q);
+    const opts = document.createElement("div"); opts.className = "quiz-opts";
+    const fb = document.createElement("div"); fb.className = "quiz-fb";
+    let listo = false;
+    OPC.forEach((o, j) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = o;
+      b.addEventListener("click", () => {
+        if (listo) return; listo = true; hechos++;
+        if (j === it.a) { b.classList.add("ok"); aciertos++; fb.textContent = "Correcto. " + it.fb; }
+        else { b.classList.add("bad"); opts.children[it.a].classList.add("ok"); fb.textContent = "Es " + OPC[it.a].toLowerCase() + ". " + it.fb; }
+        document.getElementById("mom-score").textContent = hechos === ITEMS.length ? ("Resultado: " + aciertos + " de " + ITEMS.length + ". Las dos de \"después de arrendar\" son las columnas prohibidas del task.") : ("Llevas " + hechos + " de " + ITEMS.length + ".");
+      });
+      opts.appendChild(b);
+    });
+    div.appendChild(opts); div.appendChild(fb); cont.appendChild(div);
+  });
+})();
+</script>
+<p>Qué cambió y qué significa: de las ocho columnas, cuatro se conocen antes de comprar (visitando el local o leyendo el plan de negocio del arrendatario), dos son lo que queremos predecir y dos solo existen cuando el contrato ya lleva tiempo corriendo. Esas dos últimas son las que un agente, si nadie lo frena, va a proponer como “predictor estrella”, porque en la base son las que mejor separan.</p>
+</section>
+<section id="cómo-se-escribe-un-hallazgo" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="cómo-se-escribe-un-hallazgo"><span class="header-section-number">7.8</span> Cómo se escribe un hallazgo</h2>
+<p>El formato es fijo y cabe en dos líneas. La cifra viene de una ejecución (una celda del código de la semana o un script del agente) y el “por qué importa” habla el idioma de la junta, no el de R:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>HALLAZGO: En zona residencial cierra el 28.9 % de los arrendatarios</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>          (41 de 142); en zona de oficinas, el 10.6 % (13 de 123). [código, celda d]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>POR QUÉ IMPORTA: La zona se conoce antes de comprar y separa el riesgo de</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>          cierre en 18 puntos: entra en la evaluación de los tres</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>          locales de Barranquilla.</span></code></pre></div><button title="Copiar al portapapeles" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Y una figura cuyo <strong>título dice el hallazgo</strong>: “La ciudad no separa: todas cerca del 20 %” dice algo; “Tasa de cierre por ciudad” no dice nada.</p>
+<div class="callout-practice">
+<div class="callout-title">
+El código de la semana 3 (opcional, y la referencia del task)
+</div>
+<p>Los seis pasos, reproducidos celda a celda en R, están en <a href="../practice/cocina.html">el código de la semana 3</a>. Ahí se verifica cualquier cifra que reporte el agente.</p>
+</div>
+<div class="callout-connect">
+<div class="callout-title">
+En la sesión
+</div>
+<ul>
+<li><strong>El paper:</strong> Kaufman, Rosset y Perlich (2012) estudiaron por qué los modelos que ganaban competencias de datos usaban información que no existiría al momento de predecir; en una de ellas, el número de identificación del paciente predecía el cáncer. De ahí sale el criterio del momento de la decisión, el mismo que atrapa a la mora en el canon (<code>meses_atraso_arriendo</code>).</li>
+<li><strong>La aplicación:</strong> el profesor dirige en vivo a un agente sobre el estudio de locales, con las reglas cargadas y la regla de la sesión. En algún momento el agente va a proponer un predictor estrella que no lo es, y la sala tiene que atraparlo. Después, la cacería: tres cifras del agente contra el sobre sellado, y los tres frenos con la evidencia de lo que acaba de pasar.</li>
+<li><strong>El cierre:</strong> el task 2. Dos equipos al azar muestran su matriz de influencia (dos minutos cada uno) y discutimos por qué difieren; y la prueba de la fuente, en vivo, con una fila de la tabla de un equipo cualquiera.</li>
+</ul>
+</div>
+</section>
+</section>
+<section id="y-esto-cómo-se-ve-en-tu-organización" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> ¿Y esto cómo se ve en tu organización?</h1>
+<p>Piensa en una base de tu empresa que un agente podría explorar: ventas por cliente, rotación de personal, cartera, inventarios. ¿Se la darías tal cual? Probablemente no. ¿Qué le darías entonces? Escribe mentalmente el diccionario: las columnas, sus unidades, su rango, y, para cada una, el momento en que se conoce respecto de la decisión que te importa. Mira si hay alguna que “separa demasiado bien” porque en realidad es el resultado disfrazado. Ese diccionario es lo que le darías a un agente sin mostrarle los datos, y es el punto de partida del memo individual del final del curso.</p>
+</section>
+<section id="preguntas-de-comprensión" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Preguntas de comprensión</h1>
+<details class="pregunta">
+<summary>
+<ol type="1">
+<li>Le pides al agente que explore la base y, antes de correr nada, responde: “La tasa de cierre es 19.8 %”. ¿Qué haces?
+</li></ol></summary>
+Frenar. Ese número no salió de ninguna ejecución: es una alucinación numérica, un valor plausible que el modelo generó como texto. Le escribes: “¿De qué salida sale ese número? Muéstrame el código y córrelo”. El script tiene que leer <code>estudio_locales.csv</code>, calcular <code>mean(estado_3a == "cerró")</code> y mostrar la salida: 0.200. Y la comparas con la celda b del código de la semana 3 o con el sobre.
+</details>
+
+<details class="pregunta">
+<summary>
+<ol start="2" type="1">
+<li>¿Por qué la calificación de Google no sirve para evaluar un local que aún no se compra, si en la base está claramente asociada con que el arrendatario siga abierto?
+</li></ol></summary>
+Porque solo existe después de arrendar: la calificación la ponen los clientes del negocio que ya opera. Para un local candidato en Barranquilla no hay ninguna calificación que consultar. La asociación es real (4.20 en los que siguen abiertos frente a 3.77 en los que cerraron), pero no está disponible en el momento de la decisión, y por eso es una fuga. Lo que sí se puede mirar antes de comprar es la calificación de los competidores del barrio.
+</details>
+
+<details class="pregunta">
+<summary>
+<ol start="3" type="1">
+<li>Las ventas tienen media 100.7 y mediana 95.0. ¿Cuál de las dos le dices a la junta?
+</li></ol></summary>
+La mediana, y le muestras la cola. La media está arrastrada por unos pocos arrendatarios que venden más de 200 millones al mes; 271 de los 480 venden menos que la media. Si la junta proyecta Barranquilla con 100.7, espera más de lo que vende la mayoría. “El arrendatario típico vende 95 millones al mes, y uno de cada diez pasa de 146.7” es una frase honesta.
+</details>
+
+<details class="pregunta">
+<summary>
+<ol start="4" type="1">
+<li>¿Cuál de estas dos directivas es verificable? (a) “Trata los valores atípicos con criterio”. (b) “No elimines ningún local; si un valor te parece atípico, repórtalo con su id_local y pregunta antes de hacer nada”.
+</li></ol></summary>
+La (b). Al terminar puedes revisar si se eliminó alguna fila (no debería) y si los atípicos aparecen reportados con su identificador. La (a) deja la decisión en manos del agente, que es justo lo que una regla debía impedir.
+</details>
+
+</section>
+<section id="lectura-corta-opcional" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Lectura corta (opcional)</h1>
+<p>Walter Sosa Escudero, <em>Qué es (y qué no es) la estadística</em> (Siglo XXI, 2014), el capítulo sobre correlación y causalidad. Es la versión de divulgación de lo que pasó con la mora en el canon: una asociación casi perfecta que no sirve para decidir, y la pregunta que hay que hacerse antes de leer cualquier hallazgo.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="week-03_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

@@ -1,0 +1,76 @@
+---
+title: "Task 5: el árbol del equipo"
+subtitle: "Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 5 · Task"
+lang: es
+---
+
+::: {.callout-key}
+<div class="callout-title">Qué se entrega</div>
+Una página con el árbol de clasificación del equipo leído como política: tres reglas traducidas para la junta, la fila del árbol en el ranking de modelos, el umbral elegido con la hoja de costos, los tres locales de Barranquilla con su riesgo y su nota de extrapolación, y el acta. Es la quinta pieza del expediente y sí tiene nota. Se hace con la práctica 5: no hay que escribir código.
+:::
+
+| | |
+|---|---|
+| **Quién** | El equipo |
+| **Tiempo estimado** | 90 minutos |
+| **Entrega** | En Canvas, antes de la sesión 6 (el momento exacto se confirma en la página del curso) |
+| **Formato** | `equipo-NN_task-05.pdf`, una página más la declaración de IA de tres líneas |
+| **Uso de IA** | Nivel 3, con declaración. Un asistente puede traducir y redactar; las cifras salen de la práctica y se verifican contra el sobre |
+| **Datos** | La práctica 5 (`practice/week-05.html`), con el estudio de locales, la partición fija, la hoja de costos y los tres locales de Barranquilla ya cargados. Quien prefiera verlo celda a celda en R tiene el código de la semana 5 (`practice/cocina.html`), opcional |
+
+# Parte 1. Tres reglas traducidas para la junta (1.5 puntos)
+
+Entrenen el árbol con la configuración que el equipo elija (profundidad, mínimo por hoja) **sin** las columnas de después de arrendar, y anoten la configuración. De sus reglas, elijan tres, incluida la que marca el perfil más riesgoso, y tradúzcanlas con la plantilla:
+
+> Si [condición en palabras del negocio] y [condición], cierran [X] de cada diez (p = …, n = … locales del estudio).
+
+Sin decir "nodo" ni "corte", sin "causa" ni "garantiza", y con el tamaño de la hoja. Una regla que salga de una hoja con menos de diez locales no se traduce: se reporta como anécdota.
+
+| Columna | Qué va |
+|---|---|
+| Regla | La traducción con la plantilla |
+| p y n | La probabilidad de la hoja y los locales que la respaldan |
+| Qué significa para Meridiano | Una línea: qué perfil de local y de arrendatario describe y qué se haría con él |
+
+# Parte 2. El ranking de modelos con el árbol del equipo (1.5 puntos)
+
+Completen el ranking de la semana 4 con la fila de su árbol, medida en los 120 locales de validación y con el umbral 0.5:
+
+| Regla o modelo | TP · FP · FN · TN | Exactitud ± margen | Sensibilidad |
+|---|---|---|---|
+| Nadie cierra | | | |
+| Consultora A | | | |
+| Consultora B | | | |
+| **El árbol del equipo** (configuración: …) | | | |
+
+Dos líneas: ¿le gana a las consultoras en exactitud por más que el margen? ¿Y en cierres encontrados? Si su configuración es la de referencia (profundidad 2, mínimo 15), la fila debe coincidir con el sobre; si es otra, expliquen en una línea por qué la eligieron con las cifras de validación, no con las de entrenamiento.
+
+# Parte 3. El umbral elegido con los costos y qué locales pasan (1.0 punto)
+
+Con la hoja de costos (evaluar a fondo un local y a su arrendatario cuesta 12 millones; comprar un local cuyo arrendatario incumple pierde 250; el aviso evita esas pérdidas con efectividad 0.5, o 0.25 en el escenario pesimista):
+
+- Calculen el umbral en palabras, p\* = c ÷ (u × V), para las dos efectividades.
+- Elijan un umbral para Meridiano y justifíquenlo con el beneficio neto que da en validación (la práctica lo calcula) y con lo que pasa con los falsos viables.
+- Digan cuáles de los tres locales de Barranquilla quedan por encima del umbral (se evalúan a fondo) y cuáles pasan.
+
+# Parte 4. Los tres locales con su riesgo y su nota de extrapolación (0.5 puntos)
+
+Una tabla de tres filas: local, probabilidad de cierre que da el árbol, orden por riesgo, y la **nota de extrapolación**: qué variables del local están fuera del rango del lote de entrenamiento y el hecho de que ningún local del estudio está en Barranquilla. Los tres llevan asterisco; uno de ellos lleva dos razones.
+
+# Parte 5. El acta y la declaración (0.5 puntos)
+
+Qué configuración corrieron, qué cambió cuando cambiaron la partición (¿aguantó la raíz?), qué pasó cuando permitieron `meses_atraso_arriendo` y por qué no lo reportan, y qué verificaron por su cuenta. Más la declaración de IA de tres líneas.
+
+::: {.callout-practice}
+<div class="callout-title">Si usan un asistente de IA</div>
+Puede traducir las reglas con la plantilla y redactar las líneas de "qué significa para Meridiano"; puede ayudarles a escribir el acta. Las cifras salen de la práctica, no del asistente: péguenle las reglas, la matriz y las probabilidades tal como las imprime la página. Pídanle que nunca reporte la exactitud de entrenamiento como desempeño, que no diga "causa" donde el árbol solo separa, y que incluya la nota de extrapolación en cada probabilidad de Barranquilla: sin la nota, la cifra no cuenta.
+:::
+
+::: {.callout-connect}
+<div class="callout-title">Para el cierre de la sesión 6</div>
+Traigan las tres reglas y la tabla de los locales en pantalla. Cada equipo, al azar, traduce **una rama** del árbol en voz alta como se la diría a la junta (un minuto). Después, dos preguntas para la sala: ¿el árbol cambió cuando cambiaron la semilla de la partición, y qué parte aguantó?; y, con eso, ¿qué sí se le dice a la junta y qué se guarda?
+:::
+
+::: {.callout-warning title="Lo que no cuenta"}
+La exactitud de entrenamiento presentada como desempeño. Un árbol que usó `meses_atraso_arriendo` o `calificacion_google`. Una regla salida de una hoja con menos de diez locales. Una probabilidad para Barranquilla sin su nota de extrapolación. Una fila del ranking de modelos que no coincida con el sobre (con margen) y no explique la diferencia. Una traducción que diga "causa" o "garantiza".
+:::

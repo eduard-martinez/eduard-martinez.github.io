@@ -1,0 +1,527 @@
+---
+title: "Escenarios y decisión: el análisis prescriptivo"
+subtitle: "Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 7 · Teoría"
+lang: es
+---
+
+::: {.callout-key}
+<div class="callout-title">La idea central</div>
+Lo que no se puede estimar con datos se administra con escenarios: tablas de supuestos con fuente, no narraciones. Esta semana se construyen tres o cuatro escenarios a partir de las dos incertidumbres críticas del equipo, se calcula el VPN de cada alternativa de Meridiano en cada uno, se identifica la alternativa que minimiza el arrepentimiento máximo y se dejan puestos los disparadores que avisan cuál de esos futuros está llegando.
+:::
+
+**Tiempo de estudio:** 30 a 40 minutos. **Qué se necesita:** este navegador. Las dos partes interactivas (el clasificador de frases y la mesa de escenarios reducida) están en esta página; las celdas de R que rehacen cada cifra con la plantilla del curso están en [el código de la semana 7](../practice/cocina.html) y son opcionales.
+
+# Shell, 1973
+
+En el último trimestre de 1973 el precio del petróleo se multiplicó en pocos meses, después de la guerra de octubre y del recorte de producción de los países árabes exportadores. Casi ninguna empresa lo había pronosticado, porque no era pronosticable: dependía de decisiones políticas que nadie podía meter en una serie de tiempo. Lo que sí había hecho el grupo de planeación de Shell, desde 1971, era otra cosa: analizar la oferta y la demanda de petróleo y los intereses de los países productores, y convertir ese análisis en unos pocos futuros posibles, escritos como tablas de supuestos, que los directivos tuvieron que ensayar con sus propios planes. Uno de esos futuros se parecía bastante a lo que pasó.
+
+Los escenarios no predijeron el choque. Prepararon a quienes lo habían ensayado: cuando llegó, sabían qué significaba y qué hacer, mientras otros todavía discutían si era pasajero. Pierre Wack, que dirigió ese trabajo, lo contó doce años después en dos artículos que se presentan en la sesión. La lección que organiza esta semana cabe en una línea: **no se trata de acertar el futuro, sino de que la decisión aguante varios futuros.**
+
+Para la junta directiva de Meridiano la pregunta es la misma. Las ventas base del arrendatario en los tres locales (semana 6) y el riesgo de incumplimiento (semana 5) redujeron lo que se podía reducir con datos. Queda lo irreducible de la semana 2: la demanda de espacio comercial, la oferta nueva de locales, los costos del propietario, la tasa de interés. Nadie sabe dónde estarán en 2028. Esta semana se decide de todas formas.
+
+# De la incertidumbre al escenario
+
+::: {.callout-key}
+<div class="callout-title">El giro de la semana</div>
+Hasta la semana 6 el curso fue analítica <span class="term">predictiva</span>: estimar lo que va a pasar (¿el arrendatario cumple su contrato?, ¿cuánto vende?). Desde esta semana es analítica <span class="term">prescriptiva</span>: evaluar qué hace Meridiano con su dinero. Los modelos ya entregaron sus estimaciones; falta la decisión, y el escenario es la herramienta para tomarla sin fingir que se conoce el futuro. Es la segunda mitad del título del curso.
+:::
+
+En la semana 2 el equipo eligió dos incertidumbres críticas: variables motrices o críticas en la matriz de influencia, y además irreducibles a tres años. Esas dos son los <span class="term">ejes</span>. Cada eje tiene dos estados extremos (la demanda de espacio comercial crece o se estanca; los costos del propietario y la tasa suben o se mantienen) y los dos ejes cruzados forman una **2 × 2**: cuatro cuadrantes, cuatro escenarios candidatos.
+
+```{=html}
+<div style="margin:1.2rem 0">
+<svg width="100%" viewBox="0 0 680 330" role="img" aria-label="La 2 por 2 de referencia: demanda de espacio comercial por costos del propietario y tasa">
+<rect x="150" y="30" width="200" height="120" fill="#eafaf1" stroke="#cecfd4"/>
+<rect x="350" y="30" width="200" height="120" fill="#fbf7d6" stroke="#cecfd4"/>
+<rect x="150" y="150" width="200" height="120" fill="#fbf7d6" stroke="#cecfd4"/>
+<rect x="350" y="150" width="200" height="120" fill="#fdeee8" stroke="#cecfd4"/>
+<text x="250" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#2f9460">E1 · Expansión</text>
+<text x="250" y="92" text-anchor="middle" font-size="11.5" fill="#1b1d29">la demanda crece · costos estables</text>
+<text x="250" y="112" text-anchor="middle" font-size="11" fill="#52555f">g +4 % · tasa 12 % · canon 10 %</text>
+<text x="450" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="#8a6d00">E2 · Expansión con costos</text>
+<text x="450" y="92" text-anchor="middle" font-size="11.5" fill="#1b1d29">la demanda crece · costos suben</text>
+<text x="450" y="112" text-anchor="middle" font-size="11" fill="#52555f">g +4 % · tasa 14 % · canon 9 %</text>
+<text x="250" y="190" text-anchor="middle" font-size="14" font-weight="700" fill="#8a6d00">E4 · Estancamiento</text>
+<text x="250" y="212" text-anchor="middle" font-size="11.5" fill="#1b1d29">la demanda se estanca · costos estables</text>
+<text x="250" y="232" text-anchor="middle" font-size="11" fill="#52555f">g −3 % · tasa 12 % · canon 10 %</text>
+<text x="450" y="190" text-anchor="middle" font-size="14" font-weight="700" fill="#c2552f">E3 · Contracción</text>
+<text x="450" y="212" text-anchor="middle" font-size="11.5" fill="#1b1d29">la demanda se estanca · costos suben</text>
+<text x="450" y="232" text-anchor="middle" font-size="11" fill="#52555f">g −3 % · tasa 14 % · canon 9 %</text>
+<text x="350" y="300" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3a3acb">Eje 2 · Costos del propietario y tasa</text>
+<text x="250" y="284" text-anchor="middle" font-size="11" fill="#52555f">estables</text>
+<text x="450" y="284" text-anchor="middle" font-size="11" fill="#52555f">suben</text>
+<text x="40" y="150" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3a3acb" transform="rotate(-90 40 150)">Eje 1 · Demanda de espacio comercial</text>
+<text x="120" y="94" text-anchor="middle" font-size="11" fill="#52555f">crece</text>
+<text x="120" y="214" text-anchor="middle" font-size="11" fill="#52555f">se estanca</text>
+<text x="580" y="60" font-size="10.5" fill="#88898c">Los cuatro se quedan:</text>
+<text x="580" y="76" font-size="10.5" fill="#88898c">hay una lógica de</text>
+<text x="580" y="92" font-size="10.5" fill="#88898c">cuatro líneas que</text>
+<text x="580" y="108" font-size="10.5" fill="#88898c">lleva a cada uno.</text>
+</svg>
+</div>
+```
+
+La regla para decidir cuántos quedan:
+
+- **Un cuadrante se descarta solo con una razón escrita.** La razón válida es que los dos estados no pueden darse al mismo tiempo porque uno produce al otro. Si un equipo eligiera como ejes "la oferta nueva de locales" y "los arriendos comerciales", el cuadrante "oferta nueva abundante con arriendos al alza" no sería un escenario sino una contradicción: la oferta manda sobre los arriendos (en la matriz de la semana 2, los arriendos son la variable dependiente). Pero eso delata un problema anterior: los ejes deben ser **independientes entre sí** (con poca influencia mutua en la matriz). Si uno mueve al otro, no son dos ejes: es uno.
+- **Si no hay razón, se queda.** Los cuatro de referencia se quedan. "Expansión con costos" (la demanda crece y los costos suben) es el que más tienta descartar, y es justamente el que la demanda produce: cuando un corredor comercial se llena, el predial y los seguros suben con él, y la oferta nueva que esa demanda atrae termina renegociando el canon a la baja aunque los arrendatarios vendan más.
+- **Solo entran incertidumbres irreducibles.** Si una de las dos se puede resolver con un dato (cuánto vende el arrendatario del local: medio año de operación observada; cuánto cuesta un propietario nuevo: una campaña pequeña), no es un eje: va a la lista de datos por conseguir de la semana 2. La alternativa C —arrendar el local con opción de compra— es esa idea convertida en alternativa, y la sección 7 muestra cómo se evalúa si vale lo que cuesta.
+
+::: {.callout-key}
+<div class="callout-title">Lo que importa</div>
+Tres o cuatro escenarios. Con dos no hay robustez que probar; con ocho nadie los lee ni los calcula. Y ninguno es "el más probable": en cuanto uno lleva esa etiqueta, los otros tres dejan de existir para la junta.
+:::
+
+# Las tres partes de un escenario
+
+Un escenario tiene tres partes, y ninguna es una narración larga.
+
+1. **Un nombre** que se pueda decir en una reunión: "Contracción", "Expansión con costos". Con el nombre la junta recuerda el futuro completo.
+2. **La lógica en cuatro líneas:** qué pasa con cada eje y por qué, en el orden en que pasaría. Cuatro líneas, no una página: quien necesita más está narrando, no especificando supuestos.
+3. **La tabla de supuestos:** cada parámetro de la plantilla de VPN con su valor en cada escenario, su **fuente** (la fila de la tabla de vigilancia, con URL) y su **calidad**: alta, media o baja. Un parámetro sin fuente se declara <span class="term">supuesto del equipo</span>, y vale; lo que no vale es un número sin fila.
+
+La tabla es lo que el VPN calcula; la lógica solo explica la tabla. Los cuatro de referencia, con los parámetros que cambian de un escenario a otro (los demás son los de la tabla de la sección 5):
+
+| Parámetro | E1 Expansión | E2 Expansión con costos | E3 Contracción | E4 Estancamiento | Fuente | Calidad |
+|---|---|---|---|---|---|---|
+| Crecimiento anual de las ventas del arrendatario | +4 % | +4 % | −3 % | −3 % | DANE, Encuesta Mensual de Comercio (tabla de vigilancia) | media |
+| Canon (fracción de las ventas) | 10 % | 9 % | 9 % | 10 % | Contrato estándar de Meridiano; la renegociación, con la oferta nueva de locales (DANE, licencias de construcción; portales inmobiliarios) | media |
+| Egresos del propietario (millones al mes) | 2.5 | 3.0 | 3.0 | 2.5 | Predial, seguro y mantenimiento (gerencia financiera); en "suben", +20 % | media |
+| Tasa de descuento | 12 % | 14 % | 14 % | 12 % | Plantilla de la gerencia financiera, con la tasa del Banco de la República (9.5 %) en la tabla de vigilancia | media |
+| Margen de administración | 25 % | 20 % | 20 % | 25 % | Contabilidad de la línea de administración: la tarifa de 80.000 pesos al mes es fija y absorbe el alza de costos hasta que se reajusta | media |
+| Propietarios por tramo (factor sobre 1.000 / 750 / 500) | × 1 | × 1 | × 0.75 | × 0.75 | Cotización de la campaña de adquisición; con la demanda estancada cuesta un tercio más | baja |
+| Retención anual de la administración | 70 % | 70 % | 65 % | 65 % | Historial de la línea de administración 2023 a 2026 | media |
+
+Y sus lógicas, en cuatro líneas cada una:
+
+- **E1 Expansión.** La demanda de espacio comercial crece con el empleo y el comercio formal: las ventas de los arrendatarios suben cerca de 4 % al año y la rotación de locales es baja. Los egresos del propietario se mantienen estables, la tasa de descuento no cambia y el canon pactado se sostiene. La administración de inmuebles suma propietarios al costo cotizado y retiene siete de cada diez. Comprar y administrar rinden a la vez.
+- **E2 Expansión con costos.** La demanda crece, pero los costos del propietario suben con ella: predial, seguros y mantenimiento aumentan 20 % y la tasa de descuento pasa a 14 %. Con oferta nueva en los corredores comerciales, el canon se renegocia a la baja: 9 % de las ventas en lugar de 10 %. El margen de la administración cede cinco puntos. Que el arrendatario venda más no compensa el encarecimiento del capital.
+- **E3 Contracción.** La demanda de espacio comercial se estanca: las ventas de los arrendatarios caen 3 % al año y los costos suben de todas formas (egresos +20 %, tasa 14 %, canon renegociado al 9 %). Conseguir propietarios nuevos cuesta un tercio más y se retiran antes (retención 65 %). Nada rinde y la alternativa que menos pierde es esperar.
+- **E4 Estancamiento.** El mercado no crece pero tampoco se encarece: las ventas de los arrendatarios caen 3 % al año, con egresos del propietario estables y tasa de 12 %. El canon cubre los egresos y la venta del año 5 sostiene el valor del local; la administración crece despacio y el segundo tramo apenas se paga. Un escenario sin sobresaltos en el que el inmueble conserva su valor.
+
+::: {.callout-workflow}
+<div class="callout-title">Dónde queda cada número</div>
+El libro de supuestos del expediente tiene una fila por parámetro: valor en cada escenario, fuente, calidad. Las fuentes de los escenarios son las de la tabla de vigilancia de la semana 2, con su URL; las de los parámetros internos (el canon, los egresos, las tarifas, la inversión) son los registros de Meridiano: el contrato estándar, la contabilidad de la línea de administración, las cotizaciones de la gerencia de inversión y la plantilla de la gerencia financiera. En el task, la fila que no tenga fuente lleva "supuesto del equipo"; la que no tenga ni eso, no existe.
+:::
+
+# Qué no es un escenario
+
+Tres impostores se presentan como escenarios en casi todo expediente.
+
+- **Un pronóstico disfrazado.** Un solo futuro con un número ("las ventas del arrendatario del local 1 serán 161 millones en 2028"), o un escenario con probabilidad ("Contracción, 60 %"). La probabilidad convierte los escenarios en un pronóstico con más pasos; y promediarlos con ella ("el VPN esperado de A es 17") es lo peor de los dos mundos: un número que no ocurre en ningún futuro y que supone que alguien sabe cuán probable es cada uno. En este curso los escenarios **no llevan probabilidades y no se promedian.** Lo que se compara es cómo le va a cada alternativa en cada uno.
+- **Una salida de IA presentada como evidencia.** Un asistente puede redactar la lógica de cuatro líneas y proponer fuentes que luego se verifican. Su texto no es una fuente: "crecimiento de la demanda de espacio comercial 12 % anual (fuente: ChatGPT)" es una fila sin fuente, con la agravante de que suena segura.
+- **Una narración sin supuestos.** Una descripción vívida de cómo será Barranquilla en 2028, sin un parámetro que se pueda calcular. Suena a futuro y no entra en la plantilla.
+
+## ¿Escenario, pronóstico disfrazado o narración sin supuestos?
+
+Ocho frases construidas para el ejercicio. Clasifícalas; la retroalimentación dice qué le falta o qué le sobra a cada una.
+
+```{=html}
+<div class="widget-card" id="wg-esc">
+  <div class="widget-head">¿Escenario, pronóstico disfrazado o narración sin supuestos? · Ocho frases</div>
+  <div class="widget-body">
+    <div class="widget-instr">Un escenario es una tabla de supuestos con fuente y calidad, sin probabilidad. Un pronóstico disfrazado es un solo futuro (o una probabilidad, o un promedio). Una narración sin supuestos no tiene parámetros que entren en la plantilla.</div>
+    <div id="esc-items"></div>
+    <div class="quiz-score" id="esc-score"></div>
+  </div>
+</div>
+<script>
+(function () {
+  const OPC = ["Escenario", "Pronóstico disfrazado", "Narración sin supuestos"];
+  const ITEMS = [
+    { t: "Escenario 'Contracción': ventas de los arrendatarios −3 % anual (DANE, Encuesta Mensual de Comercio, fila 3 de la tabla de vigilancia, calidad media); canon renegociado al 9 % de las ventas (DANE, licencias de construcción, fila 7, media); egresos del propietario 3.0 al mes (gerencia financiera, media); tasa 14 %.", a: 0, fb: "Cada parámetro tiene valor, fuente y calidad, y no hay probabilidad: es una tabla de supuestos. Lo único que falta es la lógica de cuatro líneas." },
+    { t: "El modelo proyecta que las ventas del arrendatario del local 1 serán de 161 millones mensuales en 2028.", a: 1, fb: "Un solo futuro con un número y sin supuestos a la vista. Es la línea del promedio de la semana 2 con otro nombre." },
+    { t: "En 2028 Barranquilla será el mercado de locales comerciales más dinámico del Caribe: los corredores del norte estarán llenos y Meridiano administrará miles de inmuebles en la ciudad.", a: 2, fb: "Una descripción vívida sin un solo parámetro que se pueda calcular ni una fuente. No entra en la plantilla." },
+    { t: "Escenario 'Expansión', probabilidad 60 %: la demanda de espacio comercial crece 4 % anual y el canon pactado se sostiene.", a: 1, fb: "La tabla puede estar bien, pero la probabilidad lo convierte en un pronóstico: nadie sabe cuán probable es ese cuadrante, y con un 60 % encima los otros tres dejan de contar para la junta." },
+    { t: "Si la oferta nueva de locales crece en los corredores comerciales, el canon se renegocia del 10 % al 9 % de las ventas: lo tomamos de los contratos renegociados en 2022 en la línea de administración (calidad media).", a: 0, fb: "Es una fila de la tabla de supuestos con su fuente y su calidad, y además dice de dónde sale el número. Así se escribe un supuesto." },
+    { t: "ChatGPT estima que la demanda de espacio comercial en Colombia crecerá 12 % anual hasta 2030.", a: 2, fb: "Una salida de IA presentada como evidencia: no hay fuente que abrir. Si el asistente cita un informe, se abre el informe y la fuente es el informe, no el asistente." },
+    { t: "Promediando los cuatro escenarios, el VPN esperado de comprar el local es de 17 millones.", a: 1, fb: "El promedio supone probabilidades iguales que nadie declaró y produce un número que no ocurre en ningún futuro. Los escenarios se comparan, no se promedian." },
+    { t: "Escenario 'Estancamiento': ventas de los arrendatarios −3 % anual (supuesto del equipo), egresos del propietario estables (pólizas y predial contratados a tres años, calidad alta), tasa 12 % (plantilla de la gerencia financiera, media).", a: 0, fb: "Un parámetro declarado como supuesto del equipo sigue siendo un supuesto honesto. La tabla está completa y sin probabilidad: es un escenario." }
+  ];
+  const cont = document.getElementById("esc-items");
+  let hechos = 0, aciertos = 0;
+  ITEMS.forEach((it, i) => {
+    const div = document.createElement("div"); div.className = "quiz-item";
+    const q = document.createElement("div"); q.className = "quiz-q"; q.textContent = (i + 1) + ". " + it.t; div.appendChild(q);
+    const opts = document.createElement("div"); opts.className = "quiz-opts";
+    const fb = document.createElement("div"); fb.className = "quiz-fb";
+    let listo = false;
+    OPC.forEach((o, j) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = o;
+      b.addEventListener("click", () => {
+        if (listo) return; listo = true; hechos++;
+        if (j === it.a) { b.classList.add("ok"); aciertos++; fb.textContent = "Correcto. " + it.fb; }
+        else { b.classList.add("bad"); opts.children[it.a].classList.add("ok"); fb.textContent = "Es " + OPC[it.a].toLowerCase() + ". " + it.fb; }
+        document.getElementById("esc-score").textContent = hechos === ITEMS.length ? `Resultado: ${aciertos} de ${ITEMS.length}.` : `Llevas ${hechos} de ${ITEMS.length}.`;
+      });
+      opts.appendChild(b);
+    });
+    div.appendChild(opts); div.appendChild(fb); cont.appendChild(div);
+  });
+})();
+</script>
+```
+
+**Qué cambió y qué significa.** Las frases que se parecen a un escenario y no lo son fallan siempre en lo mismo: un solo futuro, una probabilidad, un promedio, o una fuente que no se puede abrir. Al revisar el task de otro equipo (o la salida de un asistente), esas cuatro cosas se buscan antes de leer la lógica.
+
+# El VPN de las alternativas, línea a línea
+
+Para comparar las cuatro alternativas en cada escenario hace falta una sola medida: el <span class="term">valor presente neto</span> (VPN), lo que vale hoy el dinero que una alternativa produce durante cinco años, descontado a la tasa que fija la gerencia financiera, menos lo que hay que invertir. La plantilla es la de la gerencia financiera de Meridiano, deliberadamente simple y la misma para todas:
+
+| Regla | Valor | Por qué |
+|---|---|---|
+| Horizonte | 5 años, flujos al final de cada año | La gerencia financiera no proyecta más allá de 2031 |
+| Reventa | En el año 5 el local se vende por su precio de compra | Supuesto conservador: sin valorización. Reemplaza al valor terminal |
+| Tasa de descuento | 12 % anual (factor de anualidad 3.6048) | La tasa que la gerencia financiera exige a toda inversión, con la tasa del Banco de la República en 9.5 % como referencia |
+| Impuesto | 30 % sobre la utilidad operativa, solo cuando es positiva | Una tarifa efectiva simplificada; sin crédito por pérdidas |
+| Unidades | Millones de pesos | Como las ventas del árbol |
+
+Con esta plantilla y el canon del 10 %, **un millón mensual de ventas del arrendatario vale 0.10 × 12 × 0.70 × 3.6048 = 3.03 ≈ 3 millones de VPN**: el factor que el curso usa desde la semana 4. Y los parámetros de referencia de cada alternativa, con su fuente y su calidad, porque también son supuestos:
+
+| Alternativa | Parámetros de referencia (escenario base) | Fuente · calidad |
+|---|---|---|
+| **A** Comprar el primer local en Barranquilla y arrendarlo | Inversión \$700 millones (precio de compra, obra y escrituración). Canon mensual = 10 % de las ventas del arrendatario (el contrato estándar de Meridiano). Ventas base del árbol de la semana 6: local 1 147.0, local 2 207.2, local 3 63.3 (± 22.6). Egresos del propietario (predial, seguro, mantenimiento) 2.5 al mes. Reventa en el año 5 por el precio de compra | Gerencia de inversión · alta; contrato · alta; árbol · media (local 2 baja: canon de mercado fuera del rango y hoja de diez locales); gerencia financiera · media; reventa · supuesto del equipo |
+| **B** La administración de inmuebles por tramos | \$150 millones por tramo, hasta tres. Cada tramo suma 1.000 / 750 / 500 propietarios nuevos (150.000, 200.000 y 300.000 pesos por propietario: los primeros mil son los más fáciles de captar). Retención anual 70 %. Ingreso 80.000 pesos al mes por inmueble administrado, margen 25 %, fijos 2 al mes por tramo | Presupuesto · alta; cotización de la campaña · media; historial de la línea · media; contabilidad de la línea · alta; fijos: supuesto del equipo |
+| **C** El arriendo con opción de compra | \$120 millones por arrendar un local en Barranquilla con opción de compra durante seis meses. En el año 1 Meridiano compra A solo si conviene | Presupuesto · alta |
+| **D** Esperar | VPN 0 por definición: el dinero rinde la tasa de descuento | — |
+
+Los 3.908 propietarios administrados hoy y su crecimiento orgánico no entran en B: B compra propietarios **adicionales** a los que llegan solos. El canon de mercado de los tres locales (16.5 / 27 / 8) tampoco entra en la plantilla: el contrato de Meridiano ata el canon a las ventas del arrendatario, y esas cifras quedan como referencia del estudio (0.10 × 147.0 = 14.7 al mes, contra 16.5 que se pide en la zona). El escenario base no es un escenario: es la foto de hoy con los parámetros de referencia, y es lo que el sobre sella.
+
+Así se calcula A con el local 1, línea a línea. Es la cuenta que se hace a mano en la sesión:
+
+| Línea | Cálculo | Millones |
+|---|---|---|
+| Canon anual | 12 × 0.10 × 147.0 | 176.4 |
+| Egresos del propietario | 12 × 2.5 | −30.0 |
+| Utilidad operativa | | 146.4 |
+| Impuesto | 30 % de 146.4 | −43.9 |
+| Flujo anual | | 102.5 |
+| Valor presente de cinco flujos | × 3.6048 | 369.4 |
+| Reventa del año 5 | 700 / 1.12⁵ | 397.2 |
+| Inversión | | −700 |
+| **VPN** | | **66.6** |
+
+Sesenta y siete millones sobre una inversión de setecientos: positivo, no holgado. La reventa del año 5 deja además un punto de referencia exacto: el VPN es cero cuando el flujo después de impuestos iguala el costo financiero anual del capital, 700 × 0.12 = **84 millones**, lo que ocurre cuando el arrendatario vende **125.0** al mes. La predicción del árbol (147.0) queda 22.0 arriba de ese umbral: casi exactamente el error promedio del árbol (22.6). El signo de A pende del error de la semana 6, y la sección 7 lo mide.
+
+::: {.callout-practice}
+<div class="callout-title">El código de la semana (opcional)</div>
+La plantilla de VPN línea a línea, la robustez, los tramos, la banda con el equilibrio, el choque de vacancia y el Monte Carlo, celda a celda en R, en [el código de la semana 7](../practice/cocina.html). La mesa de escenarios completa —la práctica recomendada— es [otra página](../practice/week-07.html).
+:::
+
+Con la misma plantilla, las cuatro alternativas en el escenario base: B con dos tramos (212.1) supera a B con uno (151.3), y el tercer tramo resta valor (182.5: los últimos quinientos propietarios cuestan 300.000 pesos cada uno y no se pagan en cinco años). A con el local 1 vale 66.6; con el local 2 valdría 248.9, pero ese número lleva asterisco doble (canon de mercado de 27 fuera del rango del estudio y la hoja más alta del árbol, de diez locales) y la calidad de su venta base es baja; con el local 3, −186.8: un canon del 10 % sobre 63.3 de ventas (76.0 al año) apenas cubre dos veces y media los egresos y no paga 700 de inversión. C vale −60.5 hoy: se pagan 120 por una opción que, con las ventas base, vale 59.5. D vale 0. El orden del base es **B (2 tramos) > B (1 tramo) > A local 1 > D > C.** Pero eso es un solo futuro.
+
+# La tabla de robustez
+
+La pregunta de la semana no es "cuánto vale A" sino "cómo le va a A en cada futuro". La <span class="term">tabla de robustez</span> pone las alternativas en las filas y los escenarios en las columnas, y en cada celda el VPN con los supuestos de esa columna. De ella salen tres lecturas:
+
+- **Quién gana dónde:** el mejor VPN de cada columna.
+- **Qué pierde menos donde pierde:** el peor VPN de cada fila.
+- **El arrepentimiento:** en cada escenario, lo que una alternativa deja de ganar frente a la mejor de ese escenario (<span class="term">arrepentimiento</span> = mejor VPN del escenario − VPN de la alternativa). La alternativa **robusta** es la que tiene el menor arrepentimiento máximo: la que, pase lo que pase, menos deja de ganar.
+
+La de referencia — A con el local 1 y B con dos tramos, en los cuatro escenarios (VPN en millones):
+
+| | E1 Expansión | E2 Expansión con costos | E3 Contracción | E4 Estancamiento | Peor caso | Arrepentimiento máximo |
+|---|---|---|---|---|---|---|
+| A: comprar (local 1) | 99.4 | −13.9 | −60.8 | 43.6 | −60.8 | 112.7 |
+| B: administrar (2 tramos) | 212.1 | 72.5 | −77.5 | 17.1 | −77.5 | **77.5** |
+| C: la opción | −31.2 | −120.0 | −120.0 | −81.1 | −120.0 | 243.3 |
+| D: esperar | 0 | 0 | 0 | 0 | 0 | 212.1 |
+| **Gana** | **B** | **B** | **D** | **A** | | robusta: **B** |
+
+**Qué significa.** B gana en Expansión y en Expansión con costos; D gana en Contracción, donde nada rinde; y A gana en Estancamiento: con los costos estables, el canon cubre los egresos y la reventa del año 5 sostiene el valor del local aunque las ventas caigan. A pierde solo en dos escenarios y nunca más de 60.8 —la reventa acota su pérdida—, pero en Expansión deja de ganar 112.7 frente a B. C no gana en ninguno. Los arrepentimientos máximos: A 112.7, **B 77.5**, C 243.3, D 212.1. La robusta es B: en el escenario que peor la trata deja de ganar 77.5, menos que cualquiera de las otras en los suyos.
+
+¿Por qué no promediar? El promedio del VPN de A en los cuatro escenarios da cerca de 17: un número que no ocurre en ningún futuro, que supone que los cuatro son igual de probables (nadie lo sabe) y que esconde lo que importa: que A puede valer 99.4 o perder 60.8 según dos variables que nadie controla. La tabla muestra eso; el promedio lo borra.
+
+Una pregunta que la tabla también responde: ¿cuántos tramos? El número óptimo depende del escenario, y por eso el task pide decirlo. En Expansión el óptimo es dos tramos; en Expansión con costos, dos por un margen mínimo (72.5 frente a 71.1); en Estancamiento, uno (39.9 frente a 17.1: el segundo no se paga); en Contracción, ninguno. El tercer tramo no se paga en ningún escenario.
+
+## La mesa de escenarios
+
+Ahora los supuestos son editables. La mesa recalcula al instante, con la misma plantilla, el VPN de A, B, C y D en cada columna, el ganador, el peor caso y el arrepentimiento máximo. Carga los de referencia, cambia un parámetro y observa qué se mueve. La práctica 7 trae la mesa completa (todas las filas de la plantilla, fuentes y calidad, el choque y el Monte Carlo); esta es la versión reducida.
+
+```{=html}
+<script>
+// >>> datos en línea (JS) (los inserta input/_datos_en_linea_week07.R; no editar a mano)
+  // El motor de VPN del curso y los parámetros de referencia. Generado por datasets/week-07/_generar_vpn_meridiano.R; no editar a mano.
+  // Unidades: millones de pesos. Cinco años, flujos al final de cada año; en el año 5 el local se vende
+  // por su precio de compra (reventa); impuesto solo sobre la utilidad positiva.
+  const VPN = (function () {
+    const H = 5;
+    function anualidad(tasa, h) { h = h || H; let s = 0; for (let t = 1; t <= h; t++) s += 1 / Math.pow(1 + tasa, t); return s; }
+    function vpn(inversion, utilidad, tasa, impuesto, reventa) { let s = 0; for (let t = 0; t < utilidad.length; t++) { const u = utilidad[t]; s += (u - impuesto * Math.max(u, 0)) / Math.pow(1 + tasa, t + 1); } return -inversion + s + (reventa || 0) / Math.pow(1 + tasa, utilidad.length); }
+    // A: p = {ventas_base, crecimiento, canon, egresos_mes, meses_sin_canon, anio_vacancia, canon_post, inversion, reventa, tasa, impuesto}
+    function A(p) { const U = []; for (let t = 0; t < H; t++) { const v = p.ventas_base * Math.pow(1 + p.crecimiento, t);
+      let meses = 12, nivel = 1;
+      if (p.meses_sin_canon > 0) { if (t + 1 === p.anio_vacancia) meses = 12 - p.meses_sin_canon; if (t + 1 >= p.anio_vacancia) nivel = p.canon_post; }
+      U.push(p.canon * v * meses * nivel - 12 * p.egresos_mes); } return vpn(p.inversion, U, p.tasa, p.impuesto, p.reventa); }
+    // B: p = {tramos, nuevos: [n1, n2, n3], factor_nuevos, retencion, ingreso, margen_admin, fijos_tramo, inversion_tramo, tasa, impuesto}; sin reventa
+    function B(p) { const k = Math.round(p.tramos); if (k < 1) return 0; let comprados = 0; for (let j = 0; j < k; j++) comprados += p.nuevos[j]; comprados *= p.factor_nuevos;
+      const U = []; for (let t = 0; t < H; t++) U.push(12 * (comprados * Math.pow(p.retencion, t) * p.ingreso * p.margen_admin - p.fijos_tramo * k)); return vpn(p.inversion_tramo * k, U, p.tasa, p.impuesto, 0); }
+    // C: la opción cuesta costo_opcion hoy; A se compra en el año 1 solo si su VPN en ese escenario es positivo
+    function C(vpnA, p) { return -p.costo_opcion + Math.max(0, vpnA) / (1 + p.tasa); }
+    function D() { return 0; }
+    function todas(p) { const a = A(p); return { A: a, B: B(p), C: C(a, p), D: 0 }; }
+    // la tabla de robustez: lista = [{nombre, p}] -> VPN por alternativa y escenario, ganador, peor caso, arrepentimiento
+    function robustez(lista) {
+      const alt = ["A", "B", "C", "D"], vpn = { A: [], B: [], C: [], D: [] }, ganador = [], arrepentimiento = { A: [], B: [], C: [], D: [] };
+      lista.forEach((e) => { const r = todas(e.p); alt.forEach((a) => vpn[a].push(r[a])); const mejor = Math.max(r.A, r.B, r.C, r.D);
+        ganador.push(alt.filter((a) => Math.abs(r[a] - mejor) < 1e-9)); alt.forEach((a) => arrepentimiento[a].push(mejor - r[a])); });
+      const peor = {}, arrMax = {}; alt.forEach((a) => { peor[a] = vpn[a].length ? Math.min.apply(null, vpn[a]) : NaN; arrMax[a] = vpn[a].length ? Math.max.apply(null, arrepentimiento[a]) : NaN; });
+      let robusta = alt[0]; alt.forEach((a) => { if (arrMax[a] < arrMax[robusta] - 1e-9) robusta = a; });
+      return { alternativas: alt, vpn, ganador, peor, arrepentimiento, arrepentimiento_max: arrMax, robusta };
+    }
+    return { H, anualidad, vpn, A, B, C, D, todas, robustez };
+  })();
+  // los parámetros de referencia (el escenario base con el local 1 y dos tramos)
+  const PARAM_REF = { ventas_base: 147, local: 1, crecimiento: 0, canon: 0.1, egresos_mes: 2.5, meses_sin_canon: 0, anio_vacancia: 1, canon_post: 1, inversion: 700, reventa: 700, tramos: 2, nuevos: [1000, 750, 500], factor_nuevos: 1, retencion: 0.7, ingreso: 0.08, margen_admin: 0.25, fijos_tramo: 2, inversion_tramo: 150, costo_opcion: 120, tasa: 0.12, impuesto: 0.3, horizonte: 5 };
+  const LOCALES = [ { local: 1, nombre: "local 1 (oficinas)", ventas_base: 147, banda_baja: 124.4, banda_alta: 169.7, canon_mercado: 16.5 }, { local: 2, nombre: "local 2 (mixta)", ventas_base: 207.2, banda_baja: 184.5, banda_alta: 229.8, canon_mercado: 27 }, { local: 3, nombre: "local 3 (residencial)", ventas_base: 63.3, banda_baja: 40.6, banda_alta: 85.9, canon_mercado: 8 } ];
+  const MAE_ARBOL = 22.6;
+  // el escenario base y los cuatro de referencia (eje 1, clave demanda: la demanda de espacio comercial; eje 2, clave costos: los egresos del propietario, la tasa y el canon renegociado)
+  const ESCENARIOS_REF = [
+    { escenario: "base", nombre: "Base", demanda: "sin ajuste", costos: "sin ajuste", crecimiento: 0, canon: 0.1, egresos_mes: 2.5, margen_admin: 0.25, factor_nuevos: 1, retencion: 0.7, tasa: 0.12,
+      logica: "Los parámetros de referencia sin ajustes: el punto de partida que se sella en el sobre. No es un escenario: es la foto de hoy." },
+    { escenario: "E1", nombre: "Expansión", demanda: "crece", costos: "estables", crecimiento: 0.04, canon: 0.1, egresos_mes: 2.5, margen_admin: 0.25, factor_nuevos: 1, retencion: 0.7, tasa: 0.12,
+      logica: "La demanda de espacio comercial crece con el empleo y el comercio formal: las ventas de los arrendatarios suben cerca de 4 % al año y la rotación de locales es baja. Los egresos del propietario se mantienen estables, la tasa de descuento no cambia y el canon pactado se sostiene. La administración de inmuebles suma propietarios al costo cotizado y retiene siete de cada diez. Comprar y administrar rinden a la vez." },
+    { escenario: "E2", nombre: "Expansión con costos", demanda: "crece", costos: "suben", crecimiento: 0.04, canon: 0.09, egresos_mes: 3, margen_admin: 0.2, factor_nuevos: 1, retencion: 0.7, tasa: 0.14,
+      logica: "La demanda crece, pero los costos del propietario suben con ella: predial, seguros y mantenimiento aumentan 20 % y la tasa de descuento pasa a 14 %. Con oferta nueva en los corredores comerciales, el canon se renegocia a la baja: 9 % de las ventas en lugar de 10 %. El margen de la administración cede cinco puntos. Que el arrendatario venda más no compensa el encarecimiento del capital." },
+    { escenario: "E3", nombre: "Contracción", demanda: "se estanca", costos: "suben", crecimiento: -0.03, canon: 0.09, egresos_mes: 3, margen_admin: 0.2, factor_nuevos: 0.75, retencion: 0.65, tasa: 0.14,
+      logica: "La demanda de espacio comercial se estanca: las ventas de los arrendatarios caen 3 % al año y los costos suben de todas formas (egresos +20 %, tasa 14 %, canon renegociado al 9 %). Conseguir propietarios nuevos cuesta un tercio más y se retiran antes (retención 65 %). Nada rinde y la alternativa que menos pierde es esperar." },
+    { escenario: "E4", nombre: "Estancamiento", demanda: "se estanca", costos: "estables", crecimiento: -0.03, canon: 0.1, egresos_mes: 2.5, margen_admin: 0.25, factor_nuevos: 0.75, retencion: 0.65, tasa: 0.12,
+      logica: "El mercado no crece pero tampoco se encarece: las ventas de los arrendatarios caen 3 % al año, con egresos del propietario estables y tasa de 12 %. El canon cubre los egresos y la venta del año 5 sostiene el valor del local; la administración crece despacio y el segundo tramo apenas se paga. Un escenario sin sobresaltos en el que el inmueble conserva su valor." }
+  ];
+  const VPN_SELLADO = { A: [66.6, 248.9, -186.8], B: [151.3, 212.1, 182.5], C: -60.5, D: 0, choque: { A: [-92.0, 37.6, -274.1], B: [140.8, 194.5, 161.1], C: -120.0, D: 0 } };
+// <<< fin de los datos en línea (JS)
+</script>
+<style>
+  /* estilos propios de la mesa de escenarios (prefijo me-); candidatos a styles.css */
+  .me-tabla { border-collapse: collapse; font-size: 0.84rem; width: 100%; margin: 0.5em 0; }
+  .me-tabla th, .me-tabla td { padding: 4px 6px; border-bottom: 1px solid #e6e6ea; text-align: center; }
+  .me-tabla th { color: #3a3acb; font-weight: 600; }
+  .me-tabla td:first-child, .me-tabla th:first-child { text-align: left; }
+  .me-tabla input[type="number"], .me-tabla input[type="text"] { width: 92px; padding: 3px 5px; border: 1px solid #cecfd4; border-radius: 6px; font-size: 0.82rem; text-align: center; }
+  .me-tabla input[type="text"] { width: 130px; }
+  .me-gana { background: #eafaf1; color: #2f9460; font-weight: 700; }
+  .me-neg { color: #c2552f; }
+  .me-robusta { color: #2f9460; font-weight: 700; }
+</style>
+<div class="widget-card" id="wg-mesa">
+  <div class="widget-head">La mesa de escenarios · Supuestos editables</div>
+  <div class="widget-body">
+    <div class="widget-instr">Cada columna es un escenario; cada fila, un parámetro de la plantilla. Los que no aparecen (inversión, reventa, ingreso por propietario, costo de la opción, impuesto) son los de referencia. "Copiar la tabla" prepara el texto para el task.</div>
+    <div class="widget-row">
+      <label for="ms-n">Escenarios</label>
+      <select id="ms-n"><option value="3">3</option><option value="4" selected>4</option></select>
+      <label for="ms-local">Local de A</label>
+      <select id="ms-local"></select>
+      <button type="button" class="btn-widget btn-widget-ghost" id="ms-ref">Cargar los escenarios de referencia</button>
+      <button type="button" class="btn-widget btn-widget-ghost" id="ms-base">Todos como el base</button>
+      <button type="button" class="btn-widget" id="ms-copiar">Copiar la tabla</button>
+    </div>
+    <div style="overflow-x:auto"><table id="ms-supuestos" class="me-tabla"></table></div>
+    <div style="overflow-x:auto"><table id="ms-vpn" class="me-tabla"></table></div>
+    <svg id="ms-svg" class="widget-svg" viewBox="0 0 680 300" role="img" aria-label="VPN por alternativa y escenario"></svg>
+    <div class="widget-note" id="ms-nota"></div>
+    <textarea id="ms-texto" style="width:100%; height:120px; margin-top:.6em; font-family: var(--font-mono); font-size:.78rem; border:1px solid var(--borde); border-radius:8px; padding:8px" placeholder="Aquí aparece el texto para el task."></textarea>
+  </div>
+</div>
+<script>
+(function () {
+  const el = (id) => document.getElementById(id);
+  const C = { morado: "#5454e9", verde: "#4cb979", naranja: "#e9683b", gris: "#88898c", tinta: "#1b1d29", borde: "#cecfd4" };
+  const COL = { A: C.morado, B: C.verde, C: C.naranja, D: C.gris };
+  const ETIQ = { A: "A: comprar", B: "B: administrar", C: "C: la opción", D: "D: esperar" };
+  const FILAS = [
+    { k: "nombre", et: "Nombre del escenario", tipo: "text" },
+    { k: "ventas_base", et: "Ventas base del arrendatario (millones al mes)", tipo: "num", step: 0.1 },
+    { k: "crecimiento", et: "Crecimiento anual de las ventas (%)", tipo: "pct", step: 0.5 },
+    { k: "canon", et: "Canon (% de las ventas)", tipo: "pct", step: 0.5 },
+    { k: "egresos_mes", et: "Egresos del propietario (millones al mes)", tipo: "num", step: 0.1 },
+    { k: "tasa", et: "Tasa de descuento (%)", tipo: "pct", step: 0.5 },
+    { k: "factor_nuevos", et: "Propietarios por tramo (factor sobre 1.000 / 750 / 500)", tipo: "num", step: 0.05 },
+    { k: "retencion", et: "Retención anual de la administración (%)", tipo: "pct", step: 1 },
+    { k: "margen_admin", et: "Margen de administración (%)", tipo: "pct", step: 1 },
+    { k: "tramos", et: "Tramos de B (1 a 3)", tipo: "int", min: 1, max: 3 }
+  ];
+  const f1 = (x) => (Math.round(x * 10) / 10).toFixed(1);
+  let N = 4, local = LOCALES[0], esc = [], anterior = null;
+  function base(nombre) { return { nombre, ventas_base: local.ventas_base, crecimiento: 0, canon: PARAM_REF.canon, egresos_mes: PARAM_REF.egresos_mes, tasa: PARAM_REF.tasa, factor_nuevos: 1, retencion: PARAM_REF.retencion, margen_admin: PARAM_REF.margen_admin, tramos: 2 }; }
+  function deReferencia() {
+    const ref = ESCENARIOS_REF.filter((e) => e.escenario !== "base");
+    esc = ref.slice(0, N).map((e) => ({ nombre: e.nombre, ventas_base: local.ventas_base, crecimiento: e.crecimiento, canon: e.canon, egresos_mes: e.egresos_mes, tasa: e.tasa, factor_nuevos: e.factor_nuevos, retencion: e.retencion, margen_admin: e.margen_admin, tramos: 2 }));
+    while (esc.length < N) esc.push(base("Escenario " + (esc.length + 1)));
+  }
+  function params(e) { return { ...PARAM_REF, ...e, local: local.local }; }
+  function construir() {
+    const t = el("ms-supuestos"); t.innerHTML = "";
+    const h = document.createElement("tr"); h.appendChild(Object.assign(document.createElement("th"), { textContent: "Parámetro" }));
+    esc.forEach((e, j) => h.appendChild(Object.assign(document.createElement("th"), { textContent: "Escenario " + (j + 1) }))); t.appendChild(h);
+    FILAS.forEach((f) => {
+      const tr = document.createElement("tr"); tr.appendChild(Object.assign(document.createElement("td"), { textContent: f.et }));
+      esc.forEach((e) => {
+        const td = document.createElement("td"); const inp = document.createElement("input");
+        if (f.tipo === "text") { inp.type = "text"; inp.value = e[f.k]; }
+        else { inp.type = "number"; inp.step = f.step || 1; if (f.tipo === "int") { inp.min = f.min; inp.max = f.max; }
+          inp.value = f.tipo === "pct" ? Math.round(e[f.k] * 1000) / 10 : e[f.k]; }
+        inp.addEventListener("input", () => {
+          if (f.tipo === "text") e[f.k] = inp.value;
+          else { let v = Number(inp.value); if (isNaN(v)) return; if (f.tipo === "int") v = Math.max(f.min, Math.min(f.max, Math.round(v))); e[f.k] = f.tipo === "pct" ? v / 100 : v; }
+          actualizar();
+        });
+        td.appendChild(inp); tr.appendChild(td);
+      });
+      t.appendChild(tr);
+    });
+    actualizar();
+  }
+  function actualizar() {
+    const lista = esc.map((e) => ({ nombre: e.nombre, p: params(e) }));
+    const r = VPN.robustez(lista);
+    const t = el("ms-vpn"); t.innerHTML = "";
+    const h = document.createElement("tr"); h.appendChild(Object.assign(document.createElement("th"), { textContent: "VPN (millones)" }));
+    esc.forEach((e) => h.appendChild(Object.assign(document.createElement("th"), { textContent: e.nombre || "(sin nombre)" })));
+    h.appendChild(Object.assign(document.createElement("th"), { textContent: "Peor caso" })); h.appendChild(Object.assign(document.createElement("th"), { textContent: "Arrepentimiento máximo" })); t.appendChild(h);
+    r.alternativas.forEach((a) => {
+      const tr = document.createElement("tr"); tr.appendChild(Object.assign(document.createElement("td"), { textContent: ETIQ[a] + (a === "A" ? " (" + local.nombre.split(" (")[0] + ")" : "") }));
+      r.vpn[a].forEach((v, j) => { const td = document.createElement("td"); td.textContent = f1(v); if (r.ganador[j].includes(a)) td.className = "me-gana"; else if (v < 0) td.className = "me-neg"; tr.appendChild(td); });
+      const p = document.createElement("td"); p.textContent = f1(r.peor[a]); if (r.peor[a] < 0) p.className = "me-neg"; tr.appendChild(p);
+      const m = document.createElement("td"); m.textContent = f1(r.arrepentimiento_max[a]); if (a === r.robusta) m.className = "me-robusta"; tr.appendChild(m);
+      t.appendChild(tr);
+    });
+    const g = document.createElement("tr"); g.appendChild(Object.assign(document.createElement("td"), { textContent: "Gana", style: "font-weight:700" }));
+    r.ganador.forEach((w) => g.appendChild(Object.assign(document.createElement("td"), { textContent: w.join(" y "), className: "me-gana" })));
+    g.appendChild(document.createElement("td")); g.appendChild(Object.assign(document.createElement("td"), { textContent: "robusta: " + r.robusta, className: "me-robusta" })); t.appendChild(g);
+    dibujar(r); nota(r); anterior = r;
+  }
+  function svgEl(tag, attrs, text) { const e = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text !== undefined) e.textContent = text; return e; }
+  function dibujar(r) {
+    const svg = el("ms-svg"); svg.innerHTML = "";
+    const W = 680, H = 300, L = 56, R = 16, T = 28, B = 46;
+    let vals = []; r.alternativas.forEach((a) => vals = vals.concat(r.vpn[a]));
+    const vmax = Math.max(50, ...vals.map(Math.abs)) * 1.15;
+    const sy = (v) => T + (1 - (v + vmax) / (2 * vmax)) * (H - T - B);
+    svg.appendChild(svgEl("rect", { x: L, y: T, width: W - L - R, height: H - T - B, fill: "#fbfbfe", stroke: C.borde }));
+    svg.appendChild(svgEl("line", { x1: L, y1: sy(0), x2: W - R, y2: sy(0), stroke: C.tinta }));
+    [-vmax, -vmax / 2, 0, vmax / 2, vmax].forEach((v) => { svg.appendChild(svgEl("text", { x: L - 6, y: sy(v) + 4, "font-size": 10, fill: C.gris, "text-anchor": "end" }, Math.round(v))); });
+    const ng = esc.length, gw = (W - L - R) / ng, bw = gw / 6;
+    esc.forEach((e, j) => {
+      r.alternativas.forEach((a, i) => {
+        const v = r.vpn[a][j]; const x = L + j * gw + gw * 0.1 + i * bw * 1.2;
+        svg.appendChild(svgEl("rect", { x, y: Math.min(sy(v), sy(0)), width: bw, height: Math.abs(sy(v) - sy(0)), fill: COL[a], opacity: r.ganador[j].includes(a) ? 1 : 0.55 }));
+        svg.appendChild(svgEl("text", { x: x + bw / 2, y: v >= 0 ? sy(v) - 3 : sy(v) + 11, "font-size": 9, fill: C.tinta, "text-anchor": "middle" }, Math.round(v)));
+      });
+      svg.appendChild(svgEl("text", { x: L + j * gw + gw / 2, y: H - B + 16, "font-size": 11, fill: C.tinta, "text-anchor": "middle" }, (e.nombre || "escenario " + (j + 1)).slice(0, 22)));
+      svg.appendChild(svgEl("text", { x: L + j * gw + gw / 2, y: H - B + 30, "font-size": 10, fill: r.ganador[j].length === 1 ? COL[r.ganador[j][0]] : C.gris, "font-weight": 700, "text-anchor": "middle" }, "gana " + r.ganador[j].join(" y ")));
+    });
+    r.alternativas.forEach((a, i) => { svg.appendChild(svgEl("rect", { x: L + 8 + i * 150, y: 8, width: 10, height: 10, fill: COL[a] })); svg.appendChild(svgEl("text", { x: L + 22 + i * 150, y: 17, "font-size": 10.5, fill: C.tinta }, ETIQ[a])); });
+  }
+  function nota(r) {
+    const cuenta = {}; r.ganador.forEach((w) => w.forEach((a) => cuenta[a] = (cuenta[a] || 0) + 1));
+    const quien = r.alternativas.filter((a) => cuenta[a]).map((a) => `${a} gana en ${cuenta[a]} de ${esc.length}`).join("; ");
+    const b = VPN.todas(params(base("")));
+    let s = `${quien}. La robusta es ${r.robusta} (arrepentimiento máximo ${f1(r.arrepentimiento_max[r.robusta])}); la que más se puede arrepentir es ${r.alternativas.reduce((m, a) => r.arrepentimiento_max[a] > r.arrepentimiento_max[m] ? a : m, "A")}. `;
+    s += `Con este local y dos tramos, el base vale A ${f1(b.A)} · B ${f1(b.B)} · C ${f1(b.C)} · D 0 (el sobre, con el local 1: 66.6 · 212.1 · -60.5 · 0). `;
+    if (anterior && anterior.robusta !== r.robusta) s += `Qué cambió: la robusta pasó de ${anterior.robusta} a ${r.robusta}. `;
+    else if (anterior) { const dif = r.ganador.map((w, j) => (anterior.ganador[j] && anterior.ganador[j].join("") !== w.join("")) ? j + 1 : 0).filter((x) => x); if (dif.length) s += `Qué cambió: el ganador del escenario ${dif.join(", ")}. `; }
+    s += "Qué significa: la alternativa que se recomienda tiene que sostenerse en estas columnas, no en la que más guste.";
+    el("ms-nota").textContent = s;
+  }
+  function texto() {
+    const r = VPN.robustez(esc.map((e) => ({ nombre: e.nombre, p: params(e) })));
+    let s = "Tabla de supuestos (local de A: " + local.nombre + ", ventas base " + local.ventas_base + ")\n";
+    s += "parametro | " + esc.map((e) => e.nombre).join(" | ") + "\n";
+    FILAS.slice(1).forEach((f) => { s += f.et + " | " + esc.map((e) => f.tipo === "pct" ? Math.round(e[f.k] * 1000) / 10 + " %" : e[f.k]).join(" | ") + "\n"; });
+    s += "\nTabla de robustez (VPN a cinco años, millones)\nalternativa | " + esc.map((e) => e.nombre).join(" | ") + " | peor caso | arrepentimiento maximo\n";
+    r.alternativas.forEach((a) => { s += ETIQ[a] + " | " + r.vpn[a].map(f1).join(" | ") + " | " + f1(r.peor[a]) + " | " + f1(r.arrepentimiento_max[a]) + "\n"; });
+    s += "gana | " + r.ganador.map((w) => w.join(" y ")).join(" | ") + "\nrobusta: " + r.robusta + "\n";
+    return s;
+  }
+  LOCALES.forEach((l) => { const o = document.createElement("option"); o.value = l.local; o.textContent = `${l.nombre}: ventas base ${l.ventas_base} [${l.banda_baja}, ${l.banda_alta}]`; el("ms-local").appendChild(o); });
+  el("ms-n").addEventListener("change", () => { N = Number(el("ms-n").value); while (esc.length < N) esc.push(base("Escenario " + (esc.length + 1))); esc = esc.slice(0, N); construir(); });
+  el("ms-local").addEventListener("change", () => { local = LOCALES[Number(el("ms-local").value) - 1]; esc.forEach((e) => e.ventas_base = local.ventas_base); construir(); });
+  el("ms-ref").addEventListener("click", () => { deReferencia(); construir(); });
+  el("ms-base").addEventListener("click", () => { esc = esc.map((e, j) => base(e.nombre || "Escenario " + (j + 1))); construir(); });
+  el("ms-copiar").addEventListener("click", () => { const s = texto(); el("ms-texto").value = s; if (navigator.clipboard) navigator.clipboard.writeText(s).catch(() => {}); });
+  deReferencia(); construir();
+})();
+</script>
+```
+
+**Qué cambió y qué significa.** Pon la tasa en 14 % en las cuatro columnas: A deja de ganar en Estancamiento (43.6 pasa a −6.1) y el mapa queda en manos de B y D. Baja las ventas base a 124.4, la banda baja del árbol: A pierde en tres de las cuatro columnas. Sube la retención de la administración a 75 %: B gana en tres y su arrepentimiento máximo cae de 77.5 a 18.8. Eso es la sensibilidad de la recomendación a los supuestos, y es lo que la junta pregunta: no cuánto vale A, sino con qué supuestos deja de valer.
+
+# El error del árbol: la banda y el equilibrio
+
+Hay una incertidumbre que no está en la 2 × 2 porque no es irreducible: cuánto vende de verdad el arrendatario del local 1. El árbol dice 147.0 con un error promedio de 22.6, y el VPN de A cambia de signo en el equilibrio exacto de la sección 5: **125.0** de ventas mensuales, 22.0 por debajo de la predicción. El <span class="term">análisis de banda</span> calcula A, C y D con las ventas del local en la banda baja, base y alta de la semana 6. C se calcula como lo que es: pagar 120 hoy por el arriendo con opción y, en el año 1, comprar solo si las ventas observadas lo justifican.
+
+| Ventas base del local 1 | A | C | D |
+|---|---|---|---|
+| Banda baja, 124.4 | −1.8 | −120.0 | 0 |
+| Predicción del árbol, 147.0 | 66.6 | −60.5 | 0 |
+| Banda alta, 169.7 | 135.4 | 0.9 | 0 |
+
+**Qué significa.** El signo de A sigue dependiendo del error del árbol (−1.8 en la banda baja, 135.4 en la alta), pero la reventa del año 5 acota la pérdida: el peor caso de la banda ya no es profundo. Eso cambia el papel de C. Una opción vale cuando compra la información que decide **y** cuando el peor caso sin ella es costoso; aquí **C queda dominada por A en toda la banda** (−120.0, −60.5 y 0.9 contra −1.8, 66.6 y 135.4): pagar 120 por esperar un año protege contra una pérdida máxima de 1.8. El <span class="term">valor de la información</span> no se presume: se calcula contra la plantilla, y con esta plantilla la opción no vale lo que cuesta. Esperar (D) tampoco es gratis: vale 0 frente a los 66.6 de actuar, y los locales candidatos pueden venderse a otro comprador.
+
+¿Dónde queda entonces el riesgo de A, si la banda no lo mata? En lo que la banda no mide. El árbol estima cuánto vende el arrendatario **si opera**; no dice nada de que deje de operar. Ese riesgo —la vacancia— es el choque de la siguiente sección, y los escenarios ya mostraron el otro (Contracción: −60.8).
+
+# El choque de la sesión: la vacancia
+
+El choque que se presenta en la sesión no mueve la demanda ni los costos: mueve el contrato. El arrendatario sale al inicio del año 1; el local pasa **8 meses sin canon** (los egresos del propietario siguen corriendo), se re-arrienda con un canon **10 % más bajo** y la tasa sube a **14 %**. En [el código de la semana](../practice/cocina.html) se puede cambiar cada pieza y recalcular.
+
+A con el local 1 pasa de 66.6 a **−92.0**. Las piezas, por separado: la vacancia sola (8 meses y canon −10 %) la deja en −44.0; la tasa sola, en 15.4. La tasa, sola, no le cambia el signo: lo que se lo cambia es el contrato. El local 2 cae a 37.6 y el local 3 a −274.1. B con dos tramos, que no depende de ningún local, pasa de 212.1 a 194.5; C queda en −120.0 (con A en −92.0, la opción no se ejerce) y D en 0. **Sobreviven B y D.** Una recomendación que no sobrevive un choque de este tamaño no era una recomendación: era una apuesta a que el arrendatario se quedaba.
+
+Aquí reaparece, en su lugar correcto, la lección de la sección anterior: la opción de compra informa sobre la demanda del local (seis meses de operación observada antes de poner 700), y el choque muestra el riesgo que esa información reduce. Si el equipo cree que la rotación de arrendatarios en la zona es alta, C vuelve a la conversación aunque el base le dé −60.5 — pero esa creencia es un supuesto, va a la tabla con su fuente, y lo que la vigila mientras tanto es un disparador.
+
+# Los disparadores
+
+Un escenario sin disparadores es un ejercicio de salón. El <span class="term">disparador</span> es lo que se vería **primero** si un escenario está llegando: un indicador de la tabla de vigilancia, un umbral, cada cuánto se mira, quién lo mira y qué se hace cuando cruza. Es la vigilancia de la semana 2 con un dueño y una acción. Los de referencia:
+
+| Indicador | Umbral | Frecuencia | Dueño | Acción |
+|---|---|---|---|---|
+| Oferta nueva de locales comerciales en Barranquilla (DANE, licencias de construcción; portales inmobiliarios) | Área comercial aprobada creciendo a dos dígitos interanual | Trimestral | Gerencia de inversión | Activar "suben" en el canon: recalcular A con canon renegociado al 9 % antes de firmar |
+| Ventas reales del comercio minorista (DANE, Encuesta Mensual de Comercio) | Variación anual negativa tres meses seguidos | Mensual | Gerencia financiera | Activar "se estanca": recalcular con ventas −3 % y revisar la posición |
+| Tiempo de re-arriendo de locales en los corredores comerciales de Barranquilla (portales inmobiliarios; corredores de la plaza) | Más de 4 meses en promedio | Trimestral | Gerencia de administración | Recalcular A con el choque de vacancia (8 meses sin canon, canon −10 %) y provisionarla |
+| Costo de adquisición por propietario en la campaña de administración | Más de 200.000 pesos en el primer tramo | Quincenal durante la campaña | Gerencia de administración | Parar antes del segundo tramo; revisar el canal |
+| Tasa de política del Banco de la República | 11 % o más | Cada reunión de la junta del Banco | Gerencia financiera | Recalcular todo con tasa 14 %: el margen de la compra se reduce a 15.4 |
+
+El disparador **no dice qué va a pasar**: dice qué se hace cuando pase. Un disparador sin acción es una alarma que nadie atiende; uno sin dueño, una alarma que nadie oye.
+
+# Opcional: ponerle ruido a los supuestos
+
+Los escenarios son pocos futuros, escritos con cuidado. Hay otra forma de preguntarle a la plantilla qué tan frágil es una alternativa: dejar los supuestos del escenario base y **ponerles ruido**: sortear mil veces las ventas base alrededor de 147 (con la desviación del error del árbol), el crecimiento entre −3 % y +4 %, el canon entre 9 % y 11 %, una vacancia de seis meses que ocurre con probabilidad de entre 10 % y 30 % (y cae en un año sorteado), la retención entre 62 % y 75 % y el factor de propietarios entre 0.75 y 1.10, y mirar la distribución del VPN. Se llama Monte Carlo. No es ponerles probabilidades a los escenarios: las distribuciones son supuestos sobre los parámetros, dentro de un solo futuro, y también van al libro de supuestos.
+
+El resultado, con mil corridas y la semilla fija del curso: A pierde en el **25.4 %** de las corridas (P10 −52.1, P50 56.9, P90 181.0; hay una vacancia en el 20.4 % de ellas) y B con dos tramos casi nunca (P10 62.5, P50 156.7, P90 251.8; pierde en el 0.1 %). El tornado dice qué parámetro manda: las ventas base mueven el VPN de A en 217.3 millones entre sus extremos; el canon, 89.0; el crecimiento, 55.8; la vacancia de hasta seis meses, 55.1. Lo que más pesa sigue siendo la estimación del árbol de la semana 6: por eso la banda acompaña la recomendación hasta el final, y por eso el primer disparador de la tabla vigila el mercado del que esa estimación depende. Las corridas y el tornado, celda a celda, están en [el código de la semana](../practice/cocina.html).
+
+::: {.callout-connect}
+<div class="callout-title">En la sesión</div>
+- **El paper:** Wack (1985), los dos artículos de *Harvard Business Review* sobre los escenarios de Shell antes del choque del petróleo de 1973. Qué investigaron, con qué análisis, qué encontraron (los escenarios cambiaron el mapa mental de los directivos) y por qué importa para una decisión: robustez frente a exactitud. También qué tipo de evidencia es, porque no es un paper empírico.
+- **La aplicación:** el taxi de 2005 en una lámina; la 2 × 2 armada en vivo con las incertidumbres de los equipos; la tabla de supuestos con un error sembrado; el VPN de A a mano, con la reventa del año 5; la tabla de robustez y el arrepentimiento; el giro (la vacancia) y los disparadores con dueño.
+- **El cierre:** el task 6. ¿Le ganamos a la regla del sector? Las bandas de los tres locales comparadas entre equipos y la posición actualizada. Cada equipo trae sus dos incertidumbres críticas de la semana 2 escritas en una línea: se arman las 2 × 2 de la sala.
+:::
+
+# ¿Y esto cómo se ve en tu organización?
+
+¿Qué dos incertidumbres partirían en cuatro el futuro de tu negocio? No las dos que más preocupan: las dos que más mueven a las demás y que nadie puede resolver con un dato. Escríbelas como ejes (con sus dos extremos) y ponle nombre al cuadrante en el que el plan actual deja de funcionar. Es la primera pregunta del cierre de la semana 8.
+
+# Preguntas de comprensión
+
+<details class="pregunta">
+<summary>1. ¿Por qué no se promedian los escenarios?</summary>
+Porque el promedio exige probabilidades que nadie declaró (y que, declaradas, convertirían los escenarios en un pronóstico), y produce un número que no ocurre en ningún futuro. A vale 99.4 en Expansión y −60.8 en Contracción; el promedio de los cuatro, cerca de 17, borra justamente la información que la junta necesita: en qué futuros A funciona y en cuáles no. Los escenarios se comparan con la tabla de robustez, no se promedian.
+</details>
+
+<details class="pregunta">
+<summary>2. ¿Qué le falta a esta tabla de supuestos? "Crecimiento de la demanda de espacio comercial: +12 % anual. Canon renegociado: 9 % de las ventas (DANE, licencias de construcción, y portal inmobiliario, fila 7, calidad media). Probabilidad del escenario: 60 %."</summary>
+Dos cosas. La fila del crecimiento no tiene fuente ni dice "supuesto del equipo", así que no existe (y 12 % anual multiplica lo que cualquier serie oficial muestra: habría que abrir la fuente). Y sobra la probabilidad: un escenario con 60 % es un pronóstico disfrazado, y hace que los otros tres dejen de contar. La fila del canon está bien.
+</details>
+
+<details class="pregunta">
+<summary>3. ¿Cuándo vale una opción de compra?</summary>
+Cuando la incertidumbre que manda es reducible (cuánto vende el arrendatario del local, no cuánto crece la demanda de la ciudad), cuando el peor caso sin la opción es costoso y cuando actuar es irreversible. En este caso la banda de A cruza el cero (−1.8 a 135.4), pero la reventa del año 5 acota el peor caso a −1.8: C queda dominada por A en toda la banda (−120.0 a 0.9) y sus 120 millones no compran protección que la plantilla no tenga ya. El valor de la información se calcula, no se presume; donde la opción vuelve a la conversación es en el riesgo de vacancia, que la banda no mide, y ese supuesto va a la tabla con su fuente.
+</details>
+
+<details class="pregunta">
+<summary>4. ¿Qué disparador le pondrías al riesgo de vacancia?</summary>
+Indicador: el tiempo promedio de re-arriendo de locales en los corredores comerciales de Barranquilla (portales inmobiliarios y corredores de la plaza) y, en el portafolio propio, la mora en el canon de los arrendatarios. Umbral: más de 4 meses de re-arriendo promedio (o dos meses de mora de un arrendatario). Frecuencia: trimestral (la mora, mensual). Dueño: la gerencia de administración, que responde por los contratos. Acción: recalcular A con el choque (8 meses sin canon, canon −10 %), provisionar la vacancia y, si además la tasa cruzó su umbral, pasar la recomendación a B o D: con los dos choques A queda en −92.0.
+</details>
+
+# Lectura corta (opcional)
+
+Walter Sosa Escudero, *Qué es (y qué no es) la estadística* (Siglo XXI, 2014), el capítulo sobre predicción e incertidumbre (verifica el número del capítulo en el índice de la edición que tengas). Veinte páginas sobre por qué un pronóstico sin su incertidumbre no dice lo que parece decir, en el tono de esta página.

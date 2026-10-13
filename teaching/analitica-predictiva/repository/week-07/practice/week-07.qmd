@@ -1,0 +1,519 @@
+---
+title: "Práctica 7: la mesa de escenarios completa"
+subtitle: "Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 7 · Práctica"
+lang: es
+---
+
+::: {.callout-key}
+<div class="callout-title">Qué es esta página</div>
+La mesa arma la tabla de supuestos de los escenarios del equipo y calcula, con la plantilla de VPN del curso, cuánto vale cada alternativa de Meridiano en cada uno: la tabla de robustez con el ganador, el peor caso y el arrepentimiento máximo; el análisis de banda con el equilibrio; el choque de la sesión (la vacancia); y, opcional, el ruido sobre los supuestos. Todo es aritmética en el navegador: carga al instante y se guarda sola en este navegador para que no se pierda al recargar. Las dos tablas que exporta son las del task 7.
+:::
+
+**Tiempo:** 40 a 60 minutos, en equipo. **Qué se necesita:** las dos incertidumbres críticas del task 2 con su tabla de vigilancia, y las ventas base con banda de su local (task 6). **La configuración de referencia reproduce el sobre:** local 1, dos tramos y el botón "Cargar los escenarios de referencia" deben dar A 66.6, B 212.1, C −60.5 y D 0 en el base, y B robusta con arrepentimiento máximo 77.5. Si aparece otra cosa, pulsa "Borrar lo guardado" y vuelve a cargar.
+
+```{=html}
+<script>
+// >>> datos en línea (JS) (los inserta input/_datos_en_linea_week07.R; no editar a mano)
+  // El motor de VPN del curso y los parámetros de referencia. Generado por datasets/week-07/_generar_vpn_meridiano.R; no editar a mano.
+  // Unidades: millones de pesos. Cinco años, flujos al final de cada año; en el año 5 el local se vende
+  // por su precio de compra (reventa); impuesto solo sobre la utilidad positiva.
+  const VPN = (function () {
+    const H = 5;
+    function anualidad(tasa, h) { h = h || H; let s = 0; for (let t = 1; t <= h; t++) s += 1 / Math.pow(1 + tasa, t); return s; }
+    function vpn(inversion, utilidad, tasa, impuesto, reventa) { let s = 0; for (let t = 0; t < utilidad.length; t++) { const u = utilidad[t]; s += (u - impuesto * Math.max(u, 0)) / Math.pow(1 + tasa, t + 1); } return -inversion + s + (reventa || 0) / Math.pow(1 + tasa, utilidad.length); }
+    // A: p = {ventas_base, crecimiento, canon, egresos_mes, meses_sin_canon, anio_vacancia, canon_post, inversion, reventa, tasa, impuesto}
+    function A(p) { const U = []; for (let t = 0; t < H; t++) { const v = p.ventas_base * Math.pow(1 + p.crecimiento, t);
+      let meses = 12, nivel = 1;
+      if (p.meses_sin_canon > 0) { if (t + 1 === p.anio_vacancia) meses = 12 - p.meses_sin_canon; if (t + 1 >= p.anio_vacancia) nivel = p.canon_post; }
+      U.push(p.canon * v * meses * nivel - 12 * p.egresos_mes); } return vpn(p.inversion, U, p.tasa, p.impuesto, p.reventa); }
+    // B: p = {tramos, nuevos: [n1, n2, n3], factor_nuevos, retencion, ingreso, margen_admin, fijos_tramo, inversion_tramo, tasa, impuesto}; sin reventa
+    function B(p) { const k = Math.round(p.tramos); if (k < 1) return 0; let comprados = 0; for (let j = 0; j < k; j++) comprados += p.nuevos[j]; comprados *= p.factor_nuevos;
+      const U = []; for (let t = 0; t < H; t++) U.push(12 * (comprados * Math.pow(p.retencion, t) * p.ingreso * p.margen_admin - p.fijos_tramo * k)); return vpn(p.inversion_tramo * k, U, p.tasa, p.impuesto, 0); }
+    // C: la opción cuesta costo_opcion hoy; A se compra en el año 1 solo si su VPN en ese escenario es positivo
+    function C(vpnA, p) { return -p.costo_opcion + Math.max(0, vpnA) / (1 + p.tasa); }
+    function D() { return 0; }
+    function todas(p) { const a = A(p); return { A: a, B: B(p), C: C(a, p), D: 0 }; }
+    // la tabla de robustez: lista = [{nombre, p}] -> VPN por alternativa y escenario, ganador, peor caso, arrepentimiento
+    function robustez(lista) {
+      const alt = ["A", "B", "C", "D"], vpn = { A: [], B: [], C: [], D: [] }, ganador = [], arrepentimiento = { A: [], B: [], C: [], D: [] };
+      lista.forEach((e) => { const r = todas(e.p); alt.forEach((a) => vpn[a].push(r[a])); const mejor = Math.max(r.A, r.B, r.C, r.D);
+        ganador.push(alt.filter((a) => Math.abs(r[a] - mejor) < 1e-9)); alt.forEach((a) => arrepentimiento[a].push(mejor - r[a])); });
+      const peor = {}, arrMax = {}; alt.forEach((a) => { peor[a] = vpn[a].length ? Math.min.apply(null, vpn[a]) : NaN; arrMax[a] = vpn[a].length ? Math.max.apply(null, arrepentimiento[a]) : NaN; });
+      let robusta = alt[0]; alt.forEach((a) => { if (arrMax[a] < arrMax[robusta] - 1e-9) robusta = a; });
+      return { alternativas: alt, vpn, ganador, peor, arrepentimiento, arrepentimiento_max: arrMax, robusta };
+    }
+    return { H, anualidad, vpn, A, B, C, D, todas, robustez };
+  })();
+  // los parámetros de referencia (el escenario base con el local 1 y dos tramos)
+  const PARAM_REF = { ventas_base: 147, local: 1, crecimiento: 0, canon: 0.1, egresos_mes: 2.5, meses_sin_canon: 0, anio_vacancia: 1, canon_post: 1, inversion: 700, reventa: 700, tramos: 2, nuevos: [1000, 750, 500], factor_nuevos: 1, retencion: 0.7, ingreso: 0.08, margen_admin: 0.25, fijos_tramo: 2, inversion_tramo: 150, costo_opcion: 120, tasa: 0.12, impuesto: 0.3, horizonte: 5 };
+  const LOCALES = [ { local: 1, nombre: "local 1 (oficinas)", ventas_base: 147, banda_baja: 124.4, banda_alta: 169.7, canon_mercado: 16.5 }, { local: 2, nombre: "local 2 (mixta)", ventas_base: 207.2, banda_baja: 184.5, banda_alta: 229.8, canon_mercado: 27 }, { local: 3, nombre: "local 3 (residencial)", ventas_base: 63.3, banda_baja: 40.6, banda_alta: 85.9, canon_mercado: 8 } ];
+  const MAE_ARBOL = 22.6;
+  // el escenario base y los cuatro de referencia (eje 1, clave demanda: la demanda de espacio comercial; eje 2, clave costos: los egresos del propietario, la tasa y el canon renegociado)
+  const ESCENARIOS_REF = [
+    { escenario: "base", nombre: "Base", demanda: "sin ajuste", costos: "sin ajuste", crecimiento: 0, canon: 0.1, egresos_mes: 2.5, margen_admin: 0.25, factor_nuevos: 1, retencion: 0.7, tasa: 0.12,
+      logica: "Los parámetros de referencia sin ajustes: el punto de partida que se sella en el sobre. No es un escenario: es la foto de hoy." },
+    { escenario: "E1", nombre: "Expansión", demanda: "crece", costos: "estables", crecimiento: 0.04, canon: 0.1, egresos_mes: 2.5, margen_admin: 0.25, factor_nuevos: 1, retencion: 0.7, tasa: 0.12,
+      logica: "La demanda de espacio comercial crece con el empleo y el comercio formal: las ventas de los arrendatarios suben cerca de 4 % al año y la rotación de locales es baja. Los egresos del propietario se mantienen estables, la tasa de descuento no cambia y el canon pactado se sostiene. La administración de inmuebles suma propietarios al costo cotizado y retiene siete de cada diez. Comprar y administrar rinden a la vez." },
+    { escenario: "E2", nombre: "Expansión con costos", demanda: "crece", costos: "suben", crecimiento: 0.04, canon: 0.09, egresos_mes: 3, margen_admin: 0.2, factor_nuevos: 1, retencion: 0.7, tasa: 0.14,
+      logica: "La demanda crece, pero los costos del propietario suben con ella: predial, seguros y mantenimiento aumentan 20 % y la tasa de descuento pasa a 14 %. Con oferta nueva en los corredores comerciales, el canon se renegocia a la baja: 9 % de las ventas en lugar de 10 %. El margen de la administración cede cinco puntos. Que el arrendatario venda más no compensa el encarecimiento del capital." },
+    { escenario: "E3", nombre: "Contracción", demanda: "se estanca", costos: "suben", crecimiento: -0.03, canon: 0.09, egresos_mes: 3, margen_admin: 0.2, factor_nuevos: 0.75, retencion: 0.65, tasa: 0.14,
+      logica: "La demanda de espacio comercial se estanca: las ventas de los arrendatarios caen 3 % al año y los costos suben de todas formas (egresos +20 %, tasa 14 %, canon renegociado al 9 %). Conseguir propietarios nuevos cuesta un tercio más y se retiran antes (retención 65 %). Nada rinde y la alternativa que menos pierde es esperar." },
+    { escenario: "E4", nombre: "Estancamiento", demanda: "se estanca", costos: "estables", crecimiento: -0.03, canon: 0.1, egresos_mes: 2.5, margen_admin: 0.25, factor_nuevos: 0.75, retencion: 0.65, tasa: 0.12,
+      logica: "El mercado no crece pero tampoco se encarece: las ventas de los arrendatarios caen 3 % al año, con egresos del propietario estables y tasa de 12 %. El canon cubre los egresos y la venta del año 5 sostiene el valor del local; la administración crece despacio y el segundo tramo apenas se paga. Un escenario sin sobresaltos en el que el inmueble conserva su valor." }
+  ];
+  const VPN_SELLADO = { A: [66.6, 248.9, -186.8], B: [151.3, 212.1, 182.5], C: -60.5, D: 0, choque: { A: [-92.0, 37.6, -274.1], B: [140.8, 194.5, 161.1], C: -120.0, D: 0 } };
+// <<< fin de los datos en línea (JS)
+</script>
+<style>
+  /* estilos propios de la mesa de escenarios (prefijo me-); candidatos a styles.css */
+  .me-tabla { border-collapse: collapse; font-size: 0.84rem; width: 100%; margin: 0.5em 0; }
+  .me-tabla th, .me-tabla td { padding: 4px 6px; border-bottom: 1px solid #e6e6ea; text-align: center; vertical-align: middle; }
+  .me-tabla th { color: #3a3acb; font-weight: 600; }
+  .me-tabla td:first-child, .me-tabla th:first-child { text-align: left; }
+  .me-tabla input[type="number"], .me-tabla input[type="text"], .me-tabla select, .me-tabla textarea { padding: 3px 5px; border: 1px solid #cecfd4; border-radius: 6px; font-size: 0.8rem; font-family: var(--font-sans); }
+  .me-tabla input[type="number"] { width: 84px; text-align: center; }
+  .me-tabla input[type="text"] { width: 120px; }
+  .me-tabla input.me-fuente { width: 210px; text-align: left; }
+  .me-tabla textarea { width: 120px; height: 64px; font-size: 0.74rem; resize: vertical; }
+  .me-grupo td { background: #f4f4fb; color: #3a3acb; font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: .03em; }
+  .me-gana { background: #eafaf1; color: #2f9460; font-weight: 700; }
+  .me-neg { color: #c2552f; }
+  .me-robusta { color: #2f9460; font-weight: 700; }
+  .me-base { background: #f4f4fb; }
+  .me-texto { width: 100%; height: 120px; margin-top: .6em; font-family: var(--font-mono); font-size: .76rem; border: 1px solid var(--borde); border-radius: 8px; padding: 8px; }
+</style>
+```
+
+# Los escenarios y sus supuestos
+
+Hasta cuatro escenarios, cada uno con su nombre y su lógica en cuatro líneas; debajo, todas las filas de la plantilla. Las columnas **Fuente** y **Calidad** son de cada parámetro (valen para todos los escenarios) y viajan con la exportación: son el libro de supuestos. El local y los tramos de referencia fijan el escenario base con el que se compara todo.
+
+```{=html}
+<div class="widget-card" id="wg-supuestos">
+  <div class="widget-head">La tabla de supuestos · Un escenario por columna</div>
+  <div class="widget-body">
+    <div class="widget-instr">Los porcentajes se escriben como porcentaje (4 es +4 %; −3 es −3 %). "Cargar los escenarios de referencia" trae los cuatro de la teoría con el local y los tramos elegidos; "Todos como el base" deja cada columna con los parámetros de referencia para cambiar solo lo que la lógica del escenario dice.</div>
+    <div class="widget-row">
+      <label for="mp-n">Escenarios</label>
+      <select id="mp-n"><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option></select>
+      <label for="mp-local">Local de A (base)</label>
+      <select id="mp-local"></select>
+      <label for="mp-tramos">Tramos de B (base)</label>
+      <select id="mp-tramos"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
+    </div>
+    <div class="widget-row">
+      <button type="button" class="btn-widget btn-widget-ghost" id="mp-ref">Cargar los escenarios de referencia</button>
+      <button type="button" class="btn-widget btn-widget-ghost" id="mp-base">Todos como el base</button>
+      <button type="button" class="btn-widget btn-widget-ghost" id="mp-borrar">Borrar lo guardado</button>
+      <button type="button" class="btn-widget" id="mp-copiar-sup">Copiar la tabla de supuestos</button>
+    </div>
+    <div style="overflow-x:auto"><table id="mp-supuestos" class="me-tabla"></table></div>
+    <div class="widget-note" id="mp-nota-sup"></div>
+    <textarea id="mp-texto-sup" class="me-texto" placeholder="Aquí aparece la tabla de supuestos en texto, para el anexo del task."></textarea>
+  </div>
+</div>
+```
+
+::: {.callout-workflow}
+<div class="callout-title">Qué mirar y qué significa</div>
+Cada celda que cambies es un supuesto y necesita una fila con fuente o la declaración "supuesto del equipo". Si una columna solo se distingue de las otras por el nombre, no es un escenario. Si dos columnas solo se distinguen en un parámetro de calidad baja, lo que se está probando es ese parámetro, y eso es exactamente lo que vale la pena saber antes de preguntarle al experto.
+:::
+
+# El VPN por escenario y la tabla de robustez
+
+```{=html}
+<div class="widget-card" id="wg-robustez">
+  <div class="widget-head">La tabla de robustez · VPN a cinco años, millones de pesos</div>
+  <div class="widget-body">
+    <div class="widget-instr">La columna "Base" usa los parámetros de referencia con el local y los tramos elegidos y es la que se compara con el sobre. El peor caso y el arrepentimiento máximo se calculan sobre los escenarios del equipo, no sobre el base.</div>
+    <div style="overflow-x:auto"><table id="mp-vpn" class="me-tabla"></table></div>
+    <svg id="mp-svg" class="widget-svg" viewBox="0 0 680 300" role="img" aria-label="VPN por alternativa y escenario"></svg>
+    <div class="widget-note" id="mp-nota-rob"></div>
+    <div class="widget-row" style="margin-top:.6em"><button type="button" class="btn-widget" id="mp-copiar-rob">Copiar la tabla de robustez</button></div>
+    <textarea id="mp-texto-rob" class="me-texto" placeholder="Aquí aparece la tabla de robustez en texto, para la parte 2 del task."></textarea>
+  </div>
+</div>
+```
+
+::: {.callout-workflow}
+<div class="callout-title">Qué mirar y qué significa</div>
+Primero la fila "Gana": si una alternativa gana en todas las columnas, la decisión es fácil y conviene preguntarse si los escenarios son lo bastante distintos. Luego el peor caso: cuánto pierde cada alternativa en el futuro que peor la trata. Por último el arrepentimiento máximo: la robusta es la que menos deja de ganar en el escenario en que más se equivoca. Si la robusta no coincide con la ganadora del base, la recomendación tiene que decir por qué eligió una u otra. Y los escenarios no se promedian: la tabla ya dice todo lo que el promedio esconde.
+:::
+
+# El análisis de banda y el equilibrio
+
+```{=html}
+<div class="widget-card" id="wg-banda">
+  <div class="widget-head">A, C y D con las ventas del local en su banda · parámetros del base</div>
+  <div class="widget-body">
+    <div class="widget-instr">La banda es la de la semana 6 (la predicción del árbol ± su error, 22.6). C paga la opción hoy y compra A en el año 1 solo si conviene.</div>
+    <div style="overflow-x:auto"><table id="mp-banda" class="me-tabla"></table></div>
+    <div class="widget-note" id="mp-nota-banda"></div>
+  </div>
+</div>
+```
+
+::: {.callout-workflow}
+<div class="callout-title">Qué mirar y qué significa</div>
+Si el VPN de A cambia de signo dentro de la banda, el signo depende del error del árbol y no de los escenarios; con la reventa del año 5, además, el peor caso queda acotado. Compara A y C punto por punto: si A domina en toda la banda, la opción no compra protección que la plantilla no tenga ya, y su costo no se justifica. Si la banda entera queda por encima de cero, la opción sobra; si queda entera por debajo, también, porque la respuesta ya es no.
+:::
+
+# El choque: la vacancia
+
+```{=html}
+<div class="widget-card" id="wg-choque">
+  <div class="widget-head">El choque de la sesión sobre el base · vacancia de 8 meses, canon −10 %, tasa 14 %</div>
+  <div class="widget-body">
+    <div class="widget-instr">"Calcular el choque" recalcula el base con el arrendatario saliendo al inicio del año 1: 8 meses sin canon (los egresos siguen corriendo), contrato nuevo 10 % más bajo y tasa en 14 %. "Aplicar a las columnas" pone esos supuestos en todos los escenarios, para ver qué recomendaciones sobreviven; "Deshacer" vuelve a lo que había.</div>
+    <div class="widget-row">
+      <button type="button" class="btn-widget" id="mp-choque">Calcular el choque</button>
+      <button type="button" class="btn-widget btn-widget-ghost" id="mp-aplicar">Aplicar a las columnas</button>
+      <button type="button" class="btn-widget btn-widget-ghost" id="mp-deshacer">Deshacer</button>
+    </div>
+    <div style="overflow-x:auto"><table id="mp-tabla-choque" class="me-tabla"></table></div>
+    <div class="widget-note" id="mp-nota-choque">Pulsa "Calcular el choque".</div>
+  </div>
+</div>
+```
+
+::: {.callout-workflow}
+<div class="callout-title">Qué mirar y qué significa</div>
+Con el local 1 y dos tramos, A pasa de 66.6 a −92.0 y B de 212.1 a 194.5: sobreviven B y D. Las piezas por separado dicen más: la tasa sola deja a A en 15.4 y la vacancia sola en −44.0 — lo que cambia el signo es el contrato, no la tasa. Con tu local y tus tramos la pregunta es la misma: ¿qué alternativa sigue en pie y cuál se cae?
+:::
+
+# Ponerle ruido a los supuestos (opcional)
+
+```{=html}
+<div class="widget-card" id="wg-mc">
+  <div class="widget-head">Monte Carlo · Ruido sobre los supuestos del base</div>
+  <div class="widget-body">
+    <div class="widget-instr">Ventas base ~ Normal(la del local elegido, 28); crecimiento entre −3 % y +4 %; canon entre 9 % y 11 %; una vacancia de seis meses con probabilidad entre 10 % y 30 % (si ocurre, cae en un año sorteado); retención entre 62 % y 75 %; propietarios × 0.75 a 1.10. Son supuestos sobre los parámetros dentro de un solo futuro, no probabilidades de los escenarios. El generador de números aleatorios no es el de R: los percentiles difieren de los del sobre en unos pocos millones.</div>
+    <div class="widget-row">
+      <label for="mp-ncorridas">Corridas</label>
+      <input type="number" id="mp-ncorridas" min="200" max="2000" step="100" value="1000" style="width:90px; padding:3px 6px; border:1px solid #cecfd4; border-radius:6px">
+      <button type="button" class="btn-widget" id="mp-correr">Ejecutar</button>
+    </div>
+    <div style="overflow-x:auto"><table id="mp-tabla-mc" class="me-tabla"></table></div>
+    <svg id="mp-tornado" class="widget-svg" viewBox="0 0 680 230" role="img" aria-label="Tornado del VPN de A"></svg>
+    <div class="widget-note" id="mp-nota-mc">Pulsa "Ejecutar".</div>
+  </div>
+</div>
+```
+
+::: {.callout-workflow}
+<div class="callout-title">Qué mirar y qué significa</div>
+La fracción de corridas con pérdida dice qué tan frágil es cada alternativa frente al ruido de sus propios supuestos; el tornado dice qué parámetro manda. Si el que manda son las ventas base, la incertidumbre grande sigue siendo la estimación del árbol: la banda de la semana 6 acompaña la recomendación y el valor de una opción se calcula contra su costo. Si manda la vacancia o el canon, lo que corresponde es un disparador con dueño.
+:::
+
+```{=html}
+<script>
+(function () {
+  const el = (id) => document.getElementById(id);
+  const f1 = (x) => (Math.round(x * 10) / 10).toFixed(1);
+  const C = { morado: "#5454e9", verde: "#4cb979", naranja: "#e9683b", gris: "#88898c", tinta: "#1b1d29", borde: "#cecfd4" };
+  const COL = { A: C.morado, B: C.verde, C: C.naranja, D: C.gris };
+  const ETIQ = { A: "A: comprar", B: "B: administrar", C: "C: la opción", D: "D: esperar" };
+  const CLAVE = "app-tic60286-s7-mesa-v3";
+  const CALIDADES = ["alta", "media", "baja", "supuesto del equipo"];
+  const FILAS = [
+    { grupo: "A · Comprar el primer local en Barranquilla" },
+    { k: "inversion", et: "Inversión (millones)", tipo: "num", step: 10 },
+    { k: "ventas_base", et: "Ventas base del arrendatario (millones al mes)", tipo: "num", step: 0.1 },
+    { k: "crecimiento", et: "Crecimiento anual de las ventas (%)", tipo: "pct", step: 0.5 },
+    { k: "canon", et: "Canon (% de las ventas del arrendatario)", tipo: "pct", step: 0.5 },
+    { k: "egresos_mes", et: "Egresos del propietario (millones al mes)", tipo: "num", step: 0.1 },
+    { k: "reventa", et: "Reventa del año 5 (millones)", tipo: "num", step: 10 },
+    { k: "meses_sin_canon", et: "Vacancia en el año 1 (meses sin canon)", tipo: "int", min: 0, max: 12 },
+    { k: "canon_post", et: "Canon tras la vacancia (% del pactado)", tipo: "pct", step: 5 },
+    { grupo: "B · La administración de inmuebles por tramos" },
+    { k: "tramos", et: "Tramos (1 a 3)", tipo: "int", min: 1, max: 3 },
+    { k: "nuevos_1", et: "Propietarios nuevos, tramo 1", tipo: "num", step: 50 },
+    { k: "nuevos_2", et: "Propietarios nuevos, tramo 2", tipo: "num", step: 50 },
+    { k: "nuevos_3", et: "Propietarios nuevos, tramo 3", tipo: "num", step: 50 },
+    { k: "inversion_tramo", et: "Inversión por tramo (millones)", tipo: "num", step: 10 },
+    { k: "ingreso", et: "Ingreso mensual por propietario (millones)", tipo: "num", step: 0.005 },
+    { k: "margen_admin", et: "Margen de administración (%)", tipo: "pct", step: 1 },
+    { k: "retencion", et: "Retención anual (%)", tipo: "pct", step: 1 },
+    { k: "fijos_tramo", et: "Costos fijos por tramo (millones al mes)", tipo: "num", step: 0.5 },
+    { grupo: "C · La opción de compra y las reglas de la plantilla" },
+    { k: "costo_opcion", et: "Costo de la opción (millones)", tipo: "num", step: 10 },
+    { k: "tasa", et: "Tasa de descuento (%)", tipo: "pct", step: 0.5 },
+    { k: "impuesto", et: "Impuesto sobre la utilidad positiva (%)", tipo: "pct", step: 1 },
+    { k: "horizonte", et: "Horizonte (años)", tipo: "fijo" }
+  ];
+  const FUENTES_REF = {
+    inversion: ["Precio de compra del local, obra y escrituración (gerencia de inversión)", "alta"],
+    ventas_base: ["Árbol de regresión de la semana 6, hoja del local", "media"],
+    crecimiento: ["DANE: Encuesta Mensual de Comercio (tabla de vigilancia)", "media"],
+    canon: ["Contrato estándar de Meridiano: canon mensual = 10 % de las ventas del arrendatario", "alta"],
+    egresos_mes: ["Predial, seguro y mantenimiento a cargo del propietario (gerencia financiera)", "media"],
+    reventa: ["Supuesto conservador de la plantilla: venta en el año 5 por el precio de compra, sin valorización", "supuesto del equipo"],
+    meses_sin_canon: ["Base: sin vacancia; el choque de la sesión usa 8 meses", "supuesto del equipo"],
+    canon_post: ["Contrato nuevo tras una vacancia (el choque usa 90 % del pactado)", "supuesto del equipo"],
+    tramos: ["Decisión del equipo", "supuesto del equipo"],
+    nuevos_1: ["Cotización de la campaña de adquisición (150.000 pesos por propietario)", "media"],
+    nuevos_2: ["Cotización de la campaña (200.000 pesos por propietario)", "media"],
+    nuevos_3: ["Cotización de la campaña (300.000 pesos por propietario)", "media"],
+    inversion_tramo: ["Presupuesto de la junta", "alta"],
+    ingreso: ["Tarifa mensual de administración por inmueble (80.000 pesos)", "alta"],
+    margen_admin: ["Contabilidad de la línea de administración", "alta"],
+    retencion: ["Historial de la línea de administración 2023 a 2026", "media"],
+    fijos_tramo: ["", "supuesto del equipo"],
+    costo_opcion: ["Presupuesto de la junta: arriendo con opción de compra, seis meses", "alta"],
+    tasa: ["Plantilla de la gerencia financiera (Banrep en 9.5 %)", "media"],
+    impuesto: ["Tarifa efectiva simplificada (gerencia financiera)", "media"],
+    horizonte: ["Plantilla de la gerencia financiera", "alta"]
+  };
+  let N = 4, local = LOCALES[0], tramosBase = 2, esc = [], fuentes = {}, anterior = null, respaldo = null;
+  function base(nombre) {
+    return { nombre, logica: "", inversion: PARAM_REF.inversion, ventas_base: local.ventas_base, crecimiento: 0, canon: PARAM_REF.canon,
+      egresos_mes: PARAM_REF.egresos_mes, reventa: PARAM_REF.reventa, meses_sin_canon: 0, canon_post: 1,
+      tramos: tramosBase, nuevos_1: PARAM_REF.nuevos[0], nuevos_2: PARAM_REF.nuevos[1], nuevos_3: PARAM_REF.nuevos[2],
+      inversion_tramo: PARAM_REF.inversion_tramo, ingreso: PARAM_REF.ingreso, margen_admin: PARAM_REF.margen_admin, retencion: PARAM_REF.retencion,
+      fijos_tramo: PARAM_REF.fijos_tramo, costo_opcion: PARAM_REF.costo_opcion, tasa: PARAM_REF.tasa, impuesto: PARAM_REF.impuesto, horizonte: 5 };
+  }
+  function params(e) { return { ...e, nuevos: [e.nuevos_1, e.nuevos_2, e.nuevos_3], factor_nuevos: 1, anio_vacancia: 1, local: local.local }; }
+  function deReferencia() {
+    const ref = ESCENARIOS_REF.filter((e) => e.escenario !== "base");
+    esc = ref.slice(0, N).map((r) => { const e = base(r.nombre); e.logica = r.logica; e.crecimiento = r.crecimiento; e.canon = r.canon;
+      e.egresos_mes = r.egresos_mes; e.margen_admin = r.margen_admin; e.retencion = r.retencion; e.tasa = r.tasa;
+      e.nuevos_1 = PARAM_REF.nuevos[0] * r.factor_nuevos; e.nuevos_2 = PARAM_REF.nuevos[1] * r.factor_nuevos; e.nuevos_3 = PARAM_REF.nuevos[2] * r.factor_nuevos; return e; });
+    while (esc.length < N) esc.push(base("Escenario " + (esc.length + 1)));
+  }
+  function fuentesDeReferencia() { fuentes = {}; FILAS.filter((f) => f.k).forEach((f) => { fuentes[f.k] = { fuente: FUENTES_REF[f.k][0], calidad: FUENTES_REF[f.k][1] }; }); }
+  function guardar() { try { localStorage.setItem(CLAVE, JSON.stringify({ N, local: local.local, tramosBase, esc, fuentes })); } catch (e) { /* sin almacenamiento: no pasa nada */ } }
+  function restaurar() {
+    try { const s = localStorage.getItem(CLAVE); if (!s) return false; const d = JSON.parse(s);
+      if (!d || !Array.isArray(d.esc) || !d.esc.length) return false;
+      N = d.N || d.esc.length; local = LOCALES[(d.local || 1) - 1] || LOCALES[0]; tramosBase = d.tramosBase || 2; esc = d.esc.slice(0, N); fuentes = d.fuentes || {};
+      FILAS.filter((f) => f.k).forEach((f) => { if (!fuentes[f.k]) fuentes[f.k] = { fuente: FUENTES_REF[f.k][0], calidad: FUENTES_REF[f.k][1] }; });
+      esc.forEach((e) => { if (e.meses_sin_canon === undefined) e.meses_sin_canon = 0; if (e.canon_post === undefined) e.canon_post = 1; });
+      return true; } catch (e) { return false; }
+  }
+  function th(texto, cls) { const t = document.createElement("th"); t.textContent = texto; if (cls) t.className = cls; return t; }
+  function td(texto, cls) { const t = document.createElement("td"); t.textContent = texto; if (cls) t.className = cls; return t; }
+  function construir() {
+    el("mp-n").value = N; el("mp-local").value = local.local; el("mp-tramos").value = tramosBase;
+    const t = el("mp-supuestos"); t.innerHTML = "";
+    const h = document.createElement("tr"); h.appendChild(th("Parámetro")); esc.forEach((e, j) => h.appendChild(th("Escenario " + (j + 1)))); h.appendChild(th("Fuente (fila de la tabla de vigilancia, con URL)")); h.appendChild(th("Calidad")); t.appendChild(h);
+    const trn = document.createElement("tr"); trn.appendChild(td("Nombre"));
+    esc.forEach((e) => { const c = document.createElement("td"); const i = document.createElement("input"); i.type = "text"; i.value = e.nombre; i.addEventListener("input", () => { e.nombre = i.value; actualizar(); }); c.appendChild(i); trn.appendChild(c); });
+    trn.appendChild(td("")); trn.appendChild(td("")); t.appendChild(trn);
+    const trl = document.createElement("tr"); trl.appendChild(td("Lógica (cuatro líneas)"));
+    esc.forEach((e) => { const c = document.createElement("td"); const a = document.createElement("textarea"); a.value = e.logica || ""; a.placeholder = "Qué pasa con cada eje y por qué"; a.addEventListener("input", () => { e.logica = a.value; guardar(); }); c.appendChild(a); trl.appendChild(c); });
+    trl.appendChild(td("")); trl.appendChild(td("")); t.appendChild(trl);
+    FILAS.forEach((f) => {
+      const tr = document.createElement("tr");
+      if (f.grupo) { tr.className = "me-grupo"; const c = td(f.grupo); c.colSpan = esc.length + 3; tr.appendChild(c); t.appendChild(tr); return; }
+      tr.appendChild(td(f.et));
+      esc.forEach((e) => {
+        const c = document.createElement("td");
+        if (f.tipo === "fijo") { c.textContent = e[f.k]; tr.appendChild(c); return; }
+        const i = document.createElement("input"); i.type = "number"; i.step = f.step || 1; if (f.tipo === "int") { i.min = f.min; i.max = f.max; }
+        i.value = f.tipo === "pct" ? Math.round(e[f.k] * 1000) / 10 : e[f.k];
+        i.addEventListener("input", () => { let v = Number(i.value); if (isNaN(v) || i.value === "") return; if (f.tipo === "int") v = Math.max(f.min, Math.min(f.max, Math.round(v))); e[f.k] = f.tipo === "pct" ? v / 100 : v; actualizar(); });
+        c.appendChild(i); tr.appendChild(c);
+      });
+      const cf = document.createElement("td"); const fi = document.createElement("input"); fi.type = "text"; fi.className = "me-fuente"; fi.value = fuentes[f.k].fuente; fi.placeholder = "fuente o URL";
+      fi.addEventListener("input", () => { fuentes[f.k].fuente = fi.value; guardar(); }); cf.appendChild(fi); tr.appendChild(cf);
+      const cc = document.createElement("td"); const se = document.createElement("select"); CALIDADES.forEach((q) => { const o = document.createElement("option"); o.value = q; o.textContent = q; se.appendChild(o); });
+      se.value = fuentes[f.k].calidad; se.addEventListener("change", () => { fuentes[f.k].calidad = se.value; guardar(); nota_supuestos(); }); cc.appendChild(se); tr.appendChild(cc);
+      t.appendChild(tr);
+    });
+    actualizar();
+  }
+  function nota_supuestos() {
+    const sin = FILAS.filter((f) => f.k && f.tipo !== "fijo" && !fuentes[f.k].fuente && fuentes[f.k].calidad !== "supuesto del equipo").map((f) => f.et);
+    const bajas = FILAS.filter((f) => f.k && fuentes[f.k].calidad === "baja").map((f) => f.et);
+    let s = sin.length ? `Sin fuente ni declaración: ${sin.join("; ")}. Esas filas no existen hasta que tengan fuente o digan "supuesto del equipo". ` : "Todas las filas tienen fuente o declaración. ";
+    s += bajas.length ? `De calidad baja: ${bajas.join("; ")}: son las preguntas para el experto.` : "Ninguna fila está marcada como de calidad baja: revisa si de verdad todas merecen media o alta.";
+    el("mp-nota-sup").textContent = s;
+  }
+  function robustez() { return VPN.robustez(esc.map((e) => ({ nombre: e.nombre, p: params(e) }))); }
+  function baseParams() { return params(base("")); }
+  function actualizar() {
+    guardar(); nota_supuestos();
+    const r = robustez(); const b = VPN.todas(baseParams());
+    const t = el("mp-vpn"); t.innerHTML = "";
+    const h = document.createElement("tr"); h.appendChild(th("Alternativa")); h.appendChild(th("Base (contra el sobre)", "me-base"));
+    esc.forEach((e) => h.appendChild(th(e.nombre || "(sin nombre)"))); h.appendChild(th("Peor caso")); h.appendChild(th("Arrepentimiento máximo")); t.appendChild(h);
+    r.alternativas.forEach((a) => {
+      const tr = document.createElement("tr");
+      tr.appendChild(td(ETIQ[a] + (a === "A" ? ` (${local.nombre.split(" (")[0]})` : a === "B" ? ` (${tramosBase} ${tramosBase === 1 ? "tramo" : "tramos"} en el base)` : "")));
+      tr.appendChild(td(f1(b[a]), "me-base" + (b[a] < 0 ? " me-neg" : "")));
+      r.vpn[a].forEach((v, j) => tr.appendChild(td(f1(v), r.ganador[j].includes(a) ? "me-gana" : (v < 0 ? "me-neg" : ""))));
+      tr.appendChild(td(f1(r.peor[a]), r.peor[a] < 0 ? "me-neg" : "")); tr.appendChild(td(f1(r.arrepentimiento_max[a]), a === r.robusta ? "me-robusta" : ""));
+      t.appendChild(tr);
+    });
+    const g = document.createElement("tr"); g.appendChild(td("Gana")); const gb = ["A", "B", "C", "D"].filter((a) => Math.abs(b[a] - Math.max(b.A, b.B, b.C, b.D)) < 1e-9);
+    g.appendChild(td(gb.join(" y "), "me-base")); r.ganador.forEach((w) => g.appendChild(td(w.join(" y "), "me-gana"))); g.appendChild(td("")); g.appendChild(td("robusta: " + r.robusta, "me-robusta")); t.appendChild(g);
+    dibujar(r); nota_robustez(r, b); banda(); anterior = r;
+    el("mp-tabla-choque").innerHTML = ""; el("mp-nota-choque").textContent = "Pulsa \"Calcular el choque\" para ver el base con la vacancia de 8 meses, el canon -10 % y la tasa 14 %.";
+  }
+  function nota_robustez(r, b) {
+    const cuenta = {}; r.ganador.forEach((w) => w.forEach((a) => cuenta[a] = (cuenta[a] || 0) + 1));
+    const quien = r.alternativas.filter((a) => cuenta[a]).map((a) => `${a} gana en ${cuenta[a]} de ${esc.length}`).join("; ");
+    const peorAlt = r.alternativas.reduce((m, a) => r.arrepentimiento_max[a] > r.arrepentimiento_max[m] ? a : m, "A");
+    let s = `Base con ${local.nombre.split(" (")[0]} y ${tramosBase} ${tramosBase === 1 ? "tramo" : "tramos"}: A ${f1(b.A)} · B ${f1(b.B)} · C ${f1(b.C)} · D 0`;
+    s += (local.local === 1 && tramosBase === 2) ? " (coincide con el sobre: 66.6 · 212.1 · -60.5 · 0). " : " (el sobre, con el local 1 y dos tramos, dice 66.6 · 212.1 · -60.5 · 0: la diferencia se explica por el local o los tramos). ";
+    s += `${quien}. La robusta es ${r.robusta} (arrepentimiento máximo ${f1(r.arrepentimiento_max[r.robusta])}); la que más se puede arrepentir es ${peorAlt} (${f1(r.arrepentimiento_max[peorAlt])}). `;
+    if (anterior) {
+      if (anterior.robusta !== r.robusta) s += `Qué cambió: la robusta pasó de ${anterior.robusta} a ${r.robusta}. `;
+      else { const dif = r.ganador.map((w, j) => (anterior.ganador[j] && anterior.ganador[j].join("") !== w.join("")) ? j + 1 : 0).filter((x) => x); if (dif.length) s += `Qué cambió: el ganador del escenario ${dif.join(", ")}. `; }
+    }
+    el("mp-nota-rob").textContent = s + "Qué significa: la recomendación tiene que sostenerse en estas columnas; donde no se sostiene, ahí va un disparador.";
+  }
+  function svgEl(tag, attrs, text) { const e = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text !== undefined) e.textContent = text; return e; }
+  function dibujar(r) {
+    const svg = el("mp-svg"); svg.innerHTML = "";
+    const W = 680, H = 300, L = 56, R = 16, T = 28, B = 46;
+    let vals = []; r.alternativas.forEach((a) => vals = vals.concat(r.vpn[a]));
+    const vmax = Math.max(50, ...vals.map(Math.abs)) * 1.15;
+    const sy = (v) => T + (1 - (v + vmax) / (2 * vmax)) * (H - T - B);
+    svg.appendChild(svgEl("rect", { x: L, y: T, width: W - L - R, height: H - T - B, fill: "#fbfbfe", stroke: C.borde }));
+    svg.appendChild(svgEl("line", { x1: L, y1: sy(0), x2: W - R, y2: sy(0), stroke: C.tinta }));
+    [-vmax, -vmax / 2, 0, vmax / 2, vmax].forEach((v) => svg.appendChild(svgEl("text", { x: L - 6, y: sy(v) + 4, "font-size": 10, fill: C.gris, "text-anchor": "end" }, Math.round(v))));
+    const ng = esc.length, gw = (W - L - R) / ng, bw = gw / 6;
+    esc.forEach((e, j) => {
+      r.alternativas.forEach((a, i) => {
+        const v = r.vpn[a][j]; const x = L + j * gw + gw * 0.1 + i * bw * 1.2;
+        svg.appendChild(svgEl("rect", { x, y: Math.min(sy(v), sy(0)), width: bw, height: Math.abs(sy(v) - sy(0)), fill: COL[a], opacity: r.ganador[j].includes(a) ? 1 : 0.55 }));
+        svg.appendChild(svgEl("text", { x: x + bw / 2, y: v >= 0 ? sy(v) - 3 : sy(v) + 11, "font-size": 9, fill: C.tinta, "text-anchor": "middle" }, Math.round(v)));
+      });
+      svg.appendChild(svgEl("text", { x: L + j * gw + gw / 2, y: H - B + 16, "font-size": 11, fill: C.tinta, "text-anchor": "middle" }, (e.nombre || "escenario " + (j + 1)).slice(0, 22)));
+      svg.appendChild(svgEl("text", { x: L + j * gw + gw / 2, y: H - B + 30, "font-size": 10, fill: r.ganador[j].length === 1 ? COL[r.ganador[j][0]] : C.gris, "font-weight": 700, "text-anchor": "middle" }, "gana " + r.ganador[j].join(" y ")));
+    });
+    r.alternativas.forEach((a, i) => { svg.appendChild(svgEl("rect", { x: L + 8 + i * 150, y: 8, width: 10, height: 10, fill: COL[a] })); svg.appendChild(svgEl("text", { x: L + 22 + i * 150, y: 17, "font-size": 10.5, fill: C.tinta }, ETIQ[a])); });
+  }
+  function banda() {
+    const p = baseParams(); const t = el("mp-banda"); t.innerHTML = "";
+    const h = document.createElement("tr"); ["Ventas base del local", "A", "C", "D"].forEach((x) => h.appendChild(th(x))); t.appendChild(h);
+    const puntos = [["Banda baja", local.banda_baja], ["Predicción del árbol", local.ventas_base], ["Banda alta", local.banda_alta]];
+    const res = puntos.map(([et, v]) => { const r = VPN.todas({ ...p, ventas_base: v }); const tr = document.createElement("tr"); tr.appendChild(td(`${et}: ${f1(v)}`));
+      ["A", "C", "D"].forEach((a) => tr.appendChild(td(f1(r[a]), r[a] < 0 ? "me-neg" : ""))); t.appendChild(tr); return r; });
+    const fa = VPN.anualidad(p.tasa); const v5 = 1 / Math.pow(1 + p.tasa, 5);
+    let uReq = (p.inversion - p.reventa * v5) / ((1 - p.impuesto) * fa); if (uReq < 0) uReq = (p.inversion - p.reventa * v5) / fa;
+    const veq = (uReq + 12 * p.egresos_mes) / (12 * p.canon);
+    let s = `Con los parámetros del base y g = ${Math.round(p.crecimiento * 100)} %, A cambia de signo cuando el arrendatario vende ${f1(veq)} al mes`;
+    s += (veq > local.banda_baja && veq < local.banda_alta) ? ` (dentro de la banda [${local.banda_baja}, ${local.banda_alta}]: el signo de A depende del error del árbol). ` : ` (fuera de la banda [${local.banda_baja}, ${local.banda_alta}]: el error del árbol no cambia el signo de A). `;
+    const dominada = res.every((r) => r.A >= r.C - 1e-9);
+    s += dominada ? `La opción queda dominada por A en toda la banda (peor caso de A: ${f1(res[0].A)}; de C: ${f1(res[0].C)}): pagar ${f1(p.costo_opcion)} por esperar un año no compra protección que la plantilla no tenga ya.` :
+      `La opción deja el peor caso en ${f1(res[0].C)} frente a ${f1(res[0].A)} de A, y conserva ${f1(res[2].C)} de los ${f1(res[2].A)} de la banda alta.`;
+    el("mp-nota-banda").textContent = s;
+  }
+  function choque() {
+    const p = baseParams(); const q = { ...p, meses_sin_canon: 8, canon_post: 0.9, tasa: 0.14 };
+    const t = el("mp-tabla-choque"); t.innerHTML = "";
+    const h = document.createElement("tr"); ["Alternativa", "Base", "Choque: vacancia 8 meses, canon −10 %, tasa 14 %"].forEach((x) => h.appendChild(th(x))); t.appendChild(h);
+    const filas = [];
+    LOCALES.forEach((l) => filas.push([`A, ${l.nombre}`, VPN.A({ ...p, ventas_base: l.ventas_base }), VPN.A({ ...q, ventas_base: l.ventas_base })]));
+    [1, 2, 3].forEach((k) => filas.push([`B, ${k} ${k === 1 ? "tramo" : "tramos"}`, VPN.B({ ...p, tramos: k }), VPN.B({ ...q, tramos: k })]));
+    filas.push(["C, la opción", VPN.todas(p).C, VPN.todas(q).C]); filas.push(["D, esperar", 0, 0]);
+    filas.forEach(([et, b, c]) => { const tr = document.createElement("tr"); tr.appendChild(td(et)); tr.appendChild(td(f1(b), b < 0 ? "me-neg" : "")); tr.appendChild(td(f1(c), c < 0 ? "me-neg" : "")); t.appendChild(tr); });
+    const sobreviven = filas.filter(([et, b, c]) => c >= 0 && !et.startsWith("D")).map(([et]) => et);
+    const caen = filas.filter(([et, b, c]) => b >= 0 && c < 0).map(([et]) => et);
+    const pz = VPN.A({ ...p, meses_sin_canon: 8, canon_post: 0.9 }), pt = VPN.A({ ...p, tasa: 0.14 });
+    el("mp-nota-choque").textContent = `Sobreviven al choque (VPN no negativo): ${sobreviven.length ? sobreviven.join("; ") : "ninguna"} y D. ` + (caen.length ? `Se caen: ${caen.join("; ")}. ` : "Ninguna que valía en el base deja de valer. ") +
+      `Por partes, con el local elegido: la vacancia sola deja a A en ${f1(pz)}; la tasa sola, en ${f1(pt)}. Qué significa: una recomendación que no sobrevive el choque era una apuesta a que el arrendatario se quedaba.`;
+  }
+  function aplicar() { respaldo = JSON.parse(JSON.stringify(esc)); esc.forEach((e) => { e.meses_sin_canon = 8; e.canon_post = 0.9; e.tasa = 0.14; }); construir(); el("mp-nota-choque").textContent = "Aplicado a las columnas: vacancia de 8 meses, canon al 90 % del pactado y tasa 14 % en todos los escenarios. Mira la tabla de robustez; \"Deshacer\" restaura lo que había."; }
+  function deshacer() { if (respaldo) { esc = respaldo; respaldo = null; construir(); el("mp-nota-choque").textContent = "Restaurado."; } }
+  // el Monte Carlo: un generador con semilla fija (mulberry32) y normales por Box-Muller
+  function rng(semilla) { let a = semilla >>> 0; return function () { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function montecarlo() {
+    const n = Math.max(200, Math.min(2000, Math.round(Number(el("mp-ncorridas").value) || 1000))); el("mp-ncorridas").value = n;
+    const p = baseParams(); const u = rng(7); const unif = (a, b) => a + (b - a) * u();
+    const norm = (mu, sd) => { let x = u(); if (x < 1e-12) x = 1e-12; return mu + sd * Math.sqrt(-2 * Math.log(x)) * Math.cos(2 * Math.PI * u()); };
+    const vA = [], vB = []; let conVacancia = 0;
+    for (let i = 0; i < n; i++) {
+      const hayVac = u() < unif(0.10, 0.30); if (hayVac) conVacancia++;
+      const anio = 1 + Math.floor(u() * 5);
+      vA.push(VPN.A({ ...p, ventas_base: norm(local.ventas_base, 28), crecimiento: unif(-0.03, 0.04), canon: unif(0.09, 0.11),
+        meses_sin_canon: hayVac ? 6 : 0, anio_vacancia: anio, canon_post: 1 }));
+      vB.push(VPN.B({ ...p, factor_nuevos: unif(0.75, 1.10), retencion: unif(0.62, 0.75) }));
+    }
+    const q = (v, pr) => { const s = v.slice().sort((a, b) => a - b); const h = (s.length - 1) * pr; const lo = Math.floor(h); return s[lo] + (h - lo) * ((s[lo + 1] !== undefined ? s[lo + 1] : s[lo]) - s[lo]); };
+    const t = el("mp-tabla-mc"); t.innerHTML = "";
+    const h = document.createElement("tr"); ["Alternativa", "P10", "P50", "P90", "Fracción con pérdida"].forEach((x) => h.appendChild(th(x))); t.appendChild(h);
+    [[`A, ${local.nombre.split(" (")[0]}`, vA], [`B, ${tramosBase} ${tramosBase === 1 ? "tramo" : "tramos"}`, vB]].forEach(([et, v]) => {
+      const tr = document.createElement("tr"); tr.appendChild(td(et)); [0.1, 0.5, 0.9].forEach((pr) => { const x = q(v, pr); tr.appendChild(td(f1(x), x < 0 ? "me-neg" : "")); });
+      const fr = v.filter((x) => x < 0).length / v.length; tr.appendChild(td((100 * fr).toFixed(1) + " %", fr > 0.5 ? "me-neg" : "")); t.appendChild(tr);
+    });
+    // el tornado de A: cada parámetro entre su mínimo y su máximo, los demás en el base
+    const z = 1.2816; const rangos = [["ventas base del arrendatario", "ventas_base", local.ventas_base - z * 28, local.ventas_base + z * 28], ["canon (9 % a 11 %)", "canon", 0.09, 0.11], ["crecimiento (-3 % a +4 %)", "crecimiento", -0.03, 0.04], ["vacancia (0 a 6 meses)", "meses_sin_canon", 0, 6]];
+    const b0 = VPN.A(p); const torn = rangos.map(([et, k, lo, hi]) => { const a = VPN.A({ ...p, [k]: lo }), b = VPN.A({ ...p, [k]: hi }); return { et, lo: Math.min(a, b), hi: Math.max(a, b), rec: Math.abs(b - a) }; }).sort((x, y) => y.rec - x.rec);
+    const svg = el("mp-tornado"); svg.innerHTML = ""; const W = 680, H = 230, L = 210, R = 40, T = 24, B = 30;
+    const xmax = Math.max(50, ...torn.map((x) => Math.max(Math.abs(x.lo), Math.abs(x.hi)))) * 1.12; const sx = (v) => L + (v + xmax) / (2 * xmax) * (W - L - R);
+    svg.appendChild(svgEl("line", { x1: sx(b0), y1: T - 6, x2: sx(b0), y2: H - B, stroke: C.tinta, "stroke-dasharray": "4 3" }));
+    svg.appendChild(svgEl("text", { x: sx(b0) + 4, y: T - 8, "font-size": 10, fill: C.tinta }, "base " + f1(b0)));
+    const bh = (H - T - B) / torn.length;
+    torn.forEach((x, i) => { const y = T + i * bh + bh * 0.2;
+      svg.appendChild(svgEl("rect", { x: sx(x.lo), y, width: sx(b0) - sx(x.lo), height: bh * 0.6, fill: C.naranja }));
+      svg.appendChild(svgEl("rect", { x: sx(b0), y, width: sx(x.hi) - sx(b0), height: bh * 0.6, fill: C.morado }));
+      svg.appendChild(svgEl("text", { x: L - 8, y: y + bh * 0.42, "font-size": 10.5, fill: C.tinta, "text-anchor": "end" }, x.et));
+      svg.appendChild(svgEl("text", { x: sx(x.lo) - 3, y: y + bh * 0.42, "font-size": 9.5, fill: C.tinta, "text-anchor": "end" }, f1(x.lo)));
+      svg.appendChild(svgEl("text", { x: sx(x.hi) + 3, y: y + bh * 0.42, "font-size": 9.5, fill: C.tinta }, f1(x.hi))); });
+    svg.appendChild(svgEl("text", { x: (L + W - R) / 2, y: H - 8, "font-size": 11, fill: C.tinta, "text-anchor": "middle" }, "VPN de A entre el mínimo y el máximo de cada parámetro (millones)"));
+    const frA = vA.filter((x) => x < 0).length / n, frB = vB.filter((x) => x < 0).length / n;
+    el("mp-nota-mc").textContent = `${n} corridas; hay una vacancia en el ${(100 * conVacancia / n).toFixed(1)} % de ellas. A pierde en el ${(100 * frA).toFixed(1)} % y B en el ${(100 * frB).toFixed(1)} %. Lo que más mueve el VPN de A: ${torn[0].et} (recorrido ${f1(torn[0].rec)}); lo que menos, ${torn[torn.length - 1].et} (${f1(torn[torn.length - 1].rec)}). ` +
+      (torn[0].et.startsWith("ventas") ? "Qué significa: manda la estimación del árbol: la banda de la semana 6 acompaña la recomendación y el valor de una opción se calcula contra su costo." : "Qué significa: manda un parámetro del contrato o del mercado: lo que corresponde es un disparador con dueño.");
+  }
+  function textoSupuestos() {
+    let s = `Tabla de supuestos (base: ${local.nombre}, ${tramosBase} ${tramosBase === 1 ? "tramo" : "tramos"})\n`;
+    s += "escenario | " + esc.map((e) => e.nombre).join(" | ") + "\n";
+    s += "logica | " + esc.map((e) => (e.logica || "").replace(/\s+/g, " ").trim()).join(" | ") + "\n";
+    s += "parametro | " + esc.map((e) => e.nombre).join(" | ") + " | fuente | calidad\n";
+    FILAS.filter((f) => f.k).forEach((f) => { s += f.et + " | " + esc.map((e) => f.tipo === "pct" ? Math.round(e[f.k] * 1000) / 10 + " %" : e[f.k]).join(" | ") + " | " + (fuentes[f.k].fuente || "-") + " | " + fuentes[f.k].calidad + "\n"; });
+    return s;
+  }
+  function textoRobustez() {
+    const r = robustez(); const b = VPN.todas(baseParams());
+    let s = `Tabla de robustez (VPN a cinco años, millones; A con ${local.nombre}, B con ${tramosBase} ${tramosBase === 1 ? "tramo" : "tramos"} en el base)\n`;
+    s += "alternativa | base | " + esc.map((e) => e.nombre).join(" | ") + " | peor caso | arrepentimiento maximo\n";
+    r.alternativas.forEach((a) => { s += ETIQ[a] + " | " + f1(b[a]) + " | " + r.vpn[a].map(f1).join(" | ") + " | " + f1(r.peor[a]) + " | " + f1(r.arrepentimiento_max[a]) + "\n"; });
+    s += "gana | " + ["A", "B", "C", "D"].filter((a) => Math.abs(b[a] - Math.max(b.A, b.B, b.C, b.D)) < 1e-9).join(" y ") + " | " + r.ganador.map((w) => w.join(" y ")).join(" | ") + "\nrobusta: " + r.robusta + "\n";
+    s += "sobre (local 1, dos tramos): A 66.6 | B 212.1 | C -60.5 | D 0\n";
+    return s;
+  }
+  function copiar(id, s) { el(id).value = s; if (navigator.clipboard) navigator.clipboard.writeText(s).catch(() => {}); }
+  LOCALES.forEach((l) => { const o = document.createElement("option"); o.value = l.local; o.textContent = `${l.nombre}: ventas base ${l.ventas_base} [${l.banda_baja}, ${l.banda_alta}]`; el("mp-local").appendChild(o); });
+  el("mp-n").addEventListener("change", () => { N = Number(el("mp-n").value); while (esc.length < N) esc.push(base("Escenario " + (esc.length + 1))); esc = esc.slice(0, N); construir(); });
+  el("mp-local").addEventListener("change", () => { const nuevo = LOCALES[Number(el("mp-local").value) - 1]; esc.forEach((e) => { if (e.ventas_base === local.ventas_base) e.ventas_base = nuevo.ventas_base; }); local = nuevo; construir(); });
+  el("mp-tramos").addEventListener("change", () => { const k = Number(el("mp-tramos").value); esc.forEach((e) => { if (e.tramos === tramosBase) e.tramos = k; }); tramosBase = k; construir(); });
+  el("mp-ref").addEventListener("click", () => { deReferencia(); fuentesDeReferencia(); construir(); });
+  el("mp-base").addEventListener("click", () => { esc = esc.map((e, j) => { const b = base(e.nombre || "Escenario " + (j + 1)); b.logica = e.logica; return b; }); construir(); });
+  el("mp-borrar").addEventListener("click", () => { try { localStorage.removeItem(CLAVE); } catch (e) {} N = 4; local = LOCALES[0]; tramosBase = 2; anterior = null; deReferencia(); fuentesDeReferencia(); construir(); });
+  el("mp-copiar-sup").addEventListener("click", () => copiar("mp-texto-sup", textoSupuestos()));
+  el("mp-copiar-rob").addEventListener("click", () => copiar("mp-texto-rob", textoRobustez()));
+  el("mp-choque").addEventListener("click", choque);
+  el("mp-aplicar").addEventListener("click", aplicar);
+  el("mp-deshacer").addEventListener("click", deshacer);
+  el("mp-correr").addEventListener("click", montecarlo);
+  if (!restaurar()) { deReferencia(); fuentesDeReferencia(); }
+  construir();
+})();
+</script>
+```
+
+# Una ruta de exploración
+
+Seis experimentos, en este orden. Anota las cifras: son las del task 7.
+
+1. **La referencia.** Carga los escenarios de referencia con el local 1 y dos tramos. Comprueba el base contra el sobre (66.6 · 212.1 · −60.5 · 0) y lee la tabla: B gana en dos, D en Contracción, A en Estancamiento; B robusta con arrepentimiento máximo 77.5.
+2. **Tu local y tus tramos.** Cambia el local al que eligió tu equipo en el task 6 y los tramos a los que prefieran. ¿Cambia el ganador del base? ¿Cambia la robusta? Si tu local es el 2, recuerda el asterisco doble: su venta base es de calidad baja.
+3. **Tus escenarios.** "Todos como el base" y escribe en cada columna solo lo que la lógica de tu escenario dice: el nombre, las cuatro líneas y los parámetros que cambian. Llena fuente y calidad de cada fila que toques.
+4. **La banda.** Mira dónde cambia de signo A con tu local (con el local 1: 125.0) y si la opción queda dominada por A en toda la banda, como en la referencia.
+5. **El choque.** Calcula el choque de vacancia y aplícalo a tus columnas. ¿Qué sobrevive? Deshaz.
+6. **El ruido.** Ejecuta el Monte Carlo con 1.000 corridas y lee el tornado. ¿Manda la estimación del árbol o un parámetro del contrato? Eso decide si la recomendación carga la banda de la semana 6 o un disparador con dueño.
+
+# Tres preguntas para cerrar
+
+Respóndelas en dos líneas cada una; van en el task 7.
+
+1. **¿Qué alternativa recomiendas y en qué escenarios se sostiene?** Con la fila "Gana" y el arrepentimiento máximo, no con el base solo.
+2. **¿En qué escenario te arrepentirías más y cuánto?** La cifra del arrepentimiento y lo que la produce (qué supuesto).
+3. **¿Qué compra la opción y qué vigila el disparador?** Con la banda y el tornado: si la opción no mejora el peor caso de A (en la referencia queda dominada), su costo no se justifica y el supuesto crítico pasa a un disparador con dueño.
+
+::: {.callout-warning title="Lo que no se reporta"}
+Una probabilidad por escenario, o un escenario señalado como "el más probable". Un parámetro sin fuente ni "supuesto del equipo". Un VPN base que no coincida con el sobre sin explicar la diferencia (otro local, otros tramos, otro parámetro declarado). El promedio de los escenarios. Los percentiles del Monte Carlo como si fueran el VPN de la alternativa.
+:::

@@ -1,0 +1,83 @@
+---
+title: "El código de la semana 1"
+subtitle: "Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 1 · Práctica opcional"
+lang: es
+webr:
+  show-startup-message: false
+---
+
+::: {.callout-key}
+<div class="callout-title">La idea central</div>
+Esta página reproduce, celda a celda y en tu navegador, las cifras de la semana 1: el cuantil crítico y el margen neto de cada regla de reserva. Es opcional: la teoría se entiende sin ella. El panel **Environment** (abajo a la derecha) muestra los objetos que vas creando.
+:::
+
+**Cómo se usa:** corre una celda a la vez, espera la salida, cambia un número y vuelve a correr.
+
+**La primera carga** tarda unos segundos mientras el navegador descarga R; el botón *Run Code* de cada celda se habilita al terminar.
+
+# Una primera mirada a las solicitudes
+
+Si quieres ver la cuenta hecha en código, estas celdas corren en tu navegador. Cambia los números y vuelve a ejecutar.
+
+Una celda oculta ya cargó los tres objetos del ejemplo: `solicitudes` (los 56 días de la zona norte de Cali), `ingreso` (450.000 pesos por avalúo realizado) y `tarifa` (100.000 pesos por cupo reservado). La primera celda corre sola; cuando termine, búscalos en el panel Environment.
+
+```{webr-r}
+#| context: setup
+## Las solicitudes de avalúo que recibió la zona norte de Cali:
+## 56 días, del 6 de enero al 2 de marzo de 2025
+solicitudes <- c(19, 33, 18, 25, 35, 16, 14, 21, 23, 26, 32, 22, 13, 16, 18, 24, 22, 13, 27, 18,
+                 22, 29, 33, 29, 30, 24, 27, 25, 20, 20, 27, 31, 38, 26, 25, 29, 19, 14, 15, 25,
+                 28, 13, 24, 35, 22, 28, 21, 16, 13, 24, 33, 26, 31, 23, 18, 12)
+ingreso <- 450000   # pesos de ingreso neto por avalúo realizado (antes de descontar el cupo)
+tarifa  <- 100000   # pesos por cupo de perito reservado, se use o no
+```
+
+```{webr-r}
+#| autorun: true
+## ¿Cómo se ven las solicitudes de un día? El resumen de los 56 días
+resumen <- summary(solicitudes)
+resumen
+
+## ¿En qué fracción de días las solicitudes superaron el promedio (23)?
+fraccion_sobre_23 <- mean(solicitudes > 23)
+fraccion_sobre_23
+```
+
+# La regla del cuantil crítico
+
+```{webr-r}
+## La regla del cuantil crítico. Cambia la tarifa (por ejemplo a 200000) y vuelve a correr.
+tarifa <- 100000
+
+## El costo de cada error, en pesos: faltar pierde el ingreso del avalúo y ahorra el cupo.
+## Sobrar paga un cupo que ningún avalúo usa.
+costo_faltar <- ingreso - tarifa
+costo_sobrar <- tarifa
+
+## El cuantil crítico: la fracción de días que conviene cubrir
+cuantil_critico <- costo_faltar / (costo_faltar + costo_sobrar)
+cuantil_critico
+
+## La cantidad que las solicitudes no superan en esa fracción de días
+cupos_del_cuantil <- quantile(solicitudes, cuantil_critico, type = 1)
+cupos_del_cuantil
+```
+
+# El margen neto de las tres reglas
+
+```{webr-r}
+## El margen neto promedio por día de tres reglas: el promedio, el cuantil y "nunca faltar"
+
+## 1. La función: el ingreso de los avalúos atendidos menos el costo de todos los cupos
+margen_neto <- function(q) mean(ingreso * pmin(q, solicitudes) - tarifa * q)
+
+## 2. Las tres reglas que compiten, en cupos reservados por día
+reglas <- c(promedio = 23, cuantil = 29, nunca_faltar = max(solicitudes))
+reglas
+
+## 3. El margen neto promedio por día de cada regla, en pesos
+margen_por_regla <- round(sapply(reglas, margen_neto))
+margen_por_regla
+```
+
+{{< include ../../_includes/panel_entorno.qmd >}}

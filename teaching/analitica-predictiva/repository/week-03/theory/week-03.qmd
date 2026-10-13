@@ -1,0 +1,477 @@
+---
+title: "Programación agéntica: dirigir y verificar"
+subtitle: "Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 3 · Teoría"
+lang: es
+---
+
+::: {.callout-key}
+<div class="callout-title">La idea central</div>
+Un agente de IA puede abrir la base, escribir el código, ejecutarlo y leer lo que salió; no puede calcular de memoria ni decidir qué pregunta importa. Esta semana se aprende a dirigirlo —qué encargarle y cómo frenarlo— y a verificar cada cifra antes de firmarla.
+:::
+
+**Tiempo de estudio:** 30 a 40 minutos. **Lectura previa:** [*Introducción a los LLMs*](llm.html) (unos 25 minutos): léela antes de esta página si nunca te has preguntado qué hay dentro de un asistente de IA. **Qué necesitas:** este navegador; en esta página no se corre código. Las partes interactivas (chat o agente, el bucle, las directivas, el momento de cada columna) están en la página; las celdas de R del EDA, reproducidas paso a paso, están en [el código de la semana 3](../practice/cocina.html), una práctica opcional.
+
+# El mecánico por teléfono {.unnumbered}
+
+El carro no arranca y llamas a un mecánico. Por teléfono, él solo sabe lo que tú le cuentas: "hace un ruido", "se prendió una luz". Te da instrucciones generales, tú las pruebas, le cuentas qué pasó y él vuelve a adivinar. Puede ser un mecánico excelente; está ciego.
+
+Ahora el mismo mecánico está en el taller, con el carro enfrente. Abre el capó, prueba, escucha el motor, cambia una pieza y vuelve a probar. No es más inteligente que por teléfono: tiene el carro.
+
+Esa es la diferencia entre un <span class="term">chat</span> y un <span class="term">agente</span>. Al chat le pegas diez filas y un mensaje de error, y te devuelve una sugerencia al aire. El agente trabaja dentro de la carpeta del proyecto: lee la base completa, escribe un script, lo ejecuta, mira la salida y corrige. Esta semana el carro es el estudio de locales, el estudio de mercado que la gerencia de inversión de Meridiano compró para evaluar la alternativa A: 480 locales comerciales comprados por gestoras inmobiliarias y arrendados a minoristas, en seis ciudades, con lo que le pasó a cada contrato a los tres años de la firma.
+
+Y hay una segunda idea, menos intuitiva: **el agente no es calculadora**. Para entender por qué —y por qué a veces afirma cifras que nadie calculó— hay que abrir la máquina un momento.
+
+# Qué hay dentro del agente
+
+Debajo de cualquier asistente de IA hay un <span class="term">modelo de lenguaje</span>: un programa entrenado con una porción enorme del texto que ha producido la humanidad, cuya única tarea es predecir la palabra siguiente, una y otra vez. Cuando le escribes, no busca la respuesta en ninguna parte: la **construye por probabilidad**, palabra a palabra, con los patrones que aprendió. Por eso siempre suena seguro: el texto más probable casi nunca suena dudoso.
+
+Ese motor no ve letras ni palabras: ve <span class="term">tokens</span>, pedazos de texto que trata como unidades. "Ferrocarril" no es para él una cadena de letras sino algo como `ferr` + `ocar` + `ril`, tres piezas opacas: por eso puede contar mal las erres, y por eso **no es calculadora**. Si le preguntas "¿cuál es la tasa de cierre?" sin que haya corrido nada, te dará un número plausible e inventado: predice qué cifra suena bien, no la calcula. Lo que sí hace bien es escribir el código que calcula y leer lo que salió. Dirigirlo es exigirle lo primero y prohibirle lo segundo.
+
+Su memoria de trabajo es la <span class="term">ventana de contexto</span>: todo lo que tiene presente en la conversación —tu encargo, los archivos que leyó, los errores de la terminal—. Es finita, como una encimera de cocina: lo que no cabe se cae y lo del medio se le pierde de vista. Por eso las reglas del proyecto que verás más abajo son cortas —cada línea consume atención— y por eso se le dan por escrito, en un archivo que relee al empezar, y no de memoria en el chat.
+
+Y cuando le falta información, el motor no se detiene: igual completa la frase con lo más plausible. Eso es una <span class="term">alucinación</span>, y es la razón de fondo del método de esta semana: al agente se le **dirige** —exigirle que escriba el código que calcula— y se le **verifica** —no firmar ninguna cifra que no hayas visto salir de una ejecución—.
+
+La versión completa de esta sección —con la calculadora de tokens, el mapa de significados de los embeddings y la encimera para llenar— está en la lectura previa: [*Introducción a los LLMs*](llm.html).
+
+# Chat o agente
+
+Un agente es un modelo de lenguaje con tres cosas más: acceso a la carpeta del proyecto (eso es su <span class="term">contexto</span>: los datos, el diccionario, las reglas, los errores de la terminal), la capacidad de ejecutar código, y un bucle que lo obliga a probar lo que escribe. Las herramientas cambian de nombre cada semestre (Claude Code, Codex, Gemini CLI, Copilot en modo agente, o el chat de claude.ai con la ejecución de código activada); el método es el mismo. Pulsa los dos botones y compara qué puede ver cada uno.
+
+```{=html}
+<div class="widget-card" id="wg-ciego">
+  <div class="widget-head">¿Qué puede ver cada uno? · Seis capacidades</div>
+  <div class="widget-body">
+    <div class="widget-instr">Las seis capacidades son las que hacen falta para explorar <code>estudio_locales.csv</code> sin pegarle nada a nadie. Pulsa cada botón.</div>
+    <div class="widget-row">
+      <button type="button" class="btn-widget" id="cg-chat">Chat en el navegador</button>
+      <button type="button" class="btn-widget btn-widget-ghost" id="cg-agente">Agente en el proyecto</button>
+    </div>
+    <ul class="cg-list" id="cg-list"></ul>
+    <div class="widget-note" id="cg-note"></div>
+  </div>
+</div>
+<style>
+  .cg-list { list-style: none; padding: 0; margin: 0.6em 0 0; }
+  .cg-list li { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-top: 1px solid var(--borde-suave); }
+  .cg-list li:first-child { border-top: none; }
+  .cg-ico { font-weight: 700; font-family: var(--font-mono); min-width: 1.4em; }
+  .cg-si .cg-ico { color: var(--exito-osc); }
+  .cg-no .cg-ico { color: var(--aviso-osc); }
+  .cg-no span:last-child { color: var(--tinta-suave); }
+</style>
+<script>
+(function () {
+  const CAPS = [
+    "Ve la carpeta del proyecto: el CSV, el diccionario y las reglas",
+    "Sabe qué versión de R o de Python hay y qué paquetes están instalados",
+    "Lee los 480 locales de estudio_locales.csv, no las diez filas que le pegaste",
+    "Ejecuta el código y observa el resultado verdadero",
+    "Lee el error completo en la terminal, sin que se lo copies",
+    "Corrige y vuelve a probar hasta que el script corre"
+  ];
+  const MODOS = {
+    chat: {
+      ok: [false, false, false, false, false, false],
+      nota: "El chat <b>solo conoce lo que le pegas en la ventana</b>. Da instrucciones al aire y no puede comprobar si funcionan: es el mecánico por teléfono. Lo que sí hace bien: ayudarte a formular la pregunta y a leer una salida que tú le pegues."
+    },
+    agente: {
+      ok: [true, true, true, true, true, true],
+      nota: "El agente trabaja <b>dentro de la carpeta del proyecto</b>: lee la base y el diccionario, escribe el script, lo corre, mira la salida y corrige. Es el mecánico en el taller. Lo que no cambia: sigue sin saber calcular de memoria y sigue sin saber qué pregunta importa."
+    }
+  };
+  const lista = document.getElementById("cg-list");
+  const nota = document.getElementById("cg-note");
+  const bChat = document.getElementById("cg-chat");
+  const bAg = document.getElementById("cg-agente");
+  function pintar(modo) {
+    const m = MODOS[modo];
+    lista.innerHTML = CAPS.map((c, i) => {
+      const si = m.ok[i];
+      return '<li class="' + (si ? "cg-si" : "cg-no") + '"><span class="cg-ico">' + (si ? "sí" : "no") + '</span><span>' + c + '</span></li>';
+    }).join("");
+    nota.innerHTML = m.nota;
+    bChat.classList.toggle("btn-widget-ghost", modo !== "chat");
+    bAg.classList.toggle("btn-widget-ghost", modo !== "agente");
+  }
+  bChat.addEventListener("click", () => pintar("chat"));
+  bAg.addEventListener("click", () => pintar("agente"));
+  pintar("chat");
+})();
+</script>
+```
+
+Dos cosas para fijar. Primera: la diferencia **no es inteligencia, es contexto y manos**. El mismo modelo que en el chat adivina, en el proyecto comprueba. Segunda: ninguna de las seis capacidades incluye "sabe qué pregunta le importa a la junta directiva de Meridiano". Eso lo pones tú, y es lo que el task califica.
+
+::: {.callout-key}
+<div class="callout-title">Lo que importa</div>
+Un agente no reemplaza al analista: reemplaza el copiar y pegar. Lo que queda para ti es lo que siempre fue tuyo: la pregunta, el criterio sobre qué columnas valen, y la firma de cada cifra.
+:::
+
+# El bucle
+
+Lo que convierte al modelo en agente es un ciclo de cuatro fases que se repite hasta que el código corre limpio: <span class="term">planear</span> (leer la carpeta y anunciar qué va a hacer), <span class="term">ejecutar</span> (correr el script en la terminal), <span class="term">observar</span> (leer la salida real, incluido el error) y <span class="term">corregir</span> (ajustar el código con esa información). Nadie copia ni pega nada en el medio. Es el <span class="term">bucle agéntico</span>.
+
+Míralo en cámara lenta, con un encargo real sobre el estudio de locales. Pulsa **Siguiente paso** nueve veces.
+
+```{=html}
+<div class="widget-card" id="wg-loop">
+  <div class="widget-head">El bucle, paso a paso · Un encargo sobre estudio_locales.csv</div>
+  <div class="widget-body">
+    <div class="loop-phases" id="loop-phases">
+      <span class="loop-chip" data-f="0">1 · Planear</span>
+      <span class="loop-chip" data-f="1">2 · Ejecutar</span>
+      <span class="loop-chip" data-f="2">3 · Observar</span>
+      <span class="loop-chip" data-f="3">4 · Corregir</span>
+      <span class="loop-chip" data-f="4">Listo</span>
+    </div>
+    <div class="sim-term" id="sim-term"></div>
+    <div class="sim-caption" id="sim-caption">Pulsa <b>Siguiente paso</b> para ver cómo trabaja el agente con un encargo real.</div>
+    <div class="widget-row" style="margin-top:.8em">
+      <button type="button" class="btn-widget" id="loop-next">Siguiente paso</button>
+      <button type="button" class="btn-widget btn-widget-ghost" id="loop-reset">Reiniciar</button>
+    </div>
+  </div>
+</div>
+<style>
+  .loop-phases { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 0.7em; }
+  .loop-chip { border: 1px solid var(--borde); border-radius: 999px; padding: 4px 12px; font-size: 0.85rem; color: var(--tinta-suave); background: var(--superficie); }
+  .loop-chip.active { background: var(--primario); color: #fff; border-color: var(--primario); font-weight: 700; }
+  .loop-chip.done { background: #eafaf1; color: var(--exito-osc); border-color: var(--exito); }
+  .sim-term { background: #1b1d29; color: #e7e8ee; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.5; padding: 14px 16px; border-radius: var(--r-md); min-height: 170px; max-height: 400px; overflow: auto; white-space: pre-wrap; }
+  .sim-term .t-cmd { color: #e4eb60; font-weight: 700; }
+  .sim-term .t-ai { color: #a9a9ff; font-weight: 700; }
+  .sim-term .t-note { color: #9a9ba0; }
+  .sim-term .t-err { color: #ff9f80; }
+  .sim-term .t-ok { color: #8be0aa; }
+  .sim-caption { margin-top: 0.7em; font-size: 0.95rem; color: var(--tinta-suave); }
+</style>
+<script>
+(function () {
+  const PASOS = [
+    { f: -1, add: '<span class="t-cmd">Tú › </span>Lee input/diccionario_estudio_locales.md y confirma qué es una fila\n     de estudio_locales.csv. Luego calcula la tasa de cierre a tres años.\n     Solo eso.\n',
+      cap: "Un encargo en español con una sola tarea. No le pegaste ni una fila: la base y el diccionario están en la carpeta." },
+    { f: 0, add: '<span class="t-ai">Agente › </span>Antes de escribir código reviso la carpeta.\n<span class="t-note">  ✓ Leí input/diccionario_estudio_locales.md: un local por fila,\n    480 filas, 17 columnas.\n  ✓ El diccionario marca dos columnas "después de arrendar": calificacion_google\n    y meses_atraso_arriendo. No las uso.</span>\n',
+      cap: "PLANEAR (1 de 2): junta contexto por su cuenta. Qué es una fila y qué columnas no se tocan salen del diccionario, no de su memoria." },
+    { f: 0, add: '<span class="t-ai">Agente › </span>Plan, en un script corto (scripts/01_tasa_cierre.R): leer el CSV,\n         comprobar que id_local no se repite y calcular la proporción de\n         locales cuyo arrendatario cerró antes de los tres años. Nada más.\n',
+      cap: "PLANEAR (2 de 2): anuncia el plan y lo limita a la tarea pedida. Un resultado, un script." },
+    { f: 1, add: '\n<span class="t-cmd">$ Rscript scripts/01_tasa_cierre.R</span>\n',
+      cap: "EJECUTAR: escribió el script y lo corre en la terminal, con el R que hay instalado en esa máquina." },
+    { f: 2, add: '<span class="t-ok">filas: 480   ids distintos: 480</span>\n<span class="t-err">[1] NA\nWarning message:\nIn mean.default(datos$estado_3a) :\n  argument is not numeric or logical: returning NA</span>\n',
+      cap: "OBSERVAR: el grano de la tabla se confirma (480 ids distintos: un local por fila), pero la tasa salió NA. En el método del chat, este aviso había que copiarlo y pegarlo a mano. El agente lo lee solo." },
+    { f: 3, add: '<span class="t-ai">Agente › </span>La columna estado_3a llegó como texto ("abierto" / "cerró"), no como\n         0/1, y mean() no promedia texto. Corrijo: cierre <- datos$estado_3a == "cerró"\n         y promedio ese indicador.\n<span class="t-note">  ✎ Editó scripts/01_tasa_cierre.R (líneas 6 a 8)</span>\n',
+      cap: "CORREGIR: usa el aviso como información, no como derrota. El diccionario ya decía que el target es texto; el código tiene que respetarlo." },
+    { f: 1, add: '\n<span class="t-cmd">$ Rscript scripts/01_tasa_cierre.R</span>\n',
+      cap: "EJECUTAR, segunda vuelta. El bucle se repite las veces que haga falta." },
+    { f: 2, add: '<span class="t-ok">filas: 480   ids distintos: 480\ncierres: 96   tasa_cierre: 0.200\n✓ output/01_tasa_cierre.txt escrito</span>\n',
+      cap: "OBSERVAR: ahora sí. La cifra existe porque el código corrió, no porque el modelo la recordara." },
+    { f: 4, add: '<span class="t-ai">Agente › </span>Listo. La tasa de cierre a tres años es 0.200 (96 de 480), de la salida\n         de scripts/01_tasa_cierre.R. No excluí filas: no hay ids repetidos ni\n         valores faltantes. Dejé fuera las dos columnas "después de arrendar".\n         ¿Sigo con la mediana de ventas o paro aquí?\n',
+      cap: "LISTO. Dice de dónde sale la cifra, qué revisó y qué dejó por fuera, y pregunta antes de seguir. Una cifra con trazabilidad: tiene script, salida y exclusiones explícitas." }
+  ];
+  const term = document.getElementById("sim-term");
+  const cap = document.getElementById("sim-caption");
+  const chips = document.querySelectorAll("#loop-phases .loop-chip");
+  const bNext = document.getElementById("loop-next");
+  let i = 0;
+  function pintar() {
+    let html = "";
+    for (let k = 0; k < i; k++) html += PASOS[k].add;
+    term.innerHTML = html || '<span class="t-note">— terminal vacía —</span>';
+    chips.forEach((c) => c.classList.remove("active", "done"));
+    if (i > 0) {
+      cap.innerHTML = "Paso " + i + " de " + PASOS.length + ". " + PASOS[i - 1].cap;
+      const f = PASOS[i - 1].f;
+      chips.forEach((c) => { if (parseInt(c.dataset.f, 10) === f) c.classList.add("active"); });
+      if (f === 4) chips.forEach((c) => { if (parseInt(c.dataset.f, 10) < 4) c.classList.add("done"); });
+    } else {
+      cap.innerHTML = "Pulsa <b>Siguiente paso</b> para ver cómo trabaja el agente con un encargo real.";
+    }
+    term.scrollTop = term.scrollHeight;
+    bNext.disabled = (i >= PASOS.length);
+    bNext.textContent = (i >= PASOS.length) ? "Fin del encargo" : "Siguiente paso";
+  }
+  bNext.addEventListener("click", () => { if (i < PASOS.length) { i++; pintar(); } });
+  document.getElementById("loop-reset").addEventListener("click", () => { i = 0; pintar(); });
+  pintar();
+})();
+</script>
+```
+
+Tres cosas para observar en la terminal:
+
+1. **No le pegaste nada.** Leyó el diccionario y la base por su cuenta, y confirmó el <span class="term">grano</span> de la tabla (qué es una fila: un local) antes de calcular. Esa es la primera pregunta de cualquier análisis, y el agente la respondió con un conteo, no con una suposición.
+2. **El primer intento falló y el error fue información.** En el método del chat, ese aviso había que copiarlo y pegarlo a mano, sin poder comprobar la corrección. Aquí el agente lo leyó, entendió que el <span class="term">target</span> (`estado_3a`, lo que se quiere predecir) es texto, y corrigió.
+3. **La cifra final tiene fuente.** 0.200 existe porque un script corrió; el agente dijo cuál, qué revisó y qué dejó por fuera. Y preguntó antes de seguir. Eso es lo que el task pide.
+
+# El encargo: las reglas del proyecto
+
+Un agente obedece lo que encuentra en la carpeta. Por eso la primera salvaguardia no es un prompt: es un archivo de texto con las reglas del proyecto, que el agente lee al empezar cada sesión (en Claude Code se llama `CLAUDE.md`; en otras herramientas, `AGENTS.md` o un archivo de instrucciones; en este curso, `reglas_proyecto.md`, que viene dentro del skill `eda-con-agente`). Dos propiedades lo hacen funcionar: es **corto**, porque todo lo que pongas ahí consume la atención del modelo, y es **verificable**, porque una regla que no se puede comprobar es una regla que el agente interpreta a su manera.
+
+Las ocho reglas del proyecto de esta semana:
+
+```default
+# Reglas del proyecto · Estudio de locales (Meridiano)
+
+1. Responde y comenta el código en español, en frases cortas.
+2. Escribe código sencillo y legible, en R o en Python. Si quien dirige
+   no lo entiende, no sirve.
+3. Haz solo la tarea que se te pide en cada prompt. No te adelantes a
+   pasos siguientes ni agregues análisis que nadie pidió.
+4. Cada resultado va en un script corto e independiente, numerado
+   (01_..., 02_...), que corre completo de arriba abajo.
+5. Los archivos de datos no se modifican nunca; toda tabla o gráfico
+   nuevo se guarda en output/.
+6. Nunca afirmes una cifra que no salga de una ejecución que acabas de
+   correr, y di de qué script sale.
+7. Antes de cualquier cálculo, lee diccionario_estudio_locales.md,
+   confirma qué es una fila y lista las columnas con momento "después
+   de arrendar": no se usan como predictoras.
+8. Si una decisión es discutible (qué hacer con faltantes, cómo partir
+   tramos, qué filas excluir), pregunta antes de aplicarla.
+```
+
+Fíjate en que ninguna regla pide virtudes ("sé cuidadoso", "sé riguroso"). Todas dicen **qué** debe cumplirse, de forma que puedas revisar si se cumplió. A eso lo llamamos una <span class="term">directiva verificable</span>. Practica la diferencia con seis reglas candidatas para el proyecto de Meridiano:
+
+```{=html}
+<div class="widget-card" id="wg-directivas">
+  <div class="widget-head">¿Directiva verificable o vaga? · Seis reglas candidatas para el proyecto</div>
+  <div class="widget-body">
+    <div class="widget-instr">Una directiva es <b>verificable</b> si, al terminar, puedes comprobar en un minuto si el agente la cumplió. Si no puedes, es <b>vaga</b>, y el agente decidirá por ti.</div>
+    <div id="dir-items"></div>
+    <div class="quiz-score" id="dir-score"></div>
+  </div>
+</div>
+<script>
+(function () {
+  const OPC = ["Verificable", "Vaga"];
+  const ITEMS = [
+    { t: "\"Explora bien la base antes de modelar.\"", a: 1, fb: "¿Qué es \"bien\"? ¿Cuántas exploraciones, cuáles? El agente decidirá por ti, que es justo lo que quieres evitar. Verificable sería: \"Haz estas cuatro exploraciones, una por script, y nada más\"." },
+    { t: "\"Antes de cualquier cálculo, lee diccionario_estudio_locales.md y lista las columnas con momento 'después de arrendar'; no las uses como predictoras.\"", a: 0, fb: "Se comprueba en un minuto: o la lista aparece en la primera respuesta y ningún script usa esas columnas, o no." },
+    { t: "\"Sé riguroso con los valores atípicos.\"", a: 1, fb: "\"Riguroso\" significa algo distinto para cada persona y para cada modelo. Verificable sería: \"No elimines ningún local por sus ventas; si un valor te parece atípico, repórtalo con su id_local y pregunta\"." },
+    { t: "\"Nunca modifiques estudio_locales.csv; toda tabla o gráfico nuevo se guarda en output/.\"", a: 0, fb: "Prohibición absoluta y comprobable: basta mirar la fecha del archivo original y el contenido de output/." },
+    { t: "\"Ten en cuenta que la decisión es comprar un local en Barranquilla.\"", a: 1, fb: "Es la frase más importante del proyecto y, sin embargo, no hay forma de comprobar si el agente la \"tuvo en cuenta\". Verificable: \"Barranquilla no está en el estudio; cada vez que reportes una cifra por ciudad, dilo en la misma línea\"." },
+    { t: "\"Toda cifra que reportes va acompañada del nombre del script que la produjo.\"", a: 0, fb: "Concreta: cada número trae su fuente, y tú puedes abrir el script y volverlo a correr. Es la regla de oro convertida en directiva." }
+  ];
+  const cont = document.getElementById("dir-items");
+  let hechos = 0, aciertos = 0;
+  ITEMS.forEach((it, i) => {
+    const div = document.createElement("div"); div.className = "quiz-item";
+    const q = document.createElement("div"); q.className = "quiz-q"; q.textContent = (i + 1) + ". " + it.t; div.appendChild(q);
+    const opts = document.createElement("div"); opts.className = "quiz-opts";
+    const fb = document.createElement("div"); fb.className = "quiz-fb";
+    let listo = false;
+    OPC.forEach((o, j) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = o;
+      b.addEventListener("click", () => {
+        if (listo) return; listo = true; hechos++;
+        if (j === it.a) { b.classList.add("ok"); aciertos++; fb.textContent = "Correcto. " + it.fb; }
+        else { b.classList.add("bad"); opts.children[it.a].classList.add("ok"); fb.textContent = "Es " + OPC[it.a].toLowerCase() + ". " + it.fb; }
+        document.getElementById("dir-score").textContent = hechos === ITEMS.length ? ("Resultado: " + aciertos + " de " + ITEMS.length + ".") : ("Llevas " + hechos + " de " + ITEMS.length + ".");
+      });
+      opts.appendChild(b);
+    });
+    div.appendChild(opts); div.appendChild(fb); cont.appendChild(div);
+  });
+})();
+</script>
+```
+
+Qué cambió y qué significa: las tres directivas verificables se pueden auditar mirando la carpeta; las tres vagas trasladan la decisión al agente. Regla mental para escribir las tuyas: dile al agente **qué** debe cumplirse, no **cómo** debe ser.
+
+::: {.callout-workflow}
+<div class="callout-title">La regla de la sesión: un prompt, una tarea, una ejecución, una mirada</div>
+No le pides el análisis completo: le pides un paso, dejas que corra el código, lees la salida y solo entonces escribes el siguiente prompt. Quien dirige eres tú. El agente escribe rápido y se equivoca en silencio; tu trabajo es decidir qué se pregunta, mirar cada salida y no aceptar una cifra que no viste correr.
+:::
+
+# La regla de oro y los tres frenos
+
+Por avanzados que sean, estos modelos siguen siendo motores de lenguaje: estiman la palabra siguiente. Si le preguntas en el chat "¿cuál es la mediana de ventas?", generará un número que parece razonable y que no salió de ningún cálculo. Es la <span class="term">alucinación numérica</span>: una cifra falsa envuelta en un lenguaje impecable, producida por el mismo mecanismo que inventa bibliografía.
+
+::: {.callout-warning title="La regla de oro"}
+El agente **escribe** el código. La máquina **calcula**. El agente **lee** la salida y la **reporta** con su fuente. Si un número no salió de un script que corrió, ese número no existe.
+:::
+
+El bucle de la sección 3 encarna esta regla: la tasa de cierre no la "supo" el modelo; salió de `Rscript` sobre los 480 locales. Un agente bien dirigido ataca la raíz del problema: ninguna cifra se reporta sin ejecución. Y aun así el último control sigue siendo tuyo: en el task, cada cifra que entregues se compara con el sobre sellado, y en la sesión haremos esa comparación en vivo.
+
+Tres cosas salen mal con frecuencia, y para cada una hay un freno de una línea:
+
+| Si el agente… | Cómo lo notas | Escríbele |
+|---|---|---|
+| **hace de más**: pediste un paso y entregó el EDA completo, con un modelo de regalo | Una respuesta larguísima, varios scripts, "además calculé…" | "Hiciste más de lo que te pedí. Deja solo *la tarea* y borra el resto." |
+| **inventa columnas**: usa `margen` o `rotacion`, que no existen en la base | Un nombre que no está en el diccionario | "No supongas los nombres. Lee el diccionario y usa los que existen." |
+| **afirma una cifra que no corrió**: "la tasa de cierre es 19.8 %" antes de ejecutar nada | No hay script ni salida de la que venga | "¿De qué salida sale ese número? Muéstrame el código y córrelo." |
+
+Los tres frenos valen para esta semana y para todo el proyecto. En la sesión los verás actuar sobre una demostración en vivo.
+
+# Privacidad: analizar sin mirar
+
+Hay un obstáculo que aparece en cuanto uno quiere usar esto con los datos de su propia empresa: muchas bases no pueden salir de la organización, por contrato, por ley o por sentido común. ¿Cómo se usa un agente sobre datos que no pueden viajar?
+
+Piensa en un chef al que contratan para organizar la cocina de un restaurante con ingredientes secretos. Le dan el menú, el inventario y las reglas de higiene, pero le prohíben abrir la nevera. El chef diseña la receta completa, con precisión, porque no necesita ver los ingredientes: le basta conocer su estructura.
+
+En datos, la estructura son los <span class="term">metadatos</span> y el <span class="term">diccionario de datos</span>: el nombre de cada columna, su tipo, su unidad, su rango y, en este curso, el momento en que se conoce. Con eso el agente puede diseñar el análisis entero, escribir los scripts y los controles de calidad sin haber visto una sola fila. Tres capas, de la más simple a la más completa:
+
+1. **Bloquear archivos.** Al agente se le prohíbe abrir los archivos de datos; ve que existen y no puede leerlos. Escribe el código; lo corre alguien que sí tiene acceso, o se corre en una máquina de la empresa.
+2. **Trabajar con el diccionario.** El análisis se diseña sobre los metadatos; el agente nunca recibe un registro individual.
+3. **Que la base calcule.** Para bases grandes, el agente envía consultas a una base de datos local, la base hace el cálculo y devuelve solo agregados: promedios, conteos, totales. Los registros no se mueven.
+
+::: {.callout-key}
+<div class="callout-title">Lo que importa</div>
+El agente no necesita ver todos los datos para ayudar bien: necesita el diccionario, la estructura y reglas claras. Es la regla de confidencialidad del curso: los datos de tu empresa no se suben a un chat; en el memo individual trabajarás con metadatos y diccionario.
+:::
+
+# El EDA con pregunta, en seis pasos
+
+El <span class="term">análisis exploratorio</span> (EDA) no responde la pregunta de negocio: la prepara. Sirve para saber qué es una fila, cómo se ve lo que queremos predecir, quién se diferencia de quién y qué columnas no se pueden usar. Y tiene una regla que lo distingue de "hacer gráficos": cada paso lleva una pregunta en el título, y cada resultado se escribe como un <span class="term">hallazgo</span> con su cifra y su "por qué importa".
+
+La pregunta de esta semana viene de la junta directiva: para evaluar la alternativa A (comprar el primer local en Barranquilla para arrendarlo), ¿qué perfil de local, entre lo que se conoce **antes de comprar**, tiene arrendatarios que cierran menos y venden más? Los seis pasos que siguen la preparan sobre los 480 locales del estudio: cada uno abre con su pregunta y cierra con el hallazgo y su cifra, el mismo formato que pide el task. Aquí no hay nada que correr; el código que produce cada cifra está, celda a celda y listo para modificar, en [el código de la semana 3](../practice/cocina.html).
+
+## a) ¿Qué es una fila?
+
+Antes de cualquier cifra: cuántas filas, cuántas columnas y qué representa cada fila. Si `id_local` no se repite, una fila es un local.
+
+**Hallazgo:** 480 filas, 17 columnas, un local por fila y ningún identificador repetido. **Por qué importa:** toda tasa que calculemos es "de cada 100 locales", no de cada 100 meses ni de cada 100 ciudades. Y no hay valores faltantes, así que ninguna decisión sobre imputar nos espera.
+
+## b) El target
+
+Lo que se quiere predecir se llama target, y hay dos: si el contrato sigue vigente a los tres años (`estado_3a`) y cuánto vende el arrendatario (`ventas_mes`, en millones de pesos al mes: la base del canon variable del contrato estándar).
+
+**Hallazgo:** uno de cada cinco arrendatarios cierra antes de los tres años (0.200, 96 de 480) y deja el local vacante; el arrendatario típico vende 95.0 millones al mes. **Por qué importa:** 0.200 es la regla ingenua contra la que se medirá cualquier modelo de la semana 4: decir "ningún arrendatario cierra" acierta el 80 % de las veces y no sirve para nada.
+
+## c) Mediana frente a media
+
+Las ventas tienen cola larga: unos pocos arrendatarios venden mucho más que el resto y arrastran el promedio hacia arriba. La <span class="term">mediana</span> (el local del medio, cuando se ordenan por ventas) no se deja arrastrar.
+
+**Hallazgo:** la media es 100.7 y la mediana 95.0; el máximo (259.0) está a más del doble de la mediana. **Por qué importa:** si la junta escucha "un arrendatario vende 100 millones al mes", espera más de lo que vende la mayoría: 271 de los 480 arrendatarios venden menos que la media. A la junta se le dice la mediana, y se le muestra la cola.
+
+## d) ¿Quiénes cierran más?
+
+La primera exploración por grupos. Se parte la base por una variable conocida antes de comprar y se compara la tasa de cierre, siempre con el conteo al lado: una tasa sobre diez locales no dice lo mismo que una sobre doscientos.
+
+**Hallazgo:** en zona residencial cierra el 28.9 % de los arrendatarios (tasa 0.289; 41 de 142); en zona de oficinas, el 10.6 % (0.106; 13 de 123). Con seis o más competidores a 500 metros cierra el 29.3 % (n = 41); con dos o menos, el 16.5 % (n = 231). Y el corte que más separa de todos los que se conocen antes de comprar: con tráfico peatonal bajo (menos de 120 personas por hora) la tasa de cierre es 0.528 (n = 53), frente a 0.159 en el resto (n = 427). **Por qué importa:** la zona, la competencia y el tráfico se conocen antes de comprar un local en Barranquilla, y separan el riesgo de cierre: más de dieciocho puntos entre zonas, casi treinta y siete entre tráfico bajo y alto. Son candidatas a entrar al árbol de la semana 5.
+
+## e) Un gráfico plano también es un hallazgo
+
+Lo que "debería" importar no siempre importa. La ciudad es la primera variable que cualquiera miraría.
+
+**Hallazgo:** la tasa de cierre por ciudad va de 0.180 (Cartagena) a 0.216 (Cali): 3.6 puntos de diferencia entre la más baja y la más alta. **Por qué importa:** la ciudad, por sí sola, no explica el cierre; lo que importa es el local y su barrio. Para Barranquilla, que no está en el estudio, es una buena noticia con una advertencia: el perfil del local viaja entre ciudades; la ciudad misma no está en los datos.
+
+## f) La fuga
+
+Hay dos columnas que separan a los arrendatarios que cerraron de los que siguen abiertos mejor que cualquier otra. Antes de celebrarlas, mira el diccionario: su momento es "después de arrendar".
+
+**Hallazgo:** con tres o más meses de mora en el canon cierra el 89.7 % de los arrendatarios (tasa 0.897, n = 97); con menos, el 2.3 % (0.023, n = 383): 87 de los 96 cierres tienen mora. La calificación de Google también separa (correlación de −0.428 con el cierre): 4.20 en los que siguen abiertos y 3.77 en los que cerraron. **Por qué importa:** ninguna de las dos sirve para un local que todavía no se compra. La mora se acumula *mientras* el contrato corre: el arrendatario que va a cerrar deja de pagar el canon meses antes; la variable no predice el cierre, lo acompaña. La calificación solo existe cuando el negocio ya tiene clientes. Para los tres locales candidatos de Barranquilla la mora es cero por definición y la calificación no existe.
+
+Eso es una <span class="term">fuga</span>: una columna que contiene información del resultado que no existiría en el momento de decidir. Un modelo entrenado con ella alcanza una exactitud espectacular en la base y no sirve para nada en la decisión. El criterio que la atrapa no es estadístico; es de calendario: el <span class="term">momento de la decisión</span>. Una variable es legítima solo si estaría disponible cuando hay que decidir.
+
+::: {.callout-workflow}
+<div class="callout-title">La regla del curso</div>
+Antes de modelar, lista las columnas con momento "después de arrendar" y exclúyelas. Si una variable separa demasiado bien, sospecha primero y celebra después. Las dos variables target tampoco se usan como predictoras la una de la otra.
+:::
+
+## ¿Esta columna sirve para evaluar un local que todavía no se compra?
+
+Ocho columnas del diccionario. Clasifica cada una según el momento en que se conoce respecto de la decisión de comprar.
+
+```{=html}
+<div class="widget-card" id="wg-momento">
+  <div class="widget-head">¿Antes de comprar, después de arrendar o target? · Ocho columnas del estudio</div>
+  <div class="widget-body">
+    <div class="widget-instr">Pregúntate una sola cosa: para un local candidato en Barranquilla, que todavía no se compra y no tiene contrato, ¿este dato existe hoy?</div>
+    <div id="mom-items"></div>
+    <div class="quiz-score" id="mom-score"></div>
+  </div>
+</div>
+<script>
+(function () {
+  const OPC = ["Antes de comprar", "Después de arrendar", "Target"];
+  const ITEMS = [
+    { t: "trafico_peatonal (personas por hora frente al local)", a: 0, fb: "Se mide parado frente al local candidato, antes de comprar. Sirve, y en la semana 5 será la raíz del árbol." },
+    { t: "calificacion_google (estrellas del negocio del arrendatario a los tres años)", a: 1, fb: "Solo existe cuando el negocio del arrendatario ya tiene clientes que lo califican. Para un local que aún no se arrienda no hay nada que consultar, aunque en la base separe (4.20 frente a 3.77)." },
+    { t: "estado_3a (el contrato sigue vigente o el arrendatario cerró)", a: 2, fb: "Es lo que queremos predecir. No es predictor de nada: es la respuesta." },
+    { t: "arriendo_mes (canon mensual de mercado, en millones de pesos)", a: 0, fb: "El canon de mercado se conoce al evaluar el local, antes de comprar. Sirve, y además entra en la cuenta del VPN de la semana 7." },
+    { t: "meses_atraso_arriendo (meses de canon en mora acumulados en tres años)", a: 1, fb: "La mora se acumula mientras el contrato corre; un local que todavía no se compra tiene cero por definición. Separa muy bien en la base (0.897 frente a 0.023) y no sirve para decidir: es la fuga." },
+    { t: "ventas_mes (ventas mensuales del arrendatario en el tercer año)", a: 2, fb: "El otro target: cuánto vende el arrendatario, que solo se observa con el contrato corriendo. Lo predice la semana 6, y no se usa para predecir el cierre." },
+    { t: "zona_comidas (1 si el local tiene zona de comidas preparadas)", a: 0, fb: "Se comprueba visitando el local candidato: la zona de comidas existe o no existe antes de comprar. Sirve." },
+    { t: "experiencia_arrendatario (años del arrendatario en comercio minorista)", a: 0, fb: "Figura en el plan de negocio que el arrendatario presenta al firmar. Sirve, y es un factor que Meridiano controla en parte: la gestora decide a quién le arrienda." }
+  ];
+  const cont = document.getElementById("mom-items");
+  let hechos = 0, aciertos = 0;
+  ITEMS.forEach((it, i) => {
+    const div = document.createElement("div"); div.className = "quiz-item";
+    const q = document.createElement("div"); q.className = "quiz-q"; q.textContent = (i + 1) + ". " + it.t; div.appendChild(q);
+    const opts = document.createElement("div"); opts.className = "quiz-opts";
+    const fb = document.createElement("div"); fb.className = "quiz-fb";
+    let listo = false;
+    OPC.forEach((o, j) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = o;
+      b.addEventListener("click", () => {
+        if (listo) return; listo = true; hechos++;
+        if (j === it.a) { b.classList.add("ok"); aciertos++; fb.textContent = "Correcto. " + it.fb; }
+        else { b.classList.add("bad"); opts.children[it.a].classList.add("ok"); fb.textContent = "Es " + OPC[it.a].toLowerCase() + ". " + it.fb; }
+        document.getElementById("mom-score").textContent = hechos === ITEMS.length ? ("Resultado: " + aciertos + " de " + ITEMS.length + ". Las dos de \"después de arrendar\" son las columnas prohibidas del task.") : ("Llevas " + hechos + " de " + ITEMS.length + ".");
+      });
+      opts.appendChild(b);
+    });
+    div.appendChild(opts); div.appendChild(fb); cont.appendChild(div);
+  });
+})();
+</script>
+```
+
+Qué cambió y qué significa: de las ocho columnas, cuatro se conocen antes de comprar (visitando el local o leyendo el plan de negocio del arrendatario), dos son lo que queremos predecir y dos solo existen cuando el contrato ya lleva tiempo corriendo. Esas dos últimas son las que un agente, si nadie lo frena, va a proponer como "predictor estrella", porque en la base son las que mejor separan.
+
+## Cómo se escribe un hallazgo
+
+El formato es fijo y cabe en dos líneas. La cifra viene de una ejecución (una celda del código de la semana o un script del agente) y el "por qué importa" habla el idioma de la junta, no el de R:
+
+```default
+HALLAZGO: En zona residencial cierra el 28.9 % de los arrendatarios
+          (41 de 142); en zona de oficinas, el 10.6 % (13 de 123). [código, celda d]
+POR QUÉ IMPORTA: La zona se conoce antes de comprar y separa el riesgo de
+          cierre en 18 puntos: entra en la evaluación de los tres
+          locales de Barranquilla.
+```
+
+Y una figura cuyo **título dice el hallazgo**: "La ciudad no separa: todas cerca del 20 %" dice algo; "Tasa de cierre por ciudad" no dice nada.
+
+::: {.callout-practice}
+<div class="callout-title">El código de la semana 3 (opcional, y la referencia del task)</div>
+Los seis pasos, reproducidos celda a celda en R, están en [el código de la semana 3](../practice/cocina.html). Ahí se verifica cualquier cifra que reporte el agente.
+:::
+
+::: {.callout-connect}
+<div class="callout-title">En la sesión</div>
+- **El paper:** Kaufman, Rosset y Perlich (2012) estudiaron por qué los modelos que ganaban competencias de datos usaban información que no existiría al momento de predecir; en una de ellas, el número de identificación del paciente predecía el cáncer. De ahí sale el criterio del momento de la decisión, el mismo que atrapa a la mora en el canon (`meses_atraso_arriendo`).
+- **La aplicación:** el profesor dirige en vivo a un agente sobre el estudio de locales, con las reglas cargadas y la regla de la sesión. En algún momento el agente va a proponer un predictor estrella que no lo es, y la sala tiene que atraparlo. Después, la cacería: tres cifras del agente contra el sobre sellado, y los tres frenos con la evidencia de lo que acaba de pasar.
+- **El cierre:** el task 2. Dos equipos al azar muestran su matriz de influencia (dos minutos cada uno) y discutimos por qué difieren; y la prueba de la fuente, en vivo, con una fila de la tabla de un equipo cualquiera.
+:::
+
+# ¿Y esto cómo se ve en tu organización?
+
+Piensa en una base de tu empresa que un agente podría explorar: ventas por cliente, rotación de personal, cartera, inventarios. ¿Se la darías tal cual? Probablemente no. ¿Qué le darías entonces? Escribe mentalmente el diccionario: las columnas, sus unidades, su rango, y, para cada una, el momento en que se conoce respecto de la decisión que te importa. Mira si hay alguna que "separa demasiado bien" porque en realidad es el resultado disfrazado. Ese diccionario es lo que le darías a un agente sin mostrarle los datos, y es el punto de partida del memo individual del final del curso.
+
+# Preguntas de comprensión
+
+<details class="pregunta">
+<summary>1. Le pides al agente que explore la base y, antes de correr nada, responde: "La tasa de cierre es 19.8 %". ¿Qué haces?</summary>
+Frenar. Ese número no salió de ninguna ejecución: es una alucinación numérica, un valor plausible que el modelo generó como texto. Le escribes: "¿De qué salida sale ese número? Muéstrame el código y córrelo". El script tiene que leer `estudio_locales.csv`, calcular `mean(estado_3a == "cerró")` y mostrar la salida: 0.200. Y la comparas con la celda b del código de la semana 3 o con el sobre.
+</details>
+
+<details class="pregunta">
+<summary>2. ¿Por qué la calificación de Google no sirve para evaluar un local que aún no se compra, si en la base está claramente asociada con que el arrendatario siga abierto?</summary>
+Porque solo existe después de arrendar: la calificación la ponen los clientes del negocio que ya opera. Para un local candidato en Barranquilla no hay ninguna calificación que consultar. La asociación es real (4.20 en los que siguen abiertos frente a 3.77 en los que cerraron), pero no está disponible en el momento de la decisión, y por eso es una fuga. Lo que sí se puede mirar antes de comprar es la calificación de los competidores del barrio.
+</details>
+
+<details class="pregunta">
+<summary>3. Las ventas tienen media 100.7 y mediana 95.0. ¿Cuál de las dos le dices a la junta?</summary>
+La mediana, y le muestras la cola. La media está arrastrada por unos pocos arrendatarios que venden más de 200 millones al mes; 271 de los 480 venden menos que la media. Si la junta proyecta Barranquilla con 100.7, espera más de lo que vende la mayoría. "El arrendatario típico vende 95 millones al mes, y uno de cada diez pasa de 146.7" es una frase honesta.
+</details>
+
+<details class="pregunta">
+<summary>4. ¿Cuál de estas dos directivas es verificable? (a) "Trata los valores atípicos con criterio". (b) "No elimines ningún local; si un valor te parece atípico, repórtalo con su id_local y pregunta antes de hacer nada".</summary>
+La (b). Al terminar puedes revisar si se eliminó alguna fila (no debería) y si los atípicos aparecen reportados con su identificador. La (a) deja la decisión en manos del agente, que es justo lo que una regla debía impedir.
+</details>
+
+# Lectura corta (opcional)
+
+Walter Sosa Escudero, *Qué es (y qué no es) la estadística* (Siglo XXI, 2014), el capítulo sobre correlación y causalidad. Es la versión de divulgación de lo que pasó con la mora en el canon: una asociación casi perfecta que no sirve para decidir, y la pregunta que hay que hacerse antes de leer cualquier hallazgo.
