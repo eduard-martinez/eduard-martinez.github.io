@@ -63,11 +63,11 @@ All course materials — syllabus, lecture slides, R applications, problem sets 
 
 In causal inference the goal is to identify a parameter correctly: the effect β of an intervention on an outcome. In this course the goal changes place — the interest is Y: building models that **predict the variable of interest well** on data the model has not seen, **evaluating** that predictive performance honestly, and **opening the model** to understand what the prediction depends on. That distinction between explaining and predicting organizes the whole semester and is drawn from the very first session.
 
-The course introduces Master's students to the statistical-learning framework and to the machine-learning tools most used today in applied economics and finance: regression as a prediction machine, cross-validation and the honest pipeline, regularization (Ridge, Lasso, Elastic Net), classification and the threshold as a decision with costs, trees, random forests and boosting, interpretation tools (permutation importance, partial dependence, SHAP) and representation with PCA, k-means and neural networks. The progression follows *An Introduction to Statistical Learning* (James, Witten, Hastie & Tibshirani, 2nd ed.), the course textbook.
+The course introduces Master's students to the statistical-learning framework and to the machine-learning tools most used today in applied economics: regression as a prediction machine, cross-validation and regularization (Ridge, Lasso, Elastic Net) as the honest pipeline, classification, trees, random forests and boosting, the tools that open the black box (variable importance, partial dependence, Shapley values) and neural networks — with a final bridge to ML in the service of causal inference. The course text is *An Introduction to Statistical Learning* (James, Witten, Hastie & Tibshirani, 2nd ed.); each session states the chapters and sections it draws on.
 
-The treatment combines **sufficient formality** with **a lot of intuition**. For each method the course presents its objective function and hyperparameters, explains what problem it solves and how it works, implements it on real data in R, evaluates its out-of-sample performance against a baseline model, and interprets the results. Long derivations live in each session's *Para profundizar* appendix.
+The treatment combines **sufficient formality** with **a lot of intuition**: each method is presented through the economic problem it solves, the equation that explains the mechanism, a figure built with the course's own data, and what it implies for the prediction. Long derivations live in each deck's appendix.
 
-**One running case.** From session 2 to session 8 the class works on a single problem: predicting the vote of each of Colombia's 12,001 polling stations in the 2022 presidential runoff, using the census characteristics of the station's surroundings and its location. Every week the same table of leaders grows by one model, evaluated on the same untouched test set. The problem sets transfer the tools to a second dataset — housing prices in Cali — and in the final project each team brings its own data.
+**One running case.** A single empirical case runs through sessions 2 to 8: Colombia's polling stations in the 2022 presidential runoff, with the 2018 census characteristics of each station's surroundings — the data behind Gelvez, Cardiles, Martínez-González & Muñoz (2026). Every week the theory takes its examples from that case's numbers, and the R practice published with the session reproduces them all. The problem sets use a second dataset — for-sale housing listings in Cali — and the final project runs on data each student chooses.
 
 ## Learning outcomes
 
@@ -75,17 +75,18 @@ By the end of the course, students will be able to:
 
 - Distinguish a prediction problem from a causal-inference problem, and recognize when out-of-sample predictive performance is the quantity of interest.
 - Build the complete workflow in R: splitting, preprocessing inside the pipeline, validation, tuning, evaluation against a baseline and interpretation.
-- Evaluate regression and classification models with the appropriate metrics (RMSE, MAE, out-of-sample R², AUC, calibration, costs of each error), and diagnose where the errors concentrate.
+- Evaluate regression and classification models with the appropriate metrics (RMSE, MAE, out-of-sample R²; confusion matrix, AUC, calibration), with their uncertainty and against a baseline, and diagnose where the errors concentrate.
 - Apply and compare regularization, k-NN, trees, random forests, boosting and neural networks on economic data, knowing when each family is the right choice.
 - Open a flexible model with permutation importance, partial dependence and SHAP — and know what it says and what it does not say.
 - Read critically and present economic research that uses ML.
+- Implement all of the above in R with transparent code and no programming black boxes (`glmnet`, `rpart`, `randomForest`, `xgboost`, `nnet`): the practices write out every step.
 
 ## How each class works
 
 Each session is organized in three parts:
 
 1. **Theory and concepts.** For every method, the same sequence: the problem it solves, the intuition, the essential formulation, how it works and how it is tuned, the application on real data, the evaluation and the interpretation. Long derivations go to the session's appendix.
-2. **Applied work in R.** The last stretch of each class is hands-on work with prepared code on the running case (week 1 is the conceptual exception, with a small simulated example). Each script reports out-of-sample performance against the previous week's leader; they are written in base R plus a handful of packages (`rio`, `dplyr`, `glmnet`, `rpart`, `randomForest`, `xgboost`, `nnet`), with no hidden machinery.
+2. **Applied work in R.** The last stretch of each class is hands-on work with prepared code on the running case (week 1 is the conceptual exception, with a small simulated example). From week 3 each session publishes two scripts: the short **application** worked in class and a full **replication** that reproduces every figure in the deck. They are written in base R plus a handful of packages (`rio`, `dplyr`, `glmnet`, `rpart`, `randomForest`, `xgboost`, `nnet`), with no hidden machinery.
 3. **The papers.** Each session has a reference applied article that shows the method at work in published research. In session 2 each team picks the paper it will present — two options per field of economics — and presents it in **session 8**, in 15 minutes: the question and the decision behind it, the data, the baseline, the out-of-sample evaluation and where the model fails, and the main result.
 
 ## Getting up to speed in R
@@ -113,6 +114,7 @@ From β to Y; the generalization risk and why the conditional mean is the best p
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-01/week-01.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-01/week-01-eng.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-language"></i>English</a>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-01/week-01.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · one dataset, three models</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-01.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 1–2 (section 2.2) · Mullainathan &amp; Spiess (2017), <em>Machine Learning: An Applied Econometric Approach</em></small>
@@ -123,6 +125,7 @@ The same OLS with a different criterion: what survives, what stops mattering and
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-02/week-02.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-02/week-02-eng.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-language"></i>English</a>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-02/week-02.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · the vote of a polling station</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-02.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 3 · ch. 7 (steps, splines and GAMs)</small>
@@ -134,8 +137,9 @@ Two tools that need each other. The judge: cross-validation estimates out-of-sam
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-03/week-03.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
-<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-03/week-03.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · cross-validation and the Lasso</a>
-<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-03/week-03-b.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application B · Ridge and Lasso on the full country</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-03/week-03-eng.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-language"></i>English</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-03/week-03-application.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application (class)</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-03/week-03-replication.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R replication (the full deck)</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-03.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL 5.1 (cross-validation) · 6.2 and 6.4 (Ridge, Lasso, high dimension)</small>
 </p>
@@ -145,7 +149,9 @@ Same election, same stations, same data; the y changes: did Petro win the statio
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-04/week-04.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
-<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-04/week-04.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · does Petro win the station?</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-04/week-04-eng.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-language"></i>English</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-04/week-04-application.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application (class)</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-04/week-04-replication.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R replication (the full deck)</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-04.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL 4.1–4.3 and 4.4.2 (confusion matrix and ROC) · 4.7.6 (the k-NN classifier lab) · Fawcett (2006)</small>
 <small class="ws-data"><strong>Milestone:</strong> Problem set 1 published — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/problem-sets/pset-1/pset-1.pdf" target="_blank" rel="noopener">PDF</a> · <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/problem-sets/pset-1/vivienda_cali.rds"><code>vivienda_cali.rds</code></a> · <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/problem-sets/pset-1/diccionario_vivienda.csv"><code>diccionario_vivienda.csv</code></a> (due Oct 20, 8:00 a.m.)</small>
@@ -158,7 +164,9 @@ Until now we wrote the flexibility by hand — which variable crossed with which
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-05/week-05.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
-<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-05/week-05.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · tree, forest and boosting</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-05/week-05-eng.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-language"></i>English</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-05/week-05-application.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application (class)</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-05/week-05-replication.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R replication (the full deck)</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-05.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL ch. 8 (8.1 the tree, 8.2 the ensembles) · Breiman (2001)</small>
 <small class="ws-data"><strong>Thread paper:</strong> Gelvez, Cardiles, Martínez-González &amp; Muñoz (2026), <em>How Predictable Is an Election?</em> — <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/literature/papers/01-economia-politica/democratization_AIM4D_Notre_Dame.pdf" target="_blank" rel="noopener">PDF</a></small>
@@ -169,6 +177,7 @@ No new model: today we walk into last week's, 738 trees and 38,330 leaves that n
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-06/week-06.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-06/week-06-eng.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-language"></i>English</a>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-06/week-06.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · what the leader learned</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-06.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> Molnar (2025), the permutation-importance, PDP and SHAP chapters (read the disadvantages twice)</small>
@@ -182,6 +191,7 @@ How many different things does the census actually know about a station — and 
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-07/week-07.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-07/week-07-eng.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-language"></i>English</a>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-07/week-07.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · PCA, k-means and a network</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-07.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> ISL 12.2 (principal components) and 12.4.1 (k-means) · 10.1–10.3 and 10.6–10.7 (neural networks)</small>
@@ -193,6 +203,7 @@ No new method: today all of them are used. The student paper presentations (15 m
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-08/week-08.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-08/week-08-eng.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-language"></i>English</a>
 <small class="ws-data"><strong>Readings:</strong> Athey &amp; Imbens (2019), sections 1–3 (the causal bridge)</small>
 <small class="ws-data"><strong>Session papers:</strong> eight fields of economics with two options each — political economy, crime and justice, health, development and poverty, labour and education, finance and credit, macro and forecasting, IO and demand. Each team picked its field and paper in session 2; who presents what is announced in class. <a href="https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers" target="_blank" rel="noopener">Paper library</a></small>
 <small class="ws-data"><strong>Milestone:</strong> project pitch — the idea in one page</small>
@@ -203,6 +214,7 @@ The Problem set 2 ranking and the course in one slide; then each team presents i
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-09/week-09.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-09/week-09-eng.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-language"></i>English</a>
 <small class="ws-data"><strong>Milestones:</strong> final project presentations · project document submitted (max. 8 pages)</small>
 </p>
 
