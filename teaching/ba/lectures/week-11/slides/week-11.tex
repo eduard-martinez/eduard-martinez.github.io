@@ -25,16 +25,21 @@
 \definecolor{grisclaro}{RGB}{242,243,246}
 \definecolor{azulcaso}{RGB}{28,60,120}
 
+%% Una cuenta en dos renglones: la operación y su resultado
+\newcommand{\cuenta}[2]{\begin{tabular}[c]{@{}c@{}}#1\\ $=$ \textbf{#2}\end{tabular}}
+
 %% Encabezado
 \title[06327-ECO]{Analítica para los negocios \\ 06327-ECO}
-\subtitle{Semana 11: El torneo de clasificadores --- ¿quién se va de Cóndor?}
+\subtitle{Semana 11: De evaluar a entrenar --- el primer árbol de la casa}
 \author{Eduard F. Martínez González, Ph.D.}
 \institute[]{Departamento de Economía, Universidad Icesi}
-\date{\textcolor{rojoal}{[fecha por definir]}}
+\date{13 de octubre de 2026}
 
 %%=================================================
+%% Begin document
 \begin{document}
 
+%%=================================================
 \begin{frame}
 \titlepage
 \end{frame}
@@ -42,262 +47,260 @@
 %%=================================================
 \begin{frame}{Objetivo de la sesión}
 \small
-La semana pasada se juzgaron reglas escritas a mano. Hoy la máquina \textbf{escribe sus propias reglas} --- y compite contra la del EDA, en el mismo sobre sellado.
+\begin{block}{La pregunta de negocio}
+¿A qué clientes debe enviarles Growth la campaña de retención?
+\end{block}
 
-\vspace{0.15cm}
-\begin{itemize} \setlength{\itemsep}{0.16cm}
-  \item Un árbol de dos preguntas, comprobado a mano.
-  \item El árbol sin frenos y la poda: la validación cruzada como juez que no abre el sobre.
-  \item Quinientos árboles votando, su juez gratis y su perilla.
-  \item Toda cifra del examen, con su margen.
+\vspace{0.2cm}
+La semana pasada la respondimos con modelos de otros. Hoy entrenamos el nuestro:
+\begin{itemize} \setlength{\itemsep}{0.15cm}
+  \item Elegir con qué variables aprende y con qué clientes se califica.
+  \item Leer el árbol que sale: qué pregunta y a quién señala.
+  \item Decidir, con las métricas y el dinero de la semana 10, si Growth lo adopta.
 \end{itemize}
 
-\vspace{0.15cm}
-\begin{block}{La idea que gobierna la sesión}
-El mejor modelo no es el que más acierta en general, sino el que \textbf{mejor sirve a la decisión}: a quién llama Growth con el cupo que tiene.
-\end{block}
+\vspace{0.25cm}
+\textcolor{azulcaso}{Hoy sí se entrena un modelo --- y se califica igual que la semana pasada: con clientes que no vio.}
 \end{frame}
 
 %%=================================================
-\begin{frame}{¿Dónde estamos en el curso?}
+\begin{frame}{Previously\ldots}
 \small
-\begin{itemize} \setlength{\itemsep}{0.22cm}
-  \item \textbf{Semana 6:} el EDA --- recencia y sesiones separan a los que se van.
-  \item \textbf{Semana 10:} el juicio --- la regla del EDA encuentra a 151 de 354 con 278 llamadas; en accuracy empata con no hacer nada.
-  \item \textbf{Semana 11 (hoy):} el entrenamiento --- árboles y bosques, con la tabla del líder de la semana 10 como vara.
+\begin{itemize} \setlength{\itemsep}{0.25cm}
+  \item \textbf{Semana 6: el EDA.} El comportamiento reciente separa a quienes se van: la recencia y las sesiones mueven el abandono del 12 al 60\,\%; la ciudad y el canal, no.
+  \item \textbf{Semana 10: el juez de modelos.} Dos proveedores contra la línea base «no enviarle la campaña a nadie» (accuracy 0.779 sin encontrar a ninguno de los 354). El proveedor A encontraba 77 a \$3.214 cada uno; la decisión dependió de cuánto vale un cliente encontrado.
+  \item \textbf{La teoría de esta semana.} Un árbol aprende haciendo preguntas a los datos: en cada paso elige el corte que mejor separa, y la profundidad controla cuánto memoriza.
 \end{itemize}
-
-\vspace{0.2cm}
-\begin{block}{Lo que cambia hoy}
-Las reglas ya no las escribe el analista: las aprende el modelo, y la validación cruzada decide cuánto dejarlo aprender.
-\end{block}
 \end{frame}
 
+%%=================================================
 \begin{frame}[noframenumbering]{Roadmap}
 \tableofcontents
 \end{frame}
 
 %%=================================================
-\section{La vara y la base}
+\section{Contexto}
 
-\begin{frame}[noframenumbering]{Roadmap}
-\tableofcontents[currentsection]
-\end{frame}
-
-\begin{frame}{La pregunta de hoy, con presupuesto}
+\begin{frame}{Contexto: ¿por qué entrenar un modelo propio?}
 \small
-\begin{block}{La misión de Growth}
-``La regla del EDA encuentra a 151 de cada 354 clientes que se van. Tenemos cupo para unas \textbf{280 llamadas por cada 1.600 clientes}. ¿Un modelo entrenado encuentra más con ese cupo?''
-\end{block}
+Tras el ejercicio de la semana pasada, la gerencia hizo la pregunta natural: \textbf{¿y si el modelo lo hacemos nosotros?} Un modelo propio no cobra por lista, se puede examinar pregunta por pregunta y se reentrena cuando cambien los datos.
 
 \vspace{0.15cm}
-\centering
-\footnotesize
-\textbf{La tabla del líder que dejó la semana 10} (test de 1.600; se van 354)
-\vspace{0.05cm}
+Las opciones de hoy:
+\begin{itemize} \setlength{\itemsep}{0.08cm}
+  \item \textbf{La línea base de siempre}: no enviarle la campaña a nadie. No cuesta nada y no encuentra a nadie.
+  \item \textbf{El árbol de la casa}: un árbol de decisión entrenado con los datos de Cóndor.
+\end{itemize}
 
-\begin{tabular}{lrrc}
-\toprule
-Regla & Llamadas & Encontrados & Accuracy \\
-\midrule
-Nadie abandona & 0 & 0 & 0,779 ± 0,021 \\
-\rowcolor{grisclaro} \textbf{Regla del EDA} & 278 & 151 & 0,794 ± 0,020 \\
-Memorizador & 86 & 26 & 0,757 ± 0,021 \\
-\bottomrule
-\end{tabular}
+\vspace{0.15cm}
+\begin{block}{Las preguntas de hoy}
+¿Qué aprende un árbol con los datos de Cóndor? ¿Le gana a la línea base --- y a qué costo?
+\end{block}
 \end{frame}
 
-\begin{frame}{Paso 1 · ¿Con qué columnas se entrena?}
-\small
-De las 29 columnas de \texttt{base\_clientes}, salen tres tipos:
-\vspace{0.1cm}
+%%=================================================
+\section{El árbol de la casa: de los datos a la decisión}
 
-\centering
+\begin{frame}{¿Con qué aprende el árbol?}
+\small
+Dos reglas para elegir las variables:
+\begin{itemize} \setlength{\itemsep}{0.06cm}
+  \item Que \textbf{existan el día de la decisión}: nada que se conozca después, como \texttt{dias\_mora} o \texttt{gasto\_proximo\_trim} (la fuga de la semana 6).
+  \item Que \textbf{no tengan vacíos}: el árbol necesita un valor para cada cliente.
+\end{itemize}
+
+\vspace{0.15cm}
+\begin{center}
 \scriptsize
-\begin{tabular}{lll}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}l l l@{}}
 \toprule
-Columna & Por qué sale & Criterio \\
+\textbf{Variable} & \textbf{Qué mide} & \textbf{Por qué entra} \\
 \midrule
-\texttt{gasto\_proximo\_trim} & se conoce después del corte & fuga (semana 10) \\
-\texttt{departamento} & 12 ciudades, 12 combinaciones & repite a \texttt{ciudad} \\
-\texttt{duracion\_sesion\_promedio} & vacía sin sesiones & ya está en las sesiones \\
-\texttt{csat\_promedio} & vacía sin tickets & ya está en los tickets \\
-\texttt{score\_buro} & vacía sin crédito & ya está en \texttt{tiene\_credito} \\
+\texttt{recencia\_dias} & días desde la última transacción & la señal más fuerte del EDA \\
+\texttt{num\_sesiones\_ult30d} & uso de la app en el último mes & del 56 al 2\,\% de abandono \\
+\texttt{frecuencia\_tx} & transacciones por trimestre & mide el hábito de uso \\
+\texttt{antiguedad\_meses} & meses como cliente & la relación acumulada \\
+\texttt{gasto\_promedio\_mensual} & gasto típico mensual & el tamaño de la relación \\
 \bottomrule
 \end{tabular}
-\raggedright
-\small
-\pause
-\vspace{0.25cm}
-\begin{alertblock}{Hallazgo 1}
-Quedan \textbf{22 predictoras} y el mismo sobre de la semana 10 (6.400 en train, 1.600 en test): la comparación con la tabla del líder es justa. Y el bosque no acepta vacíos: los ``no aplica'' se resuelven con criterio, no con la media.
+\end{center}
+
+\vspace{0.1cm}
+\begin{alertblock}{Lo que importa}
+El target es \texttt{abandono} (1 = se fue). Cinco señales de comportamiento, las mismas que el EDA mostró que separan.
 \end{alertblock}
 \end{frame}
 
 %%=================================================
-\section{El árbol}
-
-\begin{frame}[noframenumbering]{Roadmap}
-\tableofcontents[currentsection]
-\end{frame}
-
-\begin{frame}{Paso 2 · ¿Qué pregunta haría la máquina?}
+\begin{frame}{El sobre: unos clientes para aprender, otros para calificar}
 \small
-\begin{columns}[T]
-\column{0.5\textwidth}
-\includegraphics[width=0.93\textwidth]{pic/fig_s11_arbol.png}
-\column{0.5\textwidth}
-\includegraphics[width=0.93\textwidth]{pic/fig_s11_corte.png}
-\end{columns}
-\vspace{0.05cm}
-\begin{itemize} \itemsep2pt
-  \item El árbol prueba todos los cortes de las 22 variables y se queda con el que más separa: \textbf{8 o menos transacciones} (47\,\% se va) contra \textbf{9 o más} (13\,\%).
-  \item En test: accuracy \textbf{0,805 ± 0,020}, pero solo 76 llamadas y 59 encontrados (recall \textbf{0,167 ± 0,040}).
-\end{itemize}
-\pause
-\begin{alertblock}{Hallazgo 2}
-El árbol hace \textbf{solo} lo que se hizo a mano en la semana 6: comparar tasas por tramo. Repitió la recencia (158 días en vez de 90) y cambió sesiones por frecuencia. En accuracy empata con la regla del EDA; a Growth le sirve menos.
+Lo que queremos del árbol es que \textbf{generalice}: que aprenda el patrón del abandono, no que se memorice la respuesta de cada cliente. Y eso solo se comprueba con clientes que no vio: si se califica con los mismos con los que aprendió, el examen trae las respuestas vistas y la nota sale inflada.
+
+\vspace{0.2cm}
+\begin{center}
+\setlength{\tabcolsep}{8pt}
+\begin{tabular}{@{}c c c@{}}
+\textbf{8.000 clientes} & & \\
+\footnotesize sorteo 80\,/\,20 & $\longrightarrow$ &
+\footnotesize
+\begin{tabular}{@{}l@{}}
+\colorbox{grisclaro}{\textbf{6.400 entrenan}: el árbol ve qué hicieron y si se fueron} \\[0.12cm]
+\colorbox{grisclaro}{\textbf{1.600 califican}: el árbol no los ve al entrenar} \\
+\end{tabular} \\
+\end{tabular}
+\end{center}
+
+\vspace{0.2cm}
+De los 1.600 del sobre, \textbf{354 se fueron} y 1.246 se quedaron. Son \textbf{los mismos 1.600 que calificaron a los proveedores} la semana pasada: la vara no cambió.
+
+\vspace{0.15cm}
+\begin{alertblock}{Lo que importa}
+La nota del árbol se mide solo en el sobre: ahí se ve si generalizó o si memorizó. Entrenar es estudiar; el sobre es el examen.
 \end{alertblock}
 \end{frame}
 
-\begin{frame}{Paso 3 · ¿Cuánto árbol es demasiado árbol?}
+%%=================================================
+\begin{frame}{El árbol entrenado: dos preguntas}
 \small
 \begin{columns}[T]
-\column{0.58\textwidth}
-\includegraphics[width=\textwidth]{pic/fig_s11_dial.png}
+\column{0.56\textwidth}
+\includegraphics[width=\textwidth]{pic/fig_arbol_s11.png}
 \column{0.4\textwidth}
 \footnotesize
-\textbf{El árbol sin frenos} (\texttt{cp = 0,0001}, hojas de un cliente):
-\begin{itemize} \setlength{\itemsep}{0.08cm}
-  \item \textbf{926 hojas}; train \textbf{100\,\%}; test \textbf{0,729 ± 0,022}, por debajo de no hacer nada.
-  \item La validación cruzada: de \textbf{1,00} a \textbf{0,89} con 2 cortes, y sube hasta \textbf{1,32}.
-  \item Regla 1-SE: tope 0,89 + 0,02 = 0,91 $\Rightarrow$ \textbf{3 hojas}.
+El árbol quedó con \textbf{2 nodos de decisión y 3 hojas}. Cada caja es un grupo de clientes:
+\begin{itemize} \setlength{\itemsep}{0.04cm}
+  \item arriba, la clase que predice (\textbf{1 = se va});
+  \item en el medio, \textbf{cuántos se quedaron y cuántos se fueron} (ceros $|$ unos);
+  \item abajo, qué \% de los clientes cae ahí.
 \end{itemize}
+
+\vspace{0.08cm}
+Solo la hoja «\textbf{transa poco y lleva 158 días o más}» recibe la predicción «se va»: 94 se quedaron, 269 se fueron.
 \end{columns}
-\pause
-\vspace{0.1cm}
-\begin{alertblock}{Hallazgo 3}
-La poda devuelve \textbf{exactamente} el árbol de dos preguntas: la CV confirmó, sin abrir el sobre, que las otras 923 hojas compraban ruido.
+\begin{alertblock}{Lo que importa}
+De las cinco variables, el árbol usó dos: frecuencia y recencia. Las demás no mejoraban la separación lo suficiente para ganarse una pregunta.
 \end{alertblock}
 \end{frame}
 
 %%=================================================
-\section{El bosque y la perilla}
-
-\begin{frame}[noframenumbering]{Roadmap}
-\tableofcontents[currentsection]
-\end{frame}
-
-\begin{frame}{Paso 4 · ¿Qué gana el bosque votando?}
+\begin{frame}{¿Acertó el árbol, cliente por cliente?}
 \small
 \begin{columns}[T]
 \column{0.55\textwidth}
-\includegraphics[width=\textwidth]{pic/fig_s11_importancia.png}
-\column{0.43\textwidth}
-\footnotesize
-\begin{itemize} \setlength{\itemsep}{0.08cm}
-  \item 500 árboles sobre remuestras de train; en cada corte, 4 variables al azar.
-  \item \textbf{Juez gratis} (fuera de la bolsa): error de 19,8\,\%, accuracy \textbf{0,802} sin abrir el sobre.
-  \item Test: accuracy \textbf{0,809 ± 0,020} --- la más alta del torneo.
-\end{itemize}
-\end{columns}
-\pause
-\vspace{0.1cm}
-\begin{alertblock}{Hallazgo 4}
-El juez gratis y el examen coinciden. La accuracy más alta\ldots\ \textbf{empata} con el árbol y con la regla del EDA. Lo que más usa el bosque es el enganche del cliente, lo mismo que encontró el EDA.
-\end{alertblock}
-\end{frame}
-
-\begin{frame}{Paso 5 · ¿A quién llama Growth con su cupo?}
-\small
-\begin{columns}[T]
-\column{0.6\textwidth}
-\includegraphics[width=\textwidth]{pic/fig_s11_cupo.png}
-\column{0.38\textwidth}
-\footnotesize
-\begin{itemize} \setlength{\itemsep}{0.08cm}
-  \item El bosque da una \textbf{probabilidad}; el umbral la vuelve decisión.
-  \item Umbral 0,4: \textbf{288} llamadas, \textbf{159} encontrados.
-  \item Regla del EDA: 278 llamadas, 151 encontrados, margen \textbf{±19}.
-  \item Umbral 0,3: 453 llamadas, 212 encontrados.
-\end{itemize}
-\end{columns}
-\pause
-\vspace{0.1cm}
-\begin{alertblock}{Hallazgo 5 --- la lección de la semana}
-Con el cupo de Growth, \textbf{empate técnico}. Lo que compra el bosque es \textbf{la perilla}: ordena a los 1.600 por riesgo y deja fijar el cupo. El árbol podado no puede: su perilla salta en tres escalones.
-\end{alertblock}
-\end{frame}
-
-\begin{frame}{Paso 5 · ¿Y son creíbles esas probabilidades?}
-\small
-\begin{center}
-\includegraphics[width=0.66\textwidth]{pic/fig_s11_calibracion.png}
-\end{center}
-\vspace{-0.2cm}
-\begin{itemize} \itemsep2pt
-  \item Tasa real por tramo de recencia: de \textbf{12,2\,\%} a \textbf{60,1\,\%}. Probabilidad promedio del bosque: de \textbf{15,4\,\%} a \textbf{56,7\,\%} --- nunca a más de 4 puntos.
-\end{itemize}
-\begin{block}{La decisión del paso}
-Las probabilidades son creíbles y el bosque aprendió la curva de la semana 6: su riesgo sirve para decidir el cupo.
-\end{block}
-\end{frame}
-
-%%=================================================
-\section{Lo que queda}
-
-\begin{frame}[noframenumbering]{Roadmap}
-\tableofcontents[currentsection]
-\end{frame}
-
-\begin{frame}{La tabla del líder}
-\small
 \centering
-\footnotesize
-\textbf{Abandono} (test de 1.600 clientes; se van 354)
-\vspace{0.05cm}
-
-\begin{tabular}{lrrc}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}c r r c c l@{}}
 \toprule
-Regla o modelo & Llamadas & Encontrados & Accuracy \\
+\textbf{Cliente} & \textbf{Frec.} & \textbf{Rec.} & \textbf{Predicción} & \textbf{¿Se fue?} & \textbf{Res.} \\
 \midrule
-Nadie abandona & 0 & 0 & 0,779 ± 0,021 \\
-\rowcolor{grisclaro} \textbf{Regla del EDA} & 278 & 151 & 0,794 ± 0,020 \\
-Memorizador & 86 & 26 & 0,757 ± 0,021 \\
-Árbol de dos preguntas & 76 & 59 & 0,805 ± 0,020 \\
-Árbol sin frenos & 344 & 132 & 0,729 ± 0,022 \\
-Bosque, umbral 0,5 & 164 & 106 & 0,809 ± 0,020 \\
-\rowcolor{grisclaro} \textbf{Bosque, umbral 0,4} & 288 & 159 & 0,797 ± 0,020 \\
+\rowcolor{grisclaro} 3000122 & 1 & 215 & se va & sí & \textbf{TP} \\
+\rowcolor{grisclaro} 3000182 & 1 & 205 & se va & sí & \textbf{TP} \\
+\rowcolor{grisclaro} 3000357 & 3 & 170 & se va & sí & \textbf{TP} \\
+3000077 & 3 & 266 & se va & no & \textbf{FP} \\
+3000099 & 1 & 188 & se va & no & \textbf{FP} \\
+3000149 & 6 & 358 & se va & no & \textbf{FP} \\
+\rowcolor{grisclaro} 3000027 & 3 & 131 & se queda & sí & \textbf{FN} \\
+\rowcolor{grisclaro} 3000030 & 13 & 24 & se queda & sí & \textbf{FN} \\
+\rowcolor{grisclaro} 3000050 & 22 & 15 & se queda & sí & \textbf{FN} \\
+3000003 & 22 & 6 & se queda & no & TN \\
+3000004 & 14 & 1 & se queda & no & TN \\
+3000007 & 21 & 6 & se queda & no & TN \\
 \bottomrule
 \end{tabular}
 
-\raggedright
-\small
+\vspace{0.05cm}
+\tiny Doce clientes del test: tres de cada casilla.
+\column{0.42\textwidth}
+\footnotesize
+Totales en los 1.600: \textbf{59 TP}, \textbf{17 FP}, \textbf{295 FN}, 1.229 TN.
+
+\vspace{0.12cm}
+Los TP y los FP tienen el perfil que el árbol señala: poca frecuencia, mucha recencia.
+
+\vspace{0.12cm}
+Los FN duelen: el 3000030 y el 3000050 transaban seguido y se fueron sin que estas señales avisaran --- la semana pasada tampoco los vio el proveedor A.
+\end{columns}
 \pause
-\vspace{0.2cm}
-\begin{block}{La decisión}
-Nadie desbanca a la regla del EDA por más que el margen. El bosque entra como \textbf{colíder}: no porque acierte más, sino porque su riesgo ordena a todos los clientes.
-\end{block}
+\vspace{0.1cm}
+\begin{alertblock}{Lo que importa}
+El árbol solo encuentra el abandono que se parece a sus preguntas: 295 de los 354 se van por caminos que estas cinco señales no ven.
+\end{alertblock}
 \end{frame}
 
-\begin{frame}{Qué produce un torneo --- y qué no}
+%%=================================================
+\begin{frame}{Tres métricas, las de la semana pasada}
 \small
 \begin{columns}[T]
-\column{0.48\textwidth}
-\textbf{Produce}
-\begin{itemize} \setlength{\itemsep}{0.1cm}
-  \item Modelos elegidos por el juez (la CV), no por el examen.
-  \item Un riesgo creíble para cada cliente.
-  \item Una regla legible (el árbol) y un ordenador fino (el bosque).
-\end{itemize}
-\column{0.48\textwidth}
-\textbf{No produce}
-\begin{itemize} \setlength{\itemsep}{0.1cm}
-  \item Causas: la importancia dice qué \emph{usó} el bosque, no qué \emph{causa} el abandono.
-  \item Más señal que la que hay: con estos datos, el EDA ya había encontrado casi toda.
-  \item Clientes que se van por razones que no están en la base.
+\column{0.52\textwidth}
+\includegraphics[width=\textwidth]{pic/fig_metricas_s11.png}
+\column{0.46\textwidth}
+\footnotesize
+\begin{itemize} \setlength{\itemsep}{0.12cm}
+  \item \textbf{Accuracy}: 0.805 contra 0.779. Gana, pero la línea base ya acertaba mucho: con 22\,\% de abandono, acertar no es difícil.
+  \item \textbf{Precisión}: 0.776. De cada 4 envíos, 3 van a alguien que de verdad se iba (el proveedor A lograba 0.700).
+  \item \textbf{Recall}: 0.167. Encuentra a 59 de los 354; se le escapan 295.
 \end{itemize}
 \end{columns}
+\vspace{0.1cm}
+\begin{alertblock}{Lo que importa}
+Mejor que la línea base en todo --- pero «mejor» no dice todavía si el negocio paga. Eso lo decide el costo.
+\end{alertblock}
+\end{frame}
+
+%%=================================================
+\begin{frame}{¿Cómo se calcula el costo de la lista del árbol?}
+\small
+Con las casillas de la lámina 8 y \$2.250 por envío, en cuatro pasos:
+
+\vspace{0.15cm}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}m{3.6cm} c c@{}}
+\toprule
+\textbf{Paso} & \textbf{Línea base} & \textbf{Árbol de la casa} \\
+\midrule
+\textbf{1. Envíos} \newline TP $+$ FP & \cuenta{$0 + 0$}{0} & \cuenta{$59 + 17$}{76} \\[0.05cm]
+\textbf{2. Costo} \newline envíos $\times$ \$2.250 & \cuenta{$0 \times 2.250$}{\$0} & \cuenta{$76 \times 2.250$}{\$171.000} \\[0.05cm]
+\textbf{3. Encontrados} \newline TP & \textbf{0} & \textbf{59} \\[0.05cm]
+\textbf{4. Por encontrado} \newline costo $\div$ encontrados & \begin{tabular}[c]{@{}c@{}}$0 \div 0$\\ no aplica\end{tabular} & \cuenta{$171.000 \div 59$}{\$2.898} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.05cm}
+\begin{alertblock}{Lo que importa}
+Cada envío cuesta lo mismo, acierte o no; como 3 de cada 4 aciertan, cada encontrado sale en \$2.898 --- más barato que los \$3.214 del proveedor A.
+\end{alertblock}
+\end{frame}
+
+%%=================================================
+\begin{frame}{La recomendación: ¿Growth adopta el árbol?}
+\small
+Encontrar no es retener: cada cliente encontrado vale \textbf{la fracción que la campaña retiene} $\times$ \textbf{lo que deja un cliente retenido} (\$40.000, cifras ilustrativas).
+
+\vspace{0.1cm}
+\begin{center}
+\scriptsize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}l c r r r@{}}
+\toprule
+\textbf{Escenario} & \textbf{Vale c/u} & \textbf{2. Valor} & \textbf{3. Costo} & \textbf{4. Neto} \\
+ & \textit{1.} & \textit{encontrados $\times$ valor} & \textit{lámina 10} & \textit{valor $-$ costo} \\
+\midrule
+Retiene 1 de cada 10 & \$4.000 & $59 \times 4.000 =$ \$236.000 & \$171.000 & \textbf{$+$\$65.000} \\
+Retiene 1 de cada 20 & \$2.000 & $59 \times 2.000 =$ \$118.000 & \$171.000 & \textbf{$-$\$53.000} \\
+No enviar a nadie & --- & \$0 & \$0 & \$0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\pause
+\begin{alertblock}{La recomendación}
+Si la campaña retiene al menos 1 de cada 10, el árbol se adopta: deja \$65.000 más que no hacer nada. Si solo retiene 1 de cada 20, mejor no enviar. La frontera es \textbf{\$2.898}: lo que cuesta encontrar a cada cliente.
+\end{alertblock}
 \end{frame}
 
 \end{document}

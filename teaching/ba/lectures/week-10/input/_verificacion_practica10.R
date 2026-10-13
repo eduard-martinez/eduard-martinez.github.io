@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------#
 # Solo para el profesor: corre el script de la clase (../script/script_clase10.R)
 # con la base publicada de Cóndor y las predicciones de ../script/, y comprueba
-# cada checkpoint del script, cada cifra del Beamer (láminas 4 a 10) y que las
+# cada checkpoint del script, cada cifra del Beamer (láminas 3 a 12) y que las
 # preguntas del taller se responden con la salida del script. Si las
 # predicciones ya están publicadas, comprueba que son las mismas de ../script/.
 # Correr desde lectures/week-10/input/:  Rscript _verificacion_practica10.R
@@ -85,25 +85,36 @@ stopifnot(round(100 * comparacion$accuracy[1]) == 78,
           round(10 * comparacion$precision[2]) == 7, round(10 * comparacion$recall[3]) == 6)
 cat("OK 3: checkpoints del script y láminas 3 a 7\n")
 
-##=== 4. el dinero: láminas 8 a 10 ===========================================##
+##=== 4. el dinero: láminas 8 a 12 ===========================================##
 costo       <- comparacion$envios * 2250
 encontrados <- comparacion$TP
 stopifnot(identical(costo, c(0, 247500, 1005750)),
           identical(round(costo[2:3] / encontrados[2:3]), c(3214, 4767)))
-## lámina 8: «casi el triple» y «un 48 % más caro»
+## lámina 8: el cálculo paso a paso (envíos = TP + FP; costo = envíos x 2.250;
+## encontrados = TP; por encontrado = costo / encontrados = 2.250 / precisión)
+stopifnot(77 + 33 == 110, 211 + 236 == 447,
+          110 * 2250 == 247500, 447 * 2250 == 1005750,
+          round(247500 / 77) == 3214, round(1005750 / 211) == 4767,
+          round(2250 / comparacion$precision[2]) == 3214,
+          round(2250 / comparacion$precision[3]) == 4767)
+## lámina 9: «casi el triple» y «un 48 % más caro»
 stopifnot(round(encontrados[3] / encontrados[2], 2) == 2.74,
           round(100 * (4767 / 3214 - 1)) == 48)
-## lámina 9: el costo de cada cliente adicional
+## lámina 10: el costo de cada cliente adicional
 stopifnot(round(costo[2] / encontrados[2]) == 3214,
           encontrados[3] - encontrados[2] == 134, costo[3] - costo[2] == 758250,
           round((costo[3] - costo[2]) / (encontrados[3] - encontrados[2])) == 5659)
-## lámina 10: beneficio neto = encontrados x valor - costo
+## láminas 11 y 12: beneficio neto = encontrados x valor - costo; cada
+## encontrado vale $40.000 / 10 = $4.000 o 2 x $40.000 / 10 = $8.000
+stopifnot(40000 / 10 == 4000, 2 * 40000 / 10 == 8000,
+          identical(encontrados * 4000, c(0, 308000, 844000)),
+          identical(encontrados * 8000, c(0, 616000, 1688000)))
 neto_4 <- encontrados * 4000 - costo
 neto_8 <- encontrados * 8000 - costo
 stopifnot(identical(neto_4, c(0, 60500, -161750)), identical(neto_8, c(0, 368500, 682250)),
           which.max(neto_4) == 2, which.max(neto_8) == 3,
           0.1 * 40000 == 4000, 0.2 * 40000 == 8000)
-cat("OK 4: láminas 8 a 10\n")
+cat("OK 4: láminas 8 a 12\n")
 
 ##=== 5. el taller se responde con la tabla comparacion ======================##
 ## costo total = envíos x 2.250 + FN x valor de dejar ir a un cliente
@@ -115,7 +126,7 @@ stopifnot(identical(total_5, c(1770000, 1632500, 1720750)),
 ## no enviársela a nadie (no adoptar ningún modelo)
 stopifnot(comparacion$opcion[which.min(total_5)] == "proveedor A",
           comparacion$opcion[which.min(total_3)] == "línea base")
-## minimizar el costo total es maximizar el beneficio neto de la lámina 10: los
+## minimizar el costo total es maximizar el beneficio neto de la lámina 12: los
 ## mismos umbrales ($3.214 para preferir A a nadie, $5.659 para preferir B a A)
 umbral <- function(v) comparacion$opcion[which.min(comparacion$envios * 2250 + comparacion$FN * v)]
 stopifnot(umbral(3200) == "línea base", umbral(3230) == "proveedor A",
@@ -127,9 +138,15 @@ tex <- paste(readLines("../slides/week-10.tex", encoding = "UTF-8"), collapse = 
 cifras <- c("6 de octubre de 2026", "22\\,\\%", "78\\,\\%", "0.806", "0.779", "0.763",
             "7 de cada 10", "6 de cada 10", "\\$247.500", "\\$1.005.750", "\\$3.214",
             "\\$4.767", "48\\,\\%", "\\$5.659", "134", "\\$758.250", "\\$60.500",
-            "\\$161.750", "\\$368.500", "\\$682.250", "\\$40.000", "\\$2.250")
+            "\\$161.750", "\\$368.500", "\\$682.250", "\\$40.000", "\\$2.250",
+            "$77 + 33$", "$211 + 236$", "$110 \\times 2.250$", "$447 \\times 2.250$",
+            "$247.500 \\div 77$", "$1.005.750 \\div 211$", "0.700", "0.472",
+            "\\$308.000", "\\$844.000", "\\$616.000", "\\$1.688.000",
+            "\\$40.000 $\\div$ 10 $=$ \\textbf{\\$4.000}")
 faltan <- cifras[!sapply(cifras, grepl, x = tex, fixed = T)]
 if (length(faltan) > 0) stop("no están en el .tex: ", paste(faltan, collapse = ", "))
 stopifnot(!grepl("Finanzas|memorizador|regla del EDA|AUC", tex))
+## 13 frames: la portada, el roadmap sin número y las láminas 2 a 12
+stopifnot(lengths(regmatches(tex, gregexpr("\\begin{frame}", tex, fixed = T))) == 13)
 cat("OK 6: las cifras del Beamer están en el .tex, sin Finanzas, regla del EDA, memorizador ni AUC\n")
 cat("\nTODO OK\n")
