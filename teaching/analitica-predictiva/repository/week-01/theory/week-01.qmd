@@ -6,293 +6,141 @@ lang: es
 
 ::: {.callout-key}
 <div class="callout-title">La idea central</div>
-Un pronóstico estima lo que va a pasar; una decisión fija lo que la empresa hace. Esta semana se distinguen los dos problemas y se formula la pregunta de negocio de la que depende el curso.
+Un pronóstico estima lo que va a pasar; una decisión fija lo que la empresa hace. Esta página arma el marco del curso: las tres áreas de la analítica, la ruta que recorre un análisis serio, el lugar del curso en el mapa de la inteligencia artificial, qué es un modelo y qué significa aprender, las piezas de una decisión y la ficha con la que se formula la pregunta. El caso de estudio de la semana —los cupos de avalúo— queda en la práctica opcional.
 :::
 
-**Tiempo de estudio:** 30 a 40 minutos. **Qué necesitas:** solo este navegador. Las partes interactivas (el simulador de cupos, el clasificador de preguntas) están en la página; las celdas de R viven en [el código de la semana 1](../practice/cocina.html), una página aparte y opcional.
+**Tiempo de estudio:** 25 a 35 minutos de lectura, más unos 10 del clasificador de preguntas del final. **Qué necesitas:** solo este navegador; esta página no corre código. El caso de la semana —la historia de los cupos, el simulador y las celdas de R— vive en [la práctica opcional](../practice/cocina.html) y toma otros 20 a 30 minutos.
 
-# Los cupos de avalúo
+# Qué es la analítica
 
-Meridiano es una gestora inmobiliaria con sede en Cali. Una de sus líneas de negocio es el avalúo comercial: dos bancos hipotecarios le envían solicitudes de avalúo y Meridiano las atiende con peritos externos. En la zona norte de la ciudad, cada mañana alguien tiene que decidir cuántos cupos de perito se reservan para el día siguiente. Cada cupo reservado garantiza un perito disponible para un avalúo y cuesta \$100.000, se use o no. Cada avalúo realizado deja \$450.000 de ingreso neto (después de pagar el valor base al perito y antes de descontar el cupo). Los peritos no garantizan disponibilidad adicional el mismo día: la solicitud que llega cuando ya no quedan cupos se pierde, y el banco la asigna a otra firma.
+La analítica es el uso sistemático de datos para informar decisiones de negocio. La definición es amplia porque el campo lo es; se vuelve operativa cuando se distinguen tres áreas que se diferencian, no por la técnica que usan, sino por la pregunta que responden: qué pasó, qué va a pasar y qué conviene hacer.
 
-Mariana, la coordinadora de avalúos de la zona norte, usa una regla razonable: reserva el promedio de las últimas semanas. Entre el 6 de enero y el 2 de marzo de 2025, la zona recibió en promedio **23 solicitudes al día**. Así que reserva 23 cupos.
+La <span class="term">analítica descriptiva</span> resume lo que ya ocurrió. Es el territorio de los informes, los tableros y los indicadores: cuánto se recaudó este mes, cómo se compara con el año pasado, dónde se concentra la mora. Su producto es un resumen fiel —un promedio, una serie, una tabla— y su valor está en que toda la organización mire los mismos números. Es también la más madura de las tres: la mayoría de las empresas la tiene resuelta con sus tableros, y quien llega a este curso ya la practica. Su límite es que describe: un tablero puede mostrar que las renovaciones de contratos cayeron, pero no dice cuáles contratos están en riesgo el próximo trimestre ni qué hacer al respecto.
 
-Con esa regla pasaron dos cosas durante esos 56 días:
+La <span class="term">analítica predictiva</span> estima lo que todavía no se observa: la demanda de mañana, las ventas de un negocio que aún no abre, la probabilidad de que un contrato termine en mora. Su producto es una estimación —un número, una probabilidad, una clasificación— que, cuando el trabajo es honesto, llega acompañada de una medida de su error. Aquí viven los modelos, desde el promedio histórico hasta el árbol que este curso construye en las semanas 5 y 6; y aquí empieza también el malentendido más común del campo, porque una estimación, por buena que sea, todavía no dice qué hacer.
 
-- en **29 días se agotaron los cupos** y hubo solicitudes sin atender, que se perdieron;
-- en los otros 27 los cupos alcanzaron y, por lo general, sobraron; contando todos los días, **2.5 cupos por día se pagaron sin usarse**.
+La <span class="term">analítica prescriptiva</span> convierte estimaciones en acciones: cuánto reservar, a quiénes llamar, cuál alternativa elegir. Para eso necesita lo que la predicción no trae: las alternativas disponibles, lo que cuesta cada tipo de error y el criterio con que se juzgará el resultado. Su producto es una recomendación que alguien puede ejecutar —una cantidad, una lista, una alternativa— con sus supuestos a la vista. Es la menos practicada de las tres áreas y la que más valor deja sobre la mesa: es frecuente que una empresa invierta en mejorar sus pronósticos cuando el margen estaba en usar mejor los que ya tenía.
 
-::: {.callout-key}
-<div class="callout-title">Lo que importa</div>
-23 es un buen pronóstico: es, de hecho, el mejor número para describir lo que pasa un día cualquiera. Pero no es una buena decisión. Lo que separa a los dos números es lo que cuesta cada error.
-:::
+Para fijar las tres áreas sirve una empresa concreta. **Meridiano S.A.S.** es una gestora inmobiliaria con sede en Cali que administra inmuebles de terceros, mantiene un portafolio propio de locales comerciales arrendados a minoristas y presta avalúos comerciales a dos bancos hipotecarios; la acompañaremos las nueve semanas. En Meridiano conviven decisiones de todos los tamaños, y dos sirven de ilustración. Una es pequeña y diaria: Mariana, la coordinadora de avalúos de la zona norte de Cali, decide cada mañana cuántos cupos de perito reserva para el día siguiente; el cupo se paga se use o no, y la solicitud que llega sin cupo se pierde. La otra es grande y única: la junta directiva decide si compra su primer local en Barranquilla o invierte en otra cosa.
 
-# Dos errores con precios distintos
-
-Si un día llegan menos solicitudes que los cupos reservados, sobran cupos. Cada cupo que sobra costó \$100.000 y no devuelve nada: ese es el <span class="term">costo de sobrar</span>.
-
-Si llegan más solicitudes que cupos, faltan cupos y las solicitudes que no alcanzan se pierden. Cada avalúo perdido habría dejado \$450.000 de ingreso a cambio de un cupo de \$100.000: se dejan de ganar \$350.000. Ese es el <span class="term">costo de faltar</span>.
-
-| Error | Qué pasa | Cuánto cuesta cada unidad |
-|---|---|---|
-| Sobrar | Se reserva un cupo que ningún avalúo usa y se paga igual | \$100.000 |
-| Faltar | Llega una solicitud, no hay cupo y se pierde | \$350.000 |
-
-Los dos errores no pesan lo mismo: faltar cuesta tres veces y media lo que cuesta sobrar. La regla de reservar el promedio los trata como si fueran iguales, y por eso se queda corta.
-
-# Un cupo más: ¿vale la pena?
-
-Piensa en la reserva cupo por cupo. Ya está decidida una cantidad y la duda es si agregar un cupo más. Ese cupo adicional:
-
-- **se usa** si las solicitudes de mañana superan la cantidad que ya tenías, y deja \$350.000 (el ingreso de \$450.000 menos los \$100.000 del cupo);
-- **se paga sin usarse** si las solicitudes no llegan hasta ahí, y cuesta \$100.000.
-
-Vale la pena mientras lo que se gana si se usa, multiplicado por la probabilidad de que se use, supere lo que se pierde si queda sin usar, multiplicado por la probabilidad de que quede sin usar. Haciendo la cuenta, conviene seguir agregando cupos mientras la probabilidad de que la demanda **no** llegue hasta ese cupo sea menor que 350 ÷ (350 + 100) = 7/9 ≈ 0.78. Ese número es el <span class="term">cuantil crítico</span>: la fracción de días que conviene cubrir.
-
-::: {.callout-workflow}
-<div class="callout-title">La regla</div>
-Reserva la cantidad que la demanda no supera en el 78 % de los días. Con los 56 días de la zona norte: llegaron 23 solicitudes o menos solo en el 48 % de los días; llegaron **29 o menos en el 82 %** de los días. La reserva debe llegar hasta 29, no quedarse en 23.
-:::
-
-Un ejemplo pequeño, para comprobar la cuenta. Supón que mañana llegarán 18 o 28 solicitudes, con la misma probabilidad.
-
-| Cupos reservados | Si llegan 18 solicitudes | Si llegan 28 solicitudes | Promedio |
+| La decisión | Descriptiva | Predictiva | Prescriptiva |
 |---|---|---|---|
-| 18 | 18 × 450.000 − 18 × 100.000 = 6.300.000 | 18 × 450.000 − 18 × 100.000 = 6.300.000 | **6.300.000** |
-| 28 | 18 × 450.000 − 28 × 100.000 = 5.300.000 | 28 × 450.000 − 28 × 100.000 = 9.800.000 | **7.550.000** |
+| Los cupos de avalúo (diaria) | ¿cuántas solicitudes llegaron estas ocho semanas? | ¿cuántas llegarán mañana? | ¿cuántos cupos se reservan? |
+| La compra del local (única) | las ventas que reportan los arrendatarios del portafolio | ¿cuánto vendería el arrendatario de un local en Barranquilla? | ¿comprar el local o esperar? |
 
-Reservar 28 deja \$1.250.000 más por día en promedio, aunque la mitad de los días se paguen 10 cupos sin usar. En la sesión se repite la cuenta con tres escenarios y con los datos reales.
+El curso se llama *Analítica Predictiva y Prescriptiva* por las dos últimas columnas, y el trabajo de las nueve semanas es el paso de la segunda a la tercera: de la estimación a la acción. Ese paso vale dinero por sí mismo. En el caso de los cupos, pasar del pronóstico (reservar el promedio) a la decisión (reservar lo que dictan los costos de los dos errores) aumenta el margen de todos los días **sin mejorar el pronóstico ni un decimal**; la cuenta, en pesos, está en [la práctica de la semana](../practice/cocina.html).
 
-# El simulador de cupos
+La descriptiva, por su parte, no desaparece del curso: reaparece cada vez que se exploran datos (semana 3) y cada vez que un hallazgo se le muestra a quien decide (semana 8).
 
-Ahora hazlo con los 56 días de la zona norte. Mueve el deslizador: cada punto de la curva es el margen neto promedio por día (el ingreso de los avalúos realizados menos lo pagado por los cupos) que habría dejado reservar esa cantidad **todos** los días. Debajo, las barras son los 56 días: en naranja los días en que esa cantidad no alcanzó.
+# La ruta del análisis
+
+Un análisis serio no es un modelo con adornos: es un recorrido con etapas, y cada etapa produce algo que se puede revisar. La ruta que sigue este curso tiene siete:
 
 ```{=html}
-<div class="widget-card" id="wg-cupos">
-  <div class="widget-head">El simulador de cupos · Meridiano, zona norte de Cali, 56 días de 2025</div>
-  <div class="widget-body">
-    <div class="widget-instr">Ingreso neto por avalúo realizado: 450.000 pesos. Empieza en 23, la regla del promedio. Luego cambia la tarifa del cupo, o activa la devolución del perito por los cupos no usados, y observa hacia dónde se mueve la mejor cantidad.</div>
-    <div class="widget-row">
-      <label for="cp-q">Cupos reservados para el día siguiente: <span id="cp-qv">23</span></label>
-      <input type="range" id="cp-q" min="12" max="38" step="1" value="23">
-    </div>
-    <div class="widget-row">
-      <label for="cp-tarifa">Tarifa del cupo</label>
-      <select id="cp-tarifa">
-        <option value="100000" selected>100.000 pesos</option>
-        <option value="200000">200.000 pesos</option>
-      </select>
-      <label><input type="checkbox" id="cp-dev"> El perito devuelve 50.000 pesos por cupo no usado</label>
-    </div>
-    <div class="widget-stats">
-      <div class="widget-stat"><div class="k">Margen neto promedio por día</div><div class="v" id="cp-m">—</div></div>
-      <div class="widget-stat warn"><div class="k">Días con solicitudes sin atender (de 56)</div><div class="v" id="cp-sin">—</div></div>
-      <div class="widget-stat"><div class="k">Cupos sin usar por día, promedio</div><div class="v" id="cp-libres">—</div></div>
-      <div class="widget-stat ok"><div class="k">Cuantil crítico</div><div class="v" id="cp-cr">—</div></div>
-    </div>
-    <svg id="cp-curva" class="widget-svg" viewBox="0 0 680 300" role="img" aria-label="Curva del margen neto promedio por día según los cupos reservados"></svg>
-    <svg id="cp-dias" class="widget-svg" viewBox="0 0 680 170" role="img" aria-label="Los 56 días de solicitudes de avalúo"></svg>
-    <div class="widget-note" id="cp-nota">Estás en 23, la regla del promedio. Mueve el deslizador.</div>
-    <div class="widget-row" style="margin-top:.8em">
-      <button type="button" class="btn-widget" id="cp-mejor">¿Cuál es la mejor cantidad?</button>
-      <button type="button" class="btn-widget btn-widget-ghost" id="cp-reset">Volver a 23</button>
-    </div>
-  </div>
-</div>
-<script>
-(function () {
-  const SOLICITUDES = [19, 33, 18, 25, 35, 16, 14, 21, 23, 26, 32, 22, 13, 16, 18, 24, 22, 13, 27, 18, 22, 29, 33, 29, 30, 24, 27, 25, 20, 20, 27, 31, 38, 26, 25, 29, 19, 14, 15, 25, 28, 13, 24, 35, 22, 28, 21, 16, 13, 24, 33, 26, 31, 23, 18, 12];
-  const INGRESO = 450000, QMIN = 12, QMAX = 38;
-  const C = { morado: "#5454e9", moradoOsc: "#3a3acb", naranja: "#e9683b", verde: "#4cb979", gris: "#88898c", borde: "#cecfd4", tinta: "#1b1d29" };
-  const $ = (id) => document.getElementById(id);
-  const fmt = (n) => Math.round(n).toLocaleString("es-CO");
-  let prev = null;
-
-  function economia() {
-    const tarifa = Number($("cp-tarifa").value);
-    const dev = $("cp-dev").checked ? 50000 : 0;
-    const cu = INGRESO - tarifa, co = tarifa - dev;
-    return { tarifa, dev, cu, co, cr: cu / (cu + co) };
-  }
-  function margenNeto(q, e) {
-    let s = 0;
-    for (const d of SOLICITUDES) s += INGRESO * Math.min(q, d) - e.tarifa * q + e.dev * Math.max(q - d, 0);
-    return s / SOLICITUDES.length;
-  }
-  function stats(q, e) {
-    let sin = 0, libres = 0;
-    for (const d of SOLICITUDES) { if (d > q) sin++; libres += Math.max(q - d, 0); }
-    return { m: margenNeto(q, e), sin, libres: libres / SOLICITUDES.length };
-  }
-  function mejor(e) {
-    let bq = QMIN, bm = -Infinity;
-    for (let q = QMIN; q <= QMAX; q++) { const m = margenNeto(q, e); if (m > bm) { bm = m; bq = q; } }
-    return bq;
-  }
-  function svgEl(tag, attrs, text) {
-    const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
-    for (const k in attrs) el.setAttribute(k, attrs[k]);
-    if (text !== undefined) el.textContent = text;
-    return el;
-  }
-  function dibujarCurva(q, e) {
-    const svg = $("cp-curva"); svg.innerHTML = "";
-    const W = 680, H = 300, L = 70, R = 20, T = 20, B = 48;
-    const ms = []; let mmin = Infinity, mmax = -Infinity;
-    for (let x = QMIN; x <= QMAX; x++) { const m = margenNeto(x, e); ms.push([x, m]); mmin = Math.min(mmin, m); mmax = Math.max(mmax, m); }
-    const pad = (mmax - mmin) * 0.12 || 1;
-    const y0 = mmin - pad, y1 = mmax + pad;
-    const sx = (x) => L + (x - QMIN) / (QMAX - QMIN) * (W - L - R);
-    const sy = (m) => T + (y1 - m) / (y1 - y0) * (H - T - B);
-    // ejes
-    svg.appendChild(svgEl("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: C.borde }));
-    svg.appendChild(svgEl("line", { x1: L, y1: T, x2: L, y2: H - B, stroke: C.borde }));
-    for (let x = 12; x <= 38; x += 2) {
-      svg.appendChild(svgEl("text", { x: sx(x), y: H - B + 16, "text-anchor": "middle", "font-size": 11, fill: C.gris }, x));
-    }
-    const paso = (y1 - y0) / 4;
-    for (let i = 0; i <= 4; i++) {
-      const v = y0 + i * paso;
-      svg.appendChild(svgEl("text", { x: L - 6, y: sy(v) + 4, "text-anchor": "end", "font-size": 11, fill: C.gris }, fmt(v / 1000)));
-      svg.appendChild(svgEl("line", { x1: L, y1: sy(v), x2: W - R, y2: sy(v), stroke: "#eeeef5" }));
-    }
-    svg.appendChild(svgEl("text", { x: (L + W - R) / 2, y: H - 6, "text-anchor": "middle", "font-size": 12, fill: C.tinta }, "Cupos reservados para el día siguiente"));
-    svg.appendChild(svgEl("text", { x: 14, y: (T + H - B) / 2, "text-anchor": "middle", "font-size": 12, fill: C.tinta, transform: `rotate(-90 14 ${(T + H - B) / 2})` }, "Margen neto promedio por día (miles)"));
-    // curva
-    const d = ms.map(([x, m], i) => (i ? "L" : "M") + sx(x).toFixed(1) + " " + sy(m).toFixed(1)).join(" ");
-    svg.appendChild(svgEl("path", { d, fill: "none", stroke: C.morado, "stroke-width": 3 }));
-    // referencia 23 y mejor
-    const bq = mejor(e);
-    svg.appendChild(svgEl("line", { x1: sx(23), y1: T, x2: sx(23), y2: H - B, stroke: C.gris, "stroke-dasharray": "4 4" }));
-    svg.appendChild(svgEl("text", { x: sx(23), y: T + 12, "text-anchor": "middle", "font-size": 11, fill: C.gris }, "23"));
-    svg.appendChild(svgEl("line", { x1: sx(bq), y1: T, x2: sx(bq), y2: H - B, stroke: C.verde, "stroke-dasharray": "4 4" }));
-    svg.appendChild(svgEl("text", { x: sx(bq), y: T + 12, "text-anchor": "middle", "font-size": 11, fill: C.verde }, "mejor: " + bq));
-    // marcador
-    const m = margenNeto(q, e);
-    svg.appendChild(svgEl("circle", { cx: sx(q), cy: sy(m), r: 7, fill: C.naranja, stroke: "#fff", "stroke-width": 2 }));
-    svg.appendChild(svgEl("text", { x: sx(q), y: sy(m) - 12, "text-anchor": "middle", "font-size": 12, "font-weight": 700, fill: C.naranja }, q + ": " + fmt(m / 1000)));
-  }
-  function dibujarDias(q) {
-    const svg = $("cp-dias"); svg.innerHTML = "";
-    const W = 680, H = 170, L = 40, R = 20, T = 12, B = 28, n = SOLICITUDES.length;
-    const bw = (W - L - R) / n;
-    const sy = (d) => T + (1 - d / 40) * (H - T - B);
-    svg.appendChild(svgEl("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: C.borde }));
-    SOLICITUDES.forEach((d, i) => {
-      const x = L + i * bw + 1;
-      svg.appendChild(svgEl("rect", { x, y: sy(d), width: Math.max(bw - 2, 1), height: H - B - sy(d), fill: d > q ? C.naranja : C.morado, opacity: 0.9 }));
-    });
-    svg.appendChild(svgEl("line", { x1: L, y1: sy(q), x2: W - R, y2: sy(q), stroke: C.tinta, "stroke-dasharray": "5 4" }));
-    svg.appendChild(svgEl("text", { x: W - R, y: sy(q) - 4, "text-anchor": "end", "font-size": 11, fill: C.tinta }, "cupos reservados: " + q));
-    svg.appendChild(svgEl("text", { x: L, y: H - 8, "font-size": 11, fill: C.gris }, "6 de enero"));
-    svg.appendChild(svgEl("text", { x: W - R, y: H - 8, "text-anchor": "end", "font-size": 11, fill: C.gris }, "2 de marzo de 2025"));
-    svg.appendChild(svgEl("text", { x: L, y: T + 2, "font-size": 11, fill: C.naranja }, "naranja: ese día hubo solicitudes sin atender"));
-  }
-  function nota(q, e, s) {
-    const bq = mejor(e);
-    let t;
-    if (prev && prev.q !== q && prev.tarifa === e.tarifa && prev.dev === e.dev) {
-      const dM = s.m - prev.m;
-      const mill = (Math.abs(dM) * 365 / 1e6).toFixed(1);
-      t = `Pasaste de ${prev.q} a ${q} cupos: el margen neto promedio ${dM >= 0 ? "sube" : "baja"} ${fmt(Math.abs(dM))} pesos por día (${mill} millones al año). Los días con solicitudes sin atender pasan de ${prev.sin} a ${s.sin}; pagas ${s.libres.toFixed(1)} cupos sin usar por día en lugar de ${prev.libres.toFixed(1)}.`;
-    } else if (prev && (prev.tarifa !== e.tarifa || prev.dev !== e.dev)) {
-      t = `Cambió la economía: ahora faltar cuesta ${fmt(e.cu)} y sobrar ${fmt(e.co)}. El cuantil crítico es ${e.cr.toFixed(2)} y la mejor cantidad pasa de ${prev.bq} a ${bq}.`;
-    } else {
-      t = `Estás en ${q}. Faltar cuesta ${fmt(e.cu)} por solicitud sin atender y sobrar ${fmt(e.co)} por cupo sin usar: el cuantil crítico es ${e.cr.toFixed(2)}, y la mejor cantidad en estos datos es ${bq}.`;
-    }
-    if (q === bq) t += " Estás en la mejor cantidad: ningún cupo adicional vale lo que cuesta.";
-    $("cp-nota").textContent = t;
-  }
-  function actualizar() {
-    const q = Number($("cp-q").value); const e = economia(); const s = stats(q, e);
-    $("cp-qv").textContent = q;
-    $("cp-m").textContent = fmt(s.m) + " pesos";
-    $("cp-sin").textContent = s.sin;
-    $("cp-libres").textContent = s.libres.toFixed(1);
-    $("cp-cr").textContent = e.cr.toFixed(2);
-    dibujarCurva(q, e); dibujarDias(q); nota(q, e, s);
-    prev = { q, m: s.m, sin: s.sin, libres: s.libres, tarifa: e.tarifa, dev: e.dev, bq: mejor(e) };
-  }
-  $("cp-q").addEventListener("input", actualizar);
-  $("cp-tarifa").addEventListener("change", actualizar);
-  $("cp-dev").addEventListener("change", actualizar);
-  $("cp-mejor").addEventListener("click", () => { $("cp-q").value = mejor(economia()); actualizar(); });
-  $("cp-reset").addEventListener("click", () => { $("cp-q").value = 23; $("cp-tarifa").value = "100000"; $("cp-dev").checked = false; prev = null; actualizar(); });
-  actualizar();
-})();
-</script>
-```
-
-Tres cosas para observar en el simulador:
-
-1. **La curva es asimétrica.** Quedarse corto cuesta más que pasarse: a la izquierda de la mejor cantidad el margen neto cae rápido; a la derecha, despacio.
-2. **La mejor cantidad no es el promedio.** Con la tarifa de \$100.000 está en 29. Si el cupo costara \$200.000, faltar y sobrar pesarían casi lo mismo y la mejor cantidad bajaría hasta cerca del promedio.
-3. **El pronóstico no cambió en ningún momento.** Siguen siendo los mismos 56 días. Lo que cambia la decisión es la economía de los dos errores.
-
-# El mapa del curso
-
-El ejemplo ya está completo: un pronóstico (23), una decisión (29) y la economía que separa a los dos números. Antes de seguir conviene ponerle nombre a cada cosa y ubicarla en el mapa del curso: las tres analíticas, la ruta del análisis, las siglas que el mercado revuelve y la palabra que atraviesa todo el curso, *modelo*.
-
-## Las tres analíticas
-
-La <span class="term">analítica descriptiva</span> mira lo que pasó y lo resume: el tablero, el informe mensual, el promedio histórico. La <span class="term">analítica predictiva</span> estima lo que todavía no se observa: la demanda de mañana, las ventas de un arrendatario, el riesgo de un contrato. La <span class="term">analítica prescriptiva</span> convierte la estimación en una acción: una cantidad que reservar, una lista a la que llamar, una alternativa que elegir. Las tres acaban de pasar por tus manos, y las tres aparecen en la decisión que ocupará el resto del curso:
-
-| Analítica | Qué produce | En los cupos de avalúo | En la compra del local |
-|---|---|---|---|
-| Descriptiva | un resumen de lo que pasó | ¿cuántas solicitudes llegaron estas ocho semanas? | las ventas que reportan los arrendatarios del portafolio |
-| Predictiva | una estimación de lo que no se observa aún | ¿cuántas llegarán mañana? — **23**, el promedio | ¿cuánto vendería el arrendatario de un local en Barranquilla? |
-| Prescriptiva | una acción: qué hacer y en qué cantidad | ¿cuántos cupos se reservan? — **29** | ¿comprar el local o esperar? |
-
-La última columna es la decisión de la junta de Meridiano, el reto de las nueve semanas: la descriptiva resume las ventas que ya reportan los arrendatarios; la predictiva estima cuánto vendería el arrendatario de un local nuevo (semana 6); la prescriptiva elige entre comprar y esperar (semana 7).
-
-El curso se llama *Analítica Predictiva y Prescriptiva* por las dos últimas filas. La descriptiva ya la practicas —viene con tus tableros e informes, y reaparece cada vez que se exploran datos—; el trabajo de estas nueve semanas es el paso de la segunda fila a la tercera. Ese paso vale dinero: en los 56 días de la zona norte, reservar 23 cupos deja un margen neto promedio de \$6.925.000 por día; reservar 29 lo sube a \$7.297.321. Son \$372.321 diarios —cerca de \$135.9 millones al año— en una sola zona de la ciudad, sin mejorar el pronóstico ni un decimal.
-
-## La ruta del análisis
-
-Lo segundo es el camino. Un trabajo serio de analítica recorre seis pasos —formular la **pregunta**, conseguir los **datos**, **explorarlos**, construir o comprar un **modelo**, **evaluarlo en pesos** y tomar la **decisión**— y cierra con un paso más: **contar la historia** a quien decide. Cada paso tiene su semana en el curso:
-
-```{=html}
-<svg class="widget-svg" viewBox="0 0 720 158" role="img" aria-label="La ruta del análisis en seis pasos y un cierre: pregunta (semana 1), datos (semana 2), exploración (semana 3), modelo (semanas 5 y 6), evaluación en pesos (semana 4), decisión (semana 7) e historia (semana 8). La semana 9 es la defensa de todo el recorrido.">
-  <text x="54" y="13" text-anchor="middle" font-size="11" font-style="italic" fill="#c2552f">estás aquí</text>
-  <polygon points="50,19 58,19 54,27" fill="#c2552f"></polygon>
-  <rect x="9" y="30" width="90" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
-  <text x="54" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#3a3acb">pregunta</text>
-  <text x="54" y="92" text-anchor="middle" font-size="11" fill="#88898c">semana 1</text>
-  <polygon points="101,46 109,51 101,56" fill="#88898c"></polygon>
-  <rect x="111" y="30" width="90" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
-  <text x="156" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#3a3acb">datos</text>
-  <text x="156" y="92" text-anchor="middle" font-size="11" fill="#88898c">semana 2</text>
-  <polygon points="203,46 211,51 203,56" fill="#88898c"></polygon>
-  <rect x="213" y="30" width="90" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
-  <text x="258" y="57" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3a3acb">exploración</text>
-  <text x="258" y="92" text-anchor="middle" font-size="11" fill="#88898c">semana 3</text>
-  <polygon points="305,46 313,51 305,56" fill="#88898c"></polygon>
-  <rect x="315" y="30" width="90" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
-  <text x="360" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#3a3acb">modelo</text>
-  <text x="360" y="92" text-anchor="middle" font-size="11" fill="#88898c">semanas 5–6</text>
-  <polygon points="407,46 415,51 407,56" fill="#88898c"></polygon>
-  <rect x="417" y="30" width="90" height="42" rx="9" fill="#fdece5" stroke="#e9683b" stroke-width="1.5"></rect>
-  <text x="462" y="50" text-anchor="middle" font-size="12.5" font-weight="600" fill="#c2552f">evaluación</text>
-  <text x="462" y="65" text-anchor="middle" font-size="12.5" font-weight="600" fill="#c2552f">en pesos</text>
-  <text x="462" y="92" text-anchor="middle" font-size="11" font-weight="600" fill="#c2552f">semana 4</text>
-  <polygon points="509,46 517,51 509,56" fill="#88898c"></polygon>
-  <rect x="519" y="30" width="90" height="42" rx="9" fill="#e6f6ee" stroke="#4cb979" stroke-width="1.5"></rect>
-  <text x="564" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#2f9460">decisión</text>
-  <text x="564" y="92" text-anchor="middle" font-size="11" fill="#88898c">semana 7</text>
-  <polygon points="611,46 619,51 611,56" fill="#88898c"></polygon>
-  <rect x="621" y="30" width="90" height="42" rx="9" fill="#3a3acb" stroke="#3a3acb" stroke-width="1.5"></rect>
-  <text x="666" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#ffffff">historia</text>
-  <text x="666" y="92" text-anchor="middle" font-size="11" fill="#88898c">semana 8</text>
-  <path d="M 9 110 v 7 h 702 v -7" fill="none" stroke="#88898c" stroke-width="1.2"></path>
-  <text x="360" y="138" text-anchor="middle" font-size="12.5" fill="#1b1d29">La semana 9 es la defensa: recorres la ruta completa ante la junta.</text>
+<svg class="widget-svg" viewBox="0 0 736 128" role="img" aria-label="La ruta del análisis en siete etapas: la pregunta produce la ficha; los datos, las fuentes; la exploración, los hallazgos; el modelo, las predicciones; la evaluación en pesos, el ranking; la decisión, la recomendación; la comunicación, el memo. Una flecha punteada de regreso indica que la ruta se recorre con regresos.">
+  <rect x="16" y="14" width="88" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
+  <text x="60" y="41" text-anchor="middle" font-size="13" font-weight="600" fill="#3a3acb">pregunta</text>
+  <text x="60" y="70" text-anchor="middle" font-size="10.5" fill="#88898c">la ficha</text>
+  <polygon points="106,30 114,35 106,40" fill="#88898c"></polygon>
+  <rect x="118" y="14" width="88" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
+  <text x="162" y="41" text-anchor="middle" font-size="13" font-weight="600" fill="#3a3acb">datos</text>
+  <text x="162" y="70" text-anchor="middle" font-size="10.5" fill="#88898c">las fuentes</text>
+  <polygon points="208,30 216,35 208,40" fill="#88898c"></polygon>
+  <rect x="220" y="14" width="88" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
+  <text x="264" y="41" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3a3acb">exploración</text>
+  <text x="264" y="70" text-anchor="middle" font-size="10.5" fill="#88898c">los hallazgos</text>
+  <polygon points="310,30 318,35 310,40" fill="#88898c"></polygon>
+  <rect x="322" y="14" width="88" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
+  <text x="366" y="41" text-anchor="middle" font-size="13" font-weight="600" fill="#3a3acb">modelo</text>
+  <text x="366" y="70" text-anchor="middle" font-size="10.5" fill="#88898c">las predicciones</text>
+  <polygon points="412,30 420,35 412,40" fill="#88898c"></polygon>
+  <rect x="424" y="14" width="88" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
+  <text x="468" y="34" text-anchor="middle" font-size="11.5" font-weight="600" fill="#3a3acb">evaluación</text>
+  <text x="468" y="49" text-anchor="middle" font-size="11.5" font-weight="600" fill="#3a3acb">en pesos</text>
+  <text x="468" y="70" text-anchor="middle" font-size="10.5" fill="#88898c">el ranking</text>
+  <polygon points="514,30 522,35 514,40" fill="#88898c"></polygon>
+  <rect x="526" y="14" width="88" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
+  <text x="570" y="41" text-anchor="middle" font-size="13" font-weight="600" fill="#3a3acb">decisión</text>
+  <text x="570" y="70" text-anchor="middle" font-size="10.5" fill="#88898c">la recomendación</text>
+  <polygon points="616,30 624,35 616,40" fill="#88898c"></polygon>
+  <rect x="628" y="14" width="88" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
+  <text x="672" y="41" text-anchor="middle" font-size="11.5" font-weight="600" fill="#3a3acb">comunicación</text>
+  <text x="672" y="70" text-anchor="middle" font-size="10.5" fill="#88898c">el memo</text>
+  <path d="M 716 35 L 726 35 L 726 108 L 6 108 L 6 35 L 8 35" fill="none" stroke="#88898c" stroke-width="1.3" stroke-dasharray="5 4"></path>
+  <polygon points="8,30 8,40 16,35" fill="#88898c"></polygon>
+  <text x="366" y="123" text-anchor="middle" font-size="11" font-style="italic" fill="#88898c">la ruta se recorre con regresos: lo que se aprende en una etapa puede reabrir las anteriores</text>
 </svg>
 ```
 
-Mira los números de las semanas con cuidado y verás una inversión deliberada: la evaluación en pesos (semana 4) llega **antes** que los modelos propios (semanas 5 y 6). No es un descuido: primero se define cómo se mide un modelo y qué cuesta cada error —en la semana 4, dos consultoras ofrecerán los suyos y habrá que elegir—, y solo después se construyen los propios, que se evalúan con el mismo criterio.
+**1. La pregunta.** El punto de partida no es un dato sino una decisión: qué se va a hacer distinto, entre qué alternativas, quién lo decide y cuándo, con qué criterio se juzgará el resultado y qué cuesta cada tipo de error. Esta etapa produce la ficha de la pregunta —el formato de una página que cierra esta teoría— y con ella el primer filtro del trabajo: si no hay decisión, no hay análisis que hacer. Lo que suele salir mal: se arranca de un tema ("mejorar la ocupación del portafolio") o de una curiosidad, se modela durante semanas y, al final, nadie hace nada distinto con la respuesta.
 
-## Dónde vive este curso
+**2. Los datos.** Con la pregunta fijada se hace el inventario: qué datos tiene la empresa, qué existe afuera —las estadísticas oficiales y los datos no convencionales—, qué costaría conseguir lo que falta y de qué calidad es cada fuente. La etapa produce una tabla de fuentes con su procedencia y los primeros supuestos documentados: cada cifra con su origen y su calidad. Lo que suele salir mal: aceptar cifras sin fuente; confundir lo disponible con lo pertinente; y, el error más costoso del oficio, usar columnas que en el momento de decidir todavía no existen —la <span class="term">fuga</span>: predecir el cierre de un contrato con la mora que solo se observa después de firmarlo—.
 
-Tercero, las siglas, porque el mercado las revuelve. La <span class="term">inteligencia artificial</span> es el círculo grande: programas que hacen tareas que hasta hace poco creíamos exclusivamente humanas. Dentro vive el <span class="term">machine learning</span>: en lugar de dictarle la regla al computador, se le dan ejemplos y la máquina aprende la regla. Más adentro, el <span class="term">deep learning</span> aprende esas reglas con redes de muchas capas. Y en el anillo interior viven los <span class="term">modelos de lenguaje</span> (LLM), redes entrenadas sobre texto: los que están detrás de los asistentes de IA que ya usas.
+**3. La exploración.** Antes de cualquier modelo se miran los datos: las distribuciones, los rangos, los vacíos, los casos raros, las relaciones gruesas entre columnas. La etapa produce hallazgos —frases cortas, cada una con un número y una fuente, que cualquiera puede verificar— y la lista de columnas que no se pueden usar. Lo que suele salir mal: explorar para confirmar lo que ya se cree, en lugar de dejar que los datos incomoden; y, cada vez más, delegar la exploración en un asistente de IA y repetir sus conclusiones sin verificarlas.
+
+**4. El modelo.** Se construye —o se compra— la regla que convierte lo que se sabe de un caso en una predicción. La etapa produce predicciones para casos nuevos: un número, una probabilidad, una clase. Lo que suele salir mal son dos extremos: memorizar en vez de aprender, cuando el modelo recita los casos que vio y falla en los nuevos; y complicar sin ganancia, cuando un modelo opaco que mejora poco frente a uno legible termina costando más en mantenimiento y en confianza de lo que aporta en aciertos.
+
+**5. La evaluación en pesos.** Toda regla se mide fuera de muestra —en casos que el modelo no vio— y contra un <span class="term">baseline</span>: la regla ingenua que la empresa ya usa, como el promedio histórico. Y se mide en la unidad del criterio, pesos antes que porcentajes de acierto, porque los errores no cuestan lo mismo: no es igual descartar un buen local que quedarse con uno malo. La etapa produce el ranking de modelos y una cifra que la gerencia entiende: cuánto vale, en pesos, usar el modelo en lugar de la regla actual. Lo que suele salir mal: evaluar el modelo con los mismos datos con que se construyó; celebrar la exactitud sin mirar qué error comete; comparar contra nada.
+
+**6. La decisión.** La predicción entra por fin a la decisión, junto con las piezas que el modelo no trae: las alternativas, las consecuencias de cada error, el criterio. Como los supuestos pueden fallar, la recomendación se somete a escenarios —tablas de supuestos alternativos bajo las que se recalcula todo— y se le buscan los puntos débiles antes de que los encuentre la realidad. La etapa produce una recomendación con sus condiciones: qué conviene hacer, bajo qué supuestos se sostiene y qué señales obligarían a revisarla. Lo que suele salir mal: exigirle certeza al análisis antes de actuar; esconder los supuestos frágiles; recomendar lo que los números no sostienen porque "ya se había decidido".
+
+**7. La comunicación.** El análisis no termina cuando el modelo corre: termina cuando quien decide entiende qué hacer y por qué. La etapa produce un memo corto y unas pocas láminas: la recomendación, la cifra que la sostiene, los supuestos y los riesgos, en el lenguaje de quien decide y no en el del oficio. Lo que suele salir mal: contar el método en lugar de la recomendación; gráficos que decoran en lugar de mostrar; enterrar la incertidumbre para que la historia se vea limpia.
+
+Dos advertencias sobre la ruta. La primera: no es una línea de producción. En la práctica se recorre con regresos —la exploración revela que falta una fuente y devuelve el trabajo a los datos; la evaluación muestra que el modelo no vence a la regla ingenua y reabre la pregunta de si hace falta un modelo—. La segunda: las etapas no pesan lo mismo. La tentación profesional es dedicarle el tiempo a la etapa del modelo; en la experiencia que recoge este curso, el valor se gana o se pierde en la pregunta, en la evaluación y en la decisión.
+
+## Cómo este curso recorre la ruta
+
+La ruta del oficio es una cosa; el calendario del curso es otra, y conviene no confundirlos. Las nueve semanas recorren la ruta completa una sola vez, sobre una misma decisión que la junta de Meridiano encarga en la primera sesión, y cada semana produce una pieza del expediente que se defiende al final. El orden, sin embargo, no es exactamente el del oficio:
+
+```{=html}
+<svg class="widget-svg" viewBox="0 0 720 158" role="img" aria-label="El calendario del curso sobre la ruta: semana 1, la pregunta; semana 2, los datos; semana 3, la exploración; semana 4, la evaluación en pesos; semanas 5 y 6, el modelo; semana 7, la decisión; semana 8, la comunicación. La semana 9 es la defensa del recorrido completo ante la junta.">
+  <text x="54" y="13" text-anchor="middle" font-size="11" font-style="italic" fill="#c2552f">estás aquí</text>
+  <polygon points="50,19 58,19 54,27" fill="#c2552f"></polygon>
+  <rect x="9" y="30" width="90" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
+  <text x="54" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#3a3acb">semana 1</text>
+  <text x="54" y="92" text-anchor="middle" font-size="11" fill="#88898c">la pregunta</text>
+  <polygon points="101,46 109,51 101,56" fill="#88898c"></polygon>
+  <rect x="111" y="30" width="90" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
+  <text x="156" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#3a3acb">semana 2</text>
+  <text x="156" y="92" text-anchor="middle" font-size="11" fill="#88898c">los datos</text>
+  <polygon points="203,46 211,51 203,56" fill="#88898c"></polygon>
+  <rect x="213" y="30" width="90" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
+  <text x="258" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#3a3acb">semana 3</text>
+  <text x="258" y="92" text-anchor="middle" font-size="11" fill="#88898c">la exploración</text>
+  <polygon points="305,46 313,51 305,56" fill="#88898c"></polygon>
+  <rect x="315" y="30" width="90" height="42" rx="9" fill="#fdece5" stroke="#e9683b" stroke-width="1.5"></rect>
+  <text x="360" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#c2552f">semana 4</text>
+  <text x="360" y="92" text-anchor="middle" font-size="11" font-weight="600" fill="#c2552f">evaluación en pesos</text>
+  <polygon points="407,46 415,51 407,56" fill="#88898c"></polygon>
+  <rect x="417" y="30" width="90" height="42" rx="9" fill="#ecedfd" stroke="#5454e9" stroke-width="1.5"></rect>
+  <text x="462" y="57" text-anchor="middle" font-size="12.5" font-weight="600" fill="#3a3acb">semanas 5–6</text>
+  <text x="462" y="92" text-anchor="middle" font-size="11" fill="#88898c">el modelo</text>
+  <polygon points="509,46 517,51 509,56" fill="#88898c"></polygon>
+  <rect x="519" y="30" width="90" height="42" rx="9" fill="#e6f6ee" stroke="#4cb979" stroke-width="1.5"></rect>
+  <text x="564" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#2f9460">semana 7</text>
+  <text x="564" y="92" text-anchor="middle" font-size="11" fill="#88898c">la decisión</text>
+  <polygon points="611,46 619,51 611,56" fill="#88898c"></polygon>
+  <rect x="621" y="30" width="90" height="42" rx="9" fill="#3a3acb" stroke="#3a3acb" stroke-width="1.5"></rect>
+  <text x="666" y="57" text-anchor="middle" font-size="13" font-weight="600" fill="#ffffff">semana 8</text>
+  <text x="666" y="92" text-anchor="middle" font-size="11" fill="#88898c">la comunicación</text>
+  <path d="M 9 110 v 7 h 702 v -7" fill="none" stroke="#88898c" stroke-width="1.2"></path>
+  <text x="360" y="138" text-anchor="middle" font-size="12.5" fill="#1b1d29">La semana 9 es la defensa: el recorrido completo de la ruta, ante la junta.</text>
+</svg>
+```
+
+El calendario invierte dos etapas a propósito: la evaluación en pesos (semana 4) llega antes que la construcción de los modelos propios (semanas 5 y 6). La razón es económica: antes de fabricar nada hay que fijar cómo se va a juzgar. En la semana 4 dos consultoras ofrecen modelos ya construidos y hay que elegir uno con los costos de cada error sobre la mesa; en las semanas 5 y 6 se construyen árboles propios y se someten al mismo criterio. Definir la medida después de ver los resultados invita a elegir la medida que favorece el resultado propio; fijarla antes lo impide. La semana 9 no agrega etapas: es la defensa del recorrido completo ante la junta.
+
+# Dónde vive este curso
+
+Las siglas del mercado —IA, machine learning, deep learning, LLM— no son sinónimos: nombran círculos concéntricos, y conviene saber en cuál se está parado.
+
+La <span class="term">inteligencia artificial</span> es el círculo grande: programas que ejecutan tareas que hasta hace poco considerábamos exclusivamente humanas, como entender un texto, reconocer una imagen o sostener una conversación. La etiqueta es vieja —los años cincuenta— y elástica: cada vez que una de esas tareas se vuelve rutinaria deja de llamarse inteligencia artificial y pasa a llamarse software. No implica un método: hay IA hecha de reglas escritas a mano e IA que aprende de los datos.
+
+El <span class="term">machine learning</span> es el subconjunto que aprende de ejemplos. En lugar de dictarle la regla al computador —"si el atraso supera dos meses, alerta"—, se le entregan casos resueltos y el algoritmo encuentra la regla que mejor los explica, para aplicarla a casos nuevos. Es el motor de la analítica predictiva moderna y el territorio de este curso: los árboles de las semanas 5 y 6 son machine learning en su versión más legible.
+
+El <span class="term">deep learning</span> aprende esas reglas con redes neuronales de muchas capas. Donde un árbol produce una regla que se puede leer en voz alta, una red profunda produce millones de parámetros que nadie lee: gana flexibilidad —imágenes, audio, texto— al precio de la opacidad. Para datos tabulares como los de este curso, con cientos de observaciones y no millones, esa complejidad rara vez paga.
+
+Los <span class="term">modelos de lenguaje</span> (LLM) son redes profundas entrenadas sobre texto a una escala enorme; son lo que está detrás de los asistentes de IA que ya usas. Producen texto —y código— condicionado a lo que se les pide, y eso les da un papel distinto dentro del análisis: no el del modelo que predice la variable del negocio, sino el del asistente que programa.
 
 ```{=html}
 <svg class="widget-svg" viewBox="0 0 680 408" role="img" aria-label="Cuatro círculos anidados: la inteligencia artificial contiene al machine learning; este, al deep learning; y este, a los modelos de lenguaje (LLM). Una etiqueta señala que este curso vive en el anillo de machine learning y otra que tu analista de la semana 3 vive en el de los LLM.">
@@ -319,45 +167,59 @@ Tercero, las siglas, porque el mercado las revuelve. La <span class="term">intel
 </svg>
 ```
 
-Este curso vive en el anillo de machine learning aplicado a decisiones: árboles que aprenden reglas de los datos (semanas 5 y 6) y la evaluación de cualquier modelo en pesos (semana 4). Los LLM entran con otro papel: en la semana 3, un agente —un LLM que escribe y ejecuta código— será tu analista y explorará los datos por ti.
+Esa última distinción organiza el curso entero, y por eso el mapa trae dos etiquetas. Este curso vive en el anillo de machine learning aplicado a decisiones: árboles que aprenden reglas de los datos (semanas 5 y 6) y la evaluación de cualquier modelo en pesos (semana 4). Los LLM entran con el otro papel: en la semana 3, un agente —un LLM que escribe y ejecuta código— será tu analista y explorará los datos por ti, bajo tu dirección y tu verificación.
 
 ::: {.callout-key}
 <div class="callout-title">Tu modelo no es tu analista</div>
 El árbol que predice las ventas es **tu modelo**: una regla aprendida de los datos, que tú evalúas en pesos. El agente que programa por ti es **tu analista**: un asistente al que diriges y verificas. En este curso usas los dos, y no confundes sus papeles.
 :::
 
-## Qué es un modelo y qué es aprender
+# Qué es un modelo y qué es aprender
 
-La palabra <span class="term">modelo</span> aparecerá cientos de veces de aquí a la semana 9; su definición, la que usa todo el curso, cabe en una línea:
+La palabra <span class="term">modelo</span> aparecerá cientos de veces de aquí a la semana 9; conviene fijar desde ya la definición que usa todo el curso:
 
 ::: {.callout-key}
 <div class="callout-title">La definición</div>
 Un modelo es una regla, aprendida de los datos, que convierte lo que se sabe de un caso —las columnas— en una predicción.
 :::
 
-La regla del promedio ya es un modelo minúsculo: convierte 56 días de solicitudes en un número para mañana. El árbol de la semana 5 convertirá lo que se sabe de un local y de su arrendatario antes de la compra —el tráfico peatonal, el canon de arriendo, la zona— en una predicción: el arrendatario sigue abierto o cierra. La semana 4 repetirá esta definición palabra por palabra, cuando toque evaluar modelos ajenos.
+La definición es menos inocente de lo que parece, porque no exige sofisticación. La regla de reservar el promedio ya es un modelo —convierte la historia reciente en un número para mañana— y de los más importantes del curso: es la <span class="term">regla ingenua</span>, el baseline que cualquier modelo sofisticado tiene que vencer para justificar su costo. El árbol de la semana 5 convertirá lo que se sabe de un local y de su arrendatario antes de la compra —el tráfico peatonal, el canon, la zona— en una predicción: el arrendatario sigue abierto en tres años o cierra. Entre el promedio y el árbol no hay diferencia de naturaleza; hay diferencia en cuántas columnas usan y en cómo se encuentra la regla.
 
-<span class="term">Aprender</span> también tiene aquí un significado preciso: **generalizar, no memorizar**. Un modelo aprende cuando acierta en los casos que **no vio**, no cuando recita los que vio: memorizar los 56 días de la zona norte es trivial, y no sirve para mañana. Las semanas 4 a 6 viven de esa idea; en la semana 5 aparece el *memorizador*, un modelo que acierta todo en los datos que vio y, en los datos nuevos, pierde hasta con la regla ingenua.
+<span class="term">Aprender</span> también tiene aquí un significado preciso, y es el que separa al machine learning de la memoria: aprender es **generalizar**, no memorizar. Un modelo aprende cuando acierta en casos que **no vio** al construirse; recitar los casos que vio es trivial y no sirve para mañana. La distinción parece obvia y es, sin embargo, la causa del fracaso más común del campo: un modelo con suficiente flexibilidad puede acertar el 100 % de los datos con los que se construyó y fallar en los casos nuevos, que son los únicos que importan.
 
-Esa es, al final, la idea del machine learning: en lugar de dictarle la regla al computador, enseñarle a aprenderla de los ejemplos. El paper de esta semana es el intento más famoso y más aleccionador de esa idea: Google enseñó a un computador a estimar la gripe a partir de búsquedas; la regla aprendida le ganó al sistema oficial durante años y dejó de funcionar sin avisar. La historia completa, en la sesión. Y si quieres verlo contado en video, [¿Qué es *machine learning*?](https://youtu.be/IRW00HT9eds) lo explica en 6 minutos y 34 segundos (video del profesor del curso; opcional).
+De esa idea vive el arco de las semanas 4 a 6. La semana 4 enseña a medir el desempeño fuera de muestra —en casos reservados que el modelo nunca vio— y a ponerle precio a cada error. La semana 5 construye árboles de clasificación y presenta al *memorizador*: el árbol sin frenos que acierta todo en los datos de entrenamiento y, en los datos nuevos, pierde hasta con la regla ingenua. La semana 6 repite la lección con una variable en pesos: las ventas.
+
+Esa es, al final, la apuesta del machine learning: en lugar de dictarle la regla al computador, dejar que la aprenda de los ejemplos. El paper de la sesión de esta semana es el intento más famoso y más aleccionador de esa apuesta: Google enseñó a un sistema a estimar la gripe a partir de búsquedas; la regla aprendida le ganó al sistema oficial de vigilancia durante años y dejó de funcionar sin avisar. La historia completa, en la sesión. Si prefieres verlo contado en video, [¿Qué es *machine learning*?](https://youtu.be/IRW00HT9eds) lo explica en 6 minutos y 34 segundos (video del profesor del curso; opcional).
 
 # Las cinco piezas de una decisión
 
-La reserva de cupos es una decisión pequeña, pero tiene todo lo que tiene una decisión grande:
+Si el modelo es el corazón de la mitad predictiva del curso, la decisión es el de la mitad prescriptiva, y una decisión bien planteada tiene una anatomía fija de cinco piezas.
+
+**Las alternativas.** Entre qué opciones se elige de verdad, incluida siempre la de no hacer nada. Si solo hay una opción sobre la mesa, no hay decisión que analizar.
+
+**La incertidumbre.** Lo que no se sabe en el momento de decidir y afecta el resultado. Es la única pieza donde un pronóstico ayuda: la predicción reduce la incertidumbre, nunca la elimina.
+
+**Las consecuencias.** Qué pasa con cada alternativa en cada estado del mundo y, en particular, qué cuesta cada tipo de error. Pasarse y quedarse corto casi nunca cuestan lo mismo, y esa asimetría suele pesar más en la decisión que la calidad del pronóstico.
+
+**El criterio.** La unidad en que se juzga el resultado —pesos de margen, solicitudes atendidas, meses de vacancia— y la regla para comparar alternativas: ¿el promedio?, ¿el peor caso aceptable?
+
+**Quién decide y cuándo.** La persona o el comité con autoridad para ejecutar, y el momento. Un análisis que llega después del momento de decidir vale cero, por riguroso que sea.
+
+En la decisión diaria de Meridiano, las cinco piezas se ven así:
 
 | Pieza | En los cupos de avalúo |
 |---|---|
-| Las **alternativas** | Cuántos cupos reservar: 12, 23, 29, 38… |
-| La **incertidumbre** | Las solicitudes de mañana |
-| Las **consecuencias** | Lo que cuesta sobrar y lo que cuesta faltar |
-| El **criterio** | El margen neto promedio por día |
-| **Quién decide** y cuándo | Mariana, cada mañana |
+| Las alternativas | cuántos cupos de perito reservar para mañana |
+| La incertidumbre | las solicitudes de avalúo que llegarán |
+| Las consecuencias | el cupo pagado que sobra; el avalúo que se pierde por faltar |
+| El criterio | el margen neto promedio por día, en pesos |
+| Quién decide y cuándo | Mariana, la coordinadora de la zona, cada mañana |
 
-Un pronóstico, por bueno que sea, solo toca la segunda pieza. Un modelo puede predecir la demanda de forma excelente y la decisión seguir siendo mala, si nadie miró las otras cuatro. En la sesión se discute un caso famoso en el que una predicción le ganó al sistema oficial durante años y después dejó de funcionar sin avisar; la pregunta pertinente no es si la predicción era buena, sino qué decisiones se tomaron con ella.
+Un pronóstico, por bueno que sea, solo toca la segunda pieza. Un modelo puede predecir de forma excelente y la decisión seguir siendo mala, si nadie miró las otras cuatro. La sesión vuelve sobre esto con el paper de la semana: ante una predicción exitosa, la pregunta pertinente no es solo si acierta, sino qué decisiones se toman con ella y qué cuesta cada error.
 
 # La ficha de la pregunta
 
-Todo lo que harás en este curso empieza por formular bien la pregunta. Una pregunta de decisión no es un tema ("las ventas del portafolio") ni una curiosidad ("¿por qué quedan vacantes los locales?"); es algo que alguien va a hacer distinto mañana según la respuesta. La ficha tiene siete campos:
+La ruta empieza —y el curso también— por formular bien la pregunta. Una pregunta de decisión no es un tema ("las ventas del portafolio") ni una curiosidad ("¿por qué quedan vacantes los locales?"); es algo que alguien va a hacer distinto mañana según la respuesta. La ficha recoge las cinco piezas en siete campos:
 
 ```{=html}
 <div class="plantilla">
@@ -438,31 +300,16 @@ Clasifica cada enunciado. La retroalimentación usa el detector.
 </script>
 ```
 
-# El reto: Meridiano ante la junta
-
-Durante nueve semanas vas a trabajar en equipo sobre una sola decisión. Meridiano S.A.S. es una gestora inmobiliaria con sede en Cali y tres líneas de negocio: un portafolio propio de 46 locales comerciales en Cali, Bogotá y Medellín, comprados para renta y arrendados a minoristas, con un canon mensual del 10 % de las ventas del arrendatario; la administración de inmuebles de terceros, con cerca de 4.000 propietarios administrados; y los avalúos comerciales que acabas de ver. El flujo de caja de 2026 deja **\$1.000 millones** disponibles para invertir, y la junta directiva tiene cuatro alternativas sobre la mesa:
-
-| | Alternativa | Costo aproximado |
-|---|---|---|
-| A | Comprar el primer local de Meridiano en Barranquilla para arrendarlo; hay tres locales candidatos | \$700 millones |
-| B | Acelerar la administración de inmuebles: adquisición de propietarios por tramos | \$150 millones por tramo, hasta tres |
-| C | Arrendar un local en Barranquilla con opción de compra, durante seis meses, antes de decidir la compra | \$120 millones |
-| D | Esperar un año: mejoras menores en el portafolio y caja | — |
-
-La junta no ha dicho cómo juzgará una buena recomendación. Proponerlo es parte del trabajo.
-
-Cada semana el equipo construye una pieza del **expediente** de la decisión: la ficha y la posición preliminar (esta semana), la vigilancia del entorno, los hallazgos de los datos, la evaluación de los modelos, los árboles, los escenarios, la historia, y al final la defensa ante la junta. La nota premia el expediente, no el desenlace: una recomendación de esperar, bien sustentada, vale lo mismo que una de comprar.
+::: {.callout-practice}
+<div class="callout-title">El caso de estudio de la semana (práctica opcional)</div>
+Los cupos de avalúo —el tipo de pregunta que este curso enseña a responder— están en [la práctica de la semana 1](../practice/cocina.html): el simulador para jugar, las dos variantes del task y el código que valida cada cifra.
+:::
 
 ::: {.callout-connect}
 <div class="callout-title">En la sesión</div>
 - **El paper:** Google Flu Trends, una predicción construida con búsquedas que le ganó al sistema oficial de vigilancia de la gripe durante años, y lo que pasó después. Qué investigaron, con qué datos, qué encontraron y por qué importa para quien decide.
-- **La aplicación:** los cupos de avalúo con tres días posibles, resueltos a mano; la curva del margen neto con los datos reales; la ficha de la pregunta con el caso de una empresa de telecomunicaciones; y el encargo de la junta de Meridiano.
-- **El cierre:** se forman los equipos y arranca el task 1 (la ficha de Meridiano y la posición preliminar). No tienes que traer nada hecho, pero sí el simulador probado y el clasificador respondido.
-:::
-
-::: {.callout-practice}
-<div class="callout-title">El código de esta semana (opcional)</div>
-Las cifras de esta página —el cuantil crítico, el margen de cada regla— reproducidas celda a celda en R, en [el código de la semana 1](../practice/cocina.html): corre las celdas, cambia la tarifa y observa el panel Environment.
+- **La aplicación:** los cupos de avalúo resueltos a mano con tres escenarios, la curva del margen neto con los datos reales y la ficha de la pregunta con el caso de una empresa de telecomunicaciones.
+- **El cierre:** se forman los equipos, la junta de Meridiano presenta el encargo de las nueve semanas y arranca el task 1 (la ficha y la posición preliminar). No hay que traer nada hecho; ayuda llegar con el clasificador respondido y, si pasaste por la práctica, con el simulador probado.
 :::
 
 # ¿Y esto cómo se ve en tu organización?
@@ -472,23 +319,23 @@ Piensa en una decisión recurrente de tu área que hoy se toma "con el pronósti
 # Preguntas de comprensión
 
 <details class="pregunta">
-<summary>1. El pronóstico dice 23 y Mariana reserva 29 cupos. ¿Está mal el pronóstico?</summary>
-No. El 23 sigue siendo el mejor resumen de la demanda de un día cualquiera. Se reservan más cupos porque faltar cuesta 3.5 veces lo que cuesta sobrar, y conviene cubrir el 78 % de los días, no el 48 %. El pronóstico describe el mundo; la decisión responde a los costos.
+<summary>1. El informe mensual del canon recaudado, la estimación de las ventas del arrendatario de un local que se evalúa y la lista de los 300 propietarios a los que se les ofrecerá el descuento de renovación: ¿a qué área de la analítica corresponde cada pieza?</summary>
+Descriptiva, predictiva y prescriptiva, en ese orden. El informe resume lo que ya ocurrió; la estimación habla de algo que todavía no se observa; la lista es una acción que alguien ejecuta. La prueba rápida para clasificar: ¿resume, estima o decide?
 </details>
 
 <details class="pregunta">
-<summary>2. Si el cupo costara \$200.000 en lugar de \$100.000, ¿la mejor cantidad sube o baja?</summary>
-Baja. Faltar costaría \$250.000 y sobrar \$200.000: el cuantil crítico pasa de 7/9 = 0.78 a 5/9 = 0.56, y en los 56 días la mejor cantidad baja de 29 a 25, cerca del promedio. Cuando los dos errores pesan parecido, el promedio es casi la mejor decisión.
+<summary>2. En la ruta del oficio, el modelo se construye antes de evaluarse. ¿Por qué el curso enseña la evaluación en pesos (semana 4) antes que la construcción de árboles (semanas 5 y 6)?</summary>
+Porque el criterio de evaluación no depende del modelo y conviene fijarlo antes de fabricar nada: fuera de muestra, contra la regla ingenua y con el costo de cada error en pesos. En la semana 4 ese criterio sirve para elegir entre modelos ajenos; en las semanas 5 y 6, los árboles propios se someten al mismo criterio. Definirlo después de ver los resultados invita a elegir la medida que favorece el resultado propio.
 </details>
 
 <details class="pregunta">
-<summary>3. ¿Cuál de estas tres es una pregunta de decisión? (a) ¿Por qué cayeron las renovaciones del portafolio de administración? (b) ¿A cuáles 300 propietarios les ofrecemos el descuento de renovación en noviembre? (c) La retención de propietarios.</summary>
-La (b). Dice qué se hace (ofrecer el descuento), a quiénes y cuándo, y la respuesta es una lista que alguien ejecuta. La (a) es explicativa y la (c) es un tema.
+<summary>3. Un modelo acierta el 100 % de los casos con los que se construyó y, en casos nuevos, pierde con la regla ingenua. ¿Aprendió?</summary>
+No: memorizó. Aprender, en el sentido del machine learning, es generalizar —acertar en casos que no se vieron—. Por eso el desempeño se mide fuera de muestra, en datos reservados, y por eso un modelo perfecto en entrenamiento puede valer menos que el promedio histórico. Es el arco de las semanas 4 a 6.
 </details>
 
 <details class="pregunta">
-<summary>4. Una ficha trae la decisión, las alternativas, quién decide, el horizonte y el criterio. ¿Qué le falta?</summary>
-El costo de cada error y el dato que cambiaría la decisión. Sin el primero no se puede elegir entre pasarse y quedarse corto; sin el segundo no se sabe qué evidencia vale la pena conseguir.
+<summary>4. En el caso de la práctica, el mejor pronóstico de las solicitudes de un día es el promedio (23) y, sin embargo, la mejor reserva es 29 cupos. ¿Está mal el pronóstico?</summary>
+No. El 23 sigue siendo el mejor resumen de la demanda de un día cualquiera; la reserva sube porque faltar cuesta 3.5 veces lo que cuesta sobrar, y con esa asimetría conviene cubrir el 78 % de los días, no el 48 % que cubre el promedio. El pronóstico describe el mundo; la decisión responde a los costos. La cuenta completa, con el simulador y el código, está en [la práctica de la semana 1](../practice/cocina.html).
 </details>
 
 # Lectura corta (opcional)

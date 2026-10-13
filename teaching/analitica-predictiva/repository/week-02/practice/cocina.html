@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Práctica 2: el entorno de Meridiano</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="cocina_files/libs/clipboard/clipboard.min.js"></script>
+<script src="cocina_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="cocina_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="cocina_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="cocina_files/libs/quarto-html/popper.min.js"></script>
+<script src="cocina_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="cocina_files/libs/quarto-html/anchor.min.js"></script>
+<link href="cocina_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="cocina_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="cocina_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="cocina_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="cocina_files/libs/bootstrap/bootstrap-727ba3f8b3a87315a43d9d8950494688.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#el-caso-el-portafolio-de-administración" id="toc-el-caso-el-portafolio-de-administración" class="nav-link active" data-scroll-target="#el-caso-el-portafolio-de-administración"><span class="header-section-number">1</span> El caso: el portafolio de administración</a></li>
+  <li><a href="#la-línea-y-el-rango" id="toc-la-línea-y-el-rango" class="nav-link" data-scroll-target="#la-línea-y-el-rango"><span class="header-section-number">2</span> La línea y el rango</a></li>
+  <li><a href="#la-matriz-de-meridiano-el-ejemplo-resuelto" id="toc-la-matriz-de-meridiano-el-ejemplo-resuelto" class="nav-link" data-scroll-target="#la-matriz-de-meridiano-el-ejemplo-resuelto"><span class="header-section-number">3</span> La matriz de Meridiano: el ejemplo resuelto</a></li>
+  <li><a href="#llena-la-del-equipo" id="toc-llena-la-del-equipo" class="nav-link" data-scroll-target="#llena-la-del-equipo"><span class="header-section-number">4</span> Llena la del equipo</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Práctica 2: el entorno de Meridiano</h1>
+<p class="subtitle lead">Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 2 · Práctica opcional</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout-key">
+<div class="callout-title">
+La idea central
+</div>
+<p>Esta página es opcional y contiene el caso de estudio de la semana 2 completo: el portafolio de administración de Meridiano —proyectado con la línea del promedio y con el rango— y la matriz de influencia del entorno inmobiliario, con el ejemplo resuelto y el widget con el que el equipo llena la suya. La teoría se entiende sin esta página; la parte 2 del task 2 se arma con el widget del final.</p>
+</div>
+<section id="el-caso-el-portafolio-de-administración" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> El caso: el portafolio de administración</h1>
+<p>La alternativa B de la junta propone acelerar la administración de inmuebles de terceros: tramos de $150 millones, hasta tres, para adquirir propietarios más rápido. Antes de evaluar la aceleración hay que responder una pregunta más simple: ¿a dónde va el portafolio si Meridiano no hace nada distinto?</p>
+<p>La serie disponible: 45 meses de propietarios administrados, de enero de 2023 a septiembre de 2026, de 2.600 a <strong>3.908</strong> propietarios. La gerencia de administración la proyecta a dos años, a septiembre de 2028.</p>
+<p>La manera rápida —la que suele llegar al comité— es la línea: tomar el crecimiento anual promedio de la serie (10.8 %) y componerlo dos años sobre el último dato. El resultado es un solo número: <strong>4.794 propietarios</strong>. La manera honesta mira, además, cómo ha variado ese crecimiento: en las 33 ventanas de doce meses de la serie, el crecimiento anual estuvo entre <strong>7.2 %</strong> (percentil 10) y <strong>13.7 %</strong> (percentil 90), con mediana de 10.5 %. Proyectados los tres ritmos, el futuro deja de ser un punto: va de <strong>4.493 a 5.048</strong> propietarios, con centro en 4.774.</p>
+</section>
+<section id="la-línea-y-el-rango" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> La línea y el rango</h1>
+<p>Compruébalo sobre la serie real. Elige el horizonte y prende y apaga las dos maneras de mirar el futuro.</p>
+<div class="widget-card" id="wg-club">
+  <div class="widget-head">La línea y el rango · Propietarios administrados por Meridiano, 2023 a 2026</div>
+  <div class="widget-body">
+    <div class="widget-instr">La serie termina en 3.908 propietarios administrados. Elige el horizonte y compara dos maneras de mirar el futuro: la línea del crecimiento promedio y el rango de lo que el crecimiento anual ha sido de verdad (del percentil 10 al 90).</div>
+    <div class="widget-row">
+      <label for="cl-h">Horizonte</label>
+      <select id="cl-h">
+        <option value="12">12 meses</option>
+        <option value="24" selected="">24 meses</option>
+        <option value="36">36 meses</option>
+      </select>
+      <label><input type="checkbox" id="cl-linea" checked=""> La línea del promedio</label>
+      <label><input type="checkbox" id="cl-rango"> El rango honesto</label>
+    </div>
+    <div class="widget-stats">
+      <div class="widget-stat warn"><div class="k">La línea dice</div><div class="v" id="cl-vlinea">—</div></div>
+      <div class="widget-stat ok"><div class="k">El rango honesto (P10 a P90)</div><div class="v" id="cl-vrango">—</div></div>
+      <div class="widget-stat"><div class="k">Crecimiento anual histórico (P10 · P50 · P90)</div><div class="v" id="cl-vcrec">—</div></div>
+    </div>
+    <svg id="cl-svg" class="widget-svg" viewbox="0 0 680 320" role="img" aria-label="Serie de propietarios administrados con la línea y el rango"></svg>
+    <div class="widget-note" id="cl-nota"></div>
+  </div>
+</div>
+<script>
+(function () {
+  const PROPIETARIOS = [2600, 2630, 2629, 2704, 2741, 2740, 2782, 2833, 2879, 2896, 2976, 3018, 3025, 2973, 3041, 3069, 3097, 3115, 3129, 3134, 3151, 3211, 3244, 3197, 3252, 3280, 3305, 3278, 3291, 3338, 3425, 3453, 3502, 3533, 3508, 3524, 3541, 3572, 3653, 3721, 3749, 3773, 3841, 3903, 3908];
+  const n = PROPIETARIOS.length;
+  const C = { morado: "#5454e9", naranja: "#e9683b", verde: "#4cb979", gris: "#88898c", borde: "#cecfd4", tinta: "#1b1d29" };
+  const $ = (id) => document.getElementById(id);
+  const fmt = (x) => Math.round(x).toLocaleString("es-CO");
+  const pct = (x) => (100 * x).toFixed(1).replace(".", ".") + " %";
+  const yoy = []; for (let i = 12; i < n; i++) yoy.push(PROPIETARIOS[i] / PROPIETARIOS[i - 12] - 1);
+  const ord = [...yoy].sort((a, b) => a - b);
+  const q = (p) => { const h = (ord.length - 1) * p, lo = Math.floor(h); return ord[lo] + (h - lo) * ((ord[lo + 1] ?? ord[lo]) - ord[lo]); };
+  const p10 = q(0.1), p50 = q(0.5), p90 = q(0.9), media = yoy.reduce((a, b) => a + b, 0) / yoy.length;
+  function svgEl(tag, attrs, text) { const el = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) el.setAttribute(k, attrs[k]); if (text !== undefined) el.textContent = text; return el; }
+  function dibujar() {
+    const h = Number($("cl-h").value), conLinea = $("cl-linea").checked, conRango = $("cl-rango").checked;
+    const ult = PROPIETARIOS[n - 1];
+    const linea = ult * Math.pow(1 + media, h / 12);
+    const b10 = ult * Math.pow(1 + p10, h / 12), b50 = ult * Math.pow(1 + p50, h / 12), b90 = ult * Math.pow(1 + p90, h / 12);
+    $("cl-vlinea").textContent = conLinea ? fmt(linea) : "—";
+    $("cl-vrango").textContent = conRango ? fmt(b10) + " a " + fmt(b90) : "—";
+    $("cl-vcrec").textContent = pct(p10) + " · " + pct(p50) + " · " + pct(p90);
+    const svg = $("cl-svg"); svg.innerHTML = "";
+    const W = 680, H = 320, L = 64, R = 20, T = 18, B = 40;
+    const xmax = n + h; const ymin = 2400, ymax = Math.max(b90, linea, ult) * 1.06;
+    const sx = (i) => L + (i / (xmax - 1)) * (W - L - R);
+    const sy = (v) => T + (1 - (v - ymin) / (ymax - ymin)) * (H - T - B);
+    svg.appendChild(svgEl("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: C.borde }));
+    svg.appendChild(svgEl("line", { x1: L, y1: T, x2: L, y2: H - B, stroke: C.borde }));
+    const etiquetas = [[0, "ene-23"], [12, "ene-24"], [24, "ene-25"], [36, "ene-26"], [44, "sep-26"], [44 + h, "+" + h + " m"]];
+    etiquetas.forEach(([i, t]) => svg.appendChild(svgEl("text", { x: sx(i), y: H - B + 16, "text-anchor": "middle", "font-size": 11, fill: C.gris }, t)));
+    for (let v = 2500; v <= ymax; v += 500) { svg.appendChild(svgEl("line", { x1: L, y1: sy(v), x2: W - R, y2: sy(v), stroke: "#eeeef5" })); svg.appendChild(svgEl("text", { x: L - 6, y: sy(v) + 4, "text-anchor": "end", "font-size": 11, fill: C.gris }, fmt(v))); }
+    if (conRango) {
+      svg.appendChild(svgEl("polygon", { points: `${sx(n - 1)},${sy(ult)} ${sx(xmax - 1)},${sy(b10)} ${sx(xmax - 1)},${sy(b90)}`, fill: C.verde, opacity: 0.25 }));
+      svg.appendChild(svgEl("line", { x1: sx(n - 1), y1: sy(ult), x2: sx(xmax - 1), y2: sy(b50), stroke: C.verde, "stroke-width": 2, "stroke-dasharray": "5 4" }));
+      svg.appendChild(svgEl("text", { x: sx(xmax - 1) - 4, y: sy(b90) - 6, "text-anchor": "end", "font-size": 11, fill: C.verde }, "rango: " + fmt(b10) + " a " + fmt(b90)));
+    }
+    if (conLinea) {
+      svg.appendChild(svgEl("line", { x1: sx(n - 1), y1: sy(ult), x2: sx(xmax - 1), y2: sy(linea), stroke: C.naranja, "stroke-width": 2.5 }));
+      svg.appendChild(svgEl("text", { x: sx(xmax - 1) - 4, y: sy(linea) + (conRango ? 16 : -6), "text-anchor": "end", "font-size": 11, fill: C.naranja }, "la línea: " + fmt(linea)));
+    }
+    const d = PROPIETARIOS.map((v, i) => (i ? "L" : "M") + sx(i).toFixed(1) + " " + sy(v).toFixed(1)).join(" ");
+    svg.appendChild(svgEl("path", { d, fill: "none", stroke: C.morado, "stroke-width": 3 }));
+    let nota = `A ${h} meses, la línea del crecimiento promedio (${pct(media)} anual) da un solo número: ${fmt(linea)} propietarios.`;
+    if (conRango) nota += ` El crecimiento anual real estuvo entre ${pct(p10)} y ${pct(p90)} en el 80 % de los meses; proyectado, el rango va de ${fmt(b10)} a ${fmt(b90)}: ${fmt(b90 - b10)} propietarios de diferencia entre un extremo y otro. Ese ancho es la incertidumbre que la línea esconde.`;
+    else nota += " Activa el rango honesto para ver lo que la línea no dice.";
+    $("cl-nota").textContent = nota;
+  }
+  ["cl-h", "cl-linea", "cl-rango"].forEach((id) => $(id).addEventListener("change", dibujar));
+  dibujar();
+})();
+</script>
+<p>Tres cosas para observar en el widget:</p>
+<ol type="1">
+<li><strong>La línea cae dentro del rango, y eso no la salva.</strong> El promedio no está mal: es el mejor centro. El problema es presentar como un punto lo que la propia serie dice que es un intervalo; a dos años, un intervalo de 555 propietarios.</li>
+<li><strong>El ancho crece con el horizonte.</strong> A 12 meses la línea y el rango casi se confunden; a 36, la distancia entre los extremos se vuelve material para cualquier plan de inversión o de contratación.</li>
+<li><strong>El rango sale de la misma serie.</strong> No pide más datos ni supuestos nuevos: solo mirar la variación que el promedio resume y esconde.</li>
+</ol>
+<p>La nota bajo el gráfico hace la cuenta: con cada cambio de horizonte reporta la línea, el rango y la diferencia entre los extremos.</p>
+</section>
+<section id="la-matriz-de-meridiano-el-ejemplo-resuelto" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> La matriz de Meridiano: el ejemplo resuelto</h1>
+<p>Las seis variables del entorno que el comité de inversiones vigila, con los juicios de influencia ya puestos. Cada celda dice cuánto influye la variable de la fila sobre la de la columna, de 0 (nada) a 3 (mucho); la motricidad es la suma de la fila y la dependencia, la de la columna:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Influye sobre →</th>
+<th>Costos</th>
+<th>Arriendos</th>
+<th>Demanda</th>
+<th>Oferta nueva</th>
+<th>Tasa</th>
+<th>Proptech</th>
+<th><strong>Motricidad</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Costos de construcción y adecuación</td>
+<td>·</td>
+<td>0</td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td><strong>3</strong></td>
+</tr>
+<tr class="even">
+<td>Arriendos comerciales</td>
+<td>0</td>
+<td>·</td>
+<td>1</td>
+<td>2</td>
+<td>0</td>
+<td>1</td>
+<td><strong>4</strong></td>
+</tr>
+<tr class="odd">
+<td>Demanda de espacio comercial</td>
+<td>1</td>
+<td>2</td>
+<td>·</td>
+<td>3</td>
+<td>0</td>
+<td>2</td>
+<td><strong>8</strong></td>
+</tr>
+<tr class="even">
+<td>Oferta nueva de locales (licencias)</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>·</td>
+<td>0</td>
+<td>1</td>
+<td><strong>6</strong></td>
+</tr>
+<tr class="odd">
+<td>Tasa de interés</td>
+<td>0</td>
+<td>2</td>
+<td>3</td>
+<td>2</td>
+<td>·</td>
+<td>1</td>
+<td><strong>8</strong></td>
+</tr>
+<tr class="even">
+<td>Plataformas proptech y de corta estadía</td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>0</td>
+<td>·</td>
+<td><strong>5</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Dependencia</strong></td>
+<td><strong>2</strong></td>
+<td><strong>7</strong></td>
+<td><strong>10</strong></td>
+<td><strong>10</strong></td>
+<td><strong>0</strong></td>
+<td><strong>5</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Con las dos sumas (los promedios de corte quedan en 5.7), la lectura del plano:</p>
+<ul>
+<li>La <strong>tasa de interés</strong> es la motriz del sistema: mueve los arriendos, la demanda y la oferta nueva (motricidad 8) y ninguna de las otras cinco la mueve (dependencia 0). Es el entorno en estado puro: se vigila y se le hacen escenarios.</li>
+<li>La <strong>demanda de espacio comercial</strong> (8 y 10) y la <strong>oferta nueva de locales</strong> (6 y 10) son las críticas: mueven y son movidas, amplifican cualquier cambio, y por eso son las primeras candidatas a ejes de escenario.</li>
+<li>Los <strong>arriendos comerciales</strong> (4 y 7) son la dependiente típica: el resultado del sistema, no su causa. Sirven para medir el efecto; no sirven como eje.</li>
+<li>Los <strong>costos de construcción y adecuación</strong> (3 y 2) y las <strong>plataformas proptech</strong> (5 y 5) quedan como autónomas: van por su cuenta y se vigilan sin modelarse.</li>
+</ul>
+</section>
+<section id="llena-la-del-equipo" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Llena la del equipo</h1>
+<p>La matriz del task 2 se llena aquí: en equipo, celda por celda, discutiendo cada juicio. Puedes partir del ejemplo resuelto (el botón lo carga) y cambiar las variables que no apliquen. El botón «Copiar texto» exporta la matriz, la motricidad y la dependencia de cada variable y su zona: eso es lo que se entrega en la parte 2 del task, junto con el plano.</p>
+<div class="widget-card" id="wg-matriz">
+  <div class="widget-head">La matriz de influencia · Llénala a mano</div>
+  <div class="widget-body">
+    <div class="widget-instr">Cada celda: cuánto influye la variable de la fila sobre la de la columna, de 0 a 3. Puedes cambiar los nombres. El plano se actualiza solo. "Copiar texto" prepara lo que entregas en el task.</div>
+    <div class="widget-row">
+      <label for="mx-n">Variables</label>
+      <select id="mx-n"><option value="6" selected="">6</option><option value="7">7</option><option value="8">8</option></select>
+      <button type="button" class="btn-widget btn-widget-ghost" id="mx-ejemplo">Cargar el ejemplo resuelto</button>
+      <button type="button" class="btn-widget btn-widget-ghost" id="mx-limpiar">Limpiar</button>
+      <button type="button" class="btn-widget" id="mx-copiar">Copiar texto</button>
+    </div>
+    <div style="overflow-x:auto"><table id="mx-tabla" style="font-size:0.85rem; border-collapse:collapse"></table></div>
+    <svg id="mx-svg" class="widget-svg" viewbox="0 0 680 400" role="img" aria-label="Plano de motricidad y dependencia"></svg>
+    <div class="widget-note" id="mx-nota">Carga el ejemplo o empieza a llenar.</div>
+    <textarea id="mx-texto" style="width:100%; height:110px; margin-top:.6em; font-family: var(--font-mono); font-size:.8rem; border:1px solid var(--borde); border-radius:8px; padding:8px" placeholder="Aquí aparece el texto para el task."></textarea>
+  </div>
+</div>
+<script>
+(function () {
+  const EJEMPLO_NOMBRES = ["Costos de construcción y adecuación", "Arriendos comerciales", "Demanda de espacio comercial", "Oferta nueva de locales (licencias)", "Tasa de interés", "Plataformas proptech y de corta estadía"];
+  const EJEMPLO = [[0,0,2,1,0,0], [0,0,1,2,0,1], [1,2,0,3,0,2], [1,2,2,0,0,1], [0,2,3,2,0,1], [0,1,2,2,0,0]];
+  const C = { morado: "#5454e9", moradoOsc: "#3a3acb", naranja: "#e9683b", verde: "#4cb979", gris: "#88898c", borde: "#cecfd4", tinta: "#1b1d29" };
+  const $ = (id) => document.getElementById(id);
+  let N = 6, nombres = EJEMPLO_NOMBRES.slice(), M = EJEMPLO.map((r) => r.map(() => 0));
+  function svgEl(tag, attrs, text) { const el = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) el.setAttribute(k, attrs[k]); if (text !== undefined) el.textContent = text; return el; }
+  function construir() {
+    const t = $("mx-tabla"); t.innerHTML = "";
+    const thead = document.createElement("tr");
+    thead.appendChild(Object.assign(document.createElement("th"), { textContent: "fila → columna", style: "text-align:left; padding:4px 6px; color:#88898c; font-weight:600" }));
+    for (let j = 0; j < N; j++) { const th = document.createElement("th"); th.id = "mx-h" + j; th.textContent = nombres[j]; th.style.cssText = "padding:6px 6px; font-weight:600; color:#3a3acb; max-width:120px; font-size:.76rem; text-transform:none; letter-spacing:0; line-height:1.25; text-align:center"; thead.appendChild(th); }
+    thead.appendChild(Object.assign(document.createElement("th"), { textContent: "Motricidad", style: "padding:4px 6px; color:#3a3acb" }));
+    t.appendChild(thead);
+    for (let i = 0; i < N; i++) {
+      const tr = document.createElement("tr");
+      const td0 = document.createElement("td"); const inp = document.createElement("input"); inp.type = "text"; inp.value = nombres[i]; inp.style.cssText = "width:240px; font-size:.82rem; padding:3px 6px; border:1px solid #cecfd4; border-radius:6px";
+      inp.addEventListener("input", () => { nombres[i] = inp.value; $("mx-h" + i).textContent = inp.value; actualizar(); }); td0.appendChild(inp); tr.appendChild(td0);
+      for (let j = 0; j < N; j++) {
+        const td = document.createElement("td"); td.style.cssText = "padding:2px 4px; text-align:center";
+        if (i === j) { td.textContent = "·"; td.style.color = "#88898c"; }
+        else { const c = document.createElement("input"); c.type = "number"; c.min = 0; c.max = 3; c.step = 1; c.value = M[i][j]; c.style.cssText = "width:44px; text-align:center; padding:3px; border:1px solid #cecfd4; border-radius:6px";
+          c.addEventListener("input", () => { let v = Math.round(Number(c.value)); if (isNaN(v)) v = 0; v = Math.max(0, Math.min(3, v)); c.value = v; M[i][j] = v; actualizar(); }); td.appendChild(c); }
+        tr.appendChild(td);
+      }
+      const tm = document.createElement("td"); tm.id = "mx-m" + i; tm.style.cssText = "text-align:center; font-weight:700; color:#3a3acb"; tr.appendChild(tm);
+      t.appendChild(tr);
+    }
+    const trd = document.createElement("tr");
+    trd.appendChild(Object.assign(document.createElement("td"), { textContent: "Dependencia", style: "padding:4px 6px; font-weight:700; color:#3a3acb" }));
+    for (let j = 0; j < N; j++) { const td = document.createElement("td"); td.id = "mx-d" + j; td.style.cssText = "text-align:center; font-weight:700; color:#3a3acb"; trd.appendChild(td); }
+    trd.appendChild(document.createElement("td")); t.appendChild(trd);
+    actualizar();
+  }
+  function sumas() {
+    const mot = M.map((r) => r.reduce((a, b) => a + b, 0));
+    const dep = nombres.map((_, j) => M.reduce((a, r) => a + r[j], 0));
+    return { mot, dep };
+  }
+  function zona(m, d, mm, dm) { return m >= mm ? (d >= dm ? "crítica" : "motriz") : (d >= dm ? "dependiente" : "autónoma"); }
+  function actualizar() {
+    const { mot, dep } = sumas();
+    for (let i = 0; i < N; i++) { $("mx-m" + i).textContent = mot[i]; $("mx-d" + i).textContent = dep[i]; }
+    const total = mot.reduce((a, b) => a + b, 0);
+    const mm = total / N, dm = total / N;
+    const svg = $("mx-svg"); svg.innerHTML = "";
+    const W = 680, H = 400, L = 60, R = 20, T = 20, B = 46;
+    const maxv = Math.max(3 * (N - 1), 1);
+    const sx = (d) => L + (d / maxv) * (W - L - R), sy = (m) => T + (1 - m / maxv) * (H - T - B);
+    svg.appendChild(svgEl("rect", { x: L, y: T, width: W - L - R, height: H - T - B, fill: "#fbfbfe", stroke: C.borde }));
+    if (total > 0) {
+      svg.appendChild(svgEl("line", { x1: sx(dm), y1: T, x2: sx(dm), y2: H - B, stroke: C.gris, "stroke-dasharray": "5 4" }));
+      svg.appendChild(svgEl("line", { x1: L, y1: sy(mm), x2: W - R, y2: sy(mm), stroke: C.gris, "stroke-dasharray": "5 4" }));
+    }
+    svg.appendChild(svgEl("text", { x: L + 8, y: T + 16, "font-size": 11, fill: C.gris }, "MOTRICES"));
+    svg.appendChild(svgEl("text", { x: W - R - 8, y: T + 16, "font-size": 11, fill: C.naranja, "text-anchor": "end" }, "CRÍTICAS"));
+    svg.appendChild(svgEl("text", { x: L + 8, y: H - B - 8, "font-size": 11, fill: C.gris }, "AUTÓNOMAS"));
+    svg.appendChild(svgEl("text", { x: W - R - 8, y: H - B - 8, "font-size": 11, fill: C.gris, "text-anchor": "end" }, "DEPENDIENTES"));
+    svg.appendChild(svgEl("text", { x: (L + W - R) / 2, y: H - 8, "font-size": 12, fill: C.tinta, "text-anchor": "middle" }, "Dependencia: cuánto la mueven las demás"));
+    svg.appendChild(svgEl("text", { x: 14, y: (T + H - B) / 2, "font-size": 12, fill: C.tinta, "text-anchor": "middle", transform: `rotate(-90 14 ${(T + H - B) / 2})` }, "Motricidad: cuánto mueve a las demás"));
+    for (let i = 0; i < N; i++) {
+      const z = total > 0 ? zona(mot[i], dep[i], mm, dm) : "";
+      svg.appendChild(svgEl("circle", { cx: sx(dep[i]), cy: sy(mot[i]), r: 7, fill: z === "crítica" ? C.naranja : (z === "motriz" ? C.morado : C.verde), stroke: "#fff", "stroke-width": 2 }));
+      svg.appendChild(svgEl("text", { x: sx(dep[i]) + 10, y: sy(mot[i]) + 4, "font-size": 11, fill: C.tinta }, nombres[i]));
+    }
+    const criticas = nombres.filter((_, i) => total > 0 && zona(mot[i], dep[i], mm, dm) === "crítica");
+    const motrices = nombres.filter((_, i) => total > 0 && zona(mot[i], dep[i], mm, dm) === "motriz");
+    $("mx-nota").textContent = total === 0 ? "Carga el ejemplo o empieza a llenar." :
+      `Motrices: ${motrices.length ? motrices.join(", ") : "ninguna"}. Críticas: ${criticas.length ? criticas.join(", ") : "ninguna"}. Las candidatas a ejes de escenario salen de estas dos zonas; de ellas, elige las dos más inciertas a tres años.`;
+  }
+  function texto() {
+    const { mot, dep } = sumas();
+    const total = mot.reduce((a, b) => a + b, 0), mm = total / N, dm = total / N;
+    let s = "Matriz de influencia (fila influye sobre columna, 0 a 3)\n";
+    s += "variable | " + nombres.join(" | ") + " | motricidad\n";
+    for (let i = 0; i < N; i++) s += nombres[i] + " | " + M[i].map((v, j) => (i === j ? "·" : v)).join(" | ") + " | " + mot[i] + "\n";
+    s += "dependencia | " + dep.join(" | ") + "\n\nZonas:\n";
+    for (let i = 0; i < N; i++) s += `- ${nombres[i]}: motricidad ${mot[i]}, dependencia ${dep[i]}, ${total > 0 ? zona(mot[i], dep[i], mm, dm) : "sin llenar"}\n`;
+    return s;
+  }
+  $("mx-n").addEventListener("change", () => {
+    N = Number($("mx-n").value);
+    while (nombres.length < N) nombres.push("Variable " + (nombres.length + 1));
+    nombres = nombres.slice(0, N);
+    M = Array.from({ length: N }, (_, i) => Array.from({ length: N }, (_, j) => (M[i] && M[i][j]) ? M[i][j] : 0));
+    construir();
+  });
+  $("mx-ejemplo").addEventListener("click", () => { N = 6; $("mx-n").value = "6"; nombres = EJEMPLO_NOMBRES.slice(); M = EJEMPLO.map((r) => r.slice()); construir(); });
+  $("mx-limpiar").addEventListener("click", () => { M = M.map((r) => r.map(() => 0)); construir(); });
+  $("mx-copiar").addEventListener("click", () => { const s = texto(); $("mx-texto").value = s; if (navigator.clipboard) navigator.clipboard.writeText(s).catch(() => {}); });
+  construir();
+})();
+</script>
+<p>De las zonas motriz y crítica del plano salen las candidatas a ejes de escenario; las <strong>dos más inciertas</strong> a tres años son las que pide la parte 3 del <a href="../task/week-02.html">task 2</a> y las que armarán los escenarios de la semana 7.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiado");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiado");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="cocina_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

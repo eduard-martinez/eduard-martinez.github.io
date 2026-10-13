@@ -6,30 +6,32 @@ lang: es
 
 ::: {.callout-key}
 <div class="callout-title">La idea central</div>
-Un árbol de regresión predice un número con el promedio de los locales parecidos, y ese número solo sirve acompañado de su error en pesos. Esta semana se entrena el árbol que predice las ventas del arrendatario con el estudio de locales, se compara contra la regla del sector en el ranking de modelos, se examina dónde falla y cada hoja se convierte en una **banda de ventas base** para los tres locales candidatos de Barranquilla: la cifra que entra al VPN de la semana 7.
+Un árbol de regresión predice un número con el promedio de los casos parecidos, y ese número solo sirve acompañado de su error medido en la unidad del negocio. Esta página desarrolla los conceptos de la semana: qué cambia cuando el árbol responde un número en lugar de una clase, por qué su predicción es una escalera y no una rampa, cómo gobiernan la profundidad y el mínimo por hoja el sobreajuste, cómo se lee el error en las unidades del target —el MAE y el RMSE— y por qué lo que se entrega a quien decide es una banda. El caso de estudio de la semana —el árbol que predice las ventas del arrendatario y las bandas de los tres locales candidatos— queda en la práctica opcional.
 :::
 
-**Tiempo de estudio:** 30 a 40 minutos. **Qué necesitas:** este navegador. Las dos partes interactivas (la escalera y el error en pesos) están en la página; las celdas de R de la semana viven en [el código de la semana 6](../practice/cocina.html), una página aparte y opcional.
+**Tiempo de estudio:** 30 a 40 minutos de lectura. **Qué necesitas:** solo este navegador; esta página no corre código. El caso de la semana —el árbol de ventas, el ranking de modelos, los diez peores y las bandas de Barranquilla, con la escalera para jugar y las celdas de R que validan cada cifra— vive en [la práctica opcional](../practice/cocina.html) y toma otros 20 a 30 minutos; además, el árbol se entrena con controles y sin código en [el laboratorio](../practice/week-06.html), la práctica obligatoria de esta semana.
 
 # Un número sin su error no es un pronóstico
 
-Un portal inmobiliario entrega en dos segundos un avalúo automático: el apartamento vale 412 millones. La cifra acierta lo suficiente para que la gente la consulte, pero el portal nunca reporta cuánto se equivoca. ¿Conviene vender por 412? ¿Rechazar una oferta de 380? Sin saber si el error típico es de 10 millones o de 80, la cifra no sirve para decidir; sirve para conversar. Meridiano, que vive del negocio de los avalúos, conoce bien la diferencia.
+Un portal inmobiliario entrega en dos segundos un avalúo automático: el apartamento vale 412 millones. La cifra acierta lo suficiente para que la gente la consulte, pero el portal nunca reporta cuánto se equivoca. ¿Conviene vender por 412? ¿Rechazar una oferta de 380? Sin saber si el error típico es de 10 millones o de 80, la cifra no sirve para decidir; sirve para conversar.
 
-La junta de Meridiano recibe pronósticos así con frecuencia. "El arrendatario del local de Barranquilla vendería 150 millones al mes", una cifra redonda, en una lámina del comité de inversiones. El canon del contrato es el 10 % de esas ventas: si con 150 el VPN de la compra es positivo y con 120 es negativo, la cifra sola no decide: decide la **banda** en la que puede caer, y quien la calculó tiene la obligación de entregarla. Esta semana se construye esa banda con el mismo árbol de la semana pasada, ahora preguntando por un número.
+La diferencia no es cosmética, y se entiende con la estructura de la semana 4. Una predicción numérica entra a una decisión cuando se compara con un umbral: se vende si el avalúo supera cierto valor, se compra si las ventas esperadas sostienen el canon, se aprueba el crédito si el ingreso estimado cubre la cuota. Si la cifra queda lejos del umbral comparada con su error típico, el error no cambia nada y la cifra basta. Si la cifra y el umbral quedan a menos de un error de distancia, la acción que la cifra sugiere puede voltearse con un error perfectamente normal del método: el pronóstico ya no decide por sí solo, apenas acota, y lo honesto es decirlo. Por eso quien produce un pronóstico numérico tiene dos obligaciones, no una: entregar la cifra y entregar el error típico con el que su método acierta, medido en casos que el método no vio.
+
+La junta de Meridiano recibe esta semana una cifra de ese tipo —cuánto vendería el arrendatario de cada local candidato, la base del canon— y la decisión de compra depende de la banda, no del número: el caso completo está en [la práctica de la semana 6](../practice/cocina.html).
 
 # Qué cambia al predecir un número
 
-El árbol es el mismo: preguntas de sí o no en secuencia, un corte en cada nodo, una hoja al final. Lo que cambia es la pregunta que se le hace al estudio, y con ella cambian cuatro cosas:
+El árbol es el mismo de la semana 5: preguntas de sí o no en secuencia, un corte en cada nodo, una hoja al final. Lo que cambia es la pregunta que se le hace a los datos —ya no de qué clase es el caso, sino cuánto vale un número— y con ella cambian cuatro cosas:
 
-| | Semana 5: ¿cierra o sobrevive? | Semana 6: ¿cuánto vende? |
+| | Árbol de clasificación (semana 5) | Árbol de regresión (semana 6) |
 |---|---|---|
-| **Lo que predice la hoja** | La proporción de cierres entre los locales parecidos (p = 0.55) | El <span class="term">promedio de la hoja</span>: las ventas promedio de los arrendatarios de los locales parecidos (207.2 millones) |
-| **Lo que busca el corte** | Grupos puros: casi todos cerrados o casi todos abiertos | Grupos con poca <span class="term">varianza</span>: ventas parecidas dentro de cada grupo |
-| **Cómo se mide el error** | La matriz de confusión: exactitud, precisión, sensibilidad | Distancias en pesos: <span class="term">MAE</span> y <span class="term">RMSE</span>, los de la semana 4 |
-| **El baseline** | "Nadie cierra" (0.800) y las consultoras | La mediana del entrenamiento (93.1) y la <span class="term">regla del sector</span>: ventas ≈ 8 × canon de mercado |
-| **Lo que se le entrega a la junta** | Una probabilidad y un umbral con costos | Una predicción con su banda: ventas base ± error típico |
+| **Lo que predice la hoja** | La proporción de la clase entre los casos parecidos (p = 0.55) | El <span class="term">promedio de la hoja</span>: el promedio del target entre los casos parecidos |
+| **Lo que busca el corte** | Grupos puros: casi todos de una misma clase | Grupos con poca <span class="term">varianza</span>: valores parecidos dentro de cada grupo |
+| **Cómo se mide el error** | La matriz de confusión: exactitud, precisión, sensibilidad | Distancias en la unidad del target: <span class="term">MAE</span> y <span class="term">RMSE</span>, los de la semana 4 |
+| **El baseline** | La clase mayoritaria | La mediana del entrenamiento, o la regla simple que el negocio ya usa |
+| **Lo que se entrega** | Una probabilidad y un umbral con costos | Una predicción con su banda: el valor base ± el error típico |
 
-Lo decide la pregunta, no el algoritmo. En R es la misma función con otro método: `rpart(..., method = "class")` para el cierre; `rpart(..., method = "anova")` para las ventas. Y la regla de la semana 3 sigue en pie: solo entran las doce columnas que se conocen **antes de comprar**.
+Lo decide la pregunta, no el algoritmo. En R es la misma función con otro método: `rpart(..., method = "class")` para una clase; `rpart(..., method = "anova")` para un número. Y la regla de la semana 3 sigue en pie: solo entran las columnas que existen antes del momento de decidir. En el caso de la semana, la pregunta pasa de "¿el arrendatario cierra?" a "¿cuánto vende al mes?", con las mismas doce columnas de antes de comprar; el árbol entrenado, hoja por hoja, queda en la práctica.
 
 # Una escalera, no una rampa
 
@@ -125,327 +127,69 @@ Dos hojas, dos valores posibles: 60 y 120. El punto H vende 150 y el árbol le a
 Tres cosas que se ven en la escalera y que valen para cualquier árbol de regresión:
 
 - **k hojas, k valores posibles.** Con cuatro hojas el árbol solo sabe decir 53, 67, 100 o 140. No hay rampa entre peldaños: dos locales con tráfico 200 y 290 reciben exactamente lo mismo.
-- **El árbol no extrapola.** La hoja más alta es el techo. Un local frente al que pasaran 900 personas por hora recibiría 140, igual que G y H, porque el árbol solo sabe lo que vendieron los arrendatarios que vio. Guarda esto para el local 2 de Barranquilla.
+- **El árbol no extrapola.** La hoja más alta es el techo. Un local frente al que pasaran 900 personas por hora recibiría 140, igual que G y H, porque el árbol solo sabe lo que vendieron los arrendatarios que vio. Guarda esta propiedad: reaparece cada vez que un caso nuevo queda fuera del rango de los datos con los que el árbol se construyó.
 - **Cada peldaño nuevo baja el error en los locales con los que se construyó**, siempre: el MAE de los ocho pasa de 30 (la mediana, 82, para todos) a 13.5 con un corte y a 4.5 con tres. Si cada hoja termina con un solo local, el error llega a cero y el árbol no aprendió nada: es el memorizador de la semana pasada, ahora con números.
 
-## La escalera con locales del estudio
+# La profundidad y el sobreajuste en regresión
 
-Cuarenta locales del estudio, con una sola variable, el tráfico. Treinta sirven para construir el árbol; diez, con borde negro, son de prueba: el árbol no los vio. El baseline es la mediana de los treinta.
+La tercera lección de la escalera merece su propia sección, porque gobierna el uso del árbol en la práctica.
 
-```{=html}
-<div class="widget-card" id="wg-escalera">
-  <div class="widget-head">La escalera · 40 locales del estudio, solo el tráfico</div>
-  <div class="widget-body">
-    <div class="widget-instr">Empieza con profundidad 1 y lee los dos valores que el árbol puede decir. Sube a 2 y a 3 y mira qué pasa con el error en los treinta locales de construcción y con el de los diez de prueba. Luego baja el mínimo por hoja a 2: cuenta los locales de la hoja más pequeña.</div>
-    <div class="widget-row">
-      <label for="es-prof">Profundidad: <span id="es-profv">1</span></label>
-      <input type="range" id="es-prof" min="1" max="3" step="1" value="1">
-      <label for="es-min">Mínimo de locales por hoja</label>
-      <select id="es-min"><option value="2">2</option><option value="4" selected>4</option><option value="8">8</option></select>
-      <button type="button" class="btn-widget btn-widget-ghost" id="es-reset">Volver al inicio</button>
-    </div>
-    <div class="widget-stats">
-      <div class="widget-stat"><div class="k">MAE en construcción (30 locales)</div><div class="v" id="es-tr">—</div></div>
-      <div class="widget-stat ok"><div class="k">MAE en prueba (10 locales)</div><div class="v" id="es-te">—</div></div>
-      <div class="widget-stat warn"><div class="k">MAE del baseline en prueba</div><div class="v" id="es-base">—</div></div>
-      <div class="widget-stat"><div class="k">Hojas · tope</div><div class="v" id="es-hojas">—</div></div>
-    </div>
-    <svg id="es-svg" class="widget-svg" viewBox="0 0 680 330" role="img" aria-label="Los cuarenta locales y la escalera de predicciones del árbol"></svg>
-    <div class="widget-note" id="es-nota"></div>
-  </div>
-</div>
-<script>
-(function () {
-  // >>> puntos de la escalera (los inserta input/_datos_en_linea_week06.R; no editar a mano)
-  // [id del local, tráfico peatonal (personas por hora), ventas del arrendatario (millones al mes), 1 = lote de prueba]
-  const PUNTOS = [
-    [326, 79, 47.4, 0],
-    [205, 93, 69.4, 0],
-    [204, 105, 46.0, 0],
-    [109, 120, 57.3, 0],
-    [248, 137, 59.2, 0],
-    [87, 146, 141.8, 0],
-    [154, 152, 104.1, 0],
-    [55, 161, 108.0, 0],
-    [73, 167, 70.0, 0],
-    [209, 172, 102.6, 0],
-    [252, 182, 50.4, 0],
-    [264, 191, 87.5, 0],
-    [374, 198, 66.9, 0],
-    [319, 213, 76.9, 0],
-    [403, 225, 65.4, 0],
-    [116, 236, 100.3, 0],
-    [179, 251, 132.6, 0],
-    [372, 259, 84.6, 0],
-    [217, 275, 118.4, 0],
-    [395, 289, 95.9, 0],
-    [221, 304, 75.3, 0],
-    [5, 319, 220.6, 0],
-    [310, 334, 107.8, 0],
-    [254, 356, 120.9, 0],
-    [96, 377, 75.3, 0],
-    [187, 397, 119.3, 0],
-    [453, 431, 127.3, 0],
-    [111, 485, 201.2, 0],
-    [269, 532, 98.4, 0],
-    [262, 644, 161.8, 0],
-    [321, 92, 50.5, 1],
-    [79, 134, 53.0, 1],
-    [35, 161, 46.9, 1],
-    [416, 195, 88.7, 1],
-    [449, 239, 121.8, 1],
-    [258, 274, 121.3, 1],
-    [423, 323, 91.9, 1],
-    [43, 383, 89.2, 1],
-    [455, 468, 144.2, 1],
-    [405, 678, 101.1, 1]
-  ];
-  // <<< fin de los puntos de la escalera
-  const C = { morado: "#5454e9", moradoOsc: "#3a3acb", naranja: "#e9683b", verde: "#4cb979", gris: "#88898c", borde: "#cecfd4", tinta: "#1b1d29", amarillo: "#c9a227" };
-  const $ = (id) => document.getElementById(id);
-  const pts = PUNTOS.map((c) => ({ id: c[0], x: c[1], y: c[2], test: c[3] === 1 }));
-  const tr = pts.filter((p) => !p.test), te = pts.filter((p) => p.test);
-  const media = (a) => a.reduce((s, p) => s + p.y, 0) / a.length;
-  const sse = (a) => { const m = media(a); return a.reduce((s, p) => s + (p.y - m) * (p.y - m), 0); };
-  const ys = tr.map((p) => p.y).sort((u, v) => u - v);
-  const baseline = (ys[14] + ys[15]) / 2;      // el baseline: la mediana de los treinta de construcción
-  let prev = null, arbol = null;
-  function construir(a, prof, maxP, minH, x0, x1) {
-    const nodo = { n: a.length, pred: media(a), hoja: true, x0, x1 };
-    if (prof >= maxP || a.length < 2 * minH) return nodo;
-    const xs = [...new Set(a.map((p) => p.x))].sort((u, v) => u - v);
-    let mejor = null, mejorS = sse(a);
-    for (let i = 0; i < xs.length - 1; i++) {
-      const th = (xs[i] + xs[i + 1]) / 2;
-      const L = a.filter((p) => p.x < th), R = a.filter((p) => p.x >= th);
-      if (L.length < minH || R.length < minH) continue;
-      const s = sse(L) + sse(R);
-      if (s < mejorS - 1e-9) { mejorS = s; mejor = { th, L, R }; }
-    }
-    if (!mejor) return nodo;
-    nodo.hoja = false; nodo.th = mejor.th;
-    nodo.izq = construir(mejor.L, prof + 1, maxP, minH, x0, mejor.th);
-    nodo.der = construir(mejor.R, prof + 1, maxP, minH, mejor.th, x1);
-    return nodo;
-  }
-  function predecir(nd, x) { while (!nd.hoja) nd = x < nd.th ? nd.izq : nd.der; return nd.pred; }
-  function hojas(nd, acc) { if (nd.hoja) acc.push(nd); else { hojas(nd.izq, acc); hojas(nd.der, acc); } return acc; }
-  function cortes(nd, acc) { if (!nd.hoja) { acc.push(nd.th); cortes(nd.izq, acc); cortes(nd.der, acc); } return acc; }
-  const mae = (a, f) => a.reduce((s, p) => s + Math.abs(p.y - f(p.x)), 0) / a.length;
-  function svgEl(tag, attrs, text) { const el = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) el.setAttribute(k, attrs[k]); if (text !== undefined) el.textContent = text; return el; }
-  const W = 680, H = 330, L = 56, R = 16, T = 16, B = 44, X0 = 60, X1 = 700, Y0 = 30, Y1 = 230;
-  const sx = (x) => L + (x - X0) / (X1 - X0) * (W - L - R), sy = (y) => T + (1 - (y - Y0) / (Y1 - Y0)) * (H - T - B);
-  function dibujar() {
-    const svg = $("es-svg"); svg.innerHTML = "";
-    svg.appendChild(svgEl("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: C.borde }));
-    svg.appendChild(svgEl("line", { x1: L, y1: T, x2: L, y2: H - B, stroke: C.borde }));
-    [100, 200, 300, 400, 500, 600, 700].forEach((x) => svg.appendChild(svgEl("text", { x: sx(x), y: H - B + 15, "text-anchor": "middle", "font-size": 11, fill: C.gris }, x)));
-    [50, 100, 150, 200].forEach((y) => svg.appendChild(svgEl("text", { x: L - 6, y: sy(y) + 4, "text-anchor": "end", "font-size": 11, fill: C.gris }, y)));
-    svg.appendChild(svgEl("text", { x: (L + W - R) / 2, y: H - 6, "text-anchor": "middle", "font-size": 12, fill: C.tinta }, "Tráfico peatonal (personas por hora)"));
-    svg.appendChild(svgEl("text", { x: 14, y: (T + H - B) / 2, "text-anchor": "middle", "font-size": 12, fill: C.tinta, transform: `rotate(-90 14 ${(T + H - B) / 2})` }, "Ventas (millones al mes)"));
-    svg.appendChild(svgEl("line", { x1: L, y1: sy(baseline), x2: W - R, y2: sy(baseline), stroke: C.amarillo, "stroke-width": 1.5, "stroke-dasharray": "5 4" }));
-    svg.appendChild(svgEl("text", { x: W - R, y: sy(baseline) - 5, "text-anchor": "end", "font-size": 11, fill: C.amarillo }, `el baseline: mediana de construcción = ${baseline.toFixed(1)}`));
-    const hs = hojas(arbol, []);
-    hs.forEach((h, i) => {
-      const xa = Math.max(h.x0, X0), xb = Math.min(h.x1, X1);
-      svg.appendChild(svgEl("line", { x1: sx(xa), y1: sy(h.pred), x2: sx(xb), y2: sy(h.pred), stroke: C.naranja, "stroke-width": 3.5 }));
-      svg.appendChild(svgEl("text", { x: (sx(xa) + sx(xb)) / 2, y: sy(h.pred) - 7, "text-anchor": "middle", "font-size": 11, "font-weight": 700, fill: "#c2552f" }, `${h.pred.toFixed(1)} (n = ${h.n})`));
-      if (i < hs.length - 1) svg.appendChild(svgEl("line", { x1: sx(h.x1), y1: sy(h.pred), x2: sx(h.x1), y2: sy(hs[i + 1].pred), stroke: C.naranja, "stroke-width": 3.5 }));
-    });
-    pts.forEach((p) => svg.appendChild(svgEl("circle", { cx: sx(p.x), cy: sy(p.y), r: p.test ? 5.5 : 4, fill: p.test ? "#fff" : C.morado, stroke: p.test ? C.tinta : "#fff", "stroke-width": p.test ? 1.8 : 1 })));
-    svg.appendChild(svgEl("text", { x: L + 6, y: T + 10, "font-size": 11, fill: C.gris }, "morado: construcción (30) · borde negro: prueba (10) · naranja: lo que el árbol dice"));
-  }
-  function actualizar(cambio) {
-    const prof = Number($("es-prof").value), min = Number($("es-min").value);
-    $("es-profv").textContent = prof;
-    arbol = construir(tr, 0, prof, min, -Infinity, Infinity);
-    const hs = hojas(arbol, []), f = (x) => predecir(arbol, x);
-    const e = { prof, min, tr: mae(tr, f), te: mae(te, f), base: mae(te, () => baseline), hojas: hs.length, tope: Math.max(...hs.map((h) => h.pred)), chica: Math.min(...hs.map((h) => h.n)) };
-    $("es-tr").textContent = e.tr.toFixed(1); $("es-te").textContent = e.te.toFixed(1); $("es-base").textContent = e.base.toFixed(1);
-    $("es-hojas").textContent = `${e.hojas} · ${e.tope.toFixed(1)}`;
-    dibujar();
-    let t;
-    if (prev && cambio !== "inicio") {
-      t = `Pasaste de ${prev.hojas} a ${e.hojas} hojas. El MAE de construcción ${e.tr <= prev.tr ? "baja" : "sube"} de ${prev.tr.toFixed(1)} a ${e.tr.toFixed(1)} y el de prueba ${e.te <= prev.te ? "baja" : "sube"} de ${prev.te.toFixed(1)} a ${e.te.toFixed(1)}.`;
-      if (e.tr < prev.tr - 0.05 && e.te >= prev.te - 0.05) t += " Lo que ganó en los treinta locales con los que se construyó no se repite en los diez nuevos: el árbol empezó a memorizar.";
-      else if (e.te < prev.te - 0.05) t += " Esta vez el peldaño nuevo también redujo el error en los locales que no vio.";
-    } else {
-      t = `Profundidad ${prof}: ${e.hojas === 1 ? "ninguna pregunta, un solo promedio" : e.hojas === 2 ? "una pregunta, dos valores posibles" : `${e.hojas - 1} preguntas, ${e.hojas} valores posibles`}. El tope del árbol es ${e.tope.toFixed(1)} millones: ningún local, por alto que sea su tráfico, recibe más.`;
-    }
-    t += ` Frente al baseline (la mediana, MAE ${e.base.toFixed(1)} en prueba), el árbol ${e.te < e.base - 0.05 ? "le gana" : "no le gana"} en los locales nuevos.`;
-    if (e.chica < 4) t += ` Alarma: la hoja más pequeña tiene ${e.chica} local${e.chica === 1 ? "" : "es"}; su promedio es una anécdota, no una regla.`;
-    $("es-nota").textContent = t;
-    prev = e;
-  }
-  $("es-prof").addEventListener("input", () => actualizar("control"));
-  $("es-min").addEventListener("change", () => actualizar("control"));
-  $("es-reset").addEventListener("click", () => { $("es-prof").value = 1; $("es-min").value = 4; prev = null; actualizar("inicio"); });
-  actualizar("inicio");
-})();
-</script>
-```
+El error **en los casos de construcción** baja con cada peldaño, siempre. No es una observación empírica: es aritmética. Un corte parte una hoja en dos grupos y reemplaza un promedio por dos, y la <span class="term">suma de cuadrados</span> de dos grupos con su propio promedio nunca supera la del grupo unido. Cada pregunta nueva deja los datos de construcción mejor explicados, aunque la pregunta sea ruido. Llevado al extremo, un árbol sin frenos termina con un caso por hoja y error cero: recita lo que vio. Es el memorizador de la semana 5, ahora con números, y por eso el error medido en los datos de construcción no dice nada sobre el árbol: siempre mejora al complicarlo.
 
-Con una sola variable y cuarenta locales el árbol es tosco: el tráfico explica una parte de las ventas y el resto lo explican el canon, el área, el ticket previsto. Pero la lección ya está completa: el error de construcción baja con cada peldaño y el de prueba no necesariamente; lo que vale es el segundo.
+El error **en casos nuevos** no obedece esa ley. Baja mientras los cortes capturan estructura que se repite —el tráfico alto viene con ventas altas en los datos de construcción y también en los nuevos— y sube cuando los cortes empiezan a capturar casualidades de la muestra: el peldaño que en construcción parecía información, en los casos nuevos es ruido y estorba. La curva típica tiene forma de U: con poca profundidad queda estructura sin usar; con mucha, el árbol memoriza. El punto honesto se encuentra midiendo en datos reservados, nunca mirando el error de construcción.
 
-## El árbol de ventas en R
+Los frenos del árbol de regresión son los de la semana 5: la **profundidad** (cuántas preguntas en secuencia) y el **mínimo de casos por hoja**. El segundo tiene aquí una lectura directa: la predicción de una hoja es un promedio, y un promedio de tres casos es una anécdota, no una regla —su valor cambiaría por completo si uno de los tres hubiera sido otro—. Una hoja pequeña es la parte menos confiable del árbol aunque respete los frenos, y conviene mirar su tamaño antes de creerle a su cifra.
 
-Ahora los 480 locales del estudio con sus doce columnas de antes de comprar, la partición fija del curso (360 de entrenamiento y 120 de validación) y el freno del generador: un mínimo de diez locales por hoja. Con esa receta, `rpart` entrena los dos árboles de la semana: el de profundidad 2, que se deja leer completo, y el de profundidad 3, el árbol de referencia, con ocho hojas.
+La versión de esto para mover con controles —una escalera entrenada sobre cuarenta locales del estudio, con la profundidad y el mínimo por hoja como controles y el error medido en diez locales que el árbol no ve— está en [la práctica de la semana 6](../practice/cocina.html); el árbol completo, con las doce columnas, se entrena en [el laboratorio](../practice/week-06.html).
 
-::: {.callout-practice}
-<div class="callout-title">El código de la semana 6 (opcional)</div>
-El árbol en pesos, el ranking de modelos, la pareada, los diez peores y las bandas de los tres locales candidatos, celda a celda en R, en [el código de la semana 6](../practice/cocina.html). El laboratorio con controles —la práctica obligatoria— es [otra página](../practice/week-06.html).
-:::
+# El MAE en las unidades del target
 
-El árbol se lee como política. La primera pregunta no es el tráfico, como en el cierre, sino el **canon de mercado** (la columna `arriendo_mes`): ¿el local arrienda por menos de 14.15 millones al mes? Es lógico: el canon ya resume la ciudad, la zona, el área y el tráfico (por eso la regla del sector funciona), así que es la pregunta que más varianza quita de un solo golpe. Con profundidad 2, cuatro perfiles: canon bajo y tráfico bajo, 74.9 millones (146 locales); canon bajo y tráfico alto, 101.0 (126); canon alto y tráfico medio, 118.0 (53); canon alto y tráfico alto, 164.2 (35). Con profundidad 3, ocho perfiles entre 63.3 y 207.2, y la hoja más alta tiene apenas diez locales. Esa hoja es el techo del árbol: ningún local, por bueno que sea, recibe más de 207.2.
+Para un número no hay acierto ni fallo: hay una distancia. Si el modelo dijo 147 y el valor real fue 252, se equivocó por 105; si dijo 207 y fue 133, se equivocó por 74. La evaluación consiste en resumir esas distancias en una cifra, y las dos formas de hacerlo aparecieron en la semana 4:
 
-# El error en pesos
+- El **MAE** (error absoluto medio) es el <span class="term">error típico</span>: el promedio de las distancias, con el signo ignorado. Su virtud es que vive en la unidad del target —millones de ventas, pesos de avalúo, días de atraso— y por eso es la cifra que entiende quien decide: "este método se equivoca, en un caso típico, por tanto".
+- El **RMSE** eleva las distancias al cuadrado antes de promediar, así que castiga los errores grandes más que proporcionalmente. Siempre es mayor o igual que el MAE.
 
-Para un número no hay acierto ni fallo: hay una distancia. Si el árbol dijo 147.0 y el arrendatario vendió 252.0, se equivocó por 105. Las dos formas de promediar esas distancias ya las conoces de la semana 4, y aquí se vuelven la cifra central:
+La pareja dice más que cada uno por separado. Cuando el RMSE queda cerca del MAE, el error está repartido parejo. Cuando la <span class="term">brecha</span> es grande —un MAE de 14 con un RMSE de 31—, el promedio esconde una cola: la mayoría de los casos se predice con poco error y unos pocos se equivocan por mucho. Esa brecha es un diagnóstico, no una condena, y ordena el siguiente paso del trabajo: mirar los casos grandes uno por uno, buscarles el patrón —suelen tener algo en común— y decidir un <span class="term">tratamiento aparte</span>: el modelo para la mayoría de los casos, y otra cosa —una persona, una visita, una evaluación a fondo— para el perfil que el modelo no puede aprender porque los datos no le alcanzan. Lo que no se hace es subir la profundidad hasta que los errores grandes desaparezcan (desaparecen de los datos de construcción, no de los nuevos) ni reportar el error sin los casos difíciles como si fuera el desempeño: esa cifra recortada sirve para diagnosticar, y la que se reporta es la del lote completo.
 
-- El **MAE** es el <span class="term">error típico</span>: "en promedio, el árbol se equivoca por 22.6 millones al mes". Está en la unidad del negocio y es el que se le dice a la junta.
-- El **RMSE** castiga los errores grandes: 32.2 para el mismo árbol. La **brecha** entre los dos (22.6 contra 32.2) delata que en unos pocos locales el error es muy grande. En la sección 6 los vas a ver uno por uno.
+Y las dos advertencias de siempre. El error se mide **fuera de muestra**, en casos reservados: el de construcción siempre es menor —la sección anterior explica por qué— y un MAE sospechosamente bajo suele ser el de construcción presentado como si fuera el otro. Y el error se compara **contra el baseline**: un MAE de 20 no es bueno ni malo hasta saber cuánto logran la mediana, o la regla simple que el negocio ya usa, en los mismos casos; la comparación honesta es pareada, punto por punto, como en la semana 4.
 
-Y la traducción a la decisión. Como el canon del contrato es el 10 % de las ventas del arrendatario, cada millón mensual de ventas mueve el VPN a cinco años de la compra en **3 millones** (la hoja de costos de la semana 4). Un error típico de 22.6 millones al mes es un error típico de 22.6 × 3 ≈ **68 millones de VPN** en una compra de 700. Mueve el control y mira cuánto pesa cada millón de error:
+# La banda de error
 
-```{=html}
-<div class="widget-card" id="wg-error">
-  <div class="widget-head">El error en pesos · la banda de un local y su traducción a VPN</div>
-  <div class="widget-body">
-    <div class="widget-instr">Elige un local candidato de Barranquilla (su predicción es la del árbol de profundidad 3) y mueve el error típico. La banda de ventas es predicción ± error; la de VPN multiplica por 3. Mira si la regla del sector (8 × canon) cae dentro de la banda.</div>
-    <div class="widget-row">
-      <label for="er-local">Local</label>
-      <select id="er-local">
-        <option value="0" selected>Local 1: oficinas, 95 m², canon 16.5</option>
-        <option value="1">Local 2: mixta, 160 m², canon 27</option>
-        <option value="2">Local 3: residencial, 70 m², canon 8</option>
-      </select>
-      <label for="er-mae">Error típico (MAE): <span id="er-maev">22.6</span> millones al mes</label>
-      <input type="range" id="er-mae" min="5" max="40" step="any" value="22.6496">
-    </div>
-    <div class="widget-stats">
-      <div class="widget-stat"><div class="k">Ventas base del árbol</div><div class="v" id="er-base">—</div></div>
-      <div class="widget-stat ok"><div class="k">Banda de ventas (millones al mes)</div><div class="v" id="er-banda">—</div></div>
-      <div class="widget-stat warn"><div class="k">Banda en VPN a cinco años (millones)</div><div class="v" id="er-vpn">—</div></div>
-      <div class="widget-stat"><div class="k">Regla del sector: 8 × canon</div><div class="v" id="er-regla">—</div></div>
-    </div>
-    <svg id="er-svg" class="widget-svg" viewBox="0 0 680 150" role="img" aria-label="La banda de ventas y la banda de VPN del local elegido"></svg>
-    <div class="widget-note" id="er-nota"></div>
-  </div>
-</div>
-<script>
-(function () {
-  // los tres locales candidatos: ventas base del árbol de profundidad 3 (cifras selladas, sin redondear para que
-  // las bandas coincidan con el sobre: 147.0 [124.4, 169.7], 207.2 [184.5, 229.8], 63.3 [40.6, 85.9]) y la regla 8 x canon
-  const LOCALES = [
-    { nombre: "local 1", base: 147.04, regla: 132, canon: 16.5 },
-    { nombre: "local 2", base: 207.18, regla: 216, canon: 27 },
-    { nombre: "local 3", base: 63.275, regla: 64, canon: 8 }
-  ];
-  const VPN = 3, MAE_ARBOL = 22.6496;   // 3 millones de VPN por millón mensual (canon del 10 %); MAE del árbol de profundidad 3 en validación (22.6)
-  const C = { morado: "#5454e9", naranja: "#e9683b", verde: "#4cb979", gris: "#88898c", borde: "#cecfd4", tinta: "#1b1d29", amarillo: "#c9a227" };
-  const $ = (id) => document.getElementById(id);
-  const svg = $("er-svg");
-  function svgEl(tag, attrs, text) { const el = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) el.setAttribute(k, attrs[k]); if (text !== undefined) el.textContent = text; return el; }
-  const fmt = (x) => Math.round(x).toLocaleString("es-CO");
-  let prev = null;
-  function barra(y, x0, x1, base, lo, hi, marca, etiqueta, unidad) {
-    const W = 680, L = 120, R = 20, sx = (v) => L + (v - x0) / (x1 - x0) * (W - L - R);
-    svg.appendChild(svgEl("text", { x: L - 8, y: y + 4, "text-anchor": "end", "font-size": 11, fill: C.tinta, "font-weight": 600 }, etiqueta));
-    svg.appendChild(svgEl("line", { x1: L, y1: y, x2: W - R, y2: y, stroke: C.borde, "stroke-width": 1.5 }));
-    svg.appendChild(svgEl("rect", { x: sx(Math.max(lo, x0)), y: y - 9, width: Math.max(0, sx(Math.min(hi, x1)) - sx(Math.max(lo, x0))), height: 18, rx: 4, fill: C.morado, opacity: 0.28 }));
-    svg.appendChild(svgEl("line", { x1: sx(base), y1: y - 12, x2: sx(base), y2: y + 12, stroke: C.morado, "stroke-width": 3 }));
-    if (marca !== null) svg.appendChild(svgEl("polygon", { points: `${sx(marca)},${y - 13} ${sx(marca) - 6},${y - 23} ${sx(marca) + 6},${y - 23}`, fill: C.amarillo }));
-    svg.appendChild(svgEl("text", { x: sx(Math.max(lo, x0)) - 4, y: y + 26, "text-anchor": "end", "font-size": 11, fill: C.morado }, fmt(lo) + unidad));
-    svg.appendChild(svgEl("text", { x: sx(Math.min(hi, x1)) + 4, y: y + 26, "font-size": 11, fill: C.morado }, fmt(hi) + unidad));
-    [x0, (x0 + x1) / 2, x1].forEach((t) => svg.appendChild(svgEl("text", { x: sx(t), y: y + 42, "text-anchor": "middle", "font-size": 10, fill: C.gris }, fmt(t))));
-  }
-  function pinta() {
-    const loc = LOCALES[Number($("er-local").value)], e = parseFloat($("er-mae").value);
-    const lo = loc.base - e, hi = loc.base + e;
-    $("er-maev").textContent = e.toFixed(1);
-    $("er-base").textContent = loc.base.toFixed(1);
-    $("er-banda").textContent = `${lo.toFixed(1)} a ${hi.toFixed(1)}`;
-    $("er-vpn").textContent = `${fmt(VPN * lo)} a ${fmt(VPN * hi)}`;
-    $("er-regla").textContent = loc.regla;
-    svg.innerHTML = "";
-    barra(40, 0, 300, loc.base, lo, hi, loc.regla, "ventas al mes", "");
-    barra(110, 0, 900, VPN * loc.base, VPN * lo, VPN * hi, null, "VPN a cinco años", "");
-    svg.appendChild(svgEl("text", { x: 660, y: 14, "text-anchor": "end", "font-size": 10, fill: C.gris }, "triángulo: la regla del sector · barra: ventas base · sombra: la banda"));
-    const dentro = loc.regla >= lo && loc.regla <= hi;
-    let t = `Con un error típico de ${e.toFixed(1)} millones al mes, el ${loc.nombre} vende entre ${lo.toFixed(1)} y ${hi.toFixed(1)}; en VPN a cinco años, la banda va de ${fmt(VPN * lo)} a ${fmt(VPN * hi)} millones: ± ${fmt(VPN * e)} alrededor de ${fmt(VPN * loc.base)}.`;
-    if (prev && prev.loc === loc.nombre && Math.abs(prev.e - e) > 1e-9) t += ` Pasar de ${prev.e.toFixed(1)} a ${e.toFixed(1)} ${e > prev.e ? "ensancha" : "estrecha"} la banda de VPN en ${fmt(VPN * Math.abs(e - prev.e))} millones a cada lado: cada millón mensual de error son 3 millones de VPN.`;
-    t += dentro ? ` La regla del sector (${loc.regla}) cae dentro de la banda: el árbol y la regla no se contradicen.` : ` La regla del sector (${loc.regla}) queda fuera de la banda: el árbol y la regla se contradicen, y antes de elegir uno hay que saber por qué.`;
-    if (Math.abs(e - MAE_ARBOL) < 0.05) t += " Este es el error del árbol de referencia en validación.";
-    if (lo <= 0) t += " La banda llega a cero: con ese error el pronóstico no dice nada.";
-    $("er-nota").textContent = t;
-    prev = { loc: loc.nombre, e };
-  }
-  $("er-local").addEventListener("change", pinta);
-  $("er-mae").addEventListener("input", pinta);
-  pinta();
-})();
-</script>
-```
+El error típico convierte la predicción en lo que la decisión necesita: una <span class="term">banda</span>. La banda es el valor base —el promedio de la hoja donde cae el caso— más y menos el error típico medido en validación. No es un intervalo con garantías probabilísticas: es la honestidad mínima de un pronóstico. Dice "el método que produjo esta cifra se equivoca típicamente por tanto, así que el valor real puede estar, razonablemente, en este rango".
 
-Dos lecturas del control. La banda se entrega en las dos unidades: en ventas, porque es la unidad en la que piensan la gerencia de inversión y el arrendatario; en VPN, porque es la que la junta compara con la inversión. Y la regla del sector cae dentro de la banda del árbol en los tres locales con el error de referencia: cuando dos pronósticos distintos caben en la misma banda, ninguno le ha ganado al otro.
+Tres usos de la banda, que son tres preguntas sobre la decisión:
 
-# ¿Le gana a la regla del sector?
+1. **¿La decisión cambia dentro de la banda?** Si cualquier valor del rango lleva a la misma acción, el pronóstico decide y la banda lo confirma. Si el umbral de la decisión cae dentro de la banda, el pronóstico no decide por sí solo: acota, y la decisión necesita algo más —otra fuente, un escenario pesimista, una condición en el contrato—.
+2. **¿Qué dice el baseline dentro de la banda?** Si la regla simple que el negocio ya usa cae dentro de la banda del modelo, los dos métodos no se contradicen: dicen lo mismo con lenguajes distintos, y ninguno le ha ganado al otro. Es una coincidencia informativa, no un fracaso.
+3. **¿En qué unidad la necesita quien decide?** La banda se entrega en la unidad del target y, cuando el target alimenta un cálculo financiero, también en la unidad de ese cálculo: si cada unidad del target mueve una cantidad fija de pesos de valor presente, el error típico se traduce con el mismo factor y la banda del pronóstico se vuelve una banda de VPN. La traducción no agrega información; la pone en la unidad en la que se decide.
 
-El ranking de modelos de la semana 4 tenía cuatro filas de ventas; hoy entran las dos del árbol. Todo medido en los 120 locales de validación, con el margen de dos errores estándar y la comparación pareada contra la regla, punto por punto:
+Queda una advertencia que la banda no cubre: la banda mide el error del método **dentro del territorio que conoce**. Para un caso fuera del rango de los datos de construcción —una ciudad que no está en el estudio, un canon por encima del máximo observado—, el árbol responde igual, porque no sabe negarse, pero la banda ya no describe nada medido. Por eso una predicción fuera de rango lleva su **nota de extrapolación** pegada, y una predicción que cae en el tope del árbol se lee como "lo máximo que este árbol sabe decir", no como una medida del caso.
 
-| Predicción de ventas | MAE | Margen (2 EE) | RMSE | MAE en VPN (× 3) | Pareada: regla − modelo |
-|---|---|---|---|---|---|
-| Mediana del entrenamiento (93.1 para todos) | 31.1 | ± 5.7 | 43.9 | 93 | — |
-| Regla del sector: 8 × canon | 22.4 | ± 3.7 | 30.0 | 67 | el baseline |
-| Consultora A (ecuación lineal) | 22.9 | ± 3.7 | 30.6 | 69 | −0.57 ± 3.97: empate técnico |
-| Consultora B (bosque) | 17.9 | ± 3.4 | 25.9 | 54 | 4.44 ± 2.76: gana B |
-| **Árbol de profundidad 2** | 23.5 | ± 3.9 | 31.7 | 71 | −1.19 ± 3.35: empate técnico |
-| **Árbol de profundidad 3** | 22.6 | ± 4.2 | 32.2 | 68 | −0.29 ± 3.55: empate técnico |
-
-El veredicto honesto: el árbol, en cualquiera de las dos profundidades, **empata con la regla del sector**. La diferencia pareada es de menos de un millón al mes y el margen cruza el cero por los dos lados. Lo mismo le pasaba a la consultora A. La única que le gana a la regla es B, por 4.4 millones al mes por local, y B no es un árbol: es un bosque (sección 8). Un pronóstico que empata con "8 × canon" no es inútil (dice lo mismo que la gerencia de inversión ya sabe de memoria, pero lo dice con una banda medida), aunque tampoco justifica una factura. Esa es una línea de la posición actualizada del task 6.
-
-# Dónde falla: los diez peores
-
-Un MAE de 22.6 con un RMSE de 32.2 dice que el error no está repartido parejo. La prueba son los diez locales de validación en los que el árbol de profundidad 3 más se equivoca (el código de la semana los lista uno por uno, con su ficha completa).
-
-Diez locales de 120 (el 8 %) concentran el **61.8 %** del error cuadrático. En ocho de los diez el arrendatario vende mucho más de lo que el árbol dice; seis venden más de 150 millones, y siete están en zona de oficinas. El patrón se ve en el gráfico de predicho contra observado, que la práctica y el código de la semana dibujan: a la derecha y arriba, las ventas observadas se despegan de la línea porque el árbol no tiene ninguna hoja por encima de 207.2 y los arrendatarios de ventas altas (el del local 52 vende 250.2; el del 458, 252.0) caen en hojas que promedian 100 o 147. Los dos que el árbol **sobre**estima (366 y 36) están en la hoja de 207.2 y venden 133 y 145: la hoja de diez locales es, otra vez, la menos confiable.
-
-¿Qué se hace con eso? No se arregla con más profundidad: la sección 3 ya mostró que los peldaños nuevos mejoran la construcción y no la prueba. Se hace un <span class="term">tratamiento aparte</span>: el modelo para la mayoría, una persona para los grandes. El árbol pronostica bien un local típico (sin los diez peores, el MAE baja a 17.1); un local que pueda albergar un arrendatario de ventas altas (oficinas, canon alto, tráfico alto) se evalúa a fondo, con visita y con el criterio de alguien que conozca la zona, porque el estudio no tiene suficientes locales así para que el árbol los aprenda. El 17.1 es un diagnóstico, no un desempeño: la cifra que se reporta sigue siendo 22.6.
-
-# De la hoja a la banda
-
-Ahora lo que la junta necesita: cuánto vendería el arrendatario de cada uno de los tres locales candidatos de Barranquilla, con su banda. La banda es la predicción del árbol de referencia ± su error típico en validación (22.6), y se entrega al lado de lo que dice la regla del sector:
-
-| Local | Ventas base (millones al mes) | Banda: ± 22.6 | Regla 8 × canon | Nota de extrapolación |
-|---|---|---|---|---|
-| Local 1 (oficinas, 95 m², canon 16.5) | **147.0** | [124.4, 169.7] | 132 | * Barranquilla no está en el estudio |
-| Local 2 (mixta, 160 m², canon 27) | **207.2** | [184.5, 229.8] | 216 | * Barranquilla no está en el estudio; canon 27 por encima del máximo del estudio (25); cae en la hoja más alta (n = 10): el árbol no puede decir más de 207.2 |
-| Local 3 (residencial, 70 m², canon 8) | **63.3** | [40.6, 85.9] | 64 | * Barranquilla no está en el estudio |
-
-Estas tres cifras son las **ventas base** del expediente: las que entran, con su banda, al VPN de la alternativa A de Meridiano, la compra del primer local en Barranquilla, en la semana 7 (cada millón mensual son 3 de VPN: la banda del local 1 va de 373 a 509 millones de VPN). Tres observaciones que van pegadas a la tabla, no en una nota al pie:
-
-- **Ningún local del estudio está en Barranquilla.** Las tres predicciones aplican una regla aprendida en seis ciudades a una séptima. Llevan asterisco, como la semana pasada.
-- **El local 2 está fuera del rango.** Su canon de mercado es 27 millones y el máximo del estudio es 25. El árbol responde igual, porque solo pregunta si el canon pasa de 14.15, pero lo manda a la hoja de diez locales, la del techo. 207.2 no es "lo que vendería un arrendatario ahí": es lo máximo que este árbol sabe decir. Si el arrendatario del local 2 fuera a vender 260, el árbol no podría verlo.
-- **La regla y el árbol no se contradicen.** En los tres locales, 8 × canon cae dentro de la banda del árbol. Para el local 3 son casi la misma cifra. Esa coincidencia es informativa: dos métodos distintos, una misma banda.
+Las bandas del caso —las ventas base de los tres locales candidatos de Barranquilla, su traducción a VPN y sus notas de extrapolación— se construyen en [la práctica de la semana 6](../practice/cocina.html) y son el insumo del VPN de la semana 7.
 
 # Recuadro opcional: el bosque y el tarifario
 
-Dos modelos más aparecen en el ranking y conviene saber qué son.
+Dos modelos más comparten la tabla con el árbol en cualquier evaluación seria de un pronóstico numérico, y conviene saber qué son.
 
 ::: {.callout-key}
-<div class="callout-title">La consultora B es un bosque</div>
-La cura conocida para la inestabilidad del árbol es la misma que en clasificación: entrenar quinientos árboles, cada uno con una muestra distinta de locales y un subconjunto distinto de preguntas, y **promediar** sus predicciones. Es un bosque aleatorio de regresión. Promediar muchos árboles toscos da una rampa en lugar de una escalera y reduce el ruido: por eso B tiene el mejor MAE de la tabla (17.9) y es la única que le gana a la regla. El precio es el de siempre: quinientos árboles no se leen. Cuando B decide, el árbol de profundidad 3 es su vocero: dice, con cuatro preguntas, cuál es la lógica general.
+<div class="callout-title">El bosque: muchos árboles toscos, promediados</div>
+La cura conocida para la inestabilidad del árbol es la misma que en clasificación: entrenar cientos de árboles, cada uno con una muestra distinta de los datos y un subconjunto distinto de las columnas, y **promediar** sus predicciones. Es el bosque aleatorio de regresión. Promediar muchas escaleras distintas produce una rampa suave y reduce el ruido: por eso el bosque suele tener el mejor error de la tabla. El precio es el de siempre: quinientos árboles no se leen. Cuando el bosque decide, un árbol legible hace de vocero: dice, con pocas preguntas, cuál es la lógica general. En el ranking del caso, la consultora B es un bosque.
 :::
 
 ::: {.callout-key}
-<div class="callout-title">La consultora A es un tarifario</div>
-A usa una ecuación lineal con cuatro variables: ventas = una constante + tanto por cada persona de tráfico + tanto por metro cuadrado − tanto por competidor + tanto por cada peso del ticket previsto. Es la lógica de un avalúo, la del tarifario de la semana 4: cada variable tiene un precio fijo y las ventas suben por una rampa, sin peldaños. Extrapola sin restricción (para el local 2 daría una cifra por encima del techo del árbol) y empata con la regla del sector (22.9 contra 22.4). Cuando la relación es suave, el tarifario compite; cuando hay perfiles distintos con reglas distintas, el árbol lo encuentra y el tarifario no.
+<div class="callout-title">El tarifario: la ecuación lineal</div>
+La alternativa clásica es una ecuación lineal: el target es una constante, más tanto por cada unidad de una variable, más tanto por cada unidad de otra. Es la lógica de un avalúo —cada atributo tiene un precio fijo—, y por eso la semana 4 la llamó el tarifario. Produce una rampa sin peldaños y extrapola sin freno: para un caso fuera del rango responde con la misma ecuación, sin techo. Cuando la relación es suave, el tarifario compite con el árbol; cuando hay perfiles distintos con reglas distintas, el árbol los encuentra y el tarifario los promedia. En el ranking del caso, la consultora A es un tarifario.
+:::
+
+::: {.callout-practice}
+<div class="callout-title">El caso de estudio de la semana (práctica opcional)</div>
+El árbol que predice las ventas del arrendatario, la escalera con locales del estudio, el ranking de modelos en pesos, los diez peores y las bandas de los tres locales candidatos de Barranquilla están en [la práctica de la semana 6](../practice/cocina.html): cada cifra del sobre con su celda de R. Además, [el laboratorio](../practice/week-06.html) —la práctica obligatoria— entrena el mismo árbol con controles y sin código, y con él se hace el task 6.
 :::
 
 ::: {.callout-connect}
 <div class="callout-title">En la sesión</div>
 - **El paper:** Mullainathan y Spiess (2017) preguntaron qué aporta el aprendizaje automático a la economía aplicada, con un ejemplo que es el nuestro a otra escala: predecir el valor de viviendas a partir de sus características, con una regresión, un árbol, un bosque y otros, todos juzgados fuera de muestra. Qué investigaron, con qué datos, qué encontraron y por qué un pronóstico de ventas se juzga por su error en pesos fuera de muestra y no por su ajuste.
-- **La aplicación:** el árbol de ventas de Meridiano leído en voz alta; el promedio de una hoja rehecho a mano, con los ocho locales del ejemplo y con la hoja real de diez locales de la que sale 207.2; el ranking en pesos con un error sembrado que hay que encontrar; los diez peores y el tratamiento aparte; las ventas base con banda; y un giro: el vendedor del local 2 sube el precio de compra y hay que decidir si la compra aguanta.
+- **La aplicación:** el árbol de ventas de Meridiano leído en voz alta; el promedio de una hoja rehecho a mano, con los ocho locales del ejemplo y con la hoja real de diez locales; el ranking en pesos con un error sembrado que hay que encontrar; los diez peores y el tratamiento aparte; las ventas base con banda; y un giro: el vendedor de uno de los locales sube el precio de compra y hay que decidir si la compra aguanta.
 - **El cierre:** la discusión del task 5. Cada equipo traduce una rama de su árbol en voz alta; ¿aguantó la raíz al cambiar la semilla?; qué sí se le dice a la junta.
 :::
 
@@ -453,28 +197,28 @@ A usa una ecuación lineal con cuatro variables: ventas = una constante + tanto 
 
 Piensa en un pronóstico que tu área entrega como una cifra: las ventas del trimestre, la demanda de un producto nuevo, el costo de un proyecto, el tiempo de entrega. ¿Alguien lo acompaña con su error típico, medido en casos que el método no vio? ¿Contra qué baseline se compara: contra la cifra del año pasado, contra la estimación rápida de un experto, contra nada? ¿Y qué pasa con los casos en los que el pronóstico se equivoca por mucho: se revisan aparte o se promedian con los demás? Llévalo pensado: es la pregunta de la próxima sesión para tu caso.
 
-**Para verlo en movimiento (opcional, en inglés).** [Linear Regression](https://mlu-explain.github.io/linear-regression/) —el tarifario de la consultora A, animado— y [Random Forest](https://mlu-explain.github.io/random-forest/) —el bosque de la B—, de Machine Learning University.
+**Para verlo en movimiento (opcional, en inglés).** [Linear Regression](https://mlu-explain.github.io/linear-regression/) —el tarifario, animado— y [Random Forest](https://mlu-explain.github.io/random-forest/) —el bosque—, de Machine Learning University.
 
 # Preguntas de comprensión
 
 <details class="pregunta">
 <summary>1. Un pronóstico de ventas reporta MAE 14 y RMSE 31. ¿Qué está pasando?</summary>
-Dos cosas que hay que mirar antes de creerle. La brecha entre 14 y 31 dice que la mayoría de los locales se predice con pocos millones de error y en unos pocos el error es muy grande: el cuadrado los infla. Antes de usar el "14 en promedio" hay que ver esos casos, que suelen tener algo en común (aquí, los arrendatarios de ventas altas en zona de oficinas), y decidir si se tratan aparte. Y la pregunta incómoda: ¿14 es el error en validación o en entrenamiento? El árbol de referencia obtiene 17.8 en los locales con los que se construyó y 22.6 en los que no vio. Un MAE sospechosamente bajo suele ser el de entrenamiento.
+Dos cosas que hay que mirar antes de creerle. La brecha entre 14 y 31 dice que la mayoría de los casos se predice con pocos millones de error y en unos pocos el error es muy grande: el cuadrado los infla. Antes de usar el "14 en promedio" hay que ver esos casos uno por uno, buscarles el patrón y decidir si se tratan aparte. Y la pregunta incómoda: ¿14 es el error en validación o en entrenamiento? El de entrenamiento siempre es menor —cada corte nuevo lo baja por construcción— y un MAE sospechosamente bajo suele ser el de entrenamiento presentado como desempeño.
 </details>
 
 <details class="pregunta">
-<summary>2. ¿Por qué el árbol no puede predecir 300 millones si el máximo del estudio es 259?</summary>
-Porque cada hoja predice el promedio de los locales que cayeron en ella, y ningún promedio supera al mayor de sus miembros. La hoja más alta del árbol de referencia promedia 207.2 con diez locales cuyos arrendatarios venden entre 159.7 y 259.0; esa es la cifra máxima que el árbol puede decir, bastante por debajo del máximo observado. El árbol no extrapola: un arrendatario que fuera a vender 300 recibiría 207.2, y el error quedaría entre los diez peores. Por eso el local 2, con un canon por encima del rango del estudio, lleva nota: 207.2 es el techo del árbol, no una medida del local.
+<summary>2. ¿Por qué un árbol de regresión no puede predecir por encima de su hoja más alta?</summary>
+Porque cada hoja predice el promedio de los casos que cayeron en ella, y ningún promedio supera al mayor de sus miembros. En el ejemplo de juguete, H vende 150 y recibe 140, el promedio de su hoja; un local con el doble de tráfico recibiría lo mismo. El árbol no extrapola: un caso fuera del rango de los datos de construcción cae en la hoja del borde y recibe su promedio, como si fuera un caso típico de ella. Por eso una predicción que cae en el tope del árbol se lee como "lo máximo que este árbol sabe decir" y lleva su nota de extrapolación.
 </details>
 
 <details class="pregunta">
-<summary>3. ¿Qué se hace con los diez peores?</summary>
-Primero se miran: diez de 120 locales concentran el 61.8 % del error cuadrático, en ocho el arrendatario vende mucho más de lo predicho, seis pasan de 150 millones y siete están en zona de oficinas. Luego se decide el tratamiento aparte: el modelo para la mayoría (sin los diez, el MAE baja a 17.1) y una persona para los grandes, porque el estudio no tiene suficientes locales de ventas altas para que el árbol los aprenda. Lo que no se hace es subir la profundidad hasta que desaparezcan (eso es memorizar) ni reportar el 17.1 como desempeño: la cifra que se reporta es 22.6, y el diagnóstico va al lado.
+<summary>3. Diez de cien casos concentran la mayor parte del error cuadrático. ¿Se sube la profundidad hasta que desaparezcan?</summary>
+No: los peldaños nuevos bajan el error de construcción, no el de los casos nuevos; hacerlos desaparecer a fuerza de profundidad es memorizar. Lo que se hace es mirar los diez, buscarles el patrón —suelen compartir un perfil que los datos no cubren bien— y decidir el tratamiento aparte: el modelo para la mayoría, otra cosa (una persona, una evaluación a fondo) para ese perfil. El error del lote sin los diez sirve como diagnóstico de cuánto pesan, pero no se reporta como desempeño: la cifra que se reporta es la del lote completo.
 </details>
 
 <details class="pregunta">
-<summary>4. ¿Qué banda le das a la junta para el local 1?</summary>
-Las ventas base del árbol de referencia con su error típico en validación: 147.0 millones al mes, entre 124.4 y 169.7. En VPN a cinco años, cada millón mensual son 3: una banda de 373 a 509 millones de VPN, ± 68 alrededor de 441. Al lado, la regla del sector (8 × 16.5 = 132), que cae dentro de la banda, y la nota de extrapolación: Barranquilla no está en el estudio. Sin la banda, la cifra no es un pronóstico; sin la nota, la banda no cuenta.
+<summary>4. En el caso de la práctica, el árbol de referencia predice 147.0 millones al mes para el local 1 de Barranquilla, con un error típico de 22.6 en validación. ¿Qué se le entrega a la junta?</summary>
+La banda, no la cifra: ventas base de 147.0, entre 124.4 y 169.7 millones al mes. Al lado, lo que dice la regla simple del sector (132, que cae dentro de la banda: los dos métodos no se contradicen) y la nota de extrapolación: ningún local del estudio está en Barranquilla. Y como el canon del contrato depende de las ventas, la banda se traduce a VPN con el factor del caso, que es la unidad en la que la junta decide. La cuenta completa, celda a celda, está en [la práctica de la semana 6](../practice/cocina.html).
 </details>
 
 # Lectura corta (opcional)

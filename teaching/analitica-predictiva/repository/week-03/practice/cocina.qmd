@@ -1,5 +1,5 @@
 ---
-title: "El código de la semana 3"
+title: "Práctica 3: el estudio de locales"
 subtitle: "Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 3 · Práctica opcional"
 lang: es
 webr:
@@ -7,11 +7,73 @@ webr:
 ---
 
 ::: {.callout-key}
-<div class="callout-title">Qué es esta página</div>
-El EDA de la semana 3, reproducido celda a celda sobre los 480 locales del estudio de locales: cada cifra sale aquí del código que la produce, y es la misma que trae el sobre sellado. La página es **opcional** —la teoría ya cuenta los seis hallazgos completos— y es, a la vez, **la referencia del task 3**: una cifra que reporte el agente no vale hasta que coincide con estas celdas o con el sobre. El panel **Environment**, en la esquina inferior derecha, muestra los objetos de R a medida que corres las celdas.
+<div class="callout-title">La idea central</div>
+Esta página es opcional y contiene el caso de estudio de la semana 3 completo: la historia del estudio de locales, el clasificador de columnas por el momento en que se conocen y los seis pasos del EDA, cada uno con su pregunta, su celda de R y su hallazgo. La teoría se entiende sin ella; el task 3 se apoya en ella: cada cifra sale aquí del código que la produce, es la misma del sobre sellado, y una cifra que reporte un agente no vale hasta que coincide con estas celdas o con el sobre. El panel **Environment**, en la esquina inferior derecha, muestra los objetos de R a medida que corres las celdas.
 :::
 
-**Cómo se usa:** corre las celdas de una en una, en orden, y lee cada salida antes de pasar a la siguiente; después cambia la variable, el tramo o el grupo y vuelve a correr: el código es corto a propósito. La primera celda corre sola cuando R termina de cargarse en el navegador —la primera visita tarda un poco—; si un botón no responde, espera unos segundos.
+# El caso: el estudio de locales
+
+La junta directiva de Meridiano evalúa la alternativa A de su encargo: comprar el primer local de la empresa en Barranquilla para arrendarlo, con tres locales candidatos sobre la mesa. Nadie en la junta conoce ese mercado, así que la gerencia de inversión compró un estudio: 480 locales comerciales comprados por gestoras inmobiliarias como Meridiano y arrendados a minoristas en seis ciudades del país —Bogotá, Medellín, Cali, Bucaramanga, Pereira y Cartagena; Barranquilla no está, a propósito—, cada uno con al menos tres años desde la firma del contrato y con el desenlace a la vista: si el contrato sigue vigente o el arrendatario cerró antes y dejó el local vacante (`estado_3a`), y cuánto vende el arrendatario (`ventas_mes`), la base del canon variable del contrato estándar (el 10 % de las ventas).
+
+La pregunta del EDA viene de la junta: **¿qué perfil de local, entre lo que se conoce antes de comprar, tiene arrendatarios que cierran menos y venden más?** El EDA no la responde: la prepara para los modelos de las semanas 4 a 6, con hallazgos que cualquiera puede verificar y con la lista de columnas que no se pueden usar.
+
+La base (`estudio_locales.csv`) llega con su diccionario de datos, y el diccionario trae la columna de la que depende toda la semana: el <span class="term">momento</span> en que se conoce cada variable respecto de la decisión de comprar. Doce columnas se conocen **antes de comprar**, visitando el local y el barrio o leyendo el plan de negocio que el arrendatario presenta al firmar; dos solo existen **después de arrendar**, cuando el contrato ya lleva tiempo corriendo; dos son los **targets**, lo que se quiere predecir; y queda el identificador. Antes de correr una sola celda, entrena el criterio con ocho de ellas.
+
+## ¿Esta columna sirve para evaluar un local que todavía no se compra?
+
+Ocho columnas del diccionario. Clasifica cada una según el momento en que se conoce respecto de la decisión de comprar.
+
+```{=html}
+<div class="widget-card" id="wg-momento">
+  <div class="widget-head">¿Antes de comprar, después de arrendar o target? · Ocho columnas del estudio</div>
+  <div class="widget-body">
+    <div class="widget-instr">Pregúntate una sola cosa: para un local candidato en Barranquilla, que todavía no se compra y no tiene contrato, ¿este dato existe hoy?</div>
+    <div id="mom-items"></div>
+    <div class="quiz-score" id="mom-score"></div>
+  </div>
+</div>
+<script>
+(function () {
+  const OPC = ["Antes de comprar", "Después de arrendar", "Target"];
+  const ITEMS = [
+    { t: "trafico_peatonal (personas por hora frente al local)", a: 0, fb: "Se mide parado frente al local candidato, antes de comprar. Sirve, y en la semana 5 será la raíz del árbol." },
+    { t: "calificacion_google (estrellas del negocio del arrendatario a los tres años)", a: 1, fb: "Solo existe cuando el negocio del arrendatario ya tiene clientes que lo califican. Para un local que aún no se arrienda no hay nada que consultar, aunque en la base separe (4.20 frente a 3.77)." },
+    { t: "estado_3a (el contrato sigue vigente o el arrendatario cerró)", a: 2, fb: "Es lo que queremos predecir. No es predictor de nada: es la respuesta." },
+    { t: "arriendo_mes (canon mensual de mercado, en millones de pesos)", a: 0, fb: "El canon de mercado se conoce al evaluar el local, antes de comprar. Sirve, y además entra en la cuenta del VPN de la semana 7." },
+    { t: "meses_atraso_arriendo (meses de canon en mora acumulados en tres años)", a: 1, fb: "La mora se acumula mientras el contrato corre; un local que todavía no se compra tiene cero por definición. Separa muy bien en la base (0.897 frente a 0.023) y no sirve para decidir: es la fuga." },
+    { t: "ventas_mes (ventas mensuales del arrendatario en el tercer año)", a: 2, fb: "El otro target: cuánto vende el arrendatario, que solo se observa con el contrato corriendo. Lo predice la semana 6, y no se usa para predecir el cierre." },
+    { t: "zona_comidas (1 si el local tiene zona de comidas preparadas)", a: 0, fb: "Se comprueba visitando el local candidato: la zona de comidas existe o no existe antes de comprar. Sirve." },
+    { t: "experiencia_arrendatario (años del arrendatario en comercio minorista)", a: 0, fb: "Figura en el plan de negocio que el arrendatario presenta al firmar. Sirve, y es un factor que Meridiano controla en parte: la gestora decide a quién le arrienda." }
+  ];
+  const cont = document.getElementById("mom-items");
+  let hechos = 0, aciertos = 0;
+  ITEMS.forEach((it, i) => {
+    const div = document.createElement("div"); div.className = "quiz-item";
+    const q = document.createElement("div"); q.className = "quiz-q"; q.textContent = (i + 1) + ". " + it.t; div.appendChild(q);
+    const opts = document.createElement("div"); opts.className = "quiz-opts";
+    const fb = document.createElement("div"); fb.className = "quiz-fb";
+    let listo = false;
+    OPC.forEach((o, j) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = o;
+      b.addEventListener("click", () => {
+        if (listo) return; listo = true; hechos++;
+        if (j === it.a) { b.classList.add("ok"); aciertos++; fb.textContent = "Correcto. " + it.fb; }
+        else { b.classList.add("bad"); opts.children[it.a].classList.add("ok"); fb.textContent = "Es " + OPC[it.a].toLowerCase() + ". " + it.fb; }
+        document.getElementById("mom-score").textContent = hechos === ITEMS.length ? ("Resultado: " + aciertos + " de " + ITEMS.length + ". Las dos de \"después de arrendar\" son las columnas prohibidas del task.") : ("Llevas " + hechos + " de " + ITEMS.length + ".");
+      });
+      opts.appendChild(b);
+    });
+    div.appendChild(opts); div.appendChild(fb); cont.appendChild(div);
+  });
+})();
+</script>
+```
+
+Qué cambió y qué significa: de las ocho columnas, cuatro se conocen antes de comprar (visitando el local o leyendo el plan de negocio del arrendatario), dos son lo que queremos predecir y dos solo existen cuando el contrato ya lleva tiempo corriendo. Esas dos últimas son las que un agente, si nadie lo frena, va a proponer como "predictor estrella", porque en la base son las que mejor separan.
+
+# El código de la semana 3
+
+Los seis pasos del EDA, celda a celda y en tu navegador: cada paso abre con su pregunta, corre su celda y cierra con el hallazgo y su "por qué importa", el formato que pide el task 3. Corre las celdas de una en una, en orden, y lee cada salida antes de pasar a la siguiente; después cambia la variable, el tramo o el grupo y vuelve a correr: el código es corto a propósito. La primera celda corre sola cuando R termina de cargarse en el navegador —la primera visita tarda un poco—; si un botón no responde, espera unos segundos.
 
 ```{webr-r}
 #| context: setup
@@ -566,7 +628,9 @@ round(tapply(cierre, tramo, mean), 3)             # 0.165, 0.221, 0.293: sube co
 table(tramo)                                      # 231, 208 y 41 locales
 ```
 
-**Hallazgo:** en zona residencial cierra el 28.9 % de los arrendatarios (n = 142); en zona de oficinas, el 10.6 % (n = 123). Con seis o más competidores a 500 metros cierra el 29.3 % (n = 41); con dos o menos, el 16.5 % (n = 231). **Por qué importa:** la zona y la competencia se conocen antes de comprar un local en Barranquilla, y separan el riesgo de cierre en más de dieciocho puntos. Son candidatas a entrar al árbol de la semana 5.
+**Hallazgo:** en zona residencial cierra el 28.9 % de los arrendatarios (tasa 0.289; 41 de 142); en zona de oficinas, el 10.6 % (0.106; 13 de 123). Con seis o más competidores a 500 metros cierra el 29.3 % (n = 41); con dos o menos, el 16.5 % (n = 231). **Por qué importa:** la zona y la competencia se conocen antes de comprar un local en Barranquilla, y separan el riesgo de cierre en más de dieciocho puntos. Son candidatas a entrar al árbol de la semana 5.
+
+La celda está hecha para cambiarse: reemplaza la primera línea por `round(tapply(cierre, datos$trafico_peatonal < 120, mean), 3)` y corre de nuevo. El tráfico peatonal bajo (menos de 120 personas por hora) es el corte que más separa de todos los que se conocen antes de comprar: tasa de cierre de 0.528 (n = 53) frente a 0.159 en el resto (n = 427), casi treinta y siete puntos. El cruce vuelve a aparecer en la demostración de la sesión.
 
 ## e) Un gráfico plano también es un hallazgo
 
@@ -597,6 +661,8 @@ round(cor(datos$calificacion_google, cierre), 3)  # -0.428: a peor calificación
 round(tapply(datos$calificacion_google, datos$estado_3a, mean), 2)   # 4.20 abiertos, 3.77 cerrados
 ```
 
-**Hallazgo:** con tres o más meses de mora en el canon cierra el 89.7 % de los arrendatarios (n = 97); con menos, el 2.3 % (n = 383). La calificación de Google también separa: 4.20 en los que siguen abiertos y 3.77 en los que cerraron. **Por qué importa:** ninguna de las dos sirve para un local que todavía no se compra. La mora se acumula *mientras* el contrato corre: el arrendatario que va a cerrar deja de pagar el canon meses antes; la variable no predice el cierre, lo acompaña. La calificación solo existe cuando el negocio ya tiene clientes. Para los tres locales candidatos de Barranquilla la mora es cero por definición y la calificación no existe.
+**Hallazgo:** con tres o más meses de mora en el canon cierra el 89.7 % de los arrendatarios (tasa 0.897, n = 97); con menos, el 2.3 % (0.023, n = 383): 87 de los 96 cierres tienen mora. La calificación de Google también separa (correlación de −0.428 con el cierre): 4.20 en los que siguen abiertos y 3.77 en los que cerraron. **Por qué importa:** ninguna de las dos sirve para un local que todavía no se compra. La mora se acumula *mientras* el contrato corre: el arrendatario que va a cerrar deja de pagar el canon meses antes; la variable no predice el cierre, lo acompaña. La calificación solo existe cuando el negocio ya tiene clientes. Para los tres locales candidatos de Barranquilla la mora es cero por definición y la calificación no existe.
+
+Estas dos columnas son la <span class="term">fuga</span> que define [la teoría de la semana](../theory/week-03.html): información del resultado que no existiría en el momento de decidir. El criterio que las atrapa —el <span class="term">momento de la decisión</span>— es el mismo del clasificador de la primera sección: no importa cuánto separen; importa si existen a tiempo.
 
 {{< include ../../_includes/panel_entorno.qmd >}}

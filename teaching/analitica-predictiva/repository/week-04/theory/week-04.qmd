@@ -6,30 +6,30 @@ lang: es
 
 ::: {.callout-key}
 <div class="callout-title">La idea central</div>
-Un modelo no se evalúa por cuántas veces acierta, sino por cuánto dinero le hace ganar o perder a la decisión, frente a lo que ya se hacía sin él. Esta semana se arma esa evaluación: un lote que el modelo no vio, un baseline que vencer, una matriz leída en pesos y un margen de error que separa una diferencia de un espejismo.
+Un modelo no se evalúa por cuántas veces acierta, sino por cuánto dinero le hace ganar o perder a la decisión, frente a lo que ya se hacía sin él. Esta página arma el aparato de esa evaluación: el examen fuera de muestra, los baselines que hay que vencer, la matriz de confusión y sus tres métricas, el umbral que fijan los costos, el error en pesos de un pronóstico numérico, el margen que separa una diferencia de un espejismo y el beneficio neto frente a no hacer nada. El caso de estudio de la semana —las dos consultoras que le ofrecen sus modelos a Meridiano— queda en la práctica opcional.
 :::
 
-**Tiempo de estudio:** 35 a 45 minutos. **Qué necesitas:** este navegador. Las dos partes interactivas ("Arma la matriz" y "La caja de costos") están en la página. Las celdas de R que reproducen cada cifra —con los 120 locales del lote y la hoja de costos de Meridiano en línea— están en [el código de la semana 4](../practice/cocina.html), una práctica opcional.
+**Tiempo de estudio:** 25 a 35 minutos de lectura, más unos 10 del clasificador de casillas. **Qué necesitas:** solo este navegador; esta página no corre código. El caso de la semana —las dos consultoras, la hoja de costos, los dos widgets para jugar y las celdas de R que validan cada cifra— vive en [la práctica de la semana 4](../practice/cocina.html), toma otros 25 a 35 minutos y es, además, la herramienta de trabajo del task 4.
 
-# Dos consultoras, dos facturas
+# Tres preguntas antes de comprar un modelo
 
-La gerencia de inversión de Meridiano compró el estudio de locales: 480 locales comerciales arrendados a minoristas en seis ciudades (lo exploraste en la semana 3). Para la alternativa A, la compra del primer local en Barranquilla, necesita un modelo que, con lo que se puede medir de un local y de su arrendatario **antes de comprar** (zona, área, canon, tráfico, competidores, ticket previsto, experiencia del arrendatario), responda dos cosas: si el arrendatario cerraría antes de tres años y cuánto vendería al mes.
+Esta semana no se construye ningún modelo: se evalúan modelos que ya existen. Es la situación más frecuente en la práctica gerencial —el modelo lo ofrece un proveedor, lo heredó el área o lo propone el equipo de datos— y es también el orden que este curso eligió a propósito: la evaluación llega antes que la construcción (semanas 5 y 6) porque el criterio para juzgar no depende del modelo, y fijarlo después de ver los resultados invita a elegir la medida que favorece el resultado propio.
 
-Dos firmas de analítica, las consultoras A y B, le ofrecen el suyo, cada una con su factura. Las dos propuestas traen una cifra en la portada: "más de 85 % de exactitud". La cifra pierde brillo con una cuenta sencilla: en el estudio cierra uno de cada cinco arrendatarios. Una regla que diga **ningún arrendatario cierra** acierta en cuatro de cada cinco casos, sin mirar un solo dato. También saca 80 %.
+Toda propuesta comercial de analítica llega con una cifra en la portada: "más de 85 % de exactitud", "nueve de cada diez aciertos". La cifra, sola, no dice nada. Para convertirla en una decisión de compra hacen falta tres preguntas, y esta página desarrolla el aparato que responde cada una:
 
-Así que la pregunta de esta semana no es cuál consultora acierta más. Es cuál, si alguna, le hace ganar dinero a Meridiano frente a decidir como hasta ahora.
+1. **¿Sobre qué casos se midió?** Si el modelo se calificó con los mismos datos con que se construyó, la cifra está inflada. Solo cuenta el desempeño <span class="term">fuera de muestra</span>: en casos que el modelo no vio.
+2. **¿Contra qué se compara?** Un 85 % impresiona hasta que se sabe qué saca una regla que no mira ningún dato, o la regla que la empresa ya usa gratis. Esa referencia es el <span class="term">baseline</span>.
+3. **¿Cuánto cuesta cada error?** Dos modelos con la misma exactitud pueden equivocarse en casillas distintas, y las casillas no cuestan lo mismo. La evaluación termina en pesos, no en porcentajes.
 
 # Qué hay dentro de las cajas
 
-¿Y qué es, exactamente, lo que venden las consultoras? Un <span class="term">modelo</span> es una regla, aprendida de los datos, que convierte lo que se sabe de un caso —las columnas— en una predicción. Eso venden las dos: una regla. Lo que cambia entre A y B es la forma de la regla.
+Antes del aparato, conviene saber qué clase de objeto se está evaluando. Un <span class="term">modelo</span> es una regla, aprendida de los datos, que convierte lo que se sabe de un caso —las columnas— en una predicción. Eso es lo que se compra o se hereda: una regla. Dos formas de regla cubren la mayoría de las propuestas comerciales.
 
-**La consultora A entrega una regresión: un tarifario.** Piensa en cómo la línea de avalúos comerciales de la propia Meridiano —la de los cupos de la semana 1— avalúa un apartamento. El avalúo funciona como una ecuación: arranca de una base, suma un aporte por cada metro cuadrado, suma un aporte por el estrato y resta un descuento por cada año de antigüedad. Eso es un <span class="term">tarifario</span>: la lista de cuánto aporta cada característica al precio. Una <span class="term">regresión</span> hace exactamente lo mismo con los datos: en lugar de fijar los aportes por experiencia, los aprende de los casos pasados. La consultora A la aplicó a los locales del estudio: aprendió cuánto aporta cada columna —el tráfico, el canon, el área— a lo que quiere predecir. La semana 6 retoma este tarifario para ponerlo a competir con los árboles.
+**La regresión es un tarifario.** Piensa en cómo se avalúa un apartamento. El avalúo funciona como una ecuación: arranca de una base, suma un aporte por cada metro cuadrado, suma un aporte por el estrato y resta un descuento por cada año de antigüedad. Eso es un <span class="term">tarifario</span>: la lista de cuánto aporta cada característica al resultado. Una <span class="term">regresión</span> hace exactamente lo mismo con los datos: en lugar de fijar los aportes por experiencia, los aprende de los casos pasados. Su marca es la legibilidad —el modelo completo cabe en unos pocos números que se leen como una tarifa— y su límite es la rigidez: el aporte del metro cuadrado es el mismo para todos los inmuebles, sin importar su estrato ni su edad.
 
-Para ver un tarifario aprendido, [el código de la semana 4](../practice/cocina.html) ajusta uno con ocho inmuebles inventados, como los que pasan por los avalúos de Meridiano. Es opcional, y sus **cifras son ilustrativas, de un ejemplo de juguete: no son el avalúo de nadie y no entran al sobre sellado**: sobre esos ocho casos, la regresión aprende que cada metro cuadrado suma ≈ 4.2 millones, cada salto de estrato ≈ 35 y cada año de antigüedad resta ≈ 3.1.
+Para ver un tarifario aprendido, [la práctica de la semana 4](../practice/cocina.html) ajusta uno con ocho inmuebles inventados. Es opcional, y sus **cifras son ilustrativas, de un ejemplo de juguete: no son el avalúo de nadie y no entran al sobre sellado**: sobre esos ocho casos, la regresión aprende que cada metro cuadrado suma ≈ 4.2 millones, cada salto de estrato ≈ 35 y cada año de antigüedad resta ≈ 3.1. Los tres signos salen como la intuición del negocio los esperaba.
 
-Los tres signos salen como la intuición del negocio los esperaba —el área y el estrato suman, la antigüedad resta— y el modelo completo cabe en cuatro números que se leen como una tarifa. Esa legibilidad es la marca de una regresión. Su rigidez también se ve: el aporte del metro cuadrado es el mismo para los ocho inmuebles, sin importar su estrato ni su edad.
-
-**La consultora B entrega un bosque aleatorio:** cientos de árboles de decisión, cada uno entrenado sobre una muestra distinta de los datos, que votan: el bosque responde con la mayoría o, cuando predice ventas, con el promedio. Es más flexible que un tarifario —puede capturar, por ejemplo, que el tráfico peatonal solo importe en las zonas de oficinas— y mucho menos legible: nadie lee cientos de árboles en voz alta. Los árboles los construirás tú en las semanas 5 y 6.
+**El bosque aleatorio es una votación de árboles.** Cientos de árboles de decisión, cada uno entrenado sobre una muestra distinta de los datos, que votan: el bosque responde con la mayoría o, cuando predice una cantidad, con el promedio. Es más flexible que un tarifario —puede capturar, por ejemplo, que una variable solo importe en cierto tipo de casos— y mucho menos legible: nadie lee cientos de árboles en voz alta. Los árboles los construirás tú en las semanas 5 y 6.
 
 ::: {.callout-key}
 <div class="callout-title">Lo que importa</div>
@@ -38,423 +38,176 @@ Esta semana las cajas no se abren: los modelos se evalúan por fuera, y en pesos
 
 # Solo cuenta lo que el modelo no vio
 
-Antes de entregar el estudio a las consultoras, la gerencia de inversión apartó al azar **120 de los 480 locales**. Las consultoras entrenaron con los otros 360. De los 120 apartados ya se conoce el desenlace: qué arrendatarios cerraron y cuánto vendieron. Ese es el <span class="term">lote de validación</span>: la única parte del estudio donde se puede comparar, local por local, la <span class="term">predicción</span> (lo que dijo el modelo) con lo <span class="term">observado</span> (lo que pasó).
+La primera pregunta —¿sobre qué casos se midió?— tiene una respuesta técnica con nombre propio. Antes de entrenar, se aparta al azar una fracción de los casos resueltos, de los que ya se conoce el desenlace. Con el resto —el <span class="term">lote de entrenamiento</span>— el modelo aprende su regla; con lo apartado —el <span class="term">lote de validación</span>— se califica: ahí, y solo ahí, se puede comparar caso por caso la <span class="term">predicción</span> (lo que dijo el modelo) con lo <span class="term">observado</span> (lo que pasó).
 
-¿Por qué no calificar con los 360 de entrenamiento? Porque un modelo calificado con los datos que usó para aprender siempre se ve mejor de lo que es. Es el estudiante que se aprendió de memoria los parciales viejos: saca 5.0 en el simulacro y el día del examen se descubre cuánto entendía. Un modelo que memorizó los 360 locales puede reproducirlos a la perfección y no saber nada de un local nuevo en Barranquilla. La semana 3 tuvo su versión de este engaño: un modelo que use `meses_atraso_arriendo`, una columna que solo existe después de arrendar, acierta casi todo en el estudio y no sirve para ningún local que todavía no se compra.
+¿Por qué no calificar con los datos de entrenamiento? Porque un modelo calificado con los datos que usó para aprender siempre se ve mejor de lo que es. Es el estudiante que se aprendió de memoria los parciales viejos: saca 5.0 en el simulacro y el día del examen se descubre cuánto entendía. Un modelo con suficiente flexibilidad puede reproducir a la perfección los casos que vio y no saber nada de un caso nuevo —memorizar en lugar de aprender, el fracaso más común del campo, que la semana 5 mostrará en acción con el *memorizador*—. Y la semana 3 tuvo su propia versión del engaño: la <span class="term">fuga</span>, una columna que solo existe después de decidir y que hace que el modelo acierte casi todo en el estudio y no sirva para ninguna decisión real.
 
-Dos reglas del lote:
+Dos reglas del lote de validación:
 
-- **Se usa una sola vez, al final.** Si se consulta mientras se ajusta el modelo, deja de ser un examen.
-- **Las consultoras no lo vieron.** Entregaron, para cada uno de los 120 locales, una probabilidad de cierre del arrendatario, una etiqueta ("cerró" o "abierto") y una predicción de ventas, a ciegas.
+- **Se usa una sola vez, al final.** Si se consulta mientras se ajusta el modelo, deja de ser un examen y vuelve a ser un simulacro.
+- **Quien construyó el modelo no lo vio.** Las predicciones sobre el lote se entregan a ciegas; solo así la comparación con lo observado es un examen de verdad.
 
-::: {.callout-practice}
-<div class="callout-title">El código de la semana 4 (opcional, y la herramienta del task)</div>
-Todas las tablas de esta página —las matrices, las métricas, el error en pesos, el beneficio neto y el ranking de modelos— reproducidas celda a celda en [el código de la semana 4](../practice/cocina.html), con los 120 locales y la hoja de costos en línea, listas para recalcular con otros costos.
-:::
+En el caso de la práctica, la gerencia de inversión de Meridiano apartó 120 de los 480 locales del estudio antes de entregarlo a las consultoras; [la práctica de la semana 4](../practice/cocina.html) cuenta esa historia completa.
 
 # Los baselines
 
-Un modelo no se califica en el vacío: se compara con lo que Meridiano haría sin él. Eso es el <span class="term">baseline</span>. Hay tres en esta semana:
+La segunda pregunta —¿contra qué se compara?— es la que más propuestas comerciales deja sin piso. Un modelo no se califica en el vacío: se compara con lo que la empresa haría sin él. Esa referencia es el <span class="term">baseline</span>, y conviene distinguir dos.
 
-| Baseline | Qué predice | Para qué sirve |
-|---|---|---|
-| <span class="term">Regla ingenua</span> "nadie cierra" | Que los 120 siguen abiertos | Es lo que pasa hoy: Meridiano compra sin filtro. Acierta 96 de 120 (exactitud 0.800) y no encuentra ningún cierre |
-| <span class="term">Regla vigente</span> del sector: ventas ≈ 8 × arriendo | Que un arrendatario vende unas ocho veces el canon mensual del local | Es la cuenta que en el sector se hace de memoria (dicha al revés: el canon no debe pasar de la octava parte de las ventas). No necesita consultora |
-| Mediana del entrenamiento: 93.1 millones | Que todos venden lo mismo | La regla ingenua de las ventas: sin información del local |
+La <span class="term">regla ingenua</span> no usa información del caso: predice lo mismo para todos. En clasificación, la clase mayoritaria ("a nadie le pasa"); en cantidades, el promedio o la mediana históricos. Es la regla del mínimo esfuerzo, y su papel es poner el piso: cualquier modelo que no la venza con claridad no aporta nada. La semana 1 ya la presentó en su versión de pronóstico: reservar el promedio.
+
+La <span class="term">regla vigente</span> es lo que la organización ya usa para decidir: el comité, el pronóstico del área comercial, la cuenta que el sector hace de memoria. Es el baseline exigente, por una razón económica: la empresa ya tiene esa regla gratis. Un modelo que cuesta —la factura, el mantenimiento, la dependencia de un proveedor— tiene que ganarle a la regla vigente por más que el ruido para justificar el cambio; empatarle es perder.
 
 ::: {.callout-key}
 <div class="callout-title">Lo que importa</div>
-Un modelo aporta solo lo que le gana al baseline. El baseline exigente no es la regla ingenua: es la regla que ya se usa. Si una consultora no le gana a "8 × arriendo" por más que el ruido, Meridiano ya tenía esa información gratis.
+Un modelo aporta solo lo que le gana al baseline. Y el baseline exigente no es la regla ingenua: es la regla que ya se usa. Si el modelo no le gana a la regla vigente, la empresa ya tenía esa información gratis.
 :::
 
-# La matriz leída en pesos
+Los tres baselines del caso —la regla ingenua del cierre, la cuenta que el sector inmobiliario hace de memoria y la mediana del entrenamiento— están, con sus cifras, en [la práctica de la semana 4](../practice/cocina.html).
 
-La gerencia de inversión usaría el modelo de cierre para **filtrar locales candidatos**. Si el modelo marca un local como riesgoso, se evalúa a fondo antes de decidir la compra (visita de un perito, estudio del corredor comercial, revisión del plan de negocio del arrendatario): cuesta 12 millones. Si lo marca como viable, pasa a la lista corta y puede comprarse. Cada predicción cae entonces en una de cuatro casillas, y cada casilla tiene un precio:
+# La matriz de confusión
 
-| | El modelo dijo "riesgoso" | El modelo dijo "viable" |
+Cuando el modelo predice una de dos clases —pasa o no pasa—, cada predicción cae en una de cuatro casillas, según qué dijo el modelo y qué ocurrió. Esa tabla de dos por dos es la <span class="term">matriz de confusión</span>, y es el punto de partida de toda la evaluación de un clasificador.
+
+Un ejemplo pequeño y neutro. El filtro de fraude de una pasarela de pagos revisó 20 transacciones, de las cuales 4 eran fraudulentas. Marcó 5 como sospechosas: 3 eran fraude de verdad y 2 no; de las 15 que dejó pasar, 1 era fraude. La matriz:
+
+| | El filtro dijo "fraude" | El filtro dijo "legítima" |
 |---|---|---|
-| **El arrendatario cerró** | **Aviso acertado** (TP). Se evalúa a fondo (12) y, si la evaluación confirma el riesgo, se evita un incumplimiento de 250 | **Cierre no detectado** (FN). Se compra un local cuyo arrendatario incumple y cierra: 250 millones entre vacancia, adecuación y lucro cesante |
-| **El arrendatario siguió abierto** | **Falsa alarma** (FP): un falso "riesgoso". Se evalúa a fondo un local que sí daba: 12. Si además se descarta sin evaluarlo, 90 millones de utilidad que se dejan de ganar | **Viable confirmado** (TN). Sin costo |
+| **Era fraude** | **Verdadero positivo** (TP): 3. El aviso acertó | **Falso negativo** (FN): 1. El fraude pasó sin aviso |
+| **Era legítima** | **Falso positivo** (FP): 2. Una falsa alarma | **Verdadero negativo** (TN): 14. Sin novedad |
 
-En los libros esta tabla se llama <span class="term">matriz de confusión</span>; aquí se lee en pesos. Las letras (TP, FP, FN, TN) vienen de *true/false positive/negative*, con "cierre" como clase positiva. Una regla de memoria: la primera palabra dice si el modelo **acertó** (verdadero o falso); la segunda, **qué predijo** (positivo, es decir "riesgoso", o negativo). Un falso positivo es "predijo riesgoso y falló".
+Las letras vienen de *true/false positive/negative*, con la clase que se busca —aquí, el fraude— como <span class="term">clase positiva</span>. Una regla de memoria para no perderse nunca: la primera palabra dice si el modelo **acertó** (verdadero o falso); la segunda, **qué predijo** (positivo o negativo). Un falso positivo es "predijo positivo y falló".
 
-Los dos errores no cuestan lo mismo: una falsa alarma cuesta una evaluación (12); un cierre no detectado cuesta un incumplimiento (250), unas veinte veces más. Por eso Meridiano evalúa en lugar de descartar: los 12 millones de la evaluación son el seguro contra los 90 de descartar a ciegas un local bueno.
+Cada casilla tiene, además, un precio, y los precios no son simétricos. Una falsa alarma cuesta la revisión manual de una transacción legítima: unos minutos de un analista y una molestia para el cliente. Un fraude no detectado cuesta el monto completo de la transacción. La matriz sin precios dice dónde se equivoca el modelo; la matriz con precios —que es como se leerá toda la semana— dice cuánto cuesta que se equivoque ahí.
 
-Practica con diez locales del lote, con la predicción de la consultora B. Haz clic en la casilla donde cae cada uno.
+## ¿En qué casilla cae?
+
+Clasifica ocho casos de cuatro negocios distintos. En cada uno, la clase positiva está entre paréntesis; la retroalimentación usa la regla de memoria.
 
 ```{=html}
-<style>
-#wg-matriz .cmx-caso { background: var(--fondo); border: 1px solid var(--borde); border-radius: var(--r-md); padding: .7em .9em; margin-bottom: .7em; }
-#wg-matriz .cmx-tags { display: flex; gap: .5em; flex-wrap: wrap; margin-top: .45em; }
-#wg-matriz .cmx-tag { padding: .2em .7em; border-radius: 999px; font-size: .86em; font-weight: 600; }
-#wg-matriz .t-modelo { background: var(--primario-claro); color: var(--primario-osc); }
-#wg-matriz .t-real { background: #e7e8ee; color: var(--tinta-suave); }
-#wg-matriz .cmx-wrap { display: grid; grid-template-columns: minmax(6.5em, auto) 1fr 1fr; gap: .4em; margin: .7em 0; max-width: 38em; }
-#wg-matriz .cmx-head { font-size: .8em; font-weight: 700; color: var(--tinta-suave); text-align: center; align-self: end; padding: .15em; }
-#wg-matriz .cmx-side { font-size: .8em; font-weight: 700; color: var(--tinta-suave); display: flex; align-items: center; justify-content: flex-end; text-align: right; padding-right: .3em; }
-#wg-matriz .cmx-cell { border: 2px solid var(--borde); border-radius: var(--r-md); background: var(--superficie); padding: .5em .4em; text-align: center; cursor: pointer; font-family: var(--font-sans); transition: transform .12s, border-color .12s, background .12s; }
-#wg-matriz .cmx-cell:hover { border-color: var(--primario); transform: translateY(-1px); }
-#wg-matriz .cmx-k { font-weight: 800; font-size: .95em; color: var(--primario-osc); }
-#wg-matriz .cmx-n { font-size: 1.35em; font-weight: 800; color: var(--primario-osc); font-family: var(--font-mono); }
-#wg-matriz .cmx-d { font-size: .74em; color: var(--tenue); }
-#wg-matriz .cmx-cell.flash-ok { border-color: var(--exito); background: #eafaf1; }
-#wg-matriz .cmx-cell.flash-bad { border-color: var(--aviso); background: #fdeee8; }
-#wg-matriz .cmx-msg { min-height: 1.5em; font-size: .9em; margin-top: .35em; color: var(--tinta-suave); }
-</style>
-<div class="widget-card" id="wg-matriz">
-  <div class="widget-head">Arma la matriz · Diez locales del lote, con la predicción de la consultora B</div>
+<div class="widget-card" id="wg-casillas">
+  <div class="widget-head">¿En qué casilla cae? · Ocho casos, cuatro negocios</div>
   <div class="widget-body">
-    <div class="widget-instr">Clase positiva: "riesgoso" (el modelo predice que el arrendatario cierra). Para cada local se muestra lo que dijo B y lo que pasó a los tres años. Primera palabra: ¿acertó? Segunda: ¿qué predijo?</div>
-    <div class="cmx-caso" id="cmx-caso">
-      <b id="cmx-titulo">Local 1 de 10</b>
-      <div class="cmx-tags"><span class="cmx-tag t-modelo" id="cmx-dijo"></span><span class="cmx-tag t-real" id="cmx-fue"></span></div>
-    </div>
-    <div class="cmx-wrap">
-      <div></div>
-      <div class="cmx-head">El modelo dijo:<br>riesgoso</div>
-      <div class="cmx-head">El modelo dijo:<br>viable</div>
-      <div class="cmx-side">El arrendatario<br>cerró</div>
-      <button type="button" class="cmx-cell" data-k="TP"><div class="cmx-k">TP</div><div class="cmx-n" id="cmx-tp">0</div><div class="cmx-d">aviso acertado</div></button>
-      <button type="button" class="cmx-cell" data-k="FN"><div class="cmx-k">FN</div><div class="cmx-n" id="cmx-fn">0</div><div class="cmx-d">cierre no detectado</div></button>
-      <div class="cmx-side">El arrendatario<br>siguió abierto</div>
-      <button type="button" class="cmx-cell" data-k="FP"><div class="cmx-k">FP</div><div class="cmx-n" id="cmx-fp">0</div><div class="cmx-d">falsa alarma</div></button>
-      <button type="button" class="cmx-cell" data-k="TN"><div class="cmx-k">TN</div><div class="cmx-n" id="cmx-tn">0</div><div class="cmx-d">viable confirmado</div></button>
-    </div>
-    <div class="cmx-msg" id="cmx-msg">¿En qué casilla cae este local? Haz clic en la casilla.</div>
-    <div class="widget-stats" id="cmx-mets" style="display:none;">
-      <div class="widget-stat"><div class="k">Exactitud = (3 + 4) / 10</div><div class="v">0.70</div></div>
-      <div class="widget-stat"><div class="k">Precisión = 3 / (3 + 2)</div><div class="v">0.60</div></div>
-      <div class="widget-stat ok"><div class="k">Sensibilidad = 3 / (3 + 1)</div><div class="v">0.75</div></div>
-      <div class="widget-stat warn"><div class="k">"Nadie cierra" en estos diez</div><div class="v">0.60</div></div>
-    </div>
-    <div class="widget-note" id="cmx-nota" style="display:none;">La lectura en pesos. De <b>5 avisos, 2 fueron falsas alarmas</b> (precisión 0.60): dos evaluaciones de 12 millones sobre locales que sí daban. <b>Atrapó 3 de los 4 arrendatarios que cerraron</b> (sensibilidad 0.75); el que se le escapó, el local 71, habría sido un incumplimiento de 250 millones. ¿Y la exactitud de 0.70? "Nadie cierra" saca 0.60 en estos diez sin mirar nada: el modelo aporta, pero la matriz muestra <em>dónde</em> y <em>cuánto cuesta</em> cada error.</div>
-    <div style="margin-top:0.6em;"><button type="button" class="btn-widget btn-widget-ghost" id="cmx-reset">Reiniciar</button></div>
+    <div class="widget-instr">Primera palabra: ¿el modelo <b>acertó</b> (verdadero) o <b>falló</b> (falso)? Segunda: ¿qué <b>predijo</b> (positivo o negativo)? La clase positiva de cada caso va entre paréntesis.</div>
+    <div id="cas-items"></div>
+    <div class="quiz-score" id="cas-score"></div>
   </div>
 </div>
 <script>
 (function () {
-  const card = document.getElementById("wg-matriz");
-  if (!card) return;
-  // [local, lo que dijo B, lo que pasó, casilla]
-  const CASOS = [
-    [21, "riesgoso", "siguió abierto", "FP"], [22, "viable", "siguió abierto", "TN"],
-    [26, "viable", "siguió abierto", "TN"], [41, "riesgoso", "siguió abierto", "FP"],
-    [48, "riesgoso", "cerró", "TP"], [50, "riesgoso", "cerró", "TP"],
-    [53, "viable", "siguió abierto", "TN"], [71, "viable", "cerró", "FN"],
-    [75, "viable", "siguió abierto", "TN"], [84, "riesgoso", "cerró", "TP"]
+  const ITEMS = [
+    { t: "El filtro de correo manda un mensaje a la carpeta de spam; era el estado de cuenta del banco. (Clase positiva: spam.)", a: 1, fb: "El filtro predijo positivo (spam) y falló: una falsa alarma que le esconde un correo importante al usuario." },
+    { t: "El sistema de alertas de una flota no marca un camión; el camión se vara esa misma semana. (Clase positiva: la falla.)", a: 2, fb: "Predijo negativo (sin falla) y falló. Es el error que no se ve en ningún tablero hasta que cuesta." },
+    { t: "El modelo de crédito predice que un solicitante pagará, y el solicitante paga todas sus cuotas. (Clase positiva: el incumplimiento.)", a: 3, fb: "Predijo negativo (no incumple) y acertó. Que aprobar un crédito sea una predicción negativa depende de cuál sea la clase positiva: por eso se declara siempre." },
+    { t: "La prueba rápida de una enfermedad da positivo y la prueba confirmatoria lo confirma. (Clase positiva: la enfermedad.)", a: 0, fb: "Predijo positivo y acertó: el aviso disparó la confirmación a tiempo." },
+    { t: "El detector de fraude deja pasar una transacción que resultó fraudulenta. (Clase positiva: el fraude.)", a: 2, fb: "Predijo negativo (legítima) y falló: el fraude del ejemplo de arriba, el que cuesta el monto completo." },
+    { t: "El control de calidad aparta una pieza por defectuosa; la pieza funcionaba bien. (Clase positiva: el defecto.)", a: 1, fb: "Predijo positivo (defecto) y falló: una pieza buena que se reinspecciona o se descarta." },
+    { t: "El modelo marca a un estudiante en riesgo de desertar y el estudiante abandona al semestre siguiente. (Clase positiva: la deserción.)", a: 0, fb: "Predijo positivo y acertó. Si el aviso disparó una tutoría que no alcanzó, el acierto del modelo no bastó: esa distancia entre encontrar y evitar reaparece abajo, en el beneficio neto." },
+    { t: "El filtro deja un correo legítimo en la bandeja de entrada. (Clase positiva: spam.)", a: 3, fb: "Predijo negativo (no es spam) y acertó. La casilla más llena en casi todos los problemas reales: la clase positiva suele ser la rara." }
   ];
-  const NOMBRE = { TP: "aviso acertado", FP: "falsa alarma", FN: "cierre no detectado", TN: "viable confirmado" };
-  let i = 0, cnt = { TP: 0, FN: 0, FP: 0, TN: 0 };
-  const celdas = card.querySelectorAll(".cmx-cell");
-  function muestra() {
-    if (i < CASOS.length) {
-      document.getElementById("cmx-titulo").textContent = "Local " + (i + 1) + " de " + CASOS.length + " (local " + CASOS[i][0] + " del lote)";
-      document.getElementById("cmx-dijo").textContent = "La consultora B dijo: " + CASOS[i][1];
-      document.getElementById("cmx-fue").textContent = "A los tres años: " + CASOS[i][2];
-    } else {
-      document.getElementById("cmx-titulo").textContent = "Matriz completa";
-      document.getElementById("cmx-dijo").textContent = "Avisos acertados 3 · falsas alarmas 2";
-      document.getElementById("cmx-fue").textContent = "Cierres no detectados 1 · viables confirmados 4";
-      document.getElementById("cmx-msg").textContent = "Con la matriz llena, las métricas salen solas:";
-      document.getElementById("cmx-mets").style.display = "flex";
-      document.getElementById("cmx-nota").style.display = "block";
-    }
-  }
-  function limpia(el) { setTimeout(function () { el.classList.remove("flash-ok", "flash-bad"); }, 550); }
-  celdas.forEach(function (c) {
-    c.addEventListener("click", function () {
-      if (i >= CASOS.length) return;
-      const k = c.getAttribute("data-k");
-      if (k === CASOS[i][3]) {
-        cnt[k]++; c.classList.add("flash-ok"); limpia(c);
-        document.getElementById("cmx-" + k.toLowerCase()).textContent = cnt[k];
-        document.getElementById("cmx-msg").textContent = "Correcto: " + (k[0] === "T" ? "el modelo acertó" : "el modelo falló") + " y había predicho " + (k[1] === "P" ? "riesgoso (positivo)" : "viable (negativo)") + ": " + k + ", " + NOMBRE[k] + ".";
-        i++; muestra();
-      } else {
-        c.classList.add("flash-bad"); limpia(c);
-        document.getElementById("cmx-msg").textContent = "Ahí no. Primera palabra: ¿acertó o falló? Segunda: ¿qué predijo el modelo? Intenta de nuevo.";
-      }
+  const OPC = ["Verdadero positivo (TP)", "Falso positivo (FP)", "Falso negativo (FN)", "Verdadero negativo (TN)"];
+  const cont = document.getElementById("cas-items");
+  let hechos = 0, aciertos = 0;
+  ITEMS.forEach((it, i) => {
+    const div = document.createElement("div"); div.className = "quiz-item";
+    const q = document.createElement("div"); q.className = "quiz-q"; q.textContent = (i + 1) + ". " + it.t; div.appendChild(q);
+    const opts = document.createElement("div"); opts.className = "quiz-opts";
+    const fb = document.createElement("div"); fb.className = "quiz-fb";
+    let listo = false;
+    OPC.forEach((o, j) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = o;
+      b.addEventListener("click", () => {
+        if (listo) return; listo = true; hechos++;
+        if (j === it.a) { b.classList.add("ok"); aciertos++; fb.textContent = "Correcto. " + it.fb; }
+        else { b.classList.add("bad"); opts.children[it.a].classList.add("ok"); fb.textContent = "Es " + OPC[it.a].toLowerCase() + ". " + it.fb; }
+        document.getElementById("cas-score").textContent = hechos === ITEMS.length ? `Resultado: ${aciertos} de ${ITEMS.length}.` : `Llevas ${hechos} de ${ITEMS.length}.`;
+      });
+      opts.appendChild(b);
     });
+    div.appendChild(opts); div.appendChild(fb); cont.appendChild(div);
   });
-  document.getElementById("cmx-reset").addEventListener("click", function () {
-    i = 0; cnt = { TP: 0, FN: 0, FP: 0, TN: 0 };
-    ["tp", "fn", "fp", "tn"].forEach(function (s) { document.getElementById("cmx-" + s).textContent = "0"; });
-    document.getElementById("cmx-mets").style.display = "none";
-    document.getElementById("cmx-nota").style.display = "none";
-    document.getElementById("cmx-msg").textContent = "¿En qué casilla cae este local? Haz clic en la casilla.";
-    muestra();
-  });
-  muestra();
 })();
 </script>
 ```
-
-Ahora con los 120 locales y las dos consultoras. A dio 13 avisos: 10 acertados y 3 falsas alarmas; se le escaparon 14 cierres y confirmó 93 viables. B dio 25 avisos: 12 acertados y 13 falsas alarmas; se le escaparon 12 y confirmó 83. "Nadie cierra" no dio avisos: se le escaparon los 24 cierres y confirmó los 96 que siguieron abiertos.
 
 # Tres métricas, tres preguntas
 
-De la matriz salen tres resúmenes. Cada uno responde una pregunta distinta, y conviene hacer la pregunta en lenguaje de negocio antes de mirar el número:
+De la matriz salen tres resúmenes. Cada uno responde una pregunta distinta, y conviene hacer la pregunta en lenguaje de negocio antes de mirar el número. Con el filtro de fraude del ejemplo:
 
-| Métrica | La pregunta | La cuenta | Nadie cierra | A | B |
-|---|---|---|---|---|---|
-| <span class="term">Exactitud</span> | De los 120, ¿cuántas veces acertó? | (TP + TN) ÷ 120 | 0.800 | 0.858 | 0.792 |
-| <span class="term">Precisión</span> | De los avisos, ¿cuántos cerraron de verdad? | TP ÷ (TP + FP) | sin avisos | 0.769 | 0.480 |
-| <span class="term">Sensibilidad</span> | De los 24 que cerraron, ¿cuántos atrapó? | TP ÷ (TP + FN) | 0.000 | 0.417 | 0.500 |
+| Métrica | La pregunta | La cuenta | En el ejemplo |
+|---|---|---|---|
+| <span class="term">Exactitud</span> | De todos los casos, ¿cuántas veces acertó? | (TP + TN) ÷ total | (3 + 14) ÷ 20 = 0.85 |
+| <span class="term">Precisión</span> | De los avisos, ¿cuántos eran de verdad? | TP ÷ (TP + FP) | 3 ÷ 5 = 0.60 |
+| <span class="term">Sensibilidad</span> | De los casos que pasaron, ¿cuántos atrapó? | TP ÷ (TP + FN) | 3 ÷ 4 = 0.75 |
 
-Tres lecturas:
+Tres lecturas que valen para cualquier clasificador:
 
-1. **La trampa de la exactitud.** Cuando una clase es mucho más frecuente que la otra (<span class="term">clases desbalanceadas</span>: aquí cierra el 20 %), la exactitud se infla sola. "Nadie cierra" saca 0.800 sin información. B, con 0.792, queda *por debajo* de no hacer nada y, sin embargo, encuentra 12 de los 24 cierres. El ejemplo clásico es el fraude: si el 2 % de las transacciones son fraude, "nada es fraude" alcanza 98 % de exactitud y no detecta ninguno.
-2. **Cada métrica premia a una consultora distinta.** A gana en exactitud y en precisión: su lista es corta y limpia, 10 de 13 avisos acertaron. B gana en sensibilidad: atrapa la mitad de los cierres, a cambio de 13 falsas alarmas.
-3. **Cuál importa es una decisión de negocio.** Depende de qué error cuesta más, y eso no lo sabe el algoritmo. En crédito, aprobar a quien no paga es caro y se vigila la precisión; en fraude, en diagnóstico y al elegir un local, dejar pasar el caso es lo caro y se vigila la sensibilidad. Las secciones que siguen ponen los precios.
+1. **La trampa de la exactitud.** En el ejemplo, una regla que diga "ninguna transacción es fraude" acierta 16 de 20: 0.80 de exactitud sin mirar un solo dato, a cinco centésimas del filtro. Cuando una clase es mucho más frecuente que la otra (<span class="term">clases desbalanceadas</span>), la exactitud se infla sola; y la clase que importa suele ser la rara. El caso extremo lo muestra mejor: si el 2 % de las transacciones son fraude, "nada es fraude" alcanza 98 % de exactitud y no detecta ninguno.
+2. **Precisión y sensibilidad tiran en direcciones opuestas.** Un modelo prudente, que avisa poco, tiende a tener una lista corta y limpia (precisión alta) que deja escapar casos (sensibilidad baja); un modelo que avisa mucho atrapa más casos a cambio de más falsas alarmas. Dos modelos sobre los mismos datos pueden ganar cada uno una métrica distinta, y la exactitud no desempata: resume las cuatro casillas con los precios equivocados —todos iguales—.
+3. **Cuál métrica importa es una decisión de negocio.** Depende de qué error cuesta más, y eso no lo sabe el algoritmo. En crédito, aprobar a quien no paga es lo caro y se vigila la precisión de los "sí"; en fraude, en diagnóstico y en seguridad industrial, dejar pasar el caso es lo caro y se vigila la sensibilidad. Las dos secciones que siguen convierten ese juicio en números.
 
-# El umbral y el cupo
+# El umbral: la etiqueta también se decide
 
-Las consultoras no entregan un "sí" o un "no": entregan una **probabilidad** de cierre para cada local. La etiqueta sale de un <span class="term">umbral</span>: se marca riesgoso a quien lo supere. A marca cierre desde 0.5; B, desde 0.3. Esos cortes los eligieron las consultoras, no Meridiano, y son parte de por qué la lista de B es más larga.
+Los clasificadores serios no entregan un "sí" o un "no": entregan una **probabilidad** por caso. La etiqueta sale de un <span class="term">umbral</span>: se marca positivo a quien lo supere. Ese corte no es una propiedad del modelo; es una decisión, y muchas veces la toma —sin que nadie se la pida— quien construyó el modelo.
 
-El umbral es una decisión, y se decide con los costos. Vale la pena evaluar un local cuando lo que se espera evitar supera lo que cuesta evaluar: la probabilidad de cierre, por la fracción de incumplimientos que el aviso evita (la <span class="term">efectividad</span> *u*), por la pérdida evitada *V*, tiene que superar el costo de evaluar *c*. Despejando:
+El umbral correcto sale de los costos. Avisar dispara una acción que cuesta *c* (revisar la transacción, evaluar el caso a fondo); si el caso era positivo, esa acción evita una pérdida *V*, pero no siempre: solo una fracción *u* de las veces —la <span class="term">efectividad</span> de la acción—. Vale la pena avisar cuando lo que se espera evitar supera lo que cuesta actuar: *p* × *u* × *V* ≥ *c*. Despejando:
 
-> **p\* = c ÷ (u × V)**: con evaluar a 12, efectividad de 0.5 y pérdida de 250, p\* = 12 ÷ (0.5 × 250) = **0.096**. Con efectividad de 0.25, p\* = **0.192**.
+> **p\* = c ÷ (u × V).** Por encima de esa probabilidad conviene avisar; por debajo, no.
 
-La lectura: como evaluar es barato y comprar un local cuyo arrendatario cierra es muy costoso, conviene evaluar cualquier local con más de un 10 % de riesgo. Es la misma lógica del cuantil crítico de la semana 1, cuando se decidía cuántos cupos de avalúo reservar: se actúa mientras lo que se gana por actuar, pesado por su probabilidad, supere lo que cuesta. Con ese umbral las listas de las consultoras serían bastante más largas que con sus cortes de 0.5 y 0.3; la caja de costos de la sección 10 lo muestra, y la celda del umbral en el código de la semana lo calcula.
+Es la misma lógica del cuantil crítico de la semana 1: se actúa mientras lo que se gana por actuar, pesado por su probabilidad, supere lo que cuesta. Cuando la acción es barata y la pérdida evitable es grande, p\* queda bajo —conviene avisar ante riesgos pequeños— y la lista de avisos se alarga; cuando actuar es caro, p\* sube y la lista se encoge. Un umbral que no sale de esta cuenta es un supuesto escondido del proveedor.
 
-**El cupo de evaluación.** A veces el umbral no manda: manda la capacidad. Si la gerencia de inversión solo puede evaluar a fondo tres locales este semestre, la pregunta no es "¿cuáles superan p\*?" sino "¿cuáles son los tres más riesgosos?". Se ordena por probabilidad y se toman los tres primeros. Con un cupo, lo que importa del modelo es que **ordene bien**, más que dónde ponga su corte. En la semana 5 harás exactamente esto con los tres locales candidatos de Barranquilla.
+**El cupo.** A veces el umbral no manda: manda la capacidad. Si el equipo solo puede revisar tres casos este mes, la pregunta no es "¿cuáles superan p\*?" sino "¿cuáles son los tres más riesgosos?". Se ordena por probabilidad y se toman los primeros. Con un cupo, lo que importa del modelo es que **ordene bien**, más que dónde ponga su corte; en la semana 5 usarás exactamente esa lectura.
 
 # El error en pesos
 
-Para las ventas no hay acierto o error: hay una distancia. Si la consultora dijo 118.4 millones y el arrendatario vendió 84.9, se equivocó por 33.5. Dos formas de promediar esas distancias sobre los 120 locales:
+Cuando lo que se predice es una cantidad —ventas, demanda, un precio—, no hay acierto o error: hay una distancia. Si el pronóstico dijo 120 y se observaron 90, se equivocó por 30. Dos formas de promediar esas distancias sobre el lote de validación:
 
-- <span class="term">MAE</span> (error absoluto medio): el promedio de las distancias, sin signo. Se lee "en promedio se equivoca por tantos millones al mes". Está en la unidad del negocio.
-- <span class="term">RMSE</span> (raíz del error cuadrático medio): se eleva cada distancia al cuadrado antes de promediar y se saca la raíz. Los errores grandes pesan mucho más. Siempre RMSE ≥ MAE, y la **brecha** entre los dos delata errores grandes ocasionales.
+- El <span class="term">MAE</span> (error absoluto medio) promedia las distancias sin signo. Se lee en la unidad del negocio: "en promedio se equivoca por tantos millones al mes". Es la medida que una junta entiende sin traducción.
+- El <span class="term">RMSE</span> (raíz del error cuadrático medio) eleva cada distancia al cuadrado antes de promediar y saca la raíz: los errores grandes pesan mucho más. Siempre RMSE ≥ MAE, y la **brecha** entre los dos delata errores grandes ocasionales: un pronóstico puede equivocarse poco en promedio y fallar por mucho justo en los casos que más importan.
 
-| Predicción de ventas | MAE | RMSE |
-|---|---|---|
-| Mediana del entrenamiento (93.1 para todos) | 31.1 | 43.9 |
-| Regla del sector: 8 × arriendo | 22.4 | 30.0 |
-| Consultora A | 22.9 | 30.6 |
-| Consultora B | 17.9 | 25.9 |
+La traducción final es siempre a pesos de la decisión. Un error promedio de tantos millones al mes vale poco como cifra suelta; multiplicado por lo que cada millón mueve en la decisión —un margen, un valor presente—, se vuelve el precio de confiar en ese pronóstico. En el caso de la práctica, esa traducción convierte el MAE de cada consultora en millones de valor presente por local.
 
-La lectura en pesos: para Meridiano, cada millón mensual de ventas del arrendatario mueve el VPN a cinco años en **3 millones** (el canon es el 10 % de las ventas; la plantilla completa llega en la semana 7). El MAE de B, 17.9 millones al mes, equivale entonces a unos **54 millones** de VPN de error típico por local, y con ese error se evalúa una compra de 700 millones. Y la brecha importa: en todas las filas el RMSE queda bastante por encima del MAE, porque unos pocos arrendatarios (los que venden más de 200 millones) se les escapan a todos por más de cien.
+# El margen: ¿la diferencia es real?
 
-# ¿Le gana al baseline por más que el ruido?
-
-B tiene el MAE más bajo. ¿Es suficiente para decir que le gana a la regla del sector? Todavía no. El lote tiene 120 locales; otro lote de 120, sacado al azar del mismo estudio, daría otro MAE. Por eso cada MAE se reporta con un <span class="term">margen</span>: dos errores estándar, que es lo que suele moverse la cifra de un lote a otro.
-
-| Predicción de ventas | MAE | Margen (2 EE) |
-|---|---|---|
-| Mediana del entrenamiento | 31.1 | ± 5.7 |
-| Regla del sector: 8 × arriendo | 22.4 | ± 3.7 |
-| Consultora A | 22.9 | ± 3.7 |
-| Consultora B | 17.9 | ± 3.4 |
+Toda métrica calculada sobre un lote finito trae ruido muestral: otro lote del mismo tamaño, sacado al azar de los mismos datos, daría otra cifra. Por eso una métrica honesta se reporta con su <span class="term">margen</span>: dos errores estándar, que es lo que suele moverse la cifra de un lote a otro. Y de ahí sale la regla de lectura más importante de la semana:
 
 ::: {.callout-key}
 <div class="callout-title">Lo que importa</div>
-Una diferencia menor que el margen no es una diferencia. A (22.9) y la regla (22.4) están a medio millón, con márgenes de 3.7: lo mismo. Eso se llama <span class="term">empate técnico</span>.
+Una diferencia menor que el margen no es una diferencia. Dos modelos cuyos errores quedan a menos de un margen de distancia están en <span class="term">empate técnico</span>: con estos datos no se puede afirmar que uno sea mejor que el otro.
 :::
 
-Hay una forma mejor de comparar, porque los dos pronósticos se equivocan sobre **los mismos locales**: la <span class="term">comparación pareada</span>. Para cada local, al error de la regla se le resta el error de la consultora; si la consultora es mejor, la diferencia es positiva. Luego se mira el promedio de esas 120 diferencias con su margen. Como el ruido que los dos comparten se cancela, el margen suele ser más angosto que el de los MAE sueltos.
+Cuando dos pronósticos se midieron sobre **los mismos casos**, hay una comparación mejor que mirar los dos márgenes sueltos: la <span class="term">comparación pareada</span>. Para cada caso se resta el error de uno del error del otro, y se mira el promedio de esas diferencias con su propio margen. Como el ruido que los dos comparten —los casos difíciles lo son para ambos— se cancela en la resta, el margen pareado suele ser más angosto: detecta diferencias reales que los márgenes sueltos no alcanzan a separar. Si el margen pareado cruza el cero, empate técnico; si queda entero de un lado, hay un ganador por más que el ruido.
 
-- **Regla menos A: −0.57 ± 3.97.** El margen cruza el cero: A no le gana a "8 × arriendo". Empate técnico.
-- **Regla menos B: 4.44 ± 2.76.** Todo el margen queda a la derecha del cero: B le gana a la regla por unos 4.4 millones al mes por local, más que el ruido.
+El mismo razonamiento aplica a las métricas de clasificación: una exactitud calculada sobre cien o doscientos casos trae un margen de varios puntos porcentuales, y una ventaja de cinco puntos puede no ser nada. Otra razón para no decidir con la exactitud.
 
-La misma lógica aplica a la exactitud: con 120 locales, una exactitud de 0.858 tiene un margen de seis o siete puntos porcentuales (el código de la semana lo calcula), así que la ventaja de A sobre "nadie cierra" en exactitud tampoco es nítida. Otra razón para evaluar en pesos y no en porcentaje de aciertos.
+# El beneficio neto frente a no hacer nada
 
-# Beneficio neto frente a no hacer nada
+Las piezas anteriores se juntan en una sola cifra: cuánto dinero deja usar el modelo, comparado con no usar ninguno. La cuenta tiene tres ingredientes, todos de la hoja de costos del negocio y ninguno del algoritmo: lo que cuesta actuar sobre un aviso (*c*), la pérdida que un caso positivo causa si nadie lo detecta (*V*) y la efectividad de la acción (*u*), porque encontrar un caso no es evitarlo: el aviso dispara una acción, y la acción evita la pérdida solo una fracción *u* de las veces.
 
-Ahora las casillas de cierre en pesos. Cada aviso cuesta una evaluación (12 millones), acierte o no. Cada cierre encontrado evita, con efectividad *u*, un incumplimiento de 250. Y "no hacer nada" (comprar sin filtro, la regla ingenua) cuesta cero y no encuentra nada: es el baseline con el que se compara todo.
+> **beneficio neto = casos encontrados × u × V − avisos × c.** Cada aviso cuesta *c*, acierte o no; cada caso encontrado evita, en promedio, *u* × *V*. Y el baseline de esta cuenta es **no hacer nada**: cero avisos, cero costo, beneficio exactamente cero.
 
-**Paso 1. El costo de cada lista.** A dio 13 avisos: 13 × 12 = **156** millones. B dio 25: **300** millones.
+Tres propiedades de la cuenta que conviene tener a la vista:
 
-**Paso 2. El costo por cierre encontrado.** Como cada aviso cuesta lo mismo, encuentre o no, el costo por cierre encontrado es 12 ÷ precisión: A, 156 ÷ 10 = **15.6** millones; B, 300 ÷ 12 = **25.0**.
+1. **Puede dar negativo.** Un modelo que acierta mucho puede perder dinero si cada aviso cuesta más de lo que evita: acción cara, pérdida pequeña o efectividad baja. "No hacer nada" es una alternativa real, y a veces gana.
+2. **El ganador entre dos modelos puede voltearse sin que los modelos cambien.** La elección depende de *u* y de *V* tanto como de las matrices: existe una <span class="term">efectividad de quiebre</span> en la que dos modelos empatan, y a cada lado de ese quiebre gana uno distinto. Quien evalúa tiene que saber de qué lado del quiebre está su supuesto, y qué tan defendible es.
+3. **El costo marginal manda sobre el costo promedio.** Pasar de la lista corta a la lista larga cuesta las evaluaciones adicionales y aporta los casos adicionales que esa lista encuentra; ampliar la lista conviene mientras cada caso adicional valga más de lo que cuesta encontrarlo.
 
-**Paso 3. El costo marginal.** Pasar de A a B cuesta 12 evaluaciones más (144 millones) y encuentra 2 cierres más: **72 millones por cierre adicional**. Ampliar la lista conviene mientras cada cierre adicional valga más de lo que cuesta encontrarlo.
-
-**Paso 4. Cuánto vale cada cierre encontrado.** Encontrar un cierre no es evitarlo: el aviso dispara una evaluación, y la evaluación evita el incumplimiento solo una fracción *u* de las veces. Con *u* = 0.5, cada cierre encontrado vale 0.5 × 250 = 125 millones; con *u* = 0.25, vale 62.5. El <span class="term">beneficio neto</span> de una lista es lo que evita menos lo que cuesta:
-
-> **beneficio neto = cierres encontrados × u × V − evaluaciones × c**, y el de "nadie cierra" es 0.
-
-| Efectividad del aviso | Cada cierre encontrado vale | A | B | Gana |
-|---|---|---|---|---|
-| u = 0.5 (evita 1 de cada 2 incumplimientos) | 125 | 10 × 125 − 156 = **1094** | 12 × 125 − 300 = **1200** | B |
-| u = 0.25 (evita 1 de cada 4) | 62.5 | 10 × 62.5 − 156 = **469** | 12 × 62.5 − 300 = **450** | A |
-
-Los modelos no cambiaron; cambió cuánto vale cada acierto. Con el supuesto base pagan los dos tramos (hasta los 72 por cierre adicional de B); con el pesimista solo paga el primero. Las dos le ganan a no hacer nada en ambos escenarios, con holgura.
-
-¿Dónde se cruzan? En la <span class="term">efectividad de quiebre</span>: la *u* con la que A y B empatan, 12 × 12 ÷ (250 × 2) = **0.288**. Por debajo gana A; por encima, B. Dicho en la otra moneda: con *u* = 0.5, A y B empatan cuando la pérdida evitada vale 144 millones; con *V* por debajo gana A y por encima gana B. Y para que valga la pena contratar a alguna, la pérdida evitada tiene que superar 31.2 millones (A) o 50.0 (B): Meridiano está muy lejos de ese piso.
-
-## La caja de costos
-
-Mueve los supuestos y mira cómo cambia la evaluación. Los 120 locales y las probabilidades de las dos consultoras están en la página; todo se recalcula en vivo.
-
-```{=html}
-<div class="widget-card" id="wg-caja">
-  <div class="widget-head">La caja de costos · 120 locales del lote, dos consultoras y una hoja de costos</div>
-  <div class="widget-body">
-    <div class="widget-instr">Empieza en la hoja de costos de Meridiano: evaluar a fondo 12, incumplimiento 250, efectividad 0.5, y cada consultora con su umbral. Cambia un supuesto a la vez. Debajo, qué cambió y qué significa.</div>
-    <div class="widget-row">
-      <label for="cj-c">Evaluar un local a fondo, c: <span id="cj-cv">12</span> millones</label>
-      <input type="range" id="cj-c" min="2" max="60" step="1" value="12">
-    </div>
-    <div class="widget-row">
-      <label for="cj-V">Pérdida por un incumplimiento, V: <span id="cj-Vv">250</span> millones</label>
-      <input type="range" id="cj-V" min="50" max="600" step="10" value="250">
-    </div>
-    <div class="widget-row">
-      <label for="cj-u">Efectividad del aviso, u: <span id="cj-uv">0.50</span></label>
-      <input type="range" id="cj-u" min="0.1" max="0.8" step="0.01" value="0.5">
-    </div>
-    <div class="widget-row">
-      <label for="cj-modo">Umbral</label>
-      <select id="cj-modo">
-        <option value="propios" selected>El de cada consultora (A 0.5, B 0.3)</option>
-        <option value="comun">Un mismo umbral para las dos</option>
-      </select>
-      <label for="cj-t">Umbral común: <span id="cj-tv">0.30</span></label>
-      <input type="range" id="cj-t" min="0.02" max="0.9" step="0.01" value="0.3" disabled>
-      <button type="button" class="btn-widget btn-widget-ghost" id="cj-pstar">Llevar el umbral a p* = c ÷ (u × V)</button>
-    </div>
-    <div class="widget-stats">
-      <div class="widget-stat"><div class="k">p* = c ÷ (u × V)</div><div class="v" id="cj-pv">—</div></div>
-      <div class="widget-stat"><div class="k">Beneficio neto de A</div><div class="v" id="cj-bA">—</div></div>
-      <div class="widget-stat"><div class="k">Beneficio neto de B</div><div class="v" id="cj-bB">—</div></div>
-      <div class="widget-stat"><div class="k">Nadie cierra (no hacer nada)</div><div class="v">0</div></div>
-      <div class="widget-stat ok"><div class="k">Gana</div><div class="v" id="cj-gana">—</div></div>
-    </div>
-    <div id="cj-matrices" style="overflow-x:auto; font-size:0.9rem"></div>
-    <svg id="cj-curva" class="widget-svg" viewBox="0 0 680 300" role="img" aria-label="Beneficio neto de A y de B según la efectividad del aviso"></svg>
-    <div class="widget-note" id="cj-nota"></div>
-    <div class="widget-row" style="margin-top:.8em">
-      <button type="button" class="btn-widget btn-widget-ghost" id="cj-reset">Volver a la hoja de costos de Meridiano</button>
-    </div>
-  </div>
-</div>
-<script>
-(function () {
-  const CERRO = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0];
-  const PROB_A = [0.2642, 0.0004, 0.1165, 0.3323, 0.0000, 0.4447, 0.2131, 0.4761, 0.3683, 0.4536, 0.0203, 0.0836, 0.0000, 0.0234, 0.1095, 0.0427, 0.0247, 0.6315, 0.0323, 0.0331, 0.1396, 0.2622, 0.0200, 0.1692, 0.9390, 0.3126, 0.0657, 0.0086, 0.5027, 0.0695, 0.6889, 0.1917, 0.0069, 0.9272, 0.0053, 0.3350, 0.2956, 0.0043, 0.0451, 0.1873, 0.0157, 0.5307, 0.3307, 0.0379, 0.5952, 0.0004, 0.0645, 0.0194, 0.0411, 0.0534, 0.0013, 0.0009, 0.0736, 0.4066, 0.0811, 0.4213, 0.0037, 0.2303, 0.0090, 0.0000, 0.0086, 0.0011, 0.0220, 0.0001, 0.7773, 0.0313, 0.0826, 0.0169, 0.3135, 0.0001, 0.1630, 0.1303, 0.1450, 0.0014, 0.0004, 0.3555, 0.1359, 0.5516, 0.6837, 0.2867, 0.5407, 0.0613, 0.4290, 0.0002, 0.0060, 0.0227, 0.0003, 0.0450, 0.2052, 0.0077, 0.1579, 0.6266, 0.0271, 0.0007, 0.0254, 0.1123, 0.1478, 0.0006, 0.0162, 0.0004, 0.0236, 0.0332, 0.2638, 0.0000, 0.2893, 0.0121, 0.0122, 0.0016, 0.5865, 0.0280, 0.3940, 0.0043, 0.1019, 0.2936, 0.1755, 0.0032, 0.0003, 0.2661, 0.0416, 0.0331];
-  const PROB_B = [0.476, 0.028, 0.062, 0.310, 0.044, 0.506, 0.096, 0.424, 0.526, 0.364, 0.374, 0.024, 0.016, 0.086, 0.062, 0.166, 0.052, 0.296, 0.076, 0.040, 0.138, 0.258, 0.112, 0.202, 0.554, 0.238, 0.036, 0.144, 0.428, 0.018, 0.292, 0.120, 0.026, 0.544, 0.046, 0.294, 0.192, 0.002, 0.134, 0.064, 0.058, 0.286, 0.274, 0.034, 0.576, 0.034, 0.038, 0.284, 0.074, 0.136, 0.046, 0.174, 0.048, 0.232, 0.198, 0.406, 0.034, 0.236, 0.062, 0.066, 0.036, 0.038, 0.040, 0.078, 0.726, 0.122, 0.154, 0.100, 0.318, 0.120, 0.082, 0.234, 0.470, 0.066, 0.010, 0.178, 0.064, 0.480, 0.696, 0.566, 0.394, 0.148, 0.270, 0.040, 0.036, 0.082, 0.060, 0.110, 0.380, 0.120, 0.064, 0.440, 0.050, 0.010, 0.098, 0.128, 0.434, 0.010, 0.124, 0.176, 0.042, 0.062, 0.188, 0.076, 0.274, 0.044, 0.070, 0.170, 0.686, 0.130, 0.686, 0.170, 0.152, 0.424, 0.040, 0.094, 0.022, 0.180, 0.060, 0.152];
-  const N = CERRO.length, UMBRAL_A = 0.5, UMBRAL_B = 0.3;
-  const C = { morado: "#5454e9", naranja: "#e9683b", verde: "#4cb979", gris: "#88898c", borde: "#cecfd4", tinta: "#1b1d29" };
-  const $ = (id) => document.getElementById(id);
-  const fmt = (n) => Math.round(n).toString();
-  let prev = null;
-  function matriz(prob, t) {
-    let TP = 0, FP = 0, FN = 0, TN = 0;
-    for (let i = 0; i < N; i++) {
-      const aviso = prob[i] >= t - 1e-9;
-      if (aviso && CERRO[i] === 1) TP++; else if (aviso) FP++; else if (CERRO[i] === 1) FN++; else TN++;
-    }
-    return { TP, FP, FN, TN, E: TP + FP };
-  }
-  function estado() {
-    const c = Number($("cj-c").value), V = Number($("cj-V").value), u = Number($("cj-u").value);
-    const modo = $("cj-modo").value, t = Number($("cj-t").value);
-    const mA = matriz(PROB_A, modo === "propios" ? UMBRAL_A : t), mB = matriz(PROB_B, modo === "propios" ? UMBRAL_B : t);
-    const neto = (m, uu) => m.TP * uu * V - m.E * c;
-    const uq = mA.TP === mB.TP ? null : c * (mB.E - mA.E) / (V * (mB.TP - mA.TP));
-    return { c, V, u, modo, t, mA, mB, bA: neto(mA, u), bB: neto(mB, u), neto, uq, pstar: c / (u * V) };
-  }
-  function ganador(s) {
-    if (s.bA <= 0 && s.bB <= 0) return "ninguna: no hacer nada";
-    if (Math.abs(s.bA - s.bB) < 0.5) return "empate entre A y B";
-    return s.bA > s.bB ? "A" : "B";
-  }
-  function svgEl(tag, attrs, text) {
-    const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
-    for (const k in attrs) el.setAttribute(k, attrs[k]);
-    if (text !== undefined) el.textContent = text;
-    return el;
-  }
-  function tabla(s) {
-    const fila = (nombre, m, b, col) => `<tr><td style="font-weight:600;color:${col}">${nombre}</td><td>${m.TP}</td><td>${m.FP}</td><td>${m.FN}</td><td>${m.TN}</td><td>${m.E}</td><td>${fmt(m.E * s.c)}</td><td style="font-weight:700">${fmt(b)}</td></tr>`;
-    $("cj-matrices").innerHTML = `<table style="margin:0.4em 0; width:100%"><thead><tr><th></th><th>aviso acertado (TP)</th><th>falsa alarma (FP)</th><th>cierre no detectado (FN)</th><th>viable confirmado (TN)</th><th>evaluaciones</th><th>costo de la lista</th><th>beneficio neto</th></tr></thead><tbody>` +
-      fila("Nadie cierra", { TP: 0, FP: 0, FN: 24, TN: 96, E: 0 }, 0, C.gris) + fila("Consultora A", s.mA, s.bA, C.morado) + fila("Consultora B", s.mB, s.bB, C.naranja) + `</tbody></table>`;
-  }
-  function dibujar(s) {
-    const svg = $("cj-curva"); svg.innerHTML = "";
-    const W = 680, H = 300, L = 70, R = 20, T = 24, B = 48;
-    const us = []; for (let x = 0.1; x <= 0.8001; x += 0.01) us.push(Math.round(x * 100) / 100);
-    const yA = us.map((uu) => s.neto(s.mA, uu)), yB = us.map((uu) => s.neto(s.mB, uu));
-    let ymin = Math.min(0, ...yA, ...yB), ymax = Math.max(0, ...yA, ...yB); if (ymax === ymin) ymax = ymin + 1;
-    const pad = (ymax - ymin) * 0.1; ymin -= pad; ymax += pad;
-    const sx = (x) => L + (x - 0.1) / 0.7 * (W - L - R), sy = (y) => T + (ymax - y) / (ymax - ymin) * (H - T - B);
-    svg.appendChild(svgEl("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: C.borde }));
-    svg.appendChild(svgEl("line", { x1: L, y1: T, x2: L, y2: H - B, stroke: C.borde }));
-    for (let x = 0.1; x <= 0.81; x += 0.1) svg.appendChild(svgEl("text", { x: sx(x), y: H - B + 16, "text-anchor": "middle", "font-size": 11, fill: C.gris }, x.toFixed(1)));
-    const paso = (ymax - ymin) / 4;
-    for (let i = 0; i <= 4; i++) { const v = ymin + i * paso; svg.appendChild(svgEl("line", { x1: L, y1: sy(v), x2: W - R, y2: sy(v), stroke: "#eeeef5" })); svg.appendChild(svgEl("text", { x: L - 6, y: sy(v) + 4, "text-anchor": "end", "font-size": 11, fill: C.gris }, fmt(v))); }
-    svg.appendChild(svgEl("text", { x: (L + W - R) / 2, y: H - 6, "text-anchor": "middle", "font-size": 12, fill: C.tinta }, "Efectividad del aviso, u (fracción de incumplimientos evitados)"));
-    svg.appendChild(svgEl("text", { x: 14, y: (T + H - B) / 2, "text-anchor": "middle", "font-size": 12, fill: C.tinta, transform: `rotate(-90 14 ${(T + H - B) / 2})` }, "Beneficio neto (millones)"));
-    svg.appendChild(svgEl("line", { x1: L, y1: sy(0), x2: W - R, y2: sy(0), stroke: C.gris, "stroke-dasharray": "5 4" }));
-    svg.appendChild(svgEl("text", { x: W - R - 4, y: sy(0) - 5, "text-anchor": "end", "font-size": 11, fill: C.gris }, "nadie cierra: 0"));
-    const path = (ys, col) => svg.appendChild(svgEl("path", { d: us.map((x, i) => (i ? "L" : "M") + sx(x).toFixed(1) + " " + sy(ys[i]).toFixed(1)).join(" "), fill: "none", stroke: col, "stroke-width": 3 }));
-    path(yA, C.morado); path(yB, C.naranja);
-    svg.appendChild(svgEl("line", { x1: sx(s.u), y1: T, x2: sx(s.u), y2: H - B, stroke: C.tinta, "stroke-dasharray": "4 4" }));
-    svg.appendChild(svgEl("text", { x: sx(s.u), y: T - 8, "text-anchor": "middle", "font-size": 11, fill: C.tinta }, "u = " + s.u.toFixed(2)));
-    if (s.uq !== null && s.uq >= 0.1 && s.uq <= 0.8) {
-      svg.appendChild(svgEl("circle", { cx: sx(s.uq), cy: sy(s.neto(s.mA, s.uq)), r: 6, fill: C.verde, stroke: "#fff", "stroke-width": 2 }));
-      svg.appendChild(svgEl("text", { x: sx(s.uq) + 8, y: sy(s.neto(s.mA, s.uq)) - 8, "font-size": 11, fill: C.verde }, "quiebre: u = " + s.uq.toFixed(3)));
-    }
-    svg.appendChild(svgEl("circle", { cx: sx(s.u), cy: sy(s.bA), r: 6, fill: C.morado, stroke: "#fff", "stroke-width": 2 }));
-    svg.appendChild(svgEl("circle", { cx: sx(s.u), cy: sy(s.bB), r: 6, fill: C.naranja, stroke: "#fff", "stroke-width": 2 }));
-    svg.appendChild(svgEl("text", { x: L + 8, y: T + 4, "font-size": 11, fill: C.morado }, "consultora A"));
-    svg.appendChild(svgEl("text", { x: L + 100, y: T + 4, "font-size": 11, fill: C.naranja }, "consultora B"));
-  }
-  function nota(s) {
-    const g = ganador(s);
-    const quiebre = s.uq === null ? "A y B encuentran los mismos cierres: las curvas no se cruzan" : (s.uq > 0 && s.uq < 1 ? `el quiebre está en u = ${s.uq.toFixed(3)}: por debajo gana ${s.mA.E < s.mB.E ? "A" : "B"}, por encima ${s.mA.E < s.mB.E ? "B" : "A"}` : "las curvas no se cruzan en el rango");
-    let t;
-    if (!prev) {
-      t = `Esta es la hoja de costos de Meridiano, con los umbrales de las consultoras: beneficio neto de A ${fmt(s.bA)}, de B ${fmt(s.bB)}, de no hacer nada 0. Gana ${g}; ${quiebre}. Baja la efectividad a 0.25 y mira quién gana.`;
-    } else if (prev.u !== s.u && prev.c === s.c && prev.V === s.V && prev.modo === s.modo && prev.t === s.t) {
-      t = `Pasaste de u = ${prev.u.toFixed(2)} a ${s.u.toFixed(2)}: A pasa de ${fmt(prev.bA)} a ${fmt(s.bA)} y B de ${fmt(prev.bB)} a ${fmt(s.bB)}. Gana ${g}. Las listas no cambiaron; cambió cuánto vale cada cierre encontrado (${fmt(s.u * s.V)} millones), y ${quiebre}.`;
-    } else if (prev.c !== s.c || prev.V !== s.V) {
-      t = `Cambió la hoja de costos: evaluar cuesta ${s.c} y un incumplimiento ${s.V}. p* pasa de ${prev.pstar.toFixed(3)} a ${s.pstar.toFixed(3)}; el beneficio de A es ${fmt(s.bA)} y el de B ${fmt(s.bB)}: gana ${g}. Ahora ${quiebre}.`;
-    } else {
-      t = s.modo === "propios"
-        ? `De vuelta a los umbrales de las consultoras (A 0.5, B 0.3): A da ${s.mA.E} avisos y encuentra ${s.mA.TP} cierres; B da ${s.mB.E} y encuentra ${s.mB.TP}. Beneficio: A ${fmt(s.bA)}, B ${fmt(s.bB)}; gana ${g}.`
-        : `Con un mismo umbral de ${s.t.toFixed(2)} para las dos: A da ${s.mA.E} avisos y encuentra ${s.mA.TP} de los 24 cierres; B da ${s.mB.E} y encuentra ${s.mB.TP}. Beneficio: A ${fmt(s.bA)}, B ${fmt(s.bB)}; gana ${g}. Los cortes de 0.5 y 0.3 los eligieron las consultoras, no Meridiano: con p* = ${s.pstar.toFixed(3)} las listas son otras.`;
-    }
-    if (s.bA <= 0 && s.bB <= 0) t += " Con estos costos ninguna le gana a no hacer nada.";
-    $("cj-nota").textContent = t;
-  }
-  function actualizar() {
-    const s = estado();
-    $("cj-cv").textContent = s.c; $("cj-Vv").textContent = s.V; $("cj-uv").textContent = s.u.toFixed(2); $("cj-tv").textContent = s.t.toFixed(2);
-    $("cj-t").disabled = s.modo === "propios";
-    $("cj-pv").textContent = s.pstar.toFixed(3);
-    $("cj-bA").textContent = fmt(s.bA); $("cj-bB").textContent = fmt(s.bB); $("cj-gana").textContent = ganador(s);
-    tabla(s); dibujar(s); nota(s);
-    prev = s;
-  }
-  ["cj-c", "cj-V", "cj-u", "cj-t"].forEach((id) => $(id).addEventListener("input", actualizar));
-  $("cj-modo").addEventListener("change", actualizar);
-  $("cj-pstar").addEventListener("click", () => { const s = estado(); $("cj-modo").value = "comun"; $("cj-t").value = Math.min(0.9, Math.max(0.02, Math.round(s.pstar * 100) / 100)); actualizar(); });
-  $("cj-reset").addEventListener("click", () => { $("cj-c").value = 12; $("cj-V").value = 250; $("cj-u").value = 0.5; $("cj-modo").value = "propios"; $("cj-t").value = 0.3; prev = null; actualizar(); });
-  actualizar();
-})();
-</script>
-```
-
-Tres cosas para observar en la caja:
-
-1. **La efectividad decide entre A y B, no los modelos.** Con la hoja de Meridiano el quiebre está en u = 0.288. Si la gerencia de inversión cree que su evaluación a fondo evita menos de tres de cada diez incumplimientos, le conviene la lista corta de A; si evita más, la lista larga de B.
-2. **El umbral también es un supuesto.** Lleva el umbral a p\*: con 0.096 las dos consultoras dan muchos más avisos y encuentran casi todos los cierres, y el beneficio neto sube. Los cortes de 0.5 y 0.3 fueron una elección de las consultoras, no una consecuencia de los costos de Meridiano.
-3. **Hay hojas de costos en las que ninguna vale.** Sube el costo de evaluar y baja la pérdida evitada hasta que las dos curvas queden bajo el cero. No hacer nada es una opción con beneficio exactamente cero, y a veces gana.
-
-## El ranking de modelos
-
-Todo lo anterior cabe en el <span class="term">ranking de modelos</span>: dos tablas, una por target, que el task 4 pide y que trae el sobre sellado. La de **cierre** (avisos, cierres encontrados, falsas alarmas, las tres métricas y el beneficio neto con las dos efectividades) y la de **ventas** (MAE con su margen, RMSE, la comparación pareada contra la regla del sector y el veredicto de cada fila). En [el código de la semana 4](../practice/cocina.html) se construyen celda a celda y se recalculan con otra hoja de costos: es la herramienta de la parte 1 del task.
+En [la práctica de la semana 4](../practice/cocina.html), la caja de costos deja mover *c*, *V*, *u* y el umbral sobre el caso completo, y las celdas de R rehacen la cuenta con cualquier hoja de costos: es la herramienta de la sensibilidad del task.
 
 # No adoptar ninguno es una respuesta
 
-La evaluación tiene tres veredictos posibles, no dos. "Ninguna" es el correcto cuando:
+La evaluación tiene tres veredictos posibles, no dos. "Ninguno" es el veredicto correcto cuando:
 
-- **ninguna le gana a no hacer nada**: las dos curvas de beneficio quedan bajo el cero con la hoja de costos que Meridiano puede defender;
-- **el modelo no le gana a la regla vigente por más que el ruido**: un empate técnico con "8 × arriendo" significa que Meridiano ya tenía esa información gratis, y un modelo cuesta (la factura, el mantenimiento, la dependencia de un proveedor);
-- **el ganador depende de un supuesto que nadie puede defender**: si la elección entre A y B se voltea con una efectividad que nadie ha medido, la recomendación honesta dice eso y pide el dato (un piloto, una evaluación retrospectiva) antes de firmar;
-- **el lote no se parece a la decisión**: el estudio no tiene locales de Barranquilla. Un modelo que le gana al baseline en seis ciudades puede no decir nada sobre la séptima. Lo verás con los tres locales candidatos en la semana 5.
+- **ningún modelo le gana a no hacer nada**: todas las curvas de beneficio quedan bajo el cero con una hoja de costos que la empresa pueda defender;
+- **el modelo no le gana a la regla vigente por más que el ruido**: un empate técnico con la regla que ya se usa significa que la empresa ya tenía esa información gratis, y el modelo sí cuesta —la factura, el mantenimiento, la dependencia de un proveedor—;
+- **el ganador depende de un supuesto que nadie puede defender**: si la elección se voltea con una efectividad que nadie ha medido, la recomendación honesta dice eso y pide el dato —un piloto, una evaluación retrospectiva— antes de firmar;
+- **el lote no se parece a la decisión**: un modelo validado en los casos de siempre puede no decir nada sobre el caso nuevo —otra ciudad, otro segmento, otro año—. La cifra de validación habla del territorio donde se midió.
 
-"Ninguna" nunca va sola: va con lo que haría falta para cambiar de opinión. En el task 4, la recomendación se califica tanto por lo que elige como por lo que descarta, y por decir qué costo o qué efectividad la voltearía.
+"Ninguno" nunca va solo: va con lo que haría falta para cambiar de opinión —qué costo, qué efectividad, qué dato—. En el task 4, la recomendación se califica tanto por lo que elige como por lo que descarta.
+
+::: {.callout-practice}
+<div class="callout-title">El caso de estudio de la semana (práctica opcional)</div>
+Las dos consultoras que le ofrecen sus modelos a Meridiano —el lote de 120 locales, los tres baselines, las matrices con la hoja de costos, el widget de la matriz, la caja de costos y el ranking de modelos del task 4— están en [la práctica de la semana 4](../practice/cocina.html): los widgets para jugar y las celdas de R que validan cada cifra del sobre.
+:::
 
 ::: {.callout-connect}
 <div class="callout-title">En la sesión</div>
@@ -465,7 +218,7 @@ La evaluación tiene tres veredictos posibles, no dos. "Ninguna" es el correcto 
 
 # ¿Y esto cómo se ve en tu organización?
 
-Piensa en una decisión de tu área que hoy se toma con una regla: un comité, un pronóstico del área comercial, una regla práctica como "8 × arriendo". Esa regla es el baseline. ¿Qué tendría que vencer un modelo para reemplazarla, en qué unidad, y por cuánto más que el ruido? ¿Alguien ha medido alguna vez cuánto cuesta cada uno de los dos errores de esa regla? Tráelo en la cabeza: es una pregunta del cierre de la semana 5.
+Piensa en una decisión de tu área que hoy se toma con una regla: un comité, un pronóstico del área comercial, una cuenta que el sector hace de memoria. Esa regla es el baseline. ¿Qué tendría que vencer un modelo para reemplazarla, en qué unidad, y por cuánto más que el ruido? ¿Alguien ha medido alguna vez cuánto cuesta cada uno de los dos errores de esa regla? Tráelo en la cabeza: es una pregunta del cierre de la semana 5.
 
 **Para verlo en movimiento (opcional, en inglés).** Los explicables visuales de Machine Learning University: [Train, Test, and Validation Sets](https://mlu-explain.github.io/train-test-validation/), [Precision & Recall](https://mlu-explain.github.io/precision-recall/) y [ROC & AUC](https://mlu-explain.github.io/roc-auc/).
 
@@ -473,22 +226,22 @@ Piensa en una decisión de tu área que hoy se toma con una regla: un comité, u
 
 <details class="pregunta">
 <summary>1. Un modelo tiene 90 % de exactitud y, aun así, la empresa pierde dinero usándolo. ¿Cómo es posible?</summary>
-De dos maneras. Primera: si la clase rara es el 10 %, "nunca pasa" también saca 90 % y no encuentra ningún caso; una exactitud alta puede esconder una sensibilidad de cero. Segunda: el dinero no sale de la exactitud sino de la cuenta cierres encontrados × u × V − evaluaciones × c; si cada aviso cuesta más de lo que evita (una evaluación cara, una pérdida pequeña o una efectividad baja), el beneficio neto es negativo aunque el modelo acierte mucho. Por eso el baseline es "no hacer nada", con beneficio cero.
+De dos maneras. Primera: si la clase rara es el 10 %, "nunca pasa" también saca 90 % y no encuentra ningún caso; una exactitud alta puede esconder una sensibilidad de cero. Segunda: el dinero no sale de la exactitud sino de la cuenta casos encontrados × u × V − avisos × c; si cada aviso cuesta más de lo que evita (una acción cara, una pérdida pequeña o una efectividad baja), el beneficio neto es negativo aunque el modelo acierte mucho. Por eso el baseline de la cuenta es "no hacer nada", con beneficio cero.
 </details>
 
 <details class="pregunta">
-<summary>2. Al elegir un local, ¿cuál de los dos errores es el caro?</summary>
-El cierre no detectado: el modelo dijo "viable", Meridiano compró y el arrendatario cerró. Cuesta 250 millones entre vacancia, adecuación y lucro cesante. Una falsa alarma cuesta una evaluación de 12. Como el error caro es dejar pasar un cierre, aquí se vigila la sensibilidad más que la precisión, y el umbral económico es bajo: p* = 12 ÷ (0.5 × 250) = 0.096. Pero no infinitamente bajo: cada aviso cuesta 12, y por eso la lista larga de B solo gana cuando cada cierre encontrado vale más de 72 millones, que es lo que cuesta encontrar uno adicional.
+<summary>2. En el caso de la práctica, ¿cuál de los dos errores es el caro al filtrar locales candidatos?</summary>
+El cierre no detectado: el modelo dijo "viable", se compró el local y el arrendatario cerró; cuesta unas veinte veces lo que una falsa alarma, que solo paga una evaluación a fondo. Como el error caro es dejar pasar el caso, ahí se vigila la sensibilidad más que la precisión, y el umbral económico p* = c ÷ (u × V) queda bajo: conviene evaluar ante riesgos pequeños. Pero no infinitamente bajo: cada aviso cuesta, y la lista más larga solo gana mientras cada caso adicional valga más de lo que cuesta encontrarlo. Las cifras completas, con la hoja de costos, están en [la práctica de la semana 4](../practice/cocina.html).
 </details>
 
 <details class="pregunta">
 <summary>3. Un pronóstico de ventas tiene MAE 12 y RMSE 30. ¿Qué está pasando?</summary>
-Errores grandes ocasionales. El RMSE siempre es mayor o igual que el MAE, pero una brecha de 12 a 30 dice que la mayoría de los locales se predicen con unos pocos millones de error y unos pocos se van por mucho (el cuadrado los infla). Antes de confiar en el "12 en promedio" hay que mirar esos casos: en pesos, un error de 12 millones al mes son unos 36 millones de VPN con el factor de Meridiano, pero en el local equivocado el error puede ser varias veces eso.
+Errores grandes ocasionales. El RMSE siempre es mayor o igual que el MAE, pero una brecha de 12 a 30 dice que la mayoría de los casos se predicen con pocos millones de error y unos pocos se van por mucho (el cuadrado los infla). Antes de confiar en el "12 en promedio" hay que mirar esos casos: el promedio tranquiliza, y el caso equivocado paga el error varias veces.
 </details>
 
 <details class="pregunta">
-<summary>4. ¿Cuándo la recomendación correcta es "ninguna de las dos"?</summary>
-Cuando ninguna le gana a no hacer nada con una hoja de costos defendible; cuando el modelo empata técnicamente con la regla vigente (la ganancia no supera el ruido y el modelo sí cuesta); cuando la elección depende de un supuesto que nadie ha medido, como la efectividad del aviso; o cuando el lote no representa la decisión, como un estudio sin locales de Barranquilla. Y siempre con la condición que cambiaría la respuesta: qué dato, qué piloto o qué costo.
+<summary>4. ¿Cuándo la recomendación correcta es "ninguno de los modelos"?</summary>
+Cuando ninguno le gana a no hacer nada con una hoja de costos defendible; cuando el modelo empata técnicamente con la regla vigente (la ganancia no supera el ruido y el modelo sí cuesta); cuando la elección depende de un supuesto que nadie ha medido, como la efectividad de la acción; o cuando el lote de validación no representa la decisión, como un lote de seis ciudades para decidir en una séptima. Y siempre con la condición que cambiaría la respuesta: qué dato, qué piloto o qué costo.
 </details>
 
 # Lectura corta (opcional)

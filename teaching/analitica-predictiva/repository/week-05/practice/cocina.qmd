@@ -1,5 +1,5 @@
 ---
-title: "El código de la semana 5"
+title: "Práctica 5: el árbol del estudio de locales"
 subtitle: "Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 5 · Práctica opcional"
 lang: es
 webr:
@@ -8,11 +8,312 @@ webr:
 ---
 
 ::: {.callout-key}
-<div class="callout-title">Qué es esta página</div>
-Una página opcional: reproduce, celda a celda y en R, los cálculos que la teoría de la semana 5 cuenta en prosa —el árbol de referencia, el memorizador y la poda, la calibración, los tres locales de Barranquilla y la fuga—, con las mismas cifras del sobre. El panel Environment, abajo a la derecha, muestra los objetos de R que vas creando. El laboratorio con controles —la práctica obligatoria de la semana— es [otra página](week-05.html); esta página recoge el código.
+<div class="callout-title">La idea central</div>
+Esta página es opcional y contiene el caso de estudio de la semana 5 completo: el árbol de referencia del estudio de locales leído como una política, su examen en validación, el memorizador y la poda que deja el tocón, el umbral con la hoja de costos, la calibración y los tres candidatos de Barranquilla —con el traductor de reglas, el simulador del umbral y las celdas de R que reproducen cada cifra del sobre—. La teoría se entiende sin ella; el task 5 se hace con [el laboratorio de la semana 5](week-05.html), la práctica guiada obligatoria, y esta página deja ver la historia y el código detrás.
 :::
 
-**Cómo se usa:** la página descarga R y el paquete `rpart` al abrirse (unos segundos) y deja cargados los datos del estudio; ejecuta las celdas en orden, de una en una, esperando la salida de cada una antes de pulsar la siguiente. Puedes editar cualquier celda —por ejemplo `maxdepth` o `minbucket`— y volver a ejecutarla.
+# El árbol de referencia, leído como política
+
+El estudio de locales reúne 480 locales comerciales arrendados a minoristas en seis ciudades, con la partición fija del curso: 360 de entrenamiento y 120 de validación, los mismos lotes de la semana 4 (en los dos cierran dos de cada diez). Para entrenar se usan solo las doce columnas que se conocen **antes de comprar**; las dos de después de arrendar (`calificacion_google` y `meses_atraso_arriendo`) quedan fuera, por la razón que la semana 3 dejó clara.
+
+El árbol de referencia del curso tiene profundidad 2 y un mínimo de quince locales por hoja. Dibujado:
+
+```{=html}
+<div style="margin:1.2rem 0">
+<svg width="100%" viewBox="0 0 680 400" role="img" aria-label="El árbol de referencia: tráfico y experiencia">
+<rect x="190" y="12" width="300" height="60" rx="10" fill="#ecedfd" stroke="#5454e9" stroke-width="1.4"/>
+<text x="340" y="33" text-anchor="middle" font-size="11" font-weight="600" fill="#3a3acb">360 LOCALES · cierran 2 de cada 10</text>
+<text x="340" y="57" text-anchor="middle" font-size="15" font-weight="600" fill="#1b1d29">¿Tráfico de 165 o más por hora?</text>
+<line x1="275" y1="72" x2="170" y2="150" stroke="#88898c" stroke-width="1.4"/>
+<line x1="405" y1="72" x2="510" y2="150" stroke="#88898c" stroke-width="1.4"/>
+<text x="200" y="115" text-anchor="middle" font-size="12" fill="#52555f">Sí (261 locales)</text>
+<text x="480" y="115" text-anchor="middle" font-size="12" fill="#52555f">No (99 locales)</text>
+<rect x="40" y="150" width="260" height="60" rx="10" fill="#ecedfd" stroke="#5454e9" stroke-width="1.4"/>
+<text x="170" y="171" text-anchor="middle" font-size="11" font-weight="600" fill="#3a3acb">cierran 1 de cada 10</text>
+<text x="170" y="195" text-anchor="middle" font-size="14" font-weight="600" fill="#1b1d29">¿Tráfico de 225 o más?</text>
+<rect x="380" y="150" width="260" height="60" rx="10" fill="#ecedfd" stroke="#5454e9" stroke-width="1.4"/>
+<text x="510" y="171" text-anchor="middle" font-size="11" font-weight="600" fill="#3a3acb">cierran 4 de cada 10</text>
+<text x="510" y="195" text-anchor="middle" font-size="14" font-weight="600" fill="#1b1d29">¿Arrendatario con 9 años o más?</text>
+<line x1="110" y1="210" x2="80" y2="290" stroke="#88898c" stroke-width="1.4"/>
+<line x1="230" y1="210" x2="250" y2="290" stroke="#88898c" stroke-width="1.4"/>
+<line x1="450" y1="210" x2="430" y2="290" stroke="#88898c" stroke-width="1.4"/>
+<line x1="570" y1="210" x2="600" y2="290" stroke="#88898c" stroke-width="1.4"/>
+<text x="80" y="255" text-anchor="middle" font-size="12" fill="#52555f">Sí</text>
+<text x="255" y="255" text-anchor="middle" font-size="12" fill="#52555f">No</text>
+<text x="425" y="255" text-anchor="middle" font-size="12" fill="#52555f">Sí</text>
+<text x="600" y="255" text-anchor="middle" font-size="12" fill="#52555f">No</text>
+<rect x="8" y="290" width="150" height="84" rx="10" fill="#eafaf1" stroke="#4cb979" stroke-width="1.3"/>
+<text x="83" y="312" text-anchor="middle" font-size="11" font-weight="600" fill="#2f9460">abierto</text>
+<text x="83" y="334" text-anchor="middle" font-size="13" fill="#1b1d29">1 de cada 10</text>
+<text x="83" y="356" text-anchor="middle" font-size="11" fill="#52555f">p = 0.06 · n = 187</text>
+<rect x="175" y="290" width="150" height="84" rx="10" fill="#eafaf1" stroke="#4cb979" stroke-width="1.3"/>
+<text x="250" y="312" text-anchor="middle" font-size="11" font-weight="600" fill="#2f9460">abierto</text>
+<text x="250" y="334" text-anchor="middle" font-size="13" fill="#1b1d29">2 de cada 10</text>
+<text x="250" y="356" text-anchor="middle" font-size="11" fill="#52555f">p = 0.23 · n = 74</text>
+<rect x="355" y="290" width="150" height="84" rx="10" fill="#eafaf1" stroke="#4cb979" stroke-width="1.3"/>
+<text x="430" y="312" text-anchor="middle" font-size="11" font-weight="600" fill="#2f9460">abierto</text>
+<text x="430" y="334" text-anchor="middle" font-size="13" fill="#1b1d29">1 de cada 10</text>
+<text x="430" y="356" text-anchor="middle" font-size="11" fill="#52555f">p = 0.12 · n = 24</text>
+<rect x="522" y="290" width="150" height="84" rx="10" fill="#fdeee8" stroke="#e9683b" stroke-width="1.6"/>
+<text x="597" y="312" text-anchor="middle" font-size="11" font-weight="600" fill="#c2552f">cerró</text>
+<text x="597" y="334" text-anchor="middle" font-size="13" fill="#1b1d29">5 de cada 10</text>
+<text x="597" y="356" text-anchor="middle" font-size="11" fill="#52555f">p = 0.55 · n = 75</text>
+<text x="340" y="394" text-anchor="middle" font-size="11" fill="#88898c">Los cortes exactos son 164.5, 224.5 y 8.5; como las variables son enteras, equivalen a 165, 225 y 9</text>
+</svg>
+</div>
+```
+
+Leído como una política, sin decir nodo ni corte:
+
+| La regla | Qué dice el estudio |
+|---|---|
+| Un local por el que pasan **225 personas por hora o más** | Cierra 1 de cada 10 (p = 0.06, n = 187). Es el perfil más seguro del estudio |
+| Un local con **tráfico medio, entre 165 y 224** personas por hora | Cierran 2 de cada 10 (p = 0.23, n = 74) |
+| Un local con **tráfico bajo, menos de 165**, en manos de un arrendatario con **9 años de experiencia o más** | Cierra 1 de cada 10 (p = 0.12, n = 24). La experiencia compensa el tráfico |
+| Un local con **tráfico bajo y un arrendatario con menos de 9 años** | Cierran 5 de cada 10 (p = 0.55, n = 75). Es la única hoja en la que el árbol predice "cierra" |
+
+Fíjate en lo que no aparece: la ciudad, la zona, el arriendo, los competidores. No es que no importen; es que, una vez separados los locales por tráfico, ninguna de esas preguntas dejaba los grupos más puros que la experiencia. Y fíjate en la <span class="term">probabilidad de la hoja</span>: cada hoja no dice "cierra" o "no cierra", dice cuántos de cada diez cerraron entre los locales parecidos. Esa cifra es la que vas a usar para decidir.
+
+## Traduce la regla
+
+Cuatro reglas del árbol, como las diría un analista. Elige la traducción que un miembro de la junta debería escuchar.
+
+```{=html}
+<div class="widget-card" id="wg-trad">
+  <div class="widget-head">Traduce la regla · Las cuatro hojas del árbol de referencia</div>
+  <div class="widget-body">
+    <div class="widget-instr">Una traducción correcta respeta el sentido del corte, la cifra de la hoja y lo que la regla no dice (no habla de causas).</div>
+    <div id="trad-items"></div>
+    <div class="quiz-score" id="trad-score"></div>
+  </div>
+</div>
+<script>
+(function () {
+  const ITEMS = [
+    { t: "trafico_peatonal >= 164.5 y trafico_peatonal >= 224.5: p = 0.06, n = 187",
+      o: ["Si pasan 225 personas por hora o más, cierra 1 de cada 10; es el perfil más seguro del estudio (187 locales).",
+          "Si pasan 225 personas por hora o más, el local tiene garantizado sobrevivir.",
+          "Si pasan menos de 225 personas por hora, cierra 1 de cada 10."],
+      a: 0, fb: "La hoja dice 6 % de cierre entre 187 locales con tráfico alto: pocos, no cero. Y el sentido del corte es 'de 225 en adelante'." },
+    { t: "trafico_peatonal >= 164.5 y trafico_peatonal < 224.5: p = 0.23, n = 74",
+      o: ["Con tráfico medio (entre 165 y 224 personas por hora) cierran 2 de cada 10 (74 locales).",
+          "Con tráfico medio cierran 23 de cada 100 porque el tráfico medio causa el cierre.",
+          "Con tráfico medio, el árbol predice que el local cierra."],
+      a: 0, fb: "La cifra está bien en las dos primeras, pero la segunda convierte una separación en una causa. Y con p = 0.23 la hoja predice 'abierto': la mayoría sigue abierta." },
+    { t: "trafico_peatonal < 164.5 y experiencia_arrendatario >= 8.5: p = 0.12, n = 24",
+      o: ["Con poco tráfico, un arrendatario con 9 años o más de experiencia compensa: cierra 1 de cada 10, aunque son solo 24 locales.",
+          "Con poco tráfico y un arrendatario experimentado, cierran 5 de cada 10.",
+          "Elegir un arrendatario con 9 años de experiencia reduce el cierre al 12 %."],
+      a: 0, fb: "Es la hoja más pequeña del árbol (n = 24): la traducción debe decirlo. La tercera opción promete un efecto causal que el árbol no puede sostener." },
+    { t: "trafico_peatonal < 164.5 y experiencia_arrendatario < 8.5: p = 0.55, n = 75",
+      o: ["Con tráfico bajo y un arrendatario con menos de 9 años cierran 5 de cada 10 (75 locales): es el único perfil que el árbol marca como riesgoso.",
+          "Con tráfico bajo y poca experiencia cierran todos.",
+          "Con tráfico alto y poca experiencia cierran 5 de cada 10."],
+      a: 0, fb: "La mitad cierra, no todos; y el perfil es tráfico bajo. Es la única hoja con p por encima de 0.5, y por eso la única que predice 'cierra' con el umbral de 0.5." }
+  ];
+  const cont = document.getElementById("trad-items");
+  let hechos = 0, aciertos = 0;
+  ITEMS.forEach((it, i) => {
+    const div = document.createElement("div"); div.className = "quiz-item";
+    const q = document.createElement("div"); q.className = "quiz-q"; q.textContent = (i + 1) + ". Regla del árbol: " + it.t; div.appendChild(q);
+    const opts = document.createElement("div"); opts.className = "quiz-opts"; opts.style.flexDirection = "column"; opts.style.alignItems = "stretch";
+    const fb = document.createElement("div"); fb.className = "quiz-fb";
+    let listo = false;
+    it.o.forEach((o, j) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = o; b.style.textAlign = "left";
+      b.addEventListener("click", () => {
+        if (listo) return; listo = true; hechos++;
+        if (j === it.a) { b.classList.add("ok"); aciertos++; fb.textContent = "Correcto. " + it.fb; }
+        else { b.classList.add("bad"); opts.children[it.a].classList.add("ok"); fb.textContent = "No. " + it.fb; }
+        document.getElementById("trad-score").textContent = hechos === ITEMS.length ? `Resultado: ${aciertos} de ${ITEMS.length}.` : `Llevas ${hechos} de ${ITEMS.length}.`;
+      });
+      opts.appendChild(b);
+    });
+    div.appendChild(opts); div.appendChild(fb); cont.appendChild(div);
+  });
+})();
+</script>
+```
+
+## El examen en validación
+
+El examen del árbol es el de la semana 4: predecir el estado de los 120 locales de validación con el umbral de 0.5. El árbol encuentra 15 de los 24 que cerraron y deja pasar los otros 9 (sensibilidad 0.625); manda a evaluación 11 que en realidad sobrevivieron y deja tranquilos a 85 (precisión 0.577); acierta 0.833 de las veces, con un margen de ± 0.068. Guarda estas cifras: son la fila "árbol de dos niveles" del ranking de modelos.
+
+# El memorizador y la poda al tocón
+
+Quita los frenos: deja que el árbol siga preguntando hasta que cada hoja quede pura, con un mínimo de un local por hoja. El resultado son cincuenta hojas, exactitud 1.000 en entrenamiento y 0.767 en validación: peor que no hacer nada (0.800). Es el estudiante que se sabía el parcial de memoria; el árbol aprendió el ruido de sus 360 locales como si fuera un patrón.
+
+La tabla cp que `rpart` construyó mientras entrenaba —la validación cruzada de la teoría: para cada tamaño, el error `xerror`, relativo al error de "nadie cierra", que vale 1.000, con su margen `xstd`— se lee y no se programa:
+
+| Tamaño (cortes) | Hojas | Error en entrenamiento | Error de validación cruzada (`xerror`) | ± (`xstd`) |
+|---|---|---|---|---|
+| 0 | 1 | 1.000 | **1.000** | 0.105 |
+| 6 | 7 | 0.639 | 1.028 | 0.106 |
+| 10 | 11 | 0.514 | 1.000 | 0.105 |
+| 16 | 17 | 0.347 | 1.111 | 0.110 |
+| 29 | 30 | 0.167 | 1.069 | 0.108 |
+| 36 | 37 | 0.097 | 1.167 | 0.111 |
+| 39 | 40 | 0.069 | 1.167 | 0.111 |
+| 49 | 50 | 0.000 | 1.222 | 0.113 |
+
+El error en entrenamiento baja hasta cero, como debe. El de validación cruzada nunca baja de 1.000: ningún tamaño le gana a "nadie cierra", y a partir de 17 hojas empeora. La regla 1-SE toma el mínimo (1.000), le suma su margen (0.105) y se queda con el árbol más simple que quede por debajo del tope 1.000 + 0.105 = 1.105: el primero de la tabla, una sola hoja.
+
+::: {.callout-key}
+<div class="callout-title">El resultado honesto: la poda deja el tocón</div>
+Con estos datos, la regla 1-SE poda el árbol hasta una sola hoja, un <span class="term">tocón</span> que dice "nadie cierra". No es un error del procedimiento: la validación cruzada mide errores de clasificación con el umbral de 0.5, y con dos de cada diez locales cerrados, ningún corte le gana a "nadie cierra" por más de un error estándar. Es la lección de la semana 4 otra vez, ahora desde adentro del modelo: **la exactitud engaña cuando una clase es rara**.
+:::
+
+¿Significa eso que el árbol de dos niveles es inútil? No. Mira el ranking de modelos, con las filas de la semana 4 y las tres de esta:
+
+| Regla o modelo | Exactitud | Sensibilidad |
+|---|---|---|
+| Nadie cierra | 0.800 | 0.000 |
+| Consultora A | 0.858 | 0.417 |
+| Consultora B | 0.792 | 0.500 |
+| **Árbol de dos niveles** | **0.833** | **0.625** |
+| Árbol podado (regla 1-SE) | 0.800 | 0.000 |
+| Memorizador | 0.767 | 0.458 |
+
+En exactitud, el árbol de dos niveles y "nadie cierra" están a 0.033 de distancia, dentro del margen de ± 0.068: empate técnico. Pero Meridiano no quiere acertar el estado de locales ajenos; quiere **encontrar los cierres antes de comprar**. Y ahí el árbol de dos niveles encuentra 15 de 24, más que cualquier consultora, mientras el tocón no encuentra ninguno. La poda dice que no hay evidencia de que preguntar más de dos cosas mejore la exactitud; la sensibilidad dice que esas dos preguntas valen. Se reportan las dos cifras, y se deja que el costo de cada error decida, como en la sección siguiente.
+
+# El umbral con la hoja de costos
+
+El árbol no dice "cierra": dice que entre los locales parecidos cerraron 6, 12, 23 o 55 de cada 100. La semana 4 dejó la cuenta que convierte esa probabilidad en decisión: evaluar a fondo un local y a su arrendatario cuesta c = 12 millones; comprar un local cuyo arrendatario incumple pierde V = 250 millones; y el aviso evita esa pérdida con una efectividad u (0.5 en el escenario base, 0.25 en el pesimista). Conviene evaluar un local cuando lo que se espera ahorrar supera lo que cuesta evaluar, es decir, cuando su probabilidad de cierre p cumple p × u × V > c. Despejando:
+
+::: {.callout-workflow}
+<div class="callout-title">El umbral en palabras</div>
+p\* = c ÷ (u × V) = 12 ÷ (0.5 × 250) = **0.096**. Evalúa a fondo todo local cuya probabilidad de cierre pase del 9.6 %. Si el aviso solo evita una de cada cuatro pérdidas (u = 0.25), el umbral sube a 12 ÷ (0.25 × 250) = **0.192**: hay que ser más selectivo, porque cada evaluación rinde menos.
+:::
+
+Con u = 0.5, el umbral de 0.096 manda a evaluación tres de las cuatro hojas (la de 0.12, la de 0.23 y la de 0.55) y deja pasar solo la de tráfico alto. Con u = 0.25 se evalúan solo las hojas de 0.23 y 0.55. Y cuando hay un **cupo** (tres locales en Barranquilla, presupuesto para evaluar a fondo uno o dos), el umbral deja de importar: se ordena por riesgo y se evalúa de arriba hacia abajo.
+
+Mueve el umbral sobre veinte locales del lote de validación y sus probabilidades del árbol:
+
+```{=html}
+<div class="widget-card" id="wg-perilla">
+  <div class="widget-head">El simulador del umbral · 20 locales del lote de validación con su probabilidad del árbol</div>
+  <div class="widget-body">
+    <div class="widget-instr">Positivo = cierra. Cada local está en su probabilidad del árbol (0.06, 0.12, 0.23 o 0.55); los que de verdad cerraron van en la fila de arriba. Mueve el umbral y cambia la efectividad del aviso: el beneficio neto usa la hoja de costos de la semana 4 (c = 12, V = 250 millones).</div>
+    <div class="widget-row">
+      <label for="pe-u">Evaluar a fondo si la probabilidad llega a: <span id="pe-uv">0.50</span></label>
+      <input type="range" id="pe-u" min="0.05" max="0.95" step="0.05" value="0.5">
+      <label for="pe-ef">Efectividad del aviso</label>
+      <select id="pe-ef"><option value="0.5" selected>u = 0.5</option><option value="0.25">u = 0.25</option></select>
+    </div>
+    <svg id="pe-svg" class="widget-svg" viewBox="0 0 680 170" role="img" aria-label="Veinte locales ordenados por probabilidad y la línea del umbral"></svg>
+    <div class="widget-stats">
+      <div class="widget-stat"><div class="k">TP · FP · FN · TN</div><div class="v" id="pe-mat">—</div></div>
+      <div class="widget-stat"><div class="k">Precisión</div><div class="v" id="pe-prec">—</div></div>
+      <div class="widget-stat ok"><div class="k">Sensibilidad</div><div class="v" id="pe-sens">—</div></div>
+      <div class="widget-stat warn"><div class="k">Beneficio neto (millones)</div><div class="v" id="pe-ben">—</div></div>
+    </div>
+    <div class="widget-note" id="pe-nota"></div>
+  </div>
+</div>
+<script>
+(function () {
+  // [id del local, probabilidad de cierre del árbol de referencia, 1 = el arrendatario cerró a los tres años]
+  const LOCALES = [
+    [78, 0.547, 0], [122, 0.547, 1], [126, 0.547, 0], [133, 0.547, 1], [268, 0.547, 1], [321, 0.547, 1], [328, 0.547, 0], [399, 0.547, 1],
+    [62, 0.230, 0], [413, 0.230, 1], [479, 0.230, 0],
+    [235, 0.125, 1], [251, 0.125, 0],
+    [82, 0.059, 0], [141, 0.059, 0], [191, 0.059, 0], [315, 0.059, 0], [398, 0.059, 1], [405, 0.059, 0], [458, 0.059, 0]
+  ];
+  const C_EVAL = 12, V_PERD = 250;
+  const C = { morado: "#5454e9", naranja: "#e9683b", verde: "#4cb979", gris: "#88898c", borde: "#cecfd4", tinta: "#1b1d29" };
+  const $ = (id) => document.getElementById(id);
+  const W = 680, L = 110, R = 20;
+  const x = (p) => L + p * (W - L - R);
+  function svgEl(tag, attrs, text) { const el = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) el.setAttribute(k, attrs[k]); if (text !== undefined) el.textContent = text; return el; }
+  const svg = $("pe-svg");
+  let prev = null;
+  function base() {
+    svg.innerHTML = "";
+    svg.appendChild(svgEl("line", { x1: L, y1: 135, x2: W - R, y2: 135, stroke: C.borde, "stroke-width": 1.5 }));
+    [0, 0.25, 0.5, 0.75, 1].forEach((t) => { svg.appendChild(svgEl("line", { x1: x(t), y1: 135, x2: x(t), y2: 140, stroke: C.gris })); svg.appendChild(svgEl("text", { x: x(t), y: 155, "font-size": 11, fill: C.gris, "text-anchor": "middle" }, t.toFixed(2))); });
+    svg.appendChild(svgEl("text", { x: L - 8, y: 58, "font-size": 11, fill: C.naranja, "text-anchor": "end" }, "cerró (8)"));
+    svg.appendChild(svgEl("text", { x: L - 8, y: 108, "font-size": 11, fill: C.verde, "text-anchor": "end" }, "sigue abierto (12)"));
+    const cuenta = {};
+    LOCALES.forEach((c, i) => {
+      const clave = c[1] + "-" + c[2]; cuenta[clave] = (cuenta[clave] || 0); const k = cuenta[clave]++;
+      const cy = (c[2] === 1 ? 54 : 104) + (k % 2 ? 9 : -9) * Math.ceil(k / 2) * (k ? 1 : 0);
+      svg.appendChild(svgEl("circle", { id: "pe-d" + i, cx: x(c[1]), cy, r: 7, fill: c[2] === 1 ? C.naranja : C.verde, stroke: "#fff", "stroke-width": 1.5 }));
+    });
+    svg.appendChild(svgEl("line", { id: "pe-linea", x1: 0, y1: 20, x2: 0, y2: 135, stroke: C.tinta, "stroke-width": 2, "stroke-dasharray": "5 3" }));
+    svg.appendChild(svgEl("text", { id: "pe-lab", x: 0, y: 14, "font-size": 11, "font-weight": 700, fill: C.tinta, "text-anchor": "middle" }, "umbral"));
+    svg.appendChild(svgEl("line", { id: "pe-pstar", x1: 0, y1: 118, x2: 0, y2: 135, stroke: C.morado, "stroke-width": 2 }));
+    svg.appendChild(svgEl("text", { id: "pe-pstarlab", x: 0, y: 168, "font-size": 11, fill: C.morado, "text-anchor": "middle" }, "p*"));
+  }
+  base();
+  function pinta() {
+    const u = parseFloat($("pe-u").value), ef = parseFloat($("pe-ef").value);
+    const pstar = C_EVAL / (ef * V_PERD);
+    $("pe-uv").textContent = u.toFixed(2);
+    $("pe-linea").setAttribute("x1", x(u)); $("pe-linea").setAttribute("x2", x(u)); $("pe-lab").setAttribute("x", x(u));
+    $("pe-pstar").setAttribute("x1", x(pstar)); $("pe-pstar").setAttribute("x2", x(pstar)); $("pe-pstarlab").setAttribute("x", x(pstar));
+    $("pe-pstarlab").textContent = "p* = " + pstar.toFixed(3);
+    let tp = 0, fp = 0, fn = 0, tn = 0;
+    LOCALES.forEach((c, i) => {
+      const marca = c[1] >= u - 1e-9;
+      if (marca && c[2]) tp++; else if (marca && !c[2]) fp++; else if (!marca && c[2]) fn++; else tn++;
+      $("pe-d" + i).setAttribute("opacity", marca ? "1" : "0.28");
+    });
+    const prec = tp + fp > 0 ? tp / (tp + fp) : NaN, sens = tp / (tp + fn);
+    const ben = tp * ef * V_PERD - (tp + fp) * C_EVAL;
+    $("pe-mat").textContent = `${tp} · ${fp} · ${fn} · ${tn}`;
+    $("pe-prec").textContent = isNaN(prec) ? "—" : prec.toFixed(2);
+    $("pe-sens").textContent = sens.toFixed(2);
+    $("pe-ben").textContent = Math.round(ben).toLocaleString("es-CO");
+    let t = `Con el umbral en ${u.toFixed(2)} se evalúan ${tp + fp} de 20 locales y se encuentran ${tp} de los 8 que cierran. `;
+    if (prev && (prev.u !== u || prev.ef !== ef)) {
+      const dB = ben - prev.ben;
+      t += `Frente a la configuración anterior, el beneficio neto ${dB >= 0 ? "sube" : "baja"} ${Math.abs(Math.round(dB))} millones: ` +
+           (tp + fp > prev.ev ? `evalúas ${tp + fp - prev.ev} locales más y encuentras ${tp - prev.tp} cierres más.` : `evalúas ${prev.ev - (tp + fp)} locales menos y dejas de encontrar ${prev.tp - tp} cierres.`);
+    }
+    if (u > pstar + 1e-9 && fn > 0) t += ` Estás por encima de p* = ${pstar.toFixed(3)}: hay locales cuya evaluación habría rendido más de lo que cuesta y no se evalúan.`;
+    else if (u <= pstar + 1e-9) t += ` Estás en p* o por debajo: con estos costos, evaluar todo lo que pase del ${(100 * pstar).toFixed(1)} % es lo que rinde.`;
+    $("pe-nota").textContent = t;
+    prev = { u, ef, ben, ev: tp + fp, tp };
+  }
+  $("pe-u").addEventListener("input", pinta);
+  $("pe-ef").addEventListener("change", pinta);
+  pinta();
+})();
+</script>
+```
+
+Dos lecciones del simulador. La precisión y la sensibilidad no se maximizan a la vez: se intercambian moviendo el umbral, y la tasa de cambio la fija el costo de cada error. Y el umbral es una decisión del negocio disfrazada de parámetro estadístico: 0.5 es lo que trae el programa, no lo que conviene a Meridiano.
+
+# La calibración por hoja
+
+Si vas a multiplicar una probabilidad por 250 millones, más vale que la probabilidad sea cierta. La comprobación de la teoría —agrupar los locales de validación por la probabilidad que les dio el modelo y comparar con la tasa real de cierre de cada grupo— tiene aquí los tramos hechos: son las hojas del árbol:
+
+| Lo que el árbol promete (la hoja) | Tasa observada en validación | Locales |
+|---|---|---|
+| 0.059 | 0.085 | 71 |
+| 0.125 | 0.333 | 6 |
+| 0.230 | 0.059 | 17 |
+| 0.547 | 0.577 | 26 |
+
+Las dos hojas grandes son creíbles: a la de 0.06 le corresponde una tasa observada cercana, y a la de 0.55, también. Las dos hojas pequeñas oscilan: con 6 o 17 locales de validación, una tasa observada se mueve mucho con uno o dos cierres de más o de menos. Es la alarma de la hoja pequeña vista desde el examen: una hoja con pocos locales da una probabilidad que no se puede tomar al pie de la letra, y eso también explica por qué el umbral de la sección anterior no rinde exactamente lo que p\* promete. La consultora B, para comparar, está razonablemente calibrada por tramos: entre 0 y 0.1 cierra el 5.6 % (n = 54); entre 0.1 y 0.2, el 14.8 % (n = 27); entre 0.3 y 0.5, el 40.0 % (n = 15); por encima de 0.5, el 60.0 % (n = 10).
+
+# La estabilidad, los candidatos y la fuga
+
+Tres escenas más del estudio, las tres anunciadas en los límites de la teoría.
+
+**La estabilidad.** Con otras tres particiones del mismo estudio (semillas 101, 202 y 303), la raíz es siempre el tráfico, con el corte en 164.5, 160.5 y 164.5, pero el segundo nivel cambia: ticket promedio y competidores en una, tráfico y competidores en otra, experiencia en la tercera. A la junta se le dice lo que aguanta: la primera pregunta es el tráfico; el detalle del segundo nivel, no.
+
+**Los candidatos, fuera del soporte.** El árbol solo sabe de los locales que vio, y ninguno está en Barranquilla: cualquier predicción para esa ciudad está fuera del <span class="term">soporte</span> de los datos y lleva asterisco. Y el local 2 tiene un canon de mercado de 27 millones cuando el máximo del estudio es 25: el árbol lo clasificará de todos modos, porque solo pregunta por tráfico y experiencia, pero su respuesta vale lo que vale una regla aplicada fuera de donde se aprendió.
+
+Locales 1 y 2: p = 0.059 (tráfico alto); local 3: p = 0.547 (tráfico de 115 personas por hora y un arrendatario con tres años). Con cupo para evaluar a fondo uno solo, el orden por riesgo es local 3, luego 1 y 2 empatados. Con asterisco en los tres.
+
+**La fuga.** Deja entrar las dos columnas de después de arrendar y el árbol cambia de raíz: pasa a `meses_atraso_arriendo`, con corte en 2.5 y exactitud 0.942 en validación, frente a 0.833 sin la fuga. Un modelo que predice el cierre con la mora en el canon predice el pasado: la mora se acumula mientras el arrendatario cierra, y para un local que todavía no se arrienda vale cero. El salto de exactitud no es una mejora; es la señal de alarma de la semana 3.
+
+# El código de la semana 5
+
+Las mismas cifras, celda a celda y en tu navegador: el árbol de referencia, el memorizador y la poda, la calibración, los tres locales de Barranquilla y la fuga, con los datos del estudio ya cargados —los 480 locales, la partición fija del curso, los tres candidatos y la hoja de costos—. Corre las celdas en orden, de una en una, esperando la salida de cada una antes de pulsar la siguiente; puedes editar cualquier celda —por ejemplo `maxdepth` o `minbucket`— y volver a correrla. El panel **Environment** (abajo a la derecha) muestra los objetos que vas creando.
+
+**La primera carga** tarda unos segundos mientras el navegador descarga R y el paquete `rpart`; el botón *Run Code* de cada celda se habilita al terminar.
 
 ```{webr-r}
 #| context: setup
@@ -546,9 +847,9 @@ matriz <- function(observado, predicho) {
 }
 ```
 
-# El árbol de referencia y su examen
+## El árbol de referencia y su examen
 
-Las celdas corren en tu navegador con los datos del estudio ya cargados: los 480 locales, la partición fija del curso, los tres locales de Barranquilla y la hoja de costos. La primera muestra la partición; la segunda entrena el árbol de referencia y lo imprime con sus reglas; la tercera lo examina en los 120 locales de validación.
+La primera celda muestra la partición fija; la segunda entrena el árbol de referencia y lo imprime con sus reglas; la tercera lo examina en los 120 locales de validación.
 
 ```{webr-r}
 #| autorun: true
@@ -586,7 +887,7 @@ metricas
 
 En validación el árbol encuentra 15 de los 24 locales que cerraron (sensibilidad 0.625), marca 11 que en realidad sobrevivieron (precisión 0.577) y acierta 0.833 de las veces, con un margen de ± 0.068: es la fila "árbol de dos niveles" del ranking de modelos.
 
-# El memorizador y la poda
+## El memorizador y la poda
 
 Quita los frenos. Deja que el árbol siga preguntando hasta que cada hoja quede pura, con un mínimo de un local por hoja:
 
@@ -643,9 +944,9 @@ hojas_del_podado <- sum(podado$frame$var == "<leaf>")
 c(tope = round(tope, 3), hojas_del_podado = hojas_del_podado)
 ```
 
-El tope es 1.000 + 0.105 = 1.105 y el árbol más simple que queda por debajo tiene una sola hoja: la poda deja el tocón que dice "nadie cierra". No es un error del procedimiento, es la exactitud engañando cuando una clase es rara; la lectura completa está en la teoría.
+El tope es 1.000 + 0.105 = 1.105 y el árbol más simple que queda por debajo tiene una sola hoja: la poda deja el tocón que dice "nadie cierra". No es un error del procedimiento, es la exactitud engañando cuando una clase es rara; la lectura completa está arriba, en la historia del caso.
 
-# La calibración
+## La calibración
 
 Una probabilidad está calibrada cuando, entre los locales a los que les da 30 %, cierra cerca del 30 %. Se comprueba agrupando los locales de validación por la probabilidad que les dio el modelo y comparando con la tasa real de cierre de cada grupo; con el árbol, los tramos son las hojas:
 
@@ -675,7 +976,7 @@ data.frame(probabilidad_de_la_hoja = probabilidades_de_hoja,
 
 Las dos hojas grandes son creíbles: la de 0.059 observa una tasa de 0.085 entre 71 locales, y la de 0.547, una de 0.577 entre 26. Las dos pequeñas oscilan: con 6 o 17 locales de validación, una tasa observada se mueve mucho con uno o dos cierres de más o de menos.
 
-# Los locales de Barranquilla y la fuga
+## Los locales de Barranquilla y la fuga
 
 Los tres locales candidatos, con su advertencia de extrapolación: ningún local del estudio está en Barranquilla, y el canon de mercado del local 2 (27 millones) queda por fuera del rango que el árbol conoció al entrenar, de 4.5 a 25:
 

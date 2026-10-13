@@ -1,5 +1,5 @@
 ---
-title: "El código de la semana 4"
+title: "Práctica 4: las dos consultoras"
 subtitle: "Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 4 · Práctica opcional"
 lang: es
 webr:
@@ -7,11 +7,405 @@ webr:
 ---
 
 ::: {.callout-key}
-<div class="callout-title">Qué es esta página</div>
-Esta página es **opcional**: no trae contenido nuevo. Reproduce, celda a celda, las cifras de la evaluación de modelos de [la teoría](../theory/week-04.html) y del sobre sellado —las matrices, las métricas, el umbral, el error en pesos, el beneficio neto y el ranking de modelos—, y es **la herramienta de trabajo del task 4**: aquí se recalcula el ranking con otra hoja de costos. El panel **Environment**, abajo a la derecha, muestra los objetos que van quedando en memoria.
+<div class="callout-title">La idea central</div>
+Esta página es opcional y contiene el caso de estudio de la semana 4 completo: las dos consultoras que le ofrecen sus modelos a Meridiano, el lote de 120 locales donde se examinan, la hoja de costos con la que se evalúan, los dos widgets para jugar —la matriz y la caja de costos— y las celdas de R que validan cada cifra del sobre sellado. La teoría se entiende sin ella; el task 4 se resuelve con las tablas y las celdas de esta página.
 :::
 
-**Cómo se usa.** Al cargar la página quedan en línea los 120 locales del lote de validación, las predicciones de las dos consultoras y la hoja de costos de Meridiano, y la primera celda corre sola. Las demás se ejecutan con su botón, de una en una y en orden —cada celda usa objetos de las anteriores—; puedes cambiar un número, un umbral o un costo, y volver a ejecutar.
+# El caso: dos consultoras, dos facturas
+
+La gerencia de inversión de Meridiano compró el estudio de locales: 480 locales comerciales arrendados a minoristas en seis ciudades (lo exploraste en la semana 3). Para la alternativa A, la compra del primer local en Barranquilla, necesita un modelo que, con lo que se puede medir de un local y de su arrendatario **antes de comprar** (zona, área, canon, tráfico, competidores, ticket previsto, experiencia del arrendatario), responda dos cosas: si el arrendatario cerraría antes de tres años y cuánto vendería al mes.
+
+Dos firmas de analítica, las consultoras A y B, le ofrecen el suyo, cada una con su factura. Dentro de las cajas hay lo que la teoría describió: la consultora A entrega una **regresión** —un tarifario aprendido de los datos, como el que la propia línea de avalúos de Meridiano usa a diario— y la consultora B un **bosque aleatorio**, cientos de árboles que votan. Esta página no abre las cajas: las evalúa por fuera, y en pesos.
+
+Las dos propuestas traen una cifra en la portada: "más de 85 % de exactitud". La cifra pierde brillo con una cuenta sencilla: en el estudio cierra uno de cada cinco arrendatarios. Una regla que diga **ningún arrendatario cierra** acierta en cuatro de cada cinco casos, sin mirar un solo dato. También saca 80 %.
+
+Así que la pregunta de esta página no es cuál consultora acierta más. Es cuál, si alguna, le hace ganar dinero a Meridiano frente a decidir como hasta ahora.
+
+# El lote de validación
+
+Antes de entregar el estudio a las consultoras, la gerencia de inversión apartó al azar **120 de los 480 locales**. Las consultoras entrenaron con los otros 360. De los 120 apartados ya se conoce el desenlace: **24 arrendatarios cerraron** y 96 siguieron abiertos, y de todos se sabe cuánto vendieron. Ese es el lote de validación de la semana: la única parte del estudio donde se puede comparar, local por local, la predicción con lo observado.
+
+Las dos reglas del lote, que la teoría dejó sentadas, se cumplieron: el lote se usa una sola vez, al final, y las consultoras no lo vieron. Entregaron, para cada uno de los 120 locales, una probabilidad de cierre del arrendatario, una etiqueta ("cerró" o "abierto") y una predicción de ventas, a ciegas.
+
+# Los baselines de Meridiano
+
+Un modelo no se califica en el vacío: se compara con lo que Meridiano haría sin él. Hay tres baselines en esta semana:
+
+| Baseline | Qué predice | Para qué sirve |
+|---|---|---|
+| <span class="term">Regla ingenua</span> "nadie cierra" | Que los 120 siguen abiertos | Es lo que pasa hoy: Meridiano compra sin filtro. Acierta 96 de 120 (exactitud 0.800) y no encuentra ningún cierre |
+| <span class="term">Regla vigente</span> del sector: ventas ≈ 8 × arriendo | Que un arrendatario vende unas ocho veces el canon mensual del local | Es la cuenta que en el sector se hace de memoria (dicha al revés: el canon no debe pasar de la octava parte de las ventas). No necesita consultora |
+| Mediana del entrenamiento: 93.1 millones | Que todos venden lo mismo | La regla ingenua de las ventas: sin información del local |
+
+::: {.callout-key}
+<div class="callout-title">Lo que importa</div>
+Un modelo aporta solo lo que le gana al baseline. Si una consultora no le gana a "8 × arriendo" por más que el ruido, Meridiano ya tenía esa información gratis.
+:::
+
+# La matriz, local por local
+
+La gerencia de inversión usaría el modelo de cierre para **filtrar locales candidatos**. Si el modelo marca un local como riesgoso, se evalúa a fondo antes de decidir la compra (visita de un perito, estudio del corredor comercial, revisión del plan de negocio del arrendatario): cuesta 12 millones. Si lo marca como viable, pasa a la lista corta y puede comprarse. La teoría presentó la matriz de confusión con un filtro de fraude; aquí se llena con locales, y cada casilla tiene el precio de la hoja de costos de Meridiano:
+
+| | El modelo dijo "riesgoso" | El modelo dijo "viable" |
+|---|---|---|
+| **El arrendatario cerró** | **Aviso acertado** (TP). Se evalúa a fondo (12) y, si la evaluación confirma el riesgo, se evita un incumplimiento de 250 | **Cierre no detectado** (FN). Se compra un local cuyo arrendatario incumple y cierra: 250 millones entre vacancia, adecuación y lucro cesante |
+| **El arrendatario siguió abierto** | **Falsa alarma** (FP): un falso "riesgoso". Se evalúa a fondo un local que sí daba: 12. Si además se descarta sin evaluarlo, 90 millones de utilidad que se dejan de ganar | **Viable confirmado** (TN). Sin costo |
+
+Los dos errores no cuestan lo mismo: una falsa alarma cuesta una evaluación (12); un cierre no detectado cuesta un incumplimiento (250), unas veinte veces más. Por eso Meridiano evalúa en lugar de descartar: los 12 millones de la evaluación son el seguro contra los 90 de descartar a ciegas un local bueno.
+
+Practica con diez locales del lote, con la predicción de la consultora B. Haz clic en la casilla donde cae cada uno.
+
+```{=html}
+<style>
+#wg-matriz .cmx-caso { background: var(--fondo); border: 1px solid var(--borde); border-radius: var(--r-md); padding: .7em .9em; margin-bottom: .7em; }
+#wg-matriz .cmx-tags { display: flex; gap: .5em; flex-wrap: wrap; margin-top: .45em; }
+#wg-matriz .cmx-tag { padding: .2em .7em; border-radius: 999px; font-size: .86em; font-weight: 600; }
+#wg-matriz .t-modelo { background: var(--primario-claro); color: var(--primario-osc); }
+#wg-matriz .t-real { background: #e7e8ee; color: var(--tinta-suave); }
+#wg-matriz .cmx-wrap { display: grid; grid-template-columns: minmax(6.5em, auto) 1fr 1fr; gap: .4em; margin: .7em 0; max-width: 38em; }
+#wg-matriz .cmx-head { font-size: .8em; font-weight: 700; color: var(--tinta-suave); text-align: center; align-self: end; padding: .15em; }
+#wg-matriz .cmx-side { font-size: .8em; font-weight: 700; color: var(--tinta-suave); display: flex; align-items: center; justify-content: flex-end; text-align: right; padding-right: .3em; }
+#wg-matriz .cmx-cell { border: 2px solid var(--borde); border-radius: var(--r-md); background: var(--superficie); padding: .5em .4em; text-align: center; cursor: pointer; font-family: var(--font-sans); transition: transform .12s, border-color .12s, background .12s; }
+#wg-matriz .cmx-cell:hover { border-color: var(--primario); transform: translateY(-1px); }
+#wg-matriz .cmx-k { font-weight: 800; font-size: .95em; color: var(--primario-osc); }
+#wg-matriz .cmx-n { font-size: 1.35em; font-weight: 800; color: var(--primario-osc); font-family: var(--font-mono); }
+#wg-matriz .cmx-d { font-size: .74em; color: var(--tenue); }
+#wg-matriz .cmx-cell.flash-ok { border-color: var(--exito); background: #eafaf1; }
+#wg-matriz .cmx-cell.flash-bad { border-color: var(--aviso); background: #fdeee8; }
+#wg-matriz .cmx-msg { min-height: 1.5em; font-size: .9em; margin-top: .35em; color: var(--tinta-suave); }
+</style>
+<div class="widget-card" id="wg-matriz">
+  <div class="widget-head">Arma la matriz · Diez locales del lote, con la predicción de la consultora B</div>
+  <div class="widget-body">
+    <div class="widget-instr">Clase positiva: "riesgoso" (el modelo predice que el arrendatario cierra). Para cada local se muestra lo que dijo B y lo que pasó a los tres años. Primera palabra: ¿acertó? Segunda: ¿qué predijo?</div>
+    <div class="cmx-caso" id="cmx-caso">
+      <b id="cmx-titulo">Local 1 de 10</b>
+      <div class="cmx-tags"><span class="cmx-tag t-modelo" id="cmx-dijo"></span><span class="cmx-tag t-real" id="cmx-fue"></span></div>
+    </div>
+    <div class="cmx-wrap">
+      <div></div>
+      <div class="cmx-head">El modelo dijo:<br>riesgoso</div>
+      <div class="cmx-head">El modelo dijo:<br>viable</div>
+      <div class="cmx-side">El arrendatario<br>cerró</div>
+      <button type="button" class="cmx-cell" data-k="TP"><div class="cmx-k">TP</div><div class="cmx-n" id="cmx-tp">0</div><div class="cmx-d">aviso acertado</div></button>
+      <button type="button" class="cmx-cell" data-k="FN"><div class="cmx-k">FN</div><div class="cmx-n" id="cmx-fn">0</div><div class="cmx-d">cierre no detectado</div></button>
+      <div class="cmx-side">El arrendatario<br>siguió abierto</div>
+      <button type="button" class="cmx-cell" data-k="FP"><div class="cmx-k">FP</div><div class="cmx-n" id="cmx-fp">0</div><div class="cmx-d">falsa alarma</div></button>
+      <button type="button" class="cmx-cell" data-k="TN"><div class="cmx-k">TN</div><div class="cmx-n" id="cmx-tn">0</div><div class="cmx-d">viable confirmado</div></button>
+    </div>
+    <div class="cmx-msg" id="cmx-msg">¿En qué casilla cae este local? Haz clic en la casilla.</div>
+    <div class="widget-stats" id="cmx-mets" style="display:none;">
+      <div class="widget-stat"><div class="k">Exactitud = (3 + 4) / 10</div><div class="v">0.70</div></div>
+      <div class="widget-stat"><div class="k">Precisión = 3 / (3 + 2)</div><div class="v">0.60</div></div>
+      <div class="widget-stat ok"><div class="k">Sensibilidad = 3 / (3 + 1)</div><div class="v">0.75</div></div>
+      <div class="widget-stat warn"><div class="k">"Nadie cierra" en estos diez</div><div class="v">0.60</div></div>
+    </div>
+    <div class="widget-note" id="cmx-nota" style="display:none;">La lectura en pesos. De <b>5 avisos, 2 fueron falsas alarmas</b> (precisión 0.60): dos evaluaciones de 12 millones sobre locales que sí daban. <b>Atrapó 3 de los 4 arrendatarios que cerraron</b> (sensibilidad 0.75); el que se le escapó, el local 71, habría sido un incumplimiento de 250 millones. ¿Y la exactitud de 0.70? "Nadie cierra" saca 0.60 en estos diez sin mirar nada: el modelo aporta, pero la matriz muestra <em>dónde</em> y <em>cuánto cuesta</em> cada error.</div>
+    <div style="margin-top:0.6em;"><button type="button" class="btn-widget btn-widget-ghost" id="cmx-reset">Reiniciar</button></div>
+  </div>
+</div>
+<script>
+(function () {
+  const card = document.getElementById("wg-matriz");
+  if (!card) return;
+  // [local, lo que dijo B, lo que pasó, casilla]
+  const CASOS = [
+    [21, "riesgoso", "siguió abierto", "FP"], [22, "viable", "siguió abierto", "TN"],
+    [26, "viable", "siguió abierto", "TN"], [41, "riesgoso", "siguió abierto", "FP"],
+    [48, "riesgoso", "cerró", "TP"], [50, "riesgoso", "cerró", "TP"],
+    [53, "viable", "siguió abierto", "TN"], [71, "viable", "cerró", "FN"],
+    [75, "viable", "siguió abierto", "TN"], [84, "riesgoso", "cerró", "TP"]
+  ];
+  const NOMBRE = { TP: "aviso acertado", FP: "falsa alarma", FN: "cierre no detectado", TN: "viable confirmado" };
+  let i = 0, cnt = { TP: 0, FN: 0, FP: 0, TN: 0 };
+  const celdas = card.querySelectorAll(".cmx-cell");
+  function muestra() {
+    if (i < CASOS.length) {
+      document.getElementById("cmx-titulo").textContent = "Local " + (i + 1) + " de " + CASOS.length + " (local " + CASOS[i][0] + " del lote)";
+      document.getElementById("cmx-dijo").textContent = "La consultora B dijo: " + CASOS[i][1];
+      document.getElementById("cmx-fue").textContent = "A los tres años: " + CASOS[i][2];
+    } else {
+      document.getElementById("cmx-titulo").textContent = "Matriz completa";
+      document.getElementById("cmx-dijo").textContent = "Avisos acertados 3 · falsas alarmas 2";
+      document.getElementById("cmx-fue").textContent = "Cierres no detectados 1 · viables confirmados 4";
+      document.getElementById("cmx-msg").textContent = "Con la matriz llena, las métricas salen solas:";
+      document.getElementById("cmx-mets").style.display = "flex";
+      document.getElementById("cmx-nota").style.display = "block";
+    }
+  }
+  function limpia(el) { setTimeout(function () { el.classList.remove("flash-ok", "flash-bad"); }, 550); }
+  celdas.forEach(function (c) {
+    c.addEventListener("click", function () {
+      if (i >= CASOS.length) return;
+      const k = c.getAttribute("data-k");
+      if (k === CASOS[i][3]) {
+        cnt[k]++; c.classList.add("flash-ok"); limpia(c);
+        document.getElementById("cmx-" + k.toLowerCase()).textContent = cnt[k];
+        document.getElementById("cmx-msg").textContent = "Correcto: " + (k[0] === "T" ? "el modelo acertó" : "el modelo falló") + " y había predicho " + (k[1] === "P" ? "riesgoso (positivo)" : "viable (negativo)") + ": " + k + ", " + NOMBRE[k] + ".";
+        i++; muestra();
+      } else {
+        c.classList.add("flash-bad"); limpia(c);
+        document.getElementById("cmx-msg").textContent = "Ahí no. Primera palabra: ¿acertó o falló? Segunda: ¿qué predijo el modelo? Intenta de nuevo.";
+      }
+    });
+  });
+  document.getElementById("cmx-reset").addEventListener("click", function () {
+    i = 0; cnt = { TP: 0, FN: 0, FP: 0, TN: 0 };
+    ["tp", "fn", "fp", "tn"].forEach(function (s) { document.getElementById("cmx-" + s).textContent = "0"; });
+    document.getElementById("cmx-mets").style.display = "none";
+    document.getElementById("cmx-nota").style.display = "none";
+    document.getElementById("cmx-msg").textContent = "¿En qué casilla cae este local? Haz clic en la casilla.";
+    muestra();
+  });
+  muestra();
+})();
+</script>
+```
+
+Ahora con los 120 locales y las dos consultoras. A dio 13 avisos: 10 acertados y 3 falsas alarmas; se le escaparon 14 cierres y confirmó 93 viables. B dio 25 avisos: 12 acertados y 13 falsas alarmas; se le escaparon 12 y confirmó 83. "Nadie cierra" no dio avisos: se le escaparon los 24 cierres y confirmó los 96 que siguieron abiertos.
+
+# Las tres métricas sobre el lote
+
+De cada matriz salen los tres resúmenes de la teoría, y cada consultora gana el suyo:
+
+| Métrica | La pregunta | La cuenta | Nadie cierra | A | B |
+|---|---|---|---|---|---|
+| <span class="term">Exactitud</span> | De los 120, ¿cuántas veces acertó? | (TP + TN) ÷ 120 | 0.800 | 0.858 | 0.792 |
+| <span class="term">Precisión</span> | De los avisos, ¿cuántos cerraron de verdad? | TP ÷ (TP + FP) | sin avisos | 0.769 | 0.480 |
+| <span class="term">Sensibilidad</span> | De los 24 que cerraron, ¿cuántos atrapó? | TP ÷ (TP + FN) | 0.000 | 0.417 | 0.500 |
+
+Tres lecturas:
+
+1. **La trampa de la exactitud, en vivo.** Aquí cierra el 20 %: "nadie cierra" saca 0.800 sin información. B, con 0.792, queda *por debajo* de no hacer nada y, sin embargo, encuentra 12 de los 24 cierres.
+2. **Cada métrica premia a una consultora distinta.** A gana en exactitud y en precisión: su lista es corta y limpia, 10 de 13 avisos acertaron. B gana en sensibilidad: atrapa la mitad de los cierres, a cambio de 13 falsas alarmas.
+3. **Cuál importa lo deciden los costos de Meridiano**, no el algoritmo: como el error caro es dejar pasar un cierre (250 contra 12), aquí pesa la sensibilidad. Las secciones que siguen hacen esa cuenta completa.
+
+# El umbral que eligieron las consultoras
+
+Las consultoras no entregan un "sí" o un "no": entregan una **probabilidad** de cierre para cada local, y la etiqueta sale de un umbral. A marca cierre desde 0.5; B, desde 0.3. Esos cortes los eligieron las consultoras, no Meridiano, y son parte de por qué la lista de B es más larga.
+
+Con la fórmula de la teoría y la hoja de costos de Meridiano, el umbral económico queda lejos de los dos cortes:
+
+> **p\* = c ÷ (u × V)** = 12 ÷ (0.5 × 250) = **0.096**. Con efectividad de 0.25, p\* = **0.192**.
+
+La lectura: como evaluar es barato y comprar un local cuyo arrendatario cierra es muy costoso, conviene evaluar cualquier local con más de un 10 % de riesgo. Con ese umbral las listas de las dos consultoras serían bastante más largas que con sus cortes de 0.5 y 0.3; la caja de costos de esta página lo muestra, y la celda del umbral lo calcula.
+
+**El cupo de evaluación.** A veces el umbral no manda: manda la capacidad. Si la gerencia de inversión solo puede evaluar a fondo tres locales este semestre, la pregunta no es "¿cuáles superan p\*?" sino "¿cuáles son los tres más riesgosos?". Se ordena por probabilidad y se toman los tres primeros. Con un cupo, lo que importa del modelo es que **ordene bien**, más que dónde ponga su corte. En la semana 5 harás exactamente esto con los tres locales candidatos de Barranquilla.
+
+# El error en pesos de las ventas
+
+Para las ventas no hay acierto o error: hay una distancia. Si la consultora dijo 118.4 millones y el arrendatario vendió 84.9, se equivocó por 33.5. El MAE y el RMSE de la teoría, sobre los 120 locales y con el margen de dos errores estándar:
+
+| Predicción de ventas | MAE | Margen (2 EE) | RMSE |
+|---|---|---|---|
+| Mediana del entrenamiento (93.1 para todos) | 31.1 | ± 5.7 | 43.9 |
+| Regla del sector: 8 × arriendo | 22.4 | ± 3.7 | 30.0 |
+| Consultora A | 22.9 | ± 3.7 | 30.6 |
+| Consultora B | 17.9 | ± 3.4 | 25.9 |
+
+La lectura en pesos: para Meridiano, cada millón mensual de ventas del arrendatario mueve el VPN a cinco años en **3 millones** (el canon es el 10 % de las ventas; la plantilla completa llega en la semana 7). El MAE de B, 17.9 millones al mes, equivale entonces a unos **54 millones** de VPN de error típico por local, y con ese error se evalúa una compra de 700 millones. Y la brecha importa: en todas las filas el RMSE queda bastante por encima del MAE, porque unos pocos arrendatarios (los que venden más de 200 millones) se les escapan a todos por más de cien.
+
+# ¿Le gana a la regla por más que el ruido?
+
+B tiene el MAE más bajo, pero la tabla anterior todavía no basta para declarar ganadores: A (22.9) y la regla del sector (22.4) están a medio millón, con márgenes de 3.7. Una diferencia menor que el margen no es una diferencia: <span class="term">empate técnico</span>.
+
+La comparación pareada de la teoría —error de la regla menos error de la consultora, local por local, para que el ruido compartido se cancele— dicta el veredicto:
+
+- **Regla menos A: −0.57 ± 3.97.** El margen cruza el cero: A no le gana a "8 × arriendo". Empate técnico.
+- **Regla menos B: 4.44 ± 2.76.** Todo el margen queda a la derecha del cero: B le gana a la regla por unos 4.4 millones al mes por local, más que el ruido.
+
+La misma lógica aplica a la exactitud: con 120 locales, una exactitud de 0.858 trae un margen de seis o siete puntos porcentuales (la celda correspondiente lo calcula), así que la ventaja de A sobre "nadie cierra" en exactitud tampoco es nítida. Otra razón para evaluar en pesos y no en porcentaje de aciertos.
+
+# El beneficio neto frente a no hacer nada
+
+Ahora las casillas de cierre en pesos. Cada aviso cuesta una evaluación (12 millones), acierte o no. Cada cierre encontrado evita, con efectividad *u*, un incumplimiento de 250. Y "no hacer nada" (comprar sin filtro, la regla ingenua) cuesta cero y no encuentra nada: es el baseline con el que se compara todo.
+
+**Paso 1. El costo de cada lista.** A dio 13 avisos: 13 × 12 = **156** millones. B dio 25: **300** millones.
+
+**Paso 2. El costo por cierre encontrado.** Como cada aviso cuesta lo mismo, encuentre o no, el costo por cierre encontrado es 12 ÷ precisión: A, 156 ÷ 10 = **15.6** millones; B, 300 ÷ 12 = **25.0**.
+
+**Paso 3. El costo marginal.** Pasar de A a B cuesta 12 evaluaciones más (144 millones) y encuentra 2 cierres más: **72 millones por cierre adicional**. Ampliar la lista conviene mientras cada cierre adicional valga más de lo que cuesta encontrarlo.
+
+**Paso 4. Cuánto vale cada cierre encontrado.** Con *u* = 0.5, cada cierre encontrado vale 0.5 × 250 = 125 millones; con *u* = 0.25, vale 62.5. El beneficio neto de cada lista:
+
+| Efectividad del aviso | Cada cierre encontrado vale | A | B | Gana |
+|---|---|---|---|---|
+| u = 0.5 (evita 1 de cada 2 incumplimientos) | 125 | 10 × 125 − 156 = **1094** | 12 × 125 − 300 = **1200** | B |
+| u = 0.25 (evita 1 de cada 4) | 62.5 | 10 × 62.5 − 156 = **469** | 12 × 62.5 − 300 = **450** | A |
+
+Los modelos no cambiaron; cambió cuánto vale cada acierto. Con el supuesto base pagan los dos tramos (hasta los 72 por cierre adicional de B); con el pesimista solo paga el primero. Las dos le ganan a no hacer nada en ambos escenarios, con holgura.
+
+¿Dónde se cruzan? En la <span class="term">efectividad de quiebre</span>: la *u* con la que A y B empatan, 12 × 12 ÷ (250 × 2) = **0.288**. Por debajo gana A; por encima, B. Dicho en la otra moneda: con *u* = 0.5, A y B empatan cuando la pérdida evitada vale 144 millones; con *V* por debajo gana A y por encima gana B. Y para que valga la pena contratar a alguna, la pérdida evitada tiene que superar 31.2 millones (A) o 50.0 (B): Meridiano está muy lejos de ese piso.
+
+## La caja de costos
+
+Mueve los supuestos y mira cómo cambia la evaluación. Los 120 locales y las probabilidades de las dos consultoras están en la página; todo se recalcula en vivo.
+
+```{=html}
+<div class="widget-card" id="wg-caja">
+  <div class="widget-head">La caja de costos · 120 locales del lote, dos consultoras y una hoja de costos</div>
+  <div class="widget-body">
+    <div class="widget-instr">Empieza en la hoja de costos de Meridiano: evaluar a fondo 12, incumplimiento 250, efectividad 0.5, y cada consultora con su umbral. Cambia un supuesto a la vez. Debajo, qué cambió y qué significa.</div>
+    <div class="widget-row">
+      <label for="cj-c">Evaluar un local a fondo, c: <span id="cj-cv">12</span> millones</label>
+      <input type="range" id="cj-c" min="2" max="60" step="1" value="12">
+    </div>
+    <div class="widget-row">
+      <label for="cj-V">Pérdida por un incumplimiento, V: <span id="cj-Vv">250</span> millones</label>
+      <input type="range" id="cj-V" min="50" max="600" step="10" value="250">
+    </div>
+    <div class="widget-row">
+      <label for="cj-u">Efectividad del aviso, u: <span id="cj-uv">0.50</span></label>
+      <input type="range" id="cj-u" min="0.1" max="0.8" step="0.01" value="0.5">
+    </div>
+    <div class="widget-row">
+      <label for="cj-modo">Umbral</label>
+      <select id="cj-modo">
+        <option value="propios" selected>El de cada consultora (A 0.5, B 0.3)</option>
+        <option value="comun">Un mismo umbral para las dos</option>
+      </select>
+      <label for="cj-t">Umbral común: <span id="cj-tv">0.30</span></label>
+      <input type="range" id="cj-t" min="0.02" max="0.9" step="0.01" value="0.3" disabled>
+      <button type="button" class="btn-widget btn-widget-ghost" id="cj-pstar">Llevar el umbral a p* = c ÷ (u × V)</button>
+    </div>
+    <div class="widget-stats">
+      <div class="widget-stat"><div class="k">p* = c ÷ (u × V)</div><div class="v" id="cj-pv">—</div></div>
+      <div class="widget-stat"><div class="k">Beneficio neto de A</div><div class="v" id="cj-bA">—</div></div>
+      <div class="widget-stat"><div class="k">Beneficio neto de B</div><div class="v" id="cj-bB">—</div></div>
+      <div class="widget-stat"><div class="k">Nadie cierra (no hacer nada)</div><div class="v">0</div></div>
+      <div class="widget-stat ok"><div class="k">Gana</div><div class="v" id="cj-gana">—</div></div>
+    </div>
+    <div id="cj-matrices" style="overflow-x:auto; font-size:0.9rem"></div>
+    <svg id="cj-curva" class="widget-svg" viewBox="0 0 680 300" role="img" aria-label="Beneficio neto de A y de B según la efectividad del aviso"></svg>
+    <div class="widget-note" id="cj-nota"></div>
+    <div class="widget-row" style="margin-top:.8em">
+      <button type="button" class="btn-widget btn-widget-ghost" id="cj-reset">Volver a la hoja de costos de Meridiano</button>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  const CERRO = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0];
+  const PROB_A = [0.2642, 0.0004, 0.1165, 0.3323, 0.0000, 0.4447, 0.2131, 0.4761, 0.3683, 0.4536, 0.0203, 0.0836, 0.0000, 0.0234, 0.1095, 0.0427, 0.0247, 0.6315, 0.0323, 0.0331, 0.1396, 0.2622, 0.0200, 0.1692, 0.9390, 0.3126, 0.0657, 0.0086, 0.5027, 0.0695, 0.6889, 0.1917, 0.0069, 0.9272, 0.0053, 0.3350, 0.2956, 0.0043, 0.0451, 0.1873, 0.0157, 0.5307, 0.3307, 0.0379, 0.5952, 0.0004, 0.0645, 0.0194, 0.0411, 0.0534, 0.0013, 0.0009, 0.0736, 0.4066, 0.0811, 0.4213, 0.0037, 0.2303, 0.0090, 0.0000, 0.0086, 0.0011, 0.0220, 0.0001, 0.7773, 0.0313, 0.0826, 0.0169, 0.3135, 0.0001, 0.1630, 0.1303, 0.1450, 0.0014, 0.0004, 0.3555, 0.1359, 0.5516, 0.6837, 0.2867, 0.5407, 0.0613, 0.4290, 0.0002, 0.0060, 0.0227, 0.0003, 0.0450, 0.2052, 0.0077, 0.1579, 0.6266, 0.0271, 0.0007, 0.0254, 0.1123, 0.1478, 0.0006, 0.0162, 0.0004, 0.0236, 0.0332, 0.2638, 0.0000, 0.2893, 0.0121, 0.0122, 0.0016, 0.5865, 0.0280, 0.3940, 0.0043, 0.1019, 0.2936, 0.1755, 0.0032, 0.0003, 0.2661, 0.0416, 0.0331];
+  const PROB_B = [0.476, 0.028, 0.062, 0.310, 0.044, 0.506, 0.096, 0.424, 0.526, 0.364, 0.374, 0.024, 0.016, 0.086, 0.062, 0.166, 0.052, 0.296, 0.076, 0.040, 0.138, 0.258, 0.112, 0.202, 0.554, 0.238, 0.036, 0.144, 0.428, 0.018, 0.292, 0.120, 0.026, 0.544, 0.046, 0.294, 0.192, 0.002, 0.134, 0.064, 0.058, 0.286, 0.274, 0.034, 0.576, 0.034, 0.038, 0.284, 0.074, 0.136, 0.046, 0.174, 0.048, 0.232, 0.198, 0.406, 0.034, 0.236, 0.062, 0.066, 0.036, 0.038, 0.040, 0.078, 0.726, 0.122, 0.154, 0.100, 0.318, 0.120, 0.082, 0.234, 0.470, 0.066, 0.010, 0.178, 0.064, 0.480, 0.696, 0.566, 0.394, 0.148, 0.270, 0.040, 0.036, 0.082, 0.060, 0.110, 0.380, 0.120, 0.064, 0.440, 0.050, 0.010, 0.098, 0.128, 0.434, 0.010, 0.124, 0.176, 0.042, 0.062, 0.188, 0.076, 0.274, 0.044, 0.070, 0.170, 0.686, 0.130, 0.686, 0.170, 0.152, 0.424, 0.040, 0.094, 0.022, 0.180, 0.060, 0.152];
+  const N = CERRO.length, UMBRAL_A = 0.5, UMBRAL_B = 0.3;
+  const C = { morado: "#5454e9", naranja: "#e9683b", verde: "#4cb979", gris: "#88898c", borde: "#cecfd4", tinta: "#1b1d29" };
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => Math.round(n).toString();
+  let prev = null;
+  function matriz(prob, t) {
+    let TP = 0, FP = 0, FN = 0, TN = 0;
+    for (let i = 0; i < N; i++) {
+      const aviso = prob[i] >= t - 1e-9;
+      if (aviso && CERRO[i] === 1) TP++; else if (aviso) FP++; else if (CERRO[i] === 1) FN++; else TN++;
+    }
+    return { TP, FP, FN, TN, E: TP + FP };
+  }
+  function estado() {
+    const c = Number($("cj-c").value), V = Number($("cj-V").value), u = Number($("cj-u").value);
+    const modo = $("cj-modo").value, t = Number($("cj-t").value);
+    const mA = matriz(PROB_A, modo === "propios" ? UMBRAL_A : t), mB = matriz(PROB_B, modo === "propios" ? UMBRAL_B : t);
+    const neto = (m, uu) => m.TP * uu * V - m.E * c;
+    const uq = mA.TP === mB.TP ? null : c * (mB.E - mA.E) / (V * (mB.TP - mA.TP));
+    return { c, V, u, modo, t, mA, mB, bA: neto(mA, u), bB: neto(mB, u), neto, uq, pstar: c / (u * V) };
+  }
+  function ganador(s) {
+    if (s.bA <= 0 && s.bB <= 0) return "ninguna: no hacer nada";
+    if (Math.abs(s.bA - s.bB) < 0.5) return "empate entre A y B";
+    return s.bA > s.bB ? "A" : "B";
+  }
+  function svgEl(tag, attrs, text) {
+    const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    if (text !== undefined) el.textContent = text;
+    return el;
+  }
+  function tabla(s) {
+    const fila = (nombre, m, b, col) => `<tr><td style="font-weight:600;color:${col}">${nombre}</td><td>${m.TP}</td><td>${m.FP}</td><td>${m.FN}</td><td>${m.TN}</td><td>${m.E}</td><td>${fmt(m.E * s.c)}</td><td style="font-weight:700">${fmt(b)}</td></tr>`;
+    $("cj-matrices").innerHTML = `<table style="margin:0.4em 0; width:100%"><thead><tr><th></th><th>aviso acertado (TP)</th><th>falsa alarma (FP)</th><th>cierre no detectado (FN)</th><th>viable confirmado (TN)</th><th>evaluaciones</th><th>costo de la lista</th><th>beneficio neto</th></tr></thead><tbody>` +
+      fila("Nadie cierra", { TP: 0, FP: 0, FN: 24, TN: 96, E: 0 }, 0, C.gris) + fila("Consultora A", s.mA, s.bA, C.morado) + fila("Consultora B", s.mB, s.bB, C.naranja) + `</tbody></table>`;
+  }
+  function dibujar(s) {
+    const svg = $("cj-curva"); svg.innerHTML = "";
+    const W = 680, H = 300, L = 70, R = 20, T = 24, B = 48;
+    const us = []; for (let x = 0.1; x <= 0.8001; x += 0.01) us.push(Math.round(x * 100) / 100);
+    const yA = us.map((uu) => s.neto(s.mA, uu)), yB = us.map((uu) => s.neto(s.mB, uu));
+    let ymin = Math.min(0, ...yA, ...yB), ymax = Math.max(0, ...yA, ...yB); if (ymax === ymin) ymax = ymin + 1;
+    const pad = (ymax - ymin) * 0.1; ymin -= pad; ymax += pad;
+    const sx = (x) => L + (x - 0.1) / 0.7 * (W - L - R), sy = (y) => T + (ymax - y) / (ymax - ymin) * (H - T - B);
+    svg.appendChild(svgEl("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: C.borde }));
+    svg.appendChild(svgEl("line", { x1: L, y1: T, x2: L, y2: H - B, stroke: C.borde }));
+    for (let x = 0.1; x <= 0.81; x += 0.1) svg.appendChild(svgEl("text", { x: sx(x), y: H - B + 16, "text-anchor": "middle", "font-size": 11, fill: C.gris }, x.toFixed(1)));
+    const paso = (ymax - ymin) / 4;
+    for (let i = 0; i <= 4; i++) { const v = ymin + i * paso; svg.appendChild(svgEl("line", { x1: L, y1: sy(v), x2: W - R, y2: sy(v), stroke: "#eeeef5" })); svg.appendChild(svgEl("text", { x: L - 6, y: sy(v) + 4, "text-anchor": "end", "font-size": 11, fill: C.gris }, fmt(v))); }
+    svg.appendChild(svgEl("text", { x: (L + W - R) / 2, y: H - 6, "text-anchor": "middle", "font-size": 12, fill: C.tinta }, "Efectividad del aviso, u (fracción de incumplimientos evitados)"));
+    svg.appendChild(svgEl("text", { x: 14, y: (T + H - B) / 2, "text-anchor": "middle", "font-size": 12, fill: C.tinta, transform: `rotate(-90 14 ${(T + H - B) / 2})` }, "Beneficio neto (millones)"));
+    svg.appendChild(svgEl("line", { x1: L, y1: sy(0), x2: W - R, y2: sy(0), stroke: C.gris, "stroke-dasharray": "5 4" }));
+    svg.appendChild(svgEl("text", { x: W - R - 4, y: sy(0) - 5, "text-anchor": "end", "font-size": 11, fill: C.gris }, "nadie cierra: 0"));
+    const path = (ys, col) => svg.appendChild(svgEl("path", { d: us.map((x, i) => (i ? "L" : "M") + sx(x).toFixed(1) + " " + sy(ys[i]).toFixed(1)).join(" "), fill: "none", stroke: col, "stroke-width": 3 }));
+    path(yA, C.morado); path(yB, C.naranja);
+    svg.appendChild(svgEl("line", { x1: sx(s.u), y1: T, x2: sx(s.u), y2: H - B, stroke: C.tinta, "stroke-dasharray": "4 4" }));
+    svg.appendChild(svgEl("text", { x: sx(s.u), y: T - 8, "text-anchor": "middle", "font-size": 11, fill: C.tinta }, "u = " + s.u.toFixed(2)));
+    if (s.uq !== null && s.uq >= 0.1 && s.uq <= 0.8) {
+      svg.appendChild(svgEl("circle", { cx: sx(s.uq), cy: sy(s.neto(s.mA, s.uq)), r: 6, fill: C.verde, stroke: "#fff", "stroke-width": 2 }));
+      svg.appendChild(svgEl("text", { x: sx(s.uq) + 8, y: sy(s.neto(s.mA, s.uq)) - 8, "font-size": 11, fill: C.verde }, "quiebre: u = " + s.uq.toFixed(3)));
+    }
+    svg.appendChild(svgEl("circle", { cx: sx(s.u), cy: sy(s.bA), r: 6, fill: C.morado, stroke: "#fff", "stroke-width": 2 }));
+    svg.appendChild(svgEl("circle", { cx: sx(s.u), cy: sy(s.bB), r: 6, fill: C.naranja, stroke: "#fff", "stroke-width": 2 }));
+    svg.appendChild(svgEl("text", { x: L + 8, y: T + 4, "font-size": 11, fill: C.morado }, "consultora A"));
+    svg.appendChild(svgEl("text", { x: L + 100, y: T + 4, "font-size": 11, fill: C.naranja }, "consultora B"));
+  }
+  function nota(s) {
+    const g = ganador(s);
+    const quiebre = s.uq === null ? "A y B encuentran los mismos cierres: las curvas no se cruzan" : (s.uq > 0 && s.uq < 1 ? `el quiebre está en u = ${s.uq.toFixed(3)}: por debajo gana ${s.mA.E < s.mB.E ? "A" : "B"}, por encima ${s.mA.E < s.mB.E ? "B" : "A"}` : "las curvas no se cruzan en el rango");
+    let t;
+    if (!prev) {
+      t = `Esta es la hoja de costos de Meridiano, con los umbrales de las consultoras: beneficio neto de A ${fmt(s.bA)}, de B ${fmt(s.bB)}, de no hacer nada 0. Gana ${g}; ${quiebre}. Baja la efectividad a 0.25 y mira quién gana.`;
+    } else if (prev.u !== s.u && prev.c === s.c && prev.V === s.V && prev.modo === s.modo && prev.t === s.t) {
+      t = `Pasaste de u = ${prev.u.toFixed(2)} a ${s.u.toFixed(2)}: A pasa de ${fmt(prev.bA)} a ${fmt(s.bA)} y B de ${fmt(prev.bB)} a ${fmt(s.bB)}. Gana ${g}. Las listas no cambiaron; cambió cuánto vale cada cierre encontrado (${fmt(s.u * s.V)} millones), y ${quiebre}.`;
+    } else if (prev.c !== s.c || prev.V !== s.V) {
+      t = `Cambió la hoja de costos: evaluar cuesta ${s.c} y un incumplimiento ${s.V}. p* pasa de ${prev.pstar.toFixed(3)} a ${s.pstar.toFixed(3)}; el beneficio de A es ${fmt(s.bA)} y el de B ${fmt(s.bB)}: gana ${g}. Ahora ${quiebre}.`;
+    } else {
+      t = s.modo === "propios"
+        ? `De vuelta a los umbrales de las consultoras (A 0.5, B 0.3): A da ${s.mA.E} avisos y encuentra ${s.mA.TP} cierres; B da ${s.mB.E} y encuentra ${s.mB.TP}. Beneficio: A ${fmt(s.bA)}, B ${fmt(s.bB)}; gana ${g}.`
+        : `Con un mismo umbral de ${s.t.toFixed(2)} para las dos: A da ${s.mA.E} avisos y encuentra ${s.mA.TP} de los 24 cierres; B da ${s.mB.E} y encuentra ${s.mB.TP}. Beneficio: A ${fmt(s.bA)}, B ${fmt(s.bB)}; gana ${g}. Los cortes de 0.5 y 0.3 los eligieron las consultoras, no Meridiano: con p* = ${s.pstar.toFixed(3)} las listas son otras.`;
+    }
+    if (s.bA <= 0 && s.bB <= 0) t += " Con estos costos ninguna le gana a no hacer nada.";
+    $("cj-nota").textContent = t;
+  }
+  function actualizar() {
+    const s = estado();
+    $("cj-cv").textContent = s.c; $("cj-Vv").textContent = s.V; $("cj-uv").textContent = s.u.toFixed(2); $("cj-tv").textContent = s.t.toFixed(2);
+    $("cj-t").disabled = s.modo === "propios";
+    $("cj-pv").textContent = s.pstar.toFixed(3);
+    $("cj-bA").textContent = fmt(s.bA); $("cj-bB").textContent = fmt(s.bB); $("cj-gana").textContent = ganador(s);
+    tabla(s); dibujar(s); nota(s);
+    prev = s;
+  }
+  ["cj-c", "cj-V", "cj-u", "cj-t"].forEach((id) => $(id).addEventListener("input", actualizar));
+  $("cj-modo").addEventListener("change", actualizar);
+  $("cj-pstar").addEventListener("click", () => { const s = estado(); $("cj-modo").value = "comun"; $("cj-t").value = Math.min(0.9, Math.max(0.02, Math.round(s.pstar * 100) / 100)); actualizar(); });
+  $("cj-reset").addEventListener("click", () => { $("cj-c").value = 12; $("cj-V").value = 250; $("cj-u").value = 0.5; $("cj-modo").value = "propios"; $("cj-t").value = 0.3; prev = null; actualizar(); });
+  actualizar();
+})();
+</script>
+```
+
+Tres cosas para observar en la caja:
+
+1. **La efectividad decide entre A y B, no los modelos.** Con la hoja de Meridiano el quiebre está en u = 0.288. Si la gerencia de inversión cree que su evaluación a fondo evita menos de tres de cada diez incumplimientos, le conviene la lista corta de A; si evita más, la lista larga de B.
+2. **El umbral también es un supuesto.** Lleva el umbral a p\*: con 0.096 las dos consultoras dan muchos más avisos y encuentran casi todos los cierres, y el beneficio neto sube. Los cortes de 0.5 y 0.3 fueron una elección de las consultoras, no una consecuencia de los costos de Meridiano.
+3. **Hay hojas de costos en las que ninguna vale.** Sube el costo de evaluar y baja la pérdida evitada hasta que las dos curvas queden bajo el cero. No hacer nada es una opción con beneficio exactamente cero, y a veces gana.
+
+# El ranking de modelos
+
+Todo lo anterior cabe en el <span class="term">ranking de modelos</span>: dos tablas, una por target, que el task 4 pide y que trae el sobre sellado. La de **cierre** (avisos, cierres encontrados, falsas alarmas, las tres métricas y el beneficio neto con las dos efectividades) y la de **ventas** (MAE con su margen, RMSE, la comparación pareada contra la regla del sector y el veredicto de cada fila). En las celdas que siguen se construyen paso a paso y se recalculan con otra hoja de costos: son la herramienta de la parte 1 del task.
+
+# El código de la semana 4
+
+Las mismas cifras, celda a celda y en tu navegador. Al cargar la página quedan en línea los 120 locales del lote de validación, las predicciones de las dos consultoras y la hoja de costos de Meridiano, y la primera celda corre sola. Las demás se ejecutan con su botón, de una en una y en orden —cada celda usa objetos de las anteriores—; puedes cambiar un número, un umbral o un costo, y volver a ejecutar. El panel **Environment**, abajo a la derecha, muestra los objetos que van quedando en memoria.
+
+**La primera carga** tarda unos segundos mientras el navegador descarga R; el botón *Run Code* de cada celda se habilita al terminar.
 
 ```{webr-r}
 #| context: setup
