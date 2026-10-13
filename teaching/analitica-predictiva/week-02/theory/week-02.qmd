@@ -1,0 +1,413 @@
+---
+title: "Vigilar sin tragar entero"
+subtitle: "Analítica Predictiva y Prescriptiva · TIC-60286 · Semana 2 · Teoría"
+lang: es
+---
+
+::: {.callout-key}
+<div class="callout-title">En una frase</div>
+Lo que pasa afuera cambia la decisión más que lo que pasa adentro. Esta semana aprendes a mirar el entorno con un método: qué cuenta como señal, a qué fuente creerle, qué hacer cuando el dato oficial no existe, y qué mueve a qué.
+:::
+
+**Tiempo de estudio:** 35 a 45 minutos. **Qué necesitas:** este navegador. Las tres partes interactivas (el clasificador de titulares, la línea y el rango, la matriz de influencia) están en la página; esta semana no hay celdas de R.
+
+# El taxi de 2005
+
+Imagina una empresa de taxis en 2005. Un pronóstico razonable habría proyectado la flota con los datos de los últimos años: tantos carros, tantos viajes, tanto crecimiento. Mientras tanto, afuera pasaban tres cosas que no estaban en esa serie: los teléfonos empezaban a traer GPS, los pagos con tarjeta se movían al celular y una generación se acostumbraba a pedir todo desde una pantalla. Ninguna de las tres hablaba de taxis. Siete años después existía Uber.
+
+Las señales estaban ahí. Lo que faltaba no era información: era alguien que las mirara con una regla. Eso es la <span class="term">vigilancia del entorno</span>: buscar afuera, de forma constante y con criterio, lo que puede cambiar una decisión.
+
+Para la junta directiva de Latitud, el entorno decide buena parte de la pregunta. Cuánto vendería la primera tienda en Barranquilla depende de los arriendos comerciales, del gasto de los hogares y de la competencia de las cadenas de descuento; cuánto crece el Club depende de lo que hagan las plataformas de domicilios y del presupuesto de los hogares; y la inflación de alimentos presiona el margen de toda la operación, porque encarece la mercancía de las tiendas y la canasta del Club.
+
+# Tres cosas distintas: señal, tendencia, impulsor
+
+No todo lo que se publica pesa lo mismo. La regla de este curso es deliberadamente simple, porque obliga a **contar fuentes** en lugar de confiar en la intuición:
+
+| Qué es | La regla | Ejemplo del sector |
+|---|---|---|
+| <span class="term">señal</span> | Un hecho que aparece **una vez**, en una fuente | Una cadena extranjera de conveniencia anuncia que estudia entrar a Colombia |
+| <span class="term">tendencia</span> | Un hecho que aparece **dos o más veces**, en fuentes distintas | Tres informes del año registran una caída de las visitas a los puntos de venta de conveniencia en Bogotá |
+| <span class="term">impulsor</span> | Una tendencia que además viene con **una magnitud económica**: pesos, precios, tasas, volúmenes | Los precios mayoristas de los alimentos suben a una tasa de dos dígitos por segundo año consecutivo, según el DANE y según Fenalco |
+| ruido | Lo que no tiene fuente verificable, o no toca la decisión | "Las tiendas de conveniencia están de moda", dice un video |
+
+Dos cosas más de cada hecho:
+
+- **La dirección.** Si favorece a Latitud es una oportunidad; si la amenaza, un riesgo. Un mismo hecho puede ser las dos cosas según la alternativa, o pesar distinto en cada una: los arriendos altos en Barranquilla son un riesgo para la tienda (A) y apenas afectan al Club (B).
+- **El ascenso.** Una señal de hoy puede ser la tendencia de mañana. Por eso la vigilancia es constante: la tabla que armes esta semana se vuelve, en la semana 7, la lista de cosas que hay que seguir mirando.
+
+::: {.callout-key}
+<div class="callout-title">Lo que importa</div>
+Un hecho con cifras que aparece una sola vez sigue siendo una señal. Se vuelve impulsor cuando otra fuente lo confirma. La regla te protege del titular espectacular que nadie más reporta.
+:::
+
+# ¿Quién lo dice y qué gana diciéndolo?
+
+Antes de contar un hecho, hay que saber de dónde viene. Las fuentes no son iguales:
+
+| Fuente | Qué suele traer | Con qué cuidado |
+|---|---|---|
+| Oficial (DANE, Banco de la República) | Series largas, método público, rezago de semanas o meses | Mide agregados; no ve a tu zona ni a tu nicho |
+| Gremial (Fenalco, cámaras de comercio) | Cifras del sector, antes que nadie | Es parte interesada: lee el dato, no la interpretación |
+| Prensa económica | Reúne lo anterior y lo vuelve noticia | Recicla: dos notas pueden ser la misma fuente contada dos veces |
+| Empresas y plataformas | Datos finos y frescos de su propio negocio | Publican lo que les conviene publicar |
+| Académica | Método cuidadoso, preguntas precisas | Llega tarde y responde una pregunta que no es exactamente la tuya |
+
+Tres preguntas para cualquier fuente: **¿quién mide?**, **¿cada cuánto y con qué rezago?**, **¿a quién no ve?** Con las respuestas calificas la fuente como de calidad alta, media o baja; esa calificación acompaña al dato en el libro de supuestos del expediente.
+
+Y la <span class="term">prueba de la fuente</span>, que toma un minuto: abrir el enlace, mirar la fecha, mirar quién lo publica, y encontrar la frase exacta que respalda el hecho. Si no está, el hecho no existe.
+
+::: {.callout-warning title="La regla de la cifra"}
+Un hecho sin enlace no cuenta. Una fuente que no abriste no cuenta. Dos notas de prensa que citan el mismo informe cuentan como **una** fuente.
+:::
+
+# Cuando el dato oficial no existe o llega tarde
+
+Para muchas decisiones el dato que necesitas no existe, o existe pero llega en meses. ¿Cuánta gente entra hoy a los puntos de venta de conveniencia del norte de Barranquilla? Ninguna estadística oficial lo dice. Ahí entran los <span class="term">datos alternativos</span>: huellas que la actividad deja en otra parte y que alguien puede leer.
+
+| Fuente alternativa | Qué mide | Cada cuánto | A quién no ve |
+|---|---|---|---|
+| Luces nocturnas (satélite) | La escala de la operación urbana | Diario, con nubes | A un negocio pequeño; a lo que pasa de día |
+| Horas populares (mapas) | La afluencia a un establecimiento frente a su patrón habitual | Semanal | La caja: gente no es venta |
+| Reseñas en línea | El flujo de clientes y lo que dicen | Continuo | A quien no reseña; sesga hacia los extremos |
+| Búsquedas (tendencias) | El interés por un término en una ciudad | Semanal | La demanda real: buscar no es comprar |
+| Portales de arriendo | El precio pedido por metro cuadrado de local | Continuo | El precio pactado, que suele ser menor |
+| Ofertas de empleo | La expansión de los competidores | Continuo | A las empresas que contratan sin publicar |
+| Movilidad (celulares, tránsito) | Cuánta gente pasa por una zona | Diario | Quién es esa gente |
+
+Cada una es un **sustituto**: mide algo parecido a lo que quieres, con un sesgo de cobertura que hay que conocer. En la sesión verás tres casos en los que esto funcionó (reseñas que anticipan la economía local, luces que miden crecimiento donde no hay estadísticas, celulares que mapean la pobreza) y uno de Cali con el que trabaja el profesor.
+
+## ¿Señal, tendencia, impulsor o ruido?
+
+Doce titulares construidos para el ejercicio (en el task trabajarás con fuentes reales). Clasifícalos con la regla; la retroalimentación te dice también la dirección.
+
+```{=html}
+<div class="widget-card" id="wg-quiz">
+  <div class="widget-head">¿Señal, tendencia, impulsor o ruido? · Doce titulares del sector</div>
+  <div class="widget-body">
+    <div class="widget-instr">Cuenta las fuentes y mira si hay una magnitud económica. Lee cada titular como lo leería el comité de inversiones de Latitud.</div>
+    <div id="quiz-items"></div>
+    <div class="quiz-score" id="quiz-score"></div>
+  </div>
+</div>
+<script>
+(function () {
+  const OPC = ["Señal", "Tendencia", "Impulsor", "Ruido"];
+  const ITEMS = [
+    { t: "Una cadena extranjera de conveniencia anuncia que estudia entrar a Colombia en 2027.", a: 0, fb: "Aparece una vez y sin magnitud: señal. Riesgo para la tienda (A), por la competencia." },
+    { t: "Tercer informe del año que registra una caída de las visitas a los puntos de venta de conveniencia en Bogotá.", a: 1, fb: "Dos o más fuentes, sin cifra económica en el titular: tendencia. Riesgo para las tiendas; neutro para el Club, que entrega a domicilio." },
+    { t: "Los precios mayoristas de los alimentos suben a una tasa de dos dígitos por segundo año consecutivo, según el DANE y según Fenalco.", a: 2, fb: "Dos o más fuentes y una magnitud económica (un alza de precios): impulsor. Riesgo de costos para todas las alternativas." },
+    { t: "Un creador de contenido dice en un video que las tiendas de conveniencia \"están de moda\".", a: 3, fb: "Sin fuente verificable y sin hecho: ruido. No entra a la tabla." },
+    { t: "El arriendo comercial pedido en el norte de Barranquilla subió 18 % en 2026, según un portal inmobiliario; en 2025 había subido 12 %, según la Cámara de Comercio.", a: 2, fb: "Dos fuentes y una magnitud: impulsor. Riesgo directo para la tienda (A) y para el piloto (C)." },
+    { t: "Un suscriptor del Club se queja en redes sociales del retraso en la entrega de su canasta.", a: 0, fb: "Una sola ocurrencia: señal. Riesgo para el Club (B) si se repite; hoy, algo que vigilar." },
+    { t: "El DANE reporta que la inflación de alimentos lleva tres meses por encima de la inflación total.", a: 1, fb: "Es una fuente, pero el hecho se repite en el tiempo y la propia serie oficial lo confirma: tendencia. Riesgo para el margen de las tiendas y del Club." },
+    { t: "Tres plataformas de domicilios anuncian nuevas comisiones para los comercios aliados este semestre.", a: 1, fb: "Varias ocurrencias, sin cifra en el titular: tendencia. Riesgo para el margen de las tiendas; oportunidad relativa para el Club, que no depende de ellas." },
+    { t: "El Banco de la República recorta la tasa de interés por cuarta vez consecutiva, a 9.5 %.", a: 2, fb: "Repetido y con una magnitud económica (la tasa): impulsor. Oportunidad: financia a menor costo cualquier alternativa y alivia el presupuesto de los hogares." },
+    { t: "Un estudio universitario estima que las ventas del canal de conveniencia crecen 9 % anual en Colombia desde 2022.", a: 0, fb: "Trae una cifra, pero aparece una sola vez: sigue siendo señal hasta que otra fuente la confirme. Oportunidad para todas las alternativas si se confirma." },
+    { t: "El Festival Petronio Álvarez se suspende por el sismo; la agenda cultural se mueve al último trimestre.", a: 0, fb: "Un evento, una vez: señal. Riesgo de corto plazo para las ventas de las tiendas de Cali." },
+    { t: "Un comentario anónimo en un foro asegura que \"van a cerrar la mitad de las tiendas de barrio de Barranquilla\".", a: 3, fb: "Anónimo, sin enlace, sin hecho: ruido. Si te inquieta, busca el dato en la Cámara de Comercio." }
+  ];
+  const cont = document.getElementById("quiz-items");
+  let hechos = 0, aciertos = 0;
+  ITEMS.forEach((it, i) => {
+    const div = document.createElement("div"); div.className = "quiz-item";
+    const q = document.createElement("div"); q.className = "quiz-q"; q.textContent = (i + 1) + ". " + it.t; div.appendChild(q);
+    const opts = document.createElement("div"); opts.className = "quiz-opts";
+    const fb = document.createElement("div"); fb.className = "quiz-fb";
+    let listo = false;
+    OPC.forEach((o, j) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = o;
+      b.addEventListener("click", () => {
+        if (listo) return; listo = true; hechos++;
+        if (j === it.a) { b.classList.add("ok"); aciertos++; fb.textContent = "Correcto. " + it.fb; }
+        else { b.classList.add("bad"); opts.children[it.a].classList.add("ok"); fb.textContent = "Es " + OPC[it.a].toLowerCase() + ". " + it.fb; }
+        document.getElementById("quiz-score").textContent = hechos === ITEMS.length ? `Resultado: ${aciertos} de ${ITEMS.length}.` : `Llevas ${hechos} de ${ITEMS.length}.`;
+      });
+      opts.appendChild(b);
+    });
+    div.appendChild(opts); div.appendChild(fb); cont.appendChild(div);
+  });
+})();
+</script>
+```
+
+# Leer una tendencia sin engañarse
+
+Hay un error que se comete con buena fe: tomar una serie que crece, extrapolar el crecimiento promedio y presentar el resultado como **el** futuro. Eso no es una tendencia leída; es un pronóstico disfrazado, con un solo número y sin su incertidumbre.
+
+La alternativa honesta es sencilla: mira cómo ha variado el crecimiento en el pasado y proyecta un **rango**. El Club Latitud, el programa de suscripción de la cadena, sirve de ejemplo: 45 meses de suscriptores, de enero de 2023 a septiembre de 2026.
+
+```{=html}
+<div class="widget-card" id="wg-club">
+  <div class="widget-head">La línea y el rango · Suscriptores del Club Latitud, 2023 a 2026</div>
+  <div class="widget-body">
+    <div class="widget-instr">La serie termina en 3.908 suscriptores. Elige el horizonte y compara dos maneras de mirar el futuro: la línea del crecimiento promedio y el rango de lo que el crecimiento anual ha sido de verdad (del percentil 10 al 90).</div>
+    <div class="widget-row">
+      <label for="cl-h">Horizonte</label>
+      <select id="cl-h">
+        <option value="12">12 meses</option>
+        <option value="24" selected>24 meses</option>
+        <option value="36">36 meses</option>
+      </select>
+      <label><input type="checkbox" id="cl-linea" checked> La línea del promedio</label>
+      <label><input type="checkbox" id="cl-rango"> El rango honesto</label>
+    </div>
+    <div class="widget-stats">
+      <div class="widget-stat warn"><div class="k">La línea dice</div><div class="v" id="cl-vlinea">—</div></div>
+      <div class="widget-stat ok"><div class="k">El rango honesto (P10 a P90)</div><div class="v" id="cl-vrango">—</div></div>
+      <div class="widget-stat"><div class="k">Crecimiento anual histórico (P10 · P50 · P90)</div><div class="v" id="cl-vcrec">—</div></div>
+    </div>
+    <svg id="cl-svg" class="widget-svg" viewBox="0 0 680 320" role="img" aria-label="Serie de suscriptores con la línea y el rango"></svg>
+    <div class="widget-note" id="cl-nota"></div>
+  </div>
+</div>
+<script>
+(function () {
+  const CLUB = [2600, 2630, 2629, 2704, 2741, 2740, 2782, 2833, 2879, 2896, 2976, 3018, 3025, 2973, 3041, 3069, 3097, 3115, 3129, 3134, 3151, 3211, 3244, 3197, 3252, 3280, 3305, 3278, 3291, 3338, 3425, 3453, 3502, 3533, 3508, 3524, 3541, 3572, 3653, 3721, 3749, 3773, 3841, 3903, 3908];
+  const n = CLUB.length;
+  const C = { morado: "#5454e9", naranja: "#e9683b", verde: "#4cb979", gris: "#88898c", borde: "#cecfd4", tinta: "#1b1d29" };
+  const $ = (id) => document.getElementById(id);
+  const fmt = (x) => Math.round(x).toLocaleString("es-CO");
+  const pct = (x) => (100 * x).toFixed(1).replace(".", ".") + " %";
+  const yoy = []; for (let i = 12; i < n; i++) yoy.push(CLUB[i] / CLUB[i - 12] - 1);
+  const ord = [...yoy].sort((a, b) => a - b);
+  const q = (p) => { const h = (ord.length - 1) * p, lo = Math.floor(h); return ord[lo] + (h - lo) * ((ord[lo + 1] ?? ord[lo]) - ord[lo]); };
+  const p10 = q(0.1), p50 = q(0.5), p90 = q(0.9), media = yoy.reduce((a, b) => a + b, 0) / yoy.length;
+  function svgEl(tag, attrs, text) { const el = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) el.setAttribute(k, attrs[k]); if (text !== undefined) el.textContent = text; return el; }
+  function dibujar() {
+    const h = Number($("cl-h").value), conLinea = $("cl-linea").checked, conRango = $("cl-rango").checked;
+    const ult = CLUB[n - 1];
+    const linea = ult * Math.pow(1 + media, h / 12);
+    const b10 = ult * Math.pow(1 + p10, h / 12), b50 = ult * Math.pow(1 + p50, h / 12), b90 = ult * Math.pow(1 + p90, h / 12);
+    $("cl-vlinea").textContent = conLinea ? fmt(linea) : "—";
+    $("cl-vrango").textContent = conRango ? fmt(b10) + " a " + fmt(b90) : "—";
+    $("cl-vcrec").textContent = pct(p10) + " · " + pct(p50) + " · " + pct(p90);
+    const svg = $("cl-svg"); svg.innerHTML = "";
+    const W = 680, H = 320, L = 64, R = 20, T = 18, B = 40;
+    const xmax = n + h; const ymin = 2400, ymax = Math.max(b90, linea, ult) * 1.06;
+    const sx = (i) => L + (i / (xmax - 1)) * (W - L - R);
+    const sy = (v) => T + (1 - (v - ymin) / (ymax - ymin)) * (H - T - B);
+    svg.appendChild(svgEl("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: C.borde }));
+    svg.appendChild(svgEl("line", { x1: L, y1: T, x2: L, y2: H - B, stroke: C.borde }));
+    const etiquetas = [[0, "ene-23"], [12, "ene-24"], [24, "ene-25"], [36, "ene-26"], [44, "sep-26"], [44 + h, "+" + h + " m"]];
+    etiquetas.forEach(([i, t]) => svg.appendChild(svgEl("text", { x: sx(i), y: H - B + 16, "text-anchor": "middle", "font-size": 11, fill: C.gris }, t)));
+    for (let v = 2500; v <= ymax; v += 500) { svg.appendChild(svgEl("line", { x1: L, y1: sy(v), x2: W - R, y2: sy(v), stroke: "#eeeef5" })); svg.appendChild(svgEl("text", { x: L - 6, y: sy(v) + 4, "text-anchor": "end", "font-size": 11, fill: C.gris }, fmt(v))); }
+    if (conRango) {
+      svg.appendChild(svgEl("polygon", { points: `${sx(n - 1)},${sy(ult)} ${sx(xmax - 1)},${sy(b10)} ${sx(xmax - 1)},${sy(b90)}`, fill: C.verde, opacity: 0.25 }));
+      svg.appendChild(svgEl("line", { x1: sx(n - 1), y1: sy(ult), x2: sx(xmax - 1), y2: sy(b50), stroke: C.verde, "stroke-width": 2, "stroke-dasharray": "5 4" }));
+      svg.appendChild(svgEl("text", { x: sx(xmax - 1) - 4, y: sy(b90) - 6, "text-anchor": "end", "font-size": 11, fill: C.verde }, "rango: " + fmt(b10) + " a " + fmt(b90)));
+    }
+    if (conLinea) {
+      svg.appendChild(svgEl("line", { x1: sx(n - 1), y1: sy(ult), x2: sx(xmax - 1), y2: sy(linea), stroke: C.naranja, "stroke-width": 2.5 }));
+      svg.appendChild(svgEl("text", { x: sx(xmax - 1) - 4, y: sy(linea) + (conRango ? 16 : -6), "text-anchor": "end", "font-size": 11, fill: C.naranja }, "la línea: " + fmt(linea)));
+    }
+    const d = CLUB.map((v, i) => (i ? "L" : "M") + sx(i).toFixed(1) + " " + sy(v).toFixed(1)).join(" ");
+    svg.appendChild(svgEl("path", { d, fill: "none", stroke: C.morado, "stroke-width": 3 }));
+    let nota = `A ${h} meses, la línea del crecimiento promedio (${pct(media)} anual) da un solo número: ${fmt(linea)} suscriptores.`;
+    if (conRango) nota += ` El crecimiento anual real estuvo entre ${pct(p10)} y ${pct(p90)} en el 80 % de los meses; proyectado, el rango va de ${fmt(b10)} a ${fmt(b90)}: ${fmt(b90 - b10)} suscriptores de diferencia entre un extremo y otro. Ese ancho es la incertidumbre que la línea esconde.`;
+    else nota += " Activa el rango honesto para ver lo que la línea no dice.";
+    $("cl-nota").textContent = nota;
+  }
+  ["cl-h", "cl-linea", "cl-rango"].forEach((id) => $(id).addEventListener("change", dibujar));
+  dibujar();
+})();
+</script>
+```
+
+Dos lecciones del widget. Primera: el rango no es pesimismo; es lo que la propia historia de la serie dice. Segunda: cuanto más largo el horizonte, más ancho el rango, y más vale tener un plan para los dos extremos que una cifra exacta para el centro. Esa es la puerta de los escenarios de la semana 7.
+
+# ¿Qué mueve a qué? La matriz de influencia
+
+Después de vigilar tienes una lista de variables del entorno. Algunas mueven a las demás; otras solo reciben el movimiento. Distinguirlas es lo que hace la <span class="term">matriz de influencia</span>, una herramienta de lápiz que viene de la prospectiva estratégica.
+
+Funciona así: pones las variables en filas y en columnas, y en cada celda anotas cuánto influye la variable de la fila sobre la de la columna, de 0 (nada) a 3 (mucho). Luego sumas:
+
+- la <span class="term">motricidad</span> de una variable es la suma de su fila: cuánto mueve a las demás;
+- la <span class="term">dependencia</span> es la suma de su columna: cuánto la mueven las demás.
+
+El ejemplo resuelto, con seis variables del entorno de Latitud:
+
+| Influye sobre → | Inflación | Arriendos | Gasto | Competencia | Tasa | Plataformas | **Motricidad** |
+|---|---|---|---|---|---|---|---|
+| Inflación de alimentos | · | 0 | 2 | 1 | 0 | 0 | **3** |
+| Arriendos comerciales | 0 | · | 1 | 2 | 0 | 1 | **4** |
+| Gasto de los hogares | 1 | 2 | · | 3 | 0 | 2 | **8** |
+| Competencia de cadenas de descuento | 1 | 2 | 2 | · | 0 | 1 | **6** |
+| Tasa de interés | 0 | 2 | 3 | 2 | · | 1 | **8** |
+| Plataformas de domicilios | 0 | 1 | 2 | 2 | 0 | · | **5** |
+| **Dependencia** | **2** | **7** | **10** | **10** | **0** | **5** | |
+
+Con las dos sumas, cada variable cae en una zona del plano:
+
+| Zona | Motricidad | Dependencia | Qué significa | En el ejemplo |
+|---|---|---|---|---|
+| Motrices | alta | baja | Mueven el sistema y nadie las mueve: son el entorno de verdad | Tasa de interés |
+| Críticas | alta | alta | Mueven y son movidas: inestables, amplifican los cambios | Gasto de los hogares, competencia de cadenas de descuento |
+| Dependientes | baja | alta | Son resultado de lo demás | Arriendos comerciales |
+| Autónomas | baja | baja | Van por su cuenta; se vigilan, no se modelan | Inflación de alimentos, plataformas de domicilios |
+
+Las **críticas** y las **motrices** son las candidatas a ejes de escenario. De ellas, las dos más inciertas a tres años serán los ejes de la semana 7.
+
+::: {.callout-workflow}
+<div class="callout-title">Cómo se llena</div>
+En equipo, celda por celda, discutiendo. El valor es un juicio, no un cálculo, y por eso dos equipos pueden llegar a planos distintos con las mismas variables: esa diferencia es lo que se discute en la sesión. Un asistente de IA puede sugerir variables; la matriz la llenan ustedes.
+:::
+
+```{=html}
+<div class="widget-card" id="wg-matriz">
+  <div class="widget-head">La matriz de influencia · Llénala a mano</div>
+  <div class="widget-body">
+    <div class="widget-instr">Cada celda: cuánto influye la variable de la fila sobre la de la columna, de 0 a 3. Puedes cambiar los nombres. El plano se actualiza solo. "Copiar texto" prepara lo que entregas en el task.</div>
+    <div class="widget-row">
+      <label for="mx-n">Variables</label>
+      <select id="mx-n"><option value="6" selected>6</option><option value="7">7</option><option value="8">8</option></select>
+      <button type="button" class="btn-widget btn-widget-ghost" id="mx-ejemplo">Cargar el ejemplo resuelto</button>
+      <button type="button" class="btn-widget btn-widget-ghost" id="mx-limpiar">Limpiar</button>
+      <button type="button" class="btn-widget" id="mx-copiar">Copiar texto</button>
+    </div>
+    <div style="overflow-x:auto"><table id="mx-tabla" style="font-size:0.85rem; border-collapse:collapse"></table></div>
+    <svg id="mx-svg" class="widget-svg" viewBox="0 0 680 400" role="img" aria-label="Plano de motricidad y dependencia"></svg>
+    <div class="widget-note" id="mx-nota">Carga el ejemplo o empieza a llenar.</div>
+    <textarea id="mx-texto" style="width:100%; height:110px; margin-top:.6em; font-family: var(--font-mono); font-size:.8rem; border:1px solid var(--borde); border-radius:8px; padding:8px" placeholder="Aquí aparece el texto para el task."></textarea>
+  </div>
+</div>
+<script>
+(function () {
+  const EJEMPLO_NOMBRES = ["Inflación de alimentos", "Arriendos comerciales", "Gasto de los hogares", "Competencia de cadenas de descuento", "Tasa de interés", "Plataformas de domicilios"];
+  const EJEMPLO = [[0,0,2,1,0,0], [0,0,1,2,0,1], [1,2,0,3,0,2], [1,2,2,0,0,1], [0,2,3,2,0,1], [0,1,2,2,0,0]];
+  const C = { morado: "#5454e9", moradoOsc: "#3a3acb", naranja: "#e9683b", verde: "#4cb979", gris: "#88898c", borde: "#cecfd4", tinta: "#1b1d29" };
+  const $ = (id) => document.getElementById(id);
+  let N = 6, nombres = EJEMPLO_NOMBRES.slice(), M = EJEMPLO.map((r) => r.map(() => 0));
+  function svgEl(tag, attrs, text) { const el = document.createElementNS("http://www.w3.org/2000/svg", tag); for (const k in attrs) el.setAttribute(k, attrs[k]); if (text !== undefined) el.textContent = text; return el; }
+  function construir() {
+    const t = $("mx-tabla"); t.innerHTML = "";
+    const thead = document.createElement("tr");
+    thead.appendChild(Object.assign(document.createElement("th"), { textContent: "fila → columna", style: "text-align:left; padding:4px 6px; color:#88898c; font-weight:600" }));
+    for (let j = 0; j < N; j++) { const th = document.createElement("th"); th.id = "mx-h" + j; th.textContent = nombres[j]; th.style.cssText = "padding:6px 6px; font-weight:600; color:#3a3acb; max-width:120px; font-size:.76rem; text-transform:none; letter-spacing:0; line-height:1.25; text-align:center"; thead.appendChild(th); }
+    thead.appendChild(Object.assign(document.createElement("th"), { textContent: "Motricidad", style: "padding:4px 6px; color:#3a3acb" }));
+    t.appendChild(thead);
+    for (let i = 0; i < N; i++) {
+      const tr = document.createElement("tr");
+      const td0 = document.createElement("td"); const inp = document.createElement("input"); inp.type = "text"; inp.value = nombres[i]; inp.style.cssText = "width:240px; font-size:.82rem; padding:3px 6px; border:1px solid #cecfd4; border-radius:6px";
+      inp.addEventListener("input", () => { nombres[i] = inp.value; $("mx-h" + i).textContent = inp.value; actualizar(); }); td0.appendChild(inp); tr.appendChild(td0);
+      for (let j = 0; j < N; j++) {
+        const td = document.createElement("td"); td.style.cssText = "padding:2px 4px; text-align:center";
+        if (i === j) { td.textContent = "·"; td.style.color = "#88898c"; }
+        else { const c = document.createElement("input"); c.type = "number"; c.min = 0; c.max = 3; c.step = 1; c.value = M[i][j]; c.style.cssText = "width:44px; text-align:center; padding:3px; border:1px solid #cecfd4; border-radius:6px";
+          c.addEventListener("input", () => { let v = Math.round(Number(c.value)); if (isNaN(v)) v = 0; v = Math.max(0, Math.min(3, v)); c.value = v; M[i][j] = v; actualizar(); }); td.appendChild(c); }
+        tr.appendChild(td);
+      }
+      const tm = document.createElement("td"); tm.id = "mx-m" + i; tm.style.cssText = "text-align:center; font-weight:700; color:#3a3acb"; tr.appendChild(tm);
+      t.appendChild(tr);
+    }
+    const trd = document.createElement("tr");
+    trd.appendChild(Object.assign(document.createElement("td"), { textContent: "Dependencia", style: "padding:4px 6px; font-weight:700; color:#3a3acb" }));
+    for (let j = 0; j < N; j++) { const td = document.createElement("td"); td.id = "mx-d" + j; td.style.cssText = "text-align:center; font-weight:700; color:#3a3acb"; trd.appendChild(td); }
+    trd.appendChild(document.createElement("td")); t.appendChild(trd);
+    actualizar();
+  }
+  function sumas() {
+    const mot = M.map((r) => r.reduce((a, b) => a + b, 0));
+    const dep = nombres.map((_, j) => M.reduce((a, r) => a + r[j], 0));
+    return { mot, dep };
+  }
+  function zona(m, d, mm, dm) { return m >= mm ? (d >= dm ? "crítica" : "motriz") : (d >= dm ? "dependiente" : "autónoma"); }
+  function actualizar() {
+    const { mot, dep } = sumas();
+    for (let i = 0; i < N; i++) { $("mx-m" + i).textContent = mot[i]; $("mx-d" + i).textContent = dep[i]; }
+    const total = mot.reduce((a, b) => a + b, 0);
+    const mm = total / N, dm = total / N;
+    const svg = $("mx-svg"); svg.innerHTML = "";
+    const W = 680, H = 400, L = 60, R = 20, T = 20, B = 46;
+    const maxv = Math.max(3 * (N - 1), 1);
+    const sx = (d) => L + (d / maxv) * (W - L - R), sy = (m) => T + (1 - m / maxv) * (H - T - B);
+    svg.appendChild(svgEl("rect", { x: L, y: T, width: W - L - R, height: H - T - B, fill: "#fbfbfe", stroke: C.borde }));
+    if (total > 0) {
+      svg.appendChild(svgEl("line", { x1: sx(dm), y1: T, x2: sx(dm), y2: H - B, stroke: C.gris, "stroke-dasharray": "5 4" }));
+      svg.appendChild(svgEl("line", { x1: L, y1: sy(mm), x2: W - R, y2: sy(mm), stroke: C.gris, "stroke-dasharray": "5 4" }));
+    }
+    svg.appendChild(svgEl("text", { x: L + 8, y: T + 16, "font-size": 11, fill: C.gris }, "MOTRICES"));
+    svg.appendChild(svgEl("text", { x: W - R - 8, y: T + 16, "font-size": 11, fill: C.naranja, "text-anchor": "end" }, "CRÍTICAS"));
+    svg.appendChild(svgEl("text", { x: L + 8, y: H - B - 8, "font-size": 11, fill: C.gris }, "AUTÓNOMAS"));
+    svg.appendChild(svgEl("text", { x: W - R - 8, y: H - B - 8, "font-size": 11, fill: C.gris, "text-anchor": "end" }, "DEPENDIENTES"));
+    svg.appendChild(svgEl("text", { x: (L + W - R) / 2, y: H - 8, "font-size": 12, fill: C.tinta, "text-anchor": "middle" }, "Dependencia: cuánto la mueven las demás"));
+    svg.appendChild(svgEl("text", { x: 14, y: (T + H - B) / 2, "font-size": 12, fill: C.tinta, "text-anchor": "middle", transform: `rotate(-90 14 ${(T + H - B) / 2})` }, "Motricidad: cuánto mueve a las demás"));
+    for (let i = 0; i < N; i++) {
+      const z = total > 0 ? zona(mot[i], dep[i], mm, dm) : "";
+      svg.appendChild(svgEl("circle", { cx: sx(dep[i]), cy: sy(mot[i]), r: 7, fill: z === "crítica" ? C.naranja : (z === "motriz" ? C.morado : C.verde), stroke: "#fff", "stroke-width": 2 }));
+      svg.appendChild(svgEl("text", { x: sx(dep[i]) + 10, y: sy(mot[i]) + 4, "font-size": 11, fill: C.tinta }, nombres[i]));
+    }
+    const criticas = nombres.filter((_, i) => total > 0 && zona(mot[i], dep[i], mm, dm) === "crítica");
+    const motrices = nombres.filter((_, i) => total > 0 && zona(mot[i], dep[i], mm, dm) === "motriz");
+    $("mx-nota").textContent = total === 0 ? "Carga el ejemplo o empieza a llenar." :
+      `Motrices: ${motrices.length ? motrices.join(", ") : "ninguna"}. Críticas: ${criticas.length ? criticas.join(", ") : "ninguna"}. Las candidatas a ejes de escenario salen de estas dos zonas; de ellas, elige las dos más inciertas a tres años.`;
+  }
+  function texto() {
+    const { mot, dep } = sumas();
+    const total = mot.reduce((a, b) => a + b, 0), mm = total / N, dm = total / N;
+    let s = "Matriz de influencia (fila influye sobre columna, 0 a 3)\n";
+    s += "variable | " + nombres.join(" | ") + " | motricidad\n";
+    for (let i = 0; i < N; i++) s += nombres[i] + " | " + M[i].map((v, j) => (i === j ? "·" : v)).join(" | ") + " | " + mot[i] + "\n";
+    s += "dependencia | " + dep.join(" | ") + "\n\nZonas:\n";
+    for (let i = 0; i < N; i++) s += `- ${nombres[i]}: motricidad ${mot[i]}, dependencia ${dep[i]}, ${total > 0 ? zona(mot[i], dep[i], mm, dm) : "sin llenar"}\n`;
+    return s;
+  }
+  $("mx-n").addEventListener("change", () => {
+    N = Number($("mx-n").value);
+    while (nombres.length < N) nombres.push("Variable " + (nombres.length + 1));
+    nombres = nombres.slice(0, N);
+    M = Array.from({ length: N }, (_, i) => Array.from({ length: N }, (_, j) => (M[i] && M[i][j]) ? M[i][j] : 0));
+    construir();
+  });
+  $("mx-ejemplo").addEventListener("click", () => { N = 6; $("mx-n").value = "6"; nombres = EJEMPLO_NOMBRES.slice(); M = EJEMPLO.map((r) => r.slice()); construir(); });
+  $("mx-limpiar").addEventListener("click", () => { M = M.map((r) => r.map(() => 0)); construir(); });
+  $("mx-copiar").addEventListener("click", () => { const s = texto(); $("mx-texto").value = s; if (navigator.clipboard) navigator.clipboard.writeText(s).catch(() => {}); });
+  construir();
+})();
+</script>
+```
+
+# Reducible o irreducible
+
+La última distinción de la semana ordena todo lo que sigue en el curso. De cada incertidumbre pregúntate si se puede **reducir** comprando información, o si hay que **administrarla**:
+
+- **Reducible:** cuánto vendería un local en Barranquilla; qué riesgo de cierre tiene un perfil de punto de venta; cuánto responde el Club a la inversión en adquisición digital. Hay datos, hay estudios, se puede hacer un piloto. Eso es lo que hacen las semanas 3 a 6.
+- **Irreducible:** la inflación de alimentos en 2028, la tasa de interés en dos años, si una cadena extranjera entra o no. Nadie lo sabe, y comprar más datos no lo resuelve. Eso se administra con escenarios, en la semana 7.
+
+Las dos incertidumbres críticas que elijas en el task deben ser de las segundas. Si una resulta reducible, no va a los escenarios: va a la lista de datos que hay que conseguir.
+
+::: {.callout-connect}
+<div class="callout-title">En la sesión</div>
+- **El paper:** Glaeser, Kim y Luca (2017) midieron la economía local de Estados Unidos con los datos de Yelp antes de que llegaran las estadísticas oficiales. Qué preguntaron, con qué datos, qué encontraron y qué le dice eso a quien decide. Con dos primos: las luces nocturnas y los celulares de Ruanda.
+- **La aplicación:** MAREA, el monitor con el que el profesor y su equipo siguen la actividad económica de Cali con luces, afluencia y reseñas; tres hechos del sector pasados por la regla de la semana (uno de ellos no pasa); la matriz llenada en vivo con la sala; y una noticia de última hora para clasificar.
+- **El cierre:** el task 1. Dos equipos muestran su ficha de Latitud y discutimos qué dato cambiaría su decisión y cuánto costaría conseguirlo. Trae también la decisión de tu organización que se toma "con el pronóstico".
+:::
+
+# ¿Y esto cómo se ve en tu organización?
+
+Nombra tres fuentes que tu empresa no mira hoy y que un competidor atento sí miraría: una oficial, una alternativa y una gremial. Para una de ellas, responde las tres preguntas: quién mide, cada cuánto, a quién no ve.
+
+# Preguntas de comprensión
+
+<details class="pregunta">
+<summary>1. Un diario publica que las ventas del canal de conveniencia crecieron 14 % el año pasado. Es la única fuente. ¿Señal, tendencia o impulsor?</summary>
+Señal. Trae una cifra, pero aparece una sola vez. Será impulsor cuando una segunda fuente independiente (no otra nota que cite el mismo informe) lo confirme.
+</details>
+
+<details class="pregunta">
+<summary>2. ¿Por qué la luminosidad nocturna no sirve para saber cómo le va a un punto de venta de conveniencia?</summary>
+Porque mide la escala de la operación de una ciudad de noche, en agregados de cientos de metros. Un punto de venta de conveniencia es pequeño y, aunque abra de noche, su luz se pierde en la de la cuadra. Para un punto de venta sirven mejor la afluencia y las reseñas.
+</details>
+
+<details class="pregunta">
+<summary>3. Una variable tiene motricidad 8 y dependencia 10, con promedios de 5.7 en las dos. ¿En qué zona cae y qué implica?</summary>
+Crítica: mueve mucho y es movida mucho. Amplifica los cambios y es candidata a eje de escenario, si además es incierta a tres años.
+</details>
+
+<details class="pregunta">
+<summary>4. ¿Cuál de estas dos incertidumbres va a los escenarios: cuánto vende un local de 80 metros cuadrados en el norte de Barranquilla, o la inflación de alimentos en 2028?</summary>
+La inflación de alimentos: es irreducible. Las ventas del local son reducibles con un estudio de mercado o un piloto, y de eso se ocupan las semanas 3 a 6.
+</details>
+
+# Lectura corta (opcional)
+
+Walter Sosa Escudero, *Big data* (Siglo XXI, 2019), el apartado sobre cómo se midió la pobreza en Ruanda con datos de celulares. Es la versión de divulgación del paper de Blumenstock que verás en la sesión.
