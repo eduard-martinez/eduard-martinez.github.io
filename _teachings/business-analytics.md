@@ -232,17 +232,19 @@ From evaluating to training: Cóndor builds its own decision tree to predict chu
 <small class="ws-data">The script loads everything by URL (<code>base_clientes.csv</code>) — no download or project folder needed. The <strong>webR practice</strong> is optional and not graded: the full class walkthrough with the real Cóndor data, in cells that run in the browser.</small>
 </p>
 
-**Week 12 — Regresión: árboles, bosques y la ruta Lasso.**
-The regression pipeline with MAE/RMSE against a baseline; regularized linear regression (**Lasso**), regression trees, and ensembles (**random forest / XGBoost**); interpretability vs. performance. The workshop prices apartments in Cali.
+**Week 12 — Regresión: el árbol que predice números.**
+From classifying to predicting an amount: a new client — SonoUrbano, an urban-music label choosing songs for its catalog — and a numeric target, the Spotify popularity (0–100) of 2,427 real reggaeton and latin hip-hop tracks. The regression tree predicts with the average of each leaf and is judged by its error in points; the class script builds it and its final block is the workshop you hand in: your own tree of the songs.
 
 <p>
 <span class="ws-tag">Before class</span>
-<a href="/teaching/ba/lectures/week-12/theory/week-12.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
+<a href="/teaching/ba/lectures/week-12/theory/week-12.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory (video + interactive apps)</a>
 <br>
 <span class="ws-tag">In class</span>
-<a href="/teaching/ba/lectures/week-12/practice/week-12.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
+<a href="/teaching/ba/lectures/week-12/slides/week-12.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Class slides · the tree that predicts numbers</a>
+<a href="/teaching/ba/lectures/week-12/script/script_clase12.R" download class="ws-btn"><i class="fas fa-download"></i>Class script (TA session)</a>
 <a href="/teaching/ba/lectures/week-12/task/week-12.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
-<small class="ws-data">Data: <a href="/teaching/ba/lectures/week-12/practice/notas_regresion.csv"><code>notas_regresion.csv</code></a> · <a href="/teaching/ba/lectures/week-12/task/apartamentos_cali.csv"><code>apartamentos_cali.csv</code></a></small>
+<a href="/teaching/ba/lectures/week-12/practice/week-12.html" class="ws-btn"><i class="fas fa-laptop-code"></i>webR practice (optional)</a>
+<small class="ws-data">The script loads everything by URL (<code>canciones_urbanas.csv</code>) — no download needed. The <strong>webR practice</strong> is optional and not graded: your regression tree with Cóndor's credit data, in cells that run in the browser.</small>
 </p>
 
 ### Unit 6 — Unsupervised learning

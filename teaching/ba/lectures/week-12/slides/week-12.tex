@@ -11,6 +11,7 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{colortbl}
+\usepackage{multirow}
 \hypersetup{
     colorlinks=true,
     linkcolor=.,
@@ -25,16 +26,21 @@
 \definecolor{grisclaro}{RGB}{242,243,246}
 \definecolor{azulcaso}{RGB}{28,60,120}
 
+%% Una cuenta en dos renglones: la operación y su resultado
+\newcommand{\cuenta}[2]{\begin{tabular}[c]{@{}c@{}}#1\\ $=$ \textbf{#2}\end{tabular}}
+
 %% Encabezado
 \title[06327-ECO]{Analítica para los negocios \\ 06327-ECO}
-\subtitle{Semana 12: El gasto del próximo trimestre --- ¿se le puede ganar a la regla de Finanzas?}
+\subtitle{Semana 12: El árbol que predice números --- ¿cuántas reproducciones logrará una canción?}
 \author{Eduard F. Martínez González, Ph.D.}
 \institute[]{Departamento de Economía, Universidad Icesi}
-\date{\textcolor{rojoal}{[fecha por definir]}}
+\date{20 de octubre de 2026}
 
 %%=================================================
+%% Begin document
 \begin{document}
 
+%%=================================================
 \begin{frame}
 \titlepage
 \end{frame}
@@ -42,285 +48,230 @@
 %%=================================================
 \begin{frame}{Objetivo de la sesión}
 \small
-Hoy vuelve la pregunta de Finanzas: \textbf{cuánto gastará cada cliente el próximo trimestre}. Tres familias de modelos intentan ganarle a una regla de negocio de una línea.
+\begin{block}{La pregunta de negocio}
+A SonoUrbano, un sello de música urbana, le ofrecen canciones para comprar. Para decidir cuáles, necesita pronosticar: ¿cuántas reproducciones logrará cada una?
+\end{block}
 
-\vspace{0.15cm}
-\begin{itemize} \setlength{\itemsep}{0.16cm}
-  \item La ruta lineal (Lasso), el árbol de regresión y el bosque, en el mismo sobre sellado.
-  \item Cada ventaja, cliente a cliente y con su margen: ¿real o ruido?
-  \item El diagnóstico: dónde se equivoca el mejor modelo.
-  \item La decisión que junta las semanas 11 y 12: a quién llama Growth.
+\vspace{0.2cm}
+Por primera vez el target es \textbf{un número}, no una categoría:
+\begin{itemize} \setlength{\itemsep}{0.15cm}
+  \item Entrenar un árbol que, con las características de la canción, pronostique sus \textbf{reproducciones} (en millones).
+  \item Medir el error \textbf{en millones de reproducciones} (MAE) contra la línea base del promedio.
+  \item Convertir el pronóstico en la decisión: qué comprar y cuánto invertir en cada canción.
 \end{itemize}
 
-\vspace{0.15cm}
-\begin{block}{La idea que gobierna la sesión}
-Un torneo no siempre corona a un modelo: a veces corona un \textbf{hallazgo} --- dónde está la señal, dónde se acaba y dónde falla el pronóstico.
-\end{block}
+\vspace{0.25cm}
+\textcolor{azulcaso}{La herramienta es la de la semana pasada: cambia lo que guarda la hoja y cómo se mide el error.}
 \end{frame}
 
 %%=================================================
-\begin{frame}{¿Dónde estamos en el curso?}
+\begin{frame}{Previously\ldots}
 \small
-\begin{itemize} \setlength{\itemsep}{0.22cm}
-  \item \textbf{Semana 10:} la regla ``3 × gasto mensual'' le quitó la mitad al error de la media --- con márgenes que ni se tocan.
-  \item \textbf{Semana 11:} el bosque empató con la regla del EDA en el cupo de Growth; lo que compró fue la perilla: un riesgo para cada cliente.
-  \item \textbf{Semana 12 (hoy):} de categorías a números --- la misma maquinaria, ahora para predecir pesos.
+\begin{itemize} \setlength{\itemsep}{0.25cm}
+  \item \textbf{Semana 11: el primer árbol.} Entrenamos un árbol de clasificación con los frenos de fábrica de \texttt{rpart}: aprendió dos preguntas, encontró a 59 de los 354 que se iban y Growth decidió con costos si lo adoptaba.
+  \item \textbf{El quiz de hoy.} Leímos árboles ya entrenados: cuántos casos caen en cada hoja, qué promedio predice y cómo se recorre el árbol con un caso nuevo.
+  \item \textbf{La teoría de esta semana.} Cuando el target es un número, cada hoja guarda el promedio de su grupo y el error se mide en las unidades del target: el \textbf{MAE} es el error promedio por pronóstico.
 \end{itemize}
-
-\vspace{0.2cm}
-\begin{block}{Lo que cambia hoy}
-El error ya no es ``acertó o no'': se mide en \textbf{pesos}, y unos pocos clientes enormes pesan más que miles de pequeños.
-\end{block}
 \end{frame}
 
+%%=================================================
 \begin{frame}[noframenumbering]{Roadmap}
 \tableofcontents
 \end{frame}
 
 %%=================================================
-\section{La pregunta y la vara}
+\section{Los datos y el sobre}
 
-\begin{frame}[noframenumbering]{Roadmap}
-\tableofcontents[currentsection]
-\end{frame}
 
-\begin{frame}{La pregunta de hoy}
+\begin{frame}{Los datos: 50.000 canciones urbanas}
 \small
-\begin{block}{Frente de Finanzas}
-``¿Cuánto gastará cada cliente de Cóndor el próximo trimestre?''
-\end{block}
+Una base al estilo Spotify, solo de género urbano: \textbf{50.000 filas, una por canción, y 7 columnas}. El target es \texttt{reproducciones} (millones); las predictoras describen cada canción:
 
 \vspace{0.15cm}
-\centering
-\footnotesize
-\textbf{La tabla del líder que dejó la semana 10} (pesos por cliente, test de 1.600)
-\vspace{0.05cm}
-
-\begin{tabular}{lcr}
+\begin{center}
+\scriptsize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}l l@{}}
 \toprule
-Regla & MAE & RMSE \\
+\textbf{Variable} & \textbf{Qué mide} \\
 \midrule
-Media de train & 328.494 ± 38.496 & 836.839 \\
-\rowcolor{grisclaro} \textbf{3 × gasto mensual} & 168.728 ± 31.656 & 655.018 \\
+\texttt{bailabilidad} & qué tan bailable es la canción (0--100) \\
+\texttt{energia} & la intensidad de la pista (0--100) \\
+\texttt{bpm} & el tempo, en golpes por minuto \\
+\texttt{duracion\_seg} & la duración, en segundos \\
+\texttt{colaboracion} & 1 si la canción tiene un \textit{featuring} \\
 \bottomrule
 \end{tabular}
-
-\raggedright
-\small
-\vspace{0.2cm}
-Mismas 22 predictoras de la semana 11, con un cambio: ahora sale \texttt{abandono}, la variable del futuro para Finanzas (la fuga en espejo de la semana 10).
-\end{frame}
-
-\begin{frame}{Paso 1 · ¿Cómo se ve lo que queremos predecir?}
-\small
-\begin{center}
-\includegraphics[width=0.6\textwidth]{pic/fig_s12_cola.png}
 \end{center}
-\vspace{-0.25cm}
-\begin{itemize} \itemsep2pt
-  \item Mediana \textbf{79.300}, media \textbf{292.378}, máximo \textbf{44.083.300} pesos: la media es casi cuatro veces la mediana.
-\end{itemize}
-\pause
-\begin{alertblock}{Hallazgo 1}
-\textbf{Cola larga}, como en la semana 6: unos pocos clientes pesan muchísimo en todo lo que se mide al cuadrado --- el RMSE y la forma como aprenden los tres modelos de hoy.
+
+\vspace{0.1cm}
+\begin{alertblock}{Lo que importa}
+Las cinco existen el día del lanzamiento: se conocen antes de saber cuántas reproducciones logrará la canción. No hay fuga.
 \end{alertblock}
 \end{frame}
 
 %%=================================================
-\section{Tres familias de modelos}
-
-\begin{frame}[noframenumbering]{Roadmap}
-\tableofcontents[currentsection]
-\end{frame}
-
-\begin{frame}{Paso 2 · ¿Qué ecuación encuentra el Lasso?}
+\begin{frame}{El sobre: unas canciones para aprender, otras para calificar}
 \small
-\begin{columns}[T]
-\column{0.58\textwidth}
-\includegraphics[width=\textwidth]{pic/fig_s12_lasso.png}
-\column{0.4\textwidth}
+Queremos que el árbol \textbf{generalice} --- que aprenda el patrón de las reproducciones, no que se memorice sus 50.000 canciones. Eso solo se comprueba con canciones que no vio.
+
+\vspace{0.2cm}
+\begin{center}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}c c c@{}}
+\textbf{50.000 canciones} & & \\
+\footnotesize sorteo 80\,/\,20 & $\longrightarrow$ &
 \footnotesize
-Minimiza $\text{error}^2 + \lambda \sum |\beta_j|$; $\lambda$ por validación cruzada (\texttt{lambda.1se}).
-\begin{itemize} \setlength{\itemsep}{0.06cm}
-  \item De \textbf{41 columnas}, sobrevive \textbf{una}: gasto mensual, con coeficiente \textbf{2,888} e intercepto \textbf{141.070}.
-  \item Un cliente de 11.020 al mes: predice \textbf{172.898}; gastó \textbf{40.300}.
-  \item MAE \textbf{228.481 ± 30.386}; RMSE \textbf{649.069}.
-\end{itemize}
-\end{columns}
-\pause
-\vspace{0.1cm}
-\begin{alertblock}{Hallazgo 2}
-La máquina \textbf{redescubrió la regla de Finanzas}, pero con una base de 141 mil para todos: pierde en MAE (por más que el margen) y gana, apenas, en RMSE. El Lasso gana en la métrica que optimiza.
+\begin{tabular}{@{}l@{}}
+\colorbox{grisclaro}{\textbf{40.000 entrenan}: el árbol ve sus reproducciones} \\[0.12cm]
+\colorbox{grisclaro}{\textbf{10.000 califican}: el árbol no las ve al entrenar} \\
+\end{tabular} \\
+\end{tabular}
+\end{center}
+
+\vspace{0.2cm}
+En las 40.000 de entrenamiento, el promedio es \textbf{36.4 millones por canción}: ese número es la línea base --- pronosticárselo a todas.
+
+\vspace{0.15cm}
+\begin{alertblock}{Lo que importa}
+La nota del árbol se mide solo en las 10.000 del sobre: ahí se ve si generalizó o si memorizó.
 \end{alertblock}
 \end{frame}
 
-\begin{frame}{Paso 3 · ¿Por qué el árbol no se atreve?}
+%%=================================================
+\section{Del árbol a la decisión}
+
+\begin{frame}{El árbol entrenado: tres preguntas, cuatro hojas}
 \small
 \begin{columns}[T]
-\column{0.56\textwidth}
-\includegraphics[width=\textwidth]{pic/fig_s12_cv_arbol.png}
-\column{0.42\textwidth}
+\column{0.64\textwidth}
+\includegraphics[width=\textwidth]{pic/fig_arbol_s12.png}
+\column{0.34\textwidth}
 \footnotesize
-\begin{itemize} \setlength{\itemsep}{0.06cm}
-  \item Sin podar, todas sus preguntas son sobre el gasto mensual; arriba de 883 mil quedan \textbf{22 clientes} con promedio de \textbf{10,8 millones} --- y aun así los parte \textbf{por ciudad}.
-  \item En test: RMSE \textbf{869.870}, peor que la media.
-  \item Regla 1-SE: tope \textbf{1,037} > 1,000 $\Rightarrow$ \textbf{una sola hoja}: la media.
-\end{itemize}
-\end{columns}
-\pause
+Cada caja: arriba, \textbf{los millones que predice} (el promedio de su grupo); abajo, cuántas canciones de entrenamiento caen ahí y qué \% son (\texttt{n=12e+3} son 12.000).
+
 \vspace{0.1cm}
-\begin{alertblock}{Hallazgo 3}
-Con la cola larga, la validación cruzada cambia tanto de pliegue a pliegue que \textbf{no le cree ningún corte}: la inestabilidad del árbol, en su versión extrema --- y la razón de ser del bosque.
+Primero pregunta por la \textbf{bailabilidad}; entre las bailables, la \textbf{colaboración} separa 48 de 95 millones; entre las demás, la \textbf{energía} separa 9.7 de 21.9.
+\end{columns}
+\begin{alertblock}{Lo que importa}
+De cinco variables usó tres: ni el \texttt{bpm} ni la duración ganaron una pregunta. Y el hallazgo del negocio: \textbf{entre las bailables, el \textit{featuring} casi duplica las reproducciones}.
 \end{alertblock}
 \end{frame}
 
-\begin{frame}{Paso 4 · ¿Promediar 500 árboles arregla el árbol?}
+%%=================================================
+\begin{frame}{¿Cómo le fue, canción por canción?}
 \small
 \begin{columns}[T]
-\column{0.48\textwidth}
+\column{0.6\textwidth}
 \centering
 \scriptsize
-\begin{tabular}{lr}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}c c c c r r r@{}}
 \toprule
-Bosque (500 árboles) & Test \\
+\textbf{Canción} & \textbf{Bail.} & \textbf{Colab.} & \textbf{Energía} & \textbf{Real} & \textbf{Pron.} & \textbf{Error} \\
 \midrule
-MAE & 162.654 ± 29.017 \\
-RMSE & 602.535 \\
+URB00002 & 57 & sí & 67 & 2.8 & 9.7 & 6.9 \\
+URB00007 & 62 & no & 79 & 12.2 & 21.9 & 9.7 \\
+URB00008 & 58 & no & 70 & 16.3 & 21.9 & 5.6 \\
+URB00010 & 65 & no & 68 & 2.3 & 9.7 & 7.4 \\
+URB00011 & 66 & no & 59 & 0.1 & 9.7 & 9.6 \\
+\rowcolor{grisclaro} URB00016 & 91 & no & 100 & 36.5 & 48.0 & \textbf{11.5} \\
+\rowcolor{grisclaro} URB00022 & 70 & no & 86 & 24.1 & 21.9 & \textbf{2.2} \\
+URB00026 & 99 & no & 82 & 61.2 & 48.0 & 13.2 \\
 \bottomrule
 \end{tabular}
-\column{0.5\textwidth}
-\begin{itemize} \setlength{\itemsep}{0.12cm}
-  \item El único de hoy que le gana a la regla en las \textbf{dos} métricas.
-  \item En la importancia manda, de lejos, el \textbf{gasto mensual}; después, la antigüedad y el monto total.
-\end{itemize}
-\end{columns}
-\pause
-\vspace{0.3cm}
-\begin{alertblock}{Hallazgo 4}
-Promediar sí arregla la inestabilidad: donde un solo árbol no se atrevía, 500 árboles superan a la regla. Y la historia se repite: lo que más dice del gasto futuro es el gasto pasado.
-\end{alertblock}
-\end{frame}
 
-\begin{frame}{Paso 5 · ¿La ventaja del bosque es real o es ruido?}
-\small
-\begin{columns}[T]
-\column{0.58\textwidth}
-\includegraphics[width=\textwidth]{pic/fig_s12_torneo.png}
-\column{0.4\textwidth}
-\footnotesize
-Cliente a cliente, en el mismo test:
-\begin{itemize} \setlength{\itemsep}{0.06cm}
-  \item Bosque contra regla: \textbf{6.074 ± 14.429} pesos. El margen alcanza el cero.
-  \item Regla contra media: \textbf{159.766 ± 13.679}. Casi doce veces su margen.
-\end{itemize}
-\end{columns}
-\pause
-\vspace{0.1cm}
-\begin{alertblock}{Hallazgo 5 --- la lección de la semana}
-\textbf{Empate técnico} entre el bosque y la regla de Finanzas. La mejora de verdad fue la de la semana 10: casi todo lo que se sabe del gasto futuro ya estaba en el gasto pasado.
-\end{alertblock}
-\end{frame}
-
-%%=================================================
-\section{Dónde falla y a quién llamar}
-
-\begin{frame}[noframenumbering]{Roadmap}
-\tableofcontents[currentsection]
-\end{frame}
-
-\begin{frame}{Paso 6 · ¿Dónde se equivoca?}
-\small
-\begin{columns}[T]
-\column{0.58\textwidth}
-\includegraphics[width=\textwidth]{pic/fig_s12_diagnostico.png}
-\column{0.4\textwidth}
-\footnotesize
-\begin{itemize} \setlength{\itemsep}{0.08cm}
-  \item La nube se pega a la diagonal; unos pocos puntos se escapan, por arriba y por abajo.
-  \item Un cliente gastó \textbf{21 millones} cuando se esperaban 4.
-  \item Los \textbf{10 peores} de 1.600 se llevan el \textbf{78\,\%} del error al cuadrado.
-\end{itemize}
-\end{columns}
-\pause
-\vspace{0.1cm}
-\begin{alertblock}{Hallazgo 6}
-El pronóstico sirve para el 99\,\% de la cartera; los grandes gastadores necesitan \textbf{tratamiento aparte} (un ejecutivo de cuenta, un rango de escenarios). Y eso explica por qué el RMSE queda tan lejos del MAE.
-\end{alertblock}
-\end{frame}
-
-\begin{frame}{Paso 7 · ¿A quién llama Growth?}
-\small
-\begin{columns}[T]
-\column{0.56\textwidth}
-\includegraphics[width=\textwidth]{pic/fig_s12_valor.png}
-\column{0.42\textwidth}
-\footnotesize
-\textbf{Valor en riesgo} = probabilidad de irse (semana 11) × gasto esperado (hoy).
-\begin{itemize} \setlength{\itemsep}{0.06cm}
-  \item \textbf{Por riesgo}: 156 que se van, gasto esperado mediano de 11.762.
-  \item \textbf{Por valor en riesgo}: 22 que se van, mediana de 632.493.
-\end{itemize}
-\end{columns}
-\pause
-\vspace{0.1cm}
-\begin{alertblock}{La decisión --- no tiene respuesta única}
-Si la meta es \textbf{retener clientes}, se llama por riesgo; si es \textbf{retener gasto}, por valor en riesgo: tres veces más plata en juego, aunque la mayoría de las llamadas caiga en clientes que no se iban.
-\end{alertblock}
-\end{frame}
-
-%%=================================================
-\section{Lo que queda}
-
-\begin{frame}[noframenumbering]{Roadmap}
-\tableofcontents[currentsection]
-\end{frame}
-
-\begin{frame}{La tabla del líder}
-\small
-\centering
-\footnotesize
-\textbf{Gasto del próximo trimestre} (pesos por cliente, test de 1.600)
 \vspace{0.05cm}
+\tiny Las primeras ocho canciones del test; reproducciones en millones.
+\column{0.38\textwidth}
+\footnotesize
+Cada pronóstico es el promedio de la hoja donde cae la canción, y cada canción deja \textbf{una distancia en millones}.
 
-\begin{tabular}{lcr}
-\toprule
-Regla o modelo & MAE & RMSE \\
-\midrule
-Media de train & 328.494 ± 38.496 & 836.839 \\
-\rowcolor{grisclaro} \textbf{3 × gasto mensual} & 168.728 ± 31.656 & 655.018 \\
-Lasso (\texttt{lambda.1se}) & 228.481 ± 30.386 & 649.069 \\
-Árbol podado & 328.494 ± 38.496 & 836.839 \\
-\rowcolor{grisclaro} \textbf{Bosque} & 162.654 ± 29.017 & 602.535 \\
-\bottomrule
-\end{tabular}
-
-\raggedright
-\small
+\vspace{0.12cm}
+A URB00022 casi le atina (2.2). Con URB00026 --- bailable sin \textit{featuring} que explotó --- se queda corto por 13.2: la hoja predice su promedio, no los éxitos atípicos.
+\end{columns}
 \pause
-\vspace{0.25cm}
-\begin{block}{La decisión}
-El bosque encabeza la tabla, pero su ventaja sobre la regla de Finanzas cabe en el margen: \textbf{colíderes}. Si hay que explicarle a Finanzas cómo se pronostica, gana la regla de una línea.
-\end{block}
+\vspace{0.1cm}
+\begin{alertblock}{Lo que importa}
+En regresión no se pregunta «¿acertó?» sino \textbf{«¿por cuánto se equivocó?»} --- y eso se promedia.
+\end{alertblock}
 \end{frame}
 
-\begin{frame}{Qué produce un torneo de regresión --- y qué no}
+%%=================================================
+\begin{frame}{¿Cómo se calcula el MAE?}
+\small
+Con las ocho canciones de la lámina anterior, en tres pasos:
+
+\vspace{0.15cm}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}m{4.6cm} c@{}}
+\toprule
+\textbf{Paso} & \textbf{Con las 8 de la lámina 7} \\
+\midrule
+\textbf{1. El error absoluto de cada una} \newline $|$pronóstico $-$ real$|$ & 6.9; 9.7; 5.6; 7.4; 9.6; 11.5; 2.2; 13.2 \\[0.08cm]
+\textbf{2. Súmalos} & \cuenta{$6.9 + 9.7 + \cdots + 13.2$}{66.1 millones} \\[0.08cm]
+\textbf{3. Divide entre las canciones} & \cuenta{$66.1 \div 8$}{8.3 millones} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+La misma cuenta con las \textbf{10.000 canciones del sobre}: el árbol se equivoca \textbf{7.0 millones} por canción; el promedio, \textbf{24.3 millones}.
+
+\vspace{0.05cm}
+\begin{alertblock}{Lo que importa}
+El MAE del árbol sale de la misma cuenta que acabas de hacer a mano --- solo que sobre 10.000 canciones.
+\end{alertblock}
+\end{frame}
+
+%%=================================================
+\begin{frame}{¿El árbol le gana al promedio?}
 \small
 \begin{columns}[T]
-\column{0.48\textwidth}
-\textbf{Produce}
-\begin{itemize} \setlength{\itemsep}{0.1cm}
-  \item Un pronóstico para cada cliente, con su error típico en pesos.
-  \item Un diagnóstico: dónde falla y qué segmento pide otro tratamiento.
-  \item El valor en riesgo, junto con la semana 11.
-\end{itemize}
-\column{0.48\textwidth}
-\textbf{No produce}
-\begin{itemize} \setlength{\itemsep}{0.1cm}
-  \item Causas: el coeficiente del Lasso \emph{se asocia} con el gasto; no dice que subir el gasto de hoy suba el de mañana.
-  \item Más señal que la que hay: con estos datos, casi todo estaba en el gasto pasado.
-  \item Certeza con los extremos: diez clientes deciden el RMSE.
+\column{0.52\textwidth}
+\includegraphics[width=\textwidth]{pic/fig_mae_s12.png}
+\column{0.46\textwidth}
+\footnotesize
+\begin{itemize} \setlength{\itemsep}{0.14cm}
+  \item \textbf{La línea base}: pronosticar 36.4 millones a todas se equivoca \textbf{24.3 millones} por canción.
+  \item \textbf{El árbol}: con tres preguntas, el error baja a \textbf{7.0 millones}: 3.4 veces menos.
+  \item Con ese pronóstico, SonoUrbano prioriza: una canción que cae en la hoja de 95 millones no se promociona igual que una en la de 9.7.
 \end{itemize}
 \end{columns}
+\vspace{0.1cm}
+\begin{alertblock}{Lo que importa}
+La vara de la regresión es el promedio: el árbol la mejora \textbf{3.4 a 1}, en millones de reproducciones. Falta traducir ese error a dinero.
+\end{alertblock}
+\end{frame}
+
+%%=================================================
+\begin{frame}{¿Qué cuesta equivocarse? El costo de oportunidad}
+\small
+El sello invierte en marketing \textbf{según lo que espera de cada canción}: \$1 millón de pesos por cada millón de reproducciones pronosticado (cifra ilustrativa). Cada millón de error \textbf{desvía esa inversión}: sobra donde no habrá reproducciones y falta donde sí.
+
+\vspace{0.1cm}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}m{4.9cm} c c@{}}
+\toprule
+\textbf{Paso} & \textbf{Promedio} & \textbf{Árbol de la casa} \\
+\midrule
+\textbf{1. Error por canción} \newline el MAE, en millones & 24.3 & 7.0 \\[0.05cm]
+\textbf{2. Inversión desviada por canción} \newline error $\times$ \$1 millón & \$24.3 M & \$7.0 M \\[0.05cm]
+\textbf{3. En un lote de 20 canciones} \newline por canción $\times$ 20 & \cuenta{$24.3 \times 20$}{\$486 M} & \cuenta{$7.0 \times 20$}{\$140 M} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.05cm}
+\begin{alertblock}{La recomendación}
+Decidir el lote con el promedio desvía \textbf{\$346 millones más} ($486 - 140$) que decidirlo con el árbol. Adoptarlo --- y quedarse con su regla: \textbf{bailabilidad y \textit{featuring} mandan; el bpm y la duración, no}.
+\end{alertblock}
 \end{frame}
 
 \end{document}
