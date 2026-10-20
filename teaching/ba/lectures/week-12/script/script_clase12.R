@@ -22,7 +22,7 @@ head(canciones , 3)
 ## 1.2. son canciones reales: busca las de tu artista
 canciones %>% 
 filter(grepl("Bad Bunny" , artista)) %>% 
-select(cancion , anio , popularidad) %>% head(3)
+select(cancion , anio , popularidad , pop_artista) %>% head(3)
 
 ## 1.3. split data: el 80% aprende y con el 20% que no vio se califica
 set.seed(12)
@@ -37,7 +37,8 @@ round(mean(train$popularidad) , 1)
 ##==: 2. arbol de regresion :==##
 
 ## 2.1. estimar el arbol con las opciones por defecto de rpart
-arbol <- rpart(popularidad ~ tempo + duracion_seg + bailabilidad + energia + colaboracion ,
+arbol <- rpart(popularidad ~ pop_artista + tempo + duracion_seg + bailabilidad +
+                             energia + colaboracion ,
                data=train)
 
 ## 2.2. dibujarlo: cada hoja predice el promedio de popularidad de su grupo
@@ -51,10 +52,10 @@ test$pron_arbol <- round(predict(arbol , test) , 1)
 
 ## 3.2. ocho canciones conocidas, de hojas distintas
 ocho <- test %>%
-        filter(cancion %in% c("Si Te Vas" , "Atrévete" , "Con Calma" ,
-                              "Aullando" , "Me Gusta" , "Felices los 4" ,
-                              "Zumba" , "Taboo")) %>%
-        select(cancion , artista , tempo , duracion_seg , popularidad , pron_arbol) %>%
+        filter(cancion %in% c("Me Gusta" , "Estamos Bien" , "Si Te Vas" ,
+                              "Felices los 4" , "Con Calma" , "Gasolina" ,
+                              "Aullando" , "Amor De Pobre")) %>%
+        select(cancion , artista , pop_artista , popularidad , pron_arbol) %>%
         mutate(error = round(abs(pron_arbol - popularidad) , 1)) %>%
         arrange(desc(pron_arbol))
 ocho
@@ -65,11 +66,12 @@ round(c(mae_arbol = mean(abs(test$pron_arbol - test$popularidad)) ,
 
 ##==: 4. taller :==##
 
-## el arbol de la clase usa solo atributos de la cancion. agrega anio a la
-## formula de 2.1, entrena de nuevo, dibujalo como en 2.2 y calcula su mae
-## como en 3.3. responde como comentario: ¿mejora el mae? ¿que variable se
-## toma la raiz? ¿te sirve ese arbol para valorar una cancion que sale esta
-## semana? guarda el archivo como apellido_nombre_taller12.R y subelo a Intu.
+## entrena un segundo arbol SIN la trayectoria del artista: quita pop_artista
+## de la formula de 2.1 (solo los atributos de audio), dibujalo como en 2.2 y
+## calcula su mae como en 3.3. responde como comentario: ¿cuanto empeora el
+## error sin el artista? ¿que le dice eso al sello sobre que informacion debe
+## conseguir y mantener? guarda el archivo como apellido_nombre_taller12.R y
+## subelo a Intu.
 
 ## 4.1. tu codigo:
 

@@ -55,7 +55,7 @@ A SonoUrbano, un sello de música urbana, le ofrecen canciones para comprar. Par
 \vspace{0.2cm}
 Por primera vez el target es \textbf{un número}, no una categoría --- y los datos son \textbf{reales}: canciones que conoces.
 \begin{itemize} \setlength{\itemsep}{0.15cm}
-  \item Entrenar un árbol que, con las características de la canción, pronostique su \textbf{popularidad} en Spotify (0--100: el índice que resume las reproducciones recientes).
+  \item Entrenar un árbol que, con las características de la canción y la trayectoria de su artista, pronostique su \textbf{popularidad} en Spotify (0--100: el índice que resume las reproducciones recientes).
   \item Medir el error \textbf{en puntos de popularidad} (MAE) contra la línea base del promedio.
   \item Convertir el pronóstico en la decisión: qué comprar y cuánto invertir en cada lanzamiento.
 \end{itemize}
@@ -85,9 +85,9 @@ Por primera vez el target es \textbf{un número}, no una categoría --- y los da
 
 \begin{frame}{Los datos: 2.427 canciones urbanas, reales}
 \small
-La base pública de canciones de Spotify (proyecto TidyTuesday, enero de 2020), filtrada al género urbano --- reggaeton y latin hip hop, sin duplicados ---: \textbf{2.427 filas, una por canción}. El target es \texttt{popularidad} (0--100): el índice de Spotify que resume las reproducciones recientes.
+La base pública de Spotify (TidyTuesday, enero 2020), filtrada al género urbano --- reggaeton y latin hip hop, sin duplicados ---: \textbf{2.427 canciones}. El target es \texttt{popularidad} (0--100): el índice que resume las reproducciones recientes.
 
-\vspace{0.15cm}
+\vspace{0.05cm}
 \begin{center}
 \scriptsize
 \setlength{\tabcolsep}{5pt}
@@ -95,6 +95,7 @@ La base pública de canciones de Spotify (proyecto TidyTuesday, enero de 2020), 
 \toprule
 \textbf{Variable} & \textbf{Qué mide} \\
 \midrule
+\texttt{pop\_artista} & la trayectoria: el promedio de popularidad de las otras canciones del artista \\
 \texttt{tempo} & la velocidad de la canción, en golpes por minuto \\
 \texttt{duracion\_seg} & la duración, en segundos \\
 \texttt{bailabilidad} & qué tan bailable es la canción (0--100) \\
@@ -104,13 +105,13 @@ La base pública de canciones de Spotify (proyecto TidyTuesday, enero de 2020), 
 \end{tabular}
 \end{center}
 
-\vspace{0.1cm}
-\scriptsize \texttt{cancion} y \texttt{artista} identifican cada fila: en la base están Bad Bunny (24 canciones), J Balvin (37), Ozuna, Daddy Yankee\ldots{} \texttt{anio} y \texttt{subgenero} completan las 10 columnas.
+\vspace{0.05cm}
+\scriptsize \texttt{cancion} y \texttt{artista} identifican cada fila: en la base están Bad Bunny (24 canciones), J Balvin (37), Ozuna, Daddy Yankee\ldots{} \texttt{anio} y \texttt{subgenero} completan las 11 columnas; a un artista nuevo en el catálogo se le asigna el promedio general (45.3).
 \small
 
-\vspace{0.1cm}
+\vspace{0.05cm}
 \begin{alertblock}{Lo que importa}
-Las cinco predictoras son \textbf{atributos de la canción}: cualquier oferta nueva los trae el día del lanzamiento. El año \textbf{no} entra: una canción nueva llega con el año de hoy y no distingue entre las ofertas. El artista tampoco: queda para la discusión.
+Las seis predictoras llegan con cualquier oferta nueva: una canción trae sus atributos \textbf{y a su artista con su historial}. El año \textbf{no} entra: toda oferta nueva llega con el año de hoy y no distingue entre canciones.
 \end{alertblock}
 \end{frame}
 
@@ -145,7 +146,7 @@ La nota del árbol se mide solo en las 485 del sobre: ahí se ve si generalizó 
 %%=================================================
 \section{Del árbol a la decisión}
 
-\begin{frame}{El árbol entrenado: el tempo manda}
+\begin{frame}{El árbol entrenado: el artista manda}
 \small
 \begin{columns}[T]
 \column{0.64\textwidth}
@@ -155,10 +156,10 @@ La nota del árbol se mide solo en las 485 del sobre: ahí se ve si generalizó 
 Cada caja: arriba, \textbf{la popularidad que predice} (el promedio de su grupo); abajo, cuántas canciones de entrenamiento caen ahí y qué \% son.
 
 \vspace{0.1cm}
-Primero pregunta por el \textbf{tempo}: las rápidas (136 o más) prometen \textbf{53.5}; las lentas (menos de 121), 46.4. En el tempo medio decide el resto: 15.4 si es larga (276 s o más); si es corta, 25.7 o 41.6 según la \textbf{bailabilidad}.
+Las cuatro preguntas son la misma: la \textbf{trayectoria del artista}. Una escalera de cinco escalones --- historial muy bajo, 5.9; bajo, 21.8; medio, 40.3; alto, 55.6; y los artistas de 61.5 o más prometen \textbf{71.4}.
 \end{columns}
 \begin{alertblock}{Lo que importa}
-Cuatro nodos y cinco hojas con tres variables: el tempo (dos veces), la duración y la bailabilidad. Ni la energía ni el \textit{featuring} ganaron una pregunta --- y ningún atributo reconoce un éxito: \textbf{eso lo pone el artista}.
+De seis variables el árbol usó \textbf{una}: la trayectoria del artista, cuatro veces. Ni el tempo, ni la bailabilidad, ni el \textit{featuring} ganaron una pregunta: \textbf{quién canta pesa más que cómo suena}.
 \end{alertblock}
 \end{frame}
 
@@ -168,18 +169,18 @@ Cuatro nodos y cinco hojas con tres variables: el tempo (dos veces), la duració
 \begin{center}
 \footnotesize
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}l l c c r r r@{}}
+\begin{tabular}{@{}l l c r r r@{}}
 \toprule
-\textbf{Canción} & \textbf{Artista} & \textbf{Tempo} & \textbf{Dur.\ (seg)} & \textbf{Real} & \textbf{Pron.} & \textbf{Error} \\
+\textbf{Canción} & \textbf{Artista} & \textbf{Trayectoria} & \textbf{Real} & \textbf{Pron.} & \textbf{Error} \\
 \midrule
-Si Te Vas & Sech & 174 & 205 & 88 & 53.5 & 34.5 \\
-Atrévete & Nicky Jam & 184 & 198 & 81 & 53.5 & 27.5 \\
-Me Gusta & Shakira & 92 & 191 & 79 & 46.4 & 32.6 \\
-Aullando & Wisin \& Yandel & 90 & 226 & 80 & 46.4 & 33.6 \\
-\rowcolor{grisclaro} Con Calma & Daddy Yankee & 94 & 193 & 87 & 46.4 & \textbf{40.6} \\
-Felices los 4 & Maluma & 94 & 230 & 76 & 46.4 & 29.6 \\
-Zumba & Don Omar & 125 & 264 & 57 & 41.6 & 15.4 \\
-\rowcolor{grisclaro} Taboo & Don Omar & 125 & 292 & 1 & 15.4 & \textbf{14.4} \\
+Me Gusta & Shakira & 64.6 & 79 & 71.4 & 7.6 \\
+\rowcolor{grisclaro} Estamos Bien & Bad Bunny & 68.4 & 76 & 71.4 & \textbf{4.6} \\
+Si Te Vas & Sech & 47.7 & 88 & 55.6 & 32.4 \\
+Felices los 4 & Maluma & 58.9 & 76 & 55.6 & 20.4 \\
+Aullando & Wisin \& Yandel & 35.6 & 80 & 40.3 & 39.7 \\
+\rowcolor{grisclaro} Con Calma & Daddy Yankee & 44.8 & 87 & 40.3 & \textbf{46.7} \\
+Gasolina & Daddy Yankee & 44.8 & 76 & 40.3 & 35.7 \\
+Amor De Pobre & Zion & 12.1 & 0 & 21.8 & 21.8 \\
 \bottomrule
 \end{tabular}
 
@@ -188,7 +189,7 @@ Zumba & Don Omar & 125 & 264 & 57 & 41.6 & 15.4 \\
 \end{center}
 
 \vspace{0.15cm}
-Cada canción cae en una hoja y recibe su promedio: cuatro pronósticos distintos. A \textit{Taboo} --- casi sin audiencia --- le pronostica 15.4, cerca de su 1 real. A los éxitos, en cambio, los subestima: \textit{Con Calma} vale 87 y recibe 46.4; \textit{Si Te Vas}, 88 contra 53.5 --- la hoja predice el promedio de su grupo, y \textbf{el árbol no sabe quién canta}: el artista no está entre los atributos.
+Cada canción recibe el escalón de su artista: cuatro pronósticos distintos. A \textit{Estamos Bien} (Bad Bunny, historial 68.4) casi le atina: error 4.6. A \textit{Con Calma} no: vale 87 y recibe 40.3, porque el historial de Daddy Yankee promedia 44.8 --- \textbf{un éxito supera el historial de cualquiera}, y por eso ningún árbol pronostica un hit.
 
 \vspace{0.1cm}
 En regresión la pregunta no es «¿acertó?» sino \textbf{«¿por cuánto se equivocó?»} --- y eso se promedia.
@@ -208,15 +209,15 @@ Con las ocho canciones de la lámina anterior, en tres pasos:
 \toprule
 \textbf{Paso} & \textbf{Con las 8 de la lámina 7} \\
 \midrule
-\textbf{1. El error absoluto de cada una} \newline $|$pronóstico $-$ real$|$ & 34.5; 27.5; 32.6; 33.6; 40.6; 29.6; 15.4; 14.4 \\[0.08cm]
-\textbf{2. Súmalos} & \cuenta{$34.5 + 27.5 + \cdots + 14.4$}{228.2 puntos} \\[0.08cm]
-\textbf{3. Divide entre las canciones} & \cuenta{$228.2 \div 8$}{28.5 puntos} \\
+\textbf{1. El error absoluto de cada una} \newline $|$pronóstico $-$ real$|$ & 7.6; 4.6; 32.4; 20.4; 39.7; 46.7; 35.7; 21.8 \\[0.08cm]
+\textbf{2. Súmalos} & \cuenta{$7.6 + 4.6 + \cdots + 21.8$}{208.9 puntos} \\[0.08cm]
+\textbf{3. Divide entre las canciones} & \cuenta{$208.9 \div 8$}{26.1 puntos} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \vspace{0.1cm}
-La misma cuenta con las \textbf{485 canciones del sobre} --- ya no solo éxitos conocidos ---: el árbol se equivoca \textbf{22.9 puntos} por canción; el promedio, \textbf{24.4 puntos}.
+La misma cuenta con las \textbf{485 canciones del sobre} --- ya no solo éxitos conocidos ---: el árbol se equivoca \textbf{17.0 puntos} por canción; el promedio, \textbf{24.4 puntos}.
 
 \vspace{0.05cm}
 \begin{alertblock}{Lo que importa}
@@ -234,20 +235,20 @@ El MAE del árbol sale de la misma cuenta que acabas de hacer a mano --- solo qu
 \footnotesize
 \begin{itemize} \setlength{\itemsep}{0.14cm}
   \item \textbf{La línea base}: pronosticar 44.9 puntos a todas se equivoca \textbf{24.4 puntos} por canción.
-  \item \textbf{El árbol}: con el tempo, la duración y la bailabilidad, el error baja a \textbf{22.9 puntos}: 1.5 menos por canción, un 6\,\% menos.
-  \item El error es menor --- y \textbf{al elegir es donde se nota}: 20 canciones al azar promedian \textbf{46.6} de popularidad real; las 20 de la hoja top del árbol, \textbf{54.3}.
+  \item \textbf{El árbol}: con la trayectoria del artista, el error baja a \textbf{17.0 puntos}: 7.4 menos por canción, un 30\,\% menos.
+  \item El error es menor --- y \textbf{al elegir es donde se nota}: 20 canciones al azar promedian \textbf{46.6} de popularidad real; las 20 de la hoja top del árbol, \textbf{72.3}.
 \end{itemize}
 \end{columns}
 \vspace{0.1cm}
 \begin{alertblock}{Lo que importa}
-La vara de la regresión es el promedio: el árbol le gana por \textbf{1.5 puntos por canción}. Pero el negocio no es el error promedio: es \textbf{elegir cuáles comprar}.
+La vara de la regresión es el promedio: el árbol le gana por \textbf{7.4 puntos por canción}. Pero el negocio no es el error promedio: es \textbf{elegir cuáles comprar}.
 \end{alertblock}
 \end{frame}
 
 %%=================================================
 \begin{frame}{¿Cuánto vale el pronóstico? La decisión de compra}
 \small
-SonoUrbano va a comprar \textbf{20 canciones}, y cada punto de popularidad que consigan vale \$1 millón de pesos por canción (cifra ilustrativa). Sin modelo compra al azar: el promedio le pronostica lo mismo a todas y no distingue. Con el árbol, compra de la \textbf{hoja de 53.5} (las rápidas).
+SonoUrbano va a comprar \textbf{20 canciones}, y cada punto de popularidad que consigan vale \$1 millón de pesos por canción (cifra ilustrativa). Sin modelo compra al azar: el promedio le pronostica lo mismo a todas y no distingue. Con el árbol, compra de la \textbf{hoja de 71.4} (los artistas de historial alto).
 
 \vspace{0.1cm}
 \begin{center}
@@ -258,16 +259,16 @@ SonoUrbano va a comprar \textbf{20 canciones}, y cada punto de popularidad que c
 \toprule
 \textbf{Paso} & \textbf{Al azar} & \textbf{Con el árbol} \\
 \midrule
-\textbf{1. ¿Cuáles 20 compra?} & cualquiera del catálogo & las de la hoja de 53.5 \\[0.05cm]
-\textbf{2. Popularidad real que consigue} \newline promedio por canción, en el test & 46.6 & 54.3 \\[0.05cm]
-\textbf{3. Valor del lote} \newline real $\times$ \$1 millón $\times$ 20 & \cuenta{$46.6 \times 20$}{\$932 M} & \cuenta{$54.3 \times 20$}{\$1.086 M} \\
+\textbf{1. ¿Cuáles 20 compra?} & cualquiera del catálogo & las de la hoja de 71.4 \\[0.05cm]
+\textbf{2. Popularidad real que consigue} \newline promedio por canción, en el test & 46.6 & 72.3 \\[0.05cm]
+\textbf{3. Valor del lote} \newline real $\times$ \$1 millón $\times$ 20 & \cuenta{$46.6 \times 20$}{\$932 M} & \cuenta{$72.3 \times 20$}{\$1.446 M} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \vspace{0.05cm}
 \begin{alertblock}{La recomendación}
-El lote elegido con el árbol vale \textbf{\$154 millones más} ($1.086 - 932$): \$7.7 millones más por canción. Adoptarlo --- y para reconocer los éxitos uno a uno, conseguir la variable que falta: \textbf{el artista}.
+El lote elegido con el árbol vale \textbf{\$514 millones más} ($1.446 - 932$): \$25.7 millones más por canción. Adoptarlo --- con su límite a la vista: los éxitos como \textit{Con Calma} superan cualquier historial. \textbf{Ningún modelo pronostica un hit}.
 \end{alertblock}
 \end{frame}
 
