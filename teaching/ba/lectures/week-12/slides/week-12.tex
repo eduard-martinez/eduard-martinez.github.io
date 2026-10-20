@@ -31,7 +31,7 @@
 
 %% Encabezado
 \title[06327-ECO]{Analítica para los negocios \\ 06327-ECO}
-\subtitle{Semana 12: El árbol que predice números --- ¿cuántas reproducciones logrará una canción?}
+\subtitle{Semana 12: El árbol que predice números --- ¿qué tan popular será una canción?}
 \author{Eduard F. Martínez González, Ph.D.}
 \institute[]{Departamento de Economía, Universidad Icesi}
 \date{20 de octubre de 2026}
@@ -49,15 +49,15 @@
 \begin{frame}{Objetivo de la sesión}
 \small
 \begin{block}{La pregunta de negocio}
-A SonoUrbano, un sello de música urbana, le ofrecen canciones para comprar. Para decidir cuáles, necesita pronosticar: ¿cuántas reproducciones logrará cada una?
+A SonoUrbano, un sello de música urbana, le ofrecen canciones para comprar. Para decidir cuáles, necesita pronosticar: ¿qué tan popular será cada una?
 \end{block}
 
 \vspace{0.2cm}
-Por primera vez el target es \textbf{un número}, no una categoría:
+Por primera vez el target es \textbf{un número}, no una categoría --- y los datos son \textbf{reales}: canciones que conoces.
 \begin{itemize} \setlength{\itemsep}{0.15cm}
-  \item Entrenar un árbol que, con las características de la canción, pronostique sus \textbf{reproducciones} (en millones).
-  \item Medir el error \textbf{en millones de reproducciones} (MAE) contra la línea base del promedio.
-  \item Convertir el pronóstico en la decisión: qué comprar y cuánto invertir en cada canción.
+  \item Entrenar un árbol que, con las características de la canción, pronostique su \textbf{popularidad} en Spotify (0--100: el índice que resume las reproducciones recientes).
+  \item Medir el error \textbf{en puntos de popularidad} (MAE) contra la línea base del promedio.
+  \item Convertir el pronóstico en la decisión: qué comprar y cuánto invertir en cada lanzamiento.
 \end{itemize}
 
 \vspace{0.25cm}
@@ -83,9 +83,9 @@ Por primera vez el target es \textbf{un número}, no una categoría:
 \section{Los datos y el sobre}
 
 
-\begin{frame}{Los datos: 50.000 canciones urbanas}
+\begin{frame}{Los datos: 2.427 canciones urbanas, reales}
 \small
-Una base al estilo Spotify, solo de género urbano: \textbf{50.000 filas, una por canción, y 7 columnas}. El target es \texttt{reproducciones} (millones); las predictoras describen cada canción:
+La base pública de canciones de Spotify (proyecto TidyTuesday, enero de 2020), filtrada al género urbano --- reggaeton y latin hip hop, sin duplicados ---: \textbf{2.427 filas, una por canción}. El target es \texttt{popularidad} (0--100): el índice de Spotify que resume las reproducciones recientes.
 
 \vspace{0.15cm}
 \begin{center}
@@ -95,106 +95,103 @@ Una base al estilo Spotify, solo de género urbano: \textbf{50.000 filas, una po
 \toprule
 \textbf{Variable} & \textbf{Qué mide} \\
 \midrule
+\texttt{anio} & el año en que salió el álbum \\
+\texttt{duracion\_seg} & la duración, en segundos \\
 \texttt{bailabilidad} & qué tan bailable es la canción (0--100) \\
 \texttt{energia} & la intensidad de la pista (0--100) \\
-\texttt{bpm} & el tempo, en golpes por minuto \\
-\texttt{duracion\_seg} & la duración, en segundos \\
-\texttt{colaboracion} & 1 si la canción tiene un \textit{featuring} \\
+\texttt{colaboracion} & 1 si el título trae un \textit{featuring} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \vspace{0.1cm}
+\scriptsize \texttt{cancion} y \texttt{artista} identifican cada fila: en la base están Bad Bunny (24 canciones), J Balvin (37), Ozuna, Daddy Yankee\ldots{} \texttt{subgenero} y \texttt{tempo} completan las 10 columnas.
+\small
+
+\vspace{0.1cm}
 \begin{alertblock}{Lo que importa}
-Las cinco existen el día del lanzamiento: se conocen antes de saber cuántas reproducciones logrará la canción. No hay fuga.
+Las cinco predictoras se conocen desde el día del lanzamiento, antes de saber qué tan popular será la canción: no hay fuga. El artista \textbf{no} entra al árbol.
 \end{alertblock}
 \end{frame}
 
 %%=================================================
 \begin{frame}{El sobre: unas canciones para aprender, otras para calificar}
 \small
-Queremos que el árbol \textbf{generalice} --- que aprenda el patrón de las reproducciones, no que se memorice sus 50.000 canciones. Eso solo se comprueba con canciones que no vio.
+Queremos que el árbol \textbf{generalice} --- que aprenda el patrón de la popularidad, no que se memorice sus 2.427 canciones. Eso solo se comprueba con canciones que no vio.
 
 \vspace{0.2cm}
 \begin{center}
 \setlength{\tabcolsep}{5pt}
 \begin{tabular}{@{}c c c@{}}
-\textbf{50.000 canciones} & & \\
+\textbf{2.427 canciones} & & \\
 \footnotesize sorteo 80\,/\,20 & $\longrightarrow$ &
 \footnotesize
 \begin{tabular}{@{}l@{}}
-\colorbox{grisclaro}{\textbf{40.000 entrenan}: el árbol ve sus reproducciones} \\[0.12cm]
-\colorbox{grisclaro}{\textbf{10.000 califican}: el árbol no las ve al entrenar} \\
+\colorbox{grisclaro}{\textbf{1.942 entrenan}: el árbol ve su popularidad} \\[0.12cm]
+\colorbox{grisclaro}{\textbf{485 califican}: el árbol no las ve al entrenar} \\
 \end{tabular} \\
 \end{tabular}
 \end{center}
 
 \vspace{0.2cm}
-En las 40.000 de entrenamiento, el promedio es \textbf{36.4 millones por canción}: ese número es la línea base --- pronosticárselo a todas.
+En las 1.942 de entrenamiento, el promedio es \textbf{44.9 puntos de popularidad}: ese número es la línea base --- pronosticárselo a todas.
 
 \vspace{0.15cm}
 \begin{alertblock}{Lo que importa}
-La nota del árbol se mide solo en las 10.000 del sobre: ahí se ve si generalizó o si memorizó.
+La nota del árbol se mide solo en las 485 del sobre: ahí se ve si generalizó o si memorizó.
 \end{alertblock}
 \end{frame}
 
 %%=================================================
 \section{Del árbol a la decisión}
 
-\begin{frame}{El árbol entrenado: tres preguntas, cuatro hojas}
+\begin{frame}{El árbol entrenado: dos variables, cinco hojas}
 \small
 \begin{columns}[T]
 \column{0.64\textwidth}
 \includegraphics[width=\textwidth]{pic/fig_arbol_s12.png}
 \column{0.34\textwidth}
 \footnotesize
-Cada caja: arriba, \textbf{los millones que predice} (el promedio de su grupo); abajo, cuántas canciones de entrenamiento caen ahí y qué \% son (\texttt{n=12e+3} son 12.000).
+Cada caja: arriba, \textbf{la popularidad que predice} (el promedio de su grupo); abajo, cuántas canciones de entrenamiento caen ahí y qué \% son.
 
 \vspace{0.1cm}
-Primero pregunta por la \textbf{bailabilidad}; entre las bailables, la \textbf{colaboración} separa 48 de 95 millones; entre las demás, la \textbf{energía} separa 9.7 de 21.9.
+Primero pregunta por el \textbf{año}: las de 2019 en adelante prometen \textbf{63.6}; las de 2018, 51.9. En el catálogo viejo manda la \textbf{duración}: menos de 157 segundos cae a 14; 276 o más, a 26.5; el resto queda en 37.7.
 \end{columns}
 \begin{alertblock}{Lo que importa}
-De cinco variables usó tres: ni el \texttt{bpm} ni la duración ganaron una pregunta. Y el hallazgo del negocio: \textbf{entre las bailables, el \textit{featuring} casi duplica las reproducciones}.
+De cinco variables usó dos: el año (dos veces) y la duración (dos veces). Ni la bailabilidad, ni la energía, ni el \textit{featuring} ganaron una pregunta: \textbf{la popularidad de Spotify premia lo reciente}.
 \end{alertblock}
 \end{frame}
 
 %%=================================================
 \begin{frame}{¿Cómo le fue, canción por canción?}
 \small
-\begin{columns}[T]
-\column{0.6\textwidth}
-\centering
-\scriptsize
-\setlength{\tabcolsep}{2.5pt}
-\begin{tabular}{@{}c c c c r r r@{}}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}l l c c r r r@{}}
 \toprule
-\textbf{Canción} & \textbf{Bail.} & \textbf{Colab.} & \textbf{Energía} & \textbf{Real} & \textbf{Pron.} & \textbf{Error} \\
+\textbf{Canción} & \textbf{Artista} & \textbf{Año} & \textbf{Dur.\ (seg)} & \textbf{Real} & \textbf{Pron.} & \textbf{Error} \\
 \midrule
-URB00002 & 57 & sí & 67 & 2.8 & 9.7 & 6.9 \\
-URB00007 & 62 & no & 79 & 12.2 & 21.9 & 9.7 \\
-URB00008 & 58 & no & 70 & 16.3 & 21.9 & 5.6 \\
-URB00010 & 65 & no & 68 & 2.3 & 9.7 & 7.4 \\
-URB00011 & 66 & no & 59 & 0.1 & 9.7 & 9.6 \\
-\rowcolor{grisclaro} URB00016 & 91 & no & 100 & 36.5 & 48.0 & \textbf{11.5} \\
-\rowcolor{grisclaro} URB00022 & 70 & no & 86 & 24.1 & 21.9 & \textbf{2.2} \\
-URB00026 & 99 & no & 82 & 61.2 & 48.0 & 13.2 \\
+Me Gusta & Shakira & 2020 & 191 & 79 & 63.6 & 15.4 \\
+Con Calma & Daddy Yankee & 2019 & 193 & 87 & 63.6 & 23.4 \\
+\rowcolor{grisclaro} Baila Baila Baila & Ozuna & 2019 & 158 & 65 & 63.6 & \textbf{1.4} \\
+Felices los 4 & Maluma & 2018 & 230 & 76 & 51.9 & 24.1 \\
+Estamos Bien & Bad Bunny & 2018 & 208 & 76 & 51.9 & 24.1 \\
+\rowcolor{grisclaro} Gasolina & Daddy Yankee & 2004 & 193 & 76 & 37.7 & \textbf{38.3} \\
+Bandoleros & Don Omar & 2006 & 305 & 67 & 26.5 & 40.5 \\
+Te Suelto el Pelo & Yandel & 2003 & 136 & 55 & 14.0 & 41.0 \\
 \bottomrule
 \end{tabular}
 
 \vspace{0.05cm}
-\tiny Las primeras ocho canciones del test; reproducciones en millones.
-\column{0.38\textwidth}
-\footnotesize
-Cada pronóstico es el promedio de la hoja donde cae la canción, y cada canción deja \textbf{una distancia en millones}.
+\tiny Ocho canciones del test; popularidad de 0 a 100.
+\end{center}
 
-\vspace{0.12cm}
-A URB00022 casi le atina (2.2). Con URB00026 --- bailable sin \textit{featuring} que explotó --- se queda corto por 13.2: la hoja predice su promedio, no los éxitos atípicos.
-\end{columns}
-\pause
+\vspace{0.15cm}
+Cada canción cae en una hoja y recibe su promedio: cinco pronósticos distintos. A \textit{Baila Baila Baila} casi le atina (1.4). Y Daddy Yankee cae en dos hojas: \textit{Con Calma} (2019) en la de 63.6 y \textit{Gasolina} (2004) en la de 37.7 --- el árbol no sabe quién canta: pregunta el año. Por eso con los clásicos que siguen sonando (\textit{Gasolina}, \textit{Bandoleros}, \textit{Te Suelto el Pelo}) se queda corto por 38--41 puntos.
+
 \vspace{0.1cm}
-\begin{alertblock}{Lo que importa}
-En regresión no se pregunta «¿acertó?» sino \textbf{«¿por cuánto se equivocó?»} --- y eso se promedia.
-\end{alertblock}
+En regresión la pregunta no es «¿acertó?» sino \textbf{«¿por cuánto se equivocó?»} --- y eso se promedia.
 \end{frame}
 
 %%=================================================
@@ -211,19 +208,19 @@ Con las ocho canciones de la lámina anterior, en tres pasos:
 \toprule
 \textbf{Paso} & \textbf{Con las 8 de la lámina 7} \\
 \midrule
-\textbf{1. El error absoluto de cada una} \newline $|$pronóstico $-$ real$|$ & 6.9; 9.7; 5.6; 7.4; 9.6; 11.5; 2.2; 13.2 \\[0.08cm]
-\textbf{2. Súmalos} & \cuenta{$6.9 + 9.7 + \cdots + 13.2$}{66.1 millones} \\[0.08cm]
-\textbf{3. Divide entre las canciones} & \cuenta{$66.1 \div 8$}{8.3 millones} \\
+\textbf{1. El error absoluto de cada una} \newline $|$pronóstico $-$ real$|$ & 15.4; 23.4; 1.4; 24.1; 24.1; 38.3; 40.5; 41.0 \\[0.08cm]
+\textbf{2. Súmalos} & \cuenta{$15.4 + 23.4 + \cdots + 41.0$}{208.2 puntos} \\[0.08cm]
+\textbf{3. Divide entre las canciones} & \cuenta{$208.2 \div 8$}{26.0 puntos} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \vspace{0.1cm}
-La misma cuenta con las \textbf{10.000 canciones del sobre}: el árbol se equivoca \textbf{7.0 millones} por canción; el promedio, \textbf{24.3 millones}.
+La misma cuenta con las \textbf{485 canciones del sobre} --- ya no solo éxitos conocidos ---: el árbol se equivoca \textbf{21.0 puntos} por canción; el promedio, \textbf{24.4 puntos}.
 
 \vspace{0.05cm}
 \begin{alertblock}{Lo que importa}
-El MAE del árbol sale de la misma cuenta que acabas de hacer a mano --- solo que sobre 10.000 canciones.
+El MAE del árbol sale de la misma cuenta que acabas de hacer a mano --- solo que sobre 485 canciones.
 \end{alertblock}
 \end{frame}
 
@@ -236,21 +233,21 @@ El MAE del árbol sale de la misma cuenta que acabas de hacer a mano --- solo qu
 \column{0.46\textwidth}
 \footnotesize
 \begin{itemize} \setlength{\itemsep}{0.14cm}
-  \item \textbf{La línea base}: pronosticar 36.4 millones a todas se equivoca \textbf{24.3 millones} por canción.
-  \item \textbf{El árbol}: con tres preguntas, el error baja a \textbf{7.0 millones}: 3.4 veces menos.
-  \item Con ese pronóstico, SonoUrbano prioriza: una canción que cae en la hoja de 95 millones no se promociona igual que una en la de 9.7.
+  \item \textbf{La línea base}: pronosticar 44.9 puntos a todas se equivoca \textbf{24.4 puntos} por canción.
+  \item \textbf{El árbol}: con el año y la duración, el error baja a \textbf{21.0 puntos}: 3.4 menos por canción, un 14\,\% menos.
+  \item Con ese pronóstico, SonoUrbano prioriza: una canción que cae en la hoja de 63.6 no se lanza igual que una en la de 14.
 \end{itemize}
 \end{columns}
 \vspace{0.1cm}
 \begin{alertblock}{Lo que importa}
-La vara de la regresión es el promedio: el árbol la mejora \textbf{3.4 a 1}, en millones de reproducciones. Falta traducir ese error a dinero.
+La vara de la regresión es el promedio: el árbol le gana por \textbf{3.4 puntos por canción}. Pero el negocio no es el error promedio: es \textbf{elegir cuáles comprar}.
 \end{alertblock}
 \end{frame}
 
 %%=================================================
-\begin{frame}{¿Qué cuesta equivocarse? El costo de oportunidad}
+\begin{frame}{¿Cuánto vale el pronóstico? La decisión de compra}
 \small
-El sello invierte en marketing \textbf{según lo que espera de cada canción}: \$1 millón de pesos por cada millón de reproducciones pronosticado (cifra ilustrativa). Cada millón de error \textbf{desvía esa inversión}: sobra donde no habrá reproducciones y falta donde sí.
+SonoUrbano va a comprar \textbf{20 canciones}, y cada punto de popularidad que consigan vale \$1 millón de pesos por canción (cifra ilustrativa). Sin modelo compra al azar: el promedio le pronostica lo mismo a todas y no distingue. Con el árbol, compra de la \textbf{hoja de 63.6}.
 
 \vspace{0.1cm}
 \begin{center}
@@ -259,18 +256,18 @@ El sello invierte en marketing \textbf{según lo que espera de cada canción}: \
 \renewcommand{\arraystretch}{1.05}
 \begin{tabular}{@{}m{4.9cm} c c@{}}
 \toprule
-\textbf{Paso} & \textbf{Promedio} & \textbf{Árbol de la casa} \\
+\textbf{Paso} & \textbf{Al azar} & \textbf{Con el árbol} \\
 \midrule
-\textbf{1. Error por canción} \newline el MAE, en millones & 24.3 & 7.0 \\[0.05cm]
-\textbf{2. Inversión desviada por canción} \newline error $\times$ \$1 millón & \$24.3 M & \$7.0 M \\[0.05cm]
-\textbf{3. En un lote de 20 canciones} \newline por canción $\times$ 20 & \cuenta{$24.3 \times 20$}{\$486 M} & \cuenta{$7.0 \times 20$}{\$140 M} \\
+\textbf{1. ¿Cuáles 20 compra?} & cualquiera del catálogo & las de la hoja de 63.6 \\[0.05cm]
+\textbf{2. Popularidad real que consigue} \newline promedio por canción, en el test & 46.6 & 66.0 \\[0.05cm]
+\textbf{3. Valor del lote} \newline real $\times$ \$1 millón $\times$ 20 & \cuenta{$46.6 \times 20$}{\$932 M} & \cuenta{$66.0 \times 20$}{\$1.320 M} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \vspace{0.05cm}
 \begin{alertblock}{La recomendación}
-Decidir el lote con el promedio desvía \textbf{\$346 millones más} ($486 - 140$) que decidirlo con el árbol. Adoptarlo --- y quedarse con su regla: \textbf{bailabilidad y \textit{featuring} mandan; el bpm y la duración, no}.
+El lote elegido con el árbol vale \textbf{\$388 millones más} ($1.320 - 932$): \$19.4 millones más por canción. Adoptarlo --- y para atinarle a los éxitos uno a uno, conseguir la variable que falta: \textbf{el artista}.
 \end{alertblock}
 \end{frame}
 
