@@ -79,12 +79,14 @@ Three *skills* — packaged instructions that turn your AI assistant into a help
 <p>
 <a href="/teaching/ba/skills/curso-ba.zip" download class="ws-btn"><i class="fas fa-graduation-cap"></i>curso-ba · course context</a>
 <a href="/teaching/ba/skills/monitor-r.zip" download class="ws-btn"><i class="fa-brands fa-r-project"></i>monitor-r · your R tutor</a>
-<a href="/teaching/ba/skills/simulacro-ba.zip" download class="ws-btn"><i class="fas fa-stopwatch"></i>simulacro-ba · exam practice</a>
+<a href="/teaching/ba/skills/simulacro-ba.zip" download class="ws-btn"><i class="fas fa-stopwatch"></i>simulacro-ba · midterm 1 practice</a>
+<a href="/teaching/ba/skills/simulacro-parcial-2.zip" download class="ws-btn"><i class="fas fa-chart-column"></i>simulacro-parcial-2 · midterm 2 practice</a>
 </p>
 
 - **curso-ba** — the course context: the weekly dynamic, the Cóndor case, grading, and the course AI policy.
 - **monitor-r** — an R tutor that unblocks you without doing the workshop for you: explained errors, step-by-step code, diagnoses that teach.
-- **simulacro-ba** — generates practice exams in the exact format of the midterm (one context, four questions, weeks 2–6) and only reveals the key after you answer.
+- **simulacro-ba** — generates practice exams in the exact format of midterm 1 (one context, four questions, weeks 2–6) and only reveals the key after you answer.
+- **simulacro-parcial-2** — practice for midterm 2 in its real format: one figure (a decision tree, clusters, a confusion matrix, an EDA chart) and four or five chained questions that read it; covers weeks 6 and 10–13, key only after you answer.
 
 ## Learning outcomes
 
