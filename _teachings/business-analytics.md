@@ -252,16 +252,17 @@ From classifying to predicting an amount: a new client — SonoUrbano, an urban-
 ### Unit 6 — Unsupervised learning
 
 **Week 13 — Clustering: fundamentos y métricas.**
-Clustering as segmentation without a target; **k-means** (distance, scaling, centroids); choosing *k* with the elbow and silhouette methods; profiling segments so they are actionable. The practice segments Spotify songs; the workshop segments gym members.
+Segmentation without a target, on the most familiar data there is: the course's own grades. k-means groups the students of the class by quiz average and midterm score; the elbow and silhouette methods choose *k*, and each segment is profiled so it is actionable. The class script builds the segmentation and its final block is the workshop you hand in: your four groups.
 
 <p>
 <span class="ws-tag">Before class</span>
-<a href="/teaching/ba/lectures/week-13/theory/week-13.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory</a>
+<a href="/teaching/ba/lectures/week-13/theory/week-13.html" class="ws-btn"><i class="fas fa-book-open"></i>Theory (with video)</a>
 <br>
 <span class="ws-tag">In class</span>
-<a href="/teaching/ba/lectures/week-13/practice/week-13.html" class="ws-btn"><i class="fas fa-laptop-code"></i>Guided practice</a>
+<a href="/teaching/ba/lectures/week-13/slides/week-13.pdf" class="ws-btn"><i class="fas fa-file-pdf"></i>Class slides · what groups are in the course</a>
+<a href="/teaching/ba/lectures/week-13/script/script_clase13.R" download class="ws-btn"><i class="fas fa-download"></i>Class script (TA session)</a>
 <a href="/teaching/ba/lectures/week-13/task/week-13.html" class="ws-btn"><i class="fas fa-clipboard-check"></i>Workshop</a>
-<small class="ws-data">Data: <a href="/teaching/ba/lectures/week-13/practice/spotify_canciones.csv"><code>spotify_canciones.csv</code></a> · <a href="/teaching/ba/lectures/week-13/task/socios_califit.csv"><code>socios_califit.csv</code></a></small>
+<small class="ws-data">The script loads everything by URL (<code>notas_curso.csv</code> — the course's real grade distribution, with pseudonymous student codes).</small>
 </p>
 
 **Week 14 — Examen Parcial 2.** Second integrative written exam (20%), covering weeks 8–13. November 2–7.
