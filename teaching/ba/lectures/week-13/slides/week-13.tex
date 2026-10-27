@@ -11,6 +11,7 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{colortbl}
+\usepackage{multirow}
 \hypersetup{
     colorlinks=true,
     linkcolor=.,
@@ -27,14 +28,16 @@
 
 %% Encabezado
 \title[06327-ECO]{Analítica para los negocios \\ 06327-ECO}
-\subtitle{Semana 13: Los segmentos de Cóndor --- ¿quiénes son y dónde está la plata en riesgo?}
+\subtitle{Semana 13: Clustering con k-means --- ¿qué grupos de estudiantes hay en el curso?}
 \author{Eduard F. Martínez González, Ph.D.}
 \institute[]{Departamento de Economía, Universidad Icesi}
-\date{\textcolor{rojoal}{[fecha por definir]}}
+\date{27 de octubre de 2026}
 
 %%=================================================
+%% Begin document
 \begin{document}
 
+%%=================================================
 \begin{frame}
 \titlepage
 \end{frame}
@@ -42,253 +45,162 @@
 %%=================================================
 \begin{frame}{Objetivo de la sesión}
 \small
-Hoy se acaba la hoja de respuestas: se agrupan los mismos 8.000 clientes de Cóndor \textbf{sin target}, y los grupos se defienden con perfilamiento.
+\begin{block}{La pregunta de hoy}
+¿Qué grupos de estudiantes hay en este curso, según sus notas --- y en cuál está cada uno?
+\end{block}
 
-\vspace{0.15cm}
-\begin{itemize} \setlength{\itemsep}{0.16cm}
-  \item Recencia, frecuencia y monto: el bloque RFM de la base.
-  \item Qué pasa cuando no se escala, y cómo se elige el número de segmentos cuando las métricas no votan lo mismo.
-  \item El cruce con lo construido en las semanas 11 y 12: el riesgo y el valor en riesgo.
+\vspace{0.2cm}
+Por primera vez, \textbf{los datos son ustedes}: los 43 estudiantes de las dos jornadas.
+\begin{itemize} \setlength{\itemsep}{0.15cm}
+  \item Agrupar con \textbf{k-means} usando dos notas: el promedio de quices y el parcial 1.
+  \item Elegir \textbf{cuántos grupos} con el codo y la silueta.
+  \item Caracterizar cada grupo con su \textbf{centroide} y decidir el acompañamiento del cierre.
 \end{itemize}
 
-\vspace{0.15cm}
-\begin{block}{La idea que gobierna la sesión}
-Un segmento solo sirve si se puede \textbf{nombrar} y \textbf{accionar}. Y la acción se decide mirando dos cosas a la vez: cuánto riesgo hay y cuánta plata está en juego.
-\end{block}
+\vspace{0.25cm}
+\textcolor{azulcaso}{Hoy no hay variable a predecir: no se pronostica, se busca estructura. Primera vez sin target y sin sobre.}
 \end{frame}
 
 %%=================================================
-\begin{frame}{¿Dónde estamos en el curso?}
+\begin{frame}{Previously\ldots}
 \small
-\begin{itemize} \setlength{\itemsep}{0.16cm}
-  \item \textbf{Semana 6:} el EDA --- quiénes abandonan.
-  \item \textbf{Semana 10:} el juicio --- el sobre sellado y la tabla del líder.
-  \item \textbf{Semana 11:} quién se va --- el bosque empata con la regla del EDA y compra la perilla: un riesgo para cada cliente.
-  \item \textbf{Semana 12:} cuánto gasta --- la regla de Finanzas es casi imposible de mejorar; el valor en riesgo junta las dos preguntas.
-  \item \textbf{Semana 13 (hoy):} quiénes son --- segmentos sin target, cruzados con el riesgo y el valor.
+\begin{itemize} \setlength{\itemsep}{0.25cm}
+  \item \textbf{Semana 12: el árbol del artista.} Pronosticamos la popularidad de una canción (MAE 17.0 contra 24.4 del promedio): aprendizaje \textbf{supervisado} --- había un target que acertar.
+  \item \textbf{El quiz de hoy.} Ya leyeron un codo y un mapa de grupos con sus centroides y tamaños: ahora lo harán con sus propias notas.
+  \item \textbf{La teoría de esta semana.} k-means reparte las observaciones en k grupos; el \textbf{centroide} es el promedio del grupo, y el \textbf{codo} y la \textbf{silueta} orientan la elección de k.
 \end{itemize}
 \end{frame}
 
+%%=================================================
 \begin{frame}[noframenumbering]{Roadmap}
 \tableofcontents
 \end{frame}
 
 %%=================================================
-\section{Las variables y la escala}
+\section{Los datos y el número de grupos}
 
-\begin{frame}[noframenumbering]{Roadmap}
-\tableofcontents[currentsection]
-\end{frame}
 
-\begin{frame}{La pregunta de hoy}
+\begin{frame}{Los datos: ustedes}
 \small
-\begin{block}{Marketing y Growth}
-``Queremos segmentos de clientes con personalidad, para diseñar una acción distinta para cada uno. Y queremos saber en cuál de ellos está la plata en riesgo.''
-\end{block}
+Una fila por estudiante --- \textbf{43 en total, las dos jornadas} --- con dos notas del semestre:
 
 \vspace{0.15cm}
-\begin{itemize} \setlength{\itemsep}{0.12cm}
-  \item \textbf{Tarea:} segmentación --- agrupar sin target. Nadie dice de antemano cuántos grupos hay ni cuáles son.
-  \item \textbf{Variables:} recencia, frecuencia y monto (RFM). Quedan fuera \texttt{abandono} --- se guarda para ver si los segmentos lo separan sin haberlo visto --- y \texttt{gasto\_proximo\_trim}, del futuro.
-  \item \textbf{Método:} k-means, que agrupa por distancia alrededor de centroides.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Paso 1 · ¿Con qué variables se segmenta?}
-\small
-\begin{columns}[T]
-\column{0.5\textwidth}
-\centering
-\footnotesize
-\begin{tabular}{lr}
-\toprule
-Variable & Desviación \\
-\midrule
-Recencia (días) & 63,4 \\
-Frecuencia (transacciones) & 21,0 \\
-Monto total (pesos) & 623.353,1 \\
-\bottomrule
-\end{tabular}
-\column{0.48\textwidth}
-\begin{itemize} \setlength{\itemsep}{0.12cm}
-  \item k-means mide distancias: cada variable pesa según su escala.
-  \item El monto varía unas \textbf{10.000 veces} más que la recencia y \textbf{30.000} más que la frecuencia.
-\end{itemize}
-\end{columns}
-\pause
-\vspace{0.3cm}
-\begin{alertblock}{Hallazgo 1}
-Una variable no es como las otras. Si nadie la pone en su lugar, la distancia será, en la práctica, solo monto.
-\end{alertblock}
-\end{frame}
-
-\begin{frame}{Paso 2 · ¿Qué pasa si no se escala?}
-\small
-\begin{columns}[T]
-\column{0.58\textwidth}
-\includegraphics[width=\textwidth]{pic/fig_s13_crudo.png}
-\column{0.4\textwidth}
-\footnotesize
-k-means con $k = 4$ sobre las variables crudas:
-\begin{itemize} \setlength{\itemsep}{0.06cm}
-  \item Montos medianos de \textbf{202.500}, \textbf{700.900}, \textbf{1.442.800} y \textbf{2.656.750}: franjas de plata.
-  \item De los \textbf{886} clientes con más de 90 días sin transar, \textbf{872} quedan en el grupo más grande (4.358 clientes, recencia mediana de 30 días).
-\end{itemize}
-\end{columns}
-\pause
-\vspace{0.1cm}
-\begin{alertblock}{Hallazgo 2}
-La distancia la secuestró el monto. Los clientes dormidos --- el grupo de mayor riesgo de la semana 6 --- \textbf{no aparecen por ningún lado}: quedaron diluidos en una franja de plata.
-\end{alertblock}
-\end{frame}
-
-\begin{frame}{Paso 3 · ¿Cómo se pone a todos en la misma cancha?}
-\small
-\begin{itemize} \setlength{\itemsep}{0.2cm}
-  \item Se \textbf{escala} cada variable: $z = (x - \bar{x}) / s$. A cada una se le resta su media y se divide por su desviación.
-  \item Resultado: medias \textbf{0, 0, 0} y desviaciones \textbf{1, 1, 1} --- las tres pesan igual en la distancia.
-  \item Un día sin transar y una transacción de más ahora pesan lo mismo que la diferencia típica de monto.
-\end{itemize}
-\vspace{0.2cm}
-\begin{block}{La decisión del paso}
-Siempre se escala antes de k-means. Y el perfil de los segmentos se lee después con los datos \textbf{originales}, en las unidades que entiende el negocio.
-\end{block}
-\end{frame}
-
-%%=================================================
-\section{Cuántos y quiénes}
-
-\begin{frame}[noframenumbering]{Roadmap}
-\tableofcontents[currentsection]
-\end{frame}
-
-\begin{frame}{Paso 4 · ¿Cuántos segmentos?}
-\small
-\begin{columns}[T]
-\column{0.5\textwidth}
-\centering
-\includegraphics[width=0.78\textwidth]{pic/fig_s13_codo.png}
-\column{0.5\textwidth}
-\centering
-\includegraphics[width=0.78\textwidth]{pic/fig_s13_silueta.png}
-\end{columns}
-\vspace{-0.05cm}
-\footnotesize
-\begin{itemize} \itemsep1pt
-  \item \textbf{Codo:} el tercer segmento compra $-$5.620 de compactación; el cuarto, $-$2.422; el quinto, apenas $-$1.184.
-  \item \textbf{Silueta:} 0,502 · \textbf{0,545} · 0,461 · 0,439\ldots --- máximo en $k = 3$.
-\end{itemize}
-\pause
-\begin{alertblock}{Hallazgo 4}
-Las métricas no votan lo mismo. La regla práctica: \textbf{perfilar ambos}. Con $k = 4$ aparecen 549 clientes con más del doble de monto que los activos, que merecen una acción propia. $k = 4$ es más accionable.
-\end{alertblock}
-\end{frame}
-
-\begin{frame}{Paso 5 · ¿Quiénes son?}
-\small
-\begin{columns}[T]
-\column{0.5\textwidth}
-\includegraphics[width=\textwidth]{pic/fig_s13_segmentos.png}
-\column{0.5\textwidth}
-\includegraphics[width=\textwidth]{pic/fig_s13_abandono.png}
-\end{columns}
-\vspace{0.05cm}
-\centering
+\begin{center}
 \scriptsize
-\begin{tabular}{crrrrc}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}l l@{}}
 \toprule
-Segmento & Clientes & Recencia & Frecuencia & Monto & Abandono \\
+\textbf{Variable} & \textbf{Qué es} \\
 \midrule
-1 & 582 & 204 días & 2 & 54.850 & 68,7 ± 3,8\,\% \\
-2 & 2.261 & 7 días & 36 & 928.800 & 9,3 ± 1,2\,\% \\
-3 & 4.608 & 22 días & 12 & 276.850 & 24,7 ± 1,3\,\% \\
-4 & 549 & 4 días & 72 & 2.094.800 & 4,6 ± 1,8\,\% \\
+\texttt{codigo} & tu código estudiantil: con él te buscas en la base \\
+\texttt{jornada} & el grupo del curso en que estás matriculado \\
+\texttt{promedio\_quices} & el promedio de tus quices (0 donde faltó presentar) \\
+\texttt{parcial\_1} & la nota del primer parcial \\
 \bottomrule
 \end{tabular}
-\raggedright
-\small
-\pause
-\begin{alertblock}{Hallazgo 5}
-Los segmentos se armaron \textbf{sin mirar el abandono}, y lo separan: del 68,7\,\% al 4,6\,\%, muy por encima de los márgenes.
-\end{alertblock}
-\end{frame}
+\end{center}
 
-%%=================================================
-\section{La plata en riesgo}
+\vspace{0.15cm}
+Las dos notas vienen en la \textbf{misma escala} (0 a 5): hoy no hay que escalar. En la práctica de Cóndor --- opcional --- verán el caso contrario: allá el monto se adueña de la distancia.
 
-\begin{frame}[noframenumbering]{Roadmap}
-\tableofcontents[currentsection]
-\end{frame}
-
-\begin{frame}{Paso 6 · ¿Dónde está la plata en riesgo?}
-\small
-\begin{columns}[T]
-\column{0.58\textwidth}
-\includegraphics[width=\textwidth]{pic/fig_s13_valor.png}
-\column{0.4\textwidth}
-\footnotesize
-\textbf{Valor en riesgo} = probabilidad de irse (semana 11) × gasto esperado (semana 12), en los 1.600 clientes del sobre.
-\begin{itemize} \setlength{\itemsep}{0.06cm}
-  \item Segmento 1: riesgo \textbf{0,637}; \textbf{1,2\,\%} del valor en riesgo.
-  \item Segmento 2: riesgo \textbf{0,113}; \textbf{51\,\%} del valor en riesgo.
-\end{itemize}
-\end{columns}
-\pause
 \vspace{0.1cm}
-\begin{alertblock}{Hallazgo 6 --- la lección de la semana}
-\textbf{La plata en riesgo no está donde está el riesgo.} Una campaña que solo mire la probabilidad de irse llamaría a quienes menos plata ponen en juego.
+\begin{alertblock}{Lo que importa}
+No hay target: ninguna columna es «la respuesta». Y sin target no hay sobre ni train/test: no hay nada que acertar --- hay \textbf{estructura que encontrar}.
 \end{alertblock}
 \end{frame}
 
 %%=================================================
-\section{Lo que queda}
-
-\begin{frame}[noframenumbering]{Roadmap}
-\tableofcontents[currentsection]
-\end{frame}
-
-\begin{frame}{El mapa de los segmentos}
-\small
-\centering
-\footnotesize
-\begin{tabular}{crrcc}
-\toprule
-Segmento & Clientes & Monto mediano & Abandono real & Parte del valor en riesgo \\
-\midrule
-1 & 582 & 54.850 & 68,7\,\% & 1,2\,\% \\
-2 & 2.261 & 928.800 & 9,3\,\% & 51,0\,\% \\
-3 & 4.608 & 276.850 & 24,7\,\% & 35,6\,\% \\
-4 & 549 & 2.094.800 & 4,6\,\% & 12,2\,\% \\
-\bottomrule
-\end{tabular}
-
-\raggedright
-\small
-\pause
-\vspace{0.3cm}
-\begin{block}{La decisión}
-Una acción por segmento: reactivación barata y automática donde el riesgo es alto pero la plata poca; retención personalizada donde está la mitad del valor; un ejecutivo de cuenta para los de más monto --- el tratamiento aparte de la semana 12.
-\end{block}
-\end{frame}
-
-\begin{frame}{Qué produce una segmentación --- y qué no}
+\begin{frame}{¿Cuántos grupos? El codo y la silueta, con datos reales}
 \small
 \begin{columns}[T]
-\column{0.48\textwidth}
-\textbf{Produce}
-\begin{itemize} \setlength{\itemsep}{0.1cm}
-  \item Grupos que se pueden nombrar y accionar.
-  \item Un lenguaje común para Marketing, Growth y Finanzas.
-  \item El mapa completo: quiénes son, cuánto riesgo tienen y cuánta plata ponen en juego.
-\end{itemize}
-\column{0.48\textwidth}
-\textbf{No produce}
-\begin{itemize} \setlength{\itemsep}{0.1cm}
-  \item Una respuesta correcta: sin target, el analista valida con el perfil y la acción.
-  \item Estabilidad garantizada: otro mes de datos puede mover los grupos.
-  \item Causas: el segmento describe; no dice por qué un cliente se va.
-\end{itemize}
+\column{0.62\textwidth}
+\includegraphics[width=\textwidth]{pic/fig_codo_silueta_s13.png}
+\column{0.36\textwidth}
+\footnotesize
+El \textbf{codo} cae con fuerza hasta k = 2--3 y después duda.
+
+\vspace{0.1cm}
+La \textbf{silueta} no rompe el empate: su máximo está en k = 5\ldots{} pero con grupos de 2 y 3 estudiantes, que no se pueden accionar.
 \end{columns}
+\vspace{0.1cm}
+\begin{alertblock}{Lo que importa}
+La regla de la teoría, aplicada a datos de verdad: \textbf{el codo orienta, la silueta valida y, cuando ninguno es nítido, decide la interpretabilidad}. Trabajamos con \textbf{k = 3}.
+\end{alertblock}
+\end{frame}
+
+%%=================================================
+\section{El mapa y la decisión}
+
+\begin{frame}{El mapa del curso}
+\small
+\begin{columns}[T]
+\column{0.60\textwidth}
+\includegraphics[width=\textwidth]{pic/fig_mapa_s13.png}
+\column{0.38\textwidth}
+\footnotesize
+Cada punto es un estudiante; la cruz, el \textbf{centroide}: el estudiante promedio de su grupo.
+
+\vspace{0.1cm}
+La correlación entre quices y parcial es apenas \textbf{0.29}: ir bien en los quices no asegura el parcial. Por eso hay puntos de un grupo metidos entre los de otro: k-means agrupa por \textbf{distancia a los centroides}, con las dos notas a la vez.
+\end{columns}
+\vspace{0.1cm}
+\begin{alertblock}{Lo que importa}
+El centroide es \textbf{el promedio del grupo}: en el script lo compruebas a mano con \texttt{group\_by} y \texttt{summarise}.
+\end{alertblock}
+\end{frame}
+
+%%=================================================
+\begin{frame}{Los tres grupos, con nombre}
+\small
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{@{}l c c c l@{}}
+\toprule
+\textbf{Grupo} & \textbf{Quices} & \textbf{Parcial} & \textbf{n} & \textbf{Lectura} \\
+\midrule
+\textbf{1 --- alto y parejo} & 4.1 & 4.5 & 9 & sólido en las dos notas \\
+\textbf{2 --- la mitad del curso} & 3.8 & 3.5 & 21 & quices bien; el salto está en el parcial \\
+\textbf{3 --- en alerta} & 3.2 & 2.6 & 13 & por debajo en ambas, más en el parcial \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.2cm}
+Entre el Grupo 1 y el Grupo 2 la diferencia en quices es pequeña (4.1 contra 3.8); la del parcial es grande (4.5 contra 3.5). Entre el 2 y el 3 pasa igual (3.8 contra 3.2, y 3.5 contra 2.6).
+
+\vspace{0.1cm}
+\begin{alertblock}{El hallazgo}
+\textbf{El parcial separa los grupos más que los quices.} Los quices se parecen entre grupos; el parcial es donde el curso se abre.
+\end{alertblock}
+\end{frame}
+
+%%=================================================
+\begin{frame}{¿Qué hace el curso con cada grupo? La decisión}
+\small
+El clúster no es la meta: es el insumo. Con el cierre del semestre encima --- parcial 2 (2--7 nov) y entrega final del proyecto ---, cada grupo recibe un acompañamiento distinto:
+
+\vspace{0.15cm}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}l l@{}}
+\toprule
+\textbf{Grupo} & \textbf{Acompañamiento del cierre} \\
+\midrule
+1 --- alto y parejo & sostener el ritmo y jalonar el proyecto de su equipo \\
+2 --- la mitad del curso & la brecha es el parcial: preparación dirigida al parcial 2 \\
+3 --- en alerta & monitoría y repaso, ya, antes del parcial 2 y de la E3 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.15cm}
+\begin{alertblock}{La recomendación}
+El grupo no es una nota ni una etiqueta: es \textbf{la foto de hoy} para decidir el acompañamiento del cierre --- y las fronteras entre grupos están a décimas.
+\end{alertblock}
 \end{frame}
 
 \end{document}
