@@ -19,10 +19,12 @@ notas <- read.csv(url_notas , colClasses=c(codigo="character"))
 dim(notas)
 head(notas , 3)
 
+## 1.2. seleccionar variables
+X <- notas %>% select(promedio_quices , parcial_1)
+
 ##==: 2. el numero de grupos :==##
 
 ## 2.1. el codo: la suma de distancias a los centroides para k = 1..8
-X <- notas %>% select(promedio_quices , parcial_1)
 wss <- c()
 for (k in 1:8) {
   set.seed(13)
@@ -42,17 +44,17 @@ km <- kmeans(X , centers=3 , nstart=25)
 orden <- order(-rowSums(km$centers))
 notas$grupo <- match(km$cluster , orden)
 
-## 3.3. la caracterizacion corta: el centroide es el estudiante promedio del grupo
-notas %>%
-group_by(grupo) %>%
-summarise(quices = round(mean(promedio_quices) , 1) ,
-          parcial = round(mean(parcial_1) , 1) , n = n())
-
-## 3.4. el mapa: cada punto es un estudiante del curso
+## 3.3. el mapa: cada punto es un estudiante del curso
 ggplot(notas , aes(x=promedio_quices , y=parcial_1 , color=factor(grupo))) +
 geom_point(size=3) +
 labs(x="promedio de quices" , y="parcial 1" , color="grupo") +
 theme_minimal()
+
+## 3.4. la caracterizacion corta: el centroide es el estudiante promedio del grupo
+notas %>%
+group_by(grupo) %>%
+summarise(quices = round(mean(promedio_quices) , 1) ,
+          parcial = round(mean(parcial_1) , 1) , n = n())
 
 ##==: 4. taller :==##
 
@@ -66,5 +68,6 @@ theme_minimal()
 ## subelo a Intu.
 
 ## 4.1. tu codigo:
+
 
 ## 4.2. tu respuesta:
