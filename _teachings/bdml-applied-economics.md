@@ -239,6 +239,19 @@ Both problem sets are applied only — no conceptual questions — and work on a
 
 Each problem set is submitted as a `.zip` with the report in PDF, the code (`00_run.R` and its auxiliary scripts) and the `predicciones.csv` that the code produces: the teacher scores those predictions against the hidden labels, and that test error ranks the teams. Problem set 1 was submitted on the virtual campus; problem set 2 is submitted by email to efmartinez@icesi.edu.co with the mandatory, exact subject `[BDML] Problem Set 2 - Apellido1 y Apellido2` — an email without that subject is not registered as a submission. Each ranking is discussed in class after the deadline (problem set 1: session 7; problem set 2: Nov 24).
 
+## Final project
+
+The final project is worth 60% of the course and is done in pairs (the problem-set pairs may continue). It is **the complete design of a predictive study**: an applied-economics question in which the quantity of interest is ŷ — not the effect of anything — the data that would answer it, and the plan that would survive the rules of the course: an explicit baseline, validation that matches the structure of the data, and a test set opened once. It is not a results report — no estimated models or final tables are required; the grade rewards the quality of the decisions, and the question must be different from the class case and from the problem sets. Its 100 points split across three deliverables:
+
+<p>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/final-project/proyecto-final.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-graduation-cap"></i>Final project guidelines (PDF)</a>
+<small class="ws-data"><strong>The data:</strong> real data — thousands of observations, a well-defined <em>y</em> and at least ten predictors. Public sources that work well: DANE (GEIH, census, quality-of-life survey), SECOP, municipal open data, Registraduría, housing listings. The course datasets are allowed only with a question different from the lectures and the problem sets; data still to be collected or generated are valid with a credible plan.</small>
+</p>
+
+- **The idea in one page — due Nov 3 at 11:59 p.m., virtual campus (10 pts).** There is no class that day: the submission is digital. One page of prose, readable in two minutes, answering four things in order: the question and the decision behind it; the unit and the outcome *y*; the course method(s) the team would use and why; and the data — whether they exist, would be collected or would have to be generated, and what would be known at prediction time. The guidelines close with a one-page example of the format (Annex A).
+- **The document, at most 8 pages — due Nov 24 at 8:00 a.m., virtual campus (50 pts).** Eight pages not counting references and annexes, 11-point font; going over loses 5 points. Its sections are the steps of the course workflow: the question and the decision, the data, metric–baseline–validation (would random folds answer the wrong question? what stays under lock as the test?), at least two course families and the knobs validation would tune, what would be interpreted and what not, the risks, and the work plan.
+- **The presentation — Nov 24 in class (40 pts).** Twenty minutes per pair plus ten of questions: a defense of the design, not a reading of the document. The room's questions always start from the three every idea must survive — which decision changes with the prediction, what is known at prediction time and what is leakage in disguise, and against which baseline and test success will be judged.
+
 ## Evaluation
 
 | Component | Weight |
@@ -248,7 +261,7 @@ Each problem set is submitted as a `.zip` with the report in PDF, the code (`00_
 | Problem set 2 — sessions 5–7 | 15% |
 | Final project | 60% |
 
-**Final project.** A predictive research proposal: each team defines an economic question in which prediction is the quantity of interest, identifies its own data, and designs the study that survives the seven questions of the course — the question and the decision behind it, the unit and the outcome, the data and what is known at prediction time, the metric and the baseline, the validation strategy, the risks (leakage, extrapolation, subgroups where it fails), and the reading of the results. The idea is submitted in one page on **Nov 3** at 11:59 p.m. (there is no class that day); the document — at most eight pages — and the presentation are due on **Nov 24** (session 9). The complete guidelines — the three deliverables, their dates and the rubric — are in the <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/final-project/proyecto-final.pdf" target="_blank" rel="noopener">final project PDF</a>.
+**Final project.** Described in the [Final project](#final-project) section above: the idea in one page (Nov 3), the document and the presentation (Nov 24), with the full rubric in the <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/final-project/proyecto-final.pdf" target="_blank" rel="noopener">guidelines PDF</a>.
 
 **AI policy:** AI tools are allowed in every component of the course, as long as their use is explicitly declared — what was used and for what.
 
