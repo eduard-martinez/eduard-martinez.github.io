@@ -55,7 +55,7 @@ All course materials — syllabus, lecture slides, R applications, problem sets 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-github"></i>github.com/eduard-martinez/bdml-applied-economics</a>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/syllabus/syllabus.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Full syllabus (PDF, in Spanish)</a>
-<span class="ws-btn ws-soon"><i class="fas fa-graduation-cap"></i>Final project guidelines · soon</span>
+<a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/final-project/proyecto-final.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-graduation-cap"></i>Final project guidelines (PDF)</a>
 <a href="https://www.statlearning.com" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-book"></i>Course text — ISL, 2nd ed. (free online)</a>
 </p>
 
@@ -248,7 +248,7 @@ Each problem set is submitted as a `.zip` with the report in PDF, the code (`00_
 | Problem set 2 — sessions 5–7 | 15% |
 | Final project | 60% |
 
-**Final project.** A predictive research proposal: each team defines an economic question in which prediction is the quantity of interest, identifies its own data, and designs the study that survives the seven questions of the course — the question and the decision behind it, the unit and the outcome, the data and what is known at prediction time, the metric and the baseline, the validation strategy, the risks (leakage, extrapolation, subgroups where it fails), and the reading of the results. The idea is submitted in one page on **Nov 3** at 11:59 p.m. (there is no class that day); the document — at most eight pages — and the presentation are due on **Nov 24** (session 9).
+**Final project.** A predictive research proposal: each team defines an economic question in which prediction is the quantity of interest, identifies its own data, and designs the study that survives the seven questions of the course — the question and the decision behind it, the unit and the outcome, the data and what is known at prediction time, the metric and the baseline, the validation strategy, the risks (leakage, extrapolation, subgroups where it fails), and the reading of the results. The idea is submitted in one page on **Nov 3** at 11:59 p.m. (there is no class that day); the document — at most eight pages — and the presentation are due on **Nov 24** (session 9). The complete guidelines — the three deliverables, their dates and the rubric — are in the <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/final-project/proyecto-final.pdf" target="_blank" rel="noopener">final project PDF</a>.
 
 **AI policy:** AI tools are allowed in every component of the course, as long as their use is explicitly declared — what was used and for what.
 
