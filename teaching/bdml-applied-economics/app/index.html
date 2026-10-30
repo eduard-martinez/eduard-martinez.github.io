@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verificación del Problem Set 2</title>
+<meta name="description" content="Suba su archivo predicciones.csv y reciba la matriz de confusión y sus métricas sobre una mitad de la base de predicción.">
+<style>
+  :root {
+    --fondo: #f6f7f9;
+    --tarjeta: #ffffff;
+    --tinta: #1d2733;
+    --tinta-suave: #5a6775;
+    --borde: #d9dee4;
+    --acento: #003366;
+    --acento-tinta: #ffffff;
+    --exito: #1e6f3e;
+    --exito-fondo: #e8f3ec;
+    --error: #a3242b;
+    --error-fondo: #faecec;
+    --celda: #eef1f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --fondo: #141a21;
+      --tarjeta: #1d242d;
+      --tinta: #e8ecf1;
+      --tinta-suave: #9aa7b4;
+      --borde: #37404b;
+      --acento: #7fa8d9;
+      --acento-tinta: #10161d;
+      --exito: #7fc79a;
+      --exito-fondo: #1c2d23;
+      --error: #e09399;
+      --error-fondo: #342024;
+      --celda: #262e38;
+    }
+  }
+  :root[data-theme="dark"] {
+    --fondo: #141a21;
+    --tarjeta: #1d242d;
+    --tinta: #e8ecf1;
+    --tinta-suave: #9aa7b4;
+    --borde: #37404b;
+    --acento: #7fa8d9;
+    --acento-tinta: #10161d;
+    --exito: #7fc79a;
+    --exito-fondo: #1c2d23;
+    --error: #e09399;
+    --error-fondo: #342024;
+    --celda: #262e38;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--tinta);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    padding: 24px 16px 48px;
+  }
+  main { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+  .curso { font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-suave); }
+  h1 { font-size: 1.5rem; margin: 2px 0 0; line-height: 1.25; text-wrap: balance; }
+  .sub { color: var(--tinta-suave); margin: 6px 0 0; }
+  .tarjeta { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 10px; padding: 18px 20px; }
+  .tarjeta h2 { font-size: 1.02rem; margin: 0 0 8px; }
+  .tarjeta ul { margin: 0; padding-left: 1.2em; }
+  .tarjeta li { margin: 4px 0; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.88em;
+         background: var(--celda); padding: 1px 5px; border-radius: 4px; }
+  .zona {
+    border: 2px dashed var(--borde); border-radius: 10px; padding: 26px 18px;
+    text-align: center; background: var(--tarjeta); cursor: pointer; transition: border-color 0.15s;
+  }
+  .zona:hover, .zona:focus-visible, .zona.encima { border-color: var(--acento); outline: none; }
+  .zona strong { color: var(--acento); }
+  .zona p { margin: 4px 0; }
+  .zona .nota { font-size: 0.85rem; color: var(--tinta-suave); }
+  #archivo { display: none; }
+  .boton {
+    display: inline-block; margin-top: 10px; background: var(--acento); color: var(--acento-tinta);
+    border: none; border-radius: 7px; padding: 9px 18px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+  }
+  .boton:focus-visible { outline: 3px solid var(--borde); outline-offset: 2px; }
+  #panel-errores { border-color: var(--error); background: var(--error-fondo); display: none; }
+  #panel-errores h2 { color: var(--error); }
+  #panel-errores ul { color: var(--tinta); }
+  #panel-resultados { display: none; }
+  .ok { color: var(--exito); background: var(--exito-fondo); border-radius: 6px;
+        padding: 6px 10px; font-size: 0.9rem; display: inline-block; margin-bottom: 10px; }
+  .dos-columnas { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  caption { caption-side: top; font-weight: 600; font-size: 0.92rem; padding-bottom: 6px; text-align: left; }
+  .matriz th, .matriz td { border: 1px solid var(--borde); padding: 7px 12px; text-align: center; font-size: 0.92rem; }
+  .matriz th { background: var(--celda); font-weight: 600; }
+  .matriz td.cifra { font-size: 1.05rem; font-weight: 600; }
+  .metricas td { padding: 5px 10px 5px 0; font-size: 0.95rem; }
+  .metricas td:last-child { text-align: right; font-weight: 600; padding-left: 18px; }
+  .metricas .formula { color: var(--tinta-suave); font-size: 0.82rem; font-weight: 400; }
+  .pie { color: var(--tinta-suave); font-size: 0.84rem; }
+  .pie a { color: var(--acento); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="curso">Big Data y Machine Learning para Economía Aplicada · Universidad Icesi</div>
+    <h1>Verificación del Problem Set 2: ¿cuál vivienda tiene piscina?</h1>
+    <p class="sub">Suba su archivo <code>predicciones.csv</code> y reciba la matriz de confusión y sus métricas.</p>
+  </header>
+
+  <section class="tarjeta">
+    <h2>Cómo funciona</h2>
+    <ul>
+      <li>El archivo debe tener una fila por aviso de la base de predicción (3.029) y dos columnas: <code>id</code> y <code>piscina_predicha</code>, con valores 0 o 1 (sin probabilidades y sin <code>NA</code>).</li>
+      <li>Las métricas se calculan sobre <strong>una mitad de la base de predicción, escogida al azar</strong>. No se informa qué avisos la componen.</li>
+      <li>La otra mitad —que esta página no conoce— es la que define el ranking del curso. Verificar aquí no gasta nada: puede subir el archivo cuantas veces quiera.</li>
+    </ul>
+  </section>
+
+  <div class="zona" id="zona" role="button" tabindex="0" aria-label="Subir el archivo predicciones.csv">
+    <p><strong>Arrastre aquí su <code>predicciones.csv</code></strong> o selecciónelo con el botón.</p>
+    <p class="nota">El archivo se procesa en su navegador: no se envía a ningún servidor ni queda guardado.</p>
+    <button class="boton" type="button" id="boton-archivo">Seleccionar archivo</button>
+    <input type="file" id="archivo" accept=".csv,text/csv">
+  </div>
+
+  <section class="tarjeta" id="panel-errores" aria-live="polite">
+    <h2>El archivo no se pudo evaluar</h2>
+    <ul id="lista-errores"></ul>
+  </section>
+
+  <section class="tarjeta" id="panel-resultados" aria-live="polite">
+    <span class="ok" id="resumen-archivo"></span>
+    <div class="dos-columnas">
+      <table class="matriz">
+        <caption>Matriz de confusión</caption>
+        <tr><th></th><th scope="col">Predicho 1</th><th scope="col">Predicho 0</th></tr>
+        <tr><th scope="row">Piscina (1)</th><td class="cifra" id="vp"></td><td class="cifra" id="fn"></td></tr>
+        <tr><th scope="row">Sin piscina (0)</th><td class="cifra" id="fp"></td><td class="cifra" id="vn"></td></tr>
+      </table>
+      <table class="metricas">
+        <caption>Métricas</caption>
+        <tr><td>Exactitud <span class="formula">(VP + VN) / n</span></td><td id="exactitud"></td></tr>
+        <tr><td>Sensibilidad <span class="formula">VP / (VP + FN)</span></td><td id="sensibilidad"></td></tr>
+        <tr><td>Especificidad <span class="formula">VN / (VN + FP)</span></td><td id="especificidad"></td></tr>
+        <tr><td>Precisión <span class="formula">VP / (VP + FP)</span></td><td id="precision"></td></tr>
+        <tr><td>F1 <span class="formula">media armónica de precisión y sensibilidad</span></td><td id="f1"></td></tr>
+      </table>
+    </div>
+    <p class="pie" id="nota-mitad"></p>
+  </section>
+
+  <p class="pie">El enunciado, las dos bases y el diccionario están en la carpeta
+    <a href="https://github.com/eduard-martinez/bdml-applied-economics/tree/main/problem-sets/pset-2" target="_blank" rel="noopener">problem-sets/pset-2</a>
+    del repositorio del curso. La nota del ranking la calcula el profesor con los avisos que esta página no evalúa.</p>
+</main>
+
+<script src="datos.js"></script>
+<script>
+/*LOGICA-INICIO*/
+// la clave del enmascaramiento: el mismo generador congruencial del script de R
+function claveXor(semilla, n) {
+  var x = semilla, bits = new Array(n);
+  for (var i = 0; i < n; i++) {
+    x = (x * 48271) % 2147483647;
+    bits[i] = x % 2;
+  }
+  return bits;
+}
+
+// las etiquetas de la mitad que evalua la pagina: id -> 0/1
+function decodificarEtiquetas(datos) {
+  var n = datos.ids_plataforma.length;
+  var clave = claveXor(datos.semilla, n);
+  var etiquetas = {};
+  for (var i = 0; i < n; i++) {
+    var nibble = parseInt(datos.mascara[Math.floor(i / 4)], 16);
+    var bit = (nibble >> (3 - (i % 4))) & 1;
+    etiquetas[datos.ids_plataforma[i]] = bit ^ clave[i];
+  }
+  return etiquetas;
+}
+
+// parsear el csv: separador coma o punto y coma, con o sin comillas, CRLF o LF
+function parsearCSV(texto) {
+  var lineas = texto.replace(/^﻿/, "").split(/\r\n|\n|\r/).filter(function (l) { return l.trim() !== ""; });
+  if (lineas.length < 2) return { error: "El archivo está vacío o no tiene filas de datos." };
+  var sep = (lineas[0].split(";").length > lineas[0].split(",").length) ? ";" : ",";
+  var limpiar = function (c) { return c.trim().replace(/^"(.*)"$/, "$1").trim(); };
+  var encabezado = lineas[0].split(sep).map(limpiar).map(function (c) { return c.toLowerCase(); });
+  var colId = encabezado.indexOf("id");
+  var colPred = encabezado.indexOf("piscina_predicha");
+  if (colPred === -1) colPred = encabezado.indexOf("piscina");
+  if (colId === -1 || colPred === -1)
+    return { error: "No se encontraron las columnas <code>id</code> y <code>piscina_predicha</code> en la primera fila. Encabezado leído: <code>" + encabezado.join(", ") + "</code>." };
+  var filas = [];
+  for (var i = 1; i < lineas.length; i++) {
+    var celdas = lineas[i].split(sep).map(limpiar);
+    filas.push({ linea: i + 1, id: celdas[colId], pred: celdas[colPred] });
+  }
+  return { filas: filas };
+}
+
+// validar contra la lista de ids de la base de prediccion
+function validar(filas, datos) {
+  var errores = [];
+  var esperados = {};
+  datos.ids.forEach(function (id) { esperados[id] = true; });
+  var vistos = {}, duplicados = 0, desconocidos = [], invalidos = [];
+  var predicciones = {};
+  filas.forEach(function (f) {
+    var id = Number(f.id);
+    if (!/^\s*\d+\s*$/.test(f.id) || !esperados[id]) { desconocidos.push(f.linea); return; }
+    if (vistos[id]) { duplicados++; return; }
+    vistos[id] = true;
+    var v = Number(f.pred);
+    if (f.pred === "" || isNaN(v) || (v !== 0 && v !== 1)) { invalidos.push("línea " + f.linea + ": «" + f.pred + "»"); return; }
+    predicciones[id] = v;
+  });
+  var faltantes = datos.ids.filter(function (id) { return predicciones[id] === undefined; });
+  if (desconocidos.length > 0)
+    errores.push(desconocidos.length + " fila(s) con un <code>id</code> que no está en la base de predicción (por ejemplo, en la línea " + desconocidos[0] + "). ¿Predijo sobre la base correcta (<code>vivienda_prediccion.rds</code>)?");
+  if (duplicados > 0)
+    errores.push(duplicados + " id(s) repetidos: debe haber exactamente una fila por aviso.");
+  if (invalidos.length > 0)
+    errores.push(invalidos.length + " valor(es) de <code>piscina_predicha</code> que no son 0 ni 1 (" + invalidos.slice(0, 3).join("; ") + (invalidos.length > 3 ? "; …" : "") + "). Si su modelo produce probabilidades, conviértalas con un umbral antes de exportar.");
+  if (errores.length === 0 && faltantes.length > 0)
+    errores.push("Faltan " + faltantes.length + " aviso(s) de la base de predicción (por ejemplo, el id " + faltantes[0] + "). El archivo debe tener las " + datos.n + " filas.");
+  return { errores: errores, predicciones: predicciones };
+}
+
+// la matriz de confusion y sus metricas sobre la mitad que conoce la pagina
+function evaluar(predicciones, etiquetas, datos) {
+  var vp = 0, fn = 0, fp = 0, vn = 0;
+  datos.ids_plataforma.forEach(function (id) {
+    var y = etiquetas[id], p = predicciones[id];
+    if (y === 1 && p === 1) vp++;
+    else if (y === 1 && p === 0) fn++;
+    else if (y === 0 && p === 1) fp++;
+    else vn++;
+  });
+  var prec = (vp + fp === 0) ? NaN : vp / (vp + fp);
+  var sens = vp / (vp + fn);
+  return {
+    vp: vp, fn: fn, fp: fp, vn: vn, n: vp + fn + fp + vn,
+    exactitud: (vp + vn) / (vp + fn + fp + vn),
+    sensibilidad: sens,
+    especificidad: vn / (vn + fp),
+    precision: prec,
+    f1: (isNaN(prec) || prec + sens === 0) ? NaN : 2 * prec * sens / (prec + sens)
+  };
+}
+/*LOGICA-FIN*/
+
+var ETIQUETAS = decodificarEtiquetas(PS2_DATOS);
+
+function mostrarErrores(lista) {
+  document.getElementById("panel-resultados").style.display = "none";
+  var ul = document.getElementById("lista-errores");
+  ul.innerHTML = "";
+  lista.forEach(function (e) { var li = document.createElement("li"); li.innerHTML = e; ul.appendChild(li); });
+  document.getElementById("panel-errores").style.display = "block";
+}
+
+function mostrarResultados(r, nombre) {
+  document.getElementById("panel-errores").style.display = "none";
+  document.getElementById("resumen-archivo").textContent =
+    "Archivo " + nombre + " leído: " + PS2_DATOS.n + " predicciones válidas.";
+  ["vp", "fn", "fp", "vn"].forEach(function (k) { document.getElementById(k).textContent = r[k]; });
+  var fmt = function (x) { return isNaN(x) ? "—" : x.toFixed(3).replace(".", ","); };
+  document.getElementById("exactitud").textContent = fmt(r.exactitud);
+  document.getElementById("sensibilidad").textContent = fmt(r.sensibilidad);
+  document.getElementById("especificidad").textContent = fmt(r.especificidad);
+  document.getElementById("precision").textContent = fmt(r.precision);
+  document.getElementById("f1").textContent = fmt(r.f1);
+  document.getElementById("nota-mitad").textContent =
+    "Métricas calculadas sobre " + r.n + " de los " + PS2_DATOS.n +
+    " avisos de la base de predicción (la mitad de verificación). El ranking del curso se define con la otra mitad.";
+  document.getElementById("panel-resultados").style.display = "block";
+}
+
+function procesarArchivo(archivo) {
+  var lector = new FileReader();
+  lector.onload = function () {
+    var p = parsearCSV(lector.result);
+    if (p.error) { mostrarErrores([p.error]); return; }
+    var v = validar(p.filas, PS2_DATOS);
+    if (v.errores.length > 0) { mostrarErrores(v.errores); return; }
+    mostrarResultados(evaluar(v.predicciones, ETIQUETAS, PS2_DATOS), archivo.name);
+  };
+  lector.readAsText(archivo);
+}
+
+var zona = document.getElementById("zona");
+var entrada = document.getElementById("archivo");
+document.getElementById("boton-archivo").addEventListener("click", function (e) { e.stopPropagation(); entrada.click(); });
+zona.addEventListener("click", function () { entrada.click(); });
+zona.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); entrada.click(); } });
+entrada.addEventListener("change", function () { if (entrada.files.length > 0) { procesarArchivo(entrada.files[0]); entrada.value = ""; } });
+["dragover", "dragenter"].forEach(function (ev) {
+  zona.addEventListener(ev, function (e) { e.preventDefault(); zona.classList.add("encima"); });
+});
+["dragleave", "drop"].forEach(function (ev) {
+  zona.addEventListener(ev, function (e) { e.preventDefault(); zona.classList.remove("encima"); });
+});
+zona.addEventListener("drop", function (e) {
+  if (e.dataTransfer.files.length > 0) procesarArchivo(e.dataTransfer.files[0]);
+});
+</script>
+</body>
+</html>
