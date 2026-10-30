@@ -105,7 +105,7 @@ Equivalent reference material is offered for students who choose the Python trac
 
 Each week shows its class materials as buttons — the lecture slides, the R application script and a zip with the script plus its data — with the readings and the week's milestones on the small lines below.
 
-**Key dates.** Problem set 1: published Oct 6, due Oct 20 at 8:00 a.m. · Project pitch: Nov 3 · Problem set 2: published Oct 20, due Nov 10 at 11:59 p.m. · Final project document (max. 8 pages) and presentations: Nov 24.
+**Key dates.** No class on Nov 3. Problem set 1: published Oct 6, due Oct 20 at 8:00 a.m. · Project idea (one page): due Nov 3 at 11:59 p.m. · Paper presentations: Nov 10 (session 8) · Problem set 2: published Oct 30, due Nov 17 at 11:59 p.m. · Final project document (max. 8 pages) and presentations: Nov 24.
 
 ### Module 1 — Foundations and evaluation
 
@@ -181,7 +181,7 @@ No new model: today we walk into last week's, 738 trees and 38,330 leaves that n
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/applications/week-06/week-06.R" target="_blank" rel="noopener" class="ws-btn"><i class="fa-brands fa-r-project"></i>R application · what the leader learned</a>
 <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/applications/week-06.zip" class="ws-btn"><i class="fas fa-download"></i>Download · script + data (.zip)</a>
 <small class="ws-data"><strong>Readings:</strong> Molnar (2025), the permutation-importance, PDP and SHAP chapters (read the disadvantages twice)</small>
-<small class="ws-data"><strong>Milestones:</strong> Problem set 1 due (8:00 a.m.) · Problem set 2 published (sessions 5–7; due Nov 10, 11:59 p.m.)</small>
+<small class="ws-data"><strong>Milestones:</strong> Problem set 1 due (8:00 a.m.) · Problem set 2 published Oct 30 (session-5 toolkit; due Nov 17, 11:59 p.m.)</small>
 </p>
 
 ### Module 3 — Representation, synthesis and project
@@ -198,15 +198,15 @@ How many different things does the census actually know about a station — and 
 <small class="ws-data"><strong>Milestone:</strong> the session opens with the Problem set 1 debrief and ranking</small>
 </p>
 
-**Week 8 · Nov 3 — The papers and the synthesis of the case.**
-No new method: today all of them are used. The student paper presentations (15 minutes each), the synthesis of the case — the semester's single problem, seen whole through the seven questions every paper answers — the one-page project pitches (five minutes each), and an optional closing: the causal bridge, with the course's own data.
+**Week 8 · Nov 10 — The papers and the synthesis of the case.**
+No new method: today all of them are used. The student paper presentations (15 minutes each), the synthesis of the case — the semester's single problem, seen whole through the seven questions every paper answers — and an optional closing: the causal bridge, with the course's own data.
 
 <p>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-08/week-08.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Lecture slides</a>
 <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/lectures/week-08/week-08-eng.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-language"></i>English</a>
 <small class="ws-data"><strong>Readings:</strong> Athey &amp; Imbens (2019), sections 1–3 (the causal bridge)</small>
 <small class="ws-data"><strong>Session papers:</strong> eight fields of economics with two options each — political economy, crime and justice, health, development and poverty, labour and education, finance and credit, macro and forecasting, IO and demand. Each team picked its field and paper in session 2; who presents what is announced in class. <a href="https://github.com/eduard-martinez/bdml-applied-economics/tree/main/literature/papers" target="_blank" rel="noopener">Paper library</a></small>
-<small class="ws-data"><strong>Milestone:</strong> project pitch — the idea in one page</small>
+<small class="ws-data"><strong>Milestone:</strong> no class on Nov 3 — the project idea (one page per team) is submitted that day by 11:59 p.m. on the virtual campus</small>
 </p>
 
 **Week 9 · Nov 24 — The final project: presentations and course closing.**
@@ -222,15 +222,22 @@ The Problem set 2 ranking and the course in one slide; then each team presents i
 
 Both problem sets are applied only — no conceptual questions — and work on a second dataset: **housing prices in Cali**, so the tools travel to a problem other than the class case. Each one closes with a ranking of the teams by test error.
 
-- **Problem set 1 — How much is a home in Cali worth? (sessions 2–4).** In pairs, due Oct 20 at 8:00 a.m., before session 5. Real for-sale listings in Cali (2019–2020): a baseline and a regression, cross-validation and regularization, the binary version (is it social housing?), and a final model chosen with criteria. The test listings have their price hidden, so every intermediate decision is made with validation inside the training set and the test is used once, to predict.
+- **Problem set 1 — How much is a home in Cali worth? (sessions 2–4).** In pairs, due Oct 20 at 8:00 a.m., before session 6. Real for-sale listings in Cali (2019–2020): a baseline and a regression, cross-validation and regularization, the binary version (is it social housing?), and a final model chosen with criteria. The test listings have their price hidden, so every intermediate decision is made with validation inside the training set and the test is used once, to predict.
   <p>
   <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/problem-sets/pset-1/pset-1.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Problem set 1 (PDF)</a>
   <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/problem-sets/pset-1/vivienda_cali.rds" class="ws-btn"><i class="fas fa-download"></i>vivienda_cali.rds</a>
   <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/problem-sets/pset-1/diccionario_vivienda.csv" class="ws-btn"><i class="fas fa-download"></i>diccionario_vivienda.csv</a>
   </p>
-- **Problem set 2 — sessions 5–7.** Published Oct 20, due Nov 10 at 11:59 p.m. *PDF and data: available soon.*
+- **Problem set 2 — Which home has a pool? (session 5).** In pairs, published Oct 30, due Nov 17 at 11:59 p.m. Same Cali listings, new question — a classification one. The outcome (does the listing announce a pool?) was read from each ad's free text, which students never see: they predict it from the structured attributes with a tree and at least two ensembles (bagging, random forest, boosting), validating with folds that never split a map point. There are two datasets: a training base with the label and a prediction base without it, which shares no map point with the training base. Teams can check their `predicciones.csv` on the <a href="/teaching/bdml-applied-economics/app/">verification platform</a>: it returns the confusion matrix and its metrics on one half of the prediction base, and the other half — which the platform does not know — defines the course ranking.
+  <p>
+  <a href="https://github.com/eduard-martinez/bdml-applied-economics/blob/main/problem-sets/pset-2/pset-2.pdf" target="_blank" rel="noopener" class="ws-btn"><i class="fas fa-file-pdf"></i>Problem set 2 (PDF)</a>
+  <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/problem-sets/pset-2/vivienda_entrenamiento.rds" class="ws-btn"><i class="fas fa-download"></i>vivienda_entrenamiento.rds</a>
+  <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/problem-sets/pset-2/vivienda_prediccion.rds" class="ws-btn"><i class="fas fa-download"></i>vivienda_prediccion.rds</a>
+  <a href="https://raw.githubusercontent.com/eduard-martinez/bdml-applied-economics/main/problem-sets/pset-2/diccionario_ps2.csv" class="ws-btn"><i class="fas fa-download"></i>diccionario_ps2.csv</a>
+  <a href="/teaching/bdml-applied-economics/app/" class="ws-btn"><i class="fas fa-check-circle"></i>Verification platform</a>
+  </p>
 
-Each problem set is submitted on the virtual campus as a `.zip` with the report in PDF, the code (`00_run.R` and its auxiliary scripts) and the `predicciones.csv` that the code produces: the teacher scores those predictions against the hidden prices, and that test error ranks the teams. The ranking is discussed in session 7.
+Each problem set is submitted on the virtual campus as a `.zip` with the report in PDF, the code (`00_run.R` and its auxiliary scripts) and the `predicciones.csv` that the code produces: the teacher scores those predictions against the hidden labels, and that test error ranks the teams. Each ranking is discussed in class after the deadline (problem set 1: session 7; problem set 2: Nov 24).
 
 ## Evaluation
 
@@ -241,7 +248,7 @@ Each problem set is submitted on the virtual campus as a `.zip` with the report 
 | Problem set 2 — sessions 5–7 | 15% |
 | Final project | 60% |
 
-**Final project.** A predictive research proposal: each team defines an economic question in which prediction is the quantity of interest, identifies its own data, and designs the study that survives the seven questions of the course — the question and the decision behind it, the unit and the outcome, the data and what is known at prediction time, the metric and the baseline, the validation strategy, the risks (leakage, extrapolation, subgroups where it fails), and the reading of the results. The idea is pitched in one page on **Nov 3** (session 8); the document — at most eight pages — and the presentation are due on **Nov 24** (session 9).
+**Final project.** A predictive research proposal: each team defines an economic question in which prediction is the quantity of interest, identifies its own data, and designs the study that survives the seven questions of the course — the question and the decision behind it, the unit and the outcome, the data and what is known at prediction time, the metric and the baseline, the validation strategy, the risks (leakage, extrapolation, subgroups where it fails), and the reading of the results. The idea is submitted in one page on **Nov 3** at 11:59 p.m. (there is no class that day); the document — at most eight pages — and the presentation are due on **Nov 24** (session 9).
 
 **AI policy:** AI tools are allowed in every component of the course, as long as their use is explicitly declared — what was used and for what.
 
