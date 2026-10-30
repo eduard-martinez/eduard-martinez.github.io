@@ -101,11 +101,22 @@ The R leveling is mandatory, self-paced and happens outside class hours:
 
 Equivalent reference material is offered for students who choose the Python track.
 
+## Key dates
+
+| Date | Milestone |
+|---|---|
+| **Oct 6** | Problem set 1 published (session 4) |
+| **Oct 20 · 8:00 a.m.** | Problem set 1 due, before session 6 |
+| **Oct 30** | Problem set 2 published |
+| **Nov 3 · 11:59 p.m.** | Project idea in one page, on the virtual campus — **no class that day** |
+| **Nov 10** | Session 8 — paper presentations and the synthesis of the case |
+| **Nov 17 · 11:59 p.m.** | Problem set 2 due, by email with the exact subject |
+| **Nov 24 · 8:00 a.m.** | Final project document (max. 8 pages), on the virtual campus |
+| **Nov 24 · in class** | Session 9 — final project presentations and the Problem set 2 ranking |
+
 ## Schedule
 
 Each week shows its class materials as buttons — the lecture slides, the R application script and a zip with the script plus its data — with the readings and the week's milestones on the small lines below.
-
-**Key dates.** No class on Nov 3. Problem set 1: published Oct 6, due Oct 20 at 8:00 a.m. · Project idea (one page): due Nov 3 at 11:59 p.m. · Paper presentations: Nov 10 (session 8) · Problem set 2: published Oct 30, due Nov 17 at 11:59 p.m. · Final project document (max. 8 pages) and presentations: Nov 24.
 
 ### Module 1 — Foundations and evaluation
 
