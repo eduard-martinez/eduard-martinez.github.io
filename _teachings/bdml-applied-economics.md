@@ -103,16 +103,14 @@ Equivalent reference material is offered for students who choose the Python trac
 
 ## Key dates
 
-| Date | Milestone |
-|---|---|
-| **Oct 6** | Problem set 1 published (session 4) |
-| **Oct 20 · 8:00 a.m.** | Problem set 1 due, before session 6 |
-| **Oct 30** | Problem set 2 published |
-| **Nov 3 · 11:59 p.m.** | Project idea in one page, on the virtual campus — **no class that day** |
-| **Nov 10** | Session 8 — paper presentations and the synthesis of the case |
-| **Nov 17 · 11:59 p.m.** | Problem set 2 due, by email with the exact subject |
-| **Nov 24 · 8:00 a.m.** | Final project document (max. 8 pages), on the virtual campus |
-| **Nov 24 · in class** | Session 9 — final project presentations and the Problem set 2 ranking |
+- **Oct 6** — Problem set 1 published (session 4)
+- **Oct 20 · 8:00 a.m.** — Problem set 1 due, before session 6
+- **Oct 30** — Problem set 2 published
+- **Nov 3 · 11:59 p.m.** — Project idea in one page, on the virtual campus (**no class that day**)
+- **Nov 10** — Session 8: paper presentations and the synthesis of the case
+- **Nov 17 · 11:59 p.m.** — Problem set 2 due, by email with the exact subject
+- **Nov 24 · 8:00 a.m.** — Final project document (max. 8 pages), on the virtual campus
+- **Nov 24 · in class** — Session 9: final project presentations and the Problem set 2 ranking
 
 ## Schedule
 
