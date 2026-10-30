@@ -237,7 +237,7 @@ Both problem sets are applied only — no conceptual questions — and work on a
   <a href="/teaching/bdml-applied-economics/app/" class="ws-btn"><i class="fas fa-check-circle"></i>Verification platform</a>
   </p>
 
-Each problem set is submitted on the virtual campus as a `.zip` with the report in PDF, the code (`00_run.R` and its auxiliary scripts) and the `predicciones.csv` that the code produces: the teacher scores those predictions against the hidden labels, and that test error ranks the teams. Each ranking is discussed in class after the deadline (problem set 1: session 7; problem set 2: Nov 24).
+Each problem set is submitted as a `.zip` with the report in PDF, the code (`00_run.R` and its auxiliary scripts) and the `predicciones.csv` that the code produces: the teacher scores those predictions against the hidden labels, and that test error ranks the teams. Problem set 1 was submitted on the virtual campus; problem set 2 is submitted by email to efmartinez@icesi.edu.co with the mandatory, exact subject `[BDML] Problem Set 2 - Apellido1 y Apellido2` — an email without that subject is not registered as a submission. Each ranking is discussed in class after the deadline (problem set 1: session 7; problem set 2: Nov 24).
 
 ## Evaluation
 
